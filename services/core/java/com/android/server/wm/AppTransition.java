@@ -49,6 +49,7 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -255,6 +256,7 @@ public class AppTransition implements Dump {
     private boolean mProlongedAnimationsEnded;
 
     private final boolean mGridLayoutRecentsEnabled;
+    private final boolean mLowRamRecentsEnabled;
 
     AppTransition(Context context, WindowManagerService service) {
         mContext = context;
@@ -295,6 +297,7 @@ public class AppTransition implements Dump {
         mClipRevealTranslationY = (int) (CLIP_REVEAL_TRANSLATION_Y_DP
                 * mContext.getResources().getDisplayMetrics().density);
         mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
+        mLowRamRecentsEnabled = ActivityManager.isLowRamDeviceStatic();
     }
 
     boolean isTransitionSet() {
@@ -1121,7 +1124,8 @@ public class AppTransition implements Dump {
      */
     Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
             int uiMode, int orientation, int transit, Rect containingFrame, Rect contentInsets,
-            @Nullable Rect surfaceInsets, boolean freeform, int taskId) {
+            @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean freeform,
+            int taskId) {
         Animation a;
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
@@ -1179,8 +1183,15 @@ public class AppTransition implements Dump {
                         final float x = containingFrame.width() / 2f
                                 - containingFrame.width() / 2f * scale;
                         final float targetY = (mTmpRect.top - containingFrame.top);
-                        final float y = containingFrame.height() / 2f
+                        float y = containingFrame.height() / 2f
                                 - containingFrame.height() / 2f * scale;
+
+                        // During transition may require clipping offset from any top stable insets
+                        // such as the statusbar height when statusbar is hidden
+                        if (mLowRamRecentsEnabled && contentInsets.top == 0 && scaleUp) {
+                            mTmpFromClipRect.top += stableInsets.top;
+                            y += stableInsets.top;
+                        }
                         final float startX = targetX - x;
                         final float startY = targetY - y;
                         Animation clipAnim = scaleUp
@@ -1497,8 +1508,8 @@ public class AppTransition implements Dump {
      */
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter, int uiMode,
             int orientation, Rect frame, Rect displayFrame, Rect insets,
-            @Nullable Rect surfaceInsets, boolean isVoiceInteraction, boolean freeform,
-            int taskId) {
+            @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
+            boolean freeform, int taskId) {
         Animation a;
         if (isKeyguardGoingAwayTransit(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
@@ -1582,7 +1593,7 @@ public class AppTransition implements Dump {
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             a = createAspectScaledThumbnailEnterExitAnimationLocked(
                     getThumbnailTransitionState(enter), uiMode, orientation, transit, frame,
-                    insets, surfaceInsets, freeform, taskId);
+                    insets, surfaceInsets, stableInsets, freeform, taskId);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
                         "ANIM_THUMBNAIL_ASPECT_SCALE_UP" : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN";

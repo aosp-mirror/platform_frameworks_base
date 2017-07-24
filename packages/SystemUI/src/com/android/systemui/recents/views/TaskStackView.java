@@ -1685,7 +1685,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If the doze trigger has already fired, then update the state for this task view
         if (mUIDozeTrigger.isAsleep() ||
                 Recents.getSystemServices().hasFreeformWorkspaceSupport() ||
-                useGridLayout()) {
+                useGridLayout() || Recents.getConfiguration().isLowRamDevice) {
             tv.setNoUserInteractionState();
         }
 
@@ -1763,7 +1763,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // In grid layout, the stack action button always remains visible.
-        if (mEnterAnimationComplete && !useGridLayout()) {
+        if (mEnterAnimationComplete && !useGridLayout() &&
+                !Recents.getConfiguration().isLowRamDevice) {
             if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     mStack.getTaskCount() > 0) {
@@ -2381,7 +2382,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Always show the button in grid layout.
         if (useGridLayout() ||
                 (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
-                        mStack.getTaskCount() > 0)) {
+                        mStack.getTaskCount() > 0 && !Recents.getConfiguration().isLowRamDevice)) {
             EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
         } else {
             EventBus.getDefault().send(new HideStackActionButtonEvent());
