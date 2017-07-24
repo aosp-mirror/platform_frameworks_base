@@ -314,6 +314,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int SERIF = 2;
     private static final int MONOSPACE = 3;
 
+    // Enum for the "ellipsize" XML parameter.
+    private static final int ELLIPSIZE_NOT_SET = -1;
+    private static final int ELLIPSIZE_NONE = 0;
+    private static final int ELLIPSIZE_START = 1;
+    private static final int ELLIPSIZE_MIDDLE = 2;
+    private static final int ELLIPSIZE_END = 3;
+    private static final int ELLIPSIZE_MARQUEE = 4;
+
     // Bitfield for the "numeric" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
     private static final int SIGNED = 2;
@@ -984,7 +992,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList drawableTint = null;
         PorterDuff.Mode drawableTintMode = null;
         int drawablePadding = 0;
-        int ellipsize = -1;
+        int ellipsize = ELLIPSIZE_NOT_SET;
         boolean singleLine = false;
         int maxlength = -1;
         CharSequence text = "";
@@ -1558,21 +1566,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setInputTypeSingleLine(singleLine);
         applySingleLine(singleLine, singleLine, singleLine);
 
-        if (singleLine && getKeyListener() == null && ellipsize < 0) {
-            ellipsize = 3; // END
+        if (singleLine && getKeyListener() == null && ellipsize == ELLIPSIZE_NOT_SET) {
+            ellipsize = ELLIPSIZE_END;
         }
 
         switch (ellipsize) {
-            case 1:
+            case ELLIPSIZE_START:
                 setEllipsize(TextUtils.TruncateAt.START);
                 break;
-            case 2:
+            case ELLIPSIZE_MIDDLE:
                 setEllipsize(TextUtils.TruncateAt.MIDDLE);
                 break;
-            case 3:
+            case ELLIPSIZE_END:
                 setEllipsize(TextUtils.TruncateAt.END);
                 break;
-            case 4:
+            case ELLIPSIZE_MARQUEE:
                 if (ViewConfiguration.get(context).isFadingMarqueeEnabled()) {
                     setHorizontalFadingEdgeEnabled(true);
                     mMarqueeFadeMode = MARQUEE_FADE_NORMAL;
@@ -8011,7 +8019,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth);
             }
-            // TODO: explore always setting maxLines
             result = builder.build();
         }
         return result;
