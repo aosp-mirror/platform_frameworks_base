@@ -53,8 +53,7 @@ public class UserManagerTest extends AndroidTestCase {
 
     // Packages which are used during tests.
     private static final String[] PACKAGES = new String[] {
-            "com.android.egg",
-            "com.android.retaildemo"
+            "com.android.egg"
     };
 
     private final Object mUserRemoveLock = new Object();
