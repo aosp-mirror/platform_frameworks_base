@@ -29,9 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Class to process wallpaper colors and generate a tonal palette based on them.
@@ -46,7 +44,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     private static final String TAG = "ColorExtractor";
 
     private final SparseArray<GradientColors[]> mGradientColors;
-    private final ArrayList<WeakReference<OnColorsChangedListener>> mOnColorsChangedListeners;
+    private final ArrayList<OnColorsChangedListener> mOnColorsChangedListeners;
     private final Context mContext;
     private final ExtractionType mExtractionType;
     private WallpaperColors mSystemColors;
@@ -169,17 +167,8 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     }
 
     protected void triggerColorsChanged(int which) {
-        ArrayList<WeakReference<OnColorsChangedListener>> references =
-                new ArrayList<>(mOnColorsChangedListeners);
-        final int size = references.size();
-        for (int i = 0; i < size; i++) {
-            final WeakReference<OnColorsChangedListener> weakReference = references.get(i);
-            final OnColorsChangedListener listener = weakReference.get();
-            if (listener == null) {
-                mOnColorsChangedListeners.remove(weakReference);
-            } else {
-                listener.onColorsChanged(this, which);
-            }
+        for (OnColorsChangedListener listener: mOnColorsChangedListeners) {
+            listener.onColorsChanged(this, which);
         }
     }
 
@@ -198,20 +187,11 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     }
 
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener) {
-        mOnColorsChangedListeners.add(new WeakReference<>(listener));
+        mOnColorsChangedListeners.add(listener);
     }
 
     public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener listener) {
-        ArrayList<WeakReference<OnColorsChangedListener>> references =
-                new ArrayList<>(mOnColorsChangedListeners);
-        final int size = references.size();
-        for (int i = 0; i < size; i++) {
-            final WeakReference<OnColorsChangedListener> weakReference = references.get(i);
-            if (weakReference.get() == listener) {
-                mOnColorsChangedListeners.remove(weakReference);
-                break;
-            }
-        }
+        mOnColorsChangedListeners.remove(listener);
     }
 
     public static class GradientColors {
