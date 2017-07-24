@@ -334,6 +334,17 @@ public class StaticLayout extends Layout {
             return this;
         }
 
+        /**
+         * Sets whether the line spacing should be applied for the last line. Default value is
+         * {@code false}.
+         *
+         * @hide
+         */
+        /* package */ Builder setAddLastLineLineSpacing(boolean value) {
+            mAddLastLineLineSpacing = value;
+            return this;
+        }
+
         private long[] getHyphenators(LocaleList locales) {
             final int length = locales.size();
             final long[] result = new long[length];
@@ -430,6 +441,7 @@ public class StaticLayout extends Layout {
         int[] mLeftIndents;
         int[] mRightIndents;
         int mJustificationMode;
+        boolean mAddLastLineLineSpacing;
 
         Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -599,6 +611,7 @@ public class StaticLayout extends Layout {
         float spacingadd = b.mSpacingAdd;
         float ellipsizedWidth = b.mEllipsizedWidth;
         TextUtils.TruncateAt ellipsize = b.mEllipsize;
+        final boolean addLastLineSpacing = b.mAddLastLineLineSpacing;
         LineBreaks lineBreaks = new LineBreaks();  // TODO: move to builder to avoid allocation costs
         // store span end locations
         int[] spanEndCache = new int[4];
@@ -849,8 +862,8 @@ public class StaticLayout extends Layout {
                             fmAscent, fmDescent, fmTop, fmBottom,
                             v, spacingmult, spacingadd, chooseHt, chooseHtv, fm, flags[breakIndex],
                             needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
-                            chs, widths, paraStart, ellipsize, ellipsizedWidth,
-                            lineWidths[breakIndex], paint, moreChars);
+                            addLastLineSpacing, chs, widths, paraStart, ellipsize,
+                            ellipsizedWidth, lineWidths[breakIndex], paint, moreChars);
 
                     if (endPos < spanEnd) {
                         // preserve metrics for current span
@@ -890,7 +903,7 @@ public class StaticLayout extends Layout {
                     spacingmult, spacingadd, null,
                     null, fm, 0,
                     needMultiply, measured.mLevels, measured.mDir, measured.mEasy, bufEnd,
-                    includepad, trackpad, null,
+                    includepad, trackpad, addLastLineSpacing, null,
                     null, bufStart, ellipsize,
                     ellipsizedWidth, 0, paint, false);
         }
@@ -903,7 +916,7 @@ public class StaticLayout extends Layout {
                       Paint.FontMetricsInt fm, int flags,
                       boolean needMultiply, byte[] chdirs, int dir,
                       boolean easy, int bufEnd, boolean includePad,
-                      boolean trackPad, char[] chs,
+                      boolean trackPad, boolean addLastLineLineSpacing, char[] chs,
                       float[] widths, int widthStart, TextUtils.TruncateAt ellipsize,
                       float ellipsisWidth, float textWidth,
                       TextPaint paint, boolean moreChars) {
@@ -992,7 +1005,7 @@ public class StaticLayout extends Layout {
             }
         }
 
-        if (needMultiply && !lastLine) {
+        if (needMultiply && (addLastLineLineSpacing || !lastLine)) {
             double ex = (below - above) * (spacingmult - 1) + spacingadd;
             if (ex >= 0) {
                 extra = (int)(ex + EXTRA_ROUNDING);
