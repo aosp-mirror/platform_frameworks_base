@@ -13365,7 +13365,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r != null) {
                     final ActivityOptions activityOptions = r.pendingOptions;
-                    r.pendingOptions = null;
                     return activityOptions == null ? null : activityOptions.toBundle();
                 }
                 return null;
