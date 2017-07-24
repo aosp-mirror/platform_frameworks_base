@@ -535,7 +535,9 @@ public class Content {
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
             Bundle result = provider.call(null, mMethod, mArg, mExtras);
-            final int size = result.size(); // unpack
+            if (result != null) {
+                result.size(); // unpack
+            }
             System.out.println("Result: " + result);
         }
     }
