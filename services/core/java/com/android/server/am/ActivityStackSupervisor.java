@@ -4699,11 +4699,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Work Challenge is present) let startActivityInPackage handle the intercepting.
             if (!mService.mUserController.shouldConfirmCredentials(task.userId)
                     && task.getRootActivity() != null) {
-                mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */);
+                final ActivityRecord targetActivity = task.getTopActivity();
+
+                mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */,
+                        targetActivity);
                 mActivityMetricsLogger.notifyActivityLaunching();
                 mService.moveTaskToFrontLocked(task.taskId, 0, bOptions, true /* fromRecents */);
                 mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
-                        task.getTopActivity());
+                        targetActivity);
 
                 // If we are launching the task in the docked stack, put it into resizing mode so
                 // the window renders full-screen with the background filling the void. Also only
