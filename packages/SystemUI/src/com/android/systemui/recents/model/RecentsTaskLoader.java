@@ -306,7 +306,7 @@ public class RecentsTaskLoader {
         // Initialize the proxy, cache and loaders
         int numRecentTasks = ActivityManager.getMaxRecentTasksStatic();
         mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
-                Looper.getMainLooper());
+                Looper.getMainLooper(), Recents.getConfiguration().isLowRamDevice);
         mLoadQueue = new TaskResourceLoadQueue();
         mIconCache = new TaskKeyLruCache<>(iconCacheSize, mClearActivityInfoOnEviction);
         mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks, mClearActivityInfoOnEviction);

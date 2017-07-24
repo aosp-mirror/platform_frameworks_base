@@ -205,8 +205,8 @@ public class Recents extends SystemUI
     public void start() {
         sDebugFlags = new RecentsDebugFlags(mContext);
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
-        sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
+        sTaskLoader = new RecentsTaskLoader(mContext);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 

@@ -158,7 +158,10 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         boolean usingDarkText =
                 Color.luminance(mEmptyView.getTextColors().getDefaultColor()) < 0.5f;
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
+            mStackActionButton = (TextView) inflater.inflate(Recents.getConfiguration()
+                            .isLowRamDevice
+                        ? R.layout.recents_low_ram_stack_action_button
+                        : R.layout.recents_stack_action_button,
                     this, false);
             mStackActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -449,7 +452,6 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
 
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
-
             // If launched via dragging from the nav bar, then we should translate the whole view
             // down offscreen
             RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
@@ -457,6 +459,11 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
                 setTranslationY(getMeasuredHeight());
             } else {
                 setTranslationY(0f);
+            }
+
+            if (Recents.getConfiguration().isLowRamDevice
+                    && mEmptyView.getVisibility() == View.VISIBLE) {
+                animateEmptyView(true /* show */, null /* postAnimationTrigger */);
             }
         }
     }
@@ -507,6 +514,9 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
                 event.taskView, event.screenPinningRequested, event.targetTaskStack);
+        if (Recents.getConfiguration().isLowRamDevice) {
+            hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, false /* translate */);
+        }
     }
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
@@ -516,6 +526,10 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
             hideStackActionButton(taskViewExitToHomeDuration, false /* translate */);
         }
         animateBackgroundScrim(0f, taskViewExitToHomeDuration);
+
+        if (Recents.getConfiguration().isLowRamDevice) {
+            animateEmptyView(false /* show */, event.getAnimationTrigger());
+        }
     }
 
     public final void onBusEvent(DragStartEvent event) {
@@ -670,6 +684,9 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
             animateBackgroundScrim(getOpaqueScrimAlpha(),
                     TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
         }
+        if (Recents.getConfiguration().isLowRamDevice && mEmptyView.getVisibility() != View.VISIBLE) {
+            showStackActionButton(SHOW_STACK_ACTION_BUTTON_DURATION, false /* translate */);
+        }
     }
 
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
@@ -787,6 +804,28 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
     }
 
     /**
+     * Animates a translation in the Y direction and fades in/out for empty view to show or hide it.
+     * @param show whether to translate up and fade in the empty view to the center of the screen
+     * @param postAnimationTrigger to keep track of the animation
+     */
+    private void animateEmptyView(boolean show, ReferenceCountedTrigger postAnimationTrigger) {
+        float start = mTaskStackView.getStackAlgorithm().getTaskRect().height() / 4;
+        mEmptyView.setTranslationY(show ? start : 0);
+        mEmptyView.setAlpha(show ? 0f : 1f);
+        ViewPropertyAnimator animator = mEmptyView.animate()
+                .setDuration(150)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .translationY(show ? 0 : start)
+                .alpha(show ? 1f : 0f);
+
+        if (postAnimationTrigger != null) {
+            animator.setListener(postAnimationTrigger.decrementOnAnimationEnd());
+            postAnimationTrigger.increment();
+        }
+        animator.start();
+    }
+
+    /**
      * Updates the dock region to match the specified dock state.
      */
     private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates,
@@ -860,12 +899,21 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
      */
     private Rect getStackActionButtonBoundsFromStackLayout() {
         Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect());
-        int left = isLayoutRtl()
+        int left, top;
+        if (Recents.getConfiguration().isLowRamDevice) {
+            Rect windowRect = Recents.getSystemServices().getWindowRect();
+            left = (windowRect.width() - mSystemInsets.left - mSystemInsets.right
+                    - mStackActionButton.getMeasuredWidth()) / 2;
+            top = windowRect.height() - (mStackActionButton.getMeasuredHeight()
+                    + mSystemInsets.bottom + mStackActionButton.getPaddingBottom() / 2);
+        } else {
+            left = isLayoutRtl()
                 ? actionButtonRect.left - mStackActionButton.getPaddingLeft()
                 : actionButtonRect.right + mStackActionButton.getPaddingRight()
                         - mStackActionButton.getMeasuredWidth();
-        int top = actionButtonRect.top +
+            top = actionButtonRect.top +
                 (actionButtonRect.height() - mStackActionButton.getMeasuredHeight()) / 2;
+        }
         actionButtonRect.set(left, top, left + mStackActionButton.getMeasuredWidth(),
                 top + mStackActionButton.getMeasuredHeight());
         return actionButtonRect;
