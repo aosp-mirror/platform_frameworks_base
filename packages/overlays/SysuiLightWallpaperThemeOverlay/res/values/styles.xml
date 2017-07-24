@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="systemui_base" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+        <item name="android:textColorPrimaryInverse">@*android:color/primary_text_material_light</item>
+        <item name="android:textColorSecondaryInverse">@*android:color/secondary_text_material_light</item>
+    </style>
+
+    <style name="RecentsBase" parent="@android:style/Theme.Material">
+        <item name="android:textColorPrimaryInverse">@*android:color/primary_text_material_light</item>
+        <item name="android:textColorSecondaryInverse">@*android:color/secondary_text_material_light</item>
+    </style>
+</resources>

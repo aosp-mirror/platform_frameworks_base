@@ -23,7 +23,6 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.annotation.ColorInt;
 import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -45,7 +44,6 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
-import android.view.ContextThemeWrapper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -63,7 +61,6 @@ import android.widget.ScrollView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.Utils;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -366,7 +363,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                     return object.getBackgroundFadeAmount();
                 }
             };
-    private boolean mUsingLightTheme;
     private boolean mQsExpanded;
     private boolean mForwardScrollable;
     private boolean mBackwardScrollable;
@@ -3655,23 +3651,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         mTmpSortedChildren.clear();
-    }
-
-    /**
-     * Update colors of "dismiss" and "empty shade" views.
-     *
-     * @param lightTheme True if light theme should be used.
-     */
-    public void updateDecorViews(boolean lightTheme) {
-        if (lightTheme == mUsingLightTheme) {
-            return;
-        }
-        mUsingLightTheme = lightTheme;
-        Context context = new ContextThemeWrapper(mContext,
-                lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
-        final int textColor = Utils.getColorAttr(context, R.attr.wallpaperTextColor);
-        mDismissView.setTextColor(textColor);
-        mEmptyShadeView.setTextColor(textColor);
     }
 
     public void goToFullShade(long delay) {

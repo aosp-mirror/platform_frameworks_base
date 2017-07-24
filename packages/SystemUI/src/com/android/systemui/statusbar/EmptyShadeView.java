@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
@@ -44,10 +43,6 @@ public class EmptyShadeView extends StackScrollerDecorView {
     @Override
     protected View findContentView() {
         return findViewById(R.id.no_notifications);
-    }
-
-    public void setTextColor(@ColorInt int color) {
-        mEmptyText.setTextColor(color);
     }
 
     @Override
