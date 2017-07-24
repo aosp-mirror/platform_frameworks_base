@@ -38,9 +38,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     public static final Bundle EMPTY;
 
+    /**
+     * Special extras used to denote extras have been stripped off.
+     * @hide
+     */
+    public static final Bundle STRIPPED;
+
     static {
         EMPTY = new Bundle();
         EMPTY.mMap = ArrayMap.EMPTY;
+
+        STRIPPED = new Bundle();
+        STRIPPED.putInt("STRIPPED", 1);
     }
 
     /**
