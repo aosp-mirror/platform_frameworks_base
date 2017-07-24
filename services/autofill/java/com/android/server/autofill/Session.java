@@ -715,7 +715,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
-
+        if (mResponses == null) {
+            // Typically happens when app explicitly called cancel() while the service was showing
+            // the auth UI.
+            Slog.w(TAG, "setAuthenticationResultLocked(" + authenticationId + "): no responses");
+            removeSelf();
+            return;
+        }
         final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         final FillResponse authenticatedResponse = mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
@@ -781,7 +787,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return true;
         }
 
-        final int lastResponseIdx = getLastResponseIndex();
+        final int lastResponseIdx = getLastResponseIndexLocked();
         if (lastResponseIdx < 0) {
             Slog.w(TAG, "showSaveLocked(): did not get last response. mResponses=" + mResponses
                     + ", mViewStates=" + mViewStates);
@@ -1265,7 +1271,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Only track the views of the last response as only those are reported back to the
         // service, see #showSaveLocked
-        final FillResponse response = mResponses.valueAt(getLastResponseIndex());
+        final FillResponse response = mResponses.valueAt(getLastResponseIndexLocked());
 
         ArraySet<AutofillId> trackedViews = null;
         boolean saveOnAllViewsInvisible = false;
@@ -1642,17 +1648,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private int getLastResponseIndex() {
+    private int getLastResponseIndexLocked() {
         // The response ids are monotonically increasing so
         // we just find the largest id which is the last. We
         // do not rely on the internal ordering in sparse
         // array to avoid - wow this stopped working!?
         int lastResponseIdx = -1;
         int lastResponseId = -1;
-        final int responseCount = mResponses.size();
-        for (int i = 0; i < responseCount; i++) {
-            if (mResponses.keyAt(i) > lastResponseId) {
-                lastResponseIdx = i;
+        if (mResponses != null) {
+            final int responseCount = mResponses.size();
+            for (int i = 0; i < responseCount; i++) {
+                if (mResponses.keyAt(i) > lastResponseId) {
+                    lastResponseIdx = i;
+                }
             }
         }
         return lastResponseIdx;
