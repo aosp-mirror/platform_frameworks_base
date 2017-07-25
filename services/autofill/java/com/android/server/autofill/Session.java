@@ -798,14 +798,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         /*
          * The Save dialog is only shown if all conditions below are met:
          *
-         * - saveInfo is not null
-         * - autofillValue of all required ids is not null
+         * - saveInfo is not null.
+         * - autofillValue of all required ids is not null.
          * - autofillValue of at least one id (required or optional) has changed.
+         * - there is no Dataset in the last FillResponse whose values of all dataset fields matches
+         *   the current values of all fields in the screen.
          */
-
         if (saveInfo == null) {
             return true;
         }
+
+        // Cache used to make sure changed fields do not belong to a dataset.
+        final ArrayMap<AutofillId, AutofillValue> currentValues = new ArrayMap<>();
+        final ArraySet<AutofillId> allIds = new ArraySet<>();
 
         final AutofillId[] requiredIds = saveInfo.getRequiredIds();
         boolean allRequiredAreNotEmpty = true;
@@ -817,6 +822,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.w(TAG, "null autofill id on " + Arrays.toString(requiredIds));
                     continue;
                 }
+                allIds.add(id);
                 final ViewState viewState = mViewStates.get(id);
                 if (viewState == null) {
                     Slog.w(TAG, "showSaveLocked(): no ViewState for required " + id);
@@ -835,18 +841,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         value = initialValue;
                     } else {
                         if (sDebug) {
-                            Slog.d(TAG, "showSaveLocked(): empty value for required " + id );
+                            Slog.d(TAG, "empty value for required " + id );
                         }
                         allRequiredAreNotEmpty = false;
                         break;
                     }
                 }
+                currentValues.put(id, value);
                 final AutofillValue filledValue = viewState.getAutofilledValue();
 
                 if (!value.equals(filledValue)) {
                     if (sDebug) {
-                        Slog.d(TAG, "showSaveLocked(): found a change on required " + id + ": "
-                                + filledValue + " => " + value);
+                        Slog.d(TAG, "found a change on required " + id + ": " + filledValue
+                                + " => " + value);
                     }
                     atLeastOneChanged = true;
                 }
@@ -859,21 +866,33 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // No change on required ids yet, look for changes on optional ids.
                 for (int i = 0; i < optionalIds.length; i++) {
                     final AutofillId id = optionalIds[i];
+                    allIds.add(id);
                     final ViewState viewState = mViewStates.get(id);
                     if (viewState == null) {
-                        Slog.w(TAG, "showSaveLocked(): no ViewState for optional " + id);
+                        Slog.w(TAG, "no ViewState for optional " + id);
                         continue;
                     }
                     if ((viewState.getState() & ViewState.STATE_CHANGED) != 0) {
                         final AutofillValue currentValue = viewState.getCurrentValue();
+                        currentValues.put(id, currentValue);
                         final AutofillValue filledValue = viewState.getAutofilledValue();
                         if (currentValue != null && !currentValue.equals(filledValue)) {
                             if (sDebug) {
-                                Slog.d(TAG, "finishSessionLocked(): found a change on optional "
-                                        + id + ": " + filledValue + " => " + currentValue);
+                                Slog.d(TAG, "found a change on optional " + id + ": " + filledValue
+                                        + " => " + currentValue);
                             }
                             atLeastOneChanged = true;
                             break;
+                        }
+                    } else {
+                        // Update current values cache based on initial value
+                        final AutofillValue initialValue = getValueFromContexts(id);
+                        if (sDebug) {
+                            Slog.d(TAG, "no current value for " + id + "; initial value is "
+                                    + initialValue);
+                        }
+                        if (initialValue != null) {
+                            currentValues.put(id, initialValue);
                         }
                     }
                 }
@@ -897,6 +916,42 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                     if (!isValid) {
                         Slog.i(TAG, "not showing save UI because fields failed validation");
+                        return true;
+                    }
+                }
+
+                // Make sure the service doesn't have the fields already by checking the datasets
+                // content.
+                final ArrayList<Dataset> datasets = response.getDatasets();
+                if (datasets != null) {
+                    datasets_loop: for (int i = 0; i < datasets.size(); i++) {
+                        final Dataset dataset = datasets.get(i);
+                        final ArrayMap<AutofillId, AutofillValue> datasetValues =
+                                Helper.getFields(dataset);
+                        if (sVerbose) {
+                            Slog.v(TAG, "Checking if saved fields match contents of dataset #" + i
+                                    + ": " + dataset + "; allIds=" + allIds);
+                        }
+                        for (int j = 0; j < allIds.size(); j++) {
+                            final AutofillId id = allIds.valueAt(j);
+                            final AutofillValue currentValue = currentValues.get(id);
+                            if (currentValue == null) {
+                                if (sDebug) {
+                                    Slog.d(TAG, "dataset has value for field that is null: " + id);
+                                }
+                                continue datasets_loop;
+                            }
+                            final AutofillValue datasetValue = datasetValues.get(id);
+                            if (!currentValue.equals(datasetValue)) {
+                                if (sDebug) Slog.d(TAG, "found a change on id " + id);
+                                continue datasets_loop;
+                            }
+                            if (sVerbose) Slog.v(TAG, "no changes for id " + id);
+                        }
+                        if (sDebug) {
+                            Slog.d(TAG, "ignoring Save UI because all fields match contents of "
+                                    + "dataset #" + i + ": " + dataset);
+                        }
                         return true;
                     }
                 }

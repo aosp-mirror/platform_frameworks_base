@@ -16,11 +16,16 @@
 
 package com.android.server.autofill;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.service.autofill.Dataset;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -81,5 +86,17 @@ public final class Helper {
             array[i] = set.valueAt(i);
         }
         return array;
+    }
+
+    @NonNull
+    static ArrayMap<AutofillId, AutofillValue> getFields(@NonNull Dataset dataset) {
+        final ArrayList<AutofillId> ids = dataset.getFieldIds();
+        final ArrayList<AutofillValue> values = dataset.getFieldValues();
+        final int size = ids == null ? 0 : ids.size();
+        final ArrayMap<AutofillId, AutofillValue> fields = new ArrayMap<>(size);
+        for (int i = 0; i < size; i++) {
+            fields.put(ids.get(i), values.get(i));
+        }
+        return fields;
     }
 }
