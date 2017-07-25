@@ -1186,6 +1186,16 @@ public class PackageInstaller {
         }
 
         /**
+         * Sets the install as a virtual preload. Will only have effect when called
+         * by the verifier.
+         * {@hide}
+         */
+        @SystemApi
+        public void setInstallAsVirtualPreload() {
+            installFlags |= PackageManager.INSTALL_VIRTUAL_PRELOAD;
+        }
+
+        /**
          * Set the reason for installing this package.
          */
         public void setInstallReason(@InstallReason int installReason) {

@@ -809,6 +809,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_ALLOCATE_AGGRESSIVE = 0x00008000;
 
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package
+     * is a virtual preload.
+     *
+     * @hide
+     */
+    public static final int INSTALL_VIRTUAL_PRELOAD = 0x00010000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {
             DONT_KILL_APP
