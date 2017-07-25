@@ -280,13 +280,10 @@ public class KeyguardIndicationController {
             if (mDozing) {
                 // If we're dozing, never show a persistent indication.
                 if (!TextUtils.isEmpty(mTransientIndication)) {
-                    // When dozing we ignore the initial text color and use white instead.
-                    // We don't wait to draw black text on a black background.
-                    int color = mTransientTextColor == mInitialTextColor ?
-                            Color.WHITE : mTransientTextColor;
+                    // When dozing we ignore any text color and use white instead, because
+                    // colors can be hard to read in low brightness.
+                    mTextView.setTextColor(Color.WHITE);
                     mTextView.switchIndication(mTransientIndication);
-                    mTextView.setTextColor(color);
-
                 } else {
                     mTextView.switchIndication(null);
                 }
