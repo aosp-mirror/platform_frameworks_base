@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.MutableFloat;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -480,6 +481,13 @@ public class TaskStackLayoutAlgorithm {
         // Anchor the task rect top aligned to the stack rect
         int height = mStackRect.height() - mInitialTopOffset - mStackBottomOffset;
         mTaskRect.set(mStackRect.left, mStackRect.top, mStackRect.right, mStackRect.top + height);
+
+        if (mTaskRect.width() <= 0 || mTaskRect.height() <= 0) {
+            // Logging for b/36654830
+            Log.e(TAG, "Invalid task rect: taskRect=" + mTaskRect + " stackRect=" + mStackRect
+                    + " displayRect=" + displayRect + " windowRect=" + windowRect
+                    + " taskStackBounds=" + taskStackBounds);
+        }
 
         // Short circuit here if the stack rects haven't changed so we don't do all the work below
         if (!lastStackRect.equals(mStackRect)) {
