@@ -181,7 +181,7 @@ public class LocaleHelper {
             // Hong Kong Traditional Chinese (zh_Hant_HK) and Dzongkha (dz). But that has two
             // problems: it's expensive to extract it, and in case the output string becomes
             // automatically ellipsized, it can result in weird output.
-            localeNames[maxLocales] = TextUtils.ELLIPSIS_STRING;
+            localeNames[maxLocales] = TextUtils.getEllipsisString(TextUtils.TruncateAt.END);
         }
 
         ListFormatter lfn = ListFormatter.getInstance(dispLocale);

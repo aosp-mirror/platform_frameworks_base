@@ -2036,35 +2036,27 @@ public abstract class Layout {
         }
     }
 
-    private char getEllipsisChar(TextUtils.TruncateAt method) {
-        return (method == TextUtils.TruncateAt.END_SMALL) ?
-                TextUtils.ELLIPSIS_TWO_DOTS[0] :
-                TextUtils.ELLIPSIS_NORMAL[0];
-    }
-
     private void ellipsize(int start, int end, int line,
                            char[] dest, int destoff, TextUtils.TruncateAt method) {
-        int ellipsisCount = getEllipsisCount(line);
-
+        final int ellipsisCount = getEllipsisCount(line);
         if (ellipsisCount == 0) {
             return;
         }
+        final int ellipsisStart = getEllipsisStart(line);
+        final int lineStart = getLineStart(line);
 
-        int ellipsisStart = getEllipsisStart(line);
-        int linestart = getLineStart(line);
-
-        for (int i = ellipsisStart; i < ellipsisStart + ellipsisCount; i++) {
-            char c;
-
-            if (i == ellipsisStart) {
-                c = getEllipsisChar(method); // ellipsis
+        final String ellipsisString = TextUtils.getEllipsisString(method);
+        final int ellipsisStringLen = ellipsisString.length();
+        for (int i = 0; i < ellipsisCount; i++) {
+            final char c;
+            if (i < ellipsisStringLen && ellipsisCount <= ellipsisStringLen) {
+                c = ellipsisString.charAt(i);
             } else {
-                c = '\uFEFF'; // 0-width space
+                c = TextUtils.ELLIPSIS_FILLER;
             }
 
-            int a = i + linestart;
-
-            if (a >= start && a < end) {
+            final int a = i + ellipsisStart + lineStart;
+            if (start <= a && a < end) {
                 dest[destoff + a - start] = c;
             }
         }
