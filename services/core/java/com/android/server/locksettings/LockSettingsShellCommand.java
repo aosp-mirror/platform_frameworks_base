@@ -160,6 +160,11 @@ class LockSettingsShellCommand extends ShellCommand {
         final boolean havePassword = mLockPatternUtils.isLockPasswordEnabled(mCurrentUserId);
         final boolean havePattern = mLockPatternUtils.isLockPatternEnabled(mCurrentUserId);
         if (havePassword || havePattern) {
+            if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(mCurrentUserId)) {
+                getOutPrintWriter().println("Profile uses unified challenge");
+                return false;
+            }
+
             try {
                 final boolean result;
                 if (havePassword) {
@@ -168,9 +173,7 @@ class LockSettingsShellCommand extends ShellCommand {
                     result = mLockPatternUtils.checkPattern(stringToPattern(mOld), mCurrentUserId);
                 }
                 if (!result) {
-                    if (!mLockPatternUtils.isManagedProfileWithUnifiedChallenge(mCurrentUserId)) {
-                        mLockPatternUtils.reportFailedPasswordAttempt(mCurrentUserId);
-                    }
+                    mLockPatternUtils.reportFailedPasswordAttempt(mCurrentUserId);
                     getOutPrintWriter().println("Old password '" + mOld + "' didn't match");
                 }
                 return result;
