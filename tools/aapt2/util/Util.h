@@ -228,6 +228,12 @@ class Tokenizer {
  public:
   class iterator {
    public:
+    using reference = android::StringPiece&;
+    using value_type = android::StringPiece;
+    using difference_type = size_t;
+    using pointer = android::StringPiece*;
+    using iterator_category = std::forward_iterator_tag;
+
     iterator(const iterator&) = default;
     iterator& operator=(const iterator&) = default;
 
@@ -250,9 +256,13 @@ class Tokenizer {
 
   Tokenizer(android::StringPiece str, char sep);
 
-  iterator begin() { return begin_; }
+  iterator begin() const {
+    return begin_;
+  }
 
-  iterator end() { return end_; }
+  iterator end() const {
+    return end_;
+  }
 
  private:
   const iterator begin_;
