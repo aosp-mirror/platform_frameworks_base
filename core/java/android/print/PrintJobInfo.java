@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.print.PrintJobInfoProto;
 
 import com.android.internal.util.Preconditions;
 
@@ -88,7 +89,7 @@ public final class PrintJobInfo implements Parcelable {
      * Next valid states: {@link #STATE_QUEUED}
      * </p>
      */
-    public static final int STATE_CREATED = 1;
+    public static final int STATE_CREATED = PrintJobInfoProto.STATE_CREATED;
 
     /**
      * Print job state: The print jobs is created, it is ready
@@ -98,7 +99,7 @@ public final class PrintJobInfo implements Parcelable {
      * {@link #STATE_CANCELED}
      * </p>
      */
-    public static final int STATE_QUEUED = 2;
+    public static final int STATE_QUEUED = PrintJobInfoProto.STATE_QUEUED;
 
     /**
      * Print job state: The print job is being printed.
@@ -107,7 +108,7 @@ public final class PrintJobInfo implements Parcelable {
      * {@link #STATE_CANCELED}, {@link #STATE_BLOCKED}
      * </p>
      */
-    public static final int STATE_STARTED = 3;
+    public static final int STATE_STARTED = PrintJobInfoProto.STATE_STARTED;
 
     /**
      * Print job state: The print job is blocked.
@@ -116,7 +117,7 @@ public final class PrintJobInfo implements Parcelable {
      * {@link #STATE_STARTED}
      * </p>
      */
-    public static final int STATE_BLOCKED = 4;
+    public static final int STATE_BLOCKED = PrintJobInfoProto.STATE_BLOCKED;
 
     /**
      * Print job state: The print job is successfully printed.
@@ -125,7 +126,7 @@ public final class PrintJobInfo implements Parcelable {
      * Next valid states: None
      * </p>
      */
-    public static final int STATE_COMPLETED = 5;
+    public static final int STATE_COMPLETED = PrintJobInfoProto.STATE_COMPLETED;
 
     /**
      * Print job state: The print job was printing but printing failed.
@@ -133,7 +134,7 @@ public final class PrintJobInfo implements Parcelable {
      * Next valid states: {@link #STATE_CANCELED}, {@link #STATE_STARTED}
      * </p>
      */
-    public static final int STATE_FAILED = 6;
+    public static final int STATE_FAILED = PrintJobInfoProto.STATE_FAILED;
 
     /**
      * Print job state: The print job is canceled.
@@ -142,7 +143,7 @@ public final class PrintJobInfo implements Parcelable {
      * Next valid states: None
      * </p>
      */
-    public static final int STATE_CANCELED = 7;
+    public static final int STATE_CANCELED = PrintJobInfoProto.STATE_CANCELED;
 
     /** The unique print job id. */
     private PrintJobId mId;

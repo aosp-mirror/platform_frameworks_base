@@ -28,6 +28,7 @@ import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/power.proto";
+import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 
@@ -66,4 +67,5 @@ message IncidentProto {
     android.service.notification.NotificationServiceDumpProto notification = 3004;
     android.service.pm.PackageServiceDumpProto package = 3008;
     android.service.power.PowerServiceDumpProto power = 3009;
+    android.service.print.PrintServiceDumpProto print = 3010;
 }

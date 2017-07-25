@@ -16,6 +16,9 @@
 
 package com.android.printspooler.model;
 
+import static com.android.internal.print.DumpUtils.writeComponentName;
+import static com.android.internal.print.DumpUtils.writePrintJobInfo;
+
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -44,16 +48,19 @@ import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
+import android.service.print.PrintSpoolerInternalStateProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.printspooler.R;
 import com.android.printspooler.util.ApprovedPrintServices;
 
@@ -152,29 +159,26 @@ public final class PrintSpoolerService extends Service {
         return new PrintSpooler();
     }
 
-    @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void dumpLocked(PrintWriter pw, String[] args) {
         String prefix = (args.length > 0) ? args[0] : "";
         String tab = "  ";
 
-        synchronized (mLock) {
-            pw.append(prefix).append("print jobs:").println();
-            final int printJobCount = mPrintJobs.size();
-            for (int i = 0; i < printJobCount; i++) {
-                PrintJobInfo printJob = mPrintJobs.get(i);
-                pw.append(prefix).append(tab).append(printJob.toString());
-                pw.println();
-            }
+        pw.append(prefix).append("print jobs:").println();
+        final int printJobCount = mPrintJobs.size();
+        for (int i = 0; i < printJobCount; i++) {
+            PrintJobInfo printJob = mPrintJobs.get(i);
+            pw.append(prefix).append(tab).append(printJob.toString());
+            pw.println();
+        }
 
-            pw.append(prefix).append("print job files:").println();
-            File[] files = getFilesDir().listFiles();
-            if (files != null) {
-                final int fileCount = files.length;
-                for (int i = 0; i < fileCount; i++) {
-                    File file = files[i];
-                    if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
-                        pw.append(prefix).append(tab).append(file.getName()).println();
-                    }
+        pw.append(prefix).append("print job files:").println();
+        File[] files = getFilesDir().listFiles();
+        if (files != null) {
+            final int fileCount = files.length;
+            for (int i = 0; i < fileCount; i++) {
+                File file = files[i];
+                if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
+                    pw.append(prefix).append(tab).append(file.getName()).println();
                 }
             }
         }
@@ -185,6 +189,68 @@ public final class PrintSpoolerService extends Service {
             for (String approvedService : approvedPrintServices) {
                 pw.append(prefix).append(tab).append(approvedService).println();
             }
+        }
+    }
+
+    private void dumpLocked(@NonNull ProtoOutputStream proto) {
+        int numPrintJobs = mPrintJobs.size();
+        for (int i = 0; i < numPrintJobs; i++) {
+            writePrintJobInfo(this, proto, PrintSpoolerInternalStateProto.PRINT_JOBS,
+                    mPrintJobs.get(i));
+        }
+
+        File[] files = getFilesDir().listFiles();
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                File file = files[i];
+                if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
+                    proto.write(PrintSpoolerInternalStateProto.PRINT_JOB_FILES, file.getName());
+                }
+            }
+        }
+
+        Set<String> approvedPrintServices = (new ApprovedPrintServices(this)).getApprovedServices();
+        if (approvedPrintServices != null) {
+            for (String approvedService : approvedPrintServices) {
+                ComponentName componentName = ComponentName.unflattenFromString(approvedService);
+                if (componentName != null) {
+                    writeComponentName(proto, PrintSpoolerInternalStateProto.APPROVED_SERVICES,
+                            componentName);
+                }
+            }
+        }
+
+        proto.flush();
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        fd = Preconditions.checkNotNull(fd);
+
+        int opti = 0;
+        boolean dumpAsProto = false;
+        while (opti < args.length) {
+            String opt = args[opti];
+            if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                break;
+            }
+            opti++;
+            if ("--proto".equals(opt)) {
+                dumpAsProto = true;
+            }
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                if (dumpAsProto) {
+                    dumpLocked(new ProtoOutputStream(fd));
+                } else {
+                    dumpLocked(pw, args);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -752,7 +818,7 @@ public final class PrintSpoolerService extends Service {
      *
      * @param printerId the id of the printer the icon belongs to
      * @param icon the icon that was loaded
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon) {
         mCustomIconCache.onCustomPrinterIconLoaded(printerId, icon);
@@ -765,7 +831,7 @@ public final class PrintSpoolerService extends Service {
      * @param printerId the id of the printer the icon should be loaded for
      * @return the custom icon to be used for the printer or null if the icon is
      *         not yet available
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public Icon getCustomPrinterIcon(PrinterId printerId) {
         return mCustomIconCache.getIcon(printerId);
