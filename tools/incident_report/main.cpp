@@ -297,7 +297,7 @@ static int
 adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
 {
     const int maxAllowedSize = 20 * 1024 * 1024; // 20MB
-    uint8_t* buffer = (uint8_t*)malloc(maxAllowedSize);
+    unique_ptr<uint8_t[]> buffer(new uint8_t[maxAllowedSize]);
 
     for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
         Descriptor const* descriptor = IncidentProto::descriptor();
@@ -363,7 +363,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
 
             size_t size = 0;
             while (size < maxAllowedSize) {
-                ssize_t amt = read(pfd[0], buffer + size, maxAllowedSize - size);
+                ssize_t amt = read(pfd[0], buffer.get() + size, maxAllowedSize - size);
                 if (amt == 0) {
                     break;
                 } else if (amt == -1) {
@@ -390,7 +390,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
                     fprintf(stderr, "write error: %s\n", strerror(err));
                     return 1;
                 }
-                err = write_all(STDOUT_FILENO, buffer, size);
+                err = write_all(STDOUT_FILENO, buffer.get(), size);
                 if (err != 0) {
                     fprintf(stderr, "write error: %s\n", strerror(err));
                     return 1;
@@ -401,7 +401,6 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
         }
     }
 
-    free(buffer);
     return 0;
 }
 
