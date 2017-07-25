@@ -99,12 +99,12 @@
     <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
 
     <!-- Time format strings for fall-back clock widget -->
-    <string name="keyguard_widget_12_hours_format" translatable="false">h\uee01mm</string>
+    <string name="keyguard_widget_12_hours_format" translatable="false">h:mm</string>
     <!-- Time format strings for fall-back clock widget -->
-    <string name="keyguard_widget_24_hours_format" translatable="false">kk\uee01mm</string>
+    <string name="keyguard_widget_24_hours_format" translatable="false">kk:mm</string>
     <!-- The character used in keyguard_widget_12_hours_format and keyguard_widget_24_hours_format
          to represent a ":". -->
-    <string name="keyguard_fancy_colon" translatable="false">\uee01</string>
+    <string name="keyguard_fancy_colon" translatable="false"></string>
 
     <!-- Accessibility description of the PIN password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_area">PIN area</string>

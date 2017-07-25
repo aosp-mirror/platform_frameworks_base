@@ -36,6 +36,9 @@ class KeyguardClockAccessibilityDelegate extends View.AccessibilityDelegate {
     @Override
     public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(host, event);
+        if (TextUtils.isEmpty(mFancyColon)) {
+            return;
+        }
         CharSequence text = event.getContentDescription();
         if (!TextUtils.isEmpty(text)) {
             event.setContentDescription(replaceFancyColon(text));
@@ -44,15 +47,22 @@ class KeyguardClockAccessibilityDelegate extends View.AccessibilityDelegate {
 
     @Override
     public void onPopulateAccessibilityEvent(View host, AccessibilityEvent event) {
-        CharSequence text = ((TextView) host).getText();
-        if (!TextUtils.isEmpty(text)) {
-            event.getText().add(replaceFancyColon(text));
+        if (TextUtils.isEmpty(mFancyColon)) {
+            super.onPopulateAccessibilityEvent(host, event);
+        } else {
+            CharSequence text = ((TextView) host).getText();
+            if (!TextUtils.isEmpty(text)) {
+                event.getText().add(replaceFancyColon(text));
+            }
         }
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(host, info);
+        if (TextUtils.isEmpty(mFancyColon)) {
+            return;
+        }
         if (!TextUtils.isEmpty(info.getText())) {
             info.setText(replaceFancyColon(info.getText()));
         }
@@ -62,6 +72,13 @@ class KeyguardClockAccessibilityDelegate extends View.AccessibilityDelegate {
     }
 
     private CharSequence replaceFancyColon(CharSequence text) {
+        if (TextUtils.isEmpty(mFancyColon)) {
+            return text;
+        }
         return text.toString().replace(mFancyColon, ":");
+    }
+
+    public static boolean isNeeded(Context context) {
+        return !TextUtils.isEmpty(context.getString(R.string.keyguard_fancy_colon));
     }
 }
