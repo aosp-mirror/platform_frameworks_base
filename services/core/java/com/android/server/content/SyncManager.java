@@ -1704,6 +1704,8 @@ public class SyncManager {
             // Include "this" in the message so that the handler can ignore it if this
             // ActiveSyncContext is no longer the mActiveSyncContext at message handling
             // time.
+            mLogger.log("onFinished result=", result, " endpoint=",
+                    (mSyncOperation == null ? "null" : mSyncOperation.target));
             sendSyncFinishedOrCanceledMessage(this, result);
         }
 
@@ -1745,6 +1747,7 @@ public class SyncManager {
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                             | Context.BIND_ALLOW_OOM_MANAGEMENT,
                     new UserHandle(mSyncOperation.target.userId));
+            mLogger.log("bindService() returned=", mBound, " for ", this);
             if (!bindResult) {
                 mBound = false;
             } else {
@@ -1767,6 +1770,7 @@ public class SyncManager {
             }
             if (mBound) {
                 mBound = false;
+                mLogger.log("unbindService for ", this);
                 mContext.unbindService(this);
                 try {
                     mBatteryStats.noteSyncFinish(mEventName, mSyncAdapterUid);
@@ -2729,9 +2733,14 @@ public class SyncManager {
                             // outstanding
                             try {
                                 if (currentSyncContext.mSyncAdapter != null) {
+                                    mLogger.log("Calling cancelSync for SERVICE_DISCONNECTED ",
+                                            currentSyncContext,
+                                            " adapter=", currentSyncContext.mSyncAdapter);
                                     currentSyncContext.mSyncAdapter.cancelSync(currentSyncContext);
+                                    mLogger.log("Canceled");
                                 }
                             } catch (RemoteException e) {
+                                mLogger.log("RemoteException ", Log.getStackTraceString(e));
                                 // We don't need to retry this in this case.
                             }
 
@@ -3217,14 +3226,15 @@ public class SyncManager {
                 mLogger.log("Sync start: account=" + syncOperation.target.account,
                         " authority=", syncOperation.target.provider,
                         " reason=", SyncOperation.reasonToString(null, syncOperation.reason),
-                        " extras=", SyncOperation.extrasToString(syncOperation.extras));
+                        " extras=", SyncOperation.extrasToString(syncOperation.extras),
+                        " adapter=", activeSyncContext.mSyncAdapter);
 
                 activeSyncContext.mSyncAdapter = ISyncAdapter.Stub.asInterface(syncAdapter);
                 activeSyncContext.mSyncAdapter
                         .startSync(activeSyncContext, syncOperation.target.provider,
                                 syncOperation.target.account, syncOperation.extras);
 
-                mLogger.log("Sync finish");
+                mLogger.log("Sync is running now...");
             } catch (RemoteException remoteExc) {
                 mLogger.log("Sync failed with RemoteException: ", remoteExc.toString());
                 Log.d(TAG, "maybeStartNextSync: caught a RemoteException, rescheduling", remoteExc);
@@ -3297,7 +3307,6 @@ public class SyncManager {
                 activeSyncContext.mSyncAdapter.asBinder().unlinkToDeath(activeSyncContext, 0);
                 activeSyncContext.mIsLinkedToDeath = false;
             }
-            closeActiveSyncContext(activeSyncContext);
             final long elapsedTime = SystemClock.elapsedRealtime() - activeSyncContext.mStartTime;
             String historyMessage;
             int downstreamActivity;
@@ -3355,8 +3364,12 @@ public class SyncManager {
                 }
                 if (activeSyncContext.mSyncAdapter != null) {
                     try {
+                        mLogger.log("Calling cancelSync for runSyncFinishedOrCanceled ",
+                                activeSyncContext, "  adapter=", activeSyncContext.mSyncAdapter);
                         activeSyncContext.mSyncAdapter.cancelSync(activeSyncContext);
+                        mLogger.log("Canceled");
                     } catch (RemoteException e) {
+                        mLogger.log("RemoteException ", Log.getStackTraceString(e));
                         // we don't need to retry this in this case
                     }
                 }
@@ -3364,6 +3377,9 @@ public class SyncManager {
                 downstreamActivity = 0;
                 upstreamActivity = 0;
             }
+
+            // Close and unbind the service.  Don't use activeSyncContext.mSyncAdapter after this.
+            closeActiveSyncContext(activeSyncContext);
 
             stopSyncEvent(activeSyncContext.mHistoryRowId, syncOperation, historyMessage,
                     upstreamActivity, downstreamActivity, elapsedTime);
