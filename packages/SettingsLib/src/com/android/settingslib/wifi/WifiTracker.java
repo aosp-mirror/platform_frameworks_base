@@ -145,7 +145,9 @@ public class WifiTracker {
 
     @VisibleForTesting
     Scanner mScanner;
-    private boolean mStaleScanResults = true;
+
+    @GuardedBy("mLock")
+    static boolean sStaleScanResults = true;
 
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
@@ -239,9 +241,7 @@ public class WifiTracker {
         };
     }
 
-    /**
-     * Synchronously update the list of access points with the latest information.
-     */
+    /** Synchronously update the list of access points with the latest information. */
     @MainThread
     public void forceUpdate() {
         synchronized (mLock) {
@@ -255,6 +255,7 @@ public class WifiTracker {
             }
 
             List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+            mInternalAccessPoints.clear();
             updateAccessPointsLocked(newScanResults, configs);
 
             // Synchronously copy access points
@@ -355,7 +356,7 @@ public class WifiTracker {
      * <p>This should always be called when done with a WifiTracker (if startTracking was called) to
      * ensure proper cleanup and prevent any further callbacks from occurring.
      *
-     * <p>Calling this method will set the {@link #mStaleScanResults} bit, which prevents
+     * <p>Calling this method will set the {@link #sStaleScanResults} bit, which prevents
      * {@link WifiListener#onAccessPointsChanged()} callbacks from being invoked (until the bit
      * is unset on the next SCAN_RESULTS_AVAILABLE_ACTION).
      */
@@ -373,8 +374,8 @@ public class WifiTracker {
 
             mWorkHandler.removePendingMessages();
             mMainHandler.removePendingMessages();
+            sStaleScanResults = true;
         }
-        mStaleScanResults = true;
     }
 
     private void unregisterScoreCache() {
@@ -479,7 +480,7 @@ public class WifiTracker {
     /**
      * Safely modify {@link #mInternalAccessPoints} by acquiring {@link #mLock} first.
      *
-     * <p>Will not perform the update if {@link #mStaleScanResults} is true
+     * <p>Will not perform the update if {@link #sStaleScanResults} is true
      */
     private void updateAccessPoints() {
         List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
@@ -489,7 +490,7 @@ public class WifiTracker {
         }
 
         synchronized (mLock) {
-            if(!mStaleScanResults) {
+            if(!sStaleScanResults) {
                 updateAccessPointsLocked(newScanResults, configs);
             }
         }
@@ -499,7 +500,7 @@ public class WifiTracker {
      * Update the internal list of access points.
      *
      * <p>Do not called directly (except for forceUpdate), use {@link #updateAccessPoints()} which
-     * respects {@link #mStaleScanResults}.
+     * respects {@link #sStaleScanResults}.
      */
     @GuardedBy("mLock")
     private void updateAccessPointsLocked(final List<ScanResult> newScanResults,
@@ -789,9 +790,11 @@ public class WifiTracker {
                 mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                mConnected.set(info.isConnected());
 
-                mMainHandler.sendEmptyMessage(MainHandler.MSG_CONNECTED_CHANGED);
+                if(mConnected.get() != info.isConnected()) {
+                    mConnected.set(info.isConnected());
+                    mMainHandler.sendEmptyMessage(MainHandler.MSG_CONNECTED_CHANGED);
+                }
 
                 mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO, info)
                         .sendToTarget();
@@ -844,7 +847,7 @@ public class WifiTracker {
                     // Only notify listeners of changes if we have fresh scan results, otherwise the
                     // UI will be updated with stale results. We want to copy the APs regardless,
                     // for instances where forceUpdate was invoked by the caller.
-                    if (mStaleScanResults) {
+                    if (sStaleScanResults) {
                         copyAndNotifyListeners(false /*notifyListeners*/);
                     } else {
                         copyAndNotifyListeners(true /*notifyListeners*/);
@@ -899,7 +902,7 @@ public class WifiTracker {
             switch (msg.what) {
                 case MSG_UPDATE_ACCESS_POINTS:
                     if (msg.arg1 == CLEAR_STALE_SCAN_RESULTS) {
-                        mStaleScanResults = false;
+                        sStaleScanResults = false;
                     }
                     updateAccessPoints();
                     break;
