@@ -153,7 +153,9 @@ public class KeyguardStatusView extends GridLayout {
         mDateView = findViewById(R.id.date_view);
         mClockView = findViewById(R.id.clock_view);
         mClockView.setShowCurrentUserTime(true);
-        mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
+        if (KeyguardClockAccessibilityDelegate.isNeeded(mContext)) {
+            mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
+        }
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
         mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
