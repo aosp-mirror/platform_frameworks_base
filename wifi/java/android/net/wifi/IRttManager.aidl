@@ -23,6 +23,6 @@ import android.net.wifi.RttManager;
  */
 interface IRttManager
 {
-    Messenger getMessenger();
+    Messenger getMessenger(in IBinder binder, out int[] key);
     RttManager.RttCapabilities getRttCapabilities();
 }
