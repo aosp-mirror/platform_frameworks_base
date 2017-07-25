@@ -142,10 +142,11 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_KEEP_SCREEN_ON = false || LOCAL_LOGV;
 
     /**
-     * Set to false if we do not want to use the multi threaded renderer. Note that by disabling
+     * Set to false if we do not want to use the multi threaded renderer even though
+     * threaded renderer (aka hardware renderering) is used. Note that by disabling
      * this, WindowCallbacks will not fire.
      */
-    private static final boolean USE_MT_RENDERER = true;
+    private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -302,6 +303,7 @@ public final class ViewRootImpl implements ViewParent,
     Rect mDirty;
     public boolean mIsAnimating;
 
+    private boolean mUseMTRenderer;
     private boolean mDragResizing;
     private boolean mInvalidateRootRequested;
     private int mResizeMode;
@@ -545,18 +547,14 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void addWindowCallbacks(WindowCallbacks callback) {
-        if (USE_MT_RENDERER) {
-            synchronized (mWindowCallbacks) {
-                mWindowCallbacks.add(callback);
-            }
+        synchronized (mWindowCallbacks) {
+            mWindowCallbacks.add(callback);
         }
     }
 
     public void removeWindowCallbacks(WindowCallbacks callback) {
-        if (USE_MT_RENDERER) {
-            synchronized (mWindowCallbacks) {
-                mWindowCallbacks.remove(callback);
-            }
+        synchronized (mWindowCallbacks) {
+            mWindowCallbacks.remove(callback);
         }
     }
 
@@ -682,7 +680,17 @@ public final class ViewRootImpl implements ViewParent,
 
                 // If the application owns the surface, don't enable hardware acceleration
                 if (mSurfaceHolder == null) {
+                    // While this is supposed to enable only, it can effectively disable
+                    // the acceleration too.
                     enableHardwareAcceleration(attrs);
+                    final boolean useMTRenderer = MT_RENDERER_AVAILABLE
+                            && mAttachInfo.mThreadedRenderer != null;
+                    if (mUseMTRenderer != useMTRenderer) {
+                        // Shouldn't be resizing, as it's done only in window setup,
+                        // but end just in case.
+                        endDragResizing();
+                        mUseMTRenderer = useMTRenderer;
+                    }
                 }
 
                 boolean restore = false;
@@ -2064,7 +2072,7 @@ public final class ViewRootImpl implements ViewParent,
                         endDragResizing();
                     }
                 }
-                if (!USE_MT_RENDERER) {
+                if (!mUseMTRenderer) {
                     if (dragResizing) {
                         mCanvasOffsetX = mWinFrame.left;
                         mCanvasOffsetY = mWinFrame.top;
@@ -2702,8 +2710,10 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public void onPostDraw(DisplayListCanvas canvas) {
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
-        for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-            mWindowCallbacks.get(i).onPostDraw(canvas);
+        if (mUseMTRenderer) {
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                mWindowCallbacks.get(i).onPostDraw(canvas);
+            }
         }
     }
 
@@ -3034,7 +3044,8 @@ public final class ViewRootImpl implements ViewParent,
                     return;
                 }
 
-                if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) {
+                if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset,
+                        scalingRequired, dirty, surfaceInsets)) {
                     return;
                 }
             }
@@ -3050,11 +3061,22 @@ public final class ViewRootImpl implements ViewParent,
      * @return true if drawing was successful, false if an error occurred
      */
     private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int xoff, int yoff,
-            boolean scalingRequired, Rect dirty) {
+            boolean scalingRequired, Rect dirty, Rect surfaceInsets) {
 
         // Draw with software renderer.
         final Canvas canvas;
+
+        // We already have the offset of surfaceInsets in xoff, yoff and dirty region,
+        // therefore we need to add it back when moving the dirty region.
+        int dirtyXOffset = xoff;
+        int dirtyYOffset = yoff;
+        if (surfaceInsets != null) {
+            dirtyXOffset += surfaceInsets.left;
+            dirtyYOffset += surfaceInsets.top;
+        }
+
         try {
+            dirty.offset(-dirtyXOffset, -dirtyYOffset);
             final int left = dirty.left;
             final int top = dirty.top;
             final int right = dirty.right;
@@ -3081,6 +3103,8 @@ public final class ViewRootImpl implements ViewParent,
             // kill stuff (or ourself) for no reason.
             mLayoutRequested = true;    // ask wm for a new surface next time.
             return false;
+        } finally {
+            dirty.offset(dirtyXOffset, dirtyYOffset);  // Reset to the original value.
         }
 
         try {
@@ -6550,7 +6574,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // Tell all listeners that we are resizing the window so that the chrome can get
         // updated as fast as possible on a separate thread,
-        if (mDragResizing) {
+        if (mDragResizing && mUseMTRenderer) {
             boolean fullscreen = frame.equals(backDropFrame);
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
@@ -7798,9 +7822,11 @@ public final class ViewRootImpl implements ViewParent,
             Rect stableInsets, int resizeMode) {
         if (!mDragResizing) {
             mDragResizing = true;
-            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds, fullscreen,
-                        systemInsets, stableInsets, resizeMode);
+            if (mUseMTRenderer) {
+                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                    mWindowCallbacks.get(i).onWindowDragResizeStart(
+                            initialBounds, fullscreen, systemInsets, stableInsets, resizeMode);
+                }
             }
             mFullRedrawNeeded = true;
         }
@@ -7812,8 +7838,10 @@ public final class ViewRootImpl implements ViewParent,
     private void endDragResizing() {
         if (mDragResizing) {
             mDragResizing = false;
-            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                mWindowCallbacks.get(i).onWindowDragResizeEnd();
+            if (mUseMTRenderer) {
+                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                    mWindowCallbacks.get(i).onWindowDragResizeEnd();
+                }
             }
             mFullRedrawNeeded = true;
         }
@@ -7821,19 +7849,21 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean updateContentDrawBounds() {
         boolean updated = false;
-        for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-            updated |= mWindowCallbacks.get(i).onContentDrawn(
-                    mWindowAttributes.surfaceInsets.left,
-                    mWindowAttributes.surfaceInsets.top,
-                    mWidth, mHeight);
+        if (mUseMTRenderer) {
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                updated |=
+                        mWindowCallbacks.get(i).onContentDrawn(mWindowAttributes.surfaceInsets.left,
+                                mWindowAttributes.surfaceInsets.top, mWidth, mHeight);
+            }
         }
         return updated | (mDragResizing && mReportNextDraw);
     }
 
     private void requestDrawWindow() {
-        if (mReportNextDraw) {
-            mWindowDrawCountDown = new CountDownLatch(mWindowCallbacks.size());
+        if (!mUseMTRenderer) {
+            return;
         }
+        mWindowDrawCountDown = new CountDownLatch(mWindowCallbacks.size());
         for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
             mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
         }
