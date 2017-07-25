@@ -1527,7 +1527,12 @@
     <permission android:name="android.permission.HARDWARE_TEST"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows access to FM
+    <!-- @SystemApi Allows access to Broadcast Radio
+         @hide This is not a third-party API (intended for system apps).-->
+    <permission android:name="android.permission.ACCESS_BROADCAST_RADIO"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @deprecated @SystemApi Allows access to FM
          @hide This is not a third-party API (intended for system apps).-->
     <permission android:name="android.permission.ACCESS_FM_RADIO"
         android:protectionLevel="signature|privileged" />

@@ -91,8 +91,8 @@ public class RadioTunerTest {
         assumeTrue(isRadioSupported);
 
         // Check radio access permission
-        int res = mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FM_RADIO);
-        assertEquals("ACCESS_FM_RADIO permission not granted",
+        int res = mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_BROADCAST_RADIO);
+        assertEquals("ACCESS_BROADCAST_RADIO permission not granted",
                 PackageManager.PERMISSION_GRANTED, res);
 
         mRadioManager = (RadioManager)mContext.getSystemService(Context.RADIO_SERVICE);

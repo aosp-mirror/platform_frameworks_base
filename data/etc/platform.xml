@@ -107,7 +107,7 @@
         <group gid="audio" />
     </permission>
 
-    <permission name="android.permission.ACCESS_FM_RADIO" >
+    <permission name="android.permission.ACCESS_BROADCAST_RADIO" >
         <!-- /dev/fm is gid media, not audio -->
         <group gid="media" />
     </permission>
