@@ -60,7 +60,13 @@
         <item name="android:layout_gravity">center_horizontal|bottom</item>
     </style>
 
-    <style name="PasswordTheme" parent="systemui_theme">
+    <style name="PasswordTheme" parent="Theme.SystemUI">
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
+        <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
+        <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
+    </style>
+
+    <style name="PasswordTheme.Light" parent="Theme.SystemUI.Light">
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
         <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
