@@ -1677,6 +1677,10 @@
          The size of the WAL file is also constrained by 'db_journal_size_limit'. -->
     <integer name="db_wal_autocheckpoint">100</integer>
 
+    <!-- The number of milliseconds that SQLite connection is allowed to be idle before it
+         is closed and removed from the pool -->
+    <integer name="db_default_idle_connection_timeout">30000</integer>
+
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,
          which typically is /data/data/com.android.providers.downloads/files -->

@@ -429,6 +429,7 @@
   <java-symbol type="integer" name="db_connection_pool_size" />
   <java-symbol type="integer" name="db_journal_size_limit" />
   <java-symbol type="integer" name="db_wal_autocheckpoint" />
+  <java-symbol type="integer" name="db_default_idle_connection_timeout" />
   <java-symbol type="integer" name="config_soundEffectVolumeDb" />
   <java-symbol type="integer" name="config_lockSoundVolumeDb" />
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
