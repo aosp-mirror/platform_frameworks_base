@@ -20,11 +20,11 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,12 +41,15 @@ import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.LatencyTracker;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
@@ -100,7 +103,8 @@ import java.util.List;
 /**
  * The main Recents activity that is started from RecentsComponent.
  */
-public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreDrawListener {
+public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreDrawListener,
+        ColorExtractor.OnColorsChangedListener {
 
     private final static String TAG = "RecentsActivity";
     private final static boolean DEBUG = false;
@@ -128,6 +132,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private int mFocusTimerDuration;
     private DozeTrigger mIterateTrigger;
     private final UserInteractionEvent mUserInteractionEvent = new UserInteractionEvent();
+
+    // Theme and colors
+    private SysuiColorExtractor mColorExtractor;
+    private boolean mUsingDarkText;
 
     /**
      * A common Runnable to finish Recents by launching Home with an animation depending on the
@@ -329,6 +337,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mPackageMonitor = new RecentsPackageMonitor();
         mPackageMonitor.register(this);
 
+        // Select theme based on wallpaper colors
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
+        mColorExtractor.addOnColorsChangedListener(this);
+        mUsingDarkText = mColorExtractor.getColors(ColorExtractor.TYPE_DARK,
+                WallpaperManager.FLAG_SYSTEM, true).supportsDarkText();
+        setTheme(mUsingDarkText ? R.style.RecentsTheme_Wallpaper_Light
+                : R.style.RecentsTheme_Wallpaper);
+
         // Set the Recents layout
         setContentView(R.layout.recents);
         takeKeyEvents(true);
@@ -375,10 +391,34 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
         MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
-        // Make sure we have the right gradient and we're listening for update events
-        mRecentsView.onStart();
+        // Getting system scrim colors ignoring wallpaper visibility since it should never be grey.
+        ColorExtractor.GradientColors systemColors = mColorExtractor.getColors(
+                ColorExtractor.TYPE_DARK, WallpaperManager.FLAG_SYSTEM, true);
+        // We don't want to interpolate colors because we're defining the initial state.
+        // Gradient should be set/ready when you open "Recents".
+        mRecentsView.setScrimColors(systemColors, false);
+
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
+    }
+
+    @Override
+    public void onColorsChanged(ColorExtractor colorExtractor, int which) {
+        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+            // Recents doesn't care about the wallpaper being visible or not, it always
+            // wants to scrim with wallpaper colors
+            ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                    WallpaperManager.FLAG_SYSTEM,
+                    ColorExtractor.TYPE_DARK, true /* ignoreVis */);
+            boolean darkText = colors.supportsDarkText();
+            if (darkText != mUsingDarkText) {
+                mUsingDarkText = darkText;
+                setTheme(mUsingDarkText ? R.style.RecentsTheme_Wallpaper_Light
+                        : R.style.RecentsTheme_Wallpaper);
+                mRecentsView.reevaluateStyles();
+            }
+            mRecentsView.setScrimColors(colors, true /* animated */);
+        }
     }
 
     @Override
@@ -483,12 +523,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 mLastConfig.orientation != newDeviceConfiguration.orientation,
                 mLastConfig.densityDpi != newDeviceConfiguration.densityDpi, numStackTasks > 0));
 
-        int configDiff = mLastConfig.updateFrom(newDeviceConfiguration);
-
-        // Recreate activity if an overlay was enabled/disabled
-        if ((configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
-            recreate();
-        }
+        mLastConfig.updateFrom(newDeviceConfiguration);
     }
 
     @Override
@@ -507,9 +542,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
         Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(false);
-
-        // We don't need to update the gradient when we're not visible
-        mRecentsView.onStop();
 
         if (!isChangingConfigurations()) {
             // Workaround for b/22542869, if the RecentsActivity is started again, but without going
