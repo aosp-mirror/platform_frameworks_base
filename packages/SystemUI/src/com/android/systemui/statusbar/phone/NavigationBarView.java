@@ -316,7 +316,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mDockedIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_docked, R.drawable.ic_sysbar_docked_dark);
         }
-        if (oldConfig.densityDpi != newConfig.densityDpi) {
+        if (oldConfig.densityDpi != newConfig.densityDpi
+                || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
             mBackIcon = getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
             mBackLandIcon = mBackIcon;
             mBackAltIcon = getDrawable(ctx,
@@ -669,7 +670,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateTaskSwitchHelper();
         updateIcons(getContext(), mConfiguration, newConfig);
         updateRecentsIcon();
-        if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi) {
+        if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi
+                || mConfiguration.getLayoutDirection() != newConfig.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
             setNavigationIconHints(mNavigationIconHints, true);
         }
