@@ -1005,6 +1005,7 @@ public class StaticLayout extends Layout {
         lines[off + START] = start;
         lines[off + TOP] = v;
         lines[off + DESCENT] = below + extra;
+        lines[off + EXTRA] = extra;
 
         // special case for non-ellipsized last visible line when maxLines is set
         // store the height as if it was ellipsized
@@ -1195,6 +1196,14 @@ public class StaticLayout extends Layout {
         return mLines[mColumns * line + TOP];
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getLineExtra(int line) {
+        return mLines[mColumns * line + EXTRA];
+    }
+
     @Override
     public int getLineDescent(int line) {
         return mLines[mColumns * line + DESCENT];
@@ -1217,6 +1226,9 @@ public class StaticLayout extends Layout {
 
     @Override
     public final Directions getLineDirections(int line) {
+        if (line > getLineCount()) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
         return mLineDirections[line];
     }
 
@@ -1368,16 +1380,17 @@ public class StaticLayout extends Layout {
      */
     private int mMaxLineHeight = -1;
 
-    private static final int COLUMNS_NORMAL = 4;
-    private static final int COLUMNS_ELLIPSIZE = 6;
+    private static final int COLUMNS_NORMAL = 5;
+    private static final int COLUMNS_ELLIPSIZE = 7;
     private static final int START = 0;
     private static final int DIR = START;
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
-    private static final int HYPHEN = 3;
-    private static final int ELLIPSIS_START = 4;
-    private static final int ELLIPSIS_COUNT = 5;
+    private static final int EXTRA = 3;
+    private static final int HYPHEN = 4;
+    private static final int ELLIPSIS_START = 5;
+    private static final int ELLIPSIS_COUNT = 6;
 
     private int[] mLines;
     private Directions[] mLineDirections;
