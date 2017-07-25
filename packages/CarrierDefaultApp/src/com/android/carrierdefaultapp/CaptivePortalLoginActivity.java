@@ -77,6 +77,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private WebView mWebView;
     private MyWebViewClient mWebViewClient;
     private boolean mLaunchBrowser = false;
+    private Thread mTestingThread = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,8 +128,6 @@ public class CaptivePortalLoginActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        releaseNetworkRequest();
         if (mLaunchBrowser) {
             // Give time for this network to become default. After 500ms just proceed.
             for (int i = 0; i < 5; i++) {
@@ -143,6 +142,13 @@ public class CaptivePortalLoginActivity extends Activity {
             if (DBG) logd("starting activity with intent ACTION_VIEW for " + url);
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         }
+
+        if (mTestingThread != null) {
+            mTestingThread.interrupt();
+        }
+        mWebView.destroy();
+        releaseNetworkRequest();
+        super.onDestroy();
     }
 
     // Find WebView's proxy BroadcastReceiver and prompt it to read proxy system properties.
@@ -215,13 +221,14 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void testForCaptivePortal() {
-        new Thread(new Runnable() {
+        mTestingThread = new Thread(new Runnable() {
             public void run() {
                 // Give time for captive portal to open.
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                 }
+                if (isFinishing() || isDestroyed()) return;
                 HttpURLConnection urlConnection = null;
                 int httpResponseCode = 500;
                 int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
@@ -244,7 +251,8 @@ public class CaptivePortalLoginActivity extends Activity {
                     done(true);
                 }
             }
-        }).start();
+        });
+        mTestingThread.start();
     }
 
     private Network getNetworkForCaptivePortal() {
