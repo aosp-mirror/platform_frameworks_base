@@ -387,9 +387,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
                 GlobalSettingsProto.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT);
         dumpSetting(s, p,
-                Settings.Global.SAMPLING_PROFILER_MS,
-                GlobalSettingsProto.SAMPLING_PROFILER_MS);
-        dumpSetting(s, p,
                 Settings.Global.SETUP_PREPAID_DATA_SERVICE_URL,
                 GlobalSettingsProto.SETUP_PREPAID_DATA_SERVICE_URL);
         dumpSetting(s, p,

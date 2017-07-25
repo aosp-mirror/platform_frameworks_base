@@ -305,7 +305,6 @@ public class SettingsBackupTest {
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
                     Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
                     Settings.Global.SAFE_BOOT_DISALLOWED,
-                    Settings.Global.SAMPLING_PROFILER_MS,
                     Settings.Global.SELINUX_STATUS,
                     Settings.Global.SELINUX_UPDATE_CONTENT_URL,
                     Settings.Global.SELINUX_UPDATE_METADATA_URL,

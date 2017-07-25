@@ -4581,7 +4581,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT);
             MOVED_TO_GLOBAL.add(Settings.Global.PDP_WATCHDOG_POLL_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT);
-            MOVED_TO_GLOBAL.add(Settings.Global.SAMPLING_PROFILER_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.SETUP_PREPAID_DATA_SERVICE_URL);
             MOVED_TO_GLOBAL.add(Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST);
             MOVED_TO_GLOBAL.add(Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL);
@@ -8212,15 +8211,6 @@ public final class Settings {
         */
        public static final String PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT =
                "pdp_watchdog_max_pdp_reset_fail_count";
-
-       /**
-        * A positive value indicates how often the SamplingProfiler
-        * should take snapshots. Zero value means SamplingProfiler
-        * is disabled.
-        *
-        * @hide
-        */
-       public static final String SAMPLING_PROFILER_MS = "sampling_profiler_ms";
 
        /**
         * URL to open browser on to allow user to manage a prepay account
