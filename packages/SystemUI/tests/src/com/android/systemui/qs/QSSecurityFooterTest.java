@@ -16,12 +16,16 @@ package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
+import android.provider.Settings;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
@@ -39,6 +43,7 @@ import android.testing.TestableImageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /*
  * Compile and run the whole SystemUI test suite:
@@ -63,6 +68,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private TestableImageView mFooterIcon;
     private QSSecurityFooter mFooter;
     private SecurityController mSecurityController = mock(SecurityController.class);
+    private UserManager mUserManager;
 
     @Before
     public void setUp() {
@@ -72,6 +78,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 new LayoutInflaterBuilder(mContext)
                         .replace("ImageView", TestableImageView.class)
                         .build());
+        mUserManager = Mockito.mock(UserManager.class);
+        mContext.addMockSystemService(Context.USER_SERVICE, mUserManager);
         Handler h = new Handler(Looper.getMainLooper());
         h.post(() -> mFooter = new QSSecurityFooter(null, mContext));
         waitForIdleSync(h);
@@ -120,6 +128,21 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
+    }
+
+    @Test
+    public void testManagedDemoMode() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName()).thenReturn(null);
+        final UserInfo mockUserInfo = Mockito.mock(UserInfo.class);
+        when(mockUserInfo.isDemo()).thenReturn(true);
+        when(mUserManager.getUserInfo(anyInt())).thenReturn(mockUserInfo);
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_DEMO_MODE, 1);
+
+        mFooter.refreshState();
+
+        waitForIdleSync(mFooter.mHandler);
+        assertEquals(View.GONE, mRootView.getVisibility());
     }
 
     @Test
