@@ -19,6 +19,7 @@ package android.text.style;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.LeakyTypefaceStorage;
 import android.graphics.Typeface;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
@@ -30,11 +31,12 @@ import android.text.TextUtils;
  * resource.
  */
 public class TextAppearanceSpan extends MetricAffectingSpan implements ParcelableSpan {
-    private final String mTypeface;
+    private final String mFamilyName;
     private final int mStyle;
     private final int mTextSize;
     private final ColorStateList mTextColor;
     private final ColorStateList mTextColorLink;
+    private final Typeface mTypeface;
 
     /**
      * Uses the specified TextAppearance resource to determine the
@@ -55,7 +57,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
      */
     public TextAppearanceSpan(Context context, int appearance, int colorList) {
         ColorStateList textColor;
-        
+
         TypedArray a =
             context.obtainStyledAttributes(appearance,
                                            com.android.internal.R.styleable.TextAppearance);
@@ -68,28 +70,33 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
                                         TextAppearance_textSize, -1);
 
         mStyle = a.getInt(com.android.internal.R.styleable.TextAppearance_textStyle, 0);
-        String family = a.getString(com.android.internal.R.styleable.TextAppearance_fontFamily);
-        if (family != null) {
-            mTypeface = family;
+        mTypeface = a.getFont(com.android.internal.R.styleable.TextAppearance_fontFamily);
+        if (mTypeface != null) {
+            mFamilyName = null;
         } else {
-            int tf = a.getInt(com.android.internal.R.styleable.TextAppearance_typeface, 0);
+            String family = a.getString(com.android.internal.R.styleable.TextAppearance_fontFamily);
+            if (family != null) {
+                mFamilyName = family;
+            } else {
+                int tf = a.getInt(com.android.internal.R.styleable.TextAppearance_typeface, 0);
 
-            switch (tf) {
-                case 1:
-                    mTypeface = "sans";
-                    break;
+                switch (tf) {
+                    case 1:
+                        mFamilyName = "sans";
+                        break;
 
-                case 2:
-                    mTypeface = "serif";
-                    break;
+                    case 2:
+                        mFamilyName = "serif";
+                        break;
 
-                case 3:
-                    mTypeface = "monospace";
-                    break;
+                    case 3:
+                        mFamilyName = "monospace";
+                        break;
 
-                default:
-                    mTypeface = null;
-                    break;
+                    default:
+                        mFamilyName = null;
+                        break;
+                }
             }
         }
 
@@ -102,7 +109,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
             textColor = a.getColorStateList(colorList);
             a.recycle();
         }
-        
+
         mTextColor = textColor;
     }
 
@@ -112,15 +119,16 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
      */
     public TextAppearanceSpan(String family, int style, int size,
                               ColorStateList color, ColorStateList linkColor) {
-        mTypeface = family;
+        mFamilyName = family;
         mStyle = style;
         mTextSize = size;
         mTextColor = color;
         mTextColorLink = linkColor;
+        mTypeface = null;
     }
 
     public TextAppearanceSpan(Parcel src) {
-        mTypeface = src.readString();
+        mFamilyName = src.readString();
         mStyle = src.readInt();
         mTextSize = src.readInt();
         if (src.readInt() != 0) {
@@ -133,8 +141,9 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         } else {
             mTextColorLink = null;
         }
+        mTypeface = LeakyTypefaceStorage.readTypefaceFromParcel(src);
     }
-    
+
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
@@ -143,7 +152,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
     public int getSpanTypeIdInternal() {
         return TextUtils.TEXT_APPEARANCE_SPAN;
     }
-    
+
     public int describeContents() {
         return 0;
     }
@@ -154,7 +163,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
 
     /** @hide */
     public void writeToParcelInternal(Parcel dest, int flags) {
-        dest.writeString(mTypeface);
+        dest.writeString(mFamilyName);
         dest.writeInt(mStyle);
         dest.writeInt(mTextSize);
         if (mTextColor != null) {
@@ -169,6 +178,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         } else {
             dest.writeInt(0);
         }
+        LeakyTypefaceStorage.writeTypefaceToParcel(mTypeface, dest);
     }
 
     /**
@@ -176,7 +186,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
      * if it does not specify one.
      */
     public String getFamily() {
-        return mTypeface;
+        return mFamilyName;
     }
 
     /**
@@ -226,9 +236,14 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
 
     @Override
     public void updateMeasureState(TextPaint ds) {
-        if (mTypeface != null || mStyle != 0) {
+        final Typeface styledTypeface;
+        int style = 0;
+
+        if (mTypeface != null) {
+            style = mStyle;
+            styledTypeface = Typeface.create(mTypeface, style);
+        } else if (mFamilyName != null || mStyle != 0) {
             Typeface tf = ds.getTypeface();
-            int style = 0;
 
             if (tf != null) {
                 style = tf.getStyle();
@@ -236,15 +251,19 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
 
             style |= mStyle;
 
-            if (mTypeface != null) {
-                tf = Typeface.create(mTypeface, style);
+            if (mFamilyName != null) {
+                styledTypeface = Typeface.create(mFamilyName, style);
             } else if (tf == null) {
-                tf = Typeface.defaultFromStyle(style);
+                styledTypeface = Typeface.defaultFromStyle(style);
             } else {
-                tf = Typeface.create(tf, style);
+                styledTypeface = Typeface.create(tf, style);
             }
+        } else {
+            styledTypeface = null;
+        }
 
-            int fake = style & ~tf.getStyle();
+        if (styledTypeface != null) {
+            int fake = style & ~styledTypeface.getStyle();
 
             if ((fake & Typeface.BOLD) != 0) {
                 ds.setFakeBoldText(true);
@@ -254,7 +273,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
                 ds.setTextSkewX(-0.25f);
             }
 
-            ds.setTypeface(tf);
+            ds.setTypeface(styledTypeface);
         }
 
         if (mTextSize > 0) {
