@@ -163,14 +163,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             }
             mHandler.postDelayed(mReleaseFingerprintWakeLockRunnable,
                     FINGERPRINT_WAKELOCK_TIMEOUT_MS);
-
-            if (pulsingOrAod()) {
-                // If we are waking the device up while we are pulsing the clock and the
-                // notifications would light up first, creating an unpleasant animation.
-                // Defer changing the screen brightness by forcing doze brightness on our window
-                // until the clock and the notifications are faded out.
-                mStatusBarWindowManager.setForceDozeBrightness(true);
-            }
         }
         Trace.endSection();
     }
@@ -191,6 +183,13 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         }
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = calculateMode();
+        if (mMode == MODE_WAKE_AND_UNLOCK_PULSING && pulsingOrAod()) {
+            // If we are waking the device up while we are pulsing the clock and the
+            // notifications would light up first, creating an unpleasant animation.
+            // Defer changing the screen brightness by forcing doze brightness on our window
+            // until the clock and the notifications are faded out.
+            mStatusBarWindowManager.setForceDozeBrightness(true);
+        }
         if (!wasDeviceInteractive) {
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fp wakelock: Authenticated, waking up...");
@@ -239,9 +238,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             case MODE_ONLY_WAKE:
             case MODE_NONE:
                 break;
-        }
-        if (mMode != MODE_WAKE_AND_UNLOCK_PULSING) {
-            mStatusBarWindowManager.setForceDozeBrightness(false);
         }
         mStatusBar.notifyFpAuthModeChanged();
         Trace.endSection();
