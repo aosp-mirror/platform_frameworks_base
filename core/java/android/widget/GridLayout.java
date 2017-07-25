@@ -898,9 +898,6 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     protected void onDebugDrawMargins(Canvas canvas, Paint paint) {
         // Apply defaults, so as to remove UNDEFINED values
@@ -916,9 +913,6 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     protected void onDebugDraw(Canvas canvas) {
         Paint paint = new Paint();
