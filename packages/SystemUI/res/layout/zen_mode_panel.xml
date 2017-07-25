@@ -59,8 +59,7 @@
                 android:clickable="true"
                 android:contentDescription="@string/accessibility_desc_close"
                 android:scaleType="center"
-                android:src="@drawable/ic_close"
-                android:tint="@android:color/white" />
+                android:src="@drawable/ic_close_white" />
 
             <TextView
                 android:id="@+id/zen_introduction_message"
