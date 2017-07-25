@@ -57,7 +57,6 @@ final class RulesManagerServiceHelperImpl implements PermissionHelper, Executor 
         return true;
     }
 
-    // TODO(nfuller): Wake lock required while running in background thread?
     @Override
     public void execute(Runnable runnable) {
         AsyncTask.execute(runnable);
