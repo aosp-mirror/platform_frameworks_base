@@ -67,10 +67,10 @@ public final class IpSecTransform implements AutoCloseable {
     public @interface TransformDirection {}
 
     /** @hide */
-    private static final int MODE_TUNNEL = 0;
+    public static final int MODE_TUNNEL = 0;
 
     /** @hide */
-    private static final int MODE_TRANSPORT = 1;
+    public static final int MODE_TRANSPORT = 1;
 
     /** @hide */
     public static final int ENCAP_NONE = 0;
