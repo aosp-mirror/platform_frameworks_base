@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.om.IOverlayManager;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -38,6 +39,7 @@ public class ConfigurationControllerImpl implements ConfigurationController,
     private float mFontScale;
     private boolean mInCarMode;
     private int mUiMode;
+    private LocaleList mLocaleList;
 
     public ConfigurationControllerImpl(Context context) {
         Configuration currentConfig = context.getResources().getConfiguration();
@@ -46,6 +48,7 @@ public class ConfigurationControllerImpl implements ConfigurationController,
         mInCarMode = (currentConfig.uiMode  & Configuration.UI_MODE_TYPE_MASK)
                 == Configuration.UI_MODE_TYPE_CAR;
         mUiMode = currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        mLocaleList = currentConfig.getLocales();
     }
 
     @Override
@@ -71,6 +74,16 @@ public class ConfigurationControllerImpl implements ConfigurationController,
             mDensity = density;
             mFontScale = fontScale;
             mUiMode = uiMode;
+        }
+
+        final LocaleList localeList = newConfig.getLocales();
+        if (!localeList.equals(mLocaleList)) {
+            mLocaleList = localeList;
+            listeners.forEach(l -> {
+                if (mListeners.contains(l)) {
+                    l.onLocaleListChanged();
+                }
+            });
         }
 
         if ((mLastConfig.updateFrom(newConfig) & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
