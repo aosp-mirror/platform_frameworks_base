@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 162 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 163 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -5702,7 +5702,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         LongSamplingCounter mUserCpuTime;
         LongSamplingCounter mSystemCpuTime;
-        LongSamplingCounter[][] mCpuClusterSpeed;
+        LongSamplingCounter[][] mCpuClusterSpeedTimesUs;
 
         LongSamplingCounterArray mCpuFreqTimeMs;
         LongSamplingCounterArray mScreenOffCpuFreqTimeMs;
@@ -6551,12 +6551,12 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public long getTimeAtCpuSpeed(int cluster, int step, int which) {
-            if (mCpuClusterSpeed != null) {
-                if (cluster >= 0 && cluster < mCpuClusterSpeed.length) {
-                    final LongSamplingCounter[] cpuSpeeds = mCpuClusterSpeed[cluster];
-                    if (cpuSpeeds != null) {
-                        if (step >= 0 && step < cpuSpeeds.length) {
-                            final LongSamplingCounter c = cpuSpeeds[step];
+            if (mCpuClusterSpeedTimesUs != null) {
+                if (cluster >= 0 && cluster < mCpuClusterSpeedTimesUs.length) {
+                    final LongSamplingCounter[] cpuSpeedTimesUs = mCpuClusterSpeedTimesUs[cluster];
+                    if (cpuSpeedTimesUs != null) {
+                        if (step >= 0 && step < cpuSpeedTimesUs.length) {
+                            final LongSamplingCounter c = cpuSpeedTimesUs[step];
                             if (c != null) {
                                 return c.getCountLocked(which);
                             }
@@ -6707,8 +6707,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mUserCpuTime.reset(false);
             mSystemCpuTime.reset(false);
 
-            if (mCpuClusterSpeed != null) {
-                for (LongSamplingCounter[] speeds : mCpuClusterSpeed) {
+            if (mCpuClusterSpeedTimesUs != null) {
+                for (LongSamplingCounter[] speeds : mCpuClusterSpeedTimesUs) {
                     if (speeds != null) {
                         for (LongSamplingCounter speed : speeds) {
                             if (speed != null) {
@@ -6897,8 +6897,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 mUserCpuTime.detach();
                 mSystemCpuTime.detach();
 
-                if (mCpuClusterSpeed != null) {
-                    for (LongSamplingCounter[] cpuSpeeds : mCpuClusterSpeed) {
+                if (mCpuClusterSpeedTimesUs != null) {
+                    for (LongSamplingCounter[] cpuSpeeds : mCpuClusterSpeedTimesUs) {
                         if (cpuSpeeds != null) {
                             for (LongSamplingCounter c : cpuSpeeds) {
                                 if (c != null) {
@@ -7151,10 +7151,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mUserCpuTime.writeToParcel(out);
             mSystemCpuTime.writeToParcel(out);
 
-            if (mCpuClusterSpeed != null) {
+            if (mCpuClusterSpeedTimesUs != null) {
                 out.writeInt(1);
-                out.writeInt(mCpuClusterSpeed.length);
-                for (LongSamplingCounter[] cpuSpeeds : mCpuClusterSpeed) {
+                out.writeInt(mCpuClusterSpeedTimesUs.length);
+                for (LongSamplingCounter[] cpuSpeeds : mCpuClusterSpeedTimesUs) {
                     if (cpuSpeeds != null) {
                         out.writeInt(1);
                         out.writeInt(cpuSpeeds.length);
@@ -7448,7 +7448,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     throw new ParcelFormatException("Incompatible number of cpu clusters");
                 }
 
-                mCpuClusterSpeed = new LongSamplingCounter[numCpuClusters][];
+                mCpuClusterSpeedTimesUs = new LongSamplingCounter[numCpuClusters][];
                 for (int cluster = 0; cluster < numCpuClusters; cluster++) {
                     if (in.readInt() != 0) {
                         int numSpeeds = in.readInt();
@@ -7458,18 +7458,19 @@ public class BatteryStatsImpl extends BatteryStats {
                         }
 
                         final LongSamplingCounter[] cpuSpeeds = new LongSamplingCounter[numSpeeds];
-                        mCpuClusterSpeed[cluster] = cpuSpeeds;
+                        mCpuClusterSpeedTimesUs[cluster] = cpuSpeeds;
                         for (int speed = 0; speed < numSpeeds; speed++) {
                             if (in.readInt() != 0) {
-                                cpuSpeeds[speed] = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
+                                cpuSpeeds[speed] = new LongSamplingCounter(
+                                        mBsi.mOnBatteryTimeBase, in);
                             }
                         }
                     } else {
-                        mCpuClusterSpeed[cluster] = null;
+                        mCpuClusterSpeedTimesUs[cluster] = null;
                     }
                 }
             } else {
-                mCpuClusterSpeed = null;
+                mCpuClusterSpeedTimesUs = null;
             }
 
             mCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(in, mBsi.mOnBatteryTimeBase);
@@ -10424,46 +10425,48 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        long totalCpuClustersTime = 0;
+        long totalCpuClustersTimeMs = 0;
         // Read the time spent for each cluster at various cpu frequencies.
-        final long[][] clusterSpeeds = new long[mKernelCpuSpeedReaders.length][];
+        final long[][] clusterSpeedTimesMs = new long[mKernelCpuSpeedReaders.length][];
         for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-            clusterSpeeds[cluster] = mKernelCpuSpeedReaders[cluster].readDelta();
-            if (clusterSpeeds[cluster] != null) {
-                for (int speed = clusterSpeeds[cluster].length - 1; speed >= 0; --speed) {
-                    totalCpuClustersTime += clusterSpeeds[cluster][speed];
+            clusterSpeedTimesMs[cluster] = mKernelCpuSpeedReaders[cluster].readDelta();
+            if (clusterSpeedTimesMs[cluster] != null) {
+                for (int speed = clusterSpeedTimesMs[cluster].length - 1; speed >= 0; --speed) {
+                    totalCpuClustersTimeMs += clusterSpeedTimesMs[cluster][speed];
                 }
             }
         }
-        if (totalCpuClustersTime != 0) {
+        if (totalCpuClustersTimeMs != 0) {
             // We have cpu times per freq aggregated over all uids but we need the times per uid.
             // So, we distribute total time spent by an uid to different cpu freqs based on the
             // amount of time cpu was running at that freq.
             final int updatedUidsCount = updatedUids.size();
             for (int i = 0; i < updatedUidsCount; ++i) {
                 final Uid u = getUidStatsLocked(updatedUids.keyAt(i));
-                final long appCpuTimeMs = updatedUids.valueAt(i) / 1000;
+                final long appCpuTimeUs = updatedUids.valueAt(i);
                 // Add the cpu speeds to this UID.
                 final int numClusters = mPowerProfile.getNumCpuClusters();
-                if (u.mCpuClusterSpeed == null || u.mCpuClusterSpeed.length !=
+                if (u.mCpuClusterSpeedTimesUs == null || u.mCpuClusterSpeedTimesUs.length !=
                         numClusters) {
-                    u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
+                    u.mCpuClusterSpeedTimesUs = new LongSamplingCounter[numClusters][];
                 }
 
-                for (int cluster = 0; cluster < clusterSpeeds.length; cluster++) {
-                    final int speedsInCluster = clusterSpeeds[cluster].length;
-                    if (u.mCpuClusterSpeed[cluster] == null || speedsInCluster !=
-                            u.mCpuClusterSpeed[cluster].length) {
-                        u.mCpuClusterSpeed[cluster] = new LongSamplingCounter[speedsInCluster];
+                for (int cluster = 0; cluster < clusterSpeedTimesMs.length; cluster++) {
+                    final int speedsInCluster = clusterSpeedTimesMs[cluster].length;
+                    if (u.mCpuClusterSpeedTimesUs[cluster] == null || speedsInCluster !=
+                            u.mCpuClusterSpeedTimesUs[cluster].length) {
+                        u.mCpuClusterSpeedTimesUs[cluster]
+                                = new LongSamplingCounter[speedsInCluster];
                     }
 
-                    final LongSamplingCounter[] cpuSpeeds = u.mCpuClusterSpeed[cluster];
+                    final LongSamplingCounter[] cpuSpeeds = u.mCpuClusterSpeedTimesUs[cluster];
                     for (int speed = 0; speed < speedsInCluster; speed++) {
                         if (cpuSpeeds[speed] == null) {
                             cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
                         }
-                        cpuSpeeds[speed].addCountLocked(appCpuTimeMs * clusterSpeeds[cluster][speed]
-                                / totalCpuClustersTime);
+                        cpuSpeeds[speed].addCountLocked(appCpuTimeUs
+                                * clusterSpeedTimesMs[cluster][speed]
+                                / totalCpuClustersTimeMs);
                     }
                 }
             }
@@ -11747,7 +11750,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     throw new ParcelFormatException("Incompatible cpu cluster arrangement");
                 }
 
-                u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
+                u.mCpuClusterSpeedTimesUs = new LongSamplingCounter[numClusters][];
                 for (int cluster = 0; cluster < numClusters; cluster++) {
                     if (in.readInt() != 0) {
                         final int NSB = in.readInt();
@@ -11757,20 +11760,20 @@ public class BatteryStatsImpl extends BatteryStats {
                                     NSB);
                         }
 
-                        u.mCpuClusterSpeed[cluster] = new LongSamplingCounter[NSB];
+                        u.mCpuClusterSpeedTimesUs[cluster] = new LongSamplingCounter[NSB];
                         for (int speed = 0; speed < NSB; speed++) {
                             if (in.readInt() != 0) {
-                                u.mCpuClusterSpeed[cluster][speed] = new LongSamplingCounter(
+                                u.mCpuClusterSpeedTimesUs[cluster][speed] = new LongSamplingCounter(
                                         mOnBatteryTimeBase);
-                                u.mCpuClusterSpeed[cluster][speed].readSummaryFromParcelLocked(in);
+                                u.mCpuClusterSpeedTimesUs[cluster][speed].readSummaryFromParcelLocked(in);
                             }
                         }
                     } else {
-                        u.mCpuClusterSpeed[cluster] = null;
+                        u.mCpuClusterSpeedTimesUs[cluster] = null;
                     }
                 }
             } else {
-                u.mCpuClusterSpeed = null;
+                u.mCpuClusterSpeedTimesUs = null;
             }
 
             u.mCpuFreqTimeMs = LongSamplingCounterArray.readSummaryFromParcelLocked(
@@ -12178,10 +12181,10 @@ public class BatteryStatsImpl extends BatteryStats {
             u.mUserCpuTime.writeSummaryFromParcelLocked(out);
             u.mSystemCpuTime.writeSummaryFromParcelLocked(out);
 
-            if (u.mCpuClusterSpeed != null) {
+            if (u.mCpuClusterSpeedTimesUs != null) {
                 out.writeInt(1);
-                out.writeInt(u.mCpuClusterSpeed.length);
-                for (LongSamplingCounter[] cpuSpeeds : u.mCpuClusterSpeed) {
+                out.writeInt(u.mCpuClusterSpeedTimesUs.length);
+                for (LongSamplingCounter[] cpuSpeeds : u.mCpuClusterSpeedTimesUs) {
                     if (cpuSpeeds != null) {
                         out.writeInt(1);
                         out.writeInt(cpuSpeeds.length);
