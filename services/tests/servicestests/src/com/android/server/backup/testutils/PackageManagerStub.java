@@ -275,6 +275,11 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
+    public String[] getNamesForUids(int uid[]) {
+        return null;
+    }
+
+    @Override
     public int getUidForSharedUser(String sharedUserName)
             throws NameNotFoundException {
         return 0;

@@ -3590,6 +3590,14 @@ public abstract class PackageManager {
     public abstract @Nullable String getNameForUid(int uid);
 
     /**
+     * Retrieves the official names associated with each given uid.
+     * @see #getNameForUid(int)
+     *
+     * @hide
+     */
+    public abstract @Nullable String[] getNamesForUids(int[] uids);
+
+    /**
      * Return the user id associated with a shared user name. Multiple
      * applications can specify a shared user name in their manifest and thus
      * end up using a common uid. This might be used for new applications
