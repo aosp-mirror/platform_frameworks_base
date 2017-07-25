@@ -483,7 +483,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
-        assertTrue("Should be able to grant key to other user",
+        assertNotNull("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
     }
 
@@ -493,19 +493,19 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue("Should be able to import key for testcase", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
-        assertTrue("Should be able to grant key to other user", mKeyStore.grant(TEST_KEYNAME, 0));
+        assertNotNull("Should be able to grant key to other user", mKeyStore.grant(TEST_KEYNAME, 0));
     }
 
     public void testGrant_NoKey_Failure() throws Exception {
         assertTrue("Should be able to unlock keystore for test",
                 mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
-        assertFalse("Should not be able to grant without first initializing the keystore",
+        assertNull("Should not be able to grant without first initializing the keystore",
                 mKeyStore.grant(TEST_KEYNAME, 0));
     }
 
     public void testGrant_NotInitialized_Failure() throws Exception {
-        assertFalse("Should not be able to grant without first initializing the keystore",
+        assertNull("Should not be able to grant without first initializing the keystore",
                 mKeyStore.grant(TEST_KEYNAME, 0));
     }
 
@@ -517,7 +517,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
-        assertTrue("Should be able to grant key to other user",
+        assertNotNull("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
 
         assertTrue("Should be able to ungrant key to other user",
@@ -531,7 +531,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue("Should be able to import key for testcase", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
-        assertTrue("Should be able to grant key to other user",
+        assertNotNull("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
 
         assertTrue("Should be able to ungrant key to other user",
@@ -563,7 +563,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
-        assertTrue("Should be able to grant key to other user",
+        assertNotNull("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
 
         assertTrue("Should be able to ungrant key to other user",
@@ -581,10 +581,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
-        assertTrue("Should be able to grant key to other user",
+        assertNotNull("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
 
-        assertTrue("Should be able to grant key to other user a second time",
+        assertNotNull("Should be able to grant key to other user a second time",
                 mKeyStore.grant(TEST_KEYNAME, 0));
 
         assertTrue("Should be able to ungrant key to other user",
