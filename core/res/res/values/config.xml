@@ -2970,6 +2970,8 @@
     <string name="config_headlineFontFamily" translatable="false"></string>
     <!-- Name of a font family to use for headlines. Defaults to sans-serif-light -->
     <string name="config_headlineFontFamilyLight" translatable="false">sans-serif-light</string>
+    <!-- Allows setting custom fontFeatureSettings on specific text. -->
+    <string name="config_headlineFontFeatureSettings" translatable="false"></string>
 
     <!-- An array of packages that need to be treated as type system in battery settings -->
     <string-array translatable="false" name="config_batteryPackageTypeSystem">
