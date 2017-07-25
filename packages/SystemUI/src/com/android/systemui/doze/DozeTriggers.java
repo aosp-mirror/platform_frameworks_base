@@ -103,8 +103,11 @@ public class DozeTriggers implements DozeMachine.Part {
     private void proximityCheckThenCall(IntConsumer callback,
             boolean alreadyPerformedProxCheck,
             int pulseReason) {
+        Boolean cachedProxFar = mDozeSensors.isProximityCurrentlyFar();
         if (alreadyPerformedProxCheck) {
             callback.accept(ProximityCheck.RESULT_NOT_CHECKED);
+        } else if (cachedProxFar != null) {
+            callback.accept(cachedProxFar ? ProximityCheck.RESULT_FAR : ProximityCheck.RESULT_NEAR);
         } else {
             final long start = SystemClock.uptimeMillis();
             new ProximityCheck() {
