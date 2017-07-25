@@ -1905,6 +1905,10 @@ public class AssistStructure implements Parcelable {
                 activity.getActivityToken());
         for (int i=0; i<views.size(); i++) {
             ViewRootImpl root = views.get(i);
+            if (root.getView() == null) {
+                Log.w(TAG, "Skipping window with dettached view: " + root.getTitle());
+                continue;
+            }
             mWindowNodes.add(new WindowNode(this, root, forAutoFill, flags));
         }
     }

@@ -994,15 +994,7 @@
         <item>30</item>
     </integer-array>
 
-    <!-- Vibrator pattern for feedback about booting with safe mode disabled -->
-    <integer-array name="config_safeModeDisabledVibePattern">
-        <item>0</item>
-        <item>1</item>
-        <item>20</item>
-        <item>21</item>
-    </integer-array>
-
-    <!-- Vibrator pattern for feedback about booting with safe mode disabled -->
+    <!-- Vibrator pattern for feedback about booting with safe mode enabled -->
     <integer-array name="config_safeModeEnabledVibePattern">
         <item>0</item>
         <item>1</item>
@@ -2814,18 +2806,6 @@
 
     <!-- Component that runs demo mode when it is enabled. -->
     <string name="config_demoModePackage" translatable="false"></string>
-
-    <!-- Component that is the default launcher when demo mode is enabled. -->
-    <string name="config_demoModeLauncherComponent">com.android.retaildemo/.DemoPlayer</string>
-
-    <!-- Hashed password (SHA-256) used to restrict carrier demo mode operation. -->
-    <string name="config_carrierDemoModePassword" translatable="false"></string>
-
-    <!-- Secure setting used to activate carrier demo mode. -->
-    <string name="config_carrierDemoModeSetting" translatable="false"></string>
-
-    <!-- List of packages to enable in carrier demo mode (comma separated). -->
-    <string name="config_carrierDemoModePackages" translatable="false"></string>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->

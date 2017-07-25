@@ -15,13 +15,16 @@
  */
 package com.android.systemui.qs;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -59,6 +62,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private final Handler mMainHandler;
     private final View mDivider;
 
+    private final UserManager mUm;
+
     private AlertDialog mDialog;
     private QSTileHost mHost;
     protected H mHandler;
@@ -81,6 +86,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
         mDivider = qsPanel == null ? null : qsPanel.getDivider();
+        mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
     }
 
     public void setHostEnvironment(QSTileHost host) {
@@ -128,6 +134,9 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
     private void handleRefreshState() {
         final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
+        final UserInfo currentUser = mUm.getUserInfo(ActivityManager.getCurrentUser());
+        final boolean isDemoDevice = UserManager.isDeviceInDemoMode(mContext) && currentUser != null
+                && currentUser.isDemo();
         final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
         final boolean hasCACerts = mSecurityController.hasCACertInCurrentUser();
         final boolean hasCACertsInWorkProfile = mSecurityController.hasCACertInWorkProfile();
@@ -137,7 +146,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         final CharSequence organizationName = mSecurityController.getDeviceOwnerOrganizationName();
         final CharSequence workProfileName = mSecurityController.getWorkProfileOrganizationName();
         // Update visibility of footer
-        mIsVisible = isDeviceManaged || hasCACerts || hasCACertsInWorkProfile ||
+        mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile ||
             vpnName != null || vpnNameWorkProfile != null;
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,

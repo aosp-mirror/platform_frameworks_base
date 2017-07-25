@@ -118,7 +118,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
         // the theme set there.
-        setTheme(R.style.Theme_SystemUI);
+        setTheme(R.style.systemui_theme);
 
         SystemUIFactory.createFromConfig(this);
 

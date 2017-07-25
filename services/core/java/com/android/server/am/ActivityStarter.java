@@ -951,7 +951,7 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
-    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend) {
+    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
         boolean sendHint = forceSend;
 
         if (!sendHint) {
@@ -960,7 +960,7 @@ class ActivityStarter {
             final ActivityRecord resumedActivity = mSupervisor.getResumedActivityLocked();
             sendHint = resumedActivity == null
                 || resumedActivity.app == null
-                || !resumedActivity.app.equals(mStartActivity.app);
+                || !resumedActivity.app.equals(targetActivity.app);
         }
 
         if (sendHint && mService.mLocalPowerManager != null) {
@@ -1080,7 +1080,7 @@ class ActivityStarter {
                 }
             }
 
-            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
+            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, reusedActivity);
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
 
@@ -1109,6 +1109,7 @@ class ActivityStarter {
                 if (outActivity != null && outActivity.length > 0) {
                     outActivity[0] = reusedActivity;
                 }
+
                 return START_TASK_TO_FRONT;
             }
         }
@@ -1200,7 +1201,7 @@ class ActivityStarter {
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.getTask());
         mTargetStack.mLastPausedActivity = null;
 
-        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
+        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, mStartActivity);
 
         mTargetStack.startActivityLocked(mStartActivity, topFocused, newTask, mKeepCurTransition,
                 mOptions);
@@ -1502,7 +1503,8 @@ class ActivityStarter {
             if (mLaunchSingleInstance) {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
-               intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info, false);
+               intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info,
+                       mStartActivity.isHomeActivity());
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
@@ -1833,13 +1835,30 @@ class ActivityStarter {
 
         final TaskRecord sourceTask = mSourceRecord.getTask();
         final ActivityStack sourceStack = mSourceRecord.getStack();
-        // We only want to allow changing stack if the target task is not the top one,
-        // otherwise we would move the launching task to the other side, rather than show
-        // two side by side.
-        final boolean moveStackAllowed = sourceStack.topTask() != sourceTask;
+        // We only want to allow changing stack in two cases:
+        // 1. If the target task is not the top one. Otherwise we would move the launching task to
+        //    the other side, rather than show two side by side.
+        // 2. If activity is not allowed on target display.
+        final int targetDisplayId = mTargetStack != null ? mTargetStack.mDisplayId
+                : sourceStack.mDisplayId;
+        final boolean moveStackAllowed = sourceStack.topTask() != sourceTask
+                || !mStartActivity.canBeLaunchedOnDisplay(targetDisplayId);
         if (moveStackAllowed) {
             mTargetStack = getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.getTask(),
                     mOptions);
+            // If target stack is not found now - we can't just rely on the source stack, as it may
+            // be not suitable. Let's check other displays.
+            if (mTargetStack == null && targetDisplayId != sourceStack.mDisplayId) {
+                // Can't use target display, lets find a stack on the source display.
+                mTargetStack = mService.mStackSupervisor.getValidLaunchStackOnDisplay(
+                        sourceStack.mDisplayId, mStartActivity);
+            }
+            if (mTargetStack == null) {
+                // There are no suitable stacks on the target and source display(s). Look on all
+                // displays.
+                mTargetStack = mService.mStackSupervisor.getNextValidLaunchStackLocked(
+                        mStartActivity, -1 /* currentFocus */);
+            }
         }
 
         if (mTargetStack == null) {

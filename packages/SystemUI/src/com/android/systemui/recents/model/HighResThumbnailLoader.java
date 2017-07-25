@@ -25,6 +25,8 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task.TaskCallbacks;
 
@@ -47,25 +49,30 @@ public class HighResThumbnailLoader implements TaskCallbacks {
     private final Thread mLoadThread;
     private final Handler mMainThreadHandler;
     private final SystemServicesProxy mSystemServicesProxy;
+    private final boolean mIsLowRamDevice;
     private boolean mLoading;
     private boolean mVisible;
     private boolean mFlingingFast;
     private boolean mTaskLoadQueueIdle;
 
-    public HighResThumbnailLoader(SystemServicesProxy ssp, Looper looper) {
+    public HighResThumbnailLoader(SystemServicesProxy ssp, Looper looper, boolean isLowRamDevice) {
         mMainThreadHandler = new Handler(looper);
         mLoadThread = new Thread(mLoader, "Recents-HighResThumbnailLoader");
         mLoadThread.start();
         mSystemServicesProxy = ssp;
+        mIsLowRamDevice = isLowRamDevice;
     }
 
     public void setVisible(boolean visible) {
+        if (mIsLowRamDevice) {
+            return;
+        }
         mVisible = visible;
         updateLoading();
     }
 
     public void setFlingingFast(boolean flingingFast) {
-        if (mFlingingFast == flingingFast) {
+        if (mFlingingFast == flingingFast || mIsLowRamDevice) {
             return;
         }
         mFlingingFast = flingingFast;
@@ -77,6 +84,9 @@ public class HighResThumbnailLoader implements TaskCallbacks {
      * starting this queue until the other queue is idling.
      */
     public void setTaskLoadQueueIdle(boolean idle) {
+        if (mIsLowRamDevice) {
+            return;
+        }
         mTaskLoadQueueIdle = idle;
         updateLoading();
     }
