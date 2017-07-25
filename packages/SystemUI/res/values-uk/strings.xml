@@ -157,7 +157,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобільне передавання даних"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобільне передавання даних увімкнено"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобільне передавання даних вимкнено"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Прив’язка Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим польоту."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Мережу VPN увімкнено."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Немає SIM-карти."</string>
