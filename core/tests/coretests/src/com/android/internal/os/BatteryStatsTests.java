@@ -20,6 +20,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        BatteryStatsCpuTimesTest.class,
         BatteryStatsBackgroundStatsTest.class,
         BatteryStatsCounterTest.class,
         BatteryStatsDualTimerTest.class,
