@@ -16,8 +16,6 @@
 
 package android.net.ip;
 
-import com.android.internal.annotations.GuardedBy;
-
 import android.content.Context;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -31,17 +29,21 @@ import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
 import android.net.netlink.NetlinkSocket;
 import android.net.netlink.RtNetlinkNeighborMessage;
-import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNdMsg;
+import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNlMsgHdr;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.SharedLog;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.OsConstants;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.InterruptedIOException;
 import java.net.Inet6Address;
@@ -147,12 +149,32 @@ public class IpReachabilityMonitor {
         public void notifyLost(InetAddress ip, String logMsg);
     }
 
+    /**
+     * Encapsulates IpReachabilityMonitor depencencies on systems that hinder unit testing.
+     * TODO: consider also wrapping MultinetworkPolicyTracker in this interface.
+     */
+    interface Dependencies {
+        void acquireWakeLock(long durationMs);
+
+        static Dependencies makeDefault(Context context, String iface) {
+            final String lockName = TAG + "." + iface;
+            final PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            final WakeLock lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, lockName);
+
+            return new Dependencies() {
+                public void acquireWakeLock(long durationMs) {
+                    lock.acquire(durationMs);
+                }
+            };
+        }
+    }
+
     private final Object mLock = new Object();
-    private final PowerManager.WakeLock mWakeLock;
     private final String mInterfaceName;
     private final int mInterfaceIndex;
     private final SharedLog mLog;
     private final Callback mCallback;
+    private final Dependencies mDependencies;
     private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
     private final NetlinkSocketObserver mNetlinkSocketObserver;
     private final Thread mObserverThread;
@@ -229,20 +251,20 @@ public class IpReachabilityMonitor {
     }
 
     public IpReachabilityMonitor(Context context, String ifName, SharedLog log, Callback callback,
-            MultinetworkPolicyTracker tracker) throws IllegalArgumentException {
+            MultinetworkPolicyTracker tracker) {
+        this(ifName, getInterfaceIndex(ifName), log, callback, tracker,
+                Dependencies.makeDefault(context, ifName));
+    }
+
+    @VisibleForTesting
+    IpReachabilityMonitor(String ifName, int ifIndex, SharedLog log, Callback callback,
+            MultinetworkPolicyTracker tracker, Dependencies dependencies) {
         mInterfaceName = ifName;
-        int ifIndex = -1;
-        try {
-            NetworkInterface netIf = NetworkInterface.getByName(ifName);
-            mInterfaceIndex = netIf.getIndex();
-        } catch (SocketException | NullPointerException e) {
-            throw new IllegalArgumentException("invalid interface '" + ifName + "': ", e);
-        }
-        mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, TAG + "." + mInterfaceName);
         mLog = log.forSubComponent(TAG);
         mCallback = callback;
         mMultinetworkPolicyTracker = tracker;
+        mInterfaceIndex = ifIndex;
+        mDependencies = dependencies;
         mNetlinkSocketObserver = new NetlinkSocketObserver();
         mObserverThread = new Thread(mNetlinkSocketObserver);
         mObserverThread.start();
@@ -405,7 +427,7 @@ public class IpReachabilityMonitor {
             // The wakelock we use is (by default) refcounted, and this version
             // of acquire(timeout) queues a release message to keep acquisitions
             // and releases balanced.
-            mWakeLock.acquire(getProbeWakeLockDuration());
+            mDependencies.acquireWakeLock(getProbeWakeLockDuration());
         }
 
         for (InetAddress target : ipProbeList) {
@@ -434,6 +456,19 @@ public class IpReachabilityMonitor {
         final long retransTimeMs = 1000;
         final long gracePeriodMs = 500;
         return (numUnicastProbes * retransTimeMs) + gracePeriodMs;
+    }
+
+    private static int getInterfaceIndex(String ifname) {
+        final NetworkInterface iface;
+        try {
+            iface = NetworkInterface.getByName(ifname);
+        } catch (SocketException e) {
+            throw new IllegalArgumentException("invalid interface '" + ifname + "': ", e);
+        }
+        if (iface == null) {
+            throw new IllegalArgumentException("NetworkInterface was null for " + ifname);
+        }
+        return iface.getIndex();
     }
 
     private void logEvent(int probeType, int errorCode) {
