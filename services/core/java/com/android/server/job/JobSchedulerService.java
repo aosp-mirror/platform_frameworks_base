@@ -355,11 +355,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
             synchronized (mLock) {
                 try {
                     mParser.setString(Settings.Global.getString(mResolver,
-                            Settings.Global.ALARM_MANAGER_CONSTANTS));
+                            Settings.Global.JOB_SCHEDULER_CONSTANTS));
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
-                    Slog.e(TAG, "Bad device idle settings", e);
+                    Slog.e(TAG, "Bad jobscheduler settings", e);
                 }
 
                 MIN_IDLE_COUNT = mParser.getInt(KEY_MIN_IDLE_COUNT,
