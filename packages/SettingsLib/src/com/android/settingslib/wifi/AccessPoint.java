@@ -59,7 +59,9 @@ import com.android.settingslib.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -120,6 +122,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     private final ConcurrentHashMap<String, ScanResult> mScanResultCache =
             new ConcurrentHashMap<String, ScanResult>(32);
+
+    /** Map of BSSIDs to speed values for individual ScanResults. */
+    private final Map<String, Integer> mScanResultScores = new HashMap<>();
+
     /** Maximum age of scan results to hold onto while actively scanning. **/
     private static final long MAX_SCAN_RESULT_AGE_MS = 15000;
 
@@ -280,6 +286,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mNetworkInfo = that.mNetworkInfo;
         this.mScanResultCache.clear();
         this.mScanResultCache.putAll(that.mScanResultCache);
+        this.mScanResultScores.clear();
+        this.mScanResultScores.putAll(that.mScanResultScores);
         this.mId = that.mId;
         this.mSpeed = that.mSpeed;
         this.mIsScoredNetworkMetered = that.mIsScoredNetworkMetered;
@@ -392,6 +400,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     boolean update(WifiNetworkScoreCache scoreCache, boolean scoringUiEnabled) {
         boolean scoreChanged = false;
+        mScanResultScores.clear();
         if (scoringUiEnabled) {
             scoreChanged = updateScores(scoreCache);
         }
@@ -407,21 +416,24 @@ public class AccessPoint implements Comparable<AccessPoint> {
         int oldSpeed = mSpeed;
         mSpeed = Speed.NONE;
 
+        for (ScanResult result : mScanResultCache.values()) {
+            ScoredNetwork score = scoreCache.getScoredNetwork(result);
+            if (score == null) {
+                continue;
+            }
+
+            int speed = score.calculateBadge(result.level);
+            mScanResultScores.put(result.BSSID, speed);
+            mSpeed = Math.max(mSpeed, speed);
+        }
+
+        // set mSpeed to the connected ScanResult if the AccessPoint is the active network
         if (isActive() && mInfo != null) {
             NetworkKey key = new NetworkKey(new WifiKey(
                     AccessPoint.convertToQuotedString(ssid), mInfo.getBSSID()));
             ScoredNetwork score = scoreCache.getScoredNetwork(key);
             if (score != null) {
                 mSpeed = score.calculateBadge(mInfo.getRssi());
-            }
-        } else {
-            for (ScanResult result : mScanResultCache.values()) {
-                ScoredNetwork score = scoreCache.getScoredNetwork(result);
-                if (score == null) {
-                    continue;
-                }
-                // TODO(sghuman): Rename calculateBadge API
-                mSpeed = Math.max(mSpeed, score.calculateBadge(result.level));
             }
         }
 
@@ -813,8 +825,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     private String getVisibilityStatus() {
         StringBuilder visibility = new StringBuilder();
-        StringBuilder scans24GHz = null;
-        StringBuilder scans5GHz = null;
+        StringBuilder scans24GHz = new StringBuilder();
+        StringBuilder scans5GHz = new StringBuilder();
         String bssid = null;
 
         long now = System.currentTimeMillis();
@@ -836,93 +848,83 @@ public class AccessPoint implements Comparable<AccessPoint> {
             visibility.append(String.format("rx=%.1f", mInfo.rxSuccessRate));
         }
 
-        int rssi5 = WifiConfiguration.INVALID_RSSI;
-        int rssi24 = WifiConfiguration.INVALID_RSSI;
-        int num5 = 0;
-        int num24 = 0;
+        int maxRssi5 = WifiConfiguration.INVALID_RSSI;
+        int maxRssi24 = WifiConfiguration.INVALID_RSSI;
+        final int maxDisplayedScans = 4;
+        int num5 = 0; // number of scanned BSSID on 5GHz band
+        int num24 = 0; // number of scanned BSSID on 2.4Ghz band
         int numBlackListed = 0;
-        int n24 = 0; // Number scan results we included in the string
-        int n5 = 0; // Number scan results we included in the string
         evictOldScanResults();
+
         // TODO: sort list by RSSI or age
         for (ScanResult result : mScanResultCache.values()) {
-
             if (result.frequency >= LOWER_FREQ_5GHZ
                     && result.frequency <= HIGHER_FREQ_5GHZ) {
                 // Strictly speaking: [4915, 5825]
-                // number of known BSSID on 5GHz band
-                num5 = num5 + 1;
+                num5++;
+
+                if (result.level > maxRssi5) {
+                    maxRssi5 = result.level;
+                }
+                if (num5 <= maxDisplayedScans) {
+                    scans5GHz.append(verboseScanResultSummary(result, bssid));
+                }
             } else if (result.frequency >= LOWER_FREQ_24GHZ
                     && result.frequency <= HIGHER_FREQ_24GHZ) {
                 // Strictly speaking: [2412, 2482]
-                // number of known BSSID on 2.4Ghz band
-                num24 = num24 + 1;
-            }
+                num24++;
 
-
-            if (result.frequency >= LOWER_FREQ_5GHZ
-                    && result.frequency <= HIGHER_FREQ_5GHZ) {
-                if (result.level > rssi5) {
-                    rssi5 = result.level;
+                if (result.level > maxRssi24) {
+                    maxRssi24 = result.level;
                 }
-                if (n5 < 4) {
-                    if (scans5GHz == null) scans5GHz = new StringBuilder();
-                    scans5GHz.append(" \n{").append(result.BSSID);
-                    if (bssid != null && result.BSSID.equals(bssid)) scans5GHz.append("*");
-                    scans5GHz.append("=").append(result.frequency);
-                    scans5GHz.append(",").append(result.level);
-                    scans5GHz.append("}");
-                    n5++;
-                }
-            } else if (result.frequency >= LOWER_FREQ_24GHZ
-                    && result.frequency <= HIGHER_FREQ_24GHZ) {
-                if (result.level > rssi24) {
-                    rssi24 = result.level;
-                }
-                if (n24 < 4) {
-                    if (scans24GHz == null) scans24GHz = new StringBuilder();
-                    scans24GHz.append(" \n{").append(result.BSSID);
-                    if (bssid != null && result.BSSID.equals(bssid)) scans24GHz.append("*");
-                    scans24GHz.append("=").append(result.frequency);
-                    scans24GHz.append(",").append(result.level);
-                    scans24GHz.append("}");
-                    n24++;
+                if (num24 <= maxDisplayedScans) {
+                    scans24GHz.append(verboseScanResultSummary(result, bssid));
                 }
             }
         }
         visibility.append(" [");
         if (num24 > 0) {
             visibility.append("(").append(num24).append(")");
-            if (n24 <= 4) {
-                if (scans24GHz != null) {
-                    visibility.append(scans24GHz.toString());
-                }
-            } else {
-                visibility.append("max=").append(rssi24);
-                if (scans24GHz != null) {
-                    visibility.append(",").append(scans24GHz.toString());
-                }
+            if (num24 > maxDisplayedScans) {
+                visibility.append("max=").append(maxRssi24).append(",");
             }
+            visibility.append(scans24GHz.toString());
         }
         visibility.append(";");
         if (num5 > 0) {
             visibility.append("(").append(num5).append(")");
-            if (n5 <= 4) {
-                if (scans5GHz != null) {
-                    visibility.append(scans5GHz.toString());
-                }
-            } else {
-                visibility.append("max=").append(rssi5);
-                if (scans5GHz != null) {
-                    visibility.append(",").append(scans5GHz.toString());
-                }
+            if (num5 > maxDisplayedScans) {
+                visibility.append("max=").append(maxRssi5).append(",");
             }
+            visibility.append(scans5GHz.toString());
         }
         if (numBlackListed > 0)
             visibility.append("!").append(numBlackListed);
         visibility.append("]");
 
         return visibility.toString();
+    }
+
+    @VisibleForTesting
+    /* package */ String verboseScanResultSummary(ScanResult result, String bssid) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(" \n{").append(result.BSSID);
+        if (result.BSSID.equals(bssid)) {
+            stringBuilder.append("*");
+        }
+        stringBuilder.append("=").append(result.frequency);
+        stringBuilder.append(",").append(result.level);
+        if (hasSpeed(result)) {
+            stringBuilder.append(",")
+                    .append(getSpeedLabel(mScanResultScores.get(result.BSSID)));
+        }
+        stringBuilder.append("}");
+        return stringBuilder.toString();
+    }
+
+    private boolean hasSpeed(ScanResult result) {
+        return mScanResultScores.containsKey(result.BSSID)
+                && mScanResultScores.get(result.BSSID) != Speed.NONE;
     }
 
     /**
@@ -1135,7 +1137,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     @Nullable
     String getSpeedLabel() {
-        switch (mSpeed) {
+        return getSpeedLabel(mSpeed);
+    }
+
+    @Nullable
+    private String getSpeedLabel(int speed) {
+        switch (speed) {
             case Speed.VERY_FAST:
                 return mContext.getString(R.string.speed_label_very_fast);
             case Speed.FAST:
