@@ -128,14 +128,14 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         synchronized (mLock) {
             if (!mSystemReady) {
                 mSystemReady = true;
-                resetInternalState(mSettings.getCurrentUserId());
+                resetInternalStateLocked(mSettings.getCurrentUserId());
             }
         }
     }
 
     void onSwitchUser(@UserIdInt int userId) {
         synchronized (mLock) {
-            resetInternalState(userId);
+            resetInternalStateLocked(userId);
         }
     }
 
@@ -145,7 +145,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (userId != currentUserId) {
                 return;
             }
-            resetInternalState(currentUserId);
+            resetInternalStateLocked(currentUserId);
         }
     }
 
@@ -173,11 +173,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mSettings = new TextServicesSettings(context.getContentResolver(), userId,
                 useCopyOnWriteSettings);
 
-        // "resetInternalState" initializes the states for the foreground user
-        resetInternalState(userId);
+        // "resetInternalStateLocked" initializes the states for the foreground user
+        resetInternalStateLocked(userId);
     }
 
-    private void resetInternalState(@UserIdInt int userId) {
+    private void resetInternalStateLocked(@UserIdInt int userId) {
         final boolean useCopyOnWriteSettings =
                 !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(userId);
         mSettings.switchCurrentUser(userId, useCopyOnWriteSettings);
