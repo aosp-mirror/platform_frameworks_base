@@ -7212,34 +7212,31 @@ public class PackageManagerService extends IPackageManager.Stub
             String ephemeralPkgName) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
-            final boolean isEphemeralApp = info.activityInfo.applicationInfo.isInstantApp();
             // TODO: When adding on-demand split support for non-instant apps, remove this check
             // and always apply post filtering
             // allow activities that are defined in the provided package
-            if (isEphemeralApp) {
-                if (info.activityInfo.splitName != null
-                        && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
-                                info.activityInfo.splitName)) {
-                    // requested activity is defined in a split that hasn't been installed yet.
-                    // add the installer to the resolve list
-                    if (DEBUG_EPHEMERAL) {
-                        Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
-                    }
-                    final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
-                    installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
-                            info.activityInfo.packageName, info.activityInfo.splitName,
-                            info.activityInfo.applicationInfo.versionCode, null /*failureIntent*/);
-                    // make sure this resolver is the default
-                    installerInfo.isDefault = true;
-                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
-                    // add a non-generic filter
-                    installerInfo.filter = new IntentFilter();
-                    // load resources from the correct package
-                    installerInfo.resolvePackageName = info.getComponentInfo().packageName;
-                    resolveInfos.set(i, installerInfo);
-                    continue;
+            if (info.activityInfo.splitName != null
+                    && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
+                            info.activityInfo.splitName)) {
+                // requested activity is defined in a split that hasn't been installed yet.
+                // add the installer to the resolve list
+                if (DEBUG_INSTALL) {
+                    Slog.v(TAG, "Adding installer to the ResolveInfo list");
                 }
+                final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
+                installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
+                        info.activityInfo.packageName, info.activityInfo.splitName,
+                        info.activityInfo.applicationInfo.versionCode, null /*failureIntent*/);
+                // make sure this resolver is the default
+                installerInfo.isDefault = true;
+                installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                // add a non-generic filter
+                installerInfo.filter = new IntentFilter();
+                // load resources from the correct package
+                installerInfo.resolvePackageName = info.getComponentInfo().packageName;
+                resolveInfos.set(i, installerInfo);
+                continue;
             }
             // caller is a full app, don't need to apply any other filtering
             if (ephemeralPkgName == null) {
@@ -7249,6 +7246,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 continue;
             }
             // allow activities that have been explicitly exposed to ephemeral apps
+            final boolean isEphemeralApp = info.activityInfo.applicationInfo.isInstantApp();
             if (!isEphemeralApp
                     && ((info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0)) {
                 continue;
