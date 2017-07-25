@@ -2067,9 +2067,11 @@ public abstract class Layout {
 
         final String ellipsisString = TextUtils.getEllipsisString(method);
         final int ellipsisStringLen = ellipsisString.length();
+        // Use the ellipsis string only if there are that at least as many characters to replace.
+        final boolean useEllipsisString = ellipsisCount >= ellipsisStringLen;
         for (int i = 0; i < ellipsisCount; i++) {
             final char c;
-            if (i < ellipsisStringLen && ellipsisCount <= ellipsisStringLen) {
+            if (useEllipsisString && i < ellipsisStringLen) {
                 c = ellipsisString.charAt(i);
             } else {
                 c = TextUtils.ELLIPSIS_FILLER;
