@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"음성 지원"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"지금 잠그기"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"숨겨진 콘텐츠"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"콘텐츠가 정책에 의해 숨겨졌습니다."</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"가상 키보드"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"물리적 키보드"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"보안"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"직장으로 전환"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"주소록"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"주소록에 액세스"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 내 연락처를 액세스하도록 허용합니다."</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"위치"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"이 기기의 위치정보에 액세스"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 이 기기의 위치를 액세스하도록 허용합니다."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"캘린더에 액세스"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 내 캘린더를 액세스하도록 허용합니다."</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS 메시지 전송 및 보기"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 SMS 메시지를 전송하고 보도록 허용합니다."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일 액세스"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 기기의 사진, 미디어, 파일에 액세스하도록 허용합니다."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오 녹음"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 오디오를 녹화하도록 허용합니다."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 및 동영상 촬영"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 사진을 촬영하고 동영상을 녹화하도록 허용합니다."</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 전화를 걸고 관리하도록 허용합니다."</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"인체 감지 센서"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"생체 신호에 관한 센서 데이터에 액세스"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 생체 신호에 관한 센서 데이터에 액세스하도록 허용합니다."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"모두 선택"</string>
     <string name="cut" msgid="3092569408438626261">"잘라내기"</string>
     <string name="copy" msgid="2681946229533511987">"복사"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"붙여넣기"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"일반 텍스트로 붙여넣기"</string>
     <string name="replace" msgid="5781686059063148930">"바꾸기..."</string>
@@ -1732,14 +1725,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"고정 해제"</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"기기를 초기화하시겠습니까?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"기기를 초기화하려면 탭하세요."</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"데모 시작 중..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"기기 초기화 중..."</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"기기를 초기화하시겠습니까?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"변경사항이 사라지며 데모가 <xliff:g id="TIMEOUT">%1$s</xliff:g>초 후에 시작됩니다."</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"취소"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"지금 초기화"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> 사용 중지됨"</string>
     <string name="conference_call" msgid="3751093130790472426">"다자간 통화"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"도움말"</string>

@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ตัวช่วยเสียง"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ล็อกเลย"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"เนื้อหาถูกซ่อนไว้"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"มีการซ่อนเนื้อหาโดยนโยบาย"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"แป้นพิมพ์เสมือน"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"แป้นพิมพ์บนเครื่อง"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"ความปลอดภัย"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"เปลี่ยนไปใช้โปรไฟล์งาน"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"รายชื่อติดต่อ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"เข้าถึงรายชื่อติดต่อ"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรายชื่อติดต่อของคุณ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ตำแหน่ง"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"เข้าถึงตำแหน่งของอุปกรณ์นี้"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงตำแหน่งของอุปกรณ์นี้"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ปฏิทิน"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"เข้าถึงปฏิทิน"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงปฏิทินของคุณ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ส่งและดูข้อความ SMS"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ส่งและดูข้อความ SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"พื้นที่เก็บข้อมูล"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"เข้าถึงรูปภาพ สื่อ และไฟล์บนอุปกรณ์ของคุณ"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรูปภาพ สื่อ และไฟล์ในอุปกรณ์ของคุณ"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"บันทึกเสียง"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; บันทึกเสียง"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ถ่ายภาพและบันทึกวิดีโอ"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ถ่ายรูปและบันทึกวิดีโอ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"โทรและจัดการการโทร"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; โทรและจัดการการโทร"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"เซ็นเซอร์สำหรับร่างกาย"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกข้อมูลเนื้อหาของหน้าต่าง"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"เลือกทั้งหมด"</string>
     <string name="cut" msgid="3092569408438626261">"ตัด"</string>
     <string name="copy" msgid="2681946229533511987">"คัดลอก"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"วาง"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"วางเป็นข้อความธรรมดา"</string>
     <string name="replace" msgid="5781686059063148930">"แทนที่..."</string>
@@ -1732,14 +1725,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"เลิกปักหมุด"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"รีเซ็ตอุปกรณ์ไหม"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"แตะเพื่อรีเซ็ตอุปกรณ์"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"กำลังเริ่มการสาธิต…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"กำลังรีเซ็ตอุปกรณ์…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"รีเซ็ตอุปกรณ์ไหม"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"การเปลี่ยนแปลงของคุณจะหายไปและการสาธิตจะเริ่มต้นอีกครั้งใน <xliff:g id="TIMEOUT">%1$s</xliff:g> วินาที…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ยกเลิก"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"รีเซ็ตทันที"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ปิดใช้ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"การประชุมสาย"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"เคล็ดลับเครื่องมือ"</string>

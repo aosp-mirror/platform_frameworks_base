@@ -228,8 +228,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Usaidizi wa Sauti"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Funga sasa"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Maudhui yamefichwa"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Maudhui yamefichwa kulingana na sera"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Kibodi pepe"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Kibodi halisi"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Usalama"</string>
@@ -256,40 +256,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Badili uweke wasifu wa Kazini"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Anwani"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ifikie anwani zako"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie anwani zako"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Mahali"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"itambue mahali kifaa hiki kilipo"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie mahali kifaa kilipo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ifikie kalenda yako"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"itume na iangalie SMS"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; itume na kuangalia ujumbe wa SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hifadhi"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie picha, maudhui na faili kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Kipokea sauti"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"irekodi sauti"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; irekodi sauti"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipige picha na kurekodi video"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige picha na kurekodi video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige na kudhibiti simu"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Ruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie data ya kitambuzi kuhusu ishara zako kuu"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kurejesha maudhui ya dirisha"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kuchunguza maudhui ya dirisha unalotumia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kuwasha \'Chunguza kwa Kugusa\'"</string>
@@ -967,6 +958,8 @@
     <string name="selectAll" msgid="6876518925844129331">"Chagua zote"</string>
     <string name="cut" msgid="3092569408438626261">"Kata"</string>
     <string name="copy" msgid="2681946229533511987">"Nakala"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"Bandika"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Bandika kama maandishi dhahiri"</string>
     <string name="replace" msgid="5781686059063148930">"Badilisha..."</string>
@@ -1392,7 +1385,7 @@
     <string name="data_usage_limit_body" msgid="291731708279614081">"Data imesitishwa kwa mzunguko uliosalia"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kikomo cha data ya 2G-3G kimezidishwa"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kikomo cha data cha 4G kimezidishwa"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Kikomo cha data ya ya kifaa cha mkononi kimezidishwa"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Umepitisha kiwango cha data ulichoweka"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Taarifa za Wi-fi zimevuka kiwanga"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> juu ya kikomo kilichobainishwa."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data ya mandhari nyuma imezuiwa"</string>
@@ -1730,14 +1723,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Bandua"</string>
     <string name="app_info" msgid="6856026610594615344">"Maelezo ya programu"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Ungependa kuweka upya mipangilio ya kifaa?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Gonga ili uweke upya kifaa"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Inaanzisha onyesho..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Inaweka upya kifaa..."</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Ungependa kuweka upya mipangilio ya kifaa?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Mabadiliko yoyote hayatahifadhiwa. Onyesho litaanza tena baada ya sekunde <xliff:g id="TIMEOUT">%1$s</xliff:g>..."</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Ghairi"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Weka upya sasa"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> imezimwa"</string>
     <string name="conference_call" msgid="3751093130790472426">"Simu ya Kongamano"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Kidirisha cha vidokezo"</string>

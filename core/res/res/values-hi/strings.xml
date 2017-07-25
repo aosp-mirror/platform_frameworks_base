@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"वॉइस सहायक"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"अभी लॉक करें"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"छिपी हुई सामग्री"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"सामग्री पॉलिसी के द्वारा छिपी हुई है"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"वर्चुअल कीबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"भौतिक कीबोर्ड"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"सुरक्षा"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"कार्य प्रोफ़ाइल में स्विच करें"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"अपने संपर्कों को ऐक्सेस करने की"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने संपर्क एक्सेस करने दें"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"इस डिवाइस के स्थान को ऐक्सेस करने"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को इस डिवाइस का स्थान एक्सेस करने दें"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कैलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"अपने कैलेंडर को ऐक्सेस करने"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपना कैलेंडर एक्सेस करने दें"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS संदेश भेजें और देखने की"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को SMS संदेश भेजने और देखने दें"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"मेमोरी"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया और फ़ाइलें ऐक्सेस करने की"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने डिवाइस पर फ़ोटो, मीडिया और फ़ाइलें एक्सेस करने दें"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफ़ोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडियो रिकॉर्ड करें"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को ऑडियो रिकॉर्ड करने दें"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कैमरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्र लेने और वीडियो रिकॉर्ड करने"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को चित्र लेने दें और वीडियो रिकॉर्ड करने दें"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फ़ोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फ़ोन कॉल करें और प्रबंधित करें"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोन कॉल करने और संभालने दें"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर संवेदक"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा एक्सेस करने दें"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री प्राप्त करें"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री का निरीक्षण करें जिससे आप सहभागिता कर रहे हैं."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श द्वारा एक्सप्लोर करें को चालू करें"</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"सभी को चुनें"</string>
     <string name="cut" msgid="3092569408438626261">"काटें"</string>
     <string name="copy" msgid="2681946229533511987">"कॉपी करें"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"चिपकाएं"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"सादे पाठ के रूप में चिपकाएं"</string>
     <string name="replace" msgid="5781686059063148930">"बदलें•"</string>
@@ -1732,14 +1725,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन करें"</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"डिवाइस रीसेट करें?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"डिवाइस को रीसेट करने के लिए टैप करें"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो प्रारंभ हो रहा है…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"डिवाइस पुन: रीसेट कर रहा है…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"डिवाइस रीसेट करें?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"आपके सभी बदलाव खो जाएंगे और डेमो <xliff:g id="TIMEOUT">%1$s</xliff:g> सेकंड में फिर से शुरू हो जाएगा…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"अभी नहीं"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"अभी रीसेट करें"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"अक्षम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"कॉन्फ़्रेंस कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>

@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nu"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Innehåll har dolts"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Innehåll har dolts p.g.a. en policy"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuellt tangentbord"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fysiskt tangentbord"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Säkerhet"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tillgång till dina kontakter"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till dina kontakter"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Plats"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"komma åt enhetens platsuppgifter"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till enhetens plats"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"få tillgång till din kalender"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till din kalender"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"skicka och visa sms"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att skicka och visa sms"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"få åtkomst till foton, media och filer på din enhet"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till foton, mediafiler och andra filer på enheten"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder och spela in video"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörghet att ta bilder och spela in video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ringa och hantera telefonsamtal"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att ringa och hantera telefonsamtal"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till sensordata om vitalparametrar"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by touch"</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"Markera allt"</string>
     <string name="cut" msgid="3092569408438626261">"Klipp ut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiera"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"Klistra in"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Klistra in som oformaterad text"</string>
     <string name="replace" msgid="5781686059063148930">"Ersätt..."</string>
@@ -1732,14 +1725,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Lossa"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Vill du återställa enheten?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Tryck om du vill återställa enheten"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Demo startas …"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Enheten återställs …"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Vill du återställa enheten?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Ändringar som du har gjort sparas inte och demon börjar om om <xliff:g id="TIMEOUT">%1$s</xliff:g> sekunder …"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Avbryt"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Återställ nu"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> har inaktiverats"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferenssamtal"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Beskrivning"</string>

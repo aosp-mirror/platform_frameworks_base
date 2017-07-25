@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ndihma zanore"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Kyç tani"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Përmbajtjet janë të fshehura"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Përmbajtja është e fshehur për shkak të politikës"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Tastiera virtuale"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Tastiera fizike"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Siguria"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Ndryshoje te \"Puna\""</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"qasu te kontaktet e tua"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"qaset te vendndodhja e kësaj pajisjeje"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te vendndodhja e kësaj pajisjeje"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasje te kalendari yt"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të dërgojë dhe të shikojë mesazhe SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te fotografitë, media dhe skedarët në pajisjen tënde"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të regjistrojë audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"bëj fotografi dhe regjistro video"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që shkrepë fotografi dhe të regjistrojë video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"kryej dhe menaxho telefonata"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të kryejë dhe të menaxhojë telefonata"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensorët e trupit"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"qasu tek të dhënat e sensorëve rreth shenjave të tua jetësore"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Lejo që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te të dhënat e sensorëve rreth shenjave të tua jetësore"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nxjerrë përmbajtjen e dritares"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspekton përmbajtjen e dritares me të cilën po ndërvepron."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"Përzgjidhi të gjitha"</string>
     <string name="cut" msgid="3092569408438626261">"Pri"</string>
     <string name="copy" msgid="2681946229533511987">"Kopjo"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"Ngjit"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Ngjite si tekst të thjeshtë"</string>
     <string name="replace" msgid="5781686059063148930">"Zëvendëso…"</string>
@@ -1733,14 +1726,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Zhgozhdo"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacioni mbi aplikacionin"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Do ta rivendosësh pajisjen?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Trokit për ta rivendosur pajisjen"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Po nis demonstrimin..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Po rivendos pajisjen…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Do ta rivendosësh pajisjen?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Do të humbasësh çdo ndryshim dhe demonstrimi do të niset përsëri për <xliff:g id="TIMEOUT">%1$s</xliff:g> sekonda…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Anulo"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Rivendos tani"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> u çaktivizua"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonatë konferencë"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Këshilla për veglën"</string>
