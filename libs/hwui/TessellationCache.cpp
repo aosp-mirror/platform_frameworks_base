@@ -416,7 +416,9 @@ TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
             mProcessor = new TessellationProcessor(Caches::getInstance());
         }
         mProcessor->add(task);
-        mCache.put(entry, buffer);
+        bool inserted = mCache.put(entry, buffer);
+        // Note to the static analyzer that this insert should always succeed.
+        LOG_ALWAYS_FATAL_IF(!inserted, "buffers shouldn't spontaneously appear in the cache");
     }
     return buffer;
 }
