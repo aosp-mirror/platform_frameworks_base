@@ -130,7 +130,7 @@ interface IBatteryStats {
     long getAwakeTimePlugged();
 
     void noteBleScanStarted(in WorkSource ws, boolean isUnoptimized);
-    void noteBleScanStopped(in WorkSource ws);
+    void noteBleScanStopped(in WorkSource ws, boolean isUnoptimized);
     void noteResetBleScan();
     void noteBleScanResults(in WorkSource ws, int numNewResults);
 

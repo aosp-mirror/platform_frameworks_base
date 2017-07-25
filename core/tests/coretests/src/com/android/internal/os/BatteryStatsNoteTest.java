@@ -58,8 +58,6 @@ public class BatteryStatsNoteTest extends TestCase{
         assertEquals(101,
                 bi.getUidStats().get(UID).getBluetoothScanResultCounter()
                         .getCountLocked(STATS_SINCE_CHARGED));
-        // TODO: remove next line when Counter misreporting values when plugged-in bug is fixed.
-        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
         BatteryStats.Counter bgCntr = bi.getUidStats().get(UID).getBluetoothScanResultBgCounter();
         if (bgCntr != null) {
             assertEquals(0, bgCntr.getCountLocked(STATS_SINCE_CHARGED));
