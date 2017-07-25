@@ -1366,17 +1366,6 @@ public class CarrierConfigManager {
             "notify_international_call_on_wfc_bool";
 
     /**
-     * Determine whether user edited tether APN (type dun) has effect
-     * {@code false} - Default. APN with dun type in telephony database has no effect.
-     *
-     * {@code true}  - DUN APN added/edited in ApnEditor will be used for tethering data call.
-     *
-     * @hide
-     */
-    public static final String KEY_EDITABLE_TETHER_APN_BOOL =
-            "editable_tether_apn_bool";
-
-    /**
      * An array containing custom call forwarding number prefixes that will be blocked while the
      * device is reporting that it is roaming. By default, there are no custom call
      * forwarding prefixes and none of these numbers will be filtered. If one or more entries are
@@ -1782,7 +1771,6 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
-        sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
