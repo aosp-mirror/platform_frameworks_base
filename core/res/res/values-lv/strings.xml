@@ -233,8 +233,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Balss palīgs"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloķēt tūlīt"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"Pārsniedz"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Saturs paslēpts"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Saskaņā ar politiku saturs ir paslēpts."</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuālā tastatūra"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fiziskā tastatūra"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Drošība"</string>
@@ -261,40 +261,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Pārslēgt darba profilu"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersonas"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"piekļūt jūsu kontaktpersonu datiem"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; piekļūt jūsu kontaktpersonām"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Atrašanās vieta"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"piekļūt ierīces atrašanās vietas informācijai"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; piekļūt šīs ierīces atrašanās vietai"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendārs"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"piekļūt jūsu kalendāram"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; piekļūt jūsu kalendāram"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Īsziņas"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sūtīt un skatīt īsziņas"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sūtīt un skatīt īsziņas"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Krātuve"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"piekļūt fotoattēliem, multividei un failiem jūsu ierīcē"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; piekļūt fotoattēliem, multivides saturam un failiem jūsu ierīcē"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofons"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ierakstīt audio"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ierakstīt audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"uzņemt attēlus un ierakstīt videoklipus"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uzņemt fotoattēlus un videoklipus"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Tālrunis"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"veikt un pārvaldīt tālruņa zvanus"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; veikt un pārvaldīt tālruņa zvanus"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Ķermeņa sensori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"piekļūt sensoru datiem par jūsu veselības rādījumiem"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; piekļūt sensoru uztvertajiem veselības datiem"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Izgūt loga saturu."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Skatīt tā loga saturu, ar kuru mijiedarbojaties."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizēt funkciju “Pārlūkot pieskaroties”."</string>
@@ -989,6 +980,8 @@
     <string name="selectAll" msgid="6876518925844129331">"Atlasīt visu"</string>
     <string name="cut" msgid="3092569408438626261">"Izgriezt"</string>
     <string name="copy" msgid="2681946229533511987">"Kopēt"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"Ielīmēt"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Ielīmēt kā vienkāršu tekstu"</string>
     <string name="replace" msgid="5781686059063148930">"Aizstāt"</string>
@@ -1765,14 +1758,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Atspraust"</string>
     <string name="app_info" msgid="6856026610594615344">"Lietotnes informācija"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Vai atiestatīt ierīci?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Pieskarieties, lai atiestatītu ierīci"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Notiek demonstrācijas palaišana..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Notiek ierīces atiestatīšana..."</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Vai atiestatīt ierīci?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Pēc <xliff:g id="TIMEOUT">%1$s</xliff:g> sekundēm zaudēsiet visas izmaiņas un tiks atkārtoti palaista demonstrācija..."</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Atcelt"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Atiestatīt tūlīt"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> atspējots"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferences zvans"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Rīka padoms"</string>

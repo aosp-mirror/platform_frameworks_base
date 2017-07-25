@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ជំនួយសម្លេង"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ចាក់សោ​ឥឡូវនេះ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"បាន​លាក់​មាតិកា"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"មាតិកាត្រូវបានលាក់ដោយផ្អែកលើគោលការណ៍"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ក្ដារ​ចុច​និម្មិត"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ក្ដារចុច​រូបវន្ត"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"សុវត្ថិភាព"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"ប្តូរទៅការងារ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទំនាក់ទំនង​របស់អ្នក"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ទីតាំង"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ចូលដំណើរការទីតាំងរបស់ឧបករណ៍នេះ"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទីតាំងនៃឧបករណ៍នេះ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ប្រតិទិន"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ប្រតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ផ្ញើ និងមើលសារ SMS"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ផ្ញើ និង​មើលសារ SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ការ​ផ្ទុក"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ចូលដំណើការរូបភាព មេឌៀ និងឯកសារនៅលើឧបករណ៍របស់អ្នក"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​រូបថត មេឌៀ និងឯកសារនៅលើ​ឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ថតសំឡេង"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ថតសំឡេង"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"កាមេរ៉ា"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ថតរូប និងថតវីដេអូ"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ថតរូប និងថត​វីដេអូ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ធ្វើការហៅ និង​គ្រប់គ្រងការហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ឧបករណ៍ចាប់សញ្ញារាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"អនុញ្ញាតឲ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីសញ្ញាសំខាន់ៗរបស់អ្នក"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទាញយក​មាតិកា​វិនដូ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​មាតិកាវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"ជ្រើស​ទាំងអស់"</string>
     <string name="cut" msgid="3092569408438626261">"កាត់"</string>
     <string name="copy" msgid="2681946229533511987">"ចម្លង"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"បិទ​ភ្ជាប់"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"បិទភ្ជាប់ជាអត្ថបទធម្មតា"</string>
     <string name="replace" msgid="5781686059063148930">"ជំនួស..."</string>
@@ -1734,14 +1727,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"មិនខ្ទាស់"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"កំណត់ឧបករណ៍ឡើងវិញឬ?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"ប៉ះដើម្បីកំណត់ឧបករណ៍ឡើងវិញ"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"កំពុងចាប់ផ្តើមការបង្ហាញសាកល្បង…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"កំពុងកំណត់ឧបករណ៍ឡើងវិញ…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"កំណត់ឧបករណ៍ឡើងវិញឬ?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"អ្នកនឹងបាត់បង់ការផ្លាស់ប្តូរណាមួយ ហើយការបង្ហាញសាកល្បងនឹងចាប់ផ្តើមម្តងទៀតក្នុងរយៈពេល <xliff:g id="TIMEOUT">%1$s</xliff:g> វិនាទីទៀត…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"បោះបង់"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"កំណត់ឡើងវិញឥឡូវនេះ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ដែលបានបិទដំណើរការ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ការហៅជាក្រុម"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ផ្ទាំងលោត"</string>

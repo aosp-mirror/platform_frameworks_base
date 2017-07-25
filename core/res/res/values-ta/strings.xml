@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"குரல் உதவி"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"இப்போது பூட்டு"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"மறைந்துள்ள உள்ளடக்கம்"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"கொள்கையின்படி உள்ளடக்கம் மறைக்கப்பட்டது"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"விர்ச்சுவல் விசைப்பலகை"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"கைமுறை விசைப்பலகை"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"பாதுகாப்பு"</string>
@@ -258,40 +258,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"பணிச் சுயவிவரத்திற்கு மாறு"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுக வேண்டும்"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"தொடர்புகளை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ளலாம்"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"இந்தச் சாதனத்தின் இருபிடத்தை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகலாம்"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"கேலெண்டரை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"SMS செய்திகளை அனுப்பவும், அவற்றைப் பார்க்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"சேமிப்பிடம்"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுக வேண்டும்"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"சாதனத்தில் உள்ள படங்கள், மீடியா, கோப்புகள் ஆகியவற்றை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஒலிப் பதிவு செய்யலாம்"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"ஆடியோவைப் பதிவுசெய்ய, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"படங்களை எடுக்கவும் வீடியோவைப் பதிவுசெய்யவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அணுகல் வழங்கவும்"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"மொபைல் அழைப்புகளைச் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் உணர்விகள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
@@ -969,6 +960,8 @@
     <string name="selectAll" msgid="6876518925844129331">"அனைத்தையும் தேர்ந்தெடு"</string>
     <string name="cut" msgid="3092569408438626261">"வெட்டு"</string>
     <string name="copy" msgid="2681946229533511987">"நகலெடு"</string>
+    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
+    <skip />
     <string name="paste" msgid="5629880836805036433">"ஒட்டு"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"எளிய உரையாக ஒட்டு"</string>
     <string name="replace" msgid="5781686059063148930">"மாற்று..."</string>
@@ -1733,14 +1726,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"பின்னை அகற்று"</string>
     <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"சாதனத்தை மீட்டமைக்கவா?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"சாதனத்தை மீட்டமைக்க, தட்டவும்"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"டெமோவைத் தொடங்குகிறது…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"சாதனத்தை மீட்டமைக்கிறது…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"சாதனத்தை மீட்டமைக்கவா?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"மாற்றங்கள் சேமிக்கப்படாது, <xliff:g id="TIMEOUT">%1$s</xliff:g> வினாடிகளில் டெமோ மீண்டும் தொடங்கும்…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ரத்துசெய்"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"இப்போதே மீட்டமை"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"முடக்கப்பட்டது: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"குழு அழைப்பு"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"உதவிக்குறிப்பு"</string>
