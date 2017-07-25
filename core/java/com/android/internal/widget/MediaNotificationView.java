@@ -33,13 +33,13 @@ import android.widget.RemoteViews;
 @RemoteViews.RemoteView
 public class MediaNotificationView extends FrameLayout {
 
-    private final int mSmallImageSize;
     private final int mNotificationContentMarginEnd;
     private final int mNotificationContentImageMarginEnd;
     private ImageView mRightIcon;
     private View mActions;
     private View mHeader;
     private View mMainColumn;
+    private int mImagePushIn;
 
     public MediaNotificationView(Context context) {
         this(context, null);
@@ -62,6 +62,7 @@ public class MediaNotificationView extends FrameLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int mode = MeasureSpec.getMode(widthMeasureSpec);
         boolean reMeasure = false;
+        mImagePushIn = 0;
         if (hasIcon && mode != MeasureSpec.UNSPECIFIED) {
             int size = MeasureSpec.getSize(widthMeasureSpec);
             size = size - mActions.getMeasuredWidth();
@@ -70,14 +71,15 @@ public class MediaNotificationView extends FrameLayout {
             int imageEndMargin = layoutParams.getMarginEnd();
             size -= imageEndMargin;
             int fullHeight = getMeasuredHeight();
-            if (size < fullHeight) {
-                size = mSmallImageSize;
-            } else {
+            if (size > fullHeight) {
                 size = fullHeight;
+            } else if (size < fullHeight) {
+                size = Math.max(0, size);
+                mImagePushIn = fullHeight - size;
             }
-            if (layoutParams.width != size || layoutParams.height != size) {
-                layoutParams.width = size;
-                layoutParams.height = size;
+            if (layoutParams.width != fullHeight || layoutParams.height != fullHeight) {
+                layoutParams.width = fullHeight;
+                layoutParams.height = fullHeight;
                 mRightIcon.setLayoutParams(layoutParams);
                 reMeasure = true;
             }
@@ -111,6 +113,15 @@ public class MediaNotificationView extends FrameLayout {
         }
     }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mImagePushIn > 0) {
+            mRightIcon.layout(mRightIcon.getLeft() + mImagePushIn, mRightIcon.getTop(),
+                    mRightIcon.getRight()  + mImagePushIn, mRightIcon.getBottom());
+        }
+    }
+
     private void resetHeaderIndention() {
         if (mHeader.getPaddingEnd() != mNotificationContentMarginEnd) {
             mHeader.setPaddingRelative(mHeader.getPaddingStart(),
@@ -130,8 +141,6 @@ public class MediaNotificationView extends FrameLayout {
     public MediaNotificationView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mSmallImageSize = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.media_notification_expanded_image_small_size);
         mNotificationContentMarginEnd = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
         mNotificationContentImageMarginEnd = context.getResources().getDimensionPixelSize(
