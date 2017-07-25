@@ -41,6 +41,7 @@ import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
+import static android.content.pm.ActivityInfo.CONFIG_APP_BOUNDS;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_ROTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
@@ -2601,6 +2602,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if ((changes & CONFIG_ROTATION) != 0) {
             changes &= ~CONFIG_ROTATION;
         }
+
+        // We don't want app bound changes to cause relaunches.
+        if ((changes & CONFIG_APP_BOUNDS) != 0) {
+            changes &= ~CONFIG_APP_BOUNDS;
+        }
+
         return changes;
     }
 
