@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.SystemProperties;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -127,6 +128,8 @@ public class SyncLogger {
         @GuardedBy("mLock")
         private boolean mErrorShown;
 
+        private static final boolean DO_LOGCAT = Log.isLoggable(TAG, Log.DEBUG);
+
         RotatingFileLogger() {
             mLogPath = new File(Environment.getDataSystemDirectory(), "syncmanager-log");
         }
@@ -158,6 +161,8 @@ public class SyncLogger {
                 mStringBuilder.append(android.os.Process.myTid());
                 mStringBuilder.append(' ');
 
+                final int messageStart = mStringBuilder.length();
+
                 for (Object o : message) {
                     mStringBuilder.append(o);
                 }
@@ -166,6 +171,11 @@ public class SyncLogger {
                 try {
                     mLogWriter.append(mStringBuilder);
                     mLogWriter.flush();
+
+                    // Also write on logcat.
+                    if (DO_LOGCAT) {
+                        Log.d(TAG, mStringBuilder.substring(messageStart));
+                    }
                 } catch (IOException e) {
                     handleException("Failed to write log", e);
                 }
