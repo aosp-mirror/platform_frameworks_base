@@ -111,7 +111,9 @@ public class ZenFooter extends LinearLayout {
         if (mZen == zen) return;
         mZen = zen;
         update();
-        updateIntroduction();
+        post(() -> {
+            updateIntroduction();
+        });
     }
 
     private void setConfig(ZenModeConfig config) {
