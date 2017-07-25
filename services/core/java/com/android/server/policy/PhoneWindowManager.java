@@ -3164,7 +3164,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void selectRotationAnimationLw(int anim[]) {
         // If the screen is off or non-interactive, force a jumpcut.
-        final boolean forceJumpcut = !mScreenOnFully || !mAwake;
+        final boolean forceJumpcut = !mScreenOnFully || !okToAnimate();
         if (PRINT_ANIM) Slog.i(TAG, "selectRotationAnimation mTopFullscreen="
                 + mTopFullscreenOpaqueWindowState + " rotationAnimation="
                 + (mTopFullscreenOpaqueWindowState == null ?
