@@ -48,7 +48,7 @@ interface IKeystoreService {
     byte[] sign(String name, in byte[] data);
     int verify(String name, in byte[] data, in byte[] signature);
     byte[] get_pubkey(String name);
-    int grant(String name, int granteeUid);
+    String grant(String name, int granteeUid);
     int ungrant(String name, int granteeUid);
     long getmtime(String name, int uid);
     int duplicate(String srcKey, int srcUid, String destKey, int destUid);
