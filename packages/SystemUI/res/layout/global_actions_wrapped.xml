@@ -6,6 +6,7 @@
     android:layout_marginBottom="0dp"
     android:paddingTop="@dimen/global_actions_top_padding"
     android:clipToPadding="false"
+    android:theme="@style/qs_theme"
     android:clipChildren="false">
 
     <LinearLayout
