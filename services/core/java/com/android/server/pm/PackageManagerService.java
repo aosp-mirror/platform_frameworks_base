@@ -9435,7 +9435,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void notifyDexLoad(String loadingPackageName, List<String> dexPaths, String loaderIsa) {
+    public void notifyDexLoad(String loadingPackageName, List<String> classLoaderNames,
+            List<String> classPaths, String loaderIsa) {
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -9443,7 +9444,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 + loadingPackageName + ", user=" + userId);
             return;
         }
-        mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
+        mDexManager.notifyDexLoad(ai, classLoaderNames, classPaths, loaderIsa, userId);
     }
 
     @Override
