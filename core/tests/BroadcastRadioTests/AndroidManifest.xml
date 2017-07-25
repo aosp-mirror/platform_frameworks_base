@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="android.hardware.radio.tests">
 
-    <uses-permission android:name="android.permission.ACCESS_FM_RADIO" />
+    <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
 
     <application>
         <uses-library android:name="android.test.runner" />
