@@ -220,6 +220,7 @@
 
     <style name="TextAppearance.QS.Introduction">
         <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/zen_introduction</item>
     </style>
 
     <style name="TextAppearance.QS.Warning">
@@ -236,7 +237,7 @@
     </style>
 
     <style name="TextAppearance.QS.DetailButton.White">
-        <item name="android:textColor">@color/qs_detail_button_white</item>
+        <item name="android:textColor">@color/zen_introduction</item>
     </style>
 
     <style name="TextAppearance.QS.DetailEmpty">
