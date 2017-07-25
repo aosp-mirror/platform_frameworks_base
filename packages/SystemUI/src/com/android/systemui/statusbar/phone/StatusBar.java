@@ -156,6 +156,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityStarterDelegate;
+import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
@@ -175,6 +176,7 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -1329,6 +1331,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.onOverlayChanged();
+        }
+        if (mAmbientIndicationContainer instanceof AutoReinflateContainer) {
+            ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
         }
     }
 
@@ -5340,6 +5345,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mStatusBarWindowManager.setDozing(mDozing);
         mStatusBarKeyguardViewManager.setDozing(mDozing);
+        if (mAmbientIndicationContainer instanceof DozeReceiver) {
+            ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
+        }
         updateDozingState();
         Trace.endSection();
     }
