@@ -2638,7 +2638,6 @@
   <java-symbol type="string" name="new_sms_notification_title" />
   <java-symbol type="string" name="new_sms_notification_content" />
 
-  <java-symbol type="dimen" name="media_notification_expanded_image_small_size" />
   <java-symbol type="dimen" name="media_notification_expanded_image_margin_bottom" />
   <java-symbol type="dimen" name="notification_content_image_margin_end" />
 
