@@ -184,6 +184,13 @@ public class DozeSensors {
         pw.print("ProxSensor: "); pw.println(mProxSensor.toString());
     }
 
+    /**
+     * @return true if prox is currently far, false if near or null if unknown.
+     */
+    public Boolean isProximityCurrentlyFar() {
+        return mProxSensor.mCurrentlyFar;
+    }
+
     private class ProxSensor implements SensorEventListener {
 
         static final long COOLDOWN_TRIGGER = 2 * 1000;
