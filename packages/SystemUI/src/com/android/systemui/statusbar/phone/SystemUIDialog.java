@@ -69,9 +69,10 @@ public class SystemUIDialog extends AlertDialog {
         }
     }
 
-    public static void applyFlags(AlertDialog dialog) {
+    public static AlertDialog applyFlags(AlertDialog dialog) {
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        return dialog;
     }
 }
