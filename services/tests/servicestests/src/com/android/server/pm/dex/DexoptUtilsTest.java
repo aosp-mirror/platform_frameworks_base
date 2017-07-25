@@ -24,6 +24,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseArray;
 
 import dalvik.system.DelegateLastClassLoader;
+import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
 import org.junit.Test;
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class DexoptUtilsTest {
+    private static final String DEX_CLASS_LOADER_NAME = DexClassLoader.class.getName();
     private static final String PATH_CLASS_LOADER_NAME = PathClassLoader.class.getName();
     private static final String DELEGATE_LAST_CLASS_LOADER_NAME =
             DelegateLastClassLoader.class.getName();
@@ -57,7 +59,7 @@ public class DexoptUtilsTest {
                     DELEGATE_LAST_CLASS_LOADER_NAME,
                     DELEGATE_LAST_CLASS_LOADER_NAME,
                     PATH_CLASS_LOADER_NAME,
-                    PATH_CLASS_LOADER_NAME,
+                    DEX_CLASS_LOADER_NAME,
                     PATH_CLASS_LOADER_NAME,
                     null};  // A null class loader name should default to PathClassLoader.
             if (addSplitDependencies) {
