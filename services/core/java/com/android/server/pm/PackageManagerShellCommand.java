@@ -1221,6 +1221,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--full":
                     sessionParams.setInstallAsInstantApp(false /*isInstantApp*/);
                     break;
+                case "--preload":
+                    sessionParams.setInstallAsVirtualPreload();
+                    break;
                 case "--user":
                     params.userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;

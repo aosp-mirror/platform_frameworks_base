@@ -615,6 +615,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+            if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
+                    && !mPm.isCallerVerifier(callingUid)) {
+                params.installFlags &= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
+            }
         }
 
         // Only system components can circumvent runtime permissions when installing.
