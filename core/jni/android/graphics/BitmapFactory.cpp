@@ -7,6 +7,7 @@
 #include "SkAndroidCodec.h"
 #include "SkBRDAllocator.h"
 #include "SkFrontBufferedStream.h"
+#include "SkMakeUnique.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
@@ -213,13 +214,8 @@ static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
            needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
 }
 
-static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding, jobject options) {
-    // This function takes ownership of the input stream.  Since the SkAndroidCodec
-    // will take ownership of the stream, we don't necessarily need to take ownership
-    // here.  This is a precaution - if we were to return before creating the codec,
-    // we need to make sure that we delete the stream.
-    std::unique_ptr<SkStreamRewindable> streamDeleter(stream);
-
+static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
+                        jobject padding, jobject options) {
     // Set default values for the options parameters.
     int sampleSize = 1;
     bool onlyDecodeSize = false;
@@ -277,10 +273,10 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Create the codec.
     NinePatchPeeker peeker;
-    std::unique_ptr<SkAndroidCodec> codec(SkAndroidCodec::NewFromStream(
-            streamDeleter.release(), &peeker));
+    std::unique_ptr<SkAndroidCodec> codec = SkAndroidCodec::MakeFromStream(
+            std::move(stream), &peeker);
     if (!codec.get()) {
-        return nullObjectReturn("SkAndroidCodec::NewFromStream returned null");
+        return nullObjectReturn("SkAndroidCodec::MakeFromStream returned null");
     }
 
     // Do not allow ninepatch decodes to 565.  In the past, decodes to 565
@@ -563,7 +559,7 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
         std::unique_ptr<SkStreamRewindable> bufferedStream(
                 SkFrontBufferedStream::Create(stream.release(), SkCodec::MinBufferedBytesNeeded()));
         SkASSERT(bufferedStream.get() != NULL);
-        bitmap = doDecode(env, bufferedStream.release(), padding, options);
+        bitmap = doDecode(env, std::move(bufferedStream), padding, options);
     }
     return bitmap;
 }
@@ -605,7 +601,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     // If there is no offset for the file descriptor, we use SkFILEStream directly.
     if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
         assert(isSeekable(dupDescriptor));
-        return doDecode(env, fileStream.release(), padding, bitmapFactoryOptions);
+        return doDecode(env, std::move(fileStream), padding, bitmapFactoryOptions);
     }
 
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
@@ -614,7 +610,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.release(),
             SkCodec::MinBufferedBytesNeeded()));
 
-    return doDecode(env, stream.release(), padding, bitmapFactoryOptions);
+    return doDecode(env, std::move(stream), padding, bitmapFactoryOptions);
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
@@ -623,16 +619,15 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    std::unique_ptr<AssetStreamAdaptor> stream(new AssetStreamAdaptor(asset));
-    return doDecode(env, stream.release(), padding, options);
+    return doDecode(env, skstd::make_unique<AssetStreamAdaptor>(asset), padding, options);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
         jint offset, jint length, jobject options) {
 
     AutoJavaByteArray ar(env, byteArray);
-    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, false));
-    return doDecode(env, stream.release(), NULL, options);
+    return doDecode(env, skstd::make_unique<SkMemoryStream>(ar.ptr() + offset, length, false),
+                    nullptr, options);
 }
 
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
@@ -641,8 +636,8 @@ static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
 }
 
 jobject decodeBitmap(JNIEnv* env, void* data, size_t size) {
-    SkMemoryStream stream(data, size);
-    return doDecode(env, &stream, NULL, NULL);
+    return doDecode(env, skstd::make_unique<SkMemoryStream>(data, size),
+                    nullptr, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
