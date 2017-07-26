@@ -31,6 +31,7 @@
 #include <ui/PixelFormat.h>
 
 #include <SkCanvas.h>
+#include <SkToSRGBColorFilter.h>
 #include <SkImagePriv.h>
 
 namespace android {
@@ -208,11 +209,8 @@ Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
     buffer->incStrong(buffer);
     setImmutable(); // HW bitmaps are always immutable
     if (uirenderer::Properties::isSkiaEnabled()) {
-        // GraphicBuffer should be in the display color space (Bitmap::createFrom is always
-        // passing SRGB). The code that uploads into a GraphicBuffer should do color conversion if
-        // needed.
         mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
-                mInfo.alphaType(), nullptr);
+                mInfo.alphaType(), mInfo.refColorSpace());
     }
 }
 
@@ -319,7 +317,7 @@ GraphicBuffer* Bitmap::graphicBuffer() {
     return nullptr;
 }
 
-sk_sp<SkImage> Bitmap::makeImage() {
+sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
     sk_sp<SkImage> image = mImage;
     if (!image) {
         SkASSERT(!(isHardware() && uirenderer::Properties::isSkiaEnabled()));
@@ -330,12 +328,11 @@ sk_sp<SkImage> Bitmap::makeImage() {
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
-        if (uirenderer::Properties::isSkiaEnabled()) {
-            image = SkMakeImageInColorSpace(skiaBitmap, SkColorSpace::MakeSRGB(),
-                    skiaBitmap.getGenerationID(), kNever_SkCopyPixelsMode);
-        } else {
-            image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
-        }
+        image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
+    }
+    if(uirenderer::Properties::isSkiaEnabled() && image->colorSpace() != nullptr
+            && !image->colorSpace()->isSRGB()) {
+        *outputColorFilter = SkToSRGBColorFilter::Make(image->refColorSpace());
     }
     return image;
 }

@@ -296,6 +296,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
             colorVector[2] = EOCF(srcColorMatrix[14] / 255.0f);
             colorVector[3] =      srcColorMatrix[19] / 255.0f;  // alpha is linear
         } else {
+            ALOGE("unsupported ColorFilter type: %s", colorFilter->getTypeName());
             LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }
     } else {
