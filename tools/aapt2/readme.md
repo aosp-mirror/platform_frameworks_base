@@ -1,5 +1,8 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.19
+- Added navigation resource type.
+
 ## Version 2.18
 ### `aapt2 ...`
 - Fixed issue where enum values were interpreted as integers and range checked. (bug 62358540)
