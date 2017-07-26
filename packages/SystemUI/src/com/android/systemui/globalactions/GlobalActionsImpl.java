@@ -15,6 +15,7 @@
 package com.android.systemui.globalactions;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -38,9 +39,7 @@ public class GlobalActionsImpl implements GlobalActions {
     @Override
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mGlobalActions == null) {
-            final ContextThemeWrapper context = new ContextThemeWrapper(mContext,
-                    android.R.style.Theme_Material_Light);
-            mGlobalActions = new GlobalActionsDialog(context, manager);
+            mGlobalActions = new GlobalActionsDialog(mContext, manager);
         }
         mGlobalActions.showDialog(mKeyguardMonitor.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned());

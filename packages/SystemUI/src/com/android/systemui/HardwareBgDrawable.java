@@ -22,7 +22,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.util.Log;
+
+import com.android.settingslib.Utils;
 
 public class HardwareBgDrawable extends LayerDrawable {
 
@@ -43,22 +44,25 @@ public class HardwareBgDrawable extends LayerDrawable {
         }
         mRoundTop = roundTop;
         mLayers = layers;
-        mLayers[1].setTint(0xffeeeeee);
     }
 
     private static Drawable[] getLayers(Context context, boolean roundTop, boolean roundEnd) {
         int drawable = roundEnd ? R.drawable.rounded_bg_full : R.drawable.rounded_bg;
+        final Drawable[] layers;
         if (roundTop) {
-            return new Drawable[]{
+            layers = new Drawable[]{
                     context.getDrawable(drawable).mutate(),
                     context.getDrawable(drawable).mutate(),
             };
+        } else {
+            layers = new Drawable[]{
+                    context.getDrawable(drawable).mutate(),
+                    context.getDrawable(roundEnd ? R.drawable.rounded_full_bg_bottom
+                            : R.drawable.rounded_bg_bottom).mutate(),
+            };
         }
-        return new Drawable[]{
-                context.getDrawable(drawable).mutate(),
-                context.getDrawable(roundEnd ? R.drawable.rounded_full_bg_bottom
-                        : R.drawable.rounded_bg_bottom).mutate(),
-        };
+        layers[1].setTint(Utils.getColorAttr(context, android.R.attr.colorPrimaryDark));
+        return layers;
     }
 
     public void setCutPoint(int point) {
