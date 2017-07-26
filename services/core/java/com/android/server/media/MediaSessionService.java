@@ -138,19 +138,20 @@ public class MediaSessionService extends SystemService implements Monitor {
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
-        mAudioPlaybackMonitor = new AudioPlaybackMonitor(getContext(), mAudioService,
+        mAudioPlaybackMonitor = AudioPlaybackMonitor.getInstance(getContext(), mAudioService);
+        mAudioPlaybackMonitor.registerOnAudioPlaybackStartedListener(
                 new AudioPlaybackMonitor.OnAudioPlaybackStartedListener() {
-                    @Override
-                    public void onAudioPlaybackStarted(int uid) {
-                        synchronized (mLock) {
-                            FullUserRecord user =
-                                    getFullUserRecordLocked(UserHandle.getUserId(uid));
-                            if (user != null) {
-                                user.mPriorityStack.updateMediaButtonSessionIfNeeded();
-                            }
-                        }
+            @Override
+            public void onAudioPlaybackStarted(int uid) {
+                synchronized (mLock) {
+                    FullUserRecord user =
+                            getFullUserRecordLocked(UserHandle.getUserId(uid));
+                    if (user != null) {
+                        user.mPriorityStack.updateMediaButtonSessionIfNeeded();
                     }
-                });
+                }
+            }
+        });
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
