@@ -1194,8 +1194,13 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            if (!disableNonCoreServices && context.getResources().getBoolean(
-                        R.bool.config_enableUpdateableTimeZoneRules)) {
+            // timezone.RulesManagerService will prevent a device starting up if the chain of trust
+            // required for safe time zone updates might be broken. RuleManagerService cannot do
+            // this check when mOnlyCore == true, so we don't enable the service in this case.
+            final boolean startRulesManagerService =
+                    !mOnlyCore && context.getResources().getBoolean(
+                            R.bool.config_enableUpdateableTimeZoneRules);
+            if (startRulesManagerService) {
                 traceBeginAndSlog("StartTimeZoneRulesManagerService");
                 mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
