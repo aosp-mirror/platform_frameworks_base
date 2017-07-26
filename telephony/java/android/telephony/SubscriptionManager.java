@@ -31,14 +31,13 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
-
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,7 +58,7 @@ public class SubscriptionManager {
 
     /** Base value for Dummy SUBSCRIPTION_ID's. */
     /** FIXME: Remove DummySubId's, but for now have them map just below INVALID_SUBSCRIPTION_ID
-    /** @hide */
+     /** @hide */
     public static final int DUMMY_SUBSCRIPTION_ID_BASE = INVALID_SUBSCRIPTION_ID - 1;
 
     /** An invalid phone identifier */
@@ -368,7 +367,7 @@ public class SubscriptionManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SUB_DEFAULT_CHANGED_ACTION =
-        "android.intent.action.SUB_DEFAULT_CHANGED";
+            "android.intent.action.SUB_DEFAULT_CHANGED";
 
     /**
      * Broadcast Action: The default subscription has changed.  This has the following
@@ -621,7 +620,7 @@ public class SubscriptionManager {
         }
 
         if (result == null) {
-            result = new ArrayList<SubscriptionInfo>();
+            result = new ArrayList<>();
         }
         return result;
     }
@@ -1450,8 +1449,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                resultValue = iSub.getSubscriptionProperty(subId, propKey, 
-                    context.getOpPackageName());
+                resultValue = iSub.getSubscriptionProperty(subId, propKey,
+                        context.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1560,8 +1559,10 @@ public class SubscriptionManager {
         final INetworkPolicyManager npm = INetworkPolicyManager.Stub
                 .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
         try {
-            return Arrays.asList(npm.getSubscriptionPlans(subId,
-                    mContext.getOpPackageName()));
+            SubscriptionPlan[] subscriptionPlans =
+                    npm.getSubscriptionPlans(subId, mContext.getOpPackageName());
+            return subscriptionPlans == null
+                    ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
