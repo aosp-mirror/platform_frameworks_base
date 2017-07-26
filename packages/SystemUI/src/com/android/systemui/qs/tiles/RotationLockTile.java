@@ -24,12 +24,15 @@ import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import javax.inject.Inject;
 
@@ -39,11 +42,15 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
     private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_auto_rotate);
     private final RotationLockController mController;
 
+    private final KeyguardMonitor mKeyguard;
+    private final KeyguardCallback mKeyguardCallback = new KeyguardCallback();
+
     @Inject
     public RotationLockTile(QSHost host, RotationLockController rotationLockController) {
         super(host);
         mController = rotationLockController;
         mController.observe(this, mCallback);
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
     }
 
     @Override
@@ -51,7 +58,15 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
         return new BooleanState();
     }
 
+    @Override
     public void handleSetListening(boolean listening) {
+        if (listening) {
+            mController.addCallback(mCallback);
+            mKeyguard.addCallback(mKeyguardCallback);
+        } else {
+            mController.removeCallback(mCallback);
+            mKeyguard.removeCallback(mKeyguardCallback);
+        }
     }
 
     @Override
@@ -59,11 +74,23 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
         return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
     }
 
-    @Override
-    protected void handleClick() {
+    private void handleClickInner() {
         final boolean newState = !mState.value;
         mController.setRotationLocked(!newState);
         refreshState(newState);
+    }
+
+    @Override
+    protected void handleClick() {
+        if (mController == null) return;
+        if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
+            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                handleClickInner();
+            });
+            return;
+        }
+        handleClickInner();
     }
 
     @Override
@@ -120,4 +147,11 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
             refreshState(rotationLocked);
         }
     };
+
+    private final class KeyguardCallback implements KeyguardMonitor.Callback {
+        @Override
+        public void onKeyguardShowingChanged() {
+            refreshState();
+        }
+    }
 }
