@@ -134,7 +134,13 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node,
         const DamageAccumulator& damageAccumulator, bool wideColorGamut) {
     SkSurface* layer = node->getLayerSurface();
     if (!layer || layer->width() != node->getWidth() || layer->height() != node->getHeight()) {
-        SkImageInfo info = SkImageInfo::MakeN32Premul(node->getWidth(), node->getHeight());
+        SkImageInfo info;
+        if (wideColorGamut) {
+            info = SkImageInfo::Make(node->getWidth(), node->getHeight(), kRGBA_F16_SkColorType,
+                    kPremul_SkAlphaType);
+        } else {
+            info = SkImageInfo::MakeN32Premul(node->getWidth(), node->getHeight());
+        }
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
         // TODO: Handle wide color gamut requests

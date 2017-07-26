@@ -73,9 +73,11 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
     // setup surface for fbo0
     GrGLFramebufferInfo fboInfo;
     fboInfo.fFBOID = 0;
+    GrPixelConfig pixelConfig =
+            wideColorGamut ? kRGBA_half_GrPixelConfig : kRGBA_8888_GrPixelConfig;
 
     GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE,
-            kRGBA_8888_GrPixelConfig, fboInfo);
+            pixelConfig, fboInfo);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
