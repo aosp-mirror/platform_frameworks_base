@@ -27,13 +27,16 @@
 #include <android/hidl/manager/1.0/IServiceManager.h>
 #include <core_jni_helpers.h>
 #include <hidl/ServiceManagement.h>
+#include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
-#include <JNIHelp.h>
 
 namespace android {
 namespace server {
 namespace BroadcastRadio {
 namespace BroadcastRadioService {
+
+using std::lock_guard;
+using std::mutex;
 
 using hardware::Return;
 using hardware::hidl_string;
@@ -50,7 +53,7 @@ using V1_0::ProgramInfo;
 using V1_0::MetaData;
 using V1_0::ITuner;
 
-static Mutex gContextMutex;
+static mutex gContextMutex;
 
 static struct {
     struct {
@@ -90,8 +93,8 @@ static ServiceContext& getNativeContext(jlong nativeContextHandle) {
 }
 
 static jlong nativeInit(JNIEnv *env, jobject obj) {
-    ALOGV("nativeInit()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
 
     auto nativeContext = new ServiceContext();
     static_assert(sizeof(jlong) >= sizeof(nativeContext), "jlong is smaller than a pointer");
@@ -99,16 +102,16 @@ static jlong nativeInit(JNIEnv *env, jobject obj) {
 }
 
 static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeFinalize()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
 
     auto ctx = reinterpret_cast<ServiceContext*>(nativeContext);
     delete ctx;
 }
 
 static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeLoadModules()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
     // Get list of registered HIDL HAL implementations.
@@ -182,8 +185,8 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
 
 static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jint moduleId,
         jobject bandConfig, bool withAudio, jobject callback) {
-    ALOGV("nativeOpenTuner()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
     if (callback == nullptr) {
