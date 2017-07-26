@@ -242,42 +242,6 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
-    public void testCreateNotificationChannels_SecondCreateDoesNotChangeImportance()
-            throws Exception {
-        final NotificationChannel channel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
-        mBinderService.createNotificationChannels(PKG,
-                new ParceledListSlice(Arrays.asList(channel)));
-
-        // Recreating the channel doesn't throw, but ignores importance.
-        final NotificationChannel dupeChannel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_HIGH);
-        mBinderService.createNotificationChannels(PKG,
-                new ParceledListSlice(Arrays.asList(dupeChannel)));
-        final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
-        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, createdChannel.getImportance());
-    }
-
-    @Test
-    public void testCreateNotificationChannels_SecondCreateAllowedToDowngradeImportance()
-            throws Exception {
-        final NotificationChannel channel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
-        mBinderService.createNotificationChannels(PKG,
-                new ParceledListSlice(Arrays.asList(channel)));
-
-        // Recreating with a lower importance is allowed to modify the channel.
-        final NotificationChannel dupeChannel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_LOW);
-        mBinderService.createNotificationChannels(PKG,
-                new ParceledListSlice(Arrays.asList(dupeChannel)));
-        final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
-        assertEquals(NotificationManager.IMPORTANCE_LOW, createdChannel.getImportance());
-    }
-
-    @Test
     public void testCreateNotificationChannels_CannotDowngradeImportanceIfAlreadyUpdated()
             throws Exception {
         final NotificationChannel channel =
