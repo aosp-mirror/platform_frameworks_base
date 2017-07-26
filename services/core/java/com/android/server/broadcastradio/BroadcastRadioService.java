@@ -64,8 +64,8 @@ public class BroadcastRadioService extends SystemService {
     private class ServiceImpl extends IRadioService.Stub {
         private void enforcePolicyAccess() {
             if (PackageManager.PERMISSION_GRANTED != getContext().checkCallingPermission(
-                    Manifest.permission.ACCESS_FM_RADIO)) {
-                throw new SecurityException("ACCESS_FM_RADIO permission not granted");
+                    Manifest.permission.ACCESS_BROADCAST_RADIO)) {
+                throw new SecurityException("ACCESS_BROADCAST_RADIO permission not granted");
             }
         }
 

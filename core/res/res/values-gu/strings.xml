@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"વૉઇસ સહાય"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"હવે લૉક કરો"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"સામગ્રીઓ છુપાવેલ છે"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"નીતિ દ્વારા સામગ્રી છુપાવાઈ"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"વર્ચ્યુઅલ કીબોર્ડ"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ભૌતિક કીબોર્ડ"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"સુરક્ષા"</string>
@@ -1715,14 +1715,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"અનપિન કરો"</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"ઉપકરણ ફરીથી સેટ કરીએ?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"ઉપકરણને ફરીથી સેટ કરવા માટે ટૅપ કરો"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"ડેમો પ્રારંભ કરી રહ્યાં છે…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"ઉપકરણ ફરીથી સેટ કરી રહ્યાં છે…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"ઉપકરણ ફરીથી સેટ કરીએ?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"તમે કોઈપણ ફેરફારો ગુમાવશો અને ડેમો <xliff:g id="TIMEOUT">%1$s</xliff:g> સેકન્ડમાં ફરી શરૂ થશે…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"રદ કરો"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"હમણાં ફરીથી સેટ કરો"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> અક્ષમ કર્યું"</string>
     <string name="conference_call" msgid="3751093130790472426">"કોન્ફરન્સ કૉલ"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ટૂલટિપ"</string>

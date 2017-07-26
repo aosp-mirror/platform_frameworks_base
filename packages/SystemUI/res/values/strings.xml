@@ -2046,4 +2046,7 @@
         been identified for them as running). [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
 
+    <!-- Prompt to turn off data usage [CHAR LIMIT=NONE] -->
+    <string name="data_usage_disable_mobile" msgid="8656552431969276305">Turn off mobile data?</string>
+
 </resources>

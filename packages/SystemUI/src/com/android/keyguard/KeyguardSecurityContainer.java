@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserHandle;
+import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -470,7 +471,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return 0;
     }
 
-    protected int getLayoutIdFor(SecurityMode securityMode) {
+    @VisibleForTesting
+    public int getLayoutIdFor(SecurityMode securityMode) {
         switch (securityMode) {
             case Pattern: return R.layout.keyguard_pattern_view;
             case PIN: return R.layout.keyguard_pin_view;

@@ -30,7 +30,7 @@
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
 
-    <dimen name="toast_y_offset">64dip</dimen>
+    <dimen name="toast_y_offset">24dp</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">24dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
@@ -236,9 +236,6 @@
 
     <!-- The minimum height of the content if there are at least two lines or a picture-->
     <dimen name="notification_min_content_height">41dp</dimen>
-
-    <!-- The small size of the image if the height drawing doesn't work anymore -->
-    <dimen name="media_notification_expanded_image_small_size">72dp</dimen>
 
     <!-- The size of the media actions in the media notification. -->
     <dimen name="media_notification_action_button_size">48dp</dimen>

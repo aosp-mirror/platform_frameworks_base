@@ -50,6 +50,7 @@ import android.text.style.TtsSpan;
 
 import com.android.settingslib.R;
 
+import com.android.settingslib.wifi.AccessPoint.Speed;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -145,7 +146,13 @@ public class AccessPointTest {
         assertSortingWorks(savedAp, notSavedAp);
     }
 
-    //TODO: add tests for mRankingScore sort order if ranking is exposed
+    @Test
+    public void testCompareTo_GivesHighSpeedBeforeLowSpeed() {
+        AccessPoint fastAp = new TestAccessPointBuilder(mContext).setSpeed(Speed.FAST).build();
+        AccessPoint slowAp = new TestAccessPointBuilder(mContext).setSpeed(Speed.SLOW).build();
+
+        assertSortingWorks(fastAp, slowAp);
+    }
 
     @Test
     public void testCompareTo_GivesHighLevelBeforeLowLevel() {
@@ -505,7 +512,7 @@ public class AccessPointTest {
     }
 
     /**
-    * Assert that the first AccessPoint appears after the second AccessPoint
+    * Assert that the first AccessPoint appears before the second AccessPoint
     * once sorting has been completed.
     */
     private void assertSortingWorks(AccessPoint first, AccessPoint second) {

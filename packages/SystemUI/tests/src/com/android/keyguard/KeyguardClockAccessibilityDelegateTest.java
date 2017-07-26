@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -36,12 +37,17 @@ import java.util.List;
 public class KeyguardClockAccessibilityDelegateTest extends SysuiTestCase {
 
     private TextView mView;
+    private String m12HoursFormat;
+    private String m24HoursFormat;
 
     @Before
     public void setUp() throws Exception {
+        m12HoursFormat = mContext.getString(R.string.keyguard_widget_12_hours_format);
+        m24HoursFormat = mContext.getString(R.string.keyguard_widget_24_hours_format);
+
         mView = new TextView(mContext);
-        mView.setText(R.string.keyguard_widget_12_hours_format);
-        mView.setContentDescription(mContext.getString(R.string.keyguard_widget_12_hours_format));
+        mView.setText(m12HoursFormat);
+        mView.setContentDescription(m12HoursFormat);
         mView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
     }
 
@@ -75,6 +81,21 @@ public class KeyguardClockAccessibilityDelegateTest extends SysuiTestCase {
 
         assertFalse(TextUtils.isEmpty(info.getContentDescription()));
         assertTrue(isAscii(info.getContentDescription()));
+    }
+
+    @Test
+    public void isNeeded_returnsTrueIfDateFormatsContainNonAscii() {
+        if (!isAscii(m12HoursFormat) || !isAscii(m24HoursFormat)) {
+            assertTrue(KeyguardClockAccessibilityDelegate.isNeeded(mContext));
+        }
+    }
+
+    @Test
+    public void isNeeded_returnsWhetherFancyColonExists() {
+        boolean hasFancyColon = !TextUtils.isEmpty(mContext.getString(
+                R.string.keyguard_fancy_colon));
+
+        assertEquals(hasFancyColon, KeyguardClockAccessibilityDelegate.isNeeded(mContext));
     }
 
     private boolean isAscii(CharSequence text) {

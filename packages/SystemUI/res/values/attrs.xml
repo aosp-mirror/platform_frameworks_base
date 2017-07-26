@@ -127,7 +127,7 @@
 
     <attr name="lightIconTheme" format="reference" />
     <attr name="darkIconTheme" format="reference" />
-    <attr name="wallpaperTextColor" format="color" />
-    <attr name="wallpaperTextColorSecondary" format="color" />
+    <attr name="wallpaperTextColor" format="reference|color" />
+    <attr name="wallpaperTextColorSecondary" format="reference|color" />
 </resources>
 

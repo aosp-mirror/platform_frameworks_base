@@ -230,8 +230,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"内容已隐藏（根据政策规定）"</string>
+    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
+    <skip />
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"虚拟键盘"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"实体键盘"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"安全性"</string>
@@ -1714,14 +1714,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"要重置设备吗？"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"点按即可重置设备"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"正在启动演示模式…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"正在重置设备…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"要重置设备吗？"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"您将丢失所有更改，而且演示模式将在 <xliff:g id="TIMEOUT">%1$s</xliff:g> 秒后重新启动…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"取消"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"立即重置"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"已停用的<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"电话会议"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"提示"</string>
