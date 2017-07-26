@@ -126,7 +126,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Verify with nav bar on the right.
         when(service.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
-        task.getConfiguration().setAppBounds(taskBounds);
+        task.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
         record.info.maxAspectRatio = aspectRatio;
         record.ensureActivityConfigurationLocked(0 /* globalChanges */, false /* preserveWindow */);
         assertEquals(expectedActivityBounds, record.getBounds());

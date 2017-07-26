@@ -241,8 +241,8 @@ public class DockedStackDividerController implements DimLayerUser {
             final int leftInset = mTmpRect.left;
             final int topInset = mTmpRect.top;
 
-            config.setAppBounds(leftInset /*left*/, topInset /*top*/, leftInset + appWidth /*right*/,
-                    topInset + appHeight /*bottom*/);
+            config.windowConfiguration.setAppBounds(leftInset /*left*/, topInset /*top*/,
+                    leftInset + appWidth /*right*/, topInset + appHeight /*bottom*/);
 
             config.screenWidthDp = (int)
                     (mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, baseConfig.uiMode,

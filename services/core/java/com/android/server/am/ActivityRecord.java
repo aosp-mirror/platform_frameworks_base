@@ -46,6 +46,7 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
+import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
@@ -429,11 +430,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                 pw.print("\"");
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
-                        pw.print(prefix); pw.print("  backgroundColor=");
+                        pw.print(prefix + " backgroundColor=");
                         pw.println(Integer.toHexString(taskDescription.getBackgroundColor()));
-                        pw.print(prefix); pw.print("  statusBarColor=");
+                        pw.print(prefix + " statusBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getStatusBarColor()));
-                        pw.print(prefix); pw.print("  navigationBarColor=");
+                        pw.print(prefix + " navigationBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
             }
             if (iconFilename == null && taskDescription.getIcon() != null) {
@@ -2311,9 +2312,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // We must base this on the parent configuration, because we set our override
         // configuration's appBounds based on the result of this method. If we used our own
         // configuration, it would be influenced by past invocations.
-        final Configuration configuration = getParent().getConfiguration();
-        final int containingAppWidth = configuration.appBounds.width();
-        final int containingAppHeight = configuration.appBounds.height();
+        final Rect appBounds = getParent().getConfiguration().windowConfiguration.getAppBounds();
+        final int containingAppWidth = appBounds.width();
+        final int containingAppHeight = appBounds.height();
         int maxActivityWidth = containingAppWidth;
         int maxActivityHeight = containingAppHeight;
 
@@ -2342,8 +2343,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         outBounds.set(0, 0, maxActivityWidth, maxActivityHeight);
         // Position the activity frame on the opposite side of the nav bar.
         final int navBarPosition = service.mWindowManager.getNavBarPosition();
-        final int left = navBarPosition == NAV_BAR_LEFT
-                ? configuration.appBounds.right - outBounds.width() : 0;
+        final int left = navBarPosition == NAV_BAR_LEFT ? appBounds.right - outBounds.width() : 0;
         outBounds.offsetTo(left, 0 /* top */);
     }
 
@@ -2573,6 +2573,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (!crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
                 changes &= ~CONFIG_SMALLEST_SCREEN_SIZE;
             }
+        }
+        // We don't want window configuration to cause relaunches.
+        if ((changes & CONFIG_WINDOW_CONFIGURATION) != 0) {
+            changes &= ~CONFIG_WINDOW_CONFIGURATION;
         }
 
         return changes;
