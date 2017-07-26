@@ -74,6 +74,7 @@
   <java-symbol type="id" name="fillInIntent" />
   <java-symbol type="id" name="find" />
   <java-symbol type="id" name="fullscreenArea" />
+  <java-symbol type="id" name="group_divider" />
   <java-symbol type="id" name="hard_keyboard_section" />
   <java-symbol type="id" name="hard_keyboard_switch" />
   <java-symbol type="id" name="headers" />
