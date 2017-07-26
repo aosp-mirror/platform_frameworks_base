@@ -22,6 +22,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.RemoteAction;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -32,6 +33,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -76,6 +78,9 @@ public class PipMenuActivityController {
     public static final int MENU_STATE_NONE = 0;
     public static final int MENU_STATE_CLOSE = 1;
     public static final int MENU_STATE_FULL = 2;
+
+    // The duration to wait before we consider the start activity as having timed out
+    private static final long START_ACTIVITY_REQUEST_TIMEOUT_MS = 300;
 
     /**
      * A listener interface to receive notification on changes in PIP.
@@ -125,8 +130,9 @@ public class PipMenuActivityController {
 
     private ReferenceCountedTrigger mOnAttachDecrementTrigger;
     private boolean mStartActivityRequested;
+    private long mStartActivityRequestedTime;
     private Messenger mToActivityMessenger;
-    private Messenger mMessenger = new Messenger(new Handler() {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -161,7 +167,7 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
                     mToActivityMessenger = msg.replyTo;
-                    mStartActivityRequested = false;
+                    setStartActivityRequested(false);
                     if (mOnAttachDecrementTrigger != null) {
                         mOnAttachDecrementTrigger.decrement();
                         mOnAttachDecrementTrigger = null;
@@ -174,7 +180,17 @@ public class PipMenuActivityController {
                 }
             }
         }
-    });
+    };
+    private Messenger mMessenger = new Messenger(mHandler);
+
+    private Runnable mStartActivityRequestedTimeoutRunnable = () -> {
+        setStartActivityRequested(false);
+        if (mOnAttachDecrementTrigger != null) {
+            mOnAttachDecrementTrigger.decrement();
+            mOnAttachDecrementTrigger = null;
+        }
+        Log.e(TAG, "Expected start menu activity request timed out");
+    };
 
     private ActionListener mMediaActionListener = new ActionListener() {
         @Override
@@ -200,6 +216,11 @@ public class PipMenuActivityController {
             // registered
             mInputConsumerController.registerInputConsumer();
         }
+    }
+
+    public void onActivityUnpinned(ComponentName topPipActivity) {
+        hideMenu();
+        setStartActivityRequested(false);
     }
 
     public void onPinnedStackAnimationEnded() {
@@ -243,7 +264,9 @@ public class PipMenuActivityController {
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not notify menu to update dismiss fraction", e);
             }
-        } else if (!mStartActivityRequested) {
+        } else if (!mStartActivityRequested || isStartActivityRequestedElapsed()) {
+            // If we haven't requested the start activity, or if it previously took too long to
+            // start, then start it
             startMenuActivity(MENU_STATE_NONE, null /* stackBounds */,
                     null /* movementBounds */, false /* allowMenuTimeout */);
         }
@@ -273,7 +296,9 @@ public class PipMenuActivityController {
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not notify menu to show", e);
             }
-        } else if (!mStartActivityRequested) {
+        } else if (!mStartActivityRequested || isStartActivityRequestedElapsed()) {
+            // If we haven't requested the start activity, or if it previously took too long to
+            // start, then start it
             startMenuActivity(menuState, stackBounds, movementBounds, allowMenuTimeout);
         }
     }
@@ -368,12 +393,12 @@ public class PipMenuActivityController {
                         pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
                 options.setTaskOverlay(true, true /* canResume */);
                 mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
-                mStartActivityRequested = true;
+                setStartActivityRequested(true);
             } else {
                 Log.e(TAG, "No PIP tasks found");
             }
         } catch (RemoteException e) {
-            mStartActivityRequested = false;
+            setStartActivityRequested(false);
             Log.e(TAG, "Error showing PIP menu activity", e);
         }
     }
@@ -416,6 +441,14 @@ public class PipMenuActivityController {
     }
 
     /**
+     * @return whether the time of the activity request has exceeded the timeout.
+     */
+    private boolean isStartActivityRequestedElapsed() {
+        return (SystemClock.uptimeMillis() - mStartActivityRequestedTime)
+                >= START_ACTIVITY_REQUEST_TIMEOUT_MS;
+    }
+
+    /**
      * Handles changes in menu visibility.
      */
     private void onMenuStateChanged(int menuState, boolean resize) {
@@ -443,12 +476,24 @@ public class PipMenuActivityController {
         mMenuState = menuState;
     }
 
+    private void setStartActivityRequested(boolean requested) {
+        mHandler.removeCallbacks(mStartActivityRequestedTimeoutRunnable);
+        mStartActivityRequested = requested;
+        mStartActivityRequestedTime = requested ? SystemClock.uptimeMillis() : 0;
+    }
+
     public final void onBusEvent(HidePipMenuEvent event) {
         if (mStartActivityRequested) {
             // If the menu has been start-requested, but not actually started, then we defer the
-            // trigger callback until the menu has started and called back to the controller
+            // trigger callback until the menu has started and called back to the controller.
             mOnAttachDecrementTrigger = event.getAnimationTrigger();
             mOnAttachDecrementTrigger.increment();
+
+            // Fallback for b/63752800, we have started the PipMenuActivity but it has not made any
+            // callbacks. Don't continue to wait for the menu to show past some timeout.
+            mHandler.removeCallbacks(mStartActivityRequestedTimeoutRunnable);
+            mHandler.postDelayed(mStartActivityRequestedTimeoutRunnable,
+                    START_ACTIVITY_REQUEST_TIMEOUT_MS);
         }
     }
 
@@ -458,5 +503,7 @@ public class PipMenuActivityController {
         pw.println(innerPrefix + "mMenuState=" + mMenuState);
         pw.println(innerPrefix + "mToActivityMessenger=" + mToActivityMessenger);
         pw.println(innerPrefix + "mListeners=" + mListeners.size());
+        pw.println(innerPrefix + "mStartActivityRequested=" + mStartActivityRequested);
+        pw.println(innerPrefix + "mStartActivityRequestedTime=" + mStartActivityRequestedTime);
     }
 }
