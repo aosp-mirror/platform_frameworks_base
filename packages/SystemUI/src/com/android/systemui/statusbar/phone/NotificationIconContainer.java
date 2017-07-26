@@ -22,6 +22,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Icon;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.ArraySet;
 import android.util.AttributeSet;
@@ -122,6 +124,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mVisualOverflowAdaption;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
+    private boolean mVibrateOnAnimation;
+    private Vibrator mVibrator;
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
     private int mDarkOffsetX;
 
@@ -129,6 +133,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         super(context, attrs);
         initDimens();
         setWillNotDraw(!DEBUG);
+        mVibrator = mContext.getSystemService(Vibrator.class);
     }
 
     private void initDimens() {
@@ -499,6 +504,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return width - (getWidth() - getActualPaddingStart() - getActualPaddingEnd()) > 0;
     }
 
+    public void setVibrateOnAnimation(boolean vibrateOnAnimation) {
+        mVibrateOnAnimation = vibrateOnAnimation;
+    }
+
     public int getIconSize() {
         return mIconSize;
     }
@@ -610,6 +619,13 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     animateTo(icon, animationProperties);
                 } else {
                     super.applyToView(view);
+                }
+                boolean wasInShelf = icon.isInShelf();
+                boolean inShelf = iconAppearAmount == 1.0f;
+                icon.setIsInShelf(inShelf);
+                if (mVibrateOnAnimation && !justAdded && mAnimationsEnabled
+                        && wasInShelf != inShelf) {
+                    mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_TICK));
                 }
             }
             justAdded = false;

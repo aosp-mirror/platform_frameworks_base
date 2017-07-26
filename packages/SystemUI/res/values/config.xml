@@ -396,4 +396,8 @@
          one bar higher than they actually are -->
     <bool name="config_inflateSignalStrength">false</bool>
 
+    <!-- Should we vibrate on an icon animation of the shelf. This should only be active if the
+     vibrator is capable of subtle vibrations -->
+    <bool name="config_vibrateOnIconAnimation">false</bool>
+
 </resources>
