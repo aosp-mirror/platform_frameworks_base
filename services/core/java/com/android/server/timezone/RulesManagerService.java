@@ -57,7 +57,6 @@ import static android.app.timezone.RulesState.STAGED_OPERATION_NONE;
 import static android.app.timezone.RulesState.STAGED_OPERATION_UNINSTALL;
 import static android.app.timezone.RulesState.STAGED_OPERATION_UNKNOWN;
 
-// TODO(nfuller) Check error handling best practices in the system server.
 public final class RulesManagerService extends IRulesManager.Stub {
 
     private static final String TAG = "timezone.RulesManagerService";
@@ -336,7 +335,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
         private final CheckToken mCheckToken;
         private final ICallback mCallback;
 
-        public UninstallRunnable(CheckToken checkToken, ICallback callback) {
+        UninstallRunnable(CheckToken checkToken, ICallback callback) {
             mCheckToken = checkToken;
             mCallback = callback;
         }
@@ -401,54 +400,85 @@ public final class RulesManagerService extends IRulesManager.Stub {
             if ("-format_state".equals(args[0]) && args[1] != null) {
                 for (char c : args[1].toCharArray()) {
                     switch (c) {
-                        case 'p': // Report operation in progress
-                            pw.println("Operation in progress: "
-                                    + rulesState.isOperationInProgress());
-                            break;
-                        case 's': // Report system image rules version
-                            pw.println("System rules version: "
-                                    + rulesState.getSystemRulesVersion());
-                            break;
-                        case 'c': // Report current installation state
-                            pw.println("Current install state: "
-                                    + distroStatusToString(rulesState.getDistroStatus()));
-                            break;
-                        case 'i': // Report currently installed version
-                            DistroRulesVersion installedRulesVersion =
-                                    rulesState.getInstalledDistroRulesVersion();
-                            pw.print("Installed rules version: ");
-                            if (installedRulesVersion == null) {
-                                pw.println("<None>");
-                            } else {
-                                pw.println(installedRulesVersion.toDumpString());
+                        case 'p': {
+                            // Report operation in progress
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                value = Boolean.toString(rulesState.isOperationInProgress());
                             }
+                            pw.println("Operation in progress: " + value);
                             break;
-                        case 'o': // Report staged operation type
-                            int stagedOperationType = rulesState.getStagedOperationType();
-                            pw.println("Staged operation: "
-                                    + stagedOperationToString(stagedOperationType));
+                        }
+                        case 's': {
+                            // Report system image rules version
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                value = rulesState.getSystemRulesVersion();
+                            }
+                            pw.println("System rules version: " + value);
                             break;
-                        case 't':
+                        }
+                        case 'c': {
+                            // Report current installation state
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                value = distroStatusToString(rulesState.getDistroStatus());
+                            }
+                            pw.println("Current install state: " + value);
+                            break;
+                        }
+                        case 'i': {
+                            // Report currently installed version
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                DistroRulesVersion installedRulesVersion =
+                                        rulesState.getInstalledDistroRulesVersion();
+                                if (installedRulesVersion == null) {
+                                    value = "<None>";
+                                } else {
+                                    value = installedRulesVersion.toDumpString();
+                                }
+                            }
+                            pw.println("Installed rules version: " + value);
+                            break;
+                        }
+                        case 'o': {
+                            // Report staged operation type
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                int stagedOperationType = rulesState.getStagedOperationType();
+                                value = stagedOperationToString(stagedOperationType);
+                            }
+                            pw.println("Staged operation: " + value);
+                            break;
+                        }
+                        case 't': {
                             // Report staged version (i.e. the one that will be installed next boot
                             // if the staged operation is an install).
-                            pw.print("Staged rules version: ");
-                            DistroRulesVersion stagedDistroRulesVersion =
-                                    rulesState.getStagedDistroRulesVersion();
-                            if (stagedDistroRulesVersion == null) {
-                                pw.println("<None>");
-                            } else {
-                                pw.println(stagedDistroRulesVersion.toDumpString());
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                DistroRulesVersion stagedDistroRulesVersion =
+                                        rulesState.getStagedDistroRulesVersion();
+                                if (stagedDistroRulesVersion == null) {
+                                    value = "<None>";
+                                } else {
+                                    value = stagedDistroRulesVersion.toDumpString();
+                                }
                             }
+                            pw.println("Staged rules version: " + value);
                             break;
-                        case 'a':
+                        }
+                        case 'a': {
                             // Report the active rules version (i.e. the rules in use by the current
                             // process).
                             pw.println("Active rules version (ICU, libcore): "
                                     + ICU.getTZDataVersion() + ","
                                     + ZoneInfoDB.getInstance().getVersion());
                             break;
-                        default:
+                        }
+                        default: {
                             pw.println("Unknown option: " + c);
+                        }
                     }
                 }
                 return;
