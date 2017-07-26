@@ -665,6 +665,7 @@ public class PackageParser {
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
+        pi.isStub = p.isStub;
         pi.coreApp = p.coreApp;
         if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0
                 || (pi.applicationInfo.flags&ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
@@ -5885,10 +5886,10 @@ public class PackageParser {
 
         public byte[] restrictUpdateHash;
 
-        /**
-         * Set if the app or any of its components are visible to Instant Apps.
-         */
+        /** Set if the app or any of its components are visible to instant applications. */
         public boolean visibleToInstantApps;
+        /** Whether or not the package is a stub and must be replaced by the full version. */
+        public boolean isStub;
 
         public Package(String packageName) {
             this.packageName = packageName;

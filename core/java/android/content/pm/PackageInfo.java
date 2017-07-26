@@ -252,6 +252,9 @@ public class PackageInfo implements Parcelable {
     public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
 
     /** @hide */
+    public boolean isStub;
+
+    /** @hide */
     public boolean coreApp;
 
     /** @hide */
@@ -324,6 +327,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(reqFeatures, parcelableFlags);
         dest.writeTypedArray(featureGroups, parcelableFlags);
         dest.writeInt(installLocation);
+        dest.writeInt(isStub ? 1 : 0);
         dest.writeInt(coreApp ? 1 : 0);
         dest.writeInt(requiredForAllUsers ? 1 : 0);
         dest.writeString(restrictedAccountType);
@@ -375,6 +379,7 @@ public class PackageInfo implements Parcelable {
         reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
         featureGroups = source.createTypedArray(FeatureGroupInfo.CREATOR);
         installLocation = source.readInt();
+        isStub = source.readInt() != 0;
         coreApp = source.readInt() != 0;
         requiredForAllUsers = source.readInt() != 0;
         restrictedAccountType = source.readString();
