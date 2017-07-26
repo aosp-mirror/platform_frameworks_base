@@ -20,7 +20,10 @@ package com.android.server.power;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.ProgressDialog;
+import android.app.WallpaperColors;
+import android.app.WallpaperManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothManager;
 import android.content.BroadcastReceiver;
@@ -28,7 +31,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.om.IOverlayManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
@@ -53,6 +55,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.android.internal.telephony.ITelephony;
 import com.android.server.pm.PackageManagerService;
 
@@ -300,17 +303,21 @@ public final class ShutdownThread extends Thread {
             d.setContentView(com.android.internal.R.layout.shutdown_dialog);
             d.setCancelable(false);
 
-            int color = Color.WHITE;
+            int color;
             try {
-                IOverlayManager service = IOverlayManager.Stub.asInterface(
-                        ServiceManager.getService(Context.OVERLAY_SERVICE));
-                if (service.getOverlayInfo("com.android.systemui.theme.lightwallpaper", 0).isEnabled()) {
-                    color = Color.BLACK;
-                }
+                boolean onKeyguard = context.getSystemService(
+                        KeyguardManager.class).isKeyguardLocked();
+                WallpaperColors currentColors = context.getSystemService(WallpaperManager.class)
+                        .getWallpaperColors(onKeyguard ?
+                                WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
+                color = currentColors != null &&
+                        (currentColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT)
+                                != 0 ?
+                        Color.BLACK : Color.WHITE;
             } catch (Exception e) {
-                // Shutdown UI really shouldn't crash or have strict dependencies on other services.
-                Log.w(TAG, "Problem getting overlay state", e);
+                color = Color.WHITE;
             }
+
             ProgressBar bar = d.findViewById(com.android.internal.R.id.progress);
             bar.getIndeterminateDrawable().setTint(color);
             ((TextView) d.findViewById(com.android.internal.R.id.text1)).setTextColor(color);
