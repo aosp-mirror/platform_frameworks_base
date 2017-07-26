@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.app.ActivityManager;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.DisplayInfo;
@@ -46,6 +47,19 @@ public class AppBoundsTests extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
+    }
+
+    /**
+     * Ensures that appBounds causes {@link android.content.pm.ActivityInfo.CONFIG_APP_BOUNDS} diff.
+     */
+    @Test
+    public void testAppBoundsConfigurationDiff() {
+        final Configuration config = new Configuration();
+        final Configuration config2 = new Configuration();
+        config.appBounds = new Rect(0, 1, 1, 0);
+        config2.appBounds = new Rect(0, 2, 2, 0);
+
+        assertEquals(ActivityInfo.CONFIG_APP_BOUNDS, config.diff(config2));
     }
 
     /**
