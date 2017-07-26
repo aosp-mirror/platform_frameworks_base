@@ -31,16 +31,21 @@ import android.util.SparseArray;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * Monitors changes in audio playback and notify the newly started audio playback through the
- * {@link OnAudioPlaybackStartedListener}.
+ * Monitors changes in audio playback, and notify the newly started audio playback through the
+ * {@link OnAudioPlaybackStartedListener} and the activeness change through the
+ * {@link OnAudioPlaybackActiveStateListener}.
  */
 class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
     private static boolean DEBUG = MediaSessionService.DEBUG;
     private static String TAG = "AudioPlaybackMonitor";
+
+    private static AudioPlaybackMonitor sInstance;
 
     /**
      * Called when audio playback is started for a given UID.
@@ -49,22 +54,36 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
         void onAudioPlaybackStarted(int uid);
     }
 
+    /**
+     * Called when audio player state is changed.
+     */
+    interface OnAudioPlayerActiveStateChangedListener {
+        void onAudioPlayerActiveStateChanged(int uid, boolean active);
+    }
+
     private final Object mLock = new Object();
     private final Context mContext;
-    private final OnAudioPlaybackStartedListener mListener;
-
-    private Set<Integer> mActiveAudioPlaybackPlayerInterfaceIds = new HashSet<>();
-    private Set<Integer> mActiveAudioPlaybackClientUids = new HashSet<>();
+    private final List<OnAudioPlaybackStartedListener> mAudioPlaybackStartedListeners
+            = new ArrayList<>();
+    private final List<OnAudioPlayerActiveStateChangedListener>
+            mAudioPlayerActiveStateChangedListeners = new ArrayList<>();
+    private final Map<Integer, Integer> mAudioPlaybackStates = new HashMap<>();
+    private final Set<Integer> mActiveAudioPlaybackClientUids = new HashSet<>();
 
     // Sorted array of UIDs that had active audio playback. (i.e. playing an audio/video)
     // The UID whose audio playback becomes active at the last comes first.
     // TODO(b/35278867): Find and use unique identifier for apps because apps may share the UID.
     private final IntArray mSortedAudioPlaybackClientUids = new IntArray();
 
-    AudioPlaybackMonitor(Context context, IAudioService audioService,
-            OnAudioPlaybackStartedListener listener) {
+    static AudioPlaybackMonitor getInstance(Context context, IAudioService audioService) {
+        if (sInstance == null) {
+            sInstance = new AudioPlaybackMonitor(context, audioService);
+        }
+        return sInstance;
+    }
+
+    private AudioPlaybackMonitor(Context context, IAudioService audioService) {
         mContext = context;
-        mListener = listener;
         try {
             audioService.registerPlaybackCallback(this);
         } catch (RemoteException e) {
@@ -84,9 +103,12 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
     public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
         final long token = Binder.clearCallingIdentity();
         try {
-            Set<Integer> newActiveAudioPlaybackPlayerInterfaceIds = new HashSet<>();
             List<Integer> newActiveAudioPlaybackClientUids = new ArrayList<>();
+            List<OnAudioPlayerActiveStateChangedListener> audioPlayerActiveStateChangedListeners;
+            List<OnAudioPlaybackStartedListener> audioPlaybackStartedListeners;
             synchronized (mLock) {
+                // Update mActiveAudioPlaybackClientUids and mSortedAudioPlaybackClientUids,
+                // and find newly activated audio playbacks.
                 mActiveAudioPlaybackClientUids.clear();
                 for (AudioPlaybackConfiguration config : configs) {
                     // Ignore inactive (i.e. not playing) or PLAYER_TYPE_JAM_SOUNDPOOL
@@ -94,16 +116,14 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
                     // playback.
                     // Note that we shouldn't ignore PLAYER_TYPE_UNKNOWN because it might be OEM
                     // specific audio/video players.
-                    if (!config.isActive()
-                            || config.getPlayerType()
+                    if (!config.isActive() || config.getPlayerType()
                             == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
                         continue;
                     }
-                    mActiveAudioPlaybackClientUids.add(config.getClientUid());
 
-                    newActiveAudioPlaybackPlayerInterfaceIds.add(config.getPlayerInterfaceId());
-                    if (!mActiveAudioPlaybackPlayerInterfaceIds.contains(
-                            config.getPlayerInterfaceId())) {
+                    mActiveAudioPlaybackClientUids.add(config.getClientUid());
+                    Integer oldState = mAudioPlaybackStates.get(config.getPlayerInterfaceId());
+                    if (!isActiveState(oldState)) {
                         if (DEBUG) {
                             Log.d(TAG, "Found a new active media playback. " +
                                     AudioPlaybackConfiguration.toLogFriendlyString(config));
@@ -120,14 +140,73 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
                         mSortedAudioPlaybackClientUids.add(0, config.getClientUid());
                     }
                 }
-                mActiveAudioPlaybackPlayerInterfaceIds.clear();
-                mActiveAudioPlaybackPlayerInterfaceIds = newActiveAudioPlaybackPlayerInterfaceIds;
+                audioPlayerActiveStateChangedListeners = new ArrayList<>(
+                        mAudioPlayerActiveStateChangedListeners);
+                audioPlaybackStartedListeners = new ArrayList<>(mAudioPlaybackStartedListeners);
             }
+            // Notify the change of audio playback states.
+            for (AudioPlaybackConfiguration config : configs) {
+                boolean wasActive = isActiveState(
+                        mAudioPlaybackStates.get(config.getPlayerInterfaceId()));
+                boolean isActive = config.isActive();
+                if (wasActive != isActive) {
+                    for (OnAudioPlayerActiveStateChangedListener listener
+                            : audioPlayerActiveStateChangedListeners) {
+                        listener.onAudioPlayerActiveStateChanged(config.getClientUid(),
+                                isActive);
+                    }
+                }
+            }
+            // Notify the start of audio playback
             for (int uid : newActiveAudioPlaybackClientUids) {
-                mListener.onAudioPlaybackStarted(uid);
+                for (OnAudioPlaybackStartedListener listener : audioPlaybackStartedListeners) {
+                    listener.onAudioPlaybackStarted(uid);
+                }
+            }
+            mAudioPlaybackStates.clear();
+            for (AudioPlaybackConfiguration config : configs) {
+                mAudioPlaybackStates.put(config.getPlayerInterfaceId(), config.getPlayerState());
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Registers OnAudioPlaybackStartedListener.
+     */
+    public void registerOnAudioPlaybackStartedListener(OnAudioPlaybackStartedListener listener) {
+        synchronized (mLock) {
+            mAudioPlaybackStartedListeners.add(listener);
+        }
+    }
+
+    /**
+     * Unregisters OnAudioPlaybackStartedListener.
+     */
+    public void unregisterOnAudioPlaybackStartedListener(OnAudioPlaybackStartedListener listener) {
+        synchronized (mLock) {
+            mAudioPlaybackStartedListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Registers OnAudioPlayerActiveStateChangedListener.
+     */
+    public void registerOnAudioPlayerActiveStateChangedListener(
+            OnAudioPlayerActiveStateChangedListener listener) {
+        synchronized (mLock) {
+            mAudioPlayerActiveStateChangedListeners.add(listener);
+        }
+    }
+
+    /**
+     * Unregisters OnAudioPlayerActiveStateChangedListener.
+     */
+    public void unregisterOnAudioPlayerActiveStateChangedListener(
+            OnAudioPlayerActiveStateChangedListener listener) {
+        synchronized (mLock) {
+            mAudioPlayerActiveStateChangedListeners.remove(listener);
         }
     }
 
@@ -167,7 +246,8 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
                 if (mSortedAudioPlaybackClientUids.get(i) == mediaButtonSessionUid) {
                     break;
                 }
-                if (userId == UserHandle.getUserId(mSortedAudioPlaybackClientUids.get(i))) {
+                int uid = mSortedAudioPlaybackClientUids.get(i);
+                if (userId == UserHandle.getUserId(uid) && !isPlaybackActive(uid)) {
                     // Clean up unnecessary UIDs.
                     // It doesn't need to be managed profile aware because it's just to prevent
                     // the list from increasing indefinitely. The media button session updating
@@ -197,5 +277,9 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
                 pw.println();
             }
         }
+    }
+
+    private boolean isActiveState(Integer state) {
+        return state != null && state.equals(AudioPlaybackConfiguration.PLAYER_STATE_STARTED);
     }
 }
