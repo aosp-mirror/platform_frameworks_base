@@ -779,7 +779,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             }
 
             if ((calling != null || mPersistentVrModeEnabled)
-                    && !Objects.equals(calling, mCurrentVrModeComponent)) {
+                    && !Objects.equals(calling, mCurrentVrModeComponent)
+                    || mRunning2dInVr != running2dInVr) {
                 sendUpdatedCaller = true;
             }
             mCurrentVrModeComponent = calling;

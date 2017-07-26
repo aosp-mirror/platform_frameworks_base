@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -38,8 +39,9 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.qs.CellTileView;
 import com.android.systemui.qs.CellTileView.SignalIcon;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -55,11 +57,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
     private final ActivityStarter mActivityStarter;
+    private final KeyguardMonitor mKeyguardMonitor;
 
     public CellularTile(QSHost host) {
         super(host);
         mController = Dependency.get(NetworkController.class);
         mActivityStarter = Dependency.get(ActivityStarter.class);
+        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
     }
@@ -95,7 +99,28 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick() {
-        mDataController.setMobileDataEnabled(!mDataController.isMobileDataEnabled());
+        if (mDataController.isMobileDataEnabled()) {
+            if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                    showDisableDialog();
+                });
+            } else {
+                showDisableDialog();
+            }
+        } else {
+            mDataController.setMobileDataEnabled(true);
+        }
+    }
+
+    private void showDisableDialog() {
+        mHost.collapsePanels();
+        SystemUIDialog.applyFlags(new AlertDialog.Builder(mContext)
+                .setMessage(R.string.data_usage_disable_mobile)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(
+                        com.android.internal.R.string.alert_windows_notification_turn_off_action,
+                        (d, w) -> mDataController.setMobileDataEnabled(false))
+                .create()).show();
     }
 
     @Override

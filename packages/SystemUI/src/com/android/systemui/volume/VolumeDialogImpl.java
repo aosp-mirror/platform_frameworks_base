@@ -53,6 +53,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -151,7 +152,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private TunerZenModePanel mZenPanel;
 
     public VolumeDialogImpl(Context context) {
-        mContext = context;
+        mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mZenModeController = Dependency.get(ZenModeController.class);
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);

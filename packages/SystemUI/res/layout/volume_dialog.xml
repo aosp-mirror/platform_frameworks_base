@@ -21,6 +21,7 @@
     android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
     android:background="@drawable/volume_dialog_background"
     android:paddingTop="@dimen/volume_dialog_padding_top"
+    android:theme="@style/qs_theme"
     android:translationZ="4dp" >
 
     <LinearLayout

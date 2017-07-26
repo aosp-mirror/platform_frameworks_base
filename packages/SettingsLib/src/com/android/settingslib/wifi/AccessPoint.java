@@ -118,6 +118,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     private final ConcurrentHashMap<String, ScanResult> mScanResultCache =
             new ConcurrentHashMap<String, ScanResult>(32);
+    /** Maximum age of scan results to hold onto while actively scanning. **/
     private static final long MAX_SCAN_RESULT_AGE_MS = 15000;
 
     static final String KEY_NETWORKINFO = "key_networkinfo";
@@ -441,6 +442,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     private void evictOldScanResults() {
+        if (WifiTracker.sStaleScanResults) {
+            // Do not evict old scan results unless we are scanning and have fresh results.
+            return;
+        }
         long nowMs = SystemClock.elapsedRealtime();
         for (Iterator<ScanResult> iter = mScanResultCache.values().iterator(); iter.hasNext(); ) {
             ScanResult result = iter.next();

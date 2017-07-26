@@ -54,13 +54,20 @@
     <style name="widget_big_thin">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+        <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
     </style>
 
     <style name="BouncerSecurityContainer">
         <item name="android:layout_gravity">center_horizontal|bottom</item>
     </style>
 
-    <style name="PasswordTheme" parent="systemui_theme">
+    <style name="PasswordTheme" parent="Theme.SystemUI">
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
+        <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
+        <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
+    </style>
+
+    <style name="PasswordTheme.Light" parent="Theme.SystemUI.Light">
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
         <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>

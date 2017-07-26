@@ -240,7 +240,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Inachaji"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data ya 2G-3G imesitishwa"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data ya 4G imesitishwa"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Data ya simu imesitishwa"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Data ya mtandao wa simu imesitishwa"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data imesitishwa"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Umefikia kikomo cha data ulichoweka. Hutumii tena data ya simu.\n\nUkiendelea, huenda ukatozwa ada ya matumizi ya data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Endelea"</string>
@@ -316,7 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Mtandao-hewa"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Arifa"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Tochi"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data ya simu"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data ya mtandao wa simu"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Matumizi ya data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data iliyosalia"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Imezidi kikomo"</string>
@@ -761,7 +761,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Huhitaji kusakinisha programu zinazofunguka papo hapo."</string>
     <string name="app_info" msgid="6856026610594615344">"Maelezo ya programu"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Nenda kwenye wavuti"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Data ya simu"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Data ya mtandao wa simu"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi imezimwa"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth imezimwa"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Kipengele cha Usinisumbue kimezimwa"</string>
