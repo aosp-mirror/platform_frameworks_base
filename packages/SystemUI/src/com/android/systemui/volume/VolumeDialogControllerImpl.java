@@ -49,6 +49,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -336,11 +338,17 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
     }
 
-    boolean onVolumeChangedW(int stream, int flags) {
+    private boolean shouldShowUI(int flags) {
         updateStatusBar();
+        return mStatusBar != null
+                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
+                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
+                && mStatusBar.isDeviceInteractive()
+                && (flags & AudioManager.FLAG_SHOW_UI) != 0;
+    }
 
-        final boolean showUI = (mStatusBar != null && mStatusBar.isDeviceInteractive()) &&
-                ((flags & AudioManager.FLAG_SHOW_UI) != 0);
+    boolean onVolumeChangedW(int stream, int flags) {
+        final boolean showUI = shouldShowUI(flags);
         final boolean fromKey = (flags & AudioManager.FLAG_FROM_KEY) != 0;
         final boolean showVibrateHint = (flags & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0;
         final boolean showSilentHint = (flags & AudioManager.FLAG_SHOW_SILENT_HINT) != 0;
@@ -935,7 +943,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         @Override
         public void onRemoteVolumeChanged(Token token, int flags) {
             final int stream = mRemoteStreams.get(token);
-            final boolean showUI = (flags & AudioManager.FLAG_SHOW_UI) != 0;
+            final boolean showUI = shouldShowUI(flags);
             boolean changed = updateActiveStreamW(stream);
             if (showUI) {
                 changed |= checkRoutedToBluetoothW(AudioManager.STREAM_MUSIC);
