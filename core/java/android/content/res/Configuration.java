@@ -1445,7 +1445,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((compareUndefined || delta.appBounds != null)
                 && appBounds != delta.appBounds
                 && (appBounds == null || !appBounds.equals(delta.appBounds))) {
-            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            changed |= ActivityInfo.CONFIG_APP_BOUNDS;
         }
 
         return changed;
