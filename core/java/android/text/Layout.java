@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -1464,6 +1465,17 @@ public abstract class Layout {
     public final int getLineAscent(int line) {
         // getLineTop(line+1) - getLineDescent(line) == getLineBaseLine(line)
         return getLineTop(line) - (getLineTop(line+1) - getLineDescent(line));
+    }
+
+    /**
+     * Return the extra space added as a result of line spacing attributes
+     * {@link #getSpacingAdd()} and {@link #getSpacingMultiplier()}. Default value is {@code zero}.
+     *
+     * @param line the index of the line, the value should be equal or greater than {@code zero}
+     * @hide
+     */
+    public int getLineExtra(@IntRange(from = 0) int line) {
+        return 0;
     }
 
     public int getOffsetToLeftOf(int offset) {

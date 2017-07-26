@@ -365,6 +365,7 @@ public class DynamicLayout extends Layout
                 desc += botpad;
 
             ints[DESCENT] = desc;
+            ints[EXTRA] = reflowed.getLineExtra(i);
             objects[0] = reflowed.getLineDirections(i);
 
             final int end = (i == n - 1) ? where + after : reflowed.getLineStart(i + 1);
@@ -692,6 +693,14 @@ public class DynamicLayout extends Layout
         return mInts.getValue(line, DESCENT);
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getLineExtra(int line) {
+        return mInts.getValue(line, EXTRA);
+    }
+
     @Override
     public int getLineStart(int line) {
         return mInts.getValue(line, START) & START_MASK;
@@ -851,14 +860,15 @@ public class DynamicLayout extends Layout
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
+    private static final int EXTRA = 3;
     // HYPHEN and MAY_PROTRUDE_FROM_TOP_OR_BOTTOM share the same entry.
-    private static final int HYPHEN = 3;
+    private static final int HYPHEN = 4;
     private static final int MAY_PROTRUDE_FROM_TOP_OR_BOTTOM = HYPHEN;
-    private static final int COLUMNS_NORMAL = 4;
+    private static final int COLUMNS_NORMAL = 5;
 
-    private static final int ELLIPSIS_START = 4;
-    private static final int ELLIPSIS_COUNT = 5;
-    private static final int COLUMNS_ELLIPSIZE = 6;
+    private static final int ELLIPSIS_START = 5;
+    private static final int ELLIPSIS_COUNT = 6;
+    private static final int COLUMNS_ELLIPSIZE = 7;
 
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;

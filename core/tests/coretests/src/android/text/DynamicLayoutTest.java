@@ -18,6 +18,7 @@ package android.text;
 
 import static android.text.Layout.Alignment.ALIGN_NORMAL;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -111,5 +112,78 @@ public class DynamicLayoutTest {
         builder.delete(builder.length() -5, builder.length());
         assertFalse(layout.getBlocksAlwaysNeedToBeRedrawn().contains(0));
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().isEmpty());
+    }
+
+    @Test
+    public void testGetLineExtra_withoutLinespacing() {
+        final SpannableStringBuilder text = new SpannableStringBuilder("a\nb\nc");
+        final TextPaint textPaint = new TextPaint();
+
+        // create a StaticLayout to check against
+        final StaticLayout staticLayout = StaticLayout.Builder.obtain(text, 0,
+                text.length(), textPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .build();
+
+        // create the DynamicLayout
+        final DynamicLayout dynamicLayout = new DynamicLayout(text,
+                textPaint,
+                WIDTH,
+                ALIGN_NORMAL,
+                1f /*spacingMultiplier*/,
+                0 /*spacingAdd*/,
+                false /*includepad*/);
+
+        final int lineCount = staticLayout.getLineCount();
+        assertEquals(lineCount, dynamicLayout.getLineCount());
+        for (int i = 0; i < lineCount; i++) {
+            assertEquals(staticLayout.getLineExtra(i), dynamicLayout.getLineExtra(i));
+        }
+    }
+
+    @Test
+    public void testGetLineExtra_withLinespacing() {
+        final SpannableStringBuilder text = new SpannableStringBuilder("a\nb\nc");
+        final TextPaint textPaint = new TextPaint();
+        final float spacingMultiplier = 2f;
+        final float spacingAdd = 4;
+
+        // create a StaticLayout to check against
+        final StaticLayout staticLayout = StaticLayout.Builder.obtain(text, 0,
+                text.length(), textPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setLineSpacing(spacingAdd, spacingMultiplier)
+                .build();
+
+        // create the DynamicLayout
+        final DynamicLayout dynamicLayout = new DynamicLayout(text,
+                textPaint,
+                WIDTH,
+                ALIGN_NORMAL,
+                spacingMultiplier,
+                spacingAdd,
+                false /*includepad*/);
+
+        final int lineCount = staticLayout.getLineCount();
+        assertEquals(lineCount, dynamicLayout.getLineCount());
+        for (int i = 0; i < lineCount - 1; i++) {
+            assertEquals(staticLayout.getLineExtra(i), dynamicLayout.getLineExtra(i));
+        }
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetLineExtra_withNegativeValue() {
+        final DynamicLayout layout = new DynamicLayout("", new TextPaint(), 10 /*width*/,
+                ALIGN_NORMAL, 1.0f /*spacingMultiplier*/, 0f /*spacingAdd*/, false /*includepad*/);
+        layout.getLineExtra(-1);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetLineExtra_withParamGreaterThanLineCount() {
+        final DynamicLayout layout = new DynamicLayout("", new TextPaint(), 10 /*width*/,
+                ALIGN_NORMAL, 1.0f /*spacingMultiplier*/, 0f /*spacingAdd*/, false /*includepad*/);
+        layout.getLineExtra(100);
     }
 }

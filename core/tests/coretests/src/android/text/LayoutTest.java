@@ -215,6 +215,17 @@ public class LayoutTest {
     }
 
     @Test
+    public void testGetLineExtra_returnsZeroByDefault() {
+        final String text = "a\nb\nc\n";
+        final Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, 100 /* spacingMult*/, 100 /*spacingAdd*/);
+        final int lineCount = text.split("\n").length;
+        for (int i = 0; i < lineCount; i++) {
+            assertEquals(0, layout.getLineExtra(i));
+        }
+    }
+
+    @Test
     public void testGetLineVisibleEnd() {
         Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
                 mAlign, mSpacingMult, mSpacingAdd);
