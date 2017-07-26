@@ -110,18 +110,15 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
 
             p.setStyle(Paint.Style.FILL);
 
-            final int line = l.getLineForOffset(start);
-            final float y;
-            if (line == l.getLineCount() - 1) {
-                // line spacing values are not added to last line, vertical center is top+bottom/2
-                y = (top + bottom) / 2f;
-            } else {
-                // line spacing values are added to the lines other than last line, remove added
-                // empty line spacing to calculate vertical center
-                final float lineHeight =
-                        (top - bottom - l.getSpacingAdd()) / l.getSpacingMultiplier();
-                y = top - lineHeight / 2f;
+            if (l != null) {
+                // "bottom" position might include extra space as a result of line spacing
+                // configuration. Subtract extra space in order to show bullet in the vertical
+                // center of characters.
+                final int line = l.getLineForOffset(start);
+                bottom = bottom - l.getLineExtra(line);
             }
+
+            final float y = (top + bottom) / 2f;
 
             if (c.isHardwareAccelerated()) {
                 if (sBulletPath == null) {
