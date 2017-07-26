@@ -170,7 +170,7 @@
     <library name="javax.obex"
             file="/system/framework/javax.obex.jar" />
     <library name="org.apache.http.legacy"
-            file="/system/framework/org.apache.http.legacy.jar" />
+            file="/system/framework/org.apache.http.legacy.boot.jar" />
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->

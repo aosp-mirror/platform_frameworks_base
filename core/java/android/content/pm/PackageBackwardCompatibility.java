@@ -16,8 +16,8 @@
 
 package android.content.pm;
 
-import android.annotation.Nullable;
 import android.content.pm.PackageParser.Package;
+import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -36,6 +36,8 @@ public class PackageBackwardCompatibility {
 
     private static final String ANDROID_TEST_RUNNER = "android.test.runner";
 
+    private static final String APACHE_HTTP_LEGACY = "org.apache.http.legacy";
+
     /**
      * Modify the shared libraries in the supplied {@link Package} to maintain backwards
      * compatibility.
@@ -47,13 +49,21 @@ public class PackageBackwardCompatibility {
         ArrayList<String> usesLibraries = pkg.usesLibraries;
         ArrayList<String> usesOptionalLibraries = pkg.usesOptionalLibraries;
 
-        usesLibraries = orgApacheHttpLegacy(usesLibraries);
-        usesOptionalLibraries = orgApacheHttpLegacy(usesOptionalLibraries);
+        // Packages targeted at <= O_MR1 expect the classes in the org.apache.http.legacy library
+        // to be accessible so this maintains backward compatibility by adding the
+        // org.apache.http.legacy library to those packages.
+        if (apkTargetsApiLevelLessThanOrEqualToOMR1(pkg)) {
+            boolean apacheHttpLegacyPresent = isLibraryPresent(
+                    usesLibraries, usesOptionalLibraries, APACHE_HTTP_LEGACY);
+            if (!apacheHttpLegacyPresent) {
+                usesLibraries = ArrayUtils.add(usesLibraries, APACHE_HTTP_LEGACY);
+            }
+        }
 
         // android.test.runner has a dependency on android.test.mock so if android.test.runner
         // is present but android.test.mock is not then add android.test.mock.
-        boolean androidTestMockPresent = ArrayUtils.contains(usesLibraries, ANDROID_TEST_MOCK)
-                || ArrayUtils.contains(usesOptionalLibraries, ANDROID_TEST_MOCK);
+        boolean androidTestMockPresent = isLibraryPresent(
+                usesLibraries, usesOptionalLibraries, ANDROID_TEST_MOCK);
         if (ArrayUtils.contains(usesLibraries, ANDROID_TEST_RUNNER) && !androidTestMockPresent) {
             usesLibraries.add(ANDROID_TEST_MOCK);
         }
@@ -66,13 +76,14 @@ public class PackageBackwardCompatibility {
         pkg.usesOptionalLibraries = usesOptionalLibraries;
     }
 
-    private static ArrayList<String> orgApacheHttpLegacy(@Nullable ArrayList<String> libraries) {
-        // "org.apache.http.legacy" is now a part of the boot classpath so it doesn't need
-        // to be an explicit dependency.
-        //
-        // A future change will remove this library from the boot classpath, at which point
-        // all apps that target SDK 21 and earlier will have it automatically added to their
-        // dependency lists.
-        return ArrayUtils.remove(libraries, "org.apache.http.legacy");
+    private static boolean apkTargetsApiLevelLessThanOrEqualToOMR1(Package pkg) {
+        int targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+        return targetSdkVersion <= Build.VERSION_CODES.O_MR1;
+    }
+
+    private static boolean isLibraryPresent(ArrayList<String> usesLibraries,
+            ArrayList<String> usesOptionalLibraries, String apacheHttpLegacy) {
+        return ArrayUtils.contains(usesLibraries, apacheHttpLegacy)
+                || ArrayUtils.contains(usesOptionalLibraries, apacheHttpLegacy);
     }
 }
