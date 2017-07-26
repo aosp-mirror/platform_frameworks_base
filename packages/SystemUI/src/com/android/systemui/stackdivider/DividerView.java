@@ -596,7 +596,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         Runnable endAction = () -> {
             commitSnapFlags(snapTarget);
             mWindowManagerProxy.setResizing(false);
-            mDockSide = WindowManager.DOCKED_INVALID;
+            updateDockSide();
             mCurrentAnimator = null;
             mEntranceAnimationRunning = false;
             mExitAnimationRunning = false;
