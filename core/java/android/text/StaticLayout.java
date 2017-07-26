@@ -538,8 +538,8 @@ public class StaticLayout extends Layout {
             mEllipsizedWidth = outerwidth;
         }
 
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
-        mLines = new int[mLineDirections.length];
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
+        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
         mMaximumVisibleLineCount = maxLines;
 
         generate(b, b.mIncludePad, b.mIncludePad);
@@ -551,8 +551,8 @@ public class StaticLayout extends Layout {
         super(text, null, 0, null, 0, 0);
 
         mColumns = COLUMNS_ELLIPSIZE;
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
-        mLines = new int[mLineDirections.length];
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
+        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
     }
 
     private StaticLayout(Builder b) {
@@ -577,8 +577,8 @@ public class StaticLayout extends Layout {
             mEllipsizedWidth = b.mWidth;
         }
 
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
-        mLines = new int[mLineDirections.length];
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
+        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
         mMaximumVisibleLineCount = b.mMaxLines;
 
         mLeftIndents = b.mLeftIndents;
@@ -907,22 +907,23 @@ public class StaticLayout extends Layout {
                       float[] widths, int widthStart, TextUtils.TruncateAt ellipsize,
                       float ellipsisWidth, float textWidth,
                       TextPaint paint, boolean moreChars) {
-        int j = mLineCount;
-        int off = j * mColumns;
-        int want = off + mColumns + TOP;
+        final int j = mLineCount;
+        final int off = j * mColumns;
+        final int want = off + mColumns + TOP;
         int[] lines = mLines;
 
         if (want >= lines.length) {
-            Directions[] grow2 = ArrayUtils.newUnpaddedArray(
-                    Directions.class, GrowingArrayUtils.growSize(want));
-            System.arraycopy(mLineDirections, 0, grow2, 0,
-                             mLineDirections.length);
-            mLineDirections = grow2;
-
-            int[] grow = new int[grow2.length];
+            final int[] grow = ArrayUtils.newUnpaddedIntArray(GrowingArrayUtils.growSize(want));
             System.arraycopy(lines, 0, grow, 0, lines.length);
             mLines = grow;
             lines = grow;
+        }
+
+        if (j >= mLineDirections.length) {
+            final Directions[] grow = ArrayUtils.newUnpaddedArray(Directions.class,
+                    GrowingArrayUtils.growSize(j));
+            System.arraycopy(mLineDirections, 0, grow, 0, mLineDirections.length);
+            mLineDirections = grow;
         }
 
         if (chooseHt != null) {
