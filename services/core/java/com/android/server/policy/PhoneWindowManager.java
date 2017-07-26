@@ -816,6 +816,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_BUGREPORT_TV = 22;
     private static final int MSG_ACCESSIBILITY_TV = 23;
     private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
+    private static final int MSG_SYSTEM_KEY_PRESS = 25;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -904,6 +905,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISPATCH_BACK_KEY_TO_AUTOFILL:
                     mAutofillManagerInternal.onBackKeyPressed();
+                    break;
+                case MSG_SYSTEM_KEY_PRESS:
+                    sendSystemKeyToStatusBar(msg.arg1);
                     break;
             }
         }
@@ -1276,14 +1280,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Inform the StatusBar; but do not allow it to consume the event.
-        IStatusBarService statusBar = getStatusBarService();
-        if (statusBar != null) {
-            try {
-                statusBar.handleSystemKey(event.getKeyCode());
-            } catch (RemoteException e) {
-                // Oh well.
-            }
-        }
+        sendSystemKeyToStatusBarAsync(event.getKeyCode());
 
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
@@ -5982,6 +5979,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 if (down) {
+                    sendSystemKeyToStatusBarAsync(event.getKeyCode());
+
                     TelecomManager telecomManager = getTelecommService();
                     if (telecomManager != null) {
                         if (telecomManager.isRinging()) {
@@ -6019,7 +6018,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                         break;
                     }
-
                 }
                 if (mUseTvRouting || mHandleVolumeKeysInWM) {
                     // Defer special key handlings to
@@ -6225,17 +6223,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!mAccessibilityManager.isEnabled()
                     || !mAccessibilityManager.sendFingerprintGesture(event.getKeyCode())) {
                 if (areSystemNavigationKeysEnabled()) {
-                    IStatusBarService sbar = getStatusBarService();
-                    if (sbar != null) {
-                        try {
-                            sbar.handleSystemKey(event.getKeyCode());
-                        } catch (RemoteException e1) {
-                            // oops, no statusbar. Ignore event.
-                        }
-                    }
+                    sendSystemKeyToStatusBarAsync(event.getKeyCode());
                 }
             }
         }
+    }
+
+    /**
+     * Notify the StatusBar that a system key was pressed.
+     */
+    private void sendSystemKeyToStatusBar(int keyCode) {
+        IStatusBarService statusBar = getStatusBarService();
+        if (statusBar != null) {
+            try {
+                statusBar.handleSystemKey(keyCode);
+            } catch (RemoteException e) {
+                // Oh well.
+            }
+        }
+    }
+
+    /**
+     * Notify the StatusBar that a system key was pressed without blocking the current thread.
+     */
+    private void sendSystemKeyToStatusBarAsync(int keyCode) {
+        Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, keyCode, 0);
+        message.setAsynchronous(true);
+        mHandler.sendMessage(message);
     }
 
     /**
