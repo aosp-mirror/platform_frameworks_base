@@ -28,8 +28,6 @@ import android.util.Printer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
-
 /**
  * Information you can retrieve about a particular application
  * activity or receiver. This corresponds to information collected
@@ -775,6 +773,16 @@ public class ActivityInfo extends ComponentInfo
      * {@link Configuration}.
      */
     public static final int CONFIG_ROTATION = 0x20000000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle changes to the app bounds.  Set from the
+     * {@link android.R.attr#configChanges} attribute.  This is
+     * not a core resource configuration, but a higher-level value, so its
+     * constant starts at the high bits.
+     * @hide We do not want apps to handle this. It will eventually be moved out of
+     * {@link Configuration}.
+     */
+    public static final int CONFIG_APP_BOUNDS = 0x10000000;
 
     /** @hide
      * Unfortunately the constants for config changes in native code are
