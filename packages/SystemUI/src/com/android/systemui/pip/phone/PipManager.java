@@ -92,7 +92,7 @@ public class PipManager implements BasePipManager {
 
             ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext,
                     mActivityManager);
-            mMenuController.hideMenu();
+            mMenuController.onActivityUnpinned(topPipActivity);
             mTouchHandler.onActivityUnpinned(topPipActivity);
             mNotificationController.onActivityUnpinned(topPipActivity);
 
