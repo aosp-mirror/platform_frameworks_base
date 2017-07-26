@@ -78,12 +78,21 @@ import java.util.regex.Pattern;
 public class TextUtils {
     private static final String TAG = "TextUtils";
 
-    /* package */ static final char[] ELLIPSIS_NORMAL = { '\u2026' }; // this is "..."
-    /** {@hide} */
-    public static final String ELLIPSIS_STRING = new String(ELLIPSIS_NORMAL);
+    // Zero-width character used to fill ellipsized strings when codepoint lenght must be preserved.
+    /* package */ static final char ELLIPSIS_FILLER = '\uFEFF'; // ZERO WIDTH NO-BREAK SPACE
 
-    /* package */ static final char[] ELLIPSIS_TWO_DOTS = { '\u2025' }; // this is ".."
-    private static final String ELLIPSIS_TWO_DOTS_STRING = new String(ELLIPSIS_TWO_DOTS);
+    // TODO: Based on CLDR data, these need to be localized for Dzongkha (dz) and perhaps
+    // Hong Kong Traditional Chinese (zh-Hant-HK), but that may need to depend on the actual word
+    // being ellipsized and not the locale.
+    private static final String ELLIPSIS_NORMAL = "\u2026"; // HORIZONTAL ELLIPSIS (…)
+    private static final String ELLIPSIS_TWO_DOTS = "\u2025"; // TWO DOT LEADER (‥)
+
+    /** {@hide} */
+    @NonNull
+    public static String getEllipsisString(@NonNull TextUtils.TruncateAt method) {
+        return (method == TextUtils.TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL;
+    }
+
 
     private TextUtils() { /* cannot be instantiated */ }
 
@@ -1200,10 +1209,10 @@ public class TextUtils {
                                          TextPaint paint,
                                          float avail, TruncateAt where,
                                          boolean preserveLength,
-                                         EllipsizeCallback callback) {
+                                         @Nullable EllipsizeCallback callback) {
         return ellipsize(text, paint, avail, where, preserveLength, callback,
                 TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                (where == TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS_STRING : ELLIPSIS_STRING);
+                getEllipsisString(where));
     }
 
     /**
@@ -1223,7 +1232,7 @@ public class TextUtils {
             TextPaint paint,
             float avail, TruncateAt where,
             boolean preserveLength,
-            EllipsizeCallback callback,
+            @Nullable EllipsizeCallback callback,
             TextDirectionHeuristic textDir, String ellipsis) {
 
         int len = text.length();
@@ -1266,13 +1275,15 @@ public class TextUtils {
             char[] buf = mt.mChars;
             Spanned sp = text instanceof Spanned ? (Spanned) text : null;
 
-            int remaining = len - (right - left);
+            final int removed = right - left;
+            final int remaining = len - removed;
             if (preserveLength) {
-                if (remaining > 0) { // else eliminate the ellipsis too
-                    buf[left++] = ellipsis.charAt(0);
-                }
+                if (remaining > 0 && removed >= ellipsis.length()) {
+                    ellipsis.getChars(0, ellipsis.length(), buf, left);
+                    left += ellipsis.length();
+                } // else skip the ellipsis
                 for (int i = left; i < right; i++) {
-                    buf[i] = ZWNBS_CHAR;
+                    buf[i] = ELLIPSIS_FILLER;
                 }
                 String s = new String(buf, 0, len);
                 if (sp == null) {
@@ -1372,7 +1383,7 @@ public class TextUtils {
             final int remainingElements = totalLen - i - 1;
             if (remainingElements > 0) {
                 CharSequence morePiece = (res == null) ?
-                        ELLIPSIS_STRING :
+                        ELLIPSIS_NORMAL :
                         res.getQuantityString(moreId, remainingElements, remainingElements);
                 morePiece = bidiFormatter.unicodeWrap(morePiece);
                 output.append(morePiece);
@@ -2078,6 +2089,4 @@ public class TextUtils {
     private static char[] sTemp = null;
 
     private static String[] EMPTY_STRING_ARRAY = new String[]{};
-
-    private static final char ZWNBS_CHAR = '\uFEFF';
 }

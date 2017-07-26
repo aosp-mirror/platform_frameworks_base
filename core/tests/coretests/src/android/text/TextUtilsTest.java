@@ -341,6 +341,66 @@ public class TextUtilsTest {
     }
 
     @Test
+    public void testEllipsize_multiCodepoint() {
+        final TextPaint paint = new TextPaint();
+        final float wordWidth = paint.measureText("MMMM");
+
+        // Establish the ground rules first, for single-codepoint cases.
+        final String ellipsis = "."; // one full stop character
+        assertEquals(
+                "MM.\uFEFF",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+        assertEquals(
+                "MM.",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+        assertEquals(
+                "M.",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+        assertEquals(
+                "M.",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        ellipsis));
+
+        // Now check the differences for multi-codepoint ellipsis.
+        final String longEllipsis = ".."; // two full stop characters
+        assertEquals(
+                "MM..",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+        assertEquals(
+                "MM..",
+                TextUtils.ellipsize("MMMM", paint, 0.7f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+        assertEquals(
+                "M\uFEFF",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, true /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+        assertEquals(
+                "M..",
+                TextUtils.ellipsize("MM", paint, 0.45f * wordWidth,
+                        TextUtils.TruncateAt.END, false /* preserve length */,
+                        null /* no callback */, TextDirectionHeuristics.LTR,
+                        longEllipsis));
+    }
+
+    @Test
     public void testDelimitedStringContains() {
         assertFalse(TextUtils.delimitedStringContains("", ',', null));
         assertFalse(TextUtils.delimitedStringContains(null, ',', ""));

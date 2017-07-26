@@ -781,8 +781,8 @@ public class StaticLayout extends Layout {
                     && (ellipsize == TextUtils.TruncateAt.END
                         || (mMaximumVisibleLineCount == 1
                                 && ellipsize != TextUtils.TruncateAt.MARQUEE));
-            if (remainingLineCount > 0 && remainingLineCount < breakCount &&
-                    ellipsisMayBeApplied) {
+            if (0 < remainingLineCount && remainingLineCount < breakCount
+                    && ellipsisMayBeApplied) {
                 // Calculate width and flag.
                 float width = 0;
                 int flag = 0;
@@ -1053,9 +1053,7 @@ public class StaticLayout extends Layout {
             return;
         }
 
-        float ellipsisWidth = paint.measureText(
-                (where == TextUtils.TruncateAt.END_SMALL) ?
-                        TextUtils.ELLIPSIS_TWO_DOTS : TextUtils.ELLIPSIS_NORMAL, 0, 1);
+        float ellipsisWidth = paint.measureText(TextUtils.getEllipsisString(where));
         int ellipsisStart = 0;
         int ellipsisCount = 0;
         int len = lineEnd - lineStart;
