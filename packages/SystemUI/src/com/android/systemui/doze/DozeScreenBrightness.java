@@ -35,11 +35,8 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     private final Handler mHandler;
     private final SensorManager mSensorManager;
     private final Sensor mLightSensor;
+    private final int[] mSensorToBrightness;
     private boolean mRegistered;
-
-    private final int mHighBrightness;
-    private final int mLowBrightness;
-    private final int mSunlightBrightness;
 
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, Handler handler) {
@@ -49,12 +46,8 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
         mLightSensor = lightSensor;
         mHandler = handler;
 
-        mLowBrightness = context.getResources().getInteger(
-                R.integer.config_doze_aod_brightness_low);
-        mHighBrightness = context.getResources().getInteger(
-                R.integer.config_doze_aod_brightness_high);
-        mSunlightBrightness = context.getResources().getInteger(
-                R.integer.config_doze_aod_brightness_sunlight);
+        mSensorToBrightness = context.getResources().getIntArray(
+                R.array.config_doze_brightness_sensor_to_brightness);
     }
 
     @Override
@@ -81,21 +74,18 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mRegistered) {
-            mDozeService.setDozeScreenBrightness(computeBrightness((int) event.values[0]));
+            int brightness = computeBrightness((int) event.values[0]);
+            if (brightness > 0) {
+                mDozeService.setDozeScreenBrightness(brightness);
+            }
         }
     }
 
     private int computeBrightness(int sensorValue) {
-        // The sensor reports 0 for off, 1 for low brightness, 2 for high brightness, and 3 for
-        // sunlight. We currently use DozeScreenState for screen off, so we treat off as low
-        // brightness.
-        if (sensorValue >= 3) {
-            return mSunlightBrightness;
-        } else if (sensorValue == 2) {
-            return mHighBrightness;
-        } else {
-            return mLowBrightness;
+        if (sensorValue < 0 || sensorValue >= mSensorToBrightness.length) {
+            return -1;
         }
+        return mSensorToBrightness[sensorValue];
     }
 
     @Override
