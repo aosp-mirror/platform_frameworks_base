@@ -134,6 +134,11 @@ public class SysuiColorExtractor extends ColorExtractor {
      * @return colors
      */
     public GradientColors getColors(int which, int type, boolean ignoreWallpaperVisibility) {
+        // mWallpaperVisible only handles the "system wallpaper" and will be always set to false
+        // if we have different lock and system wallpapers.
+        if (which == WallpaperManager.FLAG_LOCK) {
+            ignoreWallpaperVisibility = true;
+        }
         if (mWallpaperVisible || ignoreWallpaperVisibility) {
             return super.getColors(which, type);
         } else {
