@@ -23,6 +23,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
+import android.support.annotation.Keep;
 import com.android.settingslib.wifi.AccessPoint.Speed;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 * applications. AccessPoints were designed to only be populated by the mechanisms of scan results
 * and wifi configurations.
 */
+@Keep
 public class TestAccessPointBuilder {
     // match the private values in WifiManager
     private static final int MIN_RSSI = -100;
@@ -55,10 +57,12 @@ public class TestAccessPointBuilder {
     Context mContext;
     private ArrayList<ScanResult> mScanResultCache;
 
+    @Keep
     public TestAccessPointBuilder(Context context) {
         mContext = context;
     }
 
+    @Keep
     public AccessPoint build() {
         Bundle bundle = new Bundle();
 
@@ -87,6 +91,7 @@ public class TestAccessPointBuilder {
         return ap;
     }
 
+    @Keep
     public TestAccessPointBuilder setActive(boolean active) {
         if (active) {
             mNetworkInfo = new NetworkInfo(
@@ -106,6 +111,7 @@ public class TestAccessPointBuilder {
      * <p>Side effect: if this AccessPoint was previously unreachable,
      * setting the level will also make it reachable.
      */
+    @Keep
     public TestAccessPointBuilder setLevel(int level) {
         // Reversal of WifiManager.calculateSignalLevels
         if (level == 0) {
@@ -120,11 +126,13 @@ public class TestAccessPointBuilder {
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setNetworkInfo(NetworkInfo info) {
         mNetworkInfo = info;
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setRssi(int rssi) {
         mRssi = rssi;
         return this;
@@ -140,6 +148,7 @@ public class TestAccessPointBuilder {
     * Side effect: if the signal level was not previously set,
     * making an AccessPoint reachable will set the signal to the minimum level.
     */
+    @Keep
     public TestAccessPointBuilder setReachable(boolean reachable) {
         if (reachable) {
             // only override the mRssi if it hasn't been set yet
@@ -152,6 +161,7 @@ public class TestAccessPointBuilder {
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setSaved(boolean saved){
         if (saved) {
              mNetworkId = 1;
@@ -161,26 +171,31 @@ public class TestAccessPointBuilder {
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setSecurity(int security) {
         mSecurity = security;
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setSsid(String newSsid) {
         ssid = newSsid;
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setFqdn(String fqdn) {
         mFqdn = fqdn;
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setProviderFriendlyName(String friendlyName) {
         mProviderFriendlyName = friendlyName;
         return this;
     }
 
+    @Keep
     public TestAccessPointBuilder setWifiInfo(WifiInfo info) {
         mWifiInfo = info;
         return this;
@@ -192,6 +207,7 @@ public class TestAccessPointBuilder {
      * <p>Setting this to a value other than {@link WifiConfiguration#INVALID_NETWORK_ID} makes this
      * AccessPoint a saved network.
      */
+    @Keep
     public TestAccessPointBuilder setNetworkId(int networkId) {
         mNetworkId = networkId;
         return this;
