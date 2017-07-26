@@ -24002,9 +24002,19 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // We might change the visibilities here, so prepare an empty app transition which
                 // might be overridden later if we actually change visibilities.
-                mWindowManager.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
+                final boolean wasTransitionSet =
+                        mWindowManager.getPendingAppTransition() != TRANSIT_NONE;
+                if (!wasTransitionSet) {
+                    mWindowManager.prepareAppTransition(TRANSIT_NONE,
+                            false /* alwaysKeepCurrent */);
+                }
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                mWindowManager.executeAppTransition();
+
+                // If there was a transition set already we don't want to interfere with it as we
+                // might be starting it too early.
+                if (!wasTransitionSet) {
+                    mWindowManager.executeAppTransition();
+                }
             }
             if (callback != null) {
                 callback.run();
