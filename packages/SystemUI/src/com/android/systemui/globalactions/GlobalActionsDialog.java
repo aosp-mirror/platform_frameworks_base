@@ -68,6 +68,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -143,7 +144,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
      * @param context everything needs a context :(
      */
     public GlobalActionsDialog(Context context, GlobalActionsManager windowManagerFuncs) {
-        mContext = context;
+        mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mDreamManager = IDreamManager.Stub.asInterface(
@@ -1226,7 +1227,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         public ActionsDialog(Context context, OnClickListener clickListener, MyAdapter adapter,
                 OnItemLongClickListener longClickListener) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
-            mContext = getContext();
+            mContext = context;
             mAdapter = adapter;
             mClickListener = clickListener;
             mLongClickListener = longClickListener;
