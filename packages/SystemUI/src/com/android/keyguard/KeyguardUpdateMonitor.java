@@ -132,6 +132,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_DREAMING_STATE_CHANGED = 333;
     private static final int MSG_USER_UNLOCKED = 334;
     private static final int MSG_ASSISTANT_STACK_CHANGED = 335;
+    private static final int MSG_FINGERPRINT_AUTHENTICATION_CONTINUE = 336;
 
     /** Fingerprint state: Not listening to fingerprint. */
     private static final int FINGERPRINT_STATE_STOPPED = 0;
@@ -199,6 +200,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private UserManager mUserManager;
     private int mFingerprintRunningState = FINGERPRINT_STATE_STOPPED;
     private LockPatternUtils mLockPatternUtils;
+
+    /**
+     * Short delay before restarting fingerprint authentication after a successful try
+     * This should be slightly longer than the time between onFingerprintAuthenticated and
+     * setKeyguardGoingAway(true).
+     */
+    private static final int FINGERPRINT_CONTINUE_DELAY_MS = 500;
 
     // If FP daemon dies, keyguard should retry after a short delay
     private int mHardwareUnavailableRetryCount = 0;
@@ -292,6 +300,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_ASSISTANT_STACK_CHANGED:
                     mAssistantVisible = (boolean)msg.obj;
+                    updateFingerprintListeningState();
+                    break;
+                case MSG_FINGERPRINT_AUTHENTICATION_CONTINUE:
                     updateFingerprintListeningState();
                     break;
             }
@@ -446,9 +457,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
 
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_FINGERPRINT_AUTHENTICATION_CONTINUE),
+                FINGERPRINT_CONTINUE_DELAY_MS);
+
         // Only authenticate fingerprint once when assistant is visible
         mAssistantVisible = false;
-        updateFingerprintListeningState();
 
         Trace.endSection();
     }
@@ -1136,6 +1149,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void updateFingerprintListeningState() {
+        // If this message exists, we should not authenticate again until this message is
+        // consumed by the handler
+        if (mHandler.hasMessages(MSG_FINGERPRINT_AUTHENTICATION_CONTINUE)) {
+            return;
+        }
         mHandler.removeCallbacks(mRetryFingerprintAuthentication);
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
         if (mFingerprintRunningState == FINGERPRINT_STATE_RUNNING && !shouldListenForFingerprint) {
@@ -1148,9 +1166,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private boolean shouldListenForFingerprint() {
         return (mKeyguardIsVisible || !mDeviceInteractive ||
-                    (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
-                    (mAssistantVisible && mKeyguardOccluded))
-                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser());
+                (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
+                (mAssistantVisible && mKeyguardOccluded))
+                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
+                && !mKeyguardGoingAway;
     }
 
     private void startListeningForFingerprint() {
