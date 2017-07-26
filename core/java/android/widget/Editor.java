@@ -1917,7 +1917,7 @@ public class Editor {
         final int offset = mTextView.getSelectionStart();
         final int line = layout.getLineForOffset(offset);
         final int top = layout.getLineTop(line);
-        final int bottom = layout.getLineTop(line + 1);
+        final int bottom = layout.getLineBottomWithoutSpacing(line);
 
         mCursorCount = layout.isLevelBoundary(offset) ? 2 : 1;
 
@@ -2985,7 +2985,8 @@ public class Editor {
 
         @Override
         protected int getVerticalLocalPosition(int line) {
-            return mTextView.getLayout().getLineBottom(line);
+            final Layout layout = mTextView.getLayout();
+            return layout.getLineBottomWithoutSpacing(line);
         }
 
         @Override
@@ -3642,7 +3643,8 @@ public class Editor {
 
         @Override
         protected int getVerticalLocalPosition(int line) {
-            return mTextView.getLayout().getLineBottom(line) - mContainerMarginTop;
+            final Layout layout = mTextView.getLayout();
+            return layout.getLineBottomWithoutSpacing(line) - mContainerMarginTop;
         }
 
         @Override
@@ -4032,7 +4034,7 @@ public class Editor {
                         primaryHorizontal,
                         layout.getLineTop(line),
                         primaryHorizontal,
-                        layout.getLineTop(line + 1) + mHandleHeight);
+                        layout.getLineBottom(line) - layout.getLineBottom(line) + mHandleHeight);
             }
             // Take TextView's padding and scroll into account.
             int textHorizontalOffset = mTextView.viewportToContentHorizontalOffset();
@@ -4127,7 +4129,7 @@ public class Editor {
                         + viewportToContentVerticalOffset;
                 final float insertionMarkerBaseline = layout.getLineBaseline(line)
                         + viewportToContentVerticalOffset;
-                final float insertionMarkerBottom = layout.getLineBottom(line)
+                final float insertionMarkerBottom = layout.getLineBottomWithoutSpacing(line)
                         + viewportToContentVerticalOffset;
                 final boolean isTopVisible = mTextView
                         .isPositionVisible(insertionMarkerX, insertionMarkerTop);
@@ -4395,7 +4397,7 @@ public class Editor {
 
                 mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX
                         - getHorizontalOffset() + getCursorOffset();
-                mPositionY = layout.getLineBottom(line);
+                mPositionY = layout.getLineBottomWithoutSpacing(line);
 
                 // Take TextView's padding and scroll into account.
                 mPositionX += mTextView.viewportToContentHorizontalOffset();

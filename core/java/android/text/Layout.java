@@ -1451,6 +1451,16 @@ public abstract class Layout {
     }
 
     /**
+     * Return the vertical position of the bottom of the specified line without the line spacing
+     * added.
+     *
+     * @hide
+     */
+    public final int getLineBottomWithoutSpacing(int line) {
+        return getLineTop(line + 1) - getLineExtra(line);
+    }
+
+    /**
      * Return the vertical position of the baseline of the specified line.
      */
     public final int getLineBaseline(int line) {
@@ -1593,13 +1603,12 @@ public abstract class Layout {
      * but can be multiple discontinuous lines in text with multiple
      * directionalities.
      */
-    public void getCursorPath(int point, Path dest,
-                              CharSequence editingBuffer) {
+    public void getCursorPath(final int point, final Path dest, final CharSequence editingBuffer) {
         dest.reset();
 
         int line = getLineForOffset(point);
         int top = getLineTop(line);
-        int bottom = getLineTop(line+1);
+        int bottom = getLineBottomWithoutSpacing(line);
 
         boolean clamped = shouldClampCursor(line);
         float h1 = getPrimaryHorizontal(point, clamped) - 0.5f;
@@ -1719,11 +1728,11 @@ public abstract class Layout {
             start = temp;
         }
 
-        int startline = getLineForOffset(start);
-        int endline = getLineForOffset(end);
+        final int startline = getLineForOffset(start);
+        final int endline = getLineForOffset(end);
 
         int top = getLineTop(startline);
-        int bottom = getLineBottom(endline);
+        int bottom = getLineBottomWithoutSpacing(endline);
 
         if (startline == endline) {
             addSelection(startline, start, end, top, bottom, dest);
@@ -1747,10 +1756,9 @@ public abstract class Layout {
             }
 
             top = getLineTop(endline);
-            bottom = getLineBottom(endline);
+            bottom = getLineBottomWithoutSpacing(endline);
 
-            addSelection(endline, getLineStart(endline), end,
-                         top, bottom, dest);
+            addSelection(endline, getLineStart(endline), end, top, bottom, dest);
 
             if (getParagraphDirection(endline) == DIR_RIGHT_TO_LEFT)
                 dest.addRect(width, top, getLineRight(endline), bottom, Path.Direction.CW);
