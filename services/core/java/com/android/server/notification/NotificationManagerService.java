@@ -21,6 +21,7 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.UserHandle.USER_NULL;
 import static android.service.notification.NotificationListenerService
         .NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
 import static android.service.notification.NotificationListenerService
@@ -405,8 +406,7 @@ public class NotificationManagerService extends SystemService {
 
     }
 
-    protected void readDefaultApprovedServices() {
-        final int userId = UserHandle.USER_SYSTEM;
+    protected void readDefaultApprovedServices(int userId) {
         String defaultListenerAccess = getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultListenerAccessPackages);
         if (defaultListenerAccess != null) {
@@ -488,7 +488,7 @@ public class NotificationManagerService extends SystemService {
             } catch (FileNotFoundException e) {
                 // No data yet
                 // Load default managed services approvals
-                readDefaultApprovedServices();
+                readDefaultApprovedServices(UserHandle.USER_SYSTEM);
             } catch (IOException e) {
                 Log.wtf(TAG, "Unable to read notification policy", e);
             } catch (NumberFormatException e) {
@@ -977,7 +977,7 @@ public class NotificationManagerService extends SystemService {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 // reload per-user settings
                 mSettingsObserver.update(null);
                 mUserProfiles.updateCache(context);
@@ -987,14 +987,18 @@ public class NotificationManagerService extends SystemService {
                 mAssistants.onUserSwitched(user);
                 mZenModeHelper.onUserSwitched(user);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
-                mUserProfiles.updateCache(context);
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                if (userId != USER_NULL) {
+                    mUserProfiles.updateCache(context);
+                    readDefaultApprovedServices(userId);
+                }
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
-                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mZenModeHelper.onUserRemoved(user);
                 mRankingHelper.onUserRemoved(user);
                 savePolicyFile();
             } else if (action.equals(Intent.ACTION_USER_UNLOCKED)) {
-                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mConditionProviders.onUserUnlocked(user);
                 mListeners.onUserUnlocked(user);
                 mAssistants.onUserUnlocked(user);
