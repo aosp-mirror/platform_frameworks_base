@@ -639,6 +639,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
 
+    public boolean isStartedGoingToSleep() {
+        return mStartedGoingToSleep;
+    }
+
+    /**
+     * If set, the device has started going to sleep but isn't fully non-interactive yet.
+     */
+    protected boolean mStartedGoingToSleep;
+
     private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
             new OnChildLocationsChangedListener() {
                 @Override
@@ -5106,6 +5115,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         recomputeDisableFlags(true /* animate */);
     }
 
+
     WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
         public void onFinishedGoingToSleep() {
@@ -5137,6 +5147,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 });
             }
             updateIsKeyguard();
+        }
+
+        @Override
+        public void onStartedGoingToSleep() {
+            dismissVolumeDialog();
         }
 
         @Override
@@ -5185,6 +5200,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
     };
+
+    public int getWakefulnessState() {
+        return mWakefulnessLifecycle.getWakefulness();
+    }
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
