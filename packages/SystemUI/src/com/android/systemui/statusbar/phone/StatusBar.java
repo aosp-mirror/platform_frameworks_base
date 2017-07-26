@@ -6821,7 +6821,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             });
 
-            final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
             final boolean afterKeyguardGone = intent.isActivity()
                     && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                             mCurrentUserId);
@@ -6848,7 +6847,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         }
                     }
                     final StatusBarNotification parentToCancelFinal = parentToCancel;
-                    new Thread() {
+                    final Runnable runnable = new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -6920,7 +6919,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 });
                             }
                         }
-                    }.start();
+                    };
+
+                    if (mStatusBarKeyguardViewManager.isShowing()
+                            && mStatusBarKeyguardViewManager.isOccluded()) {
+                        mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
+                    } else {
+                        new Thread(runnable).start();
+                    }
 
                     // close the shade if it was open
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
