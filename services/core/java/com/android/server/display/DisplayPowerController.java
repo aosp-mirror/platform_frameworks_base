@@ -171,6 +171,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // blank itself and begin an appropriate power on animation.
     private boolean mDisplayBlanksAfterDozeConfig;
 
+    // True if there are only buckets of brightness values when the display is in the doze state,
+    // rather than a full range of values. If this is true, then we'll avoid animating the screen
+    // brightness since it'd likely be multiple jarring brightness transitions instead of just one
+    // to reach the final state.
+    private boolean mBrightnessBucketsInDozeConfig;
+
     // The pending power request.
     // Initially null until the first call to requestPowerState.
     // Guarded by mLock.
@@ -418,6 +424,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mDisplayBlanksAfterDozeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_displayBlanksAfterDoze);
+
+        mBrightnessBucketsInDozeConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_displayBrightnessBucketsInDoze);
 
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -780,7 +789,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             boolean wasOrWillBeInVr = (state == Display.STATE_VR || oldState == Display.STATE_VR);
             if ((state == Display.STATE_ON
                     && mSkipRampState == RAMP_STATE_SKIP_NONE
-                    || state == Display.STATE_DOZE)
+                    || state == Display.STATE_DOZE && !mBrightnessBucketsInDozeConfig)
                     && !wasOrWillBeInVr) {
                 animateScreenBrightness(brightness,
                         slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
