@@ -956,7 +956,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Toast">
-        <item name="fontFamily">sans-serif-condensed</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.Tooltip">
