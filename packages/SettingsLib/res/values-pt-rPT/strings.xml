@@ -40,8 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Ligado através de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponível através de %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Ligado, sem Internet"</string>
-    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
-    <skip />
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Ponto de acesso temporariamente cheio"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Muito lenta"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Lenta"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
@@ -104,10 +103,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Duas barras de Wi-Fi."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Três barras de Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Sinal de Wi-Fi completo."</string>
-    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
-    <skip />
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Rede aberta"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Rede segura"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"SO Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicações removidas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicações e utilizadores removidos"</string>

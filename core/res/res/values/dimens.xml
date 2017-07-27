@@ -30,7 +30,7 @@
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
 
-    <dimen name="toast_y_offset">24dp</dimen>
+    <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">24dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
@@ -594,5 +594,8 @@
 
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>
+
+    <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
+    <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
 
 </resources>

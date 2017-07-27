@@ -249,6 +249,7 @@ public class KeyguardBouncer {
         mKeyguardView.setViewMediatorCallback(mCallback);
         mContainer.addView(mRoot, mContainer.getChildCount());
         mRoot.setVisibility(View.INVISIBLE);
+        mRoot.dispatchApplyWindowInsets(mRoot.getRootWindowInsets());
     }
 
     protected void removeView() {

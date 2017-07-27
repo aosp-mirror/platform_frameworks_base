@@ -4311,6 +4311,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mAmbientState.getScrollY()));
     }
 
+    public void setTouchActive(boolean touchActive) {
+        mShelf.setTouchActive(touchActive);
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */

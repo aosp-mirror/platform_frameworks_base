@@ -10320,7 +10320,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        setText(value.getTextValue(), mBufferType, true, 0);
+        final CharSequence autofilledValue = value.getTextValue();
+
+        // First autofill it...
+        setText(autofilledValue, mBufferType, true, 0);
+
+        // ...then move cursor to the end.
+        final CharSequence text = getText();
+        if ((text instanceof Spannable)) {
+            Selection.setSelection((Spannable) text, text.length());
+        }
     }
 
     @Override
