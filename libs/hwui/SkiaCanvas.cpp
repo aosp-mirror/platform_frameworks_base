@@ -24,6 +24,8 @@
 #include "pipeline/skia/AnimatedDrawables.h"
 
 #include <SkCanvasStateUtils.h>
+#include <SkColorFilter.h>
+// TODO remove me!
 #include <SkColorSpaceXformCanvas.h>
 #include <SkDrawable.h>
 #include <SkDeque.h>
@@ -529,25 +531,49 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
 // Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    mCanvas->drawImage(bitmap.makeImage(), left, top, paint);
+inline static const SkPaint* addFilter(const SkPaint* origPaint, SkPaint* tmpPaint,
+        sk_sp<SkColorFilter> colorFilter) {
+    if (colorFilter) {
+        if (origPaint) {
+            *tmpPaint = *origPaint;
+        }
+        tmpPaint->setColorFilter(colorFilter);
+        return tmpPaint;
+    } else {
+        return origPaint;
+    }
 }
 
-void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix, const SkPaint* paint) {
+void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
+    SkPaint tmpPaint;
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mCanvas->drawImage(image, left, top, addFilter(paint, &tmpPaint, colorFilter));
+}
+
+void SkiaCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {
     SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
-    mCanvas->drawImage(hwuiBitmap.makeImage(), 0, 0, paint);
+
+    SkPaint tmpPaint;
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mCanvas->drawImage(image, 0, 0, addFilter(paint, &tmpPaint, colorFilter));
 }
 
-void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
+void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
                             float srcRight, float srcBottom, float dstLeft, float dstTop,
                             float dstRight, float dstBottom, const SkPaint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    mCanvas->drawImageRect(hwuiBitmap.makeImage(), srcRect, dstRect, paint);
+
+    SkPaint tmpPaint;
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mCanvas->drawImageRect(image, srcRect, dstRect, addFilter(paint, &tmpPaint, colorFilter));
 }
 
-void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeight,
+void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
         const float* vertices, const int* colors, const SkPaint* paint) {
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     const int indexCount = meshWidth * meshHeight * 6;
@@ -565,8 +591,8 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
 
     // cons up texture coordinates and indices
     {
-        const SkScalar w = SkIntToScalar(hwuiBitmap.width());
-        const SkScalar h = SkIntToScalar(hwuiBitmap.height());
+        const SkScalar w = SkIntToScalar(bitmap.width());
+        const SkScalar h = SkIntToScalar(bitmap.height());
         const SkScalar dx = w / meshWidth;
         const SkScalar dy = h / meshHeight;
 
@@ -627,17 +653,22 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
         tmpPaint = *paint;
     }
 
-    sk_sp<SkImage> image = hwuiBitmap.makeImage();
-    tmpPaint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode));
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    sk_sp<SkShader> shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
+    if(colorFilter) {
+        shader = shader->makeWithColorFilter(colorFilter);
+    }
+    tmpPaint.setShader(shader);
 
     mCanvas->drawVertices(builder.detach(), SkBlendMode::kModulate, tmpPaint);
 }
 
-void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
+void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
 
     SkCanvas::Lattice lattice;
-    NinePatchUtils::SetLatticeDivs(&lattice, chunk, hwuiBitmap.width(), hwuiBitmap.height());
+    NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
@@ -654,7 +685,11 @@ void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
 
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    mCanvas->drawImageLattice(hwuiBitmap.makeImage().get(), lattice, dst, paint);
+
+    SkPaint tmpPaint;
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mCanvas->drawImageLattice(image.get(), lattice, dst, addFilter(paint, &tmpPaint, colorFilter));
 }
 
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {

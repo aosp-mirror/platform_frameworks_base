@@ -145,10 +145,14 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 // Recording Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-inline static const SkPaint* nonAAPaint(const SkPaint* origPaint, SkPaint* tmpPaint) {
-    if (origPaint && origPaint->isAntiAlias()) {
-        *tmpPaint = *origPaint;
+inline static const SkPaint* bitmapPaint(const SkPaint* origPaint, SkPaint* tmpPaint,
+        sk_sp<SkColorFilter> colorFilter) {
+    if ((origPaint && origPaint->isAntiAlias()) || colorFilter) {
+        if (origPaint) {
+            *tmpPaint = *origPaint;
+        }
         tmpPaint->setAntiAlias(false);
+        tmpPaint->setColorFilter(colorFilter);
         return tmpPaint;
     } else {
         return origPaint;
@@ -156,9 +160,10 @@ inline static const SkPaint* nonAAPaint(const SkPaint* origPaint, SkPaint* tmpPa
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    sk_sp<SkImage> image = bitmap.makeImage();
     SkPaint tmpPaint;
-    mRecorder.drawImage(image, left, top, nonAAPaint(paint, &tmpPaint));
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mRecorder.drawImage(image, left, top, bitmapPaint(paint, &tmpPaint, colorFilter));
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
     // when this function ends.
@@ -167,36 +172,40 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, cons
     }
 }
 
-void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
+void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
         const SkPaint* paint) {
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
-    sk_sp<SkImage> image = hwuiBitmap.makeImage();
+
     SkPaint tmpPaint;
-    mRecorder.drawImage(image, 0, 0, nonAAPaint(paint, &tmpPaint));
-    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique()) {
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mRecorder.drawImage(image, 0, 0, bitmapPaint(paint, &tmpPaint, colorFilter));
+    if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
 
-void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
+void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop, float dstRight,
         float dstBottom, const SkPaint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = hwuiBitmap.makeImage();
+
     SkPaint tmpPaint;
-    mRecorder.drawImageRect(image, srcRect, dstRect, nonAAPaint(paint, &tmpPaint));
-    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mRecorder.drawImageRect(image, srcRect, dstRect, bitmapPaint(paint, &tmpPaint, colorFilter));
+    if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
             && !dstRect.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
 
-void SkiaRecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
+void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
     SkCanvas::Lattice lattice;
-    NinePatchUtils::SetLatticeDivs(&lattice, chunk, hwuiBitmap.width(), hwuiBitmap.height());
+    NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
@@ -213,11 +222,13 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch
 
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = hwuiBitmap.makeImage();
 
     SkPaint tmpPaint;
-    mRecorder.drawImageLattice(image.get(), lattice, dst, nonAAPaint(paint, &tmpPaint));
-    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mRecorder.drawImageLattice(image.get(), lattice, dst,
+            bitmapPaint(paint, &tmpPaint, colorFilter));
+    if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
