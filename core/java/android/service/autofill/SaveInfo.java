@@ -118,6 +118,9 @@ import java.util.Arrays;
  *   <li>The {@link AutofillValue} of at least one view (be it required or optional) has changed
  *       (i.e., it's neither the same value passed in a {@link Dataset}, nor the initial value
  *       presented in the view).
+ *   <li>There is no {@link Dataset} in the last {@link FillResponse} that completely matches the
+ *       screen state (i.e., all required and optional fields in the dataset have the same value as
+ *       the fields in the screen).
  *   <li>The user explicitly tapped the UI affordance asking to save data for autofill.
  * </ul>
  *
