@@ -928,7 +928,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 // Make sure the service doesn't have the fields already by checking the datasets
                 // content.
-                final ArrayList<Dataset> datasets = response.getDatasets();
+                final List<Dataset> datasets = response.getDatasets();
                 if (datasets != null) {
                     datasets_loop: for (int i = 0; i < datasets.size(); i++) {
                         final Dataset dataset = datasets.get(i);
@@ -1157,7 +1157,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
 
-            final ArrayList<Dataset> datasets = response.getDatasets();
+            final List<Dataset> datasets = response.getDatasets();
             if (datasets != null) {
                 final int numDatasets = datasets.size();
 
@@ -1353,7 +1353,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Must also track that are part of datasets, otherwise the FillUI won't be hidden when
         // they go away (if they're not savable).
 
-        final ArrayList<Dataset> datasets = response.getDatasets();
+        final List<Dataset> datasets = response.getDatasets();
         ArraySet<AutofillId> fillableIds = null;
         if (datasets != null) {
             for (int i = 0; i < datasets.size(); i++) {
@@ -1426,7 +1426,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Sets the state of all views in the given response.
      */
     private void setViewStatesLocked(FillResponse response, int state, boolean clearResponse) {
-        final ArrayList<Dataset> datasets = response.getDatasets();
+        final List<Dataset> datasets = response.getDatasets();
         if (datasets != null) {
             for (int i = 0; i < datasets.size(); i++) {
                 final Dataset dataset = datasets.get(i);
