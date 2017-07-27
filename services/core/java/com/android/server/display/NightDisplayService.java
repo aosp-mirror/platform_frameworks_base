@@ -119,9 +119,9 @@ public final class NightDisplayService extends SystemService
      *  </table>
      */
     private static final float[] mColorTempCoefficients = new float[] {
-            0.0f, -0.0000000871377221f, -0.0000000753960646f,
-            0.0f, 0.000750142586f, .000725567598f,
-            1.0f, -.830130222f, -1.15546312f
+            0.0f, -0.000000014365268757f, -0.000000000910931179f,
+            0.0f, 0.000255092801250106f, 0.000207598323269139f,
+            1.0f, -0.064156942434907716f, -0.349361641294833436f
     };
 
     private int mCurrentUser = UserHandle.USER_NULL;
