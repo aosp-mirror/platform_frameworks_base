@@ -21,8 +21,8 @@
 #include <cutils/ashmem.h>
 #include <utils/Log.h>
 #include "JNIHelp.h"
-#include "JniConstants.h"
-#include "ScopedLocalRef.h"
+#include <nativehelper/JniConstants.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include <algorithm>
 #include <errno.h>
