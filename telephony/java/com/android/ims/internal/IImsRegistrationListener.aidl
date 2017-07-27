@@ -26,7 +26,7 @@ import android.net.Uri;
  *
  * {@hide}
  */
-interface IImsRegistrationListener {
+oneway interface IImsRegistrationListener {
     /**
      * Notifies the application when the device is connected to the IMS network.
      *
