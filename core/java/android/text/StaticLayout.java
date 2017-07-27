@@ -981,7 +981,20 @@ public class StaticLayout extends Layout {
             }
         }
 
-        boolean lastLine = mEllipsized || (end == bufEnd);
+        final boolean lastLine;
+        if (mEllipsized) {
+            lastLine = true;
+        } else {
+            final boolean lastCharIsNewLine = widthStart != bufEnd && bufEnd > 0
+                    && text.charAt(bufEnd - 1) == CHAR_NEW_LINE;
+            if (end == bufEnd && !lastCharIsNewLine) {
+                lastLine = true;
+            } else if (start == bufEnd && lastCharIsNewLine) {
+                lastLine = true;
+            } else {
+                lastLine = false;
+            }
+        }
 
         if (firstLine) {
             if (trackPad) {
