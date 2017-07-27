@@ -26,7 +26,7 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Os ecrãs recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignorar aplicações recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d ecrã na Vista geral</item>
+      <item quantity="one">1 ecrã na Vista geral</item>
       <item quantity="other">%d ecrãs na Vista geral</item>
     </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
@@ -252,7 +252,7 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Limpar todas as notificações."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
-      <item quantity="one">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificação no grupo.</item>
+      <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
       <item quantity="other">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
     </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Definições de notificação"</string>
@@ -556,12 +556,12 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Esta aplicação não tem categorias de notificação"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Não é possível desativar as notificações desta aplicação"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categoria de notificação desta aplicação</item>
+      <item quantity="one">1 de <xliff:g id="NUMBER_0">%d</xliff:g> categoria de notificação desta aplicação</item>
       <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categorias de notificação desta aplicação</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> e mais <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> e mais <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> e mais <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
     </plurals>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Controlos de notificações da aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> abertos"</string>
@@ -577,11 +577,11 @@
     <string name="snooze_undo" msgid="6074877317002985129">"ANULAR"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Suspensa por <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
-      <item quantity="one">%d horas</item>
+      <item quantity="one">%d hora</item>
       <item quantity="other">%d horas</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
-      <item quantity="one">%d minutos</item>
+      <item quantity="one">%d minuto</item>
       <item quantity="other">%d minutos</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utiliz. da bateria"</string>
@@ -773,4 +773,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Substituir"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicações em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Pretende desativar os dados móveis?"</string>
 </resources>
