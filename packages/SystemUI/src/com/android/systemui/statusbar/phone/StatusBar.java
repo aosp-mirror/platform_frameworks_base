@@ -4611,6 +4611,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateDozingState() {
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
         boolean animate = !mDozing && mDozeServiceHost.shouldAnimateWakeup();
         mNotificationPanel.setDozing(mDozing, animate);
@@ -5492,6 +5493,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void setAnimateWakeup(boolean animateWakeup) {
+            if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_AWAKE
+                    || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_WAKING) {
+                // Too late to change the wakeup animation.
+                return;
+            }
             mAnimateWakeup = animateWakeup;
         }
 
