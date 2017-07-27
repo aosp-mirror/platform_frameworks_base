@@ -250,8 +250,7 @@ public class Editor {
     SuggestionRangeSpan mSuggestionRangeSpan;
     private Runnable mShowSuggestionRunnable;
 
-    final Drawable[] mCursorDrawable = new Drawable[2];
-    int mCursorCount; // Current number of used mCursorDrawable: 0 (resource=0), 1 or 2 (split)
+    Drawable mCursorDrawable = null;
 
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
@@ -1658,7 +1657,7 @@ public class Editor {
             mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
         }
 
-        if (highlight != null && selectionStart == selectionEnd && mCursorCount > 0) {
+        if (highlight != null && selectionStart == selectionEnd && mCursorDrawable != null) {
             drawCursor(canvas, cursorOffsetVertical);
             // Rely on the drawable entirely, do not draw the cursor line.
             // Has to be done after the IMM related code above which relies on the highlight.
@@ -1849,8 +1848,8 @@ public class Editor {
     private void drawCursor(Canvas canvas, int cursorOffsetVertical) {
         final boolean translate = cursorOffsetVertical != 0;
         if (translate) canvas.translate(0, cursorOffsetVertical);
-        for (int i = 0; i < mCursorCount; i++) {
-            mCursorDrawable[i].draw(canvas);
+        if (mCursorDrawable != null) {
+            mCursorDrawable.draw(canvas);
         }
         if (translate) canvas.translate(0, -cursorOffsetVertical);
     }
@@ -1907,32 +1906,20 @@ public class Editor {
         }
     }
 
-    void updateCursorsPositions() {
+    void updateCursorPosition() {
         if (mTextView.mCursorDrawableRes == 0) {
-            mCursorCount = 0;
+            mCursorDrawable = null;
             return;
         }
 
-        Layout layout = mTextView.getLayout();
+        final Layout layout = mTextView.getLayout();
         final int offset = mTextView.getSelectionStart();
         final int line = layout.getLineForOffset(offset);
         final int top = layout.getLineTop(line);
         final int bottom = layout.getLineTop(line + 1);
 
-        mCursorCount = layout.isLevelBoundary(offset) ? 2 : 1;
-
-        int middle = bottom;
-        if (mCursorCount == 2) {
-            // Similar to what is done in {@link Layout.#getCursorPath(int, Path, CharSequence)}
-            middle = (top + bottom) >> 1;
-        }
-
-        boolean clamped = layout.shouldClampCursor(line);
-        updateCursorPosition(0, top, middle, layout.getPrimaryHorizontal(offset, clamped));
-
-        if (mCursorCount == 2) {
-            updateCursorPosition(1, middle, bottom, layout.getSecondaryHorizontal(offset, clamped));
-        }
+        final boolean clamped = layout.shouldClampCursor(line);
+        updateCursorPosition(top, bottom, layout.getPrimaryHorizontal(offset, clamped));
     }
 
     void refreshTextActionMode() {
@@ -2300,19 +2287,19 @@ public class Editor {
     }
 
     @VisibleForTesting
-    public Drawable[] getCursorDrawable() {
+    @Nullable
+    public Drawable getCursorDrawable() {
         return mCursorDrawable;
     }
 
-    private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
-        if (mCursorDrawable[cursorIndex] == null) {
-            mCursorDrawable[cursorIndex] = mTextView.getContext().getDrawable(
+    private void updateCursorPosition(int top, int bottom, float horizontal) {
+        if (mCursorDrawable == null) {
+            mCursorDrawable = mTextView.getContext().getDrawable(
                     mTextView.mCursorDrawableRes);
         }
-        final Drawable drawable = mCursorDrawable[cursorIndex];
-        final int left = clampHorizontalPosition(drawable, horizontal);
-        final int width = drawable.getIntrinsicWidth();
-        drawable.setBounds(left, top - mTempRect.top, left + width,
+        final int left = clampHorizontalPosition(mCursorDrawable, horizontal);
+        final int width = mCursorDrawable.getIntrinsicWidth();
+        mCursorDrawable.setBounds(left, top - mTempRect.top, left + width,
                 bottom + mTempRect.bottom);
     }
 
@@ -4011,19 +3998,8 @@ public class Editor {
                         mTextView.getSelectionStart(), mTextView.getSelectionEnd(), mSelectionPath);
                 mSelectionPath.computeBounds(mSelectionBounds, true);
                 mSelectionBounds.bottom += mHandleHeight;
-            } else if (mCursorCount == 2) {
-                // We have a split cursor. In this case, we take the rectangle that includes both
-                // parts of the cursor to ensure we don't obscure either of them.
-                Rect firstCursorBounds = mCursorDrawable[0].getBounds();
-                Rect secondCursorBounds = mCursorDrawable[1].getBounds();
-                mSelectionBounds.set(
-                        Math.min(firstCursorBounds.left, secondCursorBounds.left),
-                        Math.min(firstCursorBounds.top, secondCursorBounds.top),
-                        Math.max(firstCursorBounds.right, secondCursorBounds.right),
-                        Math.max(firstCursorBounds.bottom, secondCursorBounds.bottom)
-                                + mHandleHeight);
             } else {
-                // We have a single cursor.
+                // We have a cursor.
                 Layout layout = mTextView.getLayout();
                 int line = layout.getLineForOffset(mTextView.getSelectionStart());
                 float primaryHorizontal = clampHorizontalPosition(null,
@@ -4407,7 +4383,7 @@ public class Editor {
         }
 
         /**
-         * Return the clamped horizontal position for the first cursor.
+         * Return the clamped horizontal position for the cursor.
          *
          * @param layout Text layout.
          * @param offset Character offset for the cursor.
@@ -4643,20 +4619,19 @@ public class Editor {
         @Override
         protected int getCursorOffset() {
             int offset = super.getCursorOffset();
-            final Drawable cursor = mCursorCount > 0 ? mCursorDrawable[0] : null;
-            if (cursor != null) {
-                cursor.getPadding(mTempRect);
-                offset += (cursor.getIntrinsicWidth() - mTempRect.left - mTempRect.right) / 2;
+            if (mCursorDrawable != null) {
+                mCursorDrawable.getPadding(mTempRect);
+                offset += (mCursorDrawable.getIntrinsicWidth()
+                           - mTempRect.left - mTempRect.right) / 2;
             }
             return offset;
         }
 
         @Override
         int getCursorHorizontalPosition(Layout layout, int offset) {
-            final Drawable drawable = mCursorCount > 0 ? mCursorDrawable[0] : null;
-            if (drawable != null) {
+            if (mCursorDrawable != null) {
                 final float horizontal = getHorizontal(layout, offset);
-                return clampHorizontalPosition(drawable, horizontal) + mTempRect.left;
+                return clampHorizontalPosition(mCursorDrawable, horizontal) + mTempRect.left;
             }
             return super.getCursorHorizontalPosition(layout, offset);
         }
