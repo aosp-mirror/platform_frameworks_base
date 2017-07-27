@@ -2362,8 +2362,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
-        if (!allowResizeInDockedMode && !StackId.tasksAreFloating(stackId) &&
-                getStack(DOCKED_STACK_ID) != null) {
+        if (!allowResizeInDockedMode
+                && !stack.getWindowConfiguration().tasksAreFloating()
+                && getStack(DOCKED_STACK_ID) != null) {
             // If the docked stack exists, don't resize non-floating stacks independently of the
             // size computed from the docked stack size (otherwise they will be out of sync)
             return;

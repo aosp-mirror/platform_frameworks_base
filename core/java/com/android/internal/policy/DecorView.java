@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import android.app.WindowConfiguration;
 import android.graphics.Outline;
 import android.view.ViewOutlineProvider;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -82,11 +83,8 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
-import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
@@ -233,10 +231,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     // buttons. The visibility of this decor depends on the workspace and the window type.
     // If the window type does not require such a view, this member might be null.
     DecorCaptionView mDecorCaptionView;
-
-    // Stack window is currently in. Since querying and changing the stack is expensive,
-    // this is the stack value the window is currently set up for.
-    int mStackId;
 
     private boolean mWindowResizeCallbacksAdded = false;
     private Drawable.Callback mLastBackgroundDrawableCb = null;
@@ -1470,7 +1464,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         invalidate();
 
         int opacity = PixelFormat.OPAQUE;
-        if (StackId.hasWindowShadow(mStackId)) {
+        final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
+        if (winConfig.hasWindowShadow()) {
             // If the window has a shadow, it must be translucent.
             opacity = PixelFormat.TRANSLUCENT;
         } else{
@@ -1860,35 +1855,33 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        int workspaceId = getStackId();
-        if (mStackId != workspaceId) {
-            mStackId = workspaceId;
-            if (mDecorCaptionView == null && StackId.hasWindowDecor(mStackId)) {
-                // Configuration now requires a caption.
-                final LayoutInflater inflater = mWindow.getLayoutInflater();
-                mDecorCaptionView = createDecorCaptionView(inflater);
-                if (mDecorCaptionView != null) {
-                    if (mDecorCaptionView.getParent() == null) {
-                        addView(mDecorCaptionView, 0,
-                                new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-                    }
-                    removeView(mContentRoot);
-                    mDecorCaptionView.addView(mContentRoot,
-                            new ViewGroup.MarginLayoutParams(MATCH_PARENT, MATCH_PARENT));
+
+        final boolean displayWindowDecor =
+                newConfig.windowConfiguration.hasWindowDecorCaption();
+        if (mDecorCaptionView == null && displayWindowDecor) {
+            // Configuration now requires a caption.
+            final LayoutInflater inflater = mWindow.getLayoutInflater();
+            mDecorCaptionView = createDecorCaptionView(inflater);
+            if (mDecorCaptionView != null) {
+                if (mDecorCaptionView.getParent() == null) {
+                    addView(mDecorCaptionView, 0,
+                            new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
                 }
-            } else if (mDecorCaptionView != null) {
-                // We might have to change the kind of surface before we do anything else.
-                mDecorCaptionView.onConfigurationChanged(StackId.hasWindowDecor(mStackId));
-                enableCaption(StackId.hasWindowDecor(workspaceId));
+                removeView(mContentRoot);
+                mDecorCaptionView.addView(mContentRoot,
+                        new ViewGroup.MarginLayoutParams(MATCH_PARENT, MATCH_PARENT));
             }
+        } else if (mDecorCaptionView != null) {
+            // We might have to change the kind of surface before we do anything else.
+            mDecorCaptionView.onConfigurationChanged(displayWindowDecor);
+            enableCaption(displayWindowDecor);
         }
+
         updateAvailableWidth();
         initializeElevation();
     }
 
     void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
-        mStackId = getStackId();
-
         if (mBackdropFrameRenderer != null) {
             loadBackgroundDrawablesIfNeeded();
             mBackdropFrameRenderer.onResourcesLoaded(
@@ -1950,8 +1943,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
         final boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
+        final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
         // Only a non floating application window on one of the allowed workspaces can get a caption
-        if (!mWindow.isFloating() && isApplication && StackId.hasWindowDecor(mStackId)) {
+        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (decorCaptionView == null) {
@@ -2062,28 +2056,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
         return drawable;
-    }
-
-    /**
-     * Returns the Id of the stack which contains this window.
-     * Note that if no stack can be determined - which usually means that it was not
-     * created for an activity - the fullscreen stack ID will be returned.
-     * @return Returns the stack id which contains this window.
-     **/
-    private int getStackId() {
-        int workspaceId = INVALID_STACK_ID;
-        final Window.WindowControllerCallback callback = mWindow.getWindowControllerCallback();
-        if (callback != null) {
-            try {
-                workspaceId = callback.getWindowStackId();
-            } catch (RemoteException ex) {
-                Log.e(mLogTag, "Failed to get the workspace ID of a PhoneWindow.");
-            }
-        }
-        if (workspaceId == INVALID_STACK_ID) {
-            return FULLSCREEN_WORKSPACE_STACK_ID;
-        }
-        return workspaceId;
     }
 
     void clearContentView() {
@@ -2238,7 +2210,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean wasAdjustedForStack = mElevationAdjustedForStack;
         // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
         // since the shadow is bound to the content size and not the target size.
-        if ((mStackId == FREEFORM_WORKSPACE_STACK_ID) && !isResizing()) {
+        final int windowingMode =
+                getResources().getConfiguration().windowConfiguration.getWindowingMode();
+        if ((windowingMode == WINDOWING_MODE_FREEFORM) && !isResizing()) {
             elevation = hasWindowFocus() ?
                     DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
             // Add a maximum shadow height value to the top level view.
@@ -2251,7 +2225,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             // Convert the DP elevation into physical pixels.
             elevation = dipToPx(elevation);
             mElevationAdjustedForStack = true;
-        } else if (mStackId == PINNED_STACK_ID) {
+        } else if (windowingMode == WINDOWING_MODE_PINNED) {
             elevation = dipToPx(DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP);
             mElevationAdjustedForStack = true;
         } else {

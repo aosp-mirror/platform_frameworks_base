@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
 import android.app.ActivityManager.StackId;
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -282,7 +283,7 @@ public class StackWindowController
             config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
             boolean intersectParentBounds = false;
 
-            if (StackId.tasksAreFloating(mStackId)) {
+            if (stack.getWindowConfiguration().tasksAreFloating()) {
                 // Floating tasks should not be resized to the screen's bounds.
 
                 if (mStackId == PINNED_STACK_ID && bounds.width() == mTmpDisplayBounds.width() &&
@@ -359,7 +360,7 @@ public class StackWindowController
                 bounds.height() == displayInfo.logicalHeight)) {
             // If the bounds are fullscreen, return the value of the fullscreen configuration
             return displayContent.getConfiguration().smallestScreenWidthDp;
-        } else if (StackId.tasksAreFloating(mStackId)) {
+        } else if (mContainer.getWindowConfiguration().tasksAreFloating()) {
             // For floating tasks, calculate the smallest width from the bounds of the task
             return (int) (Math.min(bounds.width(), bounds.height()) / density);
         } else {

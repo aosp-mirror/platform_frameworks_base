@@ -277,6 +277,90 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode) + "}";
     }
 
+    /**
+     * Returns true if the activities associated with this window configuration display a shadow
+     * around their border.
+     */
+    public boolean hasWindowShadow() {
+        return tasksAreFloating();
+    }
+
+    /**
+     * Returns true if the activities associated with this window configuration display a decor
+     * view.
+     */
+    public boolean hasWindowDecorCaption() {
+        return mWindowingMode == WINDOWING_MODE_FREEFORM;
+    }
+
+    /**
+     * Returns true if the tasks associated with this window configuration can be resized
+     * independently of their parent container.
+     */
+    public boolean canResizeTask() {
+        return mWindowingMode == WINDOWING_MODE_FREEFORM;
+    }
+
+    /** Returns true if the task bounds should persist across power cycles. */
+    public boolean persistTaskBounds() {
+        return mWindowingMode == WINDOWING_MODE_FREEFORM;
+    }
+
+    /**
+     * Returns true if the tasks associated with this window configuration are floating.
+     * Floating tasks are laid out differently as they are allowed to extend past the display bounds
+     * without overscan insets.
+     */
+    public boolean tasksAreFloating() {
+        return mWindowingMode == WINDOWING_MODE_FREEFORM || mWindowingMode == WINDOWING_MODE_PINNED;
+    }
+
+    /**
+     * Returns true if the windows associated with this window configuration can receive input keys.
+     */
+    public boolean canReceiveKeys() {
+        return mWindowingMode != WINDOWING_MODE_PINNED;
+    }
+
+    /**
+     * Returns true if the container associated with this window configuration is always-on-top of
+     * its siblings.
+     */
+    public boolean isAlwaysOnTop() {
+        return mWindowingMode == WINDOWING_MODE_PINNED;
+    }
+
+    /**
+     * Returns true if any visible windows belonging to apps with this window configuration should
+     * be kept on screen when the app is killed due to something like the low memory killer.
+     */
+    public boolean keepVisibleDeadAppWindowOnScreen() {
+        return mWindowingMode != WINDOWING_MODE_PINNED;
+    }
+
+    /**
+     * Returns true if the backdrop on the client side should match the frame of the window.
+     * Returns false, if the backdrop should be fullscreen.
+     */
+    public boolean useWindowFrameForBackdrop() {
+        return mWindowingMode == WINDOWING_MODE_FREEFORM || mWindowingMode == WINDOWING_MODE_PINNED;
+    }
+
+    /**
+     * Returns true if this container may be scaled without resizing, and windows within may need
+     * to be configured as such.
+     */
+    public boolean windowsAreScaleable() {
+        return mWindowingMode == WINDOWING_MODE_PINNED;
+    }
+
+    /**
+     * Returns true if windows in this container should be given move animations by default.
+     */
+    public boolean hasMovementAnimations() {
+        return mWindowingMode == WINDOWING_MODE_PINNED;
+    }
+
     private static String windowingModeToString(@WindowingMode int windowingMode) {
         switch (windowingMode) {
             case WINDOWING_MODE_UNDEFINED: return "undefined";

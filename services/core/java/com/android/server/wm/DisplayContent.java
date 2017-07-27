@@ -1809,7 +1809,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTmpTaskForResizePointSearchResult.reset();
         for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.get(stackNdx);
-            if (!StackId.isTaskResizeAllowed(stack.mStackId)) {
+            if (!stack.getWindowConfiguration().canResizeTask()) {
                 return null;
             }
 
@@ -3373,7 +3373,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void positionChildAt(int position, TaskStack child, boolean includingParents) {
-            if (StackId.isAlwaysOnTop(child.mStackId) && position != POSITION_TOP) {
+            if (child.getWindowConfiguration().isAlwaysOnTop()
+                    && position != POSITION_TOP) {
                 // This stack is always-on-top, override the default behavior.
                 Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
 

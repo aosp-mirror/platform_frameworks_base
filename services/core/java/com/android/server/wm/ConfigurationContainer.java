@@ -110,6 +110,15 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         }
     }
 
+    public WindowConfiguration getWindowConfiguration() {
+        return mFullConfiguration.windowConfiguration;
+    }
+
+    /** Returns the windowing mode the configuration container is currently in. */
+    public int getWindowingMode() {
+        return mFullConfiguration.windowConfiguration.getWindowingMode();
+    }
+
     /** Sets the windowing mode for the configuration container. */
     void setWindowingMode(/*@WindowConfiguration.WindowingMode TODO: causes build error...why?*/
             int windowingMode) {

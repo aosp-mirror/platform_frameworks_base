@@ -4,11 +4,12 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
+import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_BIND_APPLICATION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
@@ -117,17 +118,19 @@ class ActivityMetricsLogger {
         }
         mWindowState = WINDOW_STATE_INVALID;
         stack = mSupervisor.getFocusedStack();
-        if (stack.mStackId == PINNED_STACK_ID) {
+        int windowingMode = stack.getWindowingMode();
+        if (windowingMode == WINDOWING_MODE_PINNED) {
             stack = mSupervisor.findStackBehind(stack);
+            windowingMode = stack.getWindowingMode();
         }
         if (StackId.isHomeOrRecentsStack(stack.mStackId)
-                || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                || windowingMode == WINDOWING_MODE_FULLSCREEN) {
             mWindowState = WINDOW_STATE_STANDARD;
-        } else if (stack.mStackId == DOCKED_STACK_ID) {
+        } else if (windowingMode == WINDOWING_MODE_DOCKED) {
             Slog.wtf(TAG, "Docked stack shouldn't be the focused stack, because it reported not"
                     + " being visible.");
             mWindowState = WINDOW_STATE_INVALID;
-        } else if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+        } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
             mWindowState = WINDOW_STATE_FREEFORM;
         } else if (stack.mStackId == ASSISTANT_STACK_ID) {
             mWindowState = WINDOW_STATE_ASSISTANT;

@@ -1439,7 +1439,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     void findTaskForResizePoint(int x, int y, int delta,
             DisplayContent.TaskForResizePointSearchResult results) {
-        if (!StackId.isTaskResizeAllowed(mStackId)) {
+        if (!getWindowConfiguration().canResizeTask()) {
             results.searchDone = true;
             return;
         }
@@ -1634,10 +1634,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             return (mBoundsAnimatingRequested || mBoundsAnimating);
         }
         return false;
-    }
-
-    public boolean hasMovementAnimations() {
-        return StackId.hasMovementAnimations(mStackId);
     }
 
     public boolean isForceScaled() {

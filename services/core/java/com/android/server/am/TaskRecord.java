@@ -473,7 +473,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     void removeWindowContainer() {
         mService.mStackSupervisor.removeLockedTaskLocked(this);
         mWindowContainerController.removeContainer();
-        if (!StackId.persistTaskBounds(getStackId())) {
+        if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
             // default configuration the next time it launches.
             updateOverrideConfiguration(null);
@@ -2108,8 +2108,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final Configuration newConfig = getOverrideConfiguration();
 
         mFullscreen = bounds == null;
+        final boolean persistBounds = getWindowConfiguration().persistTaskBounds();
         if (mFullscreen) {
-            if (mBounds != null && StackId.persistTaskBounds(mStack.mStackId)) {
+            if (mBounds != null && persistBounds) {
                 mLastNonFullscreenBounds = mBounds;
             }
             mBounds = null;
@@ -2122,7 +2123,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             } else {
                 mBounds.set(mTmpRect);
             }
-            if (mStack == null || StackId.persistTaskBounds(mStack.mStackId)) {
+            if (mStack == null || persistBounds) {
                 mLastNonFullscreenBounds = mBounds;
             }
             computeOverrideConfiguration(newConfig, mTmpRect, insetBounds,
@@ -2242,7 +2243,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     /** Returns the bounds that should be used to launch this task. */
-    Rect getLaunchBounds() {
+    private Rect getLaunchBounds() {
         if (mStack == null) {
             return null;
         }
@@ -2254,7 +2255,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID
                 || (stackId == DOCKED_STACK_ID && !isResizeable())) {
             return isResizeable() ? mStack.mBounds : null;
-        } else if (!StackId.persistTaskBounds(stackId)) {
+        } else if (!getWindowConfiguration().persistTaskBounds()) {
             return mStack.mBounds;
         }
         return mLastNonFullscreenBounds;
