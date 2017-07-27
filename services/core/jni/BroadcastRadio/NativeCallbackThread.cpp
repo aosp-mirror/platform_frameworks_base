@@ -23,45 +23,38 @@
 
 namespace android {
 
-NativeCallbackThread::NativeCallbackThread(JavaVM *vm) : mExitting(false), mvm(vm) {
-    auto res = pthread_create(&mThread, nullptr, main, this);
-    if (res != 0) {
-        ALOGE("Couldn't start NativeCallbackThread");
-        mThread = 0;
-        return;
-    }
+using std::lock_guard;
+using std::mutex;
+using std::unique_lock;
+
+NativeCallbackThread::NativeCallbackThread(JavaVM *vm) : mvm(vm), mExiting(false),
+        mThread(&NativeCallbackThread::threadLoop, this) {
     ALOGD("Started native callback thread %p", this);
 }
 
 NativeCallbackThread::~NativeCallbackThread() {
-    ALOGV("~NativeCallbackThread %p", this);
+    ALOGV("%s %p", __func__, this);
     stop();
 }
 
-void* NativeCallbackThread::main(void *args) {
-    auto self = reinterpret_cast<NativeCallbackThread*>(args);
-    self->main();
-    return nullptr;
-}
-
-void NativeCallbackThread::main() {
-    ALOGV("NativeCallbackThread::main()");
+void NativeCallbackThread::threadLoop() {
+    ALOGV("%s", __func__);
 
     JNIEnv *env = nullptr;
     JavaVMAttachArgs aargs = {JNI_VERSION_1_4, "NativeCallbackThread", nullptr};
     if (mvm->AttachCurrentThread(&env, &aargs) != JNI_OK || env == nullptr) {
         ALOGE("Couldn't attach thread");
+        mExiting = true;
         return;
     }
 
-    while (!mExitting) {
+    while (!mExiting) {
         ALOGV("Waiting for task...");
         Task task;
         {
-            AutoMutex _l(mQueueMutex);
-            auto res = mQueueCond.wait(mQueueMutex);
-            ALOGE_IF(res != 0, "Wait failed: %d", res);
-            if (mExitting || res != 0) break;
+            unique_lock<mutex> lk(mQueueMutex);
+            mQueueCond.wait(lk);
+            if (mExiting) break;
 
             if (mQueue.empty()) continue;
             task = mQueue.front();
@@ -84,36 +77,35 @@ void NativeCallbackThread::main() {
 }
 
 void NativeCallbackThread::enqueue(const Task &task) {
-    AutoMutex _l(mQueueMutex);
+    lock_guard<mutex> lk(mQueueMutex);
 
-    if (mThread == 0 || mExitting) {
+    if (mExiting) {
         ALOGW("Callback thread %p is not serving calls", this);
         return;
     }
 
     mQueue.push(task);
-    mQueueCond.signal();
+    mQueueCond.notify_one();
 }
 
 void NativeCallbackThread::stop() {
-    ALOGV("stop() %p", this);
+    ALOGV("%s %p", __func__, this);
 
     {
-        AutoMutex _l(mQueueMutex);
+        lock_guard<mutex> lk(mQueueMutex);
 
-        if (mThread == 0 || mExitting) return;
+        if (mExiting) return;
 
-        mExitting = true;
-        mQueueCond.signal();
+        mExiting = true;
+        mQueueCond.notify_one();
     }
 
-    if (pthread_self() == mThread) {
+    if (mThread.get_id() == std::thread::id()) {
         // you can't self-join a thread, but it's ok when calling from our sub-task
         ALOGD("About to stop native callback thread %p", this);
+        mThread.detach();
     } else {
-        auto ret = pthread_join(mThread, nullptr);
-        ALOGE_IF(ret != 0, "Couldn't join thread: %d", ret);
-
+        mThread.join();
         ALOGD("Stopped native callback thread %p", this);
     }
 }
