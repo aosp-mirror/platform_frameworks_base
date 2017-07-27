@@ -142,6 +142,18 @@ public class NetworkNotificationManager {
             extraInfo = null;
         }
 
+        // Clear any previous notification with lower priority, otherwise return. http://b/63676954.
+        // A new SIGN_IN notification with a new intent should override any existing one.
+        final int previousEventId = mNotificationTypeMap.get(id);
+        final NotificationType previousNotifyType = NotificationType.getFromId(previousEventId);
+        if (priority(previousNotifyType) > priority(notifyType)) {
+            Slog.d(TAG, String.format(
+                    "ignoring notification %s for network %s with existing notification %s",
+                    notifyType, id, previousNotifyType));
+            return;
+        }
+        clearNotification(id);
+
         if (DBG) {
             Slog.d(TAG, String.format(
                     "showNotification tag=%s event=%s transport=%s extraInfo=%s highPrioriy=%s",
@@ -273,5 +285,23 @@ public class NetworkNotificationManager {
     static String nameOf(int eventId) {
         NotificationType t = NotificationType.getFromId(eventId);
         return (t != null) ? t.name() : "UNKNOWN";
+    }
+
+    private static int priority(NotificationType t) {
+        if (t == null) {
+            return 0;
+        }
+        switch (t) {
+            case SIGN_IN:
+                return 4;
+            case NO_INTERNET:
+                return 3;
+            case NETWORK_SWITCH:
+                return 2;
+            case LOST_INTERNET:
+                return 1;
+            default:
+                return 0;
+        }
     }
 }
