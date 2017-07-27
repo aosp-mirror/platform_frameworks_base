@@ -4021,6 +4021,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
             @ResolveInfoFlags int flags, UserHandle userHandle) {
         return queryBroadcastReceiversAsUser(intent, flags, userHandle.getIdentifier());
@@ -4809,6 +4810,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract int getIntentVerificationStatusAsUser(String packageName, @UserIdInt int userId);
 
     /**
@@ -4878,6 +4880,7 @@ public abstract class PackageManager {
      */
     @TestApi
     @SystemApi
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract String getDefaultBrowserPackageNameAsUser(@UserIdInt int userId);
 
     /**
@@ -4893,7 +4896,9 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.SET_PREFERRED_APPLICATIONS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     public abstract boolean setDefaultBrowserPackageNameAsUser(String packageName,
             @UserIdInt int userId);
 
