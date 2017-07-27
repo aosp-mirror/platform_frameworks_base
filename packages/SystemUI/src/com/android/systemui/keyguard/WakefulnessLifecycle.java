@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard;
 
+import android.os.Trace;
+
 import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
@@ -39,22 +41,22 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     }
 
     public void dispatchStartedWakingUp() {
-        mWakefulness = WAKEFULNESS_WAKING;
+        setWakefulness(WAKEFULNESS_WAKING);
         dispatch(Observer::onStartedWakingUp);
     }
 
     public void dispatchFinishedWakingUp() {
-        mWakefulness = WAKEFULNESS_AWAKE;
+        setWakefulness(WAKEFULNESS_AWAKE);
         dispatch(Observer::onFinishedWakingUp);
     }
 
     public void dispatchStartedGoingToSleep() {
-        mWakefulness = WAKEFULNESS_GOING_TO_SLEEP;
+        setWakefulness(WAKEFULNESS_GOING_TO_SLEEP);
         dispatch(Observer::onStartedGoingToSleep);
     }
 
     public void dispatchFinishedGoingToSleep() {
-        mWakefulness = WAKEFULNESS_ASLEEP;
+        setWakefulness(WAKEFULNESS_ASLEEP);
         dispatch(Observer::onFinishedGoingToSleep);
     }
 
@@ -62,6 +64,11 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("WakefulnessLifecycle:");
         pw.println("  mWakefulness=" + mWakefulness);
+    }
+
+    private void setWakefulness(int wakefulness) {
+        mWakefulness = wakefulness;
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "wakefulness", wakefulness);
     }
 
     public interface Observer {

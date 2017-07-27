@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard;
 
+import android.os.Trace;
+
 import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
@@ -38,22 +40,22 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     }
 
     public void dispatchScreenTurningOn() {
-        mScreenState = SCREEN_TURNING_ON;
+        setScreenState(SCREEN_TURNING_ON);
         dispatch(Observer::onScreenTurningOn);
     }
 
     public void dispatchScreenTurnedOn() {
-        mScreenState = SCREEN_ON;
+        setScreenState(SCREEN_ON);
         dispatch(Observer::onScreenTurnedOn);
     }
 
     public void dispatchScreenTurningOff() {
-        mScreenState = SCREEN_TURNING_OFF;
+        setScreenState(SCREEN_TURNING_OFF);
         dispatch(Observer::onScreenTurningOff);
     }
 
     public void dispatchScreenTurnedOff() {
-        mScreenState = SCREEN_OFF;
+        setScreenState(SCREEN_OFF);
         dispatch(Observer::onScreenTurnedOff);
     }
 
@@ -61,6 +63,11 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("ScreenLifecycle:");
         pw.println("  mScreenState=" + mScreenState);
+    }
+
+    private void setScreenState(int screenState) {
+        mScreenState = screenState;
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "screenState", screenState);
     }
 
     public interface Observer {
