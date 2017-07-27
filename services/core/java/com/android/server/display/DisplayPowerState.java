@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Trace;
 import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Slog;
@@ -49,6 +50,7 @@ final class DisplayPowerState {
     private static final String TAG = "DisplayPowerState";
 
     private static boolean DEBUG = false;
+    private static String COUNTER_COLOR_FADE = "ColorFadeLevel";
 
     private final Handler mHandler;
     private final Choreographer mChoreographer;
@@ -190,6 +192,7 @@ final class DisplayPowerState {
      * Dismisses the color fade surface.
      */
     public void dismissColorFade() {
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, COUNTER_COLOR_FADE, 100);
         if (mColorFade != null) mColorFade.dismiss();
         mColorFadePrepared = false;
         mColorFadeReady = true;
@@ -328,6 +331,8 @@ final class DisplayPowerState {
 
             if (mColorFadePrepared) {
                 mColorFade.draw(mColorFadeLevel);
+                Trace.traceCounter(Trace.TRACE_TAG_POWER,
+                        COUNTER_COLOR_FADE, Math.round(mColorFadeLevel* 100));
             }
 
             mColorFadeReady = true;
