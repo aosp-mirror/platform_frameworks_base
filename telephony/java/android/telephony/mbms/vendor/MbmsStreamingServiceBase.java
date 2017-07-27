@@ -47,10 +47,10 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * or {@link MbmsException#SUCCESS}. Non-successful error codes will be passed to the app via
      * {@link IMbmsStreamingManagerCallback#error(int, String)}.
      *
-     * @param listener The callback to use to communicate with the app.
+     * @param callback The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
      */
-    public int initialize(MbmsStreamingManagerCallback listener, int subscriptionId)
+    public int initialize(MbmsStreamingManagerCallback callback, int subscriptionId)
             throws RemoteException {
         return 0;
     }
@@ -60,10 +60,10 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @hide
      */
     @Override
-    public final int initialize(IMbmsStreamingManagerCallback listener, final int subscriptionId)
-            throws RemoteException {
+    public final int initialize(final IMbmsStreamingManagerCallback callback,
+            final int subscriptionId) throws RemoteException {
         final int uid = Binder.getCallingUid();
-        listener.asBinder().linkToDeath(new DeathRecipient() {
+        callback.asBinder().linkToDeath(new DeathRecipient() {
             @Override
             public void binderDied() {
                 onAppCallbackDied(uid, subscriptionId);
@@ -74,7 +74,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onError(int errorCode, String message) {
                 try {
-                    listener.error(errorCode, message);
+                    callback.error(errorCode, message);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -83,7 +83,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onStreamingServicesUpdated(List<StreamingServiceInfo> services) {
                 try {
-                    listener.streamingServicesUpdated(services);
+                    callback.streamingServicesUpdated(services);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -92,7 +92,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onMiddlewareReady() {
                 try {
-                    listener.middlewareReady();
+                    callback.middlewareReady();
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -133,11 +133,11 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      *
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
-     * @param listener The listener object on which the app wishes to receive updates.
+     * @param callback The callback object on which the app wishes to receive updates.
      * @return Any error in {@link android.telephony.mbms.MbmsException.GeneralErrors}
      */
     public int startStreaming(int subscriptionId, String serviceId,
-            StreamingServiceCallback listener) throws RemoteException {
+            StreamingServiceCallback callback) throws RemoteException {
         return 0;
     }
 
@@ -148,9 +148,9 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      */
     @Override
     public int startStreaming(int subscriptionId, String serviceId,
-            IStreamingServiceCallback listener) throws RemoteException {
+            IStreamingServiceCallback callback) throws RemoteException {
         final int uid = Binder.getCallingUid();
-        listener.asBinder().linkToDeath(new DeathRecipient() {
+        callback.asBinder().linkToDeath(new DeathRecipient() {
             @Override
             public void binderDied() {
                 onAppCallbackDied(uid, subscriptionId);
@@ -161,7 +161,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onError(int errorCode, String message) {
                 try {
-                    listener.error(errorCode, message);
+                    callback.error(errorCode, message);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -171,7 +171,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             public void onStreamStateUpdated(@StreamingService.StreamingState int state,
                     @StreamingService.StreamingStateChangeReason int reason) {
                 try {
-                    listener.streamStateUpdated(state, reason);
+                    callback.streamStateUpdated(state, reason);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -180,7 +180,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onMediaDescriptionUpdated() {
                 try {
-                    listener.mediaDescriptionUpdated();
+                    callback.mediaDescriptionUpdated();
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -189,7 +189,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onBroadcastSignalStrengthUpdated(int signalStrength) {
                 try {
-                    listener.broadcastSignalStrengthUpdated(signalStrength);
+                    callback.broadcastSignalStrengthUpdated(signalStrength);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -198,7 +198,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onStreamMethodUpdated(int methodType) {
                 try {
-                    listener.streamMethodUpdated(methodType);
+                    callback.streamMethodUpdated(methodType);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }

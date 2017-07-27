@@ -16,6 +16,8 @@
 
 package android.telephony.mbms;
 
+import android.os.RemoteException;
+
 /**
  * A optional listener class used by download clients to track progress.
  * @hide
@@ -38,8 +40,9 @@ public class DownloadProgressListener extends IDownloadProgressListener.Stub {
      * @param currentDecodedSize is the number of bytes that have been decoded.
      * @param fullDecodedSize is the total number of bytes that make up the final decoded content.
      */
+    @Override
     public void progress(DownloadRequest request, FileInfo fileInfo,
             int currentDownloadSize, int fullDownloadSize,
-            int currentDecodedSize, int fullDecodedSize) {
+            int currentDecodedSize, int fullDecodedSize) throws RemoteException {
     }
 }
