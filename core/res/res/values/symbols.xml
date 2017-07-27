@@ -2921,6 +2921,7 @@
   <java-symbol type="string" name="autofill_save_type_email_address" />
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
   <java-symbol type="style" name="AutofillDatasetPicker" />
+  <java-symbol type="style" name="AutofillSaveAnimation" />
   <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
 
