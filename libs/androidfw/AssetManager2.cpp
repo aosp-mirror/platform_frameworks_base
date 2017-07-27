@@ -533,8 +533,8 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   // Create the max possible entries we can make. Once we construct the bag,
   // we will realloc to fit to size.
   const size_t max_count = parent_bag->entry_count + dtohl(map->count);
-  ResolvedBag* new_bag = reinterpret_cast<ResolvedBag*>(
-      malloc(sizeof(ResolvedBag) + (max_count * sizeof(ResolvedBag::Entry))));
+  util::unique_cptr<ResolvedBag> new_bag{reinterpret_cast<ResolvedBag*>(
+      malloc(sizeof(ResolvedBag) + (max_count * sizeof(ResolvedBag::Entry))))};
   ResolvedBag::Entry* new_entry = new_bag->entries;
 
   const ResolvedBag::Entry* parent_entry = parent_bag->entries;
@@ -601,15 +601,14 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   // Resize the resulting array to fit.
   const size_t actual_count = new_entry - new_bag->entries;
   if (actual_count != max_count) {
-    new_bag = reinterpret_cast<ResolvedBag*>(
-        realloc(new_bag, sizeof(ResolvedBag) + (actual_count * sizeof(ResolvedBag::Entry))));
+    new_bag.reset(reinterpret_cast<ResolvedBag*>(realloc(
+        new_bag.release(), sizeof(ResolvedBag) + (actual_count * sizeof(ResolvedBag::Entry)))));
   }
 
-  util::unique_cptr<ResolvedBag> final_bag{new_bag};
-  final_bag->type_spec_flags = flags;
-  final_bag->entry_count = static_cast<uint32_t>(actual_count);
-  ResolvedBag* result = final_bag.get();
-  cached_bags_[resid] = std::move(final_bag);
+  new_bag->type_spec_flags = flags;
+  new_bag->entry_count = static_cast<uint32_t>(actual_count);
+  ResolvedBag* result = new_bag.get();
+  cached_bags_[resid] = std::move(new_bag);
   return result;
 }
 
