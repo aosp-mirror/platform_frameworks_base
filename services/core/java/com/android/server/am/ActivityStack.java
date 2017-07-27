@@ -460,14 +460,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
         mTmpRect2.setEmpty();
+        final Configuration overrideConfig = getOverrideConfiguration();
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
-                mTmpRect2);
+                mTmpRect2, overrideConfig);
+        onOverrideConfigurationChanged(overrideConfig);
         mStackSupervisor.mStacks.put(mStackId, this);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
-    T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
-        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds);
+    T createStackWindowController(int displayId, boolean onTop, Rect outBounds,
+            Configuration outOverrideConfig) {
+        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds,
+                outOverrideConfig);
     }
 
     T getWindowContainerController() {
