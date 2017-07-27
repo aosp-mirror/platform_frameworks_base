@@ -629,7 +629,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /** {@hide} */
-    public @Nullable Bundle getDocumentMetadata(String documentId, @Nullable String[] tags)
+    public @Nullable Bundle getDocumentMetadata(String documentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Metadata not supported");
     }
@@ -649,11 +649,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @hide
      */
-    protected Bundle getDocumentMetadataFromStream(
-            InputStream stream, String mimeType, @Nullable String[] tags)
+    protected Bundle getDocumentMetadataFromStream(InputStream stream, String mimeType)
             throws IOException {
         Bundle metadata = new Bundle();
-        MetadataReader.getMetadata(metadata, stream, mimeType, tags);
+        // TODO: Remove the last null arg from MetadataReader. It was the "tags" value,
+        // the has been removed from the getDocumentMetadata method.
+        MetadataReader.getMetadata(metadata, stream, mimeType, null);
         return metadata;
     }
 
@@ -1169,8 +1170,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
         } else if (METHOD_GET_DOCUMENT_METADATA.equals(method)) {
-            return getDocumentMetadata(
-                    documentId, extras.getStringArray(DocumentsContract.EXTRA_METADATA_TAGS));
+            return getDocumentMetadata(documentId);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }
