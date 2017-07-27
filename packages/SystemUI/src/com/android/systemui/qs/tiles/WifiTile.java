@@ -311,12 +311,10 @@ public class WifiTile extends QSTileImpl<SignalState> {
         public View createDetailView(Context context, View convertView, ViewGroup parent) {
             if (DEBUG) Log.d(TAG, "createDetailView convertView=" + (convertView != null));
             mAccessPoints = null;
-            mWifiController.scanForAccessPoints();
-            fireScanStateChanged(true);
             mItems = QSDetailItems.convertOrInflate(context, convertView, parent);
             mItems.setTagSuffix("Wifi");
             mItems.setCallback(this);
-            updateItems();
+            mWifiController.scanForAccessPoints(); // updates APs and items
             setItemsVisible(mState.value);
             return mItems;
         }
