@@ -246,6 +246,11 @@ public class StatusBarWindowView extends FrameLayout {
         return false;
     }
 
+    public void setTouchActive(boolean touchActive) {
+        mTouchActive = touchActive;
+        mStackScrollLayout.setTouchActive(touchActive);
+    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
@@ -253,11 +258,11 @@ public class StatusBarWindowView extends FrameLayout {
             mNotificationPanel.startExpandLatencyTracking();
         }
         if (isDown) {
-            mTouchActive = true;
+            setTouchActive(true);
             mTouchCancelled = false;
         } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
                 || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-            mTouchActive = false;
+            setTouchActive(false);
         }
         if (mTouchCancelled) {
             return false;
