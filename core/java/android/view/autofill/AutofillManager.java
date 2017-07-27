@@ -694,8 +694,13 @@ public final class AutofillManager {
     /**
      * Called to indicate the current autofill context should be commited.
      *
-     * <p>For example, when a virtual view is rendering an {@code HTML} page with a form, it should
-     * call this method after the form is submitted and another page is rendered.
+     * <p>This method is typically called by {@link View Views} that manage virtual views; for
+     * example, when the view is rendering an {@code HTML} page with a form and virtual views
+     * that represent the HTML elements, it should call this method after the form is submitted and
+     * another page is rendered.
+     *
+     * <p><b>Note:</b> This method does not need to be called on regular application lifecycle
+     * methods such as {@link android.app.Activity#finish()}.
      */
     public void commit() {
         if (!hasAutofillFeature()) {
@@ -713,8 +718,13 @@ public final class AutofillManager {
     /**
      * Called to indicate the current autofill context should be cancelled.
      *
-     * <p>For example, when a virtual view is rendering an {@code HTML} page with a form, it should
-     * call this method if the user does not post the form but moves to another form in this page.
+     * <p>This method is typically called by {@link View Views} that manage virtual views; for
+     * example, when the view is rendering an {@code HTML} page with a form and virtual views
+     * that represent the HTML elements, it should call this method if the user does not post the
+     * form but moves to another form in this page.
+     *
+     * <p><b>Note:</b> This method does not need to be called on regular application lifecycle
+     * methods such as {@link android.app.Activity#finish()}.
      */
     public void cancel() {
         if (!hasAutofillFeature()) {
