@@ -131,6 +131,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private final NotificationIconDozeHelper mDozer;
     private int mContrastedDrawableColor;
     private int mCachedContrastBackgroundColor = NO_COLOR;
+    private boolean mIsInShelf;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -764,6 +765,14 @@ public class StatusBarIconView extends AnimatedImageView {
         if (mDarkAmount == 0 || mDarkAmount == 1) {
             setAllowAnimation(mDarkAmount == 0);
         }
+    }
+
+    public void setIsInShelf(boolean isInShelf) {
+        mIsInShelf = isInShelf;
+    }
+
+    public boolean isInShelf() {
+        return mIsInShelf;
     }
 
     public interface OnVisibilityChangedListener {
