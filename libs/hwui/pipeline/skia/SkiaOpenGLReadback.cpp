@@ -71,22 +71,31 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
             kTopLeft_GrSurfaceOrigin));
     if (image) {
+        // Convert imgTransform matrix from right to left handed coordinate system.
+        // If we have a matrix transformation in right handed coordinate system
+        //|ScaleX, SkewX,  TransX| same transform in left handed is    |ScaleX, SkewX,   TransX  |
+        //|SkewY,  ScaleY, TransY|                                     |-SkewY, -ScaleY, 1-TransY|
+        //|0,      0,      1     |                                     |0,      0,       1       |
         SkMatrix textureMatrix;
-        imgTransform.copyTo(textureMatrix);
+        textureMatrix.setIdentity();
+        textureMatrix[SkMatrix::kMScaleX] = imgTransform[Matrix4::kScaleX];
+        textureMatrix[SkMatrix::kMScaleY] = -imgTransform[Matrix4::kScaleY];
+        textureMatrix[SkMatrix::kMSkewX] = imgTransform[Matrix4::kSkewX];
+        textureMatrix[SkMatrix::kMSkewY] = -imgTransform[Matrix4::kSkewY];
+        textureMatrix[SkMatrix::kMTransX] = imgTransform[Matrix4::kTranslateX];
+        textureMatrix[SkMatrix::kMTransY] = 1-imgTransform[Matrix4::kTranslateY];
 
-        // remove the y-flip applied to the matrix
-        SkMatrix yFlip = SkMatrix::MakeScale(1, -1);
-        yFlip.postTranslate(0,1);
-        textureMatrix.preConcat(yFlip);
-
-        // multiply by image size, because textureMatrix maps to [0..1] range
-        textureMatrix[SkMatrix::kMTransX] *= imgWidth;
-        textureMatrix[SkMatrix::kMTransY] *= imgHeight;
-
-        // swap rotation and translation part of the matrix, because we convert from
-        // right-handed Cartesian to left-handed coordinate system.
-        std::swap(textureMatrix[SkMatrix::kMTransX], textureMatrix[SkMatrix::kMTransY]);
-        std::swap(textureMatrix[SkMatrix::kMSkewX], textureMatrix[SkMatrix::kMSkewY]);
+        // textureMatrix maps 2D texture coordinates of the form (s, t, 1) with s and t in the
+        // inclusive range [0, 1] to the texture (see GLConsumer::getTransformMatrix comments).
+        // Convert textureMatrix to translate in real texture dimensions. Texture width and
+        // height are affected by the orientation (width and height swapped for 90/270 rotation).
+        if (textureMatrix[SkMatrix::kMSkewX] >= 0.5f || textureMatrix[SkMatrix::kMSkewX] <= -0.5f) {
+            textureMatrix[SkMatrix::kMTransX] *= imgHeight;
+            textureMatrix[SkMatrix::kMTransY] *= imgWidth;
+        } else {
+            textureMatrix[SkMatrix::kMTransX] *= imgWidth;
+            textureMatrix[SkMatrix::kMTransY] *= imgHeight;
+        }
 
         // convert to Skia data structures
         SkRect skiaSrcRect = srcRect.toSkRect();
