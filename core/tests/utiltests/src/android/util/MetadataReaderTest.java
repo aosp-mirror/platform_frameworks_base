@@ -56,9 +56,11 @@ public class MetadataReaderTest extends TestCase {
         Bundle exif = mData.getBundle(DocumentsContract.METADATA_EXIF);
         assertEquals("3036", String.valueOf(exif.getInt(ExifInterface.TAG_IMAGE_WIDTH)));
         assertEquals("4048", String.valueOf(exif.getInt(ExifInterface.TAG_IMAGE_LENGTH)));
-        assertEquals("2017:07:17 19:19:28", exif.getString(ExifInterface.TAG_DATETIME));
-        assertEquals(0.0, exif.getDouble(ExifInterface.TAG_GPS_LATITUDE));
-        assertEquals(0.0, exif.getDouble(ExifInterface.TAG_GPS_LONGITUDE));
+        assertEquals("2017:07:26 21:06:25", exif.getString(ExifInterface.TAG_DATETIME));
+        assertEquals("33/1,59/1,4530/100", exif.getString(ExifInterface.TAG_GPS_LATITUDE));
+        assertEquals("N", exif.getString(ExifInterface.TAG_GPS_LATITUDE_REF));
+        assertEquals("118/1,28/1,3124/100", exif.getString(ExifInterface.TAG_GPS_LONGITUDE));
+        assertEquals("W", exif.getString(ExifInterface.TAG_GPS_LONGITUDE_REF));
         assertEquals("Google", exif.getString(ExifInterface.TAG_MAKE));
         assertEquals("Pixel", exif.getString(ExifInterface.TAG_MODEL));
         assertEquals(mData.getStringArray(DocumentsContract.METADATA_TYPES)[0],

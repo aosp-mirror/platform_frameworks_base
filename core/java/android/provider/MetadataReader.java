@@ -44,7 +44,9 @@ public final class MetadataReader {
             ExifInterface.TAG_IMAGE_LENGTH,
             ExifInterface.TAG_DATETIME,
             ExifInterface.TAG_GPS_LATITUDE,
+            ExifInterface.TAG_GPS_LATITUDE_REF,
             ExifInterface.TAG_GPS_LONGITUDE,
+            ExifInterface.TAG_GPS_LONGITUDE_REF,
             ExifInterface.TAG_MAKE,
             ExifInterface.TAG_MODEL,
             ExifInterface.TAG_APERTURE,
@@ -166,9 +168,9 @@ public final class MetadataReader {
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_DIFFERENTIAL, TYPE_INT);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_IMG_DIRECTION, TYPE_DOUBLE);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_IMG_DIRECTION_REF, TYPE_STRING);
-        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LATITUDE, TYPE_DOUBLE);
+        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LATITUDE, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_LATITUDE_REF, TYPE_STRING);
-        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LONGITUDE, TYPE_DOUBLE);
+        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LONGITUDE, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_LONGITUDE_REF, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_MAP_DATUM, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_MEASURE_MODE, TYPE_STRING);
@@ -215,7 +217,9 @@ public final class MetadataReader {
      *             ExifInterface.TAG_IMAGE_LENGTH,
      *             ExifInterface.TAG_DATETIME,
      *             ExifInterface.TAG_GPS_LATITUDE,
+     *             ExifInterface.TAG_GPS_LATITUDE_REF,
      *             ExifInterface.TAG_GPS_LONGITUDE,
+     *             ExifInterface.TAG_GPS_LONGITUDE_REF,
      *             ExifInterface.TAG_MAKE,
      *             ExifInterface.TAG_MODEL,
      *             ExifInterface.TAG_APERTURE,
@@ -250,7 +254,9 @@ public final class MetadataReader {
      *             ExifInterface.TAG_IMAGE_LENGTH,
      *             ExifInterface.TAG_DATETIME,
      *             ExifInterface.TAG_GPS_LATITUDE,
+     *             ExifInterface.TAG_GPS_LATITUDE_REF,
      *             ExifInterface.TAG_GPS_LONGITUDE,
+     *             ExifInterface.TAG_GPS_LONGITUDE_REF,
      *             ExifInterface.TAG_MAKE,
      *             ExifInterface.TAG_MODEL,
      *             ExifInterface.TAG_APERTURE,
@@ -262,21 +268,21 @@ public final class MetadataReader {
             tags = DEFAULT_EXIF_TAGS;
         }
         Bundle exif = new Bundle();
-        for (int i = 0; i < tags.length; i++) {
-            if (TYPE_MAPPING.get(tags[i]).equals(TYPE_INT)) {
-                int data = exifInterface.getAttributeInt(tags[i], Integer.MIN_VALUE);
+        for (String tag : tags) {
+            if (TYPE_MAPPING.get(tag).equals(TYPE_INT)) {
+                int data = exifInterface.getAttributeInt(tag, Integer.MIN_VALUE);
                 if (data != Integer.MIN_VALUE) {
-                    exif.putInt(tags[i], data);
+                    exif.putInt(tag, data);
                 }
-            } else if (TYPE_MAPPING.get(tags[i]).equals(TYPE_DOUBLE)) {
-                double data = exifInterface.getAttributeDouble(tags[i], Double.MIN_VALUE);
+            } else if (TYPE_MAPPING.get(tag).equals(TYPE_DOUBLE)) {
+                double data = exifInterface.getAttributeDouble(tag, Double.MIN_VALUE);
                 if (data != Double.MIN_VALUE) {
-                    exif.putDouble(tags[i], data);
+                    exif.putDouble(tag, data);
                 }
-            } else if (TYPE_MAPPING.get(tags[i]).equals(TYPE_STRING)) {
-                String data = exifInterface.getAttribute(tags[i]);
+            } else if (TYPE_MAPPING.get(tag).equals(TYPE_STRING)) {
+                String data = exifInterface.getAttribute(tag);
                 if (data != null) {
-                    exif.putString(tags[i], data);
+                    exif.putString(tag, data);
                 }
             }
         }
