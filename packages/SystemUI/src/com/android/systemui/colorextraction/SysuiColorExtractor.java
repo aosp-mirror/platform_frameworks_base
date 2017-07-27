@@ -31,11 +31,16 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
+import com.android.systemui.Dumpable;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * ColorExtractor aware of wallpaper visibility
  */
-public class SysuiColorExtractor extends ColorExtractor {
+public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
     private static final String TAG = "SysuiColorExtractor";
     private boolean mWallpaperVisible;
     // Colors to return when the wallpaper isn't visible
@@ -154,4 +159,20 @@ public class SysuiColorExtractor extends ColorExtractor {
         }
     }
 
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("SysuiColorExtractor:");
+
+        pw.println("  Current wallpaper colors:");
+        pw.println("    system: " + mSystemColors);
+        pw.println("    lock: " + mLockColors);
+
+        GradientColors[] system = mGradientColors.get(WallpaperManager.FLAG_SYSTEM);
+        GradientColors[] lock = mGradientColors.get(WallpaperManager.FLAG_LOCK);
+        pw.println("  Gradients:");
+        pw.println("    system: " + Arrays.toString(system));
+        pw.println("    lock: " + Arrays.toString(lock));
+        pw.println("  Default scrim: " + mWpHiddenColors);
+
+    }
 }
