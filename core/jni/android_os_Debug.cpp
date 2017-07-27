@@ -29,6 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <atomic>
 #include <iomanip>
 #include <string>
 
@@ -44,15 +45,10 @@
 #include "jni.h"
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
+#include "android_os_Debug.h"
 
 namespace android
 {
-
-static void safeFclose(FILE* fp) {
-  if (fp) fclose(fp);
-}
-
-using UniqueFile = std::unique_ptr<FILE, decltype(&safeFclose)>;
 
 static inline UniqueFile MakeUniqueFile(const char* path, const char* mode) {
     return UniqueFile(fopen(path, mode), safeFclose);
@@ -154,6 +150,14 @@ struct stats_t {
     int swappedOut;
     int swappedOutPss;
 };
+
+enum pss_rollup_support {
+  PSS_ROLLUP_UNTRIED,
+  PSS_ROLLUP_SUPPORTED,
+  PSS_ROLLUP_UNSUPPORTED
+};
+
+static std::atomic<pss_rollup_support> g_pss_rollup_support;
 
 #define BINDER_STATS "/proc/binder/stats"
 
@@ -548,6 +552,33 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
+UniqueFile OpenSmapsOrRollup(int pid)
+{
+    enum pss_rollup_support rollup_support =
+            g_pss_rollup_support.load(std::memory_order_relaxed);
+    if (rollup_support != PSS_ROLLUP_UNSUPPORTED) {
+        std::string smaps_rollup_path =
+                base::StringPrintf("/proc/%d/smaps_rollup", pid);
+        UniqueFile fp_rollup = MakeUniqueFile(smaps_rollup_path.c_str(), "re");
+        if (fp_rollup == nullptr && errno != ENOENT) {
+            return fp_rollup;  // Actual error, not just old kernel.
+        }
+        if (fp_rollup != nullptr) {
+            if (rollup_support == PSS_ROLLUP_UNTRIED) {
+                ALOGI("using rollup pss collection");
+                g_pss_rollup_support.store(PSS_ROLLUP_SUPPORTED,
+                                           std::memory_order_relaxed);
+            }
+            return fp_rollup;
+        }
+        g_pss_rollup_support.store(PSS_ROLLUP_UNSUPPORTED,
+                                   std::memory_order_relaxed);
+    }
+
+    std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
+    return MakeUniqueFile(smaps_path.c_str(), "re");
+}
+
 static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
         jlongArray outUssSwapPss, jlongArray outMemtrack)
 {
@@ -563,12 +594,11 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
     }
 
     {
-        std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
-        UniqueFile fp = MakeUniqueFile(smaps_path.c_str(), "re");
+        UniqueFile fp = OpenSmapsOrRollup(pid);
 
         if (fp != nullptr) {
             while (true) {
-                if (fgets(line, 1024, fp.get()) == NULL) {
+                if (fgets(line, sizeof (line), fp.get()) == NULL) {
                     break;
                 }
 
