@@ -6271,7 +6271,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int horizontalPadding = getCompoundPaddingLeft();
             final int verticalPadding = getExtendedPaddingTop() + getVerticalOffset(true);
 
-            if (mEditor.mCursorCount == 0) {
+            if (mEditor.mCursorDrawable == null) {
                 synchronized (TEMP_RECTF) {
                     /*
                      * The reason for this concern about the thickness of the
@@ -6298,11 +6298,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             (int) Math.ceil(verticalPadding + TEMP_RECTF.bottom + thick));
                 }
             } else {
-                for (int i = 0; i < mEditor.mCursorCount; i++) {
-                    Rect bounds = mEditor.mCursorDrawable[i].getBounds();
-                    invalidate(bounds.left + horizontalPadding, bounds.top + verticalPadding,
-                            bounds.right + horizontalPadding, bounds.bottom + verticalPadding);
-                }
+                final Rect bounds = mEditor.mCursorDrawable.getBounds();
+                invalidate(bounds.left + horizontalPadding, bounds.top + verticalPadding,
+                        bounds.right + horizontalPadding, bounds.bottom + verticalPadding);
             }
         }
     }
@@ -6352,12 +6350,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int bottom = mLayout.getLineBottom(lineEnd);
 
             // mEditor can be null in case selection is set programmatically.
-            if (invalidateCursor && mEditor != null) {
-                for (int i = 0; i < mEditor.mCursorCount; i++) {
-                    Rect bounds = mEditor.mCursorDrawable[i].getBounds();
-                    top = Math.min(top, bounds.top);
-                    bottom = Math.max(bottom, bounds.bottom);
-                }
+            if (invalidateCursor && mEditor != null && mEditor.mCursorDrawable != null) {
+                final Rect bounds = mEditor.mCursorDrawable.getBounds();
+                top = Math.min(top, bounds.top);
+                bottom = Math.max(bottom, bounds.bottom);
             }
 
             final int compoundPaddingLeft = getCompoundPaddingLeft();
@@ -6702,7 +6698,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         if (mHighlightPath == null) mHighlightPath = new Path();
                         mHighlightPath.reset();
                         mLayout.getCursorPath(selStart, mHighlightPath, mText);
-                        mEditor.updateCursorsPositions();
+                        mEditor.updateCursorPosition();
                         mHighlightPathBogus = false;
                     }
 
