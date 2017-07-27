@@ -107,7 +107,6 @@ public class NotificationData {
          * Resets the notification entry to be re-used.
          */
         public void reset() {
-            lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
             if (row != null) {
                 row.reset();
             }
@@ -122,6 +121,7 @@ public class NotificationData {
         }
 
         public void notifyFullScreenIntentLaunched() {
+            setInterruption();
             lastFullScreenIntentLaunchTime = SystemClock.elapsedRealtime();
         }
 
