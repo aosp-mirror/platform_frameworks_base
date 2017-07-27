@@ -89,8 +89,8 @@ public class TextUtils {
 
     /** {@hide} */
     @NonNull
-    public static String getEllipsisString(@NonNull TextUtils.TruncateAt method) {
-        return (method == TextUtils.TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL;
+    public static String getEllipsisString(@NonNull TruncateAt method) {
+        return (method == TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL;
     }
 
 
@@ -1187,9 +1187,11 @@ public class TextUtils {
      * or, if it does not fit, a truncated
      * copy with ellipsis character added at the specified edge or center.
      */
-    public static CharSequence ellipsize(CharSequence text,
-                                         TextPaint p,
-                                         float avail, TruncateAt where) {
+    @NonNull
+    public static CharSequence ellipsize(@NonNull CharSequence text,
+                                         @NonNull TextPaint p,
+                                         @FloatRange(from = 0.0) float avail,
+                                         @NonNull TruncateAt where) {
         return ellipsize(text, p, avail, where, false, null);
     }
 
@@ -1205,9 +1207,11 @@ public class TextUtils {
      * report the start and end of the ellipsized range.  TextDirection
      * is determined by the first strong directional character.
      */
-    public static CharSequence ellipsize(CharSequence text,
-                                         TextPaint paint,
-                                         float avail, TruncateAt where,
+    @NonNull
+    public static CharSequence ellipsize(@NonNull CharSequence text,
+                                         @NonNull TextPaint paint,
+                                         @FloatRange(from = 0.0) float avail,
+                                         @NonNull TruncateAt where,
                                          boolean preserveLength,
                                          @Nullable EllipsizeCallback callback) {
         return ellipsize(text, paint, avail, where, preserveLength, callback,
@@ -1228,16 +1232,19 @@ public class TextUtils {
      *
      * @hide
      */
-    public static CharSequence ellipsize(CharSequence text,
-            TextPaint paint,
-            float avail, TruncateAt where,
+    @NonNull
+    public static CharSequence ellipsize(@NonNull CharSequence text,
+            @NonNull TextPaint paint,
+            @FloatRange(from = 0.0) float avail,
+            @NonNull TruncateAt where,
             boolean preserveLength,
             @Nullable EllipsizeCallback callback,
-            TextDirectionHeuristic textDir, String ellipsis) {
+            @NonNull TextDirectionHeuristic textDir,
+            @NonNull String ellipsis) {
 
-        int len = text.length();
-
-        MeasuredText mt = MeasuredText.obtain();
+        final int len = text.length();
+        final MeasuredText mt = MeasuredText.obtain();
+        MeasuredText resultMt = null;
         try {
             float width = setPara(mt, paint, text, 0, text.length(), textDir);
 
@@ -1245,74 +1252,88 @@ public class TextUtils {
                 if (callback != null) {
                     callback.ellipsized(0, 0);
                 }
-
                 return text;
             }
 
-            // XXX assumes ellipsis string does not require shaping and
-            // is unaffected by style
-            float ellipsiswid = paint.measureText(ellipsis);
-            avail -= ellipsiswid;
-
-            int left = 0;
-            int right = len;
-            if (avail < 0) {
-                // it all goes
-            } else if (where == TruncateAt.START) {
-                right = len - mt.breakText(len, false, avail);
-            } else if (where == TruncateAt.END || where == TruncateAt.END_SMALL) {
-                left = mt.breakText(len, true, avail);
-            } else {
-                right = len - mt.breakText(len, false, avail / 2);
-                avail -= mt.measure(right, len);
-                left = mt.breakText(right, true, avail);
-            }
-
-            if (callback != null) {
-                callback.ellipsized(left, right);
-            }
-
-            char[] buf = mt.mChars;
-            Spanned sp = text instanceof Spanned ? (Spanned) text : null;
-
-            final int removed = right - left;
-            final int remaining = len - removed;
-            if (preserveLength) {
-                if (remaining > 0 && removed >= ellipsis.length()) {
-                    ellipsis.getChars(0, ellipsis.length(), buf, left);
-                    left += ellipsis.length();
-                } // else skip the ellipsis
-                for (int i = left; i < right; i++) {
-                    buf[i] = ELLIPSIS_FILLER;
+            resultMt = MeasuredText.obtain();
+            // First estimate of effective width of ellipsis.
+            float ellipsisWidth = paint.measureText(ellipsis);
+            while (true) { // Repeat until the ellipsized text fits.
+                final float remainingWidth = avail - ellipsisWidth;
+                final int start, end;
+                if (remainingWidth < 0) {
+                    // Even the ellipsis can't fit. So it all goes.
+                    start = 0;
+                    end = len;
+                } else if (where == TruncateAt.START) {
+                    start = 0;
+                    end = len - mt.breakText(len, false /* backwards */, remainingWidth);
+                } else if (where == TruncateAt.END || where == TruncateAt.END_SMALL) {
+                    start = mt.breakText(len, true /* forwards */, remainingWidth);
+                    end = len;
+                } else {
+                    end = len - mt.breakText(len, false /* backwards */, remainingWidth / 2);
+                    start = mt.breakText(end, true /* forwards */,
+                            remainingWidth - mt.measure(end, len));
                 }
-                String s = new String(buf, 0, len);
-                if (sp == null) {
-                    return s;
+
+                final char[] buf = mt.mChars;
+                final Spanned sp = text instanceof Spanned ? (Spanned) text : null;
+
+                final CharSequence result;
+                final int removed = end - start;
+                final int remaining = len - removed;
+                if (preserveLength) {
+                    int pos = start;
+                    if (remaining > 0 && removed >= ellipsis.length()) {
+                        ellipsis.getChars(0, ellipsis.length(), buf, start);
+                        pos += ellipsis.length();
+                    } // else eliminate the ellipsis
+                    while (pos < end) {
+                        buf[pos++] = ELLIPSIS_FILLER;
+                    }
+                    final String s = new String(buf, 0, len);
+                    if (sp == null) {
+                        result = s;
+                    } else {
+                        final SpannableString ss = new SpannableString(s);
+                        copySpansFrom(sp, 0, len, Object.class, ss, 0);
+                        result = ss;
+                    }
+                } else {
+                    if (remaining == 0) {
+                        result = "";
+                    } else if (sp == null) {
+                        final StringBuilder sb = new StringBuilder(remaining + ellipsis.length());
+                        sb.append(buf, 0, start);
+                        sb.append(ellipsis);
+                        sb.append(buf, end, len - end);
+                        result = sb.toString();
+                    } else {
+                        final SpannableStringBuilder ssb = new SpannableStringBuilder();
+                        ssb.append(text, 0, start);
+                        ssb.append(ellipsis);
+                        ssb.append(text, end, len);
+                        result = ssb;
+                    }
                 }
-                SpannableString ss = new SpannableString(s);
-                copySpansFrom(sp, 0, len, Object.class, ss, 0);
-                return ss;
-            }
 
-            if (remaining == 0) {
-                return "";
+                width = setPara(resultMt, paint, result, 0, result.length(), textDir);
+                if (width <= avail || remaining == 0) { // Text fits or all text is gone.
+                    if (callback != null) {
+                        callback.ellipsized(start, end);
+                    }
+                    return result;
+                } else {
+                    // Adjust the width of the ellipsis by adding the amount 'width' is still over.
+                    ellipsisWidth += width - avail;
+                }
             }
-
-            if (sp == null) {
-                StringBuilder sb = new StringBuilder(remaining + ellipsis.length());
-                sb.append(buf, 0, left);
-                sb.append(ellipsis);
-                sb.append(buf, right, len - right);
-                return sb.toString();
-            }
-
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(text, 0, left);
-            ssb.append(ellipsis);
-            ssb.append(text, right, len);
-            return ssb;
         } finally {
             MeasuredText.recycle(mt);
+            if (resultMt != null) {
+                MeasuredText.recycle(resultMt);
+            }
         }
     }
 
@@ -1343,7 +1364,6 @@ public class TextUtils {
      * @return the formatted CharSequence. If even the shortest sequence (e.g. {@code "A, 11 more"})
      *     doesn't fit, it will return an empty string.
      */
-
     public static CharSequence listEllipsize(@Nullable Context context,
             @Nullable List<CharSequence> elements, @NonNull String separator,
             @NonNull TextPaint paint, @FloatRange(from=0.0,fromInclusive=false) float avail,

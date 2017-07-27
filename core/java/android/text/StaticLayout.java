@@ -707,7 +707,7 @@ public class StaticLayout extends Layout {
                     // TODO: Support more justification mode, e.g. letter spacing, stretching.
                     b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE);
             if (mLeftIndents != null || mRightIndents != null) {
-                // TODO(raph) performance: it would be better to do this once per layout rather
+                // TODO(performance): it would be better to do this once per layout rather
                 // than once per paragraph, but that would require a change to the native
                 // interface.
                 int leftLen = mLeftIndents == null ? 0 : mLeftIndents.length;
@@ -794,7 +794,7 @@ public class StaticLayout extends Layout {
                             width += widths[j];
                         }
                     }
-                    flag |= flags[i] & TAB_MASK;
+                    flag |= flags[i] & TAB_MASK; // XXX May need to also have starting hyphen edit
                 }
                 // Treat the last line and overflowed lines as a single line.
                 breaks[remainingLineCount - 1] = breaks[breakCount - 1];
@@ -948,6 +948,25 @@ public class StaticLayout extends Layout {
             bottom = fm.bottom;
         }
 
+        // Information about hyphenation, tabs, and directions are needed for determining
+        // ellipsization, so the values should be assigned before ellipsization.
+
+        // TODO: could move TAB to share same column as HYPHEN, simplifying this code and gaining
+        // one bit for start field
+        lines[off + TAB] = flags & TAB_MASK;
+        lines[off + HYPHEN] = flags;
+
+        lines[off + DIR] |= dir << DIR_SHIFT;
+        // easy means all chars < the first RTL, so no emoji, no nothing
+        // XXX a run with no text or all spaces is easy but might be an empty
+        // RTL paragraph.  Make sure easy is false if this is the case.
+        if (easy) {
+            mLineDirections[j] = DIRS_ALL_LEFT_TO_RIGHT;
+        } else {
+            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, start - widthStart, chs,
+                    start - widthStart, end - start);
+        }
+
         boolean firstLine = (j == 0);
         boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
 
@@ -963,8 +982,8 @@ public class StaticLayout extends Layout {
                             ellipsize == TextUtils.TruncateAt.END);
             if (doEllipsis) {
                 calculateEllipsis(start, end, widths, widthStart,
-                        ellipsisWidth, ellipsize, j,
-                        textWidth, paint, forceEllipsis);
+                        ellipsisWidth - getTotalInsets(j), ellipsize, j,
+                        textWidth, paint, forceEllipsis, dir);
             }
         }
 
@@ -1003,7 +1022,7 @@ public class StaticLayout extends Layout {
             extra = 0;
         }
 
-        lines[off + START] = start;
+        lines[off + START] |= start;
         lines[off + TOP] = v;
         lines[off + DESCENT] = below + extra;
         lines[off + EXTRA] = extra;
@@ -1021,33 +1040,13 @@ public class StaticLayout extends Layout {
         lines[off + mColumns + START] = end;
         lines[off + mColumns + TOP] = v;
 
-        // TODO: could move TAB to share same column as HYPHEN, simplifying this code and gaining
-        // one bit for start field
-        lines[off + TAB] |= flags & TAB_MASK;
-        lines[off + HYPHEN] = flags;
-
-        lines[off + DIR] |= dir << DIR_SHIFT;
-        Directions linedirs = DIRS_ALL_LEFT_TO_RIGHT;
-        // easy means all chars < the first RTL, so no emoji, no nothing
-        // XXX a run with no text or all spaces is easy but might be an empty
-        // RTL paragraph.  Make sure easy is false if this is the case.
-        if (easy) {
-            mLineDirections[j] = linedirs;
-        } else {
-            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, start - widthStart, chs,
-                    start - widthStart, end - start);
-        }
-
         mLineCount++;
         return v;
     }
 
-    private void calculateEllipsis(int lineStart, int lineEnd,
-                                   float[] widths, int widthStart,
-                                   float avail, TextUtils.TruncateAt where,
-                                   int line, float textWidth, TextPaint paint,
-                                   boolean forceEllipsis) {
-        avail -= getTotalInsets(line);
+    private void calculateEllipsis(int lineStart, int lineEnd, float[] widths, int widthStart,
+            float avail, TextUtils.TruncateAt where, int line, float textWidth, TextPaint paint,
+            boolean forceEllipsis, int dir) {
         if (textWidth <= avail && !forceEllipsis) {
             // Everything fits!
             mLines[mColumns * line + ELLIPSIS_START] = 0;
@@ -1055,11 +1054,35 @@ public class StaticLayout extends Layout {
             return;
         }
 
-        float ellipsisWidth = paint.measureText(TextUtils.getEllipsisString(where));
-        int ellipsisStart = 0;
-        int ellipsisCount = 0;
-        int len = lineEnd - lineStart;
+        float tempAvail = avail;
+        while (true) {
+            float ellipsizedWidth = guessEllipsis(lineStart, lineEnd, widths, widthStart, tempAvail,
+                    where, line, textWidth, paint, forceEllipsis, dir);
+            if (ellipsizedWidth <= avail) {
+                mEllipsized = true;
+                return; // The ellipsized line fits.
+            } else {
+                // Some side effect of ellipsization has caused the text to go over the available
+                // width. Let's make the available width shorter by exactly that amount and retry.
+                tempAvail -= ellipsizedWidth - avail;
+            }
+        }
+    }
 
+    // Returns the width of the ellipsized line which in some rare cases can actually be larger
+    // than 'avail' (due to kerning or other context-based effect of replacement of text by
+    // ellipsis). If all the line needs to ellipsized away, or it's an invalud hyphenation mode,
+    // returns 0 so the caller can stop iterating.
+    private float guessEllipsis(int lineStart, int lineEnd, float[] widths, int widthStart,
+            float avail, TextUtils.TruncateAt where, int line, float textWidth, TextPaint paint,
+            boolean forceEllipsis, int dir) {
+        final float ellipsisWidth = paint.measureText(TextUtils.getEllipsisString(where));
+        final int ellipsisStart;
+        final int ellipsisCount;
+        final int len = lineEnd - lineStart;
+        final int offset = lineStart - widthStart;
+
+        int hyphen = getHyphen(line);
         // We only support start ellipsis on a single line
         if (where == TextUtils.TruncateAt.START) {
             if (mMaximumVisibleLineCount == 1) {
@@ -1067,9 +1090,9 @@ public class StaticLayout extends Layout {
                 int i;
 
                 for (i = len; i > 0; i--) {
-                    float w = widths[i - 1 + lineStart - widthStart];
+                    final float w = widths[i - 1 + offset];
                     if (w + sum + ellipsisWidth > avail) {
-                        while (i < len && widths[i + lineStart - widthStart] == 0.0f) {
+                        while (i < len && widths[i + offset] == 0.0f) {
                             i++;
                         }
                         break;
@@ -1080,9 +1103,13 @@ public class StaticLayout extends Layout {
 
                 ellipsisStart = 0;
                 ellipsisCount = i;
+                // Strip the potential hyphenation at beginning of line.
+                hyphen &= ~Paint.HYPHENEDIT_MASK_START_OF_LINE;
             } else {
+                ellipsisStart = 0;
+                ellipsisCount = 0;
                 if (Log.isLoggable(TAG, Log.WARN)) {
-                    Log.w(TAG, "Start Ellipsis only supported with one line");
+                    Log.w(TAG, "Start ellipsis only supported with one line");
                 }
             }
         } else if (where == TextUtils.TruncateAt.END || where == TextUtils.TruncateAt.MARQUEE ||
@@ -1091,7 +1118,7 @@ public class StaticLayout extends Layout {
             int i;
 
             for (i = 0; i < len; i++) {
-                float w = widths[i + lineStart - widthStart];
+                final float w = widths[i + offset];
 
                 if (w + sum + ellipsisWidth > avail) {
                     break;
@@ -1100,24 +1127,27 @@ public class StaticLayout extends Layout {
                 sum += w;
             }
 
-            ellipsisStart = i;
-            ellipsisCount = len - i;
-            if (forceEllipsis && ellipsisCount == 0 && len > 0) {
+            if (forceEllipsis && i == len && len > 0) {
                 ellipsisStart = len - 1;
                 ellipsisCount = 1;
+            } else {
+                ellipsisStart = i;
+                ellipsisCount = len - i;
             }
-        } else {
-            // where = TextUtils.TruncateAt.MIDDLE We only support middle ellipsis on a single line
+            // Strip the potential hyphenation at end of line.
+            hyphen &= ~Paint.HYPHENEDIT_MASK_END_OF_LINE;
+        } else { // where = TextUtils.TruncateAt.MIDDLE
+            // We only support middle ellipsis on a single line.
             if (mMaximumVisibleLineCount == 1) {
                 float lsum = 0, rsum = 0;
                 int left = 0, right = len;
 
-                float ravail = (avail - ellipsisWidth) / 2;
+                final float ravail = (avail - ellipsisWidth) / 2;
                 for (right = len; right > 0; right--) {
-                    float w = widths[right - 1 + lineStart - widthStart];
+                    final float w = widths[right - 1 + offset];
 
                     if (w + rsum > ravail) {
-                        while (right < len && widths[right + lineStart - widthStart] == 0.0f) {
+                        while (right < len && widths[right + offset] == 0.0f) {
                             right++;
                         }
                         break;
@@ -1125,9 +1155,9 @@ public class StaticLayout extends Layout {
                     rsum += w;
                 }
 
-                float lavail = avail - ellipsisWidth - rsum;
+                final float lavail = avail - ellipsisWidth - rsum;
                 for (left = 0; left < right; left++) {
-                    float w = widths[left + lineStart - widthStart];
+                    final float w = widths[left + offset];
 
                     if (w + lsum > lavail) {
                         break;
@@ -1139,14 +1169,46 @@ public class StaticLayout extends Layout {
                 ellipsisStart = left;
                 ellipsisCount = right - left;
             } else {
+                ellipsisStart = 0;
+                ellipsisCount = 0;
                 if (Log.isLoggable(TAG, Log.WARN)) {
-                    Log.w(TAG, "Middle Ellipsis only supported with one line");
+                    Log.w(TAG, "Middle ellipsis only supported with one line");
                 }
             }
         }
-        mEllipsized = true;
         mLines[mColumns * line + ELLIPSIS_START] = ellipsisStart;
         mLines[mColumns * line + ELLIPSIS_COUNT] = ellipsisCount;
+
+        if (ellipsisStart == 0 && (ellipsisCount == 0 || ellipsisCount == len)) {
+            // Unsupported ellipsization mode or all text is ellipsized away. Return 0.
+            return 0.0f;
+        }
+
+        final CharSequence text = getText();
+        final boolean hasTabs = getLineContainsTab(line);
+        final TabStops tabStops;
+        if (hasTabs && text instanceof Spanned) {
+            final TabStopSpan[] tabs = getParagraphSpans((Spanned) text, lineStart, lineEnd,
+                    TabStopSpan.class);
+            if (tabs.length == 0) {
+                tabStops = null;
+            } else {
+                tabStops = new TabStops(TAB_INCREMENT, tabs);
+            }
+        } else {
+            tabStops = null;
+        }
+        final TextLine textline = TextLine.obtain();
+        paint.setHyphenEdit(hyphen);
+        textline.set(paint,
+                text, /* this is an instance of Ellipsizer or SpannedEllipsizer */
+                lineStart, lineEnd,
+                dir, getLineDirections(line),
+                hasTabs, tabStops);
+        final float hyphenatedWidth = textline.metrics(null);
+        paint.setHyphenEdit(0);
+        TextLine.recycle(textline);
+        return hyphenatedWidth;
     }
 
     private float getTotalInsets(int line) {
