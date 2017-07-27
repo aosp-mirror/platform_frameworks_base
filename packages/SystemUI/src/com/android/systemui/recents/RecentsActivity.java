@@ -400,6 +400,17 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
+
+        // If Recents was restarted, then it should complete the enter animation with partially
+        // reset launch state with dock, app and home set to false
+        Object isRelaunching = getLastNonConfigurationInstance();
+        if (isRelaunching != null && isRelaunching instanceof Boolean && (boolean) isRelaunching) {
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            launchState.launchedViaDockGesture = false;
+            launchState.launchedFromApp = false;
+            launchState.launchedFromHome = false;
+            onEnterAnimationComplete();
+        }
     }
 
     @Override
@@ -502,6 +513,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+    }
+
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        return true;
     }
 
     @Override
