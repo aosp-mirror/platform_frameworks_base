@@ -52,24 +52,22 @@ struct Target {
 
     int testPassCount;
     int testFailCount;
+    int testIgnoreCount;
     int unknownFailureCount; // unknown failure == "Process crashed", etc.
-    bool actionsWithNoTests;
 
     Target(bool b, bool i, bool t, const string& p);
 };
 
 Target::Target(bool b, bool i, bool t, const string& p)
-    :build(b),
-     install(i),
-     test(t),
-     pattern(p),
-     testActionCount(0),
-     testPassCount(0),
-     testFailCount(0),
-     unknownFailureCount(0),
-     actionsWithNoTests(false)
-{
-}
+      : build(b),
+        install(i),
+        test(t),
+        pattern(p),
+        testActionCount(0),
+        testPassCount(0),
+        testFailCount(0),
+        testIgnoreCount(0),
+        unknownFailureCount(0) {}
 
 /**
  * Command line options.
@@ -188,13 +186,12 @@ struct TestAction {
 
     // The number of tests that failed
     int failCount;
+
+    // The number of tests that were ignored (because of @Ignore)
+    int ignoreCount;
 };
 
-TestAction::TestAction()
-    :passCount(0),
-     failCount(0)
-{
-}
+TestAction::TestAction() : passCount(0), failCount(0), ignoreCount(0) {}
 
 /**
  * Record for an activity that is going to be launched.
@@ -300,6 +297,13 @@ TestResults::OnTestStatus(TestStatus& status)
         } else if (stackFound) {
             printf("%s\n", stack.c_str());
         }
+    } else if (resultCode == -3) {
+        // test ignored
+        m_currentAction->ignoreCount++;
+        m_currentAction->target->testIgnoreCount++;
+        printf("%s\n%sIgnored: %s:%s#%s%s\n", g_escapeClearLine, g_escapeYellowBold,
+               m_currentAction->target->name.c_str(), className.c_str(), testName.c_str(),
+               g_escapeEndColor);
     }
 }
 
@@ -453,6 +457,35 @@ print_usage(FILE* out) {
     fprintf(out, "\n");
 }
 
+/**
+ * Prints a possibly color-coded summary of test results. Example output:
+ *
+ *     "34 passed, 0 failed, 1 ignored\n"
+ */
+static void print_results(int passed, int failed, int ignored) {
+    char const* nothing = "";
+    char const* cp = nothing;
+    char const* cf = nothing;
+    char const* ci = nothing;
+
+    if (failed > 0) {
+        cf = g_escapeRedBold;
+    } else if (passed > 0 || ignored > 0) {
+        cp = passed > 0 ? g_escapeGreenBold : nothing;
+        ci = ignored > 0 ? g_escapeYellowBold : nothing;
+    } else {
+        cp = g_escapeYellowBold;
+        cf = g_escapeYellowBold;
+    }
+
+    if (ignored > 0) {
+        printf("%s%d passed%s, %s%d failed%s, %s%d ignored%s\n", cp, passed, g_escapeEndColor, cf,
+               failed, g_escapeEndColor, ci, ignored, g_escapeEndColor);
+    } else {
+        printf("%s%d passed%s, %s%d failed%s\n", cp, passed, g_escapeEndColor, cf, failed,
+               g_escapeEndColor);
+    }
+}
 
 /**
  * Sets the appropriate flag* variables. If there is a problem with the
@@ -1038,22 +1071,10 @@ run_phases(vector<Target*> targets, const Options& options)
             err = run_instrumentation_test(action.packageName, action.runner, action.className,
                     &testResults);
             check_error(err);
-            if (action.passCount == 0 && action.failCount == 0) {
-                action.target->actionsWithNoTests = true;
-            }
             int total = action.passCount + action.failCount;
             printf("%sRan %d test%s for %s. ", g_escapeClearLine,
                     total, total > 1 ? "s" : "", action.target->name.c_str());
-            if (action.passCount == 0 && action.failCount == 0) {
-                printf("%s%d passed, %d failed%s\n", g_escapeYellowBold, action.passCount,
-                        action.failCount, g_escapeEndColor);
-            } else if (action.failCount >  0) {
-                printf("%d passed, %s%d failed%s\n", action.passCount, g_escapeRedBold,
-                        action.failCount, g_escapeEndColor);
-            } else {
-                printf("%s%d passed%s, %d failed\n", g_escapeGreenBold, action.passCount,
-                        g_escapeEndColor, action.failCount);
-            }
+            print_results(action.passCount, action.failCount, action.ignoreCount);
             if (!testResults.IsSuccess()) {
                 printf("\n%sTest didn't finish successfully: %s%s\n", g_escapeRedBold,
                         testResults.GetErrorMessage().c_str(), g_escapeEndColor);
@@ -1150,17 +1171,11 @@ run_phases(vector<Target*> targets, const Options& options)
                     printf("     %sUnknown failure, see above message.%s\n",
                             g_escapeRedBold, g_escapeEndColor);
                     hasErrors = true;
-                } else if (target->actionsWithNoTests) {
-                    printf("     %s%d passed, %d failed%s\n", g_escapeYellowBold,
-                            target->testPassCount, target->testFailCount, g_escapeEndColor);
-                    hasErrors = true;
-                } else if (target->testFailCount > 0) {
-                    printf("     %d passed, %s%d failed%s\n", target->testPassCount,
-                            g_escapeRedBold, target->testFailCount, g_escapeEndColor);
-                    hasErrors = true;
                 } else {
-                    printf("     %s%d passed%s, %d failed\n", g_escapeGreenBold,
-                            target->testPassCount, g_escapeEndColor, target->testFailCount);
+                    printf("   %s%s     ", target->name.c_str(),
+                           padding.c_str() + target->name.length());
+                    print_results(target->testPassCount, target->testFailCount,
+                                  target->testIgnoreCount);
                 }
             }
         }
