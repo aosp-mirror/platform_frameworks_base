@@ -3731,7 +3731,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                notifyHeadsUpScreenOff();
                 finishBarAnimations();
                 resetUserExpandedStates();
             }
@@ -5173,6 +5172,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
+            notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
         }
 
@@ -7266,7 +7266,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         setAreThereNotifications();
     }
 
-    protected void notifyHeadsUpScreenOff() {
+    protected void notifyHeadsUpGoingToSleep() {
         maybeEscalateHeadsUp();
     }
 
