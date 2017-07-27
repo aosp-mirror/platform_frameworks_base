@@ -100,7 +100,6 @@ public class DozeUi implements DozeMachine.Part {
 
     private boolean shouldAnimateWakeup(DozeMachine.State state) {
         switch (state) {
-            case DOZE_AOD:
             case DOZE_REQUEST_PULSE:
             case DOZE_PULSING:
             case DOZE_PULSE_DONE:
