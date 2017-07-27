@@ -57,9 +57,9 @@ public class AppBoundsTests extends WindowTestsBase {
         final Configuration config = new Configuration();
         final Configuration config2 = new Configuration();
         config.appBounds = new Rect(0, 1, 1, 0);
-        config2.appBounds = new Rect(0, 2, 2, 0);
+        config2.appBounds = new Rect(1, 2, 2, 1);
 
-        assertEquals(ActivityInfo.CONFIG_APP_BOUNDS, config.diff(config2));
+        assertEquals(ActivityInfo.CONFIG_SCREEN_SIZE, config.diff(config2));
     }
 
     /**
