@@ -468,8 +468,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         final String displayName = file.getName();
         // As of right now, we aren't sure on the performance affect of loading all PDF Thumbnails
         // Until a solution is found, it will be behind a debuggable flag.
-        if (mimeType.startsWith("image/")
-                || (mimeType.equals(MIMETYPE_PDF) && Build.IS_DEBUGGABLE)) {
+        if (mimeType.startsWith("image/") || mimeType.equals(MIMETYPE_PDF)) {
             flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
 
