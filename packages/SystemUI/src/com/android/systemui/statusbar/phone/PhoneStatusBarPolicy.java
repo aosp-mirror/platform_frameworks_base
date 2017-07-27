@@ -196,8 +196,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         }
 
         // TTY status
-        mIconController.setIcon(mSlotTty, R.drawable.stat_sys_tty_mode, null);
-        mIconController.setIconVisibility(mSlotTty, false);
+        updateTTY();
 
         // bluetooth status
         updateBluetooth();
@@ -419,9 +418,17 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mIconController.setIconVisibility(mSlotBluetooth, bluetoothEnabled);
     }
 
-    private final void updateTTY(Intent intent) {
-        int currentTtyMode = intent.getIntExtra(TelecomManager.EXTRA_CURRENT_TTY_MODE,
-                TelecomManager.TTY_MODE_OFF);
+    private final void updateTTY() {
+        TelecomManager telecomManager =
+                (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+        if (telecomManager == null) {
+            updateTTY(TelecomManager.TTY_MODE_OFF);
+        } else {
+            updateTTY(telecomManager.getCurrentTtyMode());
+        }
+    }
+
+    private final void updateTTY(int currentTtyMode) {
         boolean enabled = currentTtyMode != TelecomManager.TTY_MODE_OFF;
 
         if (DEBUG) Log.v(TAG, "updateTTY: enabled: " + enabled);
@@ -754,7 +761,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
                 updateSimState(intent);
             } else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
-                updateTTY(intent);
+                updateTTY(intent.getIntExtra(TelecomManager.EXTRA_CURRENT_TTY_MODE,
+                        TelecomManager.TTY_MODE_OFF));
             } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABLE) ||
                     action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE) ||
                     action.equals(Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
