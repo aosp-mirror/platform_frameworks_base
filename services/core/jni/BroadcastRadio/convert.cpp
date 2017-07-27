@@ -19,9 +19,9 @@
 
 #include "convert.h"
 
-#include <JNIHelp.h>
-#include <Utils.h>
+#include <broadcastradio-utils/Utils.h>
 #include <core_jni_helpers.h>
+#include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 
 namespace android {
@@ -262,7 +262,7 @@ static Deemphasis DeemphasisForRegion(Region region) {
 
 static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &prop10,
         const V1_1::Properties *prop11, jint moduleId, const std::string& serviceName) {
-    ALOGV("ModulePropertiesFromHal()");
+    ALOGV("%s", __func__);
     using namespace std::placeholders;
 
     auto jServiceName = make_javastr(env, serviceName);
@@ -298,7 +298,7 @@ JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_1::Properties &pr
 }
 
 static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
-    ALOGV("BandDescriptorFromHal()");
+    ALOGV("%s", __func__);
 
     jint spacing = config.spacings.size() > 0 ? config.spacings[0] : 0;
     ALOGW_IF(config.spacings.size() == 0, "No channel spacing specified");
@@ -327,7 +327,7 @@ static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfi
 }
 
 JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
-    ALOGV("BandConfigFromHal()");
+    ALOGV("%s", __func__);
 
     auto descriptor = BandDescriptorFromHal(env, config, region);
     if (descriptor == nullptr) return nullptr;
@@ -350,7 +350,7 @@ JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, 
 }
 
 V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region) {
-    ALOGV("BandConfigToHal()");
+    ALOGV("%s", __func__);
     auto jDescriptor = env->GetObjectField(jConfig, gjni.BandConfig.descriptor);
     if (jDescriptor == nullptr) {
         ALOGE("Descriptor is missing");
@@ -392,7 +392,7 @@ Direction DirectionToHal(bool directionDown) {
 }
 
 JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &metadata) {
-    ALOGV("MetadataFromHal()");
+    ALOGV("%s", __func__);
     if (metadata.size() == 0) return nullptr;
 
     auto jMetadata = make_javaref(env, env->NewObject(
@@ -445,13 +445,13 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
 }
 
 static JavaRef<jobject> ProgramIdentifierFromHal(JNIEnv *env, const ProgramIdentifier &id) {
-    ALOGV("ProgramIdentifierFromHal()");
+    ALOGV("%s", __func__);
     return make_javaref(env, env->NewObject(gjni.ProgramSelector.Identifier.clazz,
             gjni.ProgramSelector.Identifier.cstor, id.type, id.value));
 }
 
 static JavaRef<jobject> ProgramSelectorFromHal(JNIEnv *env, const ProgramSelector &selector) {
-    ALOGV("ProgramSelectorFromHal()");
+    ALOGV("%s", __func__);
     auto jPrimary = ProgramIdentifierFromHal(env, selector.primaryId);
     auto jSecondary = ArrayFromHal(env, selector.secondaryIds,
             gjni.ProgramSelector.Identifier.clazz, ProgramIdentifierFromHal);
@@ -462,7 +462,7 @@ static JavaRef<jobject> ProgramSelectorFromHal(JNIEnv *env, const ProgramSelecto
 }
 
 static ProgramIdentifier ProgramIdentifierToHal(JNIEnv *env, jobject jId) {
-    ALOGV("ProgramIdentifierToHal()");
+    ALOGV("%s", __func__);
 
     ProgramIdentifier id = {};
     id.type = env->GetIntField(jId, gjni.ProgramSelector.Identifier.type);
@@ -471,7 +471,7 @@ static ProgramIdentifier ProgramIdentifierToHal(JNIEnv *env, jobject jId) {
 }
 
 ProgramSelector ProgramSelectorToHal(JNIEnv *env, jobject jSelector) {
-    ALOGV("ProgramSelectorToHal()");
+    ALOGV("%s", __func__);
 
     ProgramSelector selector = {};
 
@@ -509,7 +509,7 @@ ProgramSelector ProgramSelectorToHal(JNIEnv *env, jobject jSelector) {
 
 static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info10,
         const V1_1::ProgramInfo *info11, const ProgramSelector &selector) {
-    ALOGV("ProgramInfoFromHal()");
+    ALOGV("%s", __func__);
 
     auto jMetadata = MetadataFromHal(env, info10.metadata);
     auto jVendorInfo = info11 ? make_javastr(env, info11->vendorInfo) : nullptr;

@@ -22,15 +22,18 @@
 #include "Tuner.h"
 #include "convert.h"
 
-#include <JNIHelp.h>
-#include <Utils.h>
+#include <broadcastradio-utils/Utils.h>
 #include <core_jni_helpers.h>
+#include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 
 namespace android {
 namespace server {
 namespace BroadcastRadio {
 namespace TunerCallback {
+
+using std::lock_guard;
+using std::mutex;
 
 using hardware::Return;
 using hardware::hidl_vec;
@@ -76,7 +79,7 @@ enum class TunerError : jint {
     BACKGROUND_SCAN_FAILED = 6,
 };
 
-static Mutex gContextMutex;
+static mutex gContextMutex;
 
 class NativeCallback : public ITunerCallback {
     jobject mJTuner;
@@ -122,13 +125,13 @@ private:
 
 NativeCallback::NativeCallback(JNIEnv *env, jobject jTuner, jobject jCallback, HalRevision halRev)
         : mCallbackThread(gvm), mHalRev(halRev) {
-    ALOGV("NativeCallback()");
+    ALOGV("%s", __func__);
     mJTuner = env->NewGlobalRef(jTuner);
     mJCallback = env->NewGlobalRef(jCallback);
 }
 
 NativeCallback::~NativeCallback() {
-    ALOGV("~NativeCallback()");
+    ALOGV("%s", __func__);
 
     // stop callback thread before dereferencing client callback
     mCallbackThread.stop();
@@ -155,7 +158,7 @@ Return<void> NativeCallback::hardwareFailure() {
 }
 
 Return<void> NativeCallback::configChange(Result result, const BandConfig& config) {
-    ALOGV("configChange(%d)", result);
+    ALOGV("%s(%d)", __func__, result);
 
     mCallbackThread.enqueue([result, config, this](JNIEnv *env) {
         if (result == Result::OK) {
@@ -173,7 +176,7 @@ Return<void> NativeCallback::configChange(Result result, const BandConfig& confi
 }
 
 Return<void> NativeCallback::tuneComplete(Result result, const V1_0::ProgramInfo& info) {
-    ALOGV("tuneComplete(%d)", result);
+    ALOGV("%s(%d)", __func__, result);
 
     if (mHalRev > HalRevision::V1_0) {
         ALOGW("1.0 callback was ignored");
@@ -185,7 +188,7 @@ Return<void> NativeCallback::tuneComplete(Result result, const V1_0::ProgramInfo
 }
 
 Return<void> NativeCallback::tuneComplete_1_1(Result result, const ProgramSelector& selector) {
-    ALOGV("tuneComplete_1_1(%d)", result);
+    ALOGV("%s(%d)", __func__, result);
 
     mCallbackThread.enqueue([result, this](JNIEnv *env) {
         if (result == Result::OK) {
@@ -201,17 +204,17 @@ Return<void> NativeCallback::tuneComplete_1_1(Result result, const ProgramSelect
 }
 
 Return<void> NativeCallback::afSwitch(const V1_0::ProgramInfo& info) {
-    ALOGV("afSwitch()");
+    ALOGV("%s", __func__);
     return tuneComplete(Result::OK, info);
 }
 
 Return<void> NativeCallback::afSwitch_1_1(const ProgramSelector& selector) {
-    ALOGV("afSwitch_1_1()");
+    ALOGV("%s", __func__);
     return tuneComplete_1_1(Result::OK, selector);
 }
 
 Return<void> NativeCallback::antennaStateChange(bool connected) {
-    ALOGV("antennaStateChange(%d)", connected);
+    ALOGV("%s(%d)", __func__, connected);
 
     mCallbackThread.enqueue([this, connected](JNIEnv *env) {
         env->CallVoidMethod(mJCallback, gjni.TunerCallback.onAntennaState, connected);
@@ -221,7 +224,7 @@ Return<void> NativeCallback::antennaStateChange(bool connected) {
 }
 
 Return<void> NativeCallback::trafficAnnouncement(bool active) {
-    ALOGV("trafficAnnouncement(%d)", active);
+    ALOGV("%s(%d)", __func__, active);
 
     mCallbackThread.enqueue([this, active](JNIEnv *env) {
         env->CallVoidMethod(mJCallback, gjni.TunerCallback.onTrafficAnnouncement, active);
@@ -231,7 +234,7 @@ Return<void> NativeCallback::trafficAnnouncement(bool active) {
 }
 
 Return<void> NativeCallback::emergencyAnnouncement(bool active) {
-    ALOGV("emergencyAnnouncement(%d)", active);
+    ALOGV("%s(%d)", __func__, active);
 
     mCallbackThread.enqueue([this, active](JNIEnv *env) {
         env->CallVoidMethod(mJCallback, gjni.TunerCallback.onEmergencyAnnouncement, active);
@@ -243,7 +246,7 @@ Return<void> NativeCallback::emergencyAnnouncement(bool active) {
 Return<void> NativeCallback::newMetadata(uint32_t channel, uint32_t subChannel,
         const hidl_vec<MetaData>& metadata) {
     // channel and subChannel are not used
-    ALOGV("newMetadata(%d, %d)", channel, subChannel);
+    ALOGV("%s(%d, %d)", __func__, channel, subChannel);
 
     if (mHalRev > HalRevision::V1_0) {
         ALOGW("1.0 callback was ignored");
@@ -258,7 +261,7 @@ Return<void> NativeCallback::newMetadata(uint32_t channel, uint32_t subChannel,
 }
 
 Return<void> NativeCallback::backgroundScanAvailable(bool isAvailable) {
-    ALOGV("backgroundScanAvailable(%d)", isAvailable);
+    ALOGV("%s(%d)", __func__, isAvailable);
 
     mCallbackThread.enqueue([this, isAvailable](JNIEnv *env) {
         env->CallVoidMethod(mJCallback,
@@ -269,7 +272,7 @@ Return<void> NativeCallback::backgroundScanAvailable(bool isAvailable) {
 }
 
 Return<void> NativeCallback::backgroundScanComplete(ProgramListResult result) {
-    ALOGV("backgroundScanComplete(%d)", result);
+    ALOGV("%s(%d)", __func__, result);
 
     mCallbackThread.enqueue([this, result](JNIEnv *env) {
         if (result == ProgramListResult::OK) {
@@ -285,7 +288,7 @@ Return<void> NativeCallback::backgroundScanComplete(ProgramListResult result) {
 }
 
 Return<void> NativeCallback::programListChanged() {
-    ALOGV("programListChanged()");
+    ALOGV("%s", __func__);
 
     mCallbackThread.enqueue([this](JNIEnv *env) {
         env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramListChanged);
@@ -295,7 +298,7 @@ Return<void> NativeCallback::programListChanged() {
 }
 
 Return<void> NativeCallback::programInfoChanged() {
-    ALOGV("programInfoChanged()");
+    ALOGV("%s", __func__);
 
     mCallbackThread.enqueue([this](JNIEnv *env) {
         env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
@@ -318,8 +321,8 @@ static TunerCallbackContext& getNativeContext(JNIEnv *env, jobject jTunerCb) {
 }
 
 static jlong nativeInit(JNIEnv *env, jobject obj, jobject jTuner, jint jHalRev) {
-    ALOGV("nativeInit()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
 
     auto halRev = static_cast<HalRevision>(jHalRev);
 
@@ -331,16 +334,16 @@ static jlong nativeInit(JNIEnv *env, jobject obj, jobject jTuner, jint jHalRev) 
 }
 
 static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeFinalize()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
 
     auto ctx = reinterpret_cast<TunerCallbackContext*>(nativeContext);
     delete ctx;
 }
 
 static void nativeDetach(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeDetach()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
     if (ctx.mNativeCallback == nullptr) return;
@@ -349,7 +352,7 @@ static void nativeDetach(JNIEnv *env, jobject obj, jlong nativeContext) {
 }
 
 sp<ITunerCallback> getNativeCallback(JNIEnv *env, jobject jTunerCallback) {
-    AutoMutex _l(gContextMutex);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(env, jTunerCallback);
     return ctx.mNativeCallback;
 }
