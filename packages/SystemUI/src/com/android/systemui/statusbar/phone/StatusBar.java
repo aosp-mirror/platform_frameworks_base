@@ -4726,6 +4726,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
         mNotificationPanel.expand(false /* animate */);
+        recomputeDisableFlags(false /* animate */);
     }
 
     private void instantCollapseNotificationPanel() {
