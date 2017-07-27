@@ -228,6 +228,7 @@ final class SaveUi {
         final WindowManager.LayoutParams params = window.getAttributes();
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
+        params.windowAnimations = R.style.AutofillSaveAnimation;
 
         Slog.i(TAG, "Showing save dialog: " + mTitle);
         mDialog.show();
