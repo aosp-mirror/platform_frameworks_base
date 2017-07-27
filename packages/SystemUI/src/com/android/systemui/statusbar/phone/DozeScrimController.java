@@ -322,7 +322,7 @@ public class DozeScrimController {
             mHandler.removeCallbacks(mPulseOutExtended);
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
-            startScrimAnimation(true /* inFront */, mDozeParameters.getAlwaysOn() ? 0 : 1,
+            startScrimAnimation(true /* inFront */, 1,
                     mDozeParameters.getPulseOutDuration(),
                     Interpolators.ALPHA_IN, mPulseOutFinished);
         }
@@ -336,6 +336,9 @@ public class DozeScrimController {
 
             // Signal that the pulse is all finished so we can turn the screen off now.
             pulseFinished();
+            if (mDozeParameters.getAlwaysOn()) {
+                mScrimController.setDozeInFrontAlpha(0);
+            }
         }
     };
 }
