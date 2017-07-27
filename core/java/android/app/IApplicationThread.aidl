@@ -85,6 +85,7 @@ oneway interface IApplicationThread {
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
             in Bundle coreSettings, in String buildSerial);
+    void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleConfigurationChanged(in Configuration config);
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);
