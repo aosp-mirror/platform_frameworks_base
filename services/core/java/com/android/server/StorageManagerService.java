@@ -2969,6 +2969,11 @@ class StorageManagerService extends IStorageManager.Stub
         synchronized (mLock) {
             mLocalUnlockedUsers = ArrayUtils.appendInt(mLocalUnlockedUsers, userId);
         }
+        if (userId == UserHandle.USER_SYSTEM) {
+            String propertyName = "sys.user." + userId + ".ce_available";
+            Slog.d(TAG, "Setting property: " + propertyName + "=true");
+            SystemProperties.set(propertyName, "true");
+        }
     }
 
     @Override
