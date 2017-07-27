@@ -40,15 +40,31 @@
 
     <application
         android:hasCode="true">
+        <meta-data android:name="key1" android:value="value1" />
+        <meta-data android:name="key2" android:value="this_is_app" />
+
         <activity
             android:name="com.android.frameworks.coretests.TestActivity">
+            <meta-data android:name="key1" android:value="value1" />
+            <meta-data android:name="key2" android:value="this_is_activity" />
         </activity>
         <provider
             android:name="com.android.frameworks.coretests.TestProvider"
-            android:authorities="com.android.frameworks.coretests.testprovider" />
+            android:authorities="com.android.frameworks.coretests.testprovider" >
+            <meta-data android:name="key1" android:value="value1" />
+            <meta-data android:name="key2" android:value="this_is_provider" />
+        </provider>
+
         <receiver
-            android:name="com.android.frameworks.coretests.TestReceiver" />
+            android:name="com.android.frameworks.coretests.TestReceiver" >
+            <meta-data android:name="key1" android:value="value1" />
+            <meta-data android:name="key2" android:value="this_is_receiver" />
+        </receiver>
+
         <service
-            android:name="com.android.frameworks.coretests.TestService" />
+            android:name="com.android.frameworks.coretests.TestService" >
+            <meta-data android:name="key1" android:value="value1" />
+            <meta-data android:name="key2" android:value="this_is_service" />
+        </service>
     </application>
 </manifest>
