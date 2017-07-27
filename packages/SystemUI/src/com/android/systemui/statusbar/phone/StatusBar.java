@@ -3520,6 +3520,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.print  ("      ");
             mStackScroller.dump(fd, pw, args);
         }
+        pw.println("  Theme:");
+        if (mOverlayManager == null) {
+            pw.println("    overlay manager not initialized!");
+        } else {
+            pw.println("    dark overlay on: " + isUsingDarkTheme());
+        }
+        final boolean lightWpTheme = mContext.getThemeResId() == R.style.Theme_SystemUI_Light;
+        pw.println("    light wallpaper theme: " + lightWpTheme);
 
         DozeLog.dump(pw);
 
