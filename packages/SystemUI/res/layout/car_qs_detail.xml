@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
+<!--
+     Copyright (C) 2017 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,22 +14,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout
+<!-- Extends FrameLayout -->
+<com.android.systemui.qs.car.CarQSDetail
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/car_qs_background_primary"
-    android:orientation="vertical"
-    android:elevation="4dp">
+    android:layout_height="match_parent"
+    android:background="@drawable/qs_detail_background"
+    android:paddingBottom="8dp"
+    android:visibility="gone">
 
-    <include layout="@layout/car_status_bar_header" />
-    <include layout="@layout/car_qs_footer" />
-
-    <include android:id="@+id/qs_detail" layout="@layout/car_qs_detail" />
-
-    <com.android.systemui.qs.QSPanel
-        android:id="@+id/quick_settings_panel"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"/>
-</LinearLayout>
+</com.android.systemui.qs.car.CarQSDetail>
