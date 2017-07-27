@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -1187,6 +1188,8 @@ public class RttManager {
             CMD_OP_ENALBE_RESPONDER_SUCCEEDED           = BASE + 7;
     public static final int
             CMD_OP_ENALBE_RESPONDER_FAILED              = BASE + 8;
+    /** @hide */
+    public static final int CMD_OP_REG_BINDER           = BASE + 9;
 
     private static final int INVALID_KEY = 0;
 
@@ -1215,9 +1218,10 @@ public class RttManager {
         mContext = context;
         mService = service;
         Messenger messenger = null;
+        int[] key = new int[1];
         try {
             Log.d(TAG, "Get the messenger from " + mService);
-            messenger = mService.getMessenger();
+            messenger = mService.getMessenger(new Binder(), key);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1233,6 +1237,7 @@ public class RttManager {
         // We cannot use fullyConnectSync because it sends the FULL_CONNECTION message
         // synchronously, which causes RttService to receive the wrong replyTo value.
         mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
+        mAsyncChannel.sendMessage(CMD_OP_REG_BINDER, key[0]);
     }
 
     private void validateChannel() {
