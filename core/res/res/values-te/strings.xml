@@ -246,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"వాయిస్ సహాయకం"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ఇప్పుడు లాక్ చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"వర్చువల్ కీబోర్డ్"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"భౌతిక కీబోర్డ్"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"భద్రత"</string>
@@ -1196,8 +1195,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"మరింత సమాచారం కోసం నొక్కండి"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి నొక్కండి."</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"డీబగ్గింగ్‌ని నిలిపివేయడానికి ఎంచుకోండి."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"బగ్ నివేదికను తీస్తోంది…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"బగ్ నివేదికను భాగస్వామ్యం చేస్తోంది..."</string>
