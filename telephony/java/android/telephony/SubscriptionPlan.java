@@ -21,6 +21,7 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -42,7 +43,9 @@ import java.util.Iterator;
  *
  * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
  * @see SubscriptionManager#getSubscriptionPlans(int)
+ * @hide
  */
+@SystemApi
 public final class SubscriptionPlan implements Parcelable {
     /** {@hide} */
     @IntDef(prefix = "LIMIT_BEHAVIOR_", value = {

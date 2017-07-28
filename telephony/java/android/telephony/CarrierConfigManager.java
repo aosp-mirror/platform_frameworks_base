@@ -269,7 +269,9 @@ public class CarrierConfigManager {
      *
      * @see SubscriptionManager#getSubscriptionPlans(int)
      * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
+     * @hide
      */
+    @SystemApi
     public static final String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING =
             "config_plans_package_override_string";
 
@@ -1396,11 +1398,7 @@ public class CarrierConfigManager {
      * <p>
      * This setting may be still overridden by explicit user choice. By default,
      * the platform value will be used.
-     *
-     * @deprecated replaced by
-     *             {@link SubscriptionManager#setSubscriptionPlans(int, java.util.List)}
      */
-    @Deprecated
     public static final String KEY_MONTHLY_DATA_CYCLE_DAY_INT =
             "monthly_data_cycle_day_int";
 
@@ -1425,7 +1423,6 @@ public class CarrierConfigManager {
      * default data limit, if one exists, will be disabled. A user selected data limit will not be
      * overridden.
      */
-    @Deprecated
     public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2;
 
     /**
@@ -1438,11 +1435,7 @@ public class CarrierConfigManager {
      * <p>
      * This setting may be overridden by explicit user choice. By default, the platform value
      * will be used.
-     *
-     * @deprecated replaced by
-     *             {@link SubscriptionManager#setSubscriptionPlans(int, java.util.List)}
      */
-    @Deprecated
     public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG =
             "data_warning_threshold_bytes_long";
 
@@ -1456,11 +1449,7 @@ public class CarrierConfigManager {
      * <p>
      * This setting may be overridden by explicit user choice. By default, the platform value
      * will be used.
-     *
-     * @deprecated replaced by
-     *             {@link SubscriptionManager#setSubscriptionPlans(int, java.util.List)}
      */
-    @Deprecated
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
 

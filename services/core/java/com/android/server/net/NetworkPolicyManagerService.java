@@ -19,6 +19,7 @@ package com.android.server.net;
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
+import static android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
@@ -311,6 +312,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_LIMIT_BEHAVIOR = "limitBehavior";
     private static final String ATTR_USAGE_BYTES = "usageBytes";
     private static final String ATTR_USAGE_TIME = "usageTime";
+    private static final String ATTR_OWNER_PACKAGE = "ownerPackage";
 
     private static final String ACTION_ALLOW_BACKGROUND =
             "com.android.server.net.action.ALLOW_BACKGROUND";
@@ -372,8 +374,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Currently active network rules for ifaces. */
     final ArrayMap<NetworkPolicy, String[]> mNetworkRules = new ArrayMap<>();
 
-    /** Defined subscription plans. */
+    /** Map from subId to subscription plans. */
     final SparseArray<SubscriptionPlan[]> mSubscriptionPlans = new SparseArray<>();
+    /** Map from subId to package name that owns subscription plans. */
+    final SparseArray<String> mSubscriptionPlansOwner = new SparseArray<>();
 
     /** Defined UID policies. */
     @GuardedBy("mUidRulesFirstLock") final SparseIntArray mUidPolicy = new SparseIntArray();
@@ -1761,6 +1765,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // clear any existing policy and read from disk
         mNetworkPolicy.clear();
         mSubscriptionPlans.clear();
+        mSubscriptionPlansOwner.clear();
         mUidPolicy.clear();
 
         FileInputStream fis = null;
@@ -1901,6 +1906,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final SubscriptionPlan plan = builder.build();
                         mSubscriptionPlans.put(subId, ArrayUtils.appendElement(
                                 SubscriptionPlan.class, mSubscriptionPlans.get(subId), plan));
+
+                        final String ownerPackage = readStringAttribute(in, ATTR_OWNER_PACKAGE);
+                        mSubscriptionPlansOwner.put(subId, ownerPackage);
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -2074,12 +2082,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // write all known subscription plans
             for (int i = 0; i < mSubscriptionPlans.size(); i++) {
                 final int subId = mSubscriptionPlans.keyAt(i);
+                final String ownerPackage = mSubscriptionPlansOwner.get(subId);
                 final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
                 if (ArrayUtils.isEmpty(plans)) continue;
 
                 for (SubscriptionPlan plan : plans) {
                     out.startTag(null, TAG_SUBSCRIPTION_PLAN);
                     writeIntAttribute(out, ATTR_SUB_ID, subId);
+                    writeStringAttribute(out, ATTR_OWNER_PACKAGE, ownerPackage);
                     final RecurrenceRule cycleRule = plan.getCycleRule();
                     writeStringAttribute(out, ATTR_CYCLE_START,
                             RecurrenceRule.convertZonedDateTime(cycleRule.start));
@@ -2589,14 +2599,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Verify they're not lying about package name
         mAppOps.checkPackage(callingUid, callingPackage);
 
-        // Verify they have phone permission from user
-        mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, TAG);
-        if (mAppOps.checkOp(AppOpsManager.OP_READ_PHONE_STATE, callingUid,
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
-            throw new SecurityException(
-                    "Calling package " + callingPackage + " does not hold " + READ_PHONE_STATE);
-        }
-
         final SubscriptionInfo si;
         final PersistableBundle config;
         final long token = Binder.clearCallingIdentity();
@@ -2609,8 +2611,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // First check: is caller the CarrierService?
-        if (si.isEmbedded() && si.canManageSubscription(mContext, callingPackage)) {
-            return;
+        if (si != null) {
+            if (si.isEmbedded() && si.canManageSubscription(mContext, callingPackage)) {
+                return;
+            }
         }
 
         // Second check: has the CarrierService delegated access?
@@ -2630,8 +2634,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
-        throw new SecurityException("Calling package " + callingPackage
-                + " has no access to subscription plans for " + subId);
+        // Final check: does the caller hold a permission?
+        mContext.enforceCallingOrSelfPermission(MANAGE_SUBSCRIPTION_PLANS, TAG);
     }
 
     @Override
@@ -2710,7 +2714,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         synchronized (mUidRulesFirstLock) {
             synchronized (mNetworkPoliciesSecondLock) {
-                return mSubscriptionPlans.get(subId);
+                // Only give out plan details to the package that defined them,
+                // so that we don't risk leaking plans between apps. We always
+                // let in core system components (like the Settings app).
+                final String ownerPackage = mSubscriptionPlansOwner.get(subId);
+                if (Objects.equals(ownerPackage, callingPackage)
+                        || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)) {
+                    return mSubscriptionPlans.get(subId);
+                } else {
+                    Log.w(TAG, "Not returning plans because caller " + callingPackage
+                            + " doesn't match owner " + ownerPackage);
+                    return null;
+                }
             }
         }
     }
@@ -2729,6 +2744,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     mSubscriptionPlans.put(subId, plans);
+                    mSubscriptionPlansOwner.put(subId, callingPackage);
                     // TODO: update any implicit details from newly defined plans
                     handleNetworkPoliciesUpdateAL(false);
                 }
