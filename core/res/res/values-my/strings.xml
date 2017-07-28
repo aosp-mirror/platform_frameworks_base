@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"အသံ အကူအညီ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ယခု သော့ပိတ်ရန်"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"၉၉၉+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"အကြောင်းကြားချက်အသစ်"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ပကတိအသွင်ကီးဘုတ်"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ကီးဘုတ် ခလုတ်ခုံ"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"လုံခြုံရေး"</string>
@@ -1157,7 +1156,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"သင့် SIM အသစ်ပုံမှန် အလုပ်လုပ်ရန်၊ သင်အသုံးပြုသည့် မိုဘိုင်းဝန်ဆောင်မှုမှ အက်ပ်တစ်ခုထည့်သွင်း၍ ဖွင့်ရန်လိုအပ်ပါသည်။"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"အက်ပ်ကို ရယူပါ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ယခုမဟုတ်သေးပါ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ယခုမလုပ်ပါ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM အသစ်ထည့်သွင်းလိုက်ပါသည်"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"၎င်းကိုတပ်ဆင်ရန် တို့ပါ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"အချိန်သတ်မှတ်ရန်"</string>
@@ -1180,8 +1179,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"နောက်ထပ် အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ဆက်သွယ်ရေးစနစ်ကို ပိတ်ရန် တို့ပါ။"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ချွတ်ယွင်းမှုအစီရင်ခံစာ မျှဝေနေသည်…"</string>

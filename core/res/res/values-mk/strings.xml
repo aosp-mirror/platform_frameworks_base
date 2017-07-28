@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помош"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Заклучи сега"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Ново известување"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуелна тастатура"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Физичка тастатура"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Безбедност"</string>
@@ -1180,8 +1179,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Допрете за повеќе информации"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку USB"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете за да се оневозможи отстранување грешки на USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Се зема извештајот за грешки…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели извештајот за грешки?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Се споделува извештај за грешки…"</string>
