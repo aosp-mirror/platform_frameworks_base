@@ -35,9 +35,8 @@ class CharacterProperty:
         return "{}0x{:04x}, 0x{:04x}, {}{}".format(
                 "{", self.first_char, self.last_char, ' | '.join(types), "}")
 
-def extract_unicode_properties(f, props):
-    prog = re.compile(r"^(?P<first>\w{4})(..(?P<last>\w{4}))?\W+;\W+(?P<prop>\w+)\n$")
-    chars = {}
+def extract_unicode_properties(f, props, chars_out):
+    prog = re.compile(r"^(?P<first>\w{4})(..(?P<last>\w{4}))?\W+;\W+(?P<prop>\w+)")
     for line in f:
         result = prog.match(line)
         if result:
@@ -49,10 +48,12 @@ def extract_unicode_properties(f, props):
                 last_char = (int(last_char_str, 16) if last_char_str else start_char) + 1
                 prop_type = props[prop_type_str]
                 for char in range(start_char, last_char):
-                    if char not in chars:
-                        chars[char] = CharacterProperty(char, char, 0)
-                    chars[char].prop_type |= prop_type
+                    if char not in chars_out:
+                        chars_out[char] = CharacterProperty(char, char, 0)
+                    chars_out[char].prop_type |= prop_type
+    return chars_out
 
+def flatten_unicode_properties(chars):
     result = []
     for char_prop in sorted(chars.values(), key=CharacterProperty.key):
         if len(result) == 0:
@@ -82,17 +83,20 @@ license = """/*
 """
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("must specify path to icu DerivedCoreProperties file (e.g:" \
                 "external/icu/icu4c/source/data/unidata/DerivedCoreProperties.txt)")
         sys.exit(1)
 
-    with open(sys.argv[1]) as f:
-        props = {"XID_Start": 1, "XID_Continue": 2}
-        char_props = extract_unicode_properties(f, props)
-        print("{}\nconst static std::array<CharacterProperties, {}> sCharacterProperties = {}"
-                .format(license, len(char_props), "{{"))
-        for prop in char_props:
-            print("    {},".format(prop))
-        print("}};")
+    props = {"XID_Start": 1, "XID_Continue": 2}
+    char_props = {}
+    for file_path in sys.argv[1:]:
+        with open(file_path) as f:
+            extract_unicode_properties(f, props, char_props)
+    result = flatten_unicode_properties(char_props)
+    print("{}\nconst static std::array<CharacterProperties, {}> sCharacterProperties = {}"
+            .format(license, len(result), "{{"))
+    for prop in result:
+        print("    {},".format(prop))
+    print("}};")
 

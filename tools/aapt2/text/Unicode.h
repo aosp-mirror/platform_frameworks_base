@@ -40,6 +40,10 @@ bool IsXidStart(char32_t codepoint);
 // characters in the ID_Continue set.
 bool IsXidContinue(char32_t codepoint);
 
+// Returns true if the Unicode codepoint has the White_Space property.
+// http://unicode.org/reports/tr44/#White_Space
+bool IsWhitespace(char32_t codepoint);
+
 // Returns true if the UTF8 string can be used as a Java identifier.
 // NOTE: This does not check against the set of reserved Java keywords.
 bool IsJavaIdentifier(const android::StringPiece& str);
