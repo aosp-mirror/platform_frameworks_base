@@ -178,8 +178,12 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
      * Convenience method for async writes which does not force the user to pass a useless
      * (Void) null.
      */
-    public void maybeWriteAsync() {
-      maybeWriteAsync((Void) null);
+    /*package*/ void maybeWriteAsync() {
+      maybeWriteAsync(null);
+    }
+
+    /*package*/ void writeNow() {
+        writeInternal(null);
     }
 
     @Override
