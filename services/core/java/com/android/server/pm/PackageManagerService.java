@@ -4233,8 +4233,10 @@ public class PackageManagerService extends IPackageManager.Stub
             final BasePermission p = mSettings.mPermissions.get(name);
             // If the caller is an app that targets pre 26 SDK drop protection flags.
             final PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
-            permissionInfo.protectionLevel = adjustPermissionProtectionFlagsLPr(
-                    permissionInfo.protectionLevel, packageName, callingUid);
+            if (permissionInfo != null) {
+                permissionInfo.protectionLevel = adjustPermissionProtectionFlagsLPr(
+                        permissionInfo.protectionLevel, packageName, callingUid);
+            }
             return permissionInfo;
         }
     }
