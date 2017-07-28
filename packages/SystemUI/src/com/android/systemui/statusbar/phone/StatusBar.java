@@ -1133,7 +1133,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
         View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
         mScrimController = SystemUIFactory.getInstance().createScrimController(mLightBarController,
-                scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper);
+                scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper,
+                scrimsVisible -> {
+                    if (mStatusBarWindowManager != null) {
+                        mStatusBarWindowManager.setScrimsVisible(scrimsVisible);
+                    }
+                });
         if (mScrimSrcModeEnabled) {
             Runnable runnable = new Runnable() {
                 @Override
@@ -5182,6 +5187,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStackScroller.setAnimationsEnabled(true);
             mVisualStabilityManager.setScreenOn(true);
             mNotificationPanel.setTouchDisabled(false);
+
+            maybePrepareWakeUpFromAod();
+
             mDozeServiceHost.stopDozing();
             updateVisibleToUser();
             updateIsKeyguard();
@@ -5194,11 +5202,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mFalsingManager.onScreenTurningOn();
             mNotificationPanel.onScreenTurningOn();
 
-            int wakefulness = mWakefulnessLifecycle.getWakefulness();
-            if (mDozing && (wakefulness == WAKEFULNESS_WAKING
-                    || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
-                mScrimController.prepareWakeUpFromAod();
-            }
+            maybePrepareWakeUpFromAod();
 
             if (mLaunchCameraOnScreenTurningOn) {
                 mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
@@ -5225,6 +5229,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public int getWakefulnessState() {
         return mWakefulnessLifecycle.getWakefulness();
+    }
+
+    private void maybePrepareWakeUpFromAod() {
+        int wakefulness = mWakefulnessLifecycle.getWakefulness();
+        if (mDozing && (wakefulness == WAKEFULNESS_WAKING
+                || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
+            mScrimController.prepareWakeUpFromAod();
+        }
     }
 
     private void vibrateForCameraGesture() {

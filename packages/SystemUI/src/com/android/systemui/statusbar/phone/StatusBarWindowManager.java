@@ -185,7 +185,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing);
+                || state.headsUpShowing || state.scrimsVisible);
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -324,6 +324,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         apply(mCurrentState);
     }
 
+    public void setScrimsVisible(boolean scrimsVisible) {
+        mCurrentState.scrimsVisible = scrimsVisible;
+        apply(mCurrentState);
+    }
+
     public void setHeadsUpShowing(boolean showing) {
         mCurrentState.headsUpShowing = showing;
         apply(mCurrentState);
@@ -425,6 +430,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         boolean remoteInputActive;
         boolean forcePluginOpen;
         boolean dozing;
+        boolean scrimsVisible;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;
