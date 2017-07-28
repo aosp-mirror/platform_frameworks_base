@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "Layer.h"
+#include "DeferredLayerUpdater.h"
 
 #include <SkCanvas.h>
 #include <SkDrawable.h>
@@ -30,18 +30,18 @@ namespace skiapipeline {
  */
 class LayerDrawable : public SkDrawable {
  public:
-    explicit LayerDrawable(Layer* layer)
-            : mLayer(layer) {}
+    explicit LayerDrawable(DeferredLayerUpdater* layerUpdater)
+            : mLayerUpdater(layerUpdater) {}
 
     static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer);
  protected:
      virtual SkRect onGetBounds() override {
-         return SkRect::MakeWH(mLayer->getWidth(), mLayer->getHeight());
+         return SkRect::MakeWH(mLayerUpdater->getWidth(), mLayerUpdater->getHeight());
      }
      virtual void onDraw(SkCanvas* canvas) override;
 
 private:
-    sp<Layer> mLayer;
+    sp<DeferredLayerUpdater> mLayerUpdater;
 };
 
 }; // namespace skiapipeline

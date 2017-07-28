@@ -28,7 +28,10 @@ namespace uirenderer {
 namespace skiapipeline {
 
 void LayerDrawable::onDraw(SkCanvas* canvas) {
-    DrawLayer(canvas->getGrContext(), canvas, mLayer.get());
+    Layer* layer = mLayerUpdater->backingLayer();
+    if (layer) {
+        DrawLayer(canvas->getGrContext(), canvas, layer);
+    }
 }
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer) {

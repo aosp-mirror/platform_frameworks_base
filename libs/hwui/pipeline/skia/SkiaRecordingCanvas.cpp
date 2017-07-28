@@ -91,10 +91,9 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
 }
 
 void SkiaRecordingCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layerUpdater) {
-    if (layerUpdater != nullptr && layerUpdater->backingLayer() != nullptr) {
-        uirenderer::Layer* layer = layerUpdater->backingLayer();
+    if (layerUpdater != nullptr) {
         // Create a ref-counted drawable, which is kept alive by sk_sp in SkLiteDL.
-        sk_sp<SkDrawable> drawable(new LayerDrawable(layer));
+        sk_sp<SkDrawable> drawable(new LayerDrawable(layerUpdater));
         drawDrawable(drawable.get());
     }
 }
