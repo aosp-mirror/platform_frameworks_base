@@ -88,8 +88,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:contentDescription="@string/accessibility_unlock_button"
-        android:scaleType="center"
-        android:tint="?attr/wallpaperTextColor" />
+        android:scaleType="center" />
 
     <FrameLayout
         android:id="@+id/overlay_container"
