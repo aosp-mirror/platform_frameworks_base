@@ -17,9 +17,9 @@ Copyright (C) 2017 The Android Open Source Project
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="error_to_trustedstate"
-    android:width="32dp"
+    android:width="24dp"
     android:viewportWidth="24"
-    android:height="32dp"
+    android:height="24dp"
     android:viewportHeight="24" >
     <group
         android:name="lock"
@@ -30,7 +30,8 @@ Copyright (C) 2017 The Android Open Source Project
             android:translateY="2.9375" >
             <path
                 android:name="ellipse_path_1"
-                android:fillColor="#FFFFFFFF"
+                android:fillColor="?attr/wallpaperTextColor"
+                android:fillAlpha="0.5"
                 android:pathData="M 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
         </group>
         <group
@@ -38,16 +39,16 @@ Copyright (C) 2017 The Android Open Source Project
             <path
                 android:name="path_1"
                 android:pathData="M 1.63623046875,-4.953125 c 0.0,0.0 -1.61499023438,0.0 -1.61499023438,0.0 c 0.0,0.0 0.0,2.0 0.0,2.0 c 0.0,0.0 0.00375366210938,-0.015625 0.00375366210938,-0.015625 c 0.0,0.0 0.0118713378906,7.9296875 0.0118713378906,7.9296875 c 0.0,0.0 -0.0040283203125,0.015625 -0.0040283203125,0.015625 c 0.0,0.0 -0.0052490234375,2.0 -0.0052490234375,2.0 c 0.0,0.0 1.61987304688,0.0 1.61987304688,0.0 c 1.10000610352,0.0 2.0,-0.900024414062 2.0,-2.0 c 0.0,0.0 -0.01123046875,-7.9296875 -0.01123046875,-7.9296875 c 0.0,-1.09997558594 -0.899993896484,-2.0 -2.0,-2.0 Z"
-                android:fillColor="#FFFFFFFF"
-                android:fillAlpha="0" />
+                android:fillColor="?attr/wallpaperTextColor"
+                android:fillAlpha="0.5" />
         </group>
         <group
             android:name="lock_left_side" >
             <path
                 android:name="path_2"
                 android:pathData="M 0.0252990722656,-2.96975708008 c 0.0,0.0 -0.00390625,0.0166320800781 -0.00390625,0.0166320800781 c 0.0,0.0 -0.00015258789062,-2.0 -0.00015258789062,-2.0 c 0.0,0.0 -1.63500976562,0.0 -1.63500976562,0.0 c -1.10000610352,0.0 -2.0,0.900024414062 -2.0,2.0 c 0.0,0.0 0.01123046875,7.9296875 0.01123046875,7.9296875 c 0.0,1.09997558594 0.899993896484,2.0 2.0,2.0 c 0.0,0.0 1.63500976562,0.0 1.63500976562,0.0 c 0.0,0.0 -0.000244140625,-2.0009765625 -0.000244140625,-2.0009765625 c 0.0,0.0 0.00390625,-0.015869140625 0.00390625,-0.015869140625 c 0.0,0.0 -0.0108337402344,-7.92947387695 -0.0108337402344,-7.92947387695 Z"
-                android:fillColor="#FFFFFFFF"
-                android:fillAlpha="0" />
+                android:fillColor="?attr/wallpaperTextColor"
+                android:fillAlpha="0.5" />
         </group>
         <group
             android:name="lock_top"
@@ -56,7 +57,8 @@ Copyright (C) 2017 The Android Open Source Project
             <path
                 android:name="path_3"
                 android:pathData="M 5.01239013672,3.390625 c 0.0,-2.76000976562 -2.23999023438,-5.0 -5.0,-5.0 c -2.76000976562,0.0 -5.0,2.23999023438 -5.0,5.0 c 0.0,0.0 1.89999389648,0.0 1.89999389648,0.0 c 0.0,-1.71002197266 1.38999938965,-3.09997558594 3.10000610352,-3.09997558594 c 1.71000671387,0.0 3.10000610352,1.38995361328 3.10000610352,3.09997558594 c 0.0,0.0 0.0,2.0 0.0,2.0 c 0.0,0.0 1.89999389648,0.0 1.89999389648,0.0 c 0.0,0.0 0.0,-2.0 0.0,-2.0 Z"
-                android:fillColor="#FFFFFFFF" />
+                android:fillColor="?attr/wallpaperTextColor"
+                android:fillAlpha="0.5" />
         </group>
     </group>
     <group
@@ -68,7 +70,7 @@ Copyright (C) 2017 The Android Open Source Project
             android:translateY="4" >
             <path
                 android:name="bottompath"
-                android:fillColor="#FFFFFFFF"
+                android:fillColor="?android:attr/colorError"
                 android:pathData="M 0.0,-1.1 l 0.0,0.0 c 0.60751322478,0.0 1.1,0.49248677522 1.1,1.1 l 0.0,0.0 c 0.0,0.60751322478 -0.49248677522,1.1 -1.1,1.1 l 0.0,0.0 c -0.60751322478,0.0 -1.1,-0.49248677522 -1.1,-1.1 l 0.0,0.0 c 0.0,-0.60751322478 0.49248677522,-1.1 1.1,-1.1 Z" />
         </group>
     </group>
@@ -81,7 +83,7 @@ Copyright (C) 2017 The Android Open Source Project
             android:translateY="-2" >
             <path
                 android:name="toppath"
-                android:fillColor="#FFFFFFFF"
+                android:fillColor="?android:attr/colorError"
                 android:pathData="M 0.0,-3.0 l 0.0,0.0 c 0.5522847498,0.0 1.0,0.4477152502 1.0,1.0 l 0.0,4.0 c 0.0,0.5522847498 -0.4477152502,1.0 -1.0,1.0 l 0.0,0.0 c -0.5522847498,0.0 -1.0,-0.4477152502 -1.0,-1.0 l 0.0,-4.0 c 0.0,-0.5522847498 0.4477152502,-1.0 1.0,-1.0 Z" />
         </group>
     </group>
@@ -94,7 +96,7 @@ Copyright (C) 2017 The Android Open Source Project
             android:name="circle" >
             <path
                 android:name="circlepath"
-                android:strokeColor="#FFFFFFFF"
+                android:strokeColor="?android:attr/colorError"
                 android:strokeWidth="2"
                 android:strokeLineCap="round"
                 android:pathData="M 0.0,-9.0 c 4.9705627482,0.0 9.0,4.0294372518 9.0,9.0 c 0.0,4.9705627482 -4.0294372518,9.0 -9.0,9.0 c -4.9705627482,0.0 -9.0,-4.0294372518 -9.0,-9.0 c 0.0,-4.9705627482 4.0294372518,-9.0 9.0,-9.0 Z" />
