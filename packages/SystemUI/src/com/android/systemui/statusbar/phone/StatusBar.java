@@ -3712,7 +3712,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                notifyHeadsUpScreenOff();
                 finishBarAnimations();
                 resetUserExpandedStates();
             }
@@ -4612,6 +4611,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateDozingState() {
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
         boolean animate = !mDozing && mDozeServiceHost.shouldAnimateWakeup();
         mNotificationPanel.setDozing(mDozing, animate);
@@ -5152,6 +5152,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
+            notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
         }
 
@@ -5493,6 +5494,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void setAnimateWakeup(boolean animateWakeup) {
+            if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_AWAKE
+                    || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_WAKING) {
+                // Too late to change the wakeup animation.
+                return;
+            }
             mAnimateWakeup = animateWakeup;
         }
 
@@ -7239,7 +7245,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         setAreThereNotifications();
     }
 
-    protected void notifyHeadsUpScreenOff() {
+    protected void notifyHeadsUpGoingToSleep() {
         maybeEscalateHeadsUp();
     }
 
