@@ -107,10 +107,10 @@ public class JobInfo implements Parcelable {
     public static final int BACKOFF_POLICY_EXPONENTIAL = 1;
 
     /* Minimum interval for a periodic job, in milliseconds. */
-    private static final long MIN_PERIOD_MILLIS = 15 * 60 * 1000L;   // 15 minutes
+    private static final long MIN_PERIOD_MILLIS = 30 * 60 * 1000L;   // HACK|STOPSHIP:ewol 30 minutes
 
     /* Minimum flex for a periodic job, in milliseconds. */
-    private static final long MIN_FLEX_MILLIS = 5 * 60 * 1000L; // 5 minutes
+    private static final long MIN_FLEX_MILLIS = 10 * 60 * 1000L; // HACK|STOPSHIP:ewol 10 minutes
 
     /**
      * Minimum backoff interval for a job, in milliseconds
