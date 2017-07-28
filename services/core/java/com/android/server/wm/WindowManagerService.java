@@ -6011,9 +6011,9 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (!displayContent.isReady() || !mPolicy.isScreenOn()) {
-            // No need to freeze the screen before the display is ready, system is ready, or if
-            // the screen is off.
+        if (!displayContent.isReady() || !mPolicy.isScreenOn() || !okToAnimate()) {
+            // No need to freeze the screen before the display is ready,  if the screen is off,
+            // or we can't currently animate.
             return;
         }
 
