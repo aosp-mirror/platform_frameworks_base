@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"आवाज सहायता"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"अब बन्द गर्नुहोस्"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"९९९+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"नयाँ सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"भर्चुअल किबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"वास्तविक किबोर्ड"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"सुरक्षा"</string>
@@ -1186,7 +1185,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"थप जानकारीका लागि ट्याप गर्नुहोस्"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डिबगिङलाई असक्षम गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डिबगिङ असक्षम पार्न चयन गर्नुहोस्।"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रिपोर्ट लिँदै..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्टलाई साझेदारी गर्ने हो?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्टलाई साझेदारी गर्दै ..."</string>

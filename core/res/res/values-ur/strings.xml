@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ابھی مقفل کریں"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"‎999+‎"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"نئی اطلاع"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ورچوئل کی بورڈ"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"فزیکل کی بورڈ"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"سیکیورٹی"</string>
@@ -1180,8 +1179,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"مزید معلومات کے لیے تھپتھپائيں"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے تھپتھپائیں۔"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"‏USB ڈیبگ کرنے کو غیر فعال کرنے کیلئے منتخب کریں۔"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"بگ رپورٹ لی جا رہی ہے…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"بگ رپورٹ کا اشتراک کریں؟"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"بگ رپورٹ کا اشتراک ہو رہا ہے…"</string>

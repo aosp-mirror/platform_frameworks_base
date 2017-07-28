@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Raddaðstoð"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Læsa núna"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Ný tilkynning"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Sýndarlyklaborð"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Vélbúnaðarlyklaborð"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Öryggi"</string>
@@ -1180,8 +1179,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Ýttu til að fá frekari upplýsingar"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-villuleit tengd"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Ýttu til að slökkva á USB-villuleit."</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Veldu til að gera USB-villuleit óvirka."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Tekur við villutilkynningu…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Deila villutilkynningu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Deilir villutilkynningu..."</string>
