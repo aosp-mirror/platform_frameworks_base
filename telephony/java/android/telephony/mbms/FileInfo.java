@@ -61,6 +61,10 @@ public class FileInfo implements Parcelable {
         }
     };
 
+    /**
+     * @hide
+     * TODO: systemapi
+     */
     public FileInfo(Uri uri, String mimeType, long size, byte[] md5Hash) {
         this.uri = uri;
         this.mimeType = mimeType;
