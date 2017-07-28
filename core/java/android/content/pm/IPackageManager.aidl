@@ -71,7 +71,7 @@ interface IPackageManager {
     String[] currentToCanonicalPackageNames(in String[] names);
     String[] canonicalToCurrentPackageNames(in String[] names);
 
-    PermissionInfo getPermissionInfo(String name, int flags);
+    PermissionInfo getPermissionInfo(String name, String packageName, int flags);
 
     ParceledListSlice queryPermissionsByGroup(String group, int flags);
 
