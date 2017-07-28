@@ -44,8 +44,6 @@ import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
@@ -983,8 +981,6 @@ public class ResourcesManager {
                             key.mCompatInfo));
                 }
             }
-
-            invalidatePath("/");
 
             redirectResourcesToNewImplLocked(updatedResourceKeys);
         } finally {
