@@ -8282,8 +8282,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
-                "getEphemeralApplications");
+        if (!canViewInstantApps(Binder.getCallingUid(), userId)) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
+                    "getEphemeralApplications");
+        }
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "getEphemeralApplications");
@@ -8368,9 +8370,10 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
-                "getInstantAppIcon");
-
+        if (!canViewInstantApps(Binder.getCallingUid(), userId)) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
+                    "getInstantAppIcon");
+        }
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "getInstantAppIcon");
