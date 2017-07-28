@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
@@ -563,10 +564,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
-        DockedStackExistsListener.register(exists -> mHandler.post(() -> {
-            mDockedStackExists = exists;
-            updateRecentsIcon();
-        }));
+        DockedStackExistsListener.register(mDockedListener);
         updateRotatedViews();
     }
 
@@ -839,4 +837,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         void onVerticalChanged(boolean isVertical);
     }
 
+    private final Consumer<Boolean> mDockedListener = exists -> mHandler.post(() -> {
+        mDockedStackExists = exists;
+        updateRecentsIcon();
+    });
 }
