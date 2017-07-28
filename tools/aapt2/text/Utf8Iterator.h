@@ -29,6 +29,10 @@ class Utf8Iterator {
 
   bool HasNext() const;
 
+  // Returns the current position of the iterator in bytes of the source UTF8 string.
+  // This position is the start of the codepoint returned by the next call to Next().
+  size_t Position() const;
+
   void Skip(int amount);
 
   char32_t Next();
@@ -39,6 +43,7 @@ class Utf8Iterator {
   void DoNext();
 
   android::StringPiece str_;
+  size_t current_pos_;
   size_t next_pos_;
   char32_t current_codepoint_;
 };
