@@ -53,6 +53,8 @@ namespace aapt {
  */
 class AnnotationProcessor {
  public:
+  static android::StringPiece ExtractFirstSentence(const android::StringPiece& comment);
+
   /**
    * Adds more comments. Since resources can have various values with different
    * configurations,

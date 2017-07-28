@@ -66,6 +66,17 @@ bool IsXidContinue(char32_t codepoint) {
   return FindCharacterProperties(codepoint) & CharacterProperties::kXidContinue;
 }
 
+// Hardcode the White_Space characters since they are few and the external/icu project doesn't
+// list them as data files to parse.
+// Sourced from http://www.unicode.org/Public/UCD/latest/ucd/PropList.txt
+bool IsWhitespace(char32_t codepoint) {
+  return (codepoint >= 0x0009 && codepoint <= 0x000d) || (codepoint == 0x0020) ||
+         (codepoint == 0x0085) || (codepoint == 0x00a0) || (codepoint == 0x1680) ||
+         (codepoint >= 0x2000 && codepoint <= 0x200a) || (codepoint == 0x2028) ||
+         (codepoint == 0x2029) || (codepoint == 0x202f) || (codepoint == 0x205f) ||
+         (codepoint == 0x3000);
+}
+
 bool IsJavaIdentifier(const StringPiece& str) {
   Utf8Iterator iter(str);
 
