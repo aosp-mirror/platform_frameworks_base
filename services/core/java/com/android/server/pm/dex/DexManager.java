@@ -592,6 +592,13 @@ public class DexManager {
         return existingValue == null ? newValue : existingValue;
     }
 
+    /**
+     * Saves the in-memory package dex usage to disk right away.
+     */
+    public void savePackageDexUsageNow() {
+        mPackageDexUsage.writeNow();
+    }
+
     public static class RegisterDexModuleResult {
         public RegisterDexModuleResult() {
             this(false, null);
