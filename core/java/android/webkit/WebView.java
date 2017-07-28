@@ -1642,12 +1642,23 @@ public class WebView extends AbsoluteLayout
     /**
      * Sets the list of domains that are exempt from SafeBrowsing checks. The list is
      * global for all the WebViews.
-     * TODO: Add documentation for the format of the urls.
+     * <p>
+     * Each rule should take one of these:
+     * <table>
+     * <tr><th> Rule </th> <th> Example </th> <th> Matches Subdomain</th> </tr>
+     * <tr><th> HOSTNAME </th> <th>  example.com  </th> <th> Yes </th> </tr>
+     * <tr><th>.HOSTNAME</th> <th> .example.com </th> <th> No </th> </tr>
+     * <tr><th> IPV4_LITERAL </th> <th> 192.168.1.1 </th> <th> No </th></tr>
+     * <tr><th> IPV6_LITERAL_WITH_BRACKETS</th><th>[10:20:30:40:50:60:70:80]</th><th>No</th></tr>
+     * </table>
+     * <p>
+     * All other rules, including wildcards, are invalid.
+     * <p>
      *
      * @param urls the list of URLs
-     * @param callback will be called with true if URLs are successfully added to the whitelist. It
-     * will be called with false if any URLs are malformed. The callback will be run on the UI
-     * thread.
+     * @param callback will be called with true if URLs are successfully added to the whitelist.
+     * It will be called with false if any URLs are malformed. The callback will be run on
+     * the UI thread
      */
     public static void setSafeBrowsingWhitelist(@NonNull List<String> urls,
             @Nullable ValueCallback<Boolean> callback) {
