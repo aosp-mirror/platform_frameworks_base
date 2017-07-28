@@ -4223,62 +4223,18 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public PermissionInfo getPermissionInfo(String name, String packageName, int flags) {
-        final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
+    public PermissionInfo getPermissionInfo(String name, int flags) {
+        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
         // reader
         synchronized (mPackages) {
             final BasePermission p = mSettings.mPermissions.get(name);
-            // If the caller is an app that targets pre 26 SDK drop protection flags.
-            final PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
-            permissionInfo.protectionLevel = adjustPermissionProtectionFlagsLPr(
-                    permissionInfo.protectionLevel, packageName, callingUid);
-            return permissionInfo;
+            if (p != null) {
+                return generatePermissionInfo(p, flags);
+            }
+            return null;
         }
-    }
-
-    private int adjustPermissionProtectionFlagsLPr(int protectionLevel,
-            String packageName, int uid) {
-        // Signature permission flags area always reported
-        final int protectionLevelMasked = protectionLevel
-                & (PermissionInfo.PROTECTION_NORMAL
-                | PermissionInfo.PROTECTION_DANGEROUS
-                | PermissionInfo.PROTECTION_SIGNATURE);
-        if (protectionLevelMasked == PermissionInfo.PROTECTION_SIGNATURE) {
-            return protectionLevel;
-        }
-
-        // System sees all flags.
-        final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID
-                || appId == Process.SHELL_UID) {
-            return protectionLevel;
-        }
-
-        // Normalize package name to handle renamed packages and static libs
-        packageName = resolveInternalPackageNameLPr(packageName,
-                PackageManager.VERSION_CODE_HIGHEST);
-
-        // Apps that target O see flags for all protection levels.
-        final PackageSetting ps = mSettings.mPackages.get(packageName);
-        if (ps == null) {
-            return protectionLevel;
-        }
-        if (ps.appId != appId) {
-            return protectionLevel;
-        }
-
-        final PackageParser.Package pkg = mPackages.get(packageName);
-        if (pkg == null) {
-            return protectionLevel;
-        }
-        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
-            return protectionLevelMasked;
-        }
-
-        return protectionLevel;
     }
 
     @Override
