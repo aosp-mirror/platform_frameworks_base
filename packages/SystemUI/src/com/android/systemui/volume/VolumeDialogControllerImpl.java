@@ -100,7 +100,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final MediaSessions mMediaSessions;
     protected C mCallbacks = new C();
     private final State mState = new State();
-    private final MediaSessionsCallbacks mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
+    protected final MediaSessionsCallbacks mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
@@ -906,7 +906,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
     }
 
-    private final class MediaSessionsCallbacks implements MediaSessions.Callbacks {
+    protected final class MediaSessionsCallbacks implements MediaSessions.Callbacks {
         private final HashMap<Token, Integer> mRemoteStreams = new HashMap<>();
 
         private int mNextStream = DYNAMIC_STREAM_START_INDEX;
