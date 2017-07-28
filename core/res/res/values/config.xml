@@ -568,10 +568,6 @@
          during voice calls -->
     <bool translatable="false" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit">false</bool>
 
-    <!-- Integer indicating the value that framework needs to set the tx power to for meeting SAR requirements
-         during voice calls -->
-    <integer translatable="false" name="config_wifi_framework_voice_call_sar_tx_power_limit_in_dbm">0</integer>
-
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
