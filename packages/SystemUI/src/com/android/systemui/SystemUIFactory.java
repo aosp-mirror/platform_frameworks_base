@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
+import java.util.function.Consumer;
+
 /**
  * Class factory to provide customizable SystemUI components.
  */
@@ -84,8 +86,10 @@ public class SystemUIFactory {
 
     public ScrimController createScrimController(LightBarController lightBarController,
             ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
-            LockscreenWallpaper lockscreenWallpaper) {
-        return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim);
+            LockscreenWallpaper lockscreenWallpaper,
+            Consumer<Boolean> scrimVisibleListener) {
+        return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim,
+                scrimVisibleListener);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
