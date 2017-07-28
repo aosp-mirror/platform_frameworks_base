@@ -574,17 +574,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mRotatedViews[Surface.ROTATION_270] =
                 mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
 
-        mCurrentRotation = -1;
-        reorient();
+        updateCurrentView();
     }
 
     public boolean needsReorient(int rotation) {
         return mCurrentRotation != rotation;
     }
 
-    private boolean updateCurrentView() {
+    private void updateCurrentView() {
         final int rot = mDisplay.getRotation();
-        if (rot == mCurrentRotation) return false;
         for (int i=0; i<4; i++) {
             mRotatedViews[i].setVisibility(View.GONE);
         }
@@ -596,7 +594,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         updateLayoutTransitionsEnabled();
         mCurrentRotation = rot;
-        return true;
     }
 
     private void updateRecentsIcon() {
@@ -609,14 +606,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public void reorient() {
-        if (!updateCurrentView()) {
-            return;
-        }
+        updateCurrentView();
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
-        if (getRootView() instanceof NavigationBarFrame) {
-            ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
-        }
+        ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
         mDeadZone.setDisplayRotation(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
@@ -650,7 +643,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mVertical = newVertical;
             //Log.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
             reorient();
-            getHomeButton().setVertical(mVertical);
             notifyVerticalChangedListener(newVertical);
         }
 
