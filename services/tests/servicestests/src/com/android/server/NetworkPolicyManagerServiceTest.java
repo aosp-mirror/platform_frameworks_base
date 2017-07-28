@@ -51,6 +51,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -360,6 +361,7 @@ public class NetworkPolicyManagerServiceTest {
                 .thenReturn(new ApplicationInfo());
         when(mPackageManager.getPackagesForUid(UID_A)).thenReturn(new String[] {PKG_NAME_A});
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
+        when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
         expectCurrentTime();
 
         // Prepare NPMS.
@@ -520,7 +522,6 @@ public class NetworkPolicyManagerServiceTest {
                 .setBatterySaverEnabled(true)
                 .build();
 
-        doReturn(true).when(mNetworkManager).setDataSaverModeEnabled(true);
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
 
         // RestrictBackground should be turned on because of battery saver
@@ -1634,8 +1635,6 @@ public class NetworkPolicyManagerServiceTest {
     private FutureIntent mRestrictBackgroundChanged;
 
     private void setRestrictBackground(boolean flag) throws Exception {
-        // Must set expectation, otherwise NMPS will reset value to previous one.
-        doReturn(true).when(mNetworkManager).setDataSaverModeEnabled(flag);
         mService.setRestrictBackground(flag);
         // Sanity check.
         assertEquals("restrictBackground not set", flag, mService.getRestrictBackground());
