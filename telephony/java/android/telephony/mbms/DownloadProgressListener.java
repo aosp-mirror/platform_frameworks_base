@@ -19,7 +19,9 @@ package android.telephony.mbms;
 import android.os.RemoteException;
 
 /**
- * A optional listener class used by download clients to track progress.
+ * A optional listener class used by download clients to track progress. Apps should extend this
+ * class and pass an instance into
+ * {@link android.telephony.MbmsDownloadManager#download(DownloadRequest, DownloadProgressListener)}
  * @hide
  */
 public class DownloadProgressListener extends IDownloadProgressListener.Stub {

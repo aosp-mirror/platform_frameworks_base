@@ -22,11 +22,19 @@ import android.telephony.MbmsDownloadManager;
 import java.util.List;
 
 /**
- * A Parcelable class with Cell-Broadcast service information.
+ * A callback class that apps should use to receive information on file downloads over
+ * cell-broadcast.
  * @hide
  */
 public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.Stub {
 
+    /**
+     * Indicates that the middleware has encountered an asynchronous error.
+     * @param errorCode Any error code listed in {@link MbmsException}
+     * @param message A message, intended for debugging purposes, describing the error in further
+     *                detail.
+     * @throws RemoteException
+     */
     @Override
     public void error(int errorCode, String message) throws RemoteException {
         // default implementation empty
@@ -35,14 +43,13 @@ public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.St
     /**
      * Called to indicate published File Services have changed.
      *
-     * This will only be called after the application has requested
-     * a list of file services and specified a service class list
-     * of interest AND the results of a subsequent getFileServices
-     * call with the same service class list would return different
-     * results.
+     * This will only be called after the application has requested a list of file services and
+     * specified a service class list of interest via
+     * {@link MbmsDownloadManager#getFileServices(List)}. If there are subsequent calls to
+     * {@link MbmsDownloadManager#getFileServices(List)}, this method may not be called again if
+     * the list of service classes would remain the same.
      *
-     * @param services a List of FileServiceInfos
-     *
+     * @param services The most recently updated list of available file services.
      */
     @Override
     public void fileServicesUpdated(List<FileServiceInfo> services) throws RemoteException {

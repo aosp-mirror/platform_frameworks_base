@@ -16,6 +16,7 @@
 
 package android.telephony.mbms.vendor;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,10 +29,12 @@ import java.io.File;
 import java.util.List;
 
 /**
+ * Contains constants and utility methods for MBMS Download middleware apps to communicate with
+ * frontend apps.
  * @hide
- * TODO: future systemapi
  */
-public class VendorIntents {
+//@SystemApi
+public class VendorUtils {
 
     /**
      * The MBMS middleware should send this when a download of single file has completed or
@@ -140,26 +143,19 @@ public class VendorIntents {
     /**
      * Retrieves the {@link ComponentName} for the {@link android.content.BroadcastReceiver} that
      * the various intents from the middleware should be targeted towards.
-     * @param uid The uid of the frontend app.
+     * @param packageName The package name of the app.
      * @return The component name of the receiver that the middleware should send its intents to,
      * or null if the app didn't declare it in the manifest.
      */
-    public static ComponentName getAppReceiverFromUid(Context context, int uid) {
-        String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
-        if (packageNames == null) {
-            return null;
-        }
-
-        for (String packageName : packageNames) {
-            ComponentName candidate = new ComponentName(packageName,
-                    MbmsDownloadReceiver.class.getCanonicalName());
-            Intent queryIntent = new Intent();
-            queryIntent.setComponent(candidate);
-            List<ResolveInfo> receivers =
-                    context.getPackageManager().queryBroadcastReceivers(queryIntent, 0);
-            if (receivers != null && receivers.size() > 0) {
-                return candidate;
-            }
+    public static ComponentName getAppReceiverFromPackageName(Context context, String packageName) {
+        ComponentName candidate = new ComponentName(packageName,
+                MbmsDownloadReceiver.class.getCanonicalName());
+        Intent queryIntent = new Intent();
+        queryIntent.setComponent(candidate);
+        List<ResolveInfo> receivers =
+                context.getPackageManager().queryBroadcastReceivers(queryIntent, 0);
+        if (receivers != null && receivers.size() > 0) {
+            return candidate;
         }
         return null;
     }
