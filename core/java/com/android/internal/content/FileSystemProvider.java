@@ -110,7 +110,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     }
 
     @Override
-    public @Nullable Bundle getDocumentMetadata(String documentId, @Nullable String[] tags)
+    public @Nullable Bundle getDocumentMetadata(String documentId)
             throws FileNotFoundException {
         File file = getFileForDocId(documentId);
 
@@ -132,7 +132,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         FileInputStream stream = new FileInputStream(filePath);
 
         try {
-            return getDocumentMetadataFromStream(stream, getTypeForFile(file), tags);
+            return getDocumentMetadataFromStream(stream, getTypeForFile(file));
         } catch (IOException e) {
             Log.e(TAG, "An error occurred retrieving the metadata", e);
         } finally {
