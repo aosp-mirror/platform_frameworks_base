@@ -802,7 +802,7 @@ public final class BroadcastQueue {
         IPackageManager pm = AppGlobals.getPackageManager();
         for (int i = perms.length-1; i >= 0; i--) {
             try {
-                PermissionInfo pi = pm.getPermissionInfo(perms[i], 0);
+                PermissionInfo pi = pm.getPermissionInfo(perms[i], "android", 0);
                 if ((pi.protectionLevel & (PermissionInfo.PROTECTION_MASK_BASE
                         | PermissionInfo.PROTECTION_FLAG_PRIVILEGED))
                         != PermissionInfo.PROTECTION_SIGNATURE) {
