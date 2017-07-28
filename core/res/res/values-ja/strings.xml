@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"音声アシスト"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"今すぐロック"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"新しい通知"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"仮想キーボード"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"物理キーボード"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"セキュリティ"</string>
@@ -960,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"すべて選択"</string>
     <string name="cut" msgid="3092569408438626261">"切り取り"</string>
     <string name="copy" msgid="2681946229533511987">"コピー"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"クリップボードにコピーできませんでした"</string>
     <string name="paste" msgid="5629880836805036433">"貼り付け"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"書式なしテキストとして貼り付け"</string>
     <string name="replace" msgid="5781686059063148930">"置換..."</string>

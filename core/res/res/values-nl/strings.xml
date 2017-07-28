@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Spraakassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Nu vergrendelen"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Nieuwe melding"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtueel toetsenbord"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fysiek toetsenbord"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Beveiliging"</string>
@@ -258,19 +257,19 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Overschakelen naar werkprofiel"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacten"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"toegang krijgen tot je contacten"</string>
-    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Verleen &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot je contacten"</string>
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Geef &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot je contacten"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locatie"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"de locatie van dit apparaat openen"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"Verleen &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot de locatie van dit apparaat"</string>
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Geef &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot de locatie van dit apparaat"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"toegang krijgen tot je agenda"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Verleen &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot je agenda"</string>
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Geef &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot je agenda"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sms\'jes verzenden en bekijken"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"Sta &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om sms\'jes te verzenden en te bekijken"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Opslagruimte"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang krijgen tot foto\'s, media en bestanden op je apparaat"</string>
-    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Verleen &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot foto\'s, media en bestanden op je apparaat"</string>
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Geef &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot foto\'s, media en bestanden op je apparaat"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audio opnemen"</string>
     <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Sta &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om audio op te nemen"</string>
@@ -282,7 +281,7 @@
     <string name="permgrouprequest_phone" msgid="7084161459732093690">"Sta &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om telefoongesprekken te starten en te beheren"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
-    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Verleen &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot sensorgegevens over je vitale functies"</string>
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Geef &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot sensorgegevens over je vitale functies"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Content van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De content inspecteren van een venster waarmee je interactie hebt."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
@@ -960,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"Alles selecteren"</string>
     <string name="cut" msgid="3092569408438626261">"Knippen"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiëren"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Kan niet kopiëren naar klembord"</string>
     <string name="paste" msgid="5629880836805036433">"Plakken"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Plakken als platte tekst"</string>
     <string name="replace" msgid="5781686059063148930">"Vervangen..."</string>
