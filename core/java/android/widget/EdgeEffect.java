@@ -59,7 +59,8 @@ public class EdgeEffect {
     // Time it will take in ms for a pulled glow to decay to partial strength before release
     private static final int PULL_DECAY_TIME = 2000;
 
-    private static final float MAX_ALPHA = 0.5f;
+    private static final float MAX_ALPHA = 0.15f;
+    private static final float GLOW_ALPHA_START = .09f;
 
     private static final float MAX_GLOW_SCALE = 2.f;
 
@@ -75,6 +76,7 @@ public class EdgeEffect {
     private static final double ANGLE = Math.PI / 6;
     private static final float SIN = (float) Math.sin(ANGLE);
     private static final float COS = (float) Math.cos(ANGLE);
+    private static final float RADIUS_FACTOR = 0.6f;
 
     private float mGlowAlpha;
     private float mGlowScaleY;
@@ -134,10 +136,10 @@ public class EdgeEffect {
      * @param height Effect height in pixels
      */
     public void setSize(int width, int height) {
-        final float r = width * 0.75f / SIN;
+        final float r = width * RADIUS_FACTOR / SIN;
         final float y = COS * r;
         final float h = r - y;
-        final float or = height * 0.75f / SIN;
+        final float or = height * RADIUS_FACTOR / SIN;
         final float oy = COS * or;
         final float oh = or - oy;
 
@@ -272,7 +274,7 @@ public class EdgeEffect {
 
         // The glow depends more on the velocity, and therefore starts out
         // nearly invisible.
-        mGlowAlphaStart = 0.3f;
+        mGlowAlphaStart = GLOW_ALPHA_START;
         mGlowScaleYStart = Math.max(mGlowScaleY, 0.f);
 
 
