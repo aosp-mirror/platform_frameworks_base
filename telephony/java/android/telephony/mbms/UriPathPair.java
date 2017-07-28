@@ -16,12 +16,19 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.mbms.vendor.VendorUtils;
 
-/** @hide */
+/**
+ * Wrapper for a pair of {@link Uri}s that describe a temp file used by the middleware to
+ * download files via cell-broadcast.
+ * @hide
+ */
+//@SystemApi
 public class UriPathPair implements Parcelable {
     private final Uri mFilePathUri;
     private final Uri mContentUri;
@@ -40,7 +47,7 @@ public class UriPathPair implements Parcelable {
     }
 
     /** @hide */
-    protected UriPathPair(Parcel in) {
+    private UriPathPair(Parcel in) {
         mFilePathUri = in.readParcelable(Uri.class.getClassLoader());
         mContentUri = in.readParcelable(Uri.class.getClassLoader());
     }
@@ -57,12 +64,23 @@ public class UriPathPair implements Parcelable {
         }
     };
 
-    /** future systemapi */
+    /**
+     * Returns the file-path {@link Uri}. This has scheme {@code file} and points to the actual
+     * location on disk where the temp file resides. Use this when sending {@link Uri}s back to the
+     * app in the intents in {@link VendorUtils}.
+     * @return A {@code file} {@link Uri}.
+     */
     public Uri getFilePathUri() {
         return mFilePathUri;
     }
 
-    /** future systemapi */
+    /**
+     * Returns the content {@link Uri} that may be used with
+     * {@link ContentResolver#openFileDescriptor(Uri, String)} to obtain a
+     * {@link android.os.ParcelFileDescriptor} to a temp file to write to. This {@link Uri} will
+     * expire if the middleware process dies.
+     * @return A {@code content} {@link Uri}
+     */
     public Uri getContentUri() {
         return mContentUri;
     }

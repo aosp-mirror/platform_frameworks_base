@@ -17,6 +17,8 @@
 package android.telephony.mbms.vendor;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.content.Intent;
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadProgressListener;
 import android.telephony.mbms.DownloadRequest;
@@ -30,11 +32,11 @@ import android.telephony.mbms.MbmsException;
 import java.util.List;
 
 /**
- * Base class for MbmsDownloadService. The middleware should extend this base class rather than
- * the aidl stub for compatibility
+ * Base class for MbmsDownloadService. The middleware should return an instance of this object from
+ * its {@link android.app.Service#onBind(Intent)} method.
  * @hide
- * TODO: future systemapi
  */
+//@SystemApi
 public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     /**
      * Initialize the download service for this app and subId, registering the listener.
