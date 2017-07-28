@@ -332,7 +332,7 @@ final class DisplayPowerState {
             if (mColorFadePrepared) {
                 mColorFade.draw(mColorFadeLevel);
                 Trace.traceCounter(Trace.TRACE_TAG_POWER,
-                        COUNTER_COLOR_FADE, Math.round(mColorFadeLevel* 100));
+                        COUNTER_COLOR_FADE, Math.round(mColorFadeLevel * 100));
             }
 
             mColorFadeReady = true;
