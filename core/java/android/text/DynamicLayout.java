@@ -303,8 +303,10 @@ public class DynamicLayout extends Layout
                 .setEllipsize(mEllipsizeAt)
                 .setBreakStrategy(mBreakStrategy)
                 .setHyphenationFrequency(mHyphenationFrequency)
-                .setJustificationMode(mJustificationMode);
-        reflowed.generate(b, false, true);
+                .setJustificationMode(mJustificationMode)
+                .setAddLastLineLineSpacing(!islast);
+
+        reflowed.generate(b, false /*includepad*/, true /*trackpad*/);
         int n = reflowed.getLineCount();
         // If the new layout has a blank line at the end, but it is not
         // the very end of the buffer, then we already have a line that
