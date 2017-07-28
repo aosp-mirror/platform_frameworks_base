@@ -100,6 +100,11 @@
     <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
     <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
 
+    <!-- Status message of Wi-Fi when it is connected to a Carrier Network. [CHAR LIMIT=NONE] -->
+    <string name="connected_via_carrier">Connected via %1$s</string>
+    <!-- Status message of Wi-Fi when an available network is a carrier network. [CHAR LIMIT=NONE] -->
+    <string name="available_via_carrier">Available via %1$s</string>
+
     <!-- Speed label for very slow network speed -->
     <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
