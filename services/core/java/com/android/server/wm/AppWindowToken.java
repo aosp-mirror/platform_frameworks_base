@@ -1311,7 +1311,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // going to the bottom. Allowing closing {@link AppWindowToken} to participate can lead to
         // an Activity in another task being started in the wrong orientation during the transition.
         if (!(sendingToBottom || mService.mClosingApps.contains(this))
-                && (isVisible() || mService.mOpeningApps.contains(this))) {
+                && (isVisible() || mService.mOpeningApps.contains(this) || isOnTop())) {
             return mOrientation;
         }
 
