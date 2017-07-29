@@ -34,8 +34,8 @@
 #include <utils/misc.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
-#include "ScopedLocalRef.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 // ----------------------------------------------------------------------------
 
