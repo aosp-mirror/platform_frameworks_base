@@ -87,7 +87,9 @@ class PbSerializerVisitor : public RawValueVisitor {
     pb_prim->set_data(val.data);
   }
 
-  void VisitItem(Item* item) override { LOG(FATAL) << "unimplemented item"; }
+  void VisitItem(Item* item) override {
+    LOG(FATAL) << "unimplemented item";
+  }
 
   void Visit(Attribute* attr) override {
     pb::Attribute* pb_attr = pb_compound_value()->mutable_attr();
@@ -207,19 +209,15 @@ class PbSerializerVisitor : public RawValueVisitor {
 }  // namespace
 
 std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
-  // We must do this before writing the resources, since the string pool IDs may
-  // change.
-  table->string_pool.Sort(
-      [](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
-        int diff = a.context.priority - b.context.priority;
-        if (diff < 0) return true;
-        if (diff > 0) return false;
-        diff = a.context.config.compare(b.context.config);
-        if (diff < 0) return true;
-        if (diff > 0) return false;
-        return a.value < b.value;
-      });
+  // We must do this before writing the resources, since the string pool IDs may change.
   table->string_pool.Prune();
+  table->string_pool.Sort([](const StringPool::Context& a, const StringPool::Context& b) -> int {
+    int diff = util::compare(a.priority, b.priority);
+    if (diff == 0) {
+      diff = a.config.compare(b.config);
+    }
+    return diff;
+  });
 
   auto pb_table = util::make_unique<pb::ResourceTable>();
   SerializeStringPoolToPb(table->string_pool, pb_table->mutable_string_pool());
