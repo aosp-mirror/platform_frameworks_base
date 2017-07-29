@@ -4005,6 +4005,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // reader
         synchronized (mPackages) {
             final BasePermission p = mSettings.mPermissions.get(name);
+            if (p == null) {
+                return null;
+            }
             // If the caller is an app that targets pre 26 SDK drop protection flags.
             final PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
             if (permissionInfo != null) {
