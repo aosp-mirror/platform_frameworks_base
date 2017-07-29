@@ -85,8 +85,12 @@ public class SystemProperties {
     private static native void native_report_sysprop_change();
 
     /**
-     * Get the value for the given key.
-     * @return an empty string if the key isn't found
+     * Get the String value for the given {@code key}.
+     *
+     * <b>WARNING:</b> Do not use this method if the value may not be a valid UTF string! This
+     * method will crash in native code.
+     *
+     * @return an empty string if the {@code key} isn't found
      */
     public static String get(String key) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
@@ -94,8 +98,13 @@ public class SystemProperties {
     }
 
     /**
-     * Get the value for the given key.
-     * @return if the key isn't found, return def if it isn't null, or an empty string otherwise
+     * Get the String value for the given {@code key}.
+     *
+     * <b>WARNING:</b> Do not use this method if the value may not be a valid UTF string! This
+     * method will crash in native code.
+     *
+     * @return if the {@code key} isn't found, return {@code def} if it isn't null, or an empty
+     * string otherwise
      */
     public static String get(String key, String def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
