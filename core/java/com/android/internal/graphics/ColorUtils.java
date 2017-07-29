@@ -106,6 +106,31 @@ public final class ColorUtils {
     }
 
     /**
+     * Calculates the minimum alpha value which can be applied to {@code background} so that would
+     * have a contrast value of at least {@code minContrastRatio} when alpha blended to
+     * {@code foreground}.
+     *
+     * @param foreground       the foreground color
+     * @param background       the background color, opacity will be ignored
+     * @param minContrastRatio the minimum contrast ratio
+     * @return the alpha value in the range 0-255, or -1 if no value could be calculated
+     */
+    public static int calculateMinimumBackgroundAlpha(@ColorInt int foreground,
+            @ColorInt int background, float minContrastRatio) {
+        // Ignore initial alpha that the background might have since this is
+        // what we're trying to calculate.
+        background = setAlphaComponent(background, 255);
+        final int leastContrastyColor = setAlphaComponent(foreground, 255);
+        return binaryAlphaSearch(foreground, background, minContrastRatio, (fg, bg, alpha) -> {
+            int testBackground = blendARGB(leastContrastyColor, bg, alpha/255f);
+            // Float rounding might set this alpha to something other that 255,
+            // raising an exception in calculateContrast.
+            testBackground = setAlphaComponent(testBackground, 255);
+            return calculateContrast(fg, testBackground);
+        });
+    }
+
+    /**
      * Calculates the minimum alpha value which can be applied to {@code foreground} so that would
      * have a contrast value of at least {@code minContrastRatio} when compared to
      * {@code background}.
@@ -122,14 +147,33 @@ public final class ColorUtils {
                     + Integer.toHexString(background));
         }
 
+        ContrastCalculator contrastCalculator = (fg, bg, alpha) -> {
+            int testForeground = setAlphaComponent(fg, alpha);
+            return calculateContrast(testForeground, bg);
+        };
+
         // First lets check that a fully opaque foreground has sufficient contrast
-        int testForeground = setAlphaComponent(foreground, 255);
-        double testRatio = calculateContrast(testForeground, background);
+        double testRatio = contrastCalculator.calculateContrast(foreground, background, 255);
         if (testRatio < minContrastRatio) {
             // Fully opaque foreground does not have sufficient contrast, return error
             return -1;
         }
+        foreground = setAlphaComponent(foreground, 255);
+        return binaryAlphaSearch(foreground, background, minContrastRatio, contrastCalculator);
+    }
 
+    /**
+     * Calculates the alpha value using binary search based on a given contrast evaluation function
+     * and target contrast that needs to be satisfied.
+     *
+     * @param foreground         the foreground color
+     * @param background         the opaque background color
+     * @param minContrastRatio   the minimum contrast ratio
+     * @param calculator function that calculates contrast
+     * @return the alpha value in the range 0-255, or -1 if no value could be calculated
+     */
+    private static int binaryAlphaSearch(@ColorInt int foreground, @ColorInt int background,
+            float minContrastRatio, ContrastCalculator calculator) {
         // Binary search to find a value with the minimum value which provides sufficient contrast
         int numIterations = 0;
         int minAlpha = 0;
@@ -139,9 +183,8 @@ public final class ColorUtils {
                 (maxAlpha - minAlpha) > MIN_ALPHA_SEARCH_PRECISION) {
             final int testAlpha = (minAlpha + maxAlpha) / 2;
 
-            testForeground = setAlphaComponent(foreground, testAlpha);
-            testRatio = calculateContrast(testForeground, background);
-
+            final double testRatio = calculator.calculateContrast(foreground, background,
+                    testAlpha);
             if (testRatio < minContrastRatio) {
                 minAlpha = testAlpha;
             } else {
@@ -613,6 +656,10 @@ public final class ColorUtils {
             TEMP_ARRAY.set(result);
         }
         return result;
+    }
+
+    private interface ContrastCalculator {
+        double calculateContrast(int foreground, int background, int alpha);
     }
 
 }

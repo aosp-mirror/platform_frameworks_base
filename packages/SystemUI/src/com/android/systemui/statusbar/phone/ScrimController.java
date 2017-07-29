@@ -37,6 +37,7 @@ import android.view.animation.PathInterpolator;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.ColorExtractor.OnColorsChangedListener;
+import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -88,6 +89,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mNeedsDrawableColorUpdate;
 
     protected float mScrimBehindAlpha;
+    protected float mScrimBehindAlphaResValue;
     protected float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
     protected float mScrimBehindAlphaUnlocking = SCRIM_BEHIND_ALPHA_UNLOCKING;
 
@@ -142,7 +144,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mLightBarController = lightBarController;
-        mScrimBehindAlpha = context.getResources().getFloat(R.dimen.scrim_behind_alpha);
+        mScrimBehindAlphaResValue = context.getResources().getFloat(R.dimen.scrim_behind_alpha);
+        // Scrim alpha is initially set to the value on the resource but might be changed
+        // to make sure that text on top of it is legible.
+        mScrimBehindAlpha = mScrimBehindAlphaResValue;
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -342,20 +347,30 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     protected void updateScrims() {
-        // Make sure we have the right gradients
+        // Make sure we have the right gradients and their opacities will satisfy GAR.
         if (mNeedsDrawableColorUpdate) {
             mNeedsDrawableColorUpdate = false;
+            final GradientColors currentScrimColors;
             if (mKeyguardShowing) {
                 // Always animate color changes if we're seeing the keyguard
                 mScrimInFront.setColors(mLockColors, true /* animated */);
                 mScrimBehind.setColors(mLockColors, true /* animated */);
+                currentScrimColors = mLockColors;
             } else {
                 // Only animate scrim color if the scrim view is actually visible
                 boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0;
                 boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0;
                 mScrimInFront.setColors(mSystemColors, animateScrimInFront);
                 mScrimBehind.setColors(mSystemColors, animateScrimBehind);
+                currentScrimColors = mSystemColors;
             }
+
+            // Calculate minimum scrim opacity for white or black text.
+            int textColor = currentScrimColors.supportsDarkText() ? Color.BLACK : Color.WHITE;
+            int mainColor = currentScrimColors.getMainColor();
+            float minOpacity = ColorUtils.calculateMinimumBackgroundAlpha(textColor, mainColor,
+                    4.5f /* minimumContrast */) / 255f;
+            mScrimBehindAlpha = Math.max(mScrimBehindAlphaResValue, minOpacity);
             mLightBarController.setScrimColor(mScrimInFront.getColors());
         }
 
