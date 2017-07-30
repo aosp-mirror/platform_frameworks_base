@@ -726,17 +726,6 @@ public final class Display {
     }
 
     /**
-     * Returns the rotation associated with this display as used during layout. This is currently
-     * derived from the {@link Configuration}.
-     *
-     * @hide
-     */
-    @Surface.Rotation
-    public int getLayoutRotation() {
-        return mResources.getConfiguration().getRotation();
-    }
-
-    /**
      * @deprecated use {@link #getRotation}
      * @return orientation of this display.
      */

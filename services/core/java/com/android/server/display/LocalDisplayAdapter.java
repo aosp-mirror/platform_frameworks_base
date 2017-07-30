@@ -515,6 +515,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         try {
                             final int mode = getPowerModeForState(state);
                             SurfaceControl.setDisplayPowerMode(token, mode);
+                            Trace.traceCounter(Trace.TRACE_TAG_POWER, "DisplayPowerMode", mode);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
@@ -530,6 +531,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 + "id=" + displayId + ", brightness=" + brightness + ")");
                         try {
                             mBacklight.setBrightness(brightness);
+                            Trace.traceCounter(Trace.TRACE_TAG_POWER,
+                                    "DisplayBrightness", brightness);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }

@@ -27,6 +27,8 @@
         android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:gravity="center_vertical"
         android:layout_centerVertical="true"
         android:orientation="vertical"
         android:layout_toEndOf="@android:id/checkbox"

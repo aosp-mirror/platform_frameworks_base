@@ -40,7 +40,6 @@
         android:background="@color/qs_detail_progress_track"
         android:src="@drawable/indeterminate_anim"
         android:scaleType="fitXY"
-        android:translationY="16dp"
         />
 
     <com.android.systemui.qs.NonInterceptingScrollView

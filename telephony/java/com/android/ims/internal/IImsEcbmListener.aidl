@@ -35,7 +35,7 @@ package com.android.ims.internal;
  *
  * {@hide}
  */
-interface IImsEcbmListener {
+oneway interface IImsEcbmListener {
     /**
      * Notifies the application when the device enters Emergency Callback Mode.
      */

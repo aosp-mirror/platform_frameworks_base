@@ -4223,18 +4223,67 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public PermissionInfo getPermissionInfo(String name, int flags) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+    public PermissionInfo getPermissionInfo(String name, String packageName, int flags) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
         // reader
         synchronized (mPackages) {
             final BasePermission p = mSettings.mPermissions.get(name);
-            if (p != null) {
-                return generatePermissionInfo(p, flags);
+            if (p == null) {
+                return null;
             }
-            return null;
+            // If the caller is an app that targets pre 26 SDK drop protection flags.
+            final PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
+            if (permissionInfo != null) {
+                permissionInfo.protectionLevel = adjustPermissionProtectionFlagsLPr(
+                        permissionInfo.protectionLevel, packageName, callingUid);
+            }
+            return permissionInfo;
         }
+    }
+
+    private int adjustPermissionProtectionFlagsLPr(int protectionLevel,
+            String packageName, int uid) {
+        // Signature permission flags area always reported
+        final int protectionLevelMasked = protectionLevel
+                & (PermissionInfo.PROTECTION_NORMAL
+                | PermissionInfo.PROTECTION_DANGEROUS
+                | PermissionInfo.PROTECTION_SIGNATURE);
+        if (protectionLevelMasked == PermissionInfo.PROTECTION_SIGNATURE) {
+            return protectionLevel;
+        }
+
+        // System sees all flags.
+        final int appId = UserHandle.getAppId(uid);
+        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID
+                || appId == Process.SHELL_UID) {
+            return protectionLevel;
+        }
+
+        // Normalize package name to handle renamed packages and static libs
+        packageName = resolveInternalPackageNameLPr(packageName,
+                PackageManager.VERSION_CODE_HIGHEST);
+
+        // Apps that target O see flags for all protection levels.
+        final PackageSetting ps = mSettings.mPackages.get(packageName);
+        if (ps == null) {
+            return protectionLevel;
+        }
+        if (ps.appId != appId) {
+            return protectionLevel;
+        }
+
+        final PackageParser.Package pkg = mPackages.get(packageName);
+        if (pkg == null) {
+            return protectionLevel;
+        }
+        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+            return protectionLevelMasked;
+        }
+
+        return protectionLevel;
     }
 
     @Override
@@ -7943,6 +7992,9 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId,
+                false /*requireFullPermission*/, false /*checkShell*/,
+                "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, intent, callingUid,
                 false /*includeInstantApps*/);
@@ -8049,6 +8101,9 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        enforceCrossUserPermission(callingUid, userId,
+                false /*requireFullPermission*/, false /*checkShell*/,
+                "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
         ComponentName comp = intent.getComponent();
@@ -8476,8 +8531,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
-                "getEphemeralApplications");
+        if (!canViewInstantApps(Binder.getCallingUid(), userId)) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
+                    "getEphemeralApplications");
+        }
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "getEphemeralApplications");
@@ -8562,9 +8619,10 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
-                "getInstantAppIcon");
-
+        if (!canViewInstantApps(Binder.getCallingUid(), userId)) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
+                    "getInstantAppIcon");
+        }
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "getInstantAppIcon");
@@ -15273,6 +15331,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int getIntentVerificationStatus(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
+        if (UserHandle.getUserId(callingUid) != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "getIntentVerificationStatus" + userId);
+        }
         if (getInstantAppPackageName(callingUid) != null) {
             return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         }
@@ -15356,6 +15419,10 @@ public class PackageManagerService extends IPackageManager.Stub
     public boolean setDefaultBrowserPackageName(String packageName, int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
 
         synchronized (mPackages) {
             boolean result = mSettings.setDefaultBrowserPackageNameLPw(packageName, userId);
@@ -15369,6 +15436,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getDefaultBrowserPackageName(int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }

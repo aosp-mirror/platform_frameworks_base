@@ -1133,7 +1133,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
         View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
         mScrimController = SystemUIFactory.getInstance().createScrimController(mLightBarController,
-                scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper);
+                scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper,
+                scrimsVisible -> {
+                    if (mStatusBarWindowManager != null) {
+                        mStatusBarWindowManager.setScrimsVisible(scrimsVisible);
+                    }
+                });
         if (mScrimSrcModeEnabled) {
             Runnable runnable = new Runnable() {
                 @Override
@@ -3520,6 +3525,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.print  ("      ");
             mStackScroller.dump(fd, pw, args);
         }
+        pw.println("  Theme:");
+        if (mOverlayManager == null) {
+            pw.println("    overlay manager not initialized!");
+        } else {
+            pw.println("    dark overlay on: " + isUsingDarkTheme());
+        }
+        final boolean lightWpTheme = mContext.getThemeResId() == R.style.Theme_SystemUI_Light;
+        pw.println("    light wallpaper theme: " + lightWpTheme);
 
         DozeLog.dump(pw);
 
@@ -3723,7 +3736,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                notifyHeadsUpScreenOff();
                 finishBarAnimations();
                 resetUserExpandedStates();
             }
@@ -4623,6 +4635,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateDozingState() {
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
         boolean animate = !mDozing && mDozeServiceHost.shouldAnimateWakeup();
         mNotificationPanel.setDozing(mDozing, animate);
@@ -4726,6 +4739,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true);
         mNotificationPanel.expand(false /* animate */);
+        recomputeDisableFlags(false /* animate */);
     }
 
     private void instantCollapseNotificationPanel() {
@@ -5163,6 +5177,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
+            notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
         }
 
@@ -5172,6 +5187,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStackScroller.setAnimationsEnabled(true);
             mVisualStabilityManager.setScreenOn(true);
             mNotificationPanel.setTouchDisabled(false);
+
+            maybePrepareWakeUpFromAod();
+
             mDozeServiceHost.stopDozing();
             updateVisibleToUser();
             updateIsKeyguard();
@@ -5184,11 +5202,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mFalsingManager.onScreenTurningOn();
             mNotificationPanel.onScreenTurningOn();
 
-            int wakefulness = mWakefulnessLifecycle.getWakefulness();
-            if (mDozing && (wakefulness == WAKEFULNESS_WAKING
-                    || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
-                mScrimController.prepareWakeUpFromAod();
-            }
+            maybePrepareWakeUpFromAod();
 
             if (mLaunchCameraOnScreenTurningOn) {
                 mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
@@ -5215,6 +5229,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public int getWakefulnessState() {
         return mWakefulnessLifecycle.getWakefulness();
+    }
+
+    private void maybePrepareWakeUpFromAod() {
+        int wakefulness = mWakefulnessLifecycle.getWakefulness();
+        if (mDozing && (wakefulness == WAKEFULNESS_WAKING
+                || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
+            mScrimController.prepareWakeUpFromAod();
+        }
     }
 
     private void vibrateForCameraGesture() {
@@ -5504,6 +5526,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void setAnimateWakeup(boolean animateWakeup) {
+            if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_AWAKE
+                    || mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_WAKING) {
+                // Too late to change the wakeup animation.
+                return;
+            }
             mAnimateWakeup = animateWakeup;
         }
 
@@ -7251,7 +7278,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         setAreThereNotifications();
     }
 
-    protected void notifyHeadsUpScreenOff() {
+    protected void notifyHeadsUpGoingToSleep() {
         maybeEscalateHeadsUp();
     }
 

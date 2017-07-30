@@ -50,6 +50,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.BinderThread;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -230,6 +231,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int WIRELESS_AFFORDANCE = 0;
         int WIRED_AFFORDANCE = 1;
     }
+
+    /**
+     * A protected broadcast intent action for internal use for {@link PendingIntent} in
+     * the notification.
+     */
+    private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
+            "com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
 
     final Context mContext;
     final Resources mRes;
@@ -836,6 +844,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
                 onActionLocaleChanged();
+            } else if (ACTION_SHOW_INPUT_METHOD_PICKER.equals(action)) {
+                // ACTION_SHOW_INPUT_METHOD_PICKER action is a protected-broadcast and it is
+                // guaranteed to be send only from the system, so that there is no need for extra
+                // security check such as
+                // {@link #canShowInputMethodPickerLocked(IInputMethodClient)}.
+                mHandler.obtainMessage(
+                        MSG_SHOW_IM_SUBTYPE_PICKER,
+                        InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES,
+                        0 /* arg2 */)
+                        .sendToTarget();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -1285,6 +1303,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         Bundle extras = new Bundle();
         extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
+        @ColorInt final int accentColor = mContext.getColor(
+                com.android.internal.R.color.system_notification_accent_color);
         mImeSwitcherNotification =
                 new Notification.Builder(mContext, SystemNotificationChannels.VIRTUAL_KEYBOARD)
                         .setSmallIcon(com.android.internal.R.drawable.ic_notification_ime_default)
@@ -1292,9 +1312,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         .setOngoing(true)
                         .addExtras(extras)
                         .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setColor(com.android.internal.R.color.system_notification_accent_color);
+                        .setColor(accentColor);
 
-        Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
+        Intent intent = new Intent(ACTION_SHOW_INPUT_METHOD_PICKER)
+                .setPackage(mContext.getPackageName());
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
         mShowOngoingImeSwitcherForPhones = false;
@@ -1445,6 +1466,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
                 broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
                 broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
+                broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
 
                 buildInputMethodListLocked(true /* resetDefaultEnabledIme */);

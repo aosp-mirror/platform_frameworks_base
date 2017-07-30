@@ -127,6 +127,9 @@ public class WifiTile extends QSTileImpl<SignalState> {
             return;
         }
         showDetail(true);
+        if (!mState.value) {
+            mController.setWifiEnabled(true);
+        }
     }
 
     @Override
@@ -311,12 +314,10 @@ public class WifiTile extends QSTileImpl<SignalState> {
         public View createDetailView(Context context, View convertView, ViewGroup parent) {
             if (DEBUG) Log.d(TAG, "createDetailView convertView=" + (convertView != null));
             mAccessPoints = null;
-            mWifiController.scanForAccessPoints();
-            fireScanStateChanged(true);
             mItems = QSDetailItems.convertOrInflate(context, convertView, parent);
             mItems.setTagSuffix("Wifi");
             mItems.setCallback(this);
-            updateItems();
+            mWifiController.scanForAccessPoints(); // updates APs and items
             setItemsVisible(mState.value);
             return mItems;
         }
@@ -324,9 +325,27 @@ public class WifiTile extends QSTileImpl<SignalState> {
         @Override
         public void onAccessPointsChanged(final List<AccessPoint> accessPoints) {
             mAccessPoints = accessPoints.toArray(new AccessPoint[accessPoints.size()]);
+            filterUnreachableAPs();
+
             updateItems();
             if (accessPoints != null && accessPoints.size() > 0) {
                 fireScanStateChanged(false);
+            }
+        }
+
+        /** Filter unreachable APs from mAccessPoints */
+        private void filterUnreachableAPs() {
+            int numReachable = 0;
+            for (AccessPoint ap : mAccessPoints) {
+                if (ap.isReachable()) numReachable++;
+            }
+            if (numReachable != mAccessPoints.length) {
+                AccessPoint[] unfiltered = mAccessPoints;
+                mAccessPoints = new AccessPoint[numReachable];
+                int i = 0;
+                for (AccessPoint ap : unfiltered) {
+                    if (ap.isReachable()) mAccessPoints[i++] = ap;
+                }
             }
         }
 

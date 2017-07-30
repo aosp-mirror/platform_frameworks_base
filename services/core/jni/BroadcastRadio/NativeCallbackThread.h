@@ -20,26 +20,23 @@
 #include <android-base/macros.h>
 #include <functional>
 #include <jni.h>
-#include <pthread.h>
 #include <queue>
-#include <utils/Condition.h>
-#include <utils/Mutex.h>
+#include <thread>
 
 namespace android {
 
 class NativeCallbackThread {
     typedef std::function<void(JNIEnv*)> Task;
 
-    pthread_t mThread;
-    Mutex mQueueMutex;
-    Condition mQueueCond;
-    std::atomic<bool> mExitting;
-
     JavaVM *mvm;
     std::queue<Task> mQueue;
 
-    static void* main(void *args);
-    void main();
+    std::mutex mQueueMutex;
+    std::condition_variable mQueueCond;
+    std::atomic<bool> mExiting;
+    std::thread mThread;
+
+    void threadLoop();
 
     DISALLOW_COPY_AND_ASSIGN(NativeCallbackThread);
 

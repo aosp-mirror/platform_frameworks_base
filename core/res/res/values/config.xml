@@ -603,10 +603,6 @@
          during voice calls -->
     <bool translatable="false" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit">false</bool>
 
-    <!-- Integer indicating the value that framework needs to set the tx power to for meeting SAR requirements
-         during voice calls -->
-    <integer translatable="false" name="config_wifi_framework_voice_call_sar_tx_power_limit_in_dbm">0</integer>
-
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
@@ -1889,10 +1885,12 @@
          states. -->
     <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
-    <!-- Whether the display hardware requires we go to the off state before transitioning
-         out of any doze states. -->
-    <bool name="config_displayTransitionOffAfterDoze">false</bool>
+    <!-- Whether the display blanks itself when transitioning from a doze to a non-doze state -->
+    <bool name="config_displayBlanksAfterDoze">false</bool>
 
+    <!-- True if the display hardware only has brightness buckets rather than a full range of
+         backlight values -->
+    <bool name="config_displayBrightnessBucketsInDoze">false</bool>
 
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.

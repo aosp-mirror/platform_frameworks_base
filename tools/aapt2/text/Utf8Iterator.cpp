@@ -25,23 +25,26 @@ namespace aapt {
 namespace text {
 
 Utf8Iterator::Utf8Iterator(const StringPiece& str)
-    : str_(str), next_pos_(0), current_codepoint_(0) {
+    : str_(str), current_pos_(0), next_pos_(0), current_codepoint_(0) {
   DoNext();
 }
 
 void Utf8Iterator::DoNext() {
-  size_t next_pos = 0u;
-  int32_t result = utf32_from_utf8_at(str_.data(), str_.size(), next_pos_, &next_pos);
+  current_pos_ = next_pos_;
+  int32_t result = utf32_from_utf8_at(str_.data(), str_.size(), current_pos_, &next_pos_);
   if (result == -1) {
     current_codepoint_ = 0u;
   } else {
     current_codepoint_ = static_cast<char32_t>(result);
-    next_pos_ = next_pos;
   }
 }
 
 bool Utf8Iterator::HasNext() const {
   return current_codepoint_ != 0;
+}
+
+size_t Utf8Iterator::Position() const {
+  return current_pos_;
 }
 
 void Utf8Iterator::Skip(int amount) {

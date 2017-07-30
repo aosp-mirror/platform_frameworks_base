@@ -52,6 +52,7 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
 
     private boolean mConnected;
     private long mTime;
+    private boolean mIsAlarm;
 
     public CountdownConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new CountdownConditionProvider()");
@@ -110,9 +111,11 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
         mTime = ZenModeConfig.tryParseCountdownConditionId(conditionId);
+        mIsAlarm = ZenModeConfig.isValidCountdownToAlarmConditionId(conditionId);
         final AlarmManager alarms = (AlarmManager)
                 mContext.getSystemService(Context.ALARM_SERVICE);
-        final Intent intent = new Intent(ACTION).putExtra(EXTRA_CONDITION_ID, conditionId)
+        final Intent intent = new Intent(ACTION)
+                .putExtra(EXTRA_CONDITION_ID, conditionId)
                 .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -123,7 +126,7 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
                     DateUtils.getRelativeTimeSpanString(mTime, now, DateUtils.MINUTE_IN_MILLIS);
             if (mTime <= now) {
                 // in the past, already false
-                notifyCondition(newCondition(mTime, Condition.STATE_FALSE));
+                notifyCondition(newCondition(mTime, mIsAlarm, Condition.STATE_FALSE));
             } else {
                 // in the future, set an alarm
                 alarms.setExact(AlarmManager.RTC_WAKEUP, mTime, pendingIntent);
@@ -145,17 +148,18 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
         public void onReceive(Context context, Intent intent) {
             if (ACTION.equals(intent.getAction())) {
                 final Uri conditionId = intent.getParcelableExtra(EXTRA_CONDITION_ID);
+                final boolean alarm = ZenModeConfig.isValidCountdownToAlarmConditionId(conditionId);
                 final long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
                 if (DEBUG) Slog.d(TAG, "Countdown condition fired: " + conditionId);
                 if (time > 0) {
-                    notifyCondition(newCondition(time, Condition.STATE_FALSE));
+                    notifyCondition(newCondition(time, alarm, Condition.STATE_FALSE));
                 }
             }
         }
     }
 
-    private static final Condition newCondition(long time, int state) {
-        return new Condition(ZenModeConfig.toCountdownConditionId(time),
+    private static final Condition newCondition(long time, boolean alarm, int state) {
+        return new Condition(ZenModeConfig.toCountdownConditionId(time, alarm),
                 "", "", "", 0, state,Condition.FLAG_RELEVANT_NOW);
     }
 

@@ -83,7 +83,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
-        final boolean isEnabled = (Boolean)mState.value;
+        final boolean isEnabled = mState.value;
         mController.setBluetoothEnabled(!isEnabled);
     }
 
@@ -100,6 +100,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             return;
         }
         showDetail(true);
+        if (!mState.value) {
+            mController.setBluetoothEnabled(true);
+        }
     }
 
     @Override
@@ -179,6 +182,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             refreshState();
             if (isShowingDetail()) {
                 mDetailAdapter.updateItems();
+                fireToggleStateChanged(mDetailAdapter.getToggleState());
             }
         }
 
@@ -269,7 +273,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     item.icon = R.drawable.ic_qs_bluetooth_on;
                     item.line1 = device.getName();
                     item.tag = device;
-                    int state = mController.getMaxConnectionState(device);
+                    int state = device.getMaxConnectionState();
                     if (state == BluetoothProfile.STATE_CONNECTED) {
                         item.icon = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();

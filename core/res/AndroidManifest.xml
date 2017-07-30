@@ -545,6 +545,7 @@
     <protected-broadcast android:name="android.media.tv.action.PREVIEW_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
+    <protected-broadcast android:name="com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -3167,6 +3168,10 @@
 
     <!-- @SystemApi @hide @deprecated use UPDATE_DEVICE_STATS instead -->
     <permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi @hide Allows an application to manage carrier subscription plans. -->
+    <permission android:name="android.permission.MANAGE_SUBSCRIPTION_PLANS"
         android:protectionLevel="signature|privileged" />
 
     <!-- C2DM permission.

@@ -22,18 +22,21 @@
 #include "convert.h"
 #include "TunerCallback.h"
 
-#include <JNIHelp.h>
-#include <Utils.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <binder/IPCThreadState.h>
+#include <broadcastradio-utils/Utils.h>
 #include <core_jni_helpers.h>
 #include <media/AudioSystem.h>
+#include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 
 namespace android {
 namespace server {
 namespace BroadcastRadio {
 namespace Tuner {
+
+using std::lock_guard;
+using std::mutex;
 
 using hardware::Return;
 using hardware::hidl_death_recipient;
@@ -49,7 +52,7 @@ using V1_0::Result;
 using V1_1::ITunerCallback;
 using V1_1::ProgramListResult;
 
-static Mutex gContextMutex;
+static mutex gContextMutex;
 
 static struct {
     struct {
@@ -106,8 +109,8 @@ static TunerContext& getNativeContext(JNIEnv *env, JavaRef<jobject> const &jTune
 }
 
 static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev, bool withAudio, jint band) {
-    ALOGV("nativeInit()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
 
     auto ctx = new TunerContext();
     ctx->mHalRev = static_cast<HalRevision>(halRev);
@@ -119,8 +122,8 @@ static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev, bool withAudio, j
 }
 
 static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeFinalize()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
 
     auto ctx = reinterpret_cast<TunerContext*>(nativeContext);
     delete ctx;
@@ -150,10 +153,9 @@ static void notifyAudioService(TunerContext& ctx, bool connected) {
 
 void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
         sp<V1_0::IBroadcastRadio> halModule, sp<V1_0::ITuner> halTuner) {
-    ALOGV("setHalTuner(%p)", halTuner.get());
+    ALOGV("%s(%p)", __func__, halTuner.get());
     ALOGE_IF(halTuner == nullptr, "HAL tuner is a nullptr");
-
-    AutoMutex _l(gContextMutex);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(env, jTuner);
 
     if (ctx.mIsClosed) {
@@ -187,12 +189,12 @@ static sp<V1_0::ITuner> getHalTuner(const TunerContext& ctx) {
 }
 
 sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
-    AutoMutex _l(gContextMutex);
+    lock_guard<mutex> lk(gContextMutex);
     return getHalTuner(getNativeContext(nativeContext));
 }
 
 sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
-    AutoMutex _l(gContextMutex);
+    lock_guard<mutex> lk(gContextMutex);
     return getNativeContext(nativeContext).mHalTuner11;
 }
 
@@ -206,8 +208,9 @@ Region getRegion(JNIEnv *env, jobject obj) {
 }
 
 static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
-    AutoMutex _l(gContextMutex);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
+
     if (ctx.mIsClosed) return;
     ctx.mIsClosed = true;
 
@@ -228,9 +231,10 @@ static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
 }
 
 static void nativeSetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext, jobject config) {
-    ALOGV("nativeSetConfiguration()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
+
     auto halTuner = getHalTuner(ctx);
     if (halTuner == nullptr) return;
 
@@ -244,7 +248,7 @@ static void nativeSetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext
 
 static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext,
         Region region) {
-    ALOGV("nativeSetConfiguration()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner(nativeContext);
     if (halTuner == nullptr) return nullptr;
 
@@ -263,7 +267,7 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
 
 static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
         bool directionDown, bool skipSubChannel) {
-    ALOGV("nativeStep()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner(nativeContext);
     if (halTuner == nullptr) return;
 
@@ -273,7 +277,7 @@ static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
 
 static void nativeScan(JNIEnv *env, jobject obj, jlong nativeContext,
         bool directionDown, bool skipSubChannel) {
-    ALOGV("nativeScan()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner(nativeContext);
     if (halTuner == nullptr) return;
 
@@ -282,9 +286,10 @@ static void nativeScan(JNIEnv *env, jobject obj, jlong nativeContext,
 }
 
 static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jSelector) {
-    ALOGV("nativeTune()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
+
     auto halTuner10 = getHalTuner(ctx);
     auto halTuner11 = ctx.mHalTuner11;
     if (halTuner10 == nullptr) return;
@@ -304,7 +309,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jS
 }
 
 static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeCancel()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner(nativeContext);
     if (halTuner == nullptr) return;
 
@@ -323,9 +328,10 @@ static void nativeCancelAnnouncement(JNIEnv *env, jobject obj, jlong nativeConte
 }
 
 static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeGetProgramInformation()");
-    AutoMutex _l(gContextMutex);
+    ALOGV("%s", __func__);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
+
     auto halTuner10 = getHalTuner(ctx);
     auto halTuner11 = ctx.mHalTuner11;
     if (halTuner10 == nullptr) return nullptr;
@@ -355,7 +361,7 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
 }
 
 static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeStartBackgroundScan()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner11(nativeContext);
     if (halTuner == nullptr) {
         ALOGI("Background scan is not supported with HAL < 1.1");
@@ -369,7 +375,7 @@ static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeCont
 }
 
 static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContext, jstring jFilter) {
-    ALOGV("nativeGetProgramList()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner11(nativeContext);
     if (halTuner == nullptr) {
         ALOGI("Program list is not supported with HAL < 1.1");
@@ -398,7 +404,7 @@ static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContex
 
 static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, jint id) {
     ALOGV("%s(%x)", __func__, id);
-    AutoMutex _l(gContextMutex);
+    lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
     if (ctx.mHalModule11 == nullptr) {
@@ -435,7 +441,7 @@ static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, 
 }
 
 static bool nativeIsAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeIsAnalogForced()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner11(nativeContext);
     if (halTuner == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -456,7 +462,7 @@ static bool nativeIsAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext) 
 }
 
 static void nativeSetAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext, bool isForced) {
-    ALOGV("nativeSetAnalogForced()");
+    ALOGV("%s(%d)", __func__, isForced);
     auto halTuner = getHalTuner11(nativeContext);
     if (halTuner == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -469,7 +475,7 @@ static void nativeSetAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext,
 }
 
 static bool nativeIsAntennaConnected(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("nativeIsAntennaConnected()");
+    ALOGV("%s", __func__);
     auto halTuner = getHalTuner(nativeContext);
     if (halTuner == nullptr) return false;
 

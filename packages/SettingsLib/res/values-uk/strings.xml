@@ -40,8 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Під’єднано через %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступ через %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Під’єднано, але немає доступу до Інтернету"</string>
-    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
-    <skip />
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Точка доступу тимчасово переповнена"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Дуже повільна"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Повільна"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ОК"</string>
@@ -104,18 +103,16 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Дві смужки сигналу Wi-Fi."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Три смужки сигналу Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Максимальний сигнал Wi-Fi."</string>
-    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
-    <skip />
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Відкрита мережа"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Захищена мережа"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"ОС Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Видалені програми"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Видалені програми та користувачі"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Прив\'язка USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB-модем"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Порт. точка дост."</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Прив\'язка Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Прив\'язка"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Режим модема"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Точка доступу й модем"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Усі робочі додатки"</string>
     <string name="user_guest" msgid="8475274842845401871">"Гість"</string>
     <string name="unknown" msgid="1592123443519355854">"Невідомо"</string>

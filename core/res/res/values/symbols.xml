@@ -315,7 +315,6 @@
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
   <java-symbol type="bool" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit" />
-  <java-symbol type="integer" name="config_wifi_framework_voice_call_sar_tx_power_limit_in_dbm" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
   <java-symbol type="bool" name="config_wifi_revert_country_code_on_cellular_loss" />
   <java-symbol type="bool" name="config_wifi_enable_wifi_firmware_debugging" />
@@ -3040,7 +3039,8 @@
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
-  <java-symbol type="bool" name="config_displayTransitionOffAfterDoze" />
+  <java-symbol type="bool" name="config_displayBlanksAfterDoze" />
+  <java-symbol type="bool" name="config_displayBrightnessBucketsInDoze" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
   <java-symbol type="string" name="config_headlineFontFamily" />
   <java-symbol type="string" name="config_headlineFontFamilyLight" />
