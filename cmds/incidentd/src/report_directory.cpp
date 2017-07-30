@@ -129,7 +129,8 @@ clean_directory(const char* directory, off_t maxSize, size_t maxCount)
         return;
     }
 
-    String8 dirbase(String8(directory) + "/");
+    String8 dirbase(directory);
+    if (directory[dirbase.size() - 1] != '/') dirbase += "/";
 
     off_t totalSize = 0;
     size_t totalCount = 0;

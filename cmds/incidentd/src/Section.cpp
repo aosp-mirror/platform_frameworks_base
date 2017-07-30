@@ -424,7 +424,7 @@ CommandSection::Execute(ReportRequestSet* requests) const
     status_t cmdStatus = waitForChild(cmdPid);
     status_t ihStatus  = waitForChild(ihPid);
     if (cmdStatus != NO_ERROR || ihStatus != NO_ERROR) {
-        ALOGW("CommandSection '%s' abnormal child processes, return status: command: %s, incidnet helper: %s",
+        ALOGW("CommandSection '%s' abnormal child processes, return status: command: %s, incident helper: %s",
             this->name.string(), strerror(-cmdStatus), strerror(-ihStatus));
         return cmdStatus != NO_ERROR ? cmdStatus : ihStatus;
     }

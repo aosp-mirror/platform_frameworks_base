@@ -62,8 +62,10 @@ public:
     iterator begin() { return mRequests.begin(); }
     iterator end() { return mRequests.end(); }
 
+    bool containsSection(int id);
 private:
     vector<sp<ReportRequest>> mRequests;
+    IncidentReportArgs mSections;
     int mWritableCount;
     int mMainFd;
 };
@@ -77,10 +79,10 @@ public:
         REPORT_NEEDS_DROPBOX = 1
     };
 
-    IncidentReportArgs args;
     ReportRequestSet batch;
 
     Reporter();
+    Reporter(const char* directory);
     virtual ~Reporter();
 
     // Run the report as described in the batch and args parameters.
@@ -89,12 +91,16 @@ public:
     static run_report_status_t upload_backlog();
 
 private:
+    String8 mIncidentDirectory;
+
     string mFilename;
     off_t mMaxSize;
     size_t mMaxCount;
     time_t mStartTime;
 
     status_t create_file(int* fd);
+
+    bool isTest = true; // default to true for testing
 };
 
 
