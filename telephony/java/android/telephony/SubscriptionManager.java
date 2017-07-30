@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -1554,7 +1555,9 @@ public class SubscriptionManager {
      * </ul>
      *
      * @param subId the subscriber this relationship applies to
+     * @hide
      */
+    @SystemApi
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
         final INetworkPolicyManager npm = INetworkPolicyManager.Stub
                 .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
@@ -1584,7 +1587,9 @@ public class SubscriptionManager {
      * @param plans the list of plans. The first plan is always the primary and
      *            most important plan. Any additional plans are secondary and
      *            may not be displayed or used by decision making logic.
+     * @hide
      */
+    @SystemApi
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         final INetworkPolicyManager npm = INetworkPolicyManager.Stub
                 .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
