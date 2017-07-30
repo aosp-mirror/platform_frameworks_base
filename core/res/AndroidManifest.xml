@@ -3170,6 +3170,10 @@
     <permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to manage carrier subscription plans. -->
+    <permission android:name="android.permission.MANAGE_SUBSCRIPTION_PLANS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- C2DM permission.
          @hide Used internally.
      -->
