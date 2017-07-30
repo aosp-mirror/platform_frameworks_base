@@ -45,12 +45,12 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
     private static final String TAG = "ColorExtractor";
 
-    private final SparseArray<GradientColors[]> mGradientColors;
+    protected final SparseArray<GradientColors[]> mGradientColors;
     private final ArrayList<WeakReference<OnColorsChangedListener>> mOnColorsChangedListeners;
     private final Context mContext;
     private final ExtractionType mExtractionType;
-    private WallpaperColors mSystemColors;
-    private WallpaperColors mLockColors;
+    protected WallpaperColors mSystemColors;
+    protected WallpaperColors mLockColors;
 
     public ColorExtractor(Context context) {
         this(context, new Tonal(context));

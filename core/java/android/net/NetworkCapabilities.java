@@ -23,6 +23,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * This class represents the capabilities of a network.  This is used both to specify
@@ -346,11 +347,6 @@ public final class NetworkCapabilities implements Parcelable {
         return (nc.mNetworkCapabilities == this.mNetworkCapabilities);
     }
 
-    private boolean equalsNetCapabilitiesImmutable(NetworkCapabilities that) {
-        return ((this.mNetworkCapabilities & ~MUTABLE_CAPABILITIES) ==
-                (that.mNetworkCapabilities & ~MUTABLE_CAPABILITIES));
-    }
-
     private boolean equalsNetCapabilitiesRequestable(NetworkCapabilities that) {
         return ((this.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES) ==
                 (that.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES));
@@ -504,10 +500,12 @@ public final class NetworkCapabilities implements Parcelable {
     private void combineTransportTypes(NetworkCapabilities nc) {
         this.mTransportTypes |= nc.mTransportTypes;
     }
+
     private boolean satisfiedByTransportTypes(NetworkCapabilities nc) {
         return ((this.mTransportTypes == 0) ||
                 ((this.mTransportTypes & nc.mTransportTypes) != 0));
     }
+
     /** @hide */
     public boolean equalsTransportTypes(NetworkCapabilities nc) {
         return (nc.mTransportTypes == this.mTransportTypes);
@@ -762,15 +760,43 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Checks that our immutable capabilities are the same as those of the given
-     * {@code NetworkCapabilities}.
+     * {@code NetworkCapabilities} and return a String describing any difference.
+     * The returned String is empty if there is no difference.
      *
      * @hide
      */
-    public boolean equalImmutableCapabilities(NetworkCapabilities nc) {
-        if (nc == null) return false;
-        return (equalsNetCapabilitiesImmutable(nc) &&
-                equalsTransportTypes(nc) &&
-                equalsSpecifier(nc));
+    public String describeImmutableDifferences(NetworkCapabilities that) {
+        if (that == null) {
+            return "other NetworkCapabilities was null";
+        }
+
+        StringJoiner joiner = new StringJoiner(", ");
+
+        // TODO: consider only enforcing that capabilities are not removed, allowing addition.
+        // Ignore NOT_METERED being added or removed as it is effectively dynamic. http://b/63326103
+        // TODO: properly support NOT_METERED as a mutable and requestable capability.
+        final long mask = ~MUTABLE_CAPABILITIES & ~NET_CAPABILITY_NOT_METERED;
+        long oldImmutableCapabilities = this.mNetworkCapabilities & mask;
+        long newImmutableCapabilities = that.mNetworkCapabilities & mask;
+        if (oldImmutableCapabilities != newImmutableCapabilities) {
+            String before = capabilityNamesOf(BitUtils.unpackBits(oldImmutableCapabilities));
+            String after = capabilityNamesOf(BitUtils.unpackBits(newImmutableCapabilities));
+            joiner.add(String.format("immutable capabilities changed: %s -> %s", before, after));
+        }
+
+        if (!equalsSpecifier(that)) {
+            NetworkSpecifier before = this.getNetworkSpecifier();
+            NetworkSpecifier after = that.getNetworkSpecifier();
+            joiner.add(String.format("specifier changed: %s -> %s", before, after));
+        }
+
+        if (!equalsTransportTypes(that)) {
+            String before = transportNamesOf(this.getTransportTypes());
+            String after = transportNamesOf(that.getTransportTypes());
+            joiner.add(String.format("transports changed: %s -> %s", before, after));
+        }
+
+        return joiner.toString();
     }
 
     /**
@@ -845,33 +871,15 @@ public final class NetworkCapabilities implements Parcelable {
 
     @Override
     public String toString() {
+        // TODO: enumerate bits for transports and capabilities instead of creating arrays.
+        // TODO: use a StringBuilder instead of string concatenation.
         int[] types = getTransportTypes();
         String transports = (types.length > 0) ? " Transports: " + transportNamesOf(types) : "";
 
         types = getCapabilities();
         String capabilities = (types.length > 0 ? " Capabilities: " : "");
         for (int i = 0; i < types.length; ) {
-            switch (types[i]) {
-                case NET_CAPABILITY_MMS:            capabilities += "MMS"; break;
-                case NET_CAPABILITY_SUPL:           capabilities += "SUPL"; break;
-                case NET_CAPABILITY_DUN:            capabilities += "DUN"; break;
-                case NET_CAPABILITY_FOTA:           capabilities += "FOTA"; break;
-                case NET_CAPABILITY_IMS:            capabilities += "IMS"; break;
-                case NET_CAPABILITY_CBS:            capabilities += "CBS"; break;
-                case NET_CAPABILITY_WIFI_P2P:       capabilities += "WIFI_P2P"; break;
-                case NET_CAPABILITY_IA:             capabilities += "IA"; break;
-                case NET_CAPABILITY_RCS:            capabilities += "RCS"; break;
-                case NET_CAPABILITY_XCAP:           capabilities += "XCAP"; break;
-                case NET_CAPABILITY_EIMS:           capabilities += "EIMS"; break;
-                case NET_CAPABILITY_NOT_METERED:    capabilities += "NOT_METERED"; break;
-                case NET_CAPABILITY_INTERNET:       capabilities += "INTERNET"; break;
-                case NET_CAPABILITY_NOT_RESTRICTED: capabilities += "NOT_RESTRICTED"; break;
-                case NET_CAPABILITY_TRUSTED:        capabilities += "TRUSTED"; break;
-                case NET_CAPABILITY_NOT_VPN:        capabilities += "NOT_VPN"; break;
-                case NET_CAPABILITY_VALIDATED:      capabilities += "VALIDATED"; break;
-                case NET_CAPABILITY_CAPTIVE_PORTAL: capabilities += "CAPTIVE_PORTAL"; break;
-                case NET_CAPABILITY_FOREGROUND:     capabilities += "FOREGROUND"; break;
-            }
+            capabilities += capabilityNameOf(types[i]);
             if (++i < types.length) capabilities += "&";
         }
 
@@ -891,15 +899,55 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
+    public static String capabilityNamesOf(int[] capabilities) {
+        StringJoiner joiner = new StringJoiner("|");
+        if (capabilities != null) {
+            for (int c : capabilities) {
+                joiner.add(capabilityNameOf(c));
+            }
+        }
+        return joiner.toString();
+    }
+
+    /**
+     * @hide
+     */
+    public static String capabilityNameOf(int capability) {
+        switch (capability) {
+            case NET_CAPABILITY_MMS:            return "MMS";
+            case NET_CAPABILITY_SUPL:           return "SUPL";
+            case NET_CAPABILITY_DUN:            return "DUN";
+            case NET_CAPABILITY_FOTA:           return "FOTA";
+            case NET_CAPABILITY_IMS:            return "IMS";
+            case NET_CAPABILITY_CBS:            return "CBS";
+            case NET_CAPABILITY_WIFI_P2P:       return "WIFI_P2P";
+            case NET_CAPABILITY_IA:             return "IA";
+            case NET_CAPABILITY_RCS:            return "RCS";
+            case NET_CAPABILITY_XCAP:           return "XCAP";
+            case NET_CAPABILITY_EIMS:           return "EIMS";
+            case NET_CAPABILITY_NOT_METERED:    return "NOT_METERED";
+            case NET_CAPABILITY_INTERNET:       return "INTERNET";
+            case NET_CAPABILITY_NOT_RESTRICTED: return "NOT_RESTRICTED";
+            case NET_CAPABILITY_TRUSTED:        return "TRUSTED";
+            case NET_CAPABILITY_NOT_VPN:        return "NOT_VPN";
+            case NET_CAPABILITY_VALIDATED:      return "VALIDATED";
+            case NET_CAPABILITY_CAPTIVE_PORTAL: return "CAPTIVE_PORTAL";
+            case NET_CAPABILITY_FOREGROUND:     return "FOREGROUND";
+            default:                            return Integer.toString(capability);
+        }
+    }
+
+    /**
+     * @hide
+     */
     public static String transportNamesOf(int[] types) {
-        if (types == null || types.length == 0) {
-            return "";
+        StringJoiner joiner = new StringJoiner("|");
+        if (types != null) {
+            for (int t : types) {
+                joiner.add(transportNameOf(t));
+            }
         }
-        StringBuilder transports = new StringBuilder();
-        for (int t : types) {
-            transports.append("|").append(transportNameOf(t));
-        }
-        return transports.substring(1);
+        return joiner.toString();
     }
 
     /**

@@ -273,7 +273,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     item.icon = R.drawable.ic_qs_bluetooth_on;
                     item.line1 = device.getName();
                     item.tag = device;
-                    int state = mController.getMaxConnectionState(device);
+                    int state = device.getMaxConnectionState();
                     if (state == BluetoothProfile.STATE_CONNECTED) {
                         item.icon = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();

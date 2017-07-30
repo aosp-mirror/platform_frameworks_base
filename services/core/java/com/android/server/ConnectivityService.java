@@ -4571,10 +4571,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private void updateCapabilities(
             int oldScore, NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
-        if (nai.everConnected && !nai.networkCapabilities.equalImmutableCapabilities(
-                networkCapabilities)) {
-            Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
-                    + nai.networkCapabilities + " -> " + networkCapabilities);
+        // Sanity check: a NetworkAgent should not change its static capabilities or parameters.
+        if (nai.everConnected) {
+            String diff = nai.networkCapabilities.describeImmutableDifferences(networkCapabilities);
+            if (!TextUtils.isEmpty(diff)) {
+                Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities:" + diff);
+            }
         }
 
         // Don't modify caller's NetworkCapabilities.

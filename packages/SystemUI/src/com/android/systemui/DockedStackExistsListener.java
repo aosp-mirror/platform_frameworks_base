@@ -74,8 +74,11 @@ public class DockedStackExistsListener {
 
     private static void onDockedStackExistsChanged(boolean exists) {
         synchronized (sCallbacks) {
-            sCallbacks.removeIf(wf -> wf.get() == null);
-            sCallbacks.forEach(wf -> wf.get().accept(exists));
+            sCallbacks.removeIf(wf -> {
+                Consumer<Boolean> l = wf.get();
+                if (l != null) l.accept(exists);
+                return l == null;
+            });
         }
     }
 

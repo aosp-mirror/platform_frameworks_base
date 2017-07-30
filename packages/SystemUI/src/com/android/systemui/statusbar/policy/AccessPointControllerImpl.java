@@ -97,8 +97,9 @@ public class AccessPointControllerImpl
 
     @Override
     public void scanForAccessPoints() {
-        if (DEBUG) Log.d(TAG, "scan!");
-        mWifiTracker.forceScan();
+        if (DEBUG) Log.d(TAG, "force update APs!");
+        mWifiTracker.forceUpdate();
+        fireAcccessPointsCallback(mWifiTracker.getAccessPoints());
     }
 
     @Override

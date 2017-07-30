@@ -246,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ভয়েস সহায়তা"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"এখনই লক করুন"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"৯৯৯+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"নতুন বিজ্ঞপ্তি"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ভার্চুয়াল কীবোর্ড"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ফিজিক্যাল কীবোর্ড"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"নিরাপত্তা"</string>
@@ -1196,8 +1195,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"আরও তথ্যের জন্য ট্যাপ করুন"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ডিবাগিং সংযুক্ত হয়েছে"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ডিবাগিং অক্ষম করতে আলতো চাপুন৷"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ডিবাগিং অক্ষম করতে বেছে নিন।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ত্রুটির প্রতিবেদন নেওয়া হচ্ছে..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ত্রুটির প্রতিবেদন শেয়ার করবেন?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ত্রুটির প্রতিবেদন শেয়ার করা হচ্ছে..."</string>
