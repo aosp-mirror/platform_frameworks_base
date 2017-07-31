@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
@@ -30,6 +31,7 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.OperationCanceledException;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -77,21 +79,21 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private static final int EVENT_DB_CORRUPT = 75004;
 
+    // TODO b/63398887 STOPSHIP.
+    // Temporarily enabled for testing across a broader set of dogfood devices.
+    private static final boolean DEBUG_CLOSE_IDLE_CONNECTIONS = SystemProperties
+            .getBoolean("persist.debug.sqlite.close_idle_connections", true);
+
     // Stores reference to all databases opened in the current process.
     // (The referent Object is not used at this time.)
     // INVARIANT: Guarded by sActiveDatabases.
-    private static WeakHashMap<SQLiteDatabase, Object> sActiveDatabases =
-            new WeakHashMap<SQLiteDatabase, Object>();
+    private static WeakHashMap<SQLiteDatabase, Object> sActiveDatabases = new WeakHashMap<>();
 
     // Thread-local for database sessions that belong to this database.
     // Each thread has its own database session.
     // INVARIANT: Immutable.
-    private final ThreadLocal<SQLiteSession> mThreadSession = new ThreadLocal<SQLiteSession>() {
-        @Override
-        protected SQLiteSession initialValue() {
-            return createSession();
-        }
-    };
+    private final ThreadLocal<SQLiteSession> mThreadSession = ThreadLocal
+            .withInitial(this::createSession);
 
     // The optional factory to use when creating new Cursors.  May be null.
     // INVARIANT: Immutable.
@@ -261,12 +263,29 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private SQLiteDatabase(final String path, final int openFlags,
             CursorFactory cursorFactory, DatabaseErrorHandler errorHandler,
-            int lookasideSlotSize, int lookasideSlotCount) {
+            int lookasideSlotSize, int lookasideSlotCount, long idleConnectionTimeoutMs) {
         mCursorFactory = cursorFactory;
         mErrorHandler = errorHandler != null ? errorHandler : new DefaultDatabaseErrorHandler();
         mConfigurationLocked = new SQLiteDatabaseConfiguration(path, openFlags);
         mConfigurationLocked.lookasideSlotSize = lookasideSlotSize;
         mConfigurationLocked.lookasideSlotCount = lookasideSlotCount;
+        // Disable lookaside allocator on low-RAM devices
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            mConfigurationLocked.lookasideSlotCount = 0;
+            mConfigurationLocked.lookasideSlotSize = 0;
+        }
+        long effectiveTimeoutMs = Long.MAX_VALUE;
+        // Never close idle connections for in-memory databases
+        if (!mConfigurationLocked.isInMemoryDb()) {
+            // First, check app-specific value. Otherwise use defaults
+            // -1 in idleConnectionTimeoutMs indicates unset value
+            if (idleConnectionTimeoutMs >= 0) {
+                effectiveTimeoutMs = idleConnectionTimeoutMs;
+            } else if (DEBUG_CLOSE_IDLE_CONNECTIONS) {
+                effectiveTimeoutMs = SQLiteGlobal.getIdleConnectionTimeout();
+            }
+        }
+        mConfigurationLocked.idleConnectionTimeoutMs = effectiveTimeoutMs;
     }
 
     @Override
@@ -694,7 +713,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
         Preconditions.checkArgument(openParams != null, "OpenParams cannot be null");
         SQLiteDatabase db = new SQLiteDatabase(path, openParams.mOpenFlags,
                 openParams.mCursorFactory, openParams.mErrorHandler,
-                openParams.mLookasideSlotSize, openParams.mLookasideSlotCount);
+                openParams.mLookasideSlotSize, openParams.mLookasideSlotCount,
+                openParams.mIdleConnectionTimeout);
         db.open();
         return db;
     }
@@ -720,7 +740,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase openDatabase(@NonNull String path, @Nullable CursorFactory factory,
             @DatabaseOpenFlags int flags, @Nullable DatabaseErrorHandler errorHandler) {
-        SQLiteDatabase db = new SQLiteDatabase(path, flags, factory, errorHandler, -1, -1);
+        SQLiteDatabase db = new SQLiteDatabase(path, flags, factory, errorHandler, -1, -1, -1);
         db.open();
         return db;
     }
@@ -2267,14 +2287,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
         private final DatabaseErrorHandler mErrorHandler;
         private final int mLookasideSlotSize;
         private final int mLookasideSlotCount;
+        private long mIdleConnectionTimeout;
 
         private OpenParams(int openFlags, CursorFactory cursorFactory,
-                DatabaseErrorHandler errorHandler, int lookasideSlotSize, int lookasideSlotCount) {
+                DatabaseErrorHandler errorHandler, int lookasideSlotSize, int lookasideSlotCount,
+                long idleConnectionTimeout) {
             mOpenFlags = openFlags;
             mCursorFactory = cursorFactory;
             mErrorHandler = errorHandler;
             mLookasideSlotSize = lookasideSlotSize;
             mLookasideSlotCount = lookasideSlotCount;
+            mIdleConnectionTimeout = idleConnectionTimeout;
         }
 
         /**
@@ -2330,6 +2353,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
         }
 
         /**
+         * Returns maximum number of milliseconds that SQLite connection is allowed to be idle
+         * before it is closed and removed from the pool.
+         * <p>If the value isn't set, the timeout defaults to the system wide timeout
+         *
+         * @return timeout in milliseconds or -1 if the value wasn't set.
+         */
+        public long getIdleConnectionTimeout() {
+            return mIdleConnectionTimeout;
+        }
+
+        /**
          * Creates a new instance of builder {@link Builder#Builder(OpenParams) initialized} with
          * {@code this} parameters.
          * @hide
@@ -2345,6 +2379,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         public static final class Builder {
             private int mLookasideSlotSize = -1;
             private int mLookasideSlotCount = -1;
+            private long mIdleConnectionTimeout = -1;
             private int mOpenFlags;
             private CursorFactory mCursorFactory;
             private DatabaseErrorHandler mErrorHandler;
@@ -2474,13 +2509,29 @@ public final class SQLiteDatabase extends SQLiteClosable {
             }
 
             /**
+             * Sets the maximum number of milliseconds that SQLite connection is allowed to be idle
+             * before it is closed and removed from the pool.
+             *
+             * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE}
+             * to allow unlimited idle connections.
+             */
+            @NonNull
+            public Builder setIdleConnectionTimeout(
+                    @IntRange(from = 0) long idleConnectionTimeoutMs) {
+                Preconditions.checkArgument(idleConnectionTimeoutMs >= 0,
+                        "idle connection timeout cannot be negative");
+                mIdleConnectionTimeout = idleConnectionTimeoutMs;
+                return this;
+            }
+
+            /**
              * Creates an instance of {@link OpenParams} with the options that were previously set
              * on this builder
              */
             @NonNull
             public OpenParams build() {
                 return new OpenParams(mOpenFlags, mCursorFactory, mErrorHandler, mLookasideSlotSize,
-                        mLookasideSlotCount);
+                        mLookasideSlotCount, mIdleConnectionTimeout);
             }
         }
     }

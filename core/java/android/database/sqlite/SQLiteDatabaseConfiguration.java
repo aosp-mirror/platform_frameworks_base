@@ -94,14 +94,21 @@ public final class SQLiteDatabaseConfiguration {
      *
      * <p>If negative, the default lookaside configuration will be used
      */
-    public int lookasideSlotSize;
+    public int lookasideSlotSize = -1;
 
     /**
      * The total number of lookaside memory slots per database connection
      *
      * <p>If negative, the default lookaside configuration will be used
      */
-    public int lookasideSlotCount;
+    public int lookasideSlotCount = -1;
+
+    /**
+     * The number of milliseconds that SQLite connection is allowed to be idle before it
+     * is closed and removed from the pool.
+     * <p>By default, idle connections are not closed
+     */
+    public long idleConnectionTimeoutMs = Long.MAX_VALUE;
 
     /**
      * Creates a database configuration with the required parameters for opening a
@@ -122,8 +129,6 @@ public final class SQLiteDatabaseConfiguration {
         // Set default values for optional parameters.
         maxSqlCacheSize = 25;
         locale = Locale.getDefault();
-        lookasideSlotSize = -1;
-        lookasideSlotCount = -1;
     }
 
     /**
@@ -164,6 +169,7 @@ public final class SQLiteDatabaseConfiguration {
         customFunctions.addAll(other.customFunctions);
         lookasideSlotSize = other.lookasideSlotSize;
         lookasideSlotCount = other.lookasideSlotCount;
+        idleConnectionTimeoutMs = other.idleConnectionTimeoutMs;
     }
 
     /**
