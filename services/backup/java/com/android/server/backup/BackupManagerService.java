@@ -769,7 +769,9 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // side unpredictability.
     @Override
     public int generateRandomIntegerToken() {
-        int token = mTokenGenerator.nextInt() & ~0xFF;
+        int token = mTokenGenerator.nextInt();
+        if (token < 0) token = -token;
+        token &= ~0xFF;
         token |= (mNextToken.incrementAndGet() & 0xFF);
         return token;
     }
