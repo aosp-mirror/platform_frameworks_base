@@ -20,7 +20,7 @@ import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.preference.PreferenceScreen;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class FooterPreferenceMixinTest {
 

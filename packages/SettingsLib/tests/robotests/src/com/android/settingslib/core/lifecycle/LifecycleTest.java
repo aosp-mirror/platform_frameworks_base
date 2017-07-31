@@ -20,7 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 import com.android.settingslib.core.lifecycle.events.OnAttach;
 import com.android.settingslib.core.lifecycle.events.OnCreateOptionsMenu;
@@ -41,7 +41,7 @@ import org.robolectric.util.FragmentController;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class LifecycleTest {
 
