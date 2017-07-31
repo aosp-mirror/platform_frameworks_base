@@ -412,6 +412,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             // If no sequences are pending, fire #onClosed immediately
             mSequenceDrainer.beginDrain();
         }
+        if (mInput != null) {
+            mInput.release();
+        }
     }
 
     /**
