@@ -173,8 +173,6 @@ public class PackageTracker implements IntentHelper.Listener {
             throw logAndThrowRuntimeException("Could not determine update app package details for "
                     + mUpdateAppPackageName, e);
         }
-        // TODO(nfuller) Consider permission checks. While an updated system app retains permissions
-        // obtained by the system version it's not clear how to check them.
         Slog.d(TAG, "Update app " + mUpdateAppPackageName + " is valid.");
 
         // Validate the data application package.
@@ -187,8 +185,6 @@ public class PackageTracker implements IntentHelper.Listener {
             throw logAndThrowRuntimeException("Could not determine data app package details for "
                     + mDataAppPackageName, e);
         }
-        // TODO(nfuller) Consider permission checks. While an updated system app retains permissions
-        // obtained by the system version it's not clear how to check them.
         Slog.d(TAG, "Data app " + mDataAppPackageName + " is valid.");
     }
 
@@ -466,7 +462,6 @@ public class PackageTracker implements IntentHelper.Listener {
                     + TimeZoneRulesDataContract.AUTHORITY);
             return false;
         }
-        // TODO(nfuller) Add any permissions checks needed.
         return true;
     }
 
