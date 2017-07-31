@@ -3308,6 +3308,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             setLayoutNeeded();
         }
 
+
+        @Override
+        boolean isOnTop() {
+            // Considered always on top
+            return true;
+        }
+
         @Override
         void positionChildAt(int position, TaskStack child, boolean includingParents) {
             if (StackId.isAlwaysOnTop(child.mStackId) && position != POSITION_TOP) {
