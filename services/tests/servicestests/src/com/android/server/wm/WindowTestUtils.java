@@ -89,6 +89,7 @@ public class WindowTestUtils {
 
     /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
     public static class TestAppWindowToken extends AppWindowToken {
+        boolean mOnTop = false;
 
         TestAppWindowToken(DisplayContent dc) {
             super(dc.mService, new IApplicationToken.Stub() {}, false, dc, true /* fillsParent */,
@@ -124,6 +125,15 @@ public class WindowTestUtils {
 
         int positionInParent() {
             return getParent().mChildren.indexOf(this);
+        }
+
+        void setIsOnTop(boolean onTop) {
+            mOnTop = onTop;
+        }
+
+        @Override
+        boolean isOnTop() {
+            return mOnTop;
         }
     }
 

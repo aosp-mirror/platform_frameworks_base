@@ -185,6 +185,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_UNSET, token.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, token.getOrientation(SCREEN_ORIENTATION_BEHIND));
+
+        token.sendingToBottom = false;
+        token.setIsOnTop(true);
+        // Allow for token to provide orientation hidden if on top and not being sent to bottom.
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, token.getOrientation());
     }
 
     @Test
