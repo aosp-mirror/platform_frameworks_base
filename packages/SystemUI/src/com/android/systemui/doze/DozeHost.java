@@ -44,6 +44,8 @@ public interface DozeHost {
 
     void setDozeScreenBrightness(int value);
 
+    void onIgnoreTouchWhilePulsing(boolean ignore);
+
     interface Callback {
         default void onNotificationHeadsUp() {}
         default void onPowerSaveChanged(boolean active) {}
