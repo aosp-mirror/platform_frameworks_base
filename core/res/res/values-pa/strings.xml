@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ਵੌਇਸ ਅਸਿਸਟ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ਹੁਣ ਲੌਕ ਕਰੋ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"ਨਵੀਂ ਸੂਚਨਾ"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ਆਭਾਸੀ ਕੀ-ਬੋਰਡ"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"ਸੁਰੱਖਿਆ"</string>
@@ -258,40 +257,31 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"ਕੰਮ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ਸੰਪਰਕ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ਟਿਕਾਣਾ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਇਸ ਡੀਵਾਈਸ ਦੇ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ਕੈਲੰਡਰ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਕੈਲੰਡਰ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ"</string>
-    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ ਦਿਓ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ਸਟੋਰੇਜ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ’ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਆਪਣੀ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ, ਅਤੇ ਫ਼ਾਈਲਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਲੈਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤਸਵੀਰਾਂ ਖਿੱਚਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫੋਨ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ਸਰੀਰ ਸੰਵੇਦਕ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡੈਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਲੱਛਣਾਂ ਸਬੰਧੀ ਸੈਂਸਰ ਡੈਟੇ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਕਿਸੇ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰਨਾ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਈ ਟੱਚ ਚਾਲੂ ਕਰਨਾ"</string>
@@ -969,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"ਸਭ ਚੁਣੋ"</string>
     <string name="cut" msgid="3092569408438626261">"ਕੱਟੋ"</string>
     <string name="copy" msgid="2681946229533511987">"ਕਾਪੀ ਕਰੋ"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="paste" msgid="5629880836805036433">"ਪੇਸਟ ਕਰੋ"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"ਸਧਾਰਨ ਲਿਖਤ ਦੇ ਤੌਰ \'ਤੇ ਪੇਸਟ ਕਰੋ"</string>
     <string name="replace" msgid="5781686059063148930">"ਬਦਲੋ…"</string>
@@ -1200,8 +1189,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ਡੀਬੱਗਿੰਗ ਨੂੰ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ਡੀਬੱਗਿੰਗ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਚੁਣੋ।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>

@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Trợ lý thoại"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Khóa ngay"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Thông báo mới"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Bàn phím ảo"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Bàn phím thực"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Bảo mật"</string>
@@ -960,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"Chọn tất cả"</string>
     <string name="cut" msgid="3092569408438626261">"Cắt"</string>
     <string name="copy" msgid="2681946229533511987">"Sao chép"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Không sao chép được vào khay nhớ tạm"</string>
     <string name="paste" msgid="5629880836805036433">"Dán"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Dán dưới dạng văn bản thuần túy"</string>
     <string name="replace" msgid="5781686059063148930">"Thay thế..."</string>

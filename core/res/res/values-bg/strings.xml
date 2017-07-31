@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласова помощ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Заключване сега"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Ново известие"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуална клавиатура"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Физическа клавиатура"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Сигурност"</string>
@@ -279,7 +278,7 @@
     <string name="permgrouprequest_camera" msgid="810824326507258410">"Разрешете на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да прави снимки и да записва видеоклипове"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"да извършва телефонни обаждания и да ги управлява"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Разрешете на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да управлява телефонните обаждания и да извършва такива"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Разрешете на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да извършва и управлява телефонни обаждания"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
     <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Разрешете на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до данните от сензорите за жизнените ви показатели"</string>
@@ -960,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"Избиране на всичко"</string>
     <string name="cut" msgid="3092569408438626261">"Изрязване"</string>
     <string name="copy" msgid="2681946229533511987">"Копиране"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Копирането в буферната памет не бе успешно"</string>
     <string name="paste" msgid="5629880836805036433">"Поставяне"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Поставяне като неформатиран текст"</string>
     <string name="replace" msgid="5781686059063148930">"Замяна..."</string>

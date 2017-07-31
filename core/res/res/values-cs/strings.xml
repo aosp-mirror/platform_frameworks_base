@@ -236,8 +236,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Hlas. asistence"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Zamknout"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Nové oznámení"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuální klávesnice"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fyzická klávesnice"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Zabezpečení"</string>
@@ -844,7 +843,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"změna oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Umožňuje aplikaci upravit oprávnění funkce geolokace v prohlížeči. Škodlivé aplikace toho mohou využít k odeslání údajů o poloze na libovolné webové stránky."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
-    <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"Teď ne"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamatovat"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Nikdy"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Nemáte povolení otevřít tuto stránku."</string>
@@ -1000,8 +999,7 @@
     <string name="selectAll" msgid="6876518925844129331">"Vybrat vše"</string>
     <string name="cut" msgid="3092569408438626261">"Vyjmout"</string>
     <string name="copy" msgid="2681946229533511987">"Kopírovat"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Zkopírování do schránky se nezdařilo"</string>
     <string name="paste" msgid="5629880836805036433">"Vložit"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Vložit jako prostý text"</string>
     <string name="replace" msgid="5781686059063148930">"Nahradit•"</string>

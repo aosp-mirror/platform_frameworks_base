@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ជំនួយសម្លេង"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ចាក់សោ​ឥឡូវនេះ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"ការជូនដំណឹងថ្មី"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ក្ដារ​ចុច​និម្មិត"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ក្ដារចុច​រូបវន្ត"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"សុវត្ថិភាព"</string>
@@ -960,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"ជ្រើស​ទាំងអស់"</string>
     <string name="cut" msgid="3092569408438626261">"កាត់"</string>
     <string name="copy" msgid="2681946229533511987">"ចម្លង"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"មិនអាច​ចម្លងទៅ​អង្គចងចាំទេ"</string>
     <string name="paste" msgid="5629880836805036433">"បិទ​ភ្ជាប់"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"បិទភ្ជាប់ជាអត្ថបទធម្មតា"</string>
     <string name="replace" msgid="5781686059063148930">"ជំនួស..."</string>

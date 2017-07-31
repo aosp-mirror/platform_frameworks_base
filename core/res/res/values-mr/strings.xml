@@ -230,8 +230,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"व्हॉइस सहाय्य"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"आता लॉक करा"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_hidden_text (6351207030447943784) -->
-    <skip />
+    <string name="notification_hidden_text" msgid="6351207030447943784">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"व्हर्च्युअल कीबोर्ड"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"वास्तविक कीबोर्ड"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"सुरक्षितता"</string>
@@ -264,7 +263,7 @@
     <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डीव्हाइसचे स्थान अॅक्सेस करू द्या"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"आपल्या कॅलेंडरवर प्रवेश"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या कॅलेंडरमध्ये अॅक्सेस करू द्या"</string>
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचा कॅलेंडर अॅक्सेस करू द्या"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS संदेश पाठवणे आणि पाहणे हे"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला SMS संदेश पाठवू आणि पाहू द्या"</string>
@@ -960,8 +959,7 @@
     <string name="selectAll" msgid="6876518925844129331">"सर्व निवडा"</string>
     <string name="cut" msgid="3092569408438626261">"कट करा"</string>
     <string name="copy" msgid="2681946229533511987">"कॉपी करा"</string>
-    <!-- no translation found for failed_to_copy_to_clipboard (1833662432489814471) -->
-    <skip />
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"क्लिपबोर्डवर कॉपी करण्यात अयशस्वी"</string>
     <string name="paste" msgid="5629880836805036433">"पेस्ट करा"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"साधा मजकूर म्हणून पेस्ट करा"</string>
     <string name="replace" msgid="5781686059063148930">"पुनर्स्थित करा…"</string>
@@ -1191,8 +1189,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"आणखी माहितीसाठी येथे टॅप करा"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डीबग करणे अक्षम करण्यासाठी टॅप करा."</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबगिंग बंद करण्यासाठी निवडा."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"दोष अहवाल घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल सामायिक करायचा?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"दोष अहवाल सामायिक करीत आहे..."</string>
