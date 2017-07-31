@@ -1141,8 +1141,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private void setPersistentVrModeEnabled(boolean enabled) {
         synchronized(mLock) {
             setPersistentModeAndNotifyListenersLocked(enabled);
-            // Disabling persistent mode when not showing a VR should disable the overall vr mode.
-            if (!enabled && mCurrentVrModeComponent == null) {
+            // Disabling persistent mode should disable the overall vr mode.
+            if (!enabled) {
                 setVrMode(false, null, 0, -1, null);
             }
         }
