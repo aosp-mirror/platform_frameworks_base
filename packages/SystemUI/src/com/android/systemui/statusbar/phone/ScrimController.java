@@ -379,7 +379,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             setScrimBehindAlpha(0f);
         } else if (mWakeAndUnlocking) {
             // During wake and unlock, we first hide everything behind a black scrim, which then
-            // gets faded out from animateKeyguardFadingOut.
+            // gets faded out from animateKeyguardFadingOut. This must never be animated.
+            mAnimateChange = false;
             if (mDozing) {
                 setScrimInFrontAlpha(0f);
                 setScrimBehindAlpha(1f);

@@ -87,6 +87,10 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
+    public void onIgnoreTouchWhilePulsing(boolean ignore) {
+    }
+
+    @Override
     public void abortPulsing() {
         pulseAborted = true;
     }

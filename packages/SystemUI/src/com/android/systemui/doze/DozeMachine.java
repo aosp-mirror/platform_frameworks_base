@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import android.annotation.MainThread;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
@@ -224,6 +225,9 @@ public class DozeMachine {
 
         State oldState = mState;
         mState = newState;
+
+        DozeLog.traceState(newState);
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "doze_machine_state", newState.ordinal());
 
         updatePulseReason(newState, oldState, pulseReason);
         performTransitionOnComponents(oldState, newState);
