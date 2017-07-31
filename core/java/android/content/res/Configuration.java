@@ -1318,7 +1318,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
      */
     public int diff(Configuration delta) {
-        return diff(delta, false /* compareUndefined */);
+        return diff(delta, false /* compareUndefined */, false /* publicOnly */);
+    }
+
+    /**
+     * Returns the diff against the provided {@link Configuration} excluding values that would
+     * publicly be equivalent, such as appBounds.
+     * @param delta {@link Configuration} to compare to.
+     *
+     * TODO(b/36812336): Remove once appBounds has been moved out of Configuration.
+     * {@hide}
+     */
+    public int diffPublicOnly(Configuration delta) {
+        return diff(delta, false /* compareUndefined */, true /* publicOnly */);
     }
 
     /**
@@ -1326,7 +1338,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      *
      * @hide
      */
-    public int diff(Configuration delta, boolean compareUndefined) {
+    public int diff(Configuration delta, boolean compareUndefined, boolean publicOnly) {
         int changed = 0;
         if ((compareUndefined || delta.fontScale > 0) && fontScale != delta.fontScale) {
             changed |= ActivityInfo.CONFIG_FONT_SCALE;
@@ -1424,7 +1436,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         // Make sure that one of the values is not null and that they are not equal.
         if ((compareUndefined || delta.appBounds != null)
                 && appBounds != delta.appBounds
-                && (appBounds == null || !appBounds.equals(delta.appBounds))) {
+                && (appBounds == null || (!publicOnly && !appBounds.equals(delta.appBounds))
+                        || (publicOnly && (appBounds.width() != delta.appBounds.width()
+                                || appBounds.height() != delta.appBounds.height())))) {
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
 
