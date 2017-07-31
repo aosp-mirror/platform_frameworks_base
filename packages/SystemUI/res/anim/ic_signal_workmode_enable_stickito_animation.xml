@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <objectAnimator
+        android:duration="333"
+        android:propertyName="alpha"
+        android:valueFrom="0.54"
+        android:valueTo="1.0"
+        android:valueType="floatType"
+        android:interpolator="@interpolator/ic_signal_workmode_enable_animation_interpolator_3" />
+</set>
