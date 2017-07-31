@@ -55,8 +55,6 @@ public class DeviceChooserActivity extends Activity {
             Log.e(LOG_TAG, "About to show UI, but no devices to show");
         }
 
-        mPairButton = findViewById(R.id.button_pair);
-
         if (getService().mRequest.isSingleDevice()) {
             setContentView(R.layout.device_confirmation);
             final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
@@ -64,11 +62,13 @@ public class DeviceChooserActivity extends Activity {
                     R.string.confirmation_title,
                     getCallingAppName(),
                     selectedDevice.getDisplayName()), 0));
+            mPairButton = findViewById(R.id.button_pair);
             mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
             getService().mSelectedDevice = selectedDevice;
             onSelectionUpdate();
         } else {
             setContentView(R.layout.device_chooser);
+            mPairButton = findViewById(R.id.button_pair);
             mPairButton.setVisibility(View.GONE);
             setTitle(Html.fromHtml(getString(R.string.chooser_title, getCallingAppName()), 0));
             mDeviceListView = findViewById(R.id.device_list);
