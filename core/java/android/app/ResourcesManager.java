@@ -987,8 +987,6 @@ public class ResourcesManager {
                 }
             }
 
-            invalidatePath("/");
-
             redirectResourcesToNewImplLocked(updatedResourceKeys);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
