@@ -164,6 +164,11 @@ public class DozeLog {
         }
     }
 
+    public static void traceState(DozeMachine.State state) {
+        if (!ENABLED) return;
+        log("state " + state);
+    }
+
     public static void traceProximityResult(Context context, boolean near, long millis,
             int pulseReason) {
         if (!ENABLED) return;
@@ -233,10 +238,10 @@ public class DozeLog {
                 + state + " blocked=" + blocked);
     }
 
-    public static void tracePulseCanceledByProx(Context context) {
+    public static void tracePulseTouchDisabledByProx(Context context, boolean disabled) {
         if (!ENABLED) return;
         init(context);
-        log("pulseCanceledByProx");
+        log("pulseTouchDisabledByProx " + disabled);
     }
 
     public static void setRegisterKeyguardCallback(boolean registerKeyguardCallback) {
