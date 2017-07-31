@@ -71,6 +71,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     protected final Context mContext;
     private final StatusBarWindowManager mStatusBarWindowManager;
+    private final boolean mDisplayBlanksAfterDoze;
 
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
@@ -121,6 +122,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLockPatternUtils = lockPatternUtils;
         mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
+        mDisplayBlanksAfterDoze = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_displayBlanksAfterDoze);
     }
 
     public void registerStatusBar(StatusBar statusBar,
@@ -373,7 +376,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 if (!staying) {
                     mStatusBarWindowManager.setKeyguardFadingAway(true);
                     if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK) {
-                        if (!mScreenTurnedOn) {
+                        boolean turnedOnSinceAuth =
+                                mFingerprintUnlockController.hasScreenTurnedOnSinceAuthenticating();
+                        if (!mScreenTurnedOn || mDisplayBlanksAfterDoze && !turnedOnSinceAuth) {
+                            // Not ready to animate yet; either because the screen is not on yet,
+                            // or it is on but will turn off before waking out of doze.
                             mDeferScrimFadeOut = true;
                         } else {
 
