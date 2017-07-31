@@ -5395,6 +5395,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final class DozeServiceHost implements DozeHost {
         private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
         private boolean mAnimateWakeup;
+        private boolean mIgnoreTouchWhilePulsing;
 
         @Override
         public String toString() {
@@ -5465,6 +5466,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStackScroller.setPulsing(pulsing);
                     mNotificationPanel.setPulsing(pulsing != null);
                     mVisualStabilityManager.setPulsing(pulsing != null);
+                    mIgnoreTouchWhilePulsing = false;
                 }
             }, reason);
         }
@@ -5475,6 +5477,17 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozingRequested = false;
                 DozeLog.traceDozing(mContext, mDozing);
                 updateDozing();
+            }
+        }
+
+        @Override
+        public void onIgnoreTouchWhilePulsing(boolean ignore) {
+            if (ignore != mIgnoreTouchWhilePulsing) {
+                DozeLog.tracePulseTouchDisabledByProx(mContext, ignore);
+            }
+            mIgnoreTouchWhilePulsing = ignore;
+            if (isDozing() && ignore) {
+                mStatusBarWindow.cancelCurrentTouch();
             }
         }
 
@@ -5573,6 +5586,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean shouldAnimateWakeup() {
             return mAnimateWakeup;
         }
+    }
+
+    public boolean shouldIgnoreTouch() {
+        return isDozing() && mDozeServiceHost.mIgnoreTouchWhilePulsing;
     }
 
     // Begin Extra BaseStatusBar methods.
