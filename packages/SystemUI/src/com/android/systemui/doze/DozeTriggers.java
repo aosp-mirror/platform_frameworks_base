@@ -162,10 +162,10 @@ public class DozeTriggers implements DozeMachine.Part {
         final boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
         final boolean aod = (state == DozeMachine.State.DOZE_AOD);
 
-        if (near && state == DozeMachine.State.DOZE_PULSING) {
-            if (DEBUG) Log.i(TAG, "Prox NEAR, ending pulse");
-            DozeLog.tracePulseCanceledByProx(mContext);
-            mMachine.requestState(DozeMachine.State.DOZE_PULSE_DONE);
+        if (state == DozeMachine.State.DOZE_PULSING) {
+            boolean ignoreTouch = near;
+            if (DEBUG) Log.i(TAG, "Prox changed, ignore touch = " + ignoreTouch);
+            mDozeHost.onIgnoreTouchWhilePulsing(ignoreTouch);
         }
         if (far && (paused || pausing)) {
             if (DEBUG) Log.i(TAG, "Prox FAR, unpausing AOD");

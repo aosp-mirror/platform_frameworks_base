@@ -254,6 +254,10 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
+        boolean isCancel = ev.getActionMasked() == MotionEvent.ACTION_CANCEL;
+        if (!isCancel && mService.shouldIgnoreTouch()) {
+            return false;
+        }
         if (isDown && mNotificationPanel.isFullyCollapsed()) {
             mNotificationPanel.startExpandLatencyTracking();
         }
