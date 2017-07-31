@@ -472,6 +472,13 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return false;
     }
 
+    /**
+a     * Returns whether this child is on top of the window hierarchy.
+     */
+    boolean isOnTop() {
+        return getParent().getTopChild() == this && getParent().isOnTop();
+    }
+
     /** Returns the top child container. */
     E getTopChild() {
         return mChildren.peekLast();
