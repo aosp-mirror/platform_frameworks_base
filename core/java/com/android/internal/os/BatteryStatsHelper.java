@@ -915,7 +915,10 @@ public class BatteryStatsHelper {
             }
         }
 
-        smearScreenBatterySipper(sippers, screenSipper);
+        //Only valid screen power consumption need to smear
+        if(screenSipper != null){
+           smearScreenBatterySipper(sippers, screenSipper);
+        }
 
         return proportionalSmearPowerMah;
     }
