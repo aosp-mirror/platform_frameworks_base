@@ -73,6 +73,7 @@ public class AccessPointTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
+        WifiTracker.sVerboseLogging = false;
     }
 
     @Test
@@ -426,7 +427,6 @@ public class AccessPointTest {
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
         verify(mockWifiNetworkScoreCache, times(2)).getScoredNetwork(key);
-        verify(mockWifiNetworkScoreCache, never()).getScoredNetwork(any(ScanResult.class));
         assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.FAST);
     }
 
@@ -441,6 +441,25 @@ public class AccessPointTest {
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
         assertThat(ap.getSummary()).isEqualTo(mContext.getString(R.string.speed_label_very_fast));
+    }
+
+    @Test
+    public void testVerboseSummaryString_showsScanResultSpeedLabel() {
+        WifiTracker.sVerboseLogging = true;
+
+        Bundle bundle = new Bundle();
+        ArrayList<ScanResult> scanResults = buildScanResultCache();
+        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
+        AccessPoint ap = new AccessPoint(mContext, bundle);
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        String summary = ap.verboseScanResultSummary(scanResults.get(0), null);
+
+        assertThat(summary.contains(mContext.getString(R.string.speed_label_very_fast))).isTrue();
     }
 
     @Test

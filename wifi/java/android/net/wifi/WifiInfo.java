@@ -345,7 +345,8 @@ public class WifiInfo implements Parcelable {
      * Returns the service set identifier (SSID) of the current 802.11 network.
      * If the SSID can be decoded as UTF-8, it will be returned surrounded by double
      * quotation marks. Otherwise, it is returned as a string of hex digits. The
-     * SSID may be &lt;unknown ssid&gt; if there is no network currently connected.
+     * SSID may be &lt;unknown ssid&gt; if there is no network currently connected,
+     * or if the caller has insufficient permissions to access the SSID.
      * @return the SSID
      */
     public String getSSID() {

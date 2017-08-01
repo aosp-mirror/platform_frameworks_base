@@ -44,8 +44,6 @@ import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
@@ -417,7 +415,12 @@ public class ResourcesManager {
             if (activityResources == null) {
                 return overrideConfig == null;
             } else {
-                return Objects.equals(activityResources.overrideConfig, overrideConfig);
+                // The two configurations must either be equal or publicly equivalent to be
+                // considered the same.
+                return Objects.equals(activityResources.overrideConfig, overrideConfig)
+                        || (overrideConfig != null && activityResources.overrideConfig != null
+                                && 0 == overrideConfig.diffPublicOnly(
+                                        activityResources.overrideConfig));
             }
         }
     }
@@ -983,8 +986,6 @@ public class ResourcesManager {
                             key.mCompatInfo));
                 }
             }
-
-            invalidatePath("/");
 
             redirectResourcesToNewImplLocked(updatedResourceKeys);
         } finally {
