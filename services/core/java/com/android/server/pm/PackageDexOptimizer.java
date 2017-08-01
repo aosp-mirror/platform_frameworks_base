@@ -33,12 +33,12 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
+import com.android.server.pm.dex.PackageDexUsage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import dalvik.system.DexFile;
 
@@ -251,13 +251,12 @@ public class PackageDexOptimizer {
      * throwing exceptions). Or maybe make a separate call to installd to get DexOptNeeded, though
      * that seems wasteful.
      */
-    public int dexOptSecondaryDexPath(ApplicationInfo info, String path, Set<String> isas,
-            String compilerFilter, boolean isUsedByOtherApps, boolean downgrade) {
+    public int dexOptSecondaryDexPath(ApplicationInfo info, String path,
+            PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
         synchronized (mInstallLock) {
             final long acquireTime = acquireWakeLockLI(info.uid);
             try {
-                return dexOptSecondaryDexPathLI(info, path, isas, compilerFilter,
-                        isUsedByOtherApps, downgrade);
+                return dexOptSecondaryDexPathLI(info, path, dexUseInfo, options);
             } finally {
                 releaseWakeLockLI(acquireTime);
             }
@@ -298,9 +297,16 @@ public class PackageDexOptimizer {
     }
 
     @GuardedBy("mInstallLock")
-    private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path, Set<String> isas,
-            String compilerFilter, boolean isUsedByOtherApps, boolean downgrade) {
-        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
+    private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path,
+            PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
+        if (options.isDexoptOnlySharedDex() && !dexUseInfo.isUsedByOtherApps()) {
+            // We are asked to optimize only the dex files used by other apps and this is not
+            // on of them: skip it.
+            return DEX_OPT_SKIPPED;
+        }
+
+        String compilerFilter = getRealCompilerFilter(info, options.getCompilerFilter(),
+                dexUseInfo.isUsedByOtherApps());
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         // Secondary dex files are currently not compiled at boot.
         int dexoptFlags = getDexFlags(info, compilerFilter, /* bootComplete */ true)
@@ -317,20 +323,32 @@ public class PackageDexOptimizer {
             return DEX_OPT_FAILED;
         }
         Log.d(TAG, "Running dexopt on: " + path
-                + " pkg=" + info.packageName + " isa=" + isas
+                + " pkg=" + info.packageName + " isa=" + dexUseInfo.getLoaderIsas()
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
                 + " target-filter=" + compilerFilter);
 
+        String classLoaderContext;
+        if (dexUseInfo.isUnknownClassLoaderContext() ||
+                dexUseInfo.isUnsupportedClassLoaderContext() ||
+                dexUseInfo.isVariableClassLoaderContext()) {
+            // If we have an unknown (not yet set), unsupported (custom class loaders), or a
+            // variable class loader chain, compile without a context and mark the oat file with
+            // SKIP_SHARED_LIBRARY_CHECK. Note that his might lead to a incorrect compilation.
+            // TODO(calin): We should just extract in this case.
+            classLoaderContext = SKIP_SHARED_LIBRARY_CHECK;
+        } else {
+            classLoaderContext = dexUseInfo.getClassLoaderContext();
+        }
         try {
-            for (String isa : isas) {
+            for (String isa : dexUseInfo.getLoaderIsas()) {
                 // Reuse the same dexopt path as for the primary apks. We don't need all the
                 // arguments as some (dexopNeeded and oatDir) will be computed by installd because
                 // system server cannot read untrusted app content.
                 // TODO(calin): maybe add a separate call.
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK, info.seInfoUser,
-                        downgrade);
+                        compilerFilter, info.volumeUuid, classLoaderContext, info.seInfoUser,
+                        options.isDowngrade());
             }
 
             return DEX_OPT_PERFORMED;
