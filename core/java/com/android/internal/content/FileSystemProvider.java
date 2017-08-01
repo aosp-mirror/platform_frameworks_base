@@ -28,7 +28,6 @@ import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileObserver;
@@ -39,6 +38,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
+import android.provider.MetadataReader;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -120,26 +121,31 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         if (!file.isFile()) {
             Log.w(TAG, "Can't stream non-regular file. Returning empty metadata.");
-            return Bundle.EMPTY;
+            return null;
         }
 
         if (!file.canRead()) {
             Log.w(TAG, "Can't stream non-readable file. Returning empty metadata.");
-            return Bundle.EMPTY;
+            return null;
         }
 
-        String filePath = file.getAbsolutePath();
-        FileInputStream stream = new FileInputStream(filePath);
+        String mimeType = getTypeForFile(file);
+        if (!MetadataReader.isSupportedMimeType(mimeType)) {
+            return null;
+        }
 
+        InputStream stream = null;
         try {
-            return getDocumentMetadataFromStream(stream, getTypeForFile(file));
+            Bundle metadata = new Bundle();
+            stream = new FileInputStream(file.getAbsolutePath());
+            MetadataReader.getMetadata(metadata, stream, mimeType, null);
+            return metadata;
         } catch (IOException e) {
             Log.e(TAG, "An error occurred retrieving the metadata", e);
+            return null;
         } finally {
             IoUtils.closeQuietly(stream);
         }
-
-        return null;
     }
 
     protected final List<String> findDocumentPath(File parent, File doc)
@@ -502,7 +508,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     }
 
     protected boolean typeSupportsMetadata(String mimeType) {
-        return MIMETYPE_JPG.equals(mimeType) || MIMETYPE_JPEG.equals(mimeType);
+        return MetadataReader.isSupportedMimeType(mimeType);
     }
 
     private static String getTypeForName(String name) {
