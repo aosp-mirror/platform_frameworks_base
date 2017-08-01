@@ -328,9 +328,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
             filterUnreachableAPs();
 
             updateItems();
-            if (accessPoints != null && accessPoints.size() > 0) {
-                fireScanStateChanged(false);
-            }
         }
 
         /** Filter unreachable APs from mAccessPoints */
@@ -378,6 +375,12 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
         private void updateItems() {
             if (mItems == null) return;
+            if ((mAccessPoints != null && mAccessPoints.length > 0)
+                    || !mSignalCallback.mInfo.enabled) {
+                fireScanStateChanged(false);
+            } else {
+                fireScanStateChanged(true);
+            }
 
             // Wi-Fi is off
             if (!mSignalCallback.mInfo.enabled) {
