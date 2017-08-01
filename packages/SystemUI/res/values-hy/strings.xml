@@ -756,7 +756,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ծանուցումներ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Էկրանի պատկերներ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Ընդհանուր հաղորդագրություններ"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"Հիշողություն"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Տարածք"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Ակնթարթորեն գործարկվող հավելվածներ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Ակնթարթորեն գործարկվող հավելվածները տեղադրում չեն պահանջում։"</string>
     <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
