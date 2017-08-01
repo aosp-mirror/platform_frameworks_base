@@ -27,10 +27,10 @@ LOCAL_JAVA_LIBRARIES := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     time_zone_distro \
     time_zone_distro_installer \
-    android.hidl.base-V1.0-java-static \
-    android.hardware.biometrics.fingerprint-V2.1-java-static \
-    android.hardware.tetheroffload.control-V1.0-java-static \
-    android.hardware.vibrator-V1.0-java-constants \
+    android.hidl.base-V1.0-java \
+    android.hardware.biometrics.fingerprint-V2.1-java \
+    android.hardware.tetheroffload.control-V1.0-java \
+    android.hardware.vibrator-V1.0-java \
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
