@@ -58,6 +58,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
@@ -166,6 +167,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
+        doReturn(Collections.singletonList(new ResolveInfo()))
+                .when(getServices().packageManager).queryBroadcastReceiversAsUser(
+                        any(Intent.class),
+                        anyInt(),
+                        any(UserHandle.class));
 
         // By default, pretend all users are running and unlocked.
         when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(true);

@@ -614,11 +614,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
+                    maybeSendAdminEnabledBroadcastLocked(userHandle);
                     // Reset the policy data
                     mUserData.remove(userHandle);
-                    sendAdminEnabledBroadcastLocked(userHandle);
                 }
                 handlePackagesChanged(null /* check all admins */, userHandle);
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                synchronized (DevicePolicyManagerService.this) {
+                    maybeSendAdminEnabledBroadcastLocked(userHandle);
+                }
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 handlePackagesChanged(null /* check all admins */, userHandle);
             } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
@@ -1854,6 +1858,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
@@ -2372,11 +2377,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         sendAdminCommandLocked(admin, action, null, result);
     }
 
-    /**
-     * Send an update to one specific admin, get notified when that admin returns a result.
-     */
     void sendAdminCommandLocked(ActiveAdmin admin, String action, Bundle adminExtras,
             BroadcastReceiver result) {
+        sendAdminCommandLocked(admin, action, adminExtras, result, false);
+    }
+
+    /**
+     * Send an update to one specific admin, get notified when that admin returns a result.
+     *
+     * @return whether the broadcast was successfully sent
+     */
+    boolean sendAdminCommandLocked(ActiveAdmin admin, String action, Bundle adminExtras,
+            BroadcastReceiver result, boolean inForeground) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
         if (UserManager.isDeviceInDemoMode(mContext)) {
@@ -2385,8 +2397,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (action.equals(DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING)) {
             intent.putExtra("expiration", admin.passwordExpirationDate);
         }
+        if (inForeground) {
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        }
         if (adminExtras != null) {
             intent.putExtras(adminExtras);
+        }
+        if (mInjector.getPackageManager().queryBroadcastReceiversAsUser(
+                intent,
+                PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                admin.getUserHandle()).isEmpty()) {
+            return false;
         }
         if (result != null) {
             mContext.sendOrderedBroadcastAsUser(intent, admin.getUserHandle(),
@@ -2394,6 +2415,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
         }
+        return true;
     }
 
     /**
@@ -8099,20 +8121,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-
-    private void sendAdminEnabledBroadcastLocked(int userHandle) {
+    private void maybeSendAdminEnabledBroadcastLocked(int userHandle) {
         DevicePolicyData policyData = getUserData(userHandle);
         if (policyData.mAdminBroadcastPending) {
             // Send the initialization data to profile owner and delete the data
             ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+            boolean clearInitBundle = true;
             if (admin != null) {
                 PersistableBundle initBundle = policyData.mInitBundle;
-                sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
-                        initBundle == null ? null : new Bundle(initBundle), null);
+                clearInitBundle = sendAdminCommandLocked(admin,
+                        DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
+                        initBundle == null ? null : new Bundle(initBundle),
+                        null /* result receiver */,
+                        true /* send in foreground */);
             }
-            policyData.mInitBundle = null;
-            policyData.mAdminBroadcastPending = false;
-            saveSettingsLocked(userHandle);
+            if (clearInitBundle) {
+                // If there's no admin or we've successfully called the admin, clear the init bundle
+                // otherwise, keep it around
+                policyData.mInitBundle = null;
+                policyData.mAdminBroadcastPending = false;
+                saveSettingsLocked(userHandle);
+            }
         }
     }
 
