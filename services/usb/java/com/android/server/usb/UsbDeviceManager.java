@@ -1161,8 +1161,7 @@ public class UsbDeviceManager {
                                         .usb_unsupported_audio_accessory_message);
                     }
 
-                    Notification notification =
-                            new Notification.Builder(mContext, channel)
+                    Notification.Builder builder = new Notification.Builder(mContext, channel)
                                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                                     .setWhen(0)
                                     .setOngoing(true)
@@ -1174,8 +1173,15 @@ public class UsbDeviceManager {
                                     .setContentTitle(title)
                                     .setContentText(message)
                                     .setContentIntent(pi)
-                                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                                    .build();
+                                    .setVisibility(Notification.VISIBILITY_PUBLIC);
+
+                    if (titleRes
+                            == com.android.internal.R.string
+                            .usb_unsupported_audio_accessory_title) {
+                        builder.setStyle(new Notification.BigTextStyle()
+                                .bigText(message));
+                    }
+                    Notification notification = builder.build();
 
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
