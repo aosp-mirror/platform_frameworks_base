@@ -16,8 +16,10 @@
 
 package android.hardware.radio;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -1571,6 +1573,7 @@ public class RadioManager {
      *  <li>{@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails, </li>
      * </ul>
      */
+    @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
     public int listModules(List<ModuleProperties> modules) {
         if (modules == null) {
             Log.e(TAG, "the output list must not be empty");
@@ -1611,6 +1614,7 @@ public class RadioManager {
      * Can be null if default handler is OK.
      * @return a valid {@link RadioTuner} interface in case of success or null in case of error.
      */
+    @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
     public RadioTuner openTuner(int moduleId, BandConfig config, boolean withAudio,
             RadioTuner.Callback callback, Handler handler) {
         if (callback == null) {
