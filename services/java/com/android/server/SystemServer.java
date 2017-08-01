@@ -1203,7 +1203,7 @@ public final class SystemServer {
             if (startRulesManagerService) {
                 traceBeginAndSlog("StartTimeZoneRulesManagerService");
                 mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                traceEnd();
             }
 
             traceBeginAndSlog("StartAudioService");
