@@ -359,7 +359,7 @@ public class PackageDexUsageTests {
     public void testRecordDexFileUsersNotTheOwningPackage() {
         PackageDexUsage packageDexUsageRecordUsers = new PackageDexUsage();
         Set<String> users = new HashSet<>(Arrays.asList(
-                new String[] {mFooBaseUser0.mPackageName,}));
+                new String[] {mFooBaseUser0.mPackageName}));
         Set<String> usersExtra = new HashSet<>(Arrays.asList(
                 new String[] {"another.package.2", "another.package.3"}));
 
@@ -375,6 +375,89 @@ public class PackageDexUsageTests {
                 mFooSecondary1User0);
     }
 
+    @Test
+    public void testRecordClassLoaderContextVariableContext() {
+        // Record a secondary dex file.
+        assertTrue(record(mFooSecondary1User0));
+        // Now update its context.
+        TestData fooSecondary1User0NewContext = mFooSecondary1User0.updateClassLoaderContext(
+                "PCL[new_context.dex]");
+        assertTrue(record(fooSecondary1User0NewContext));
+
+        // Not check that the context was switch to variable.
+        TestData expectedContext = mFooSecondary1User0.updateClassLoaderContext(
+                PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT);
+
+        assertPackageDexUsage(null, expectedContext);
+        writeAndReadBack();
+        assertPackageDexUsage(null, expectedContext);
+    }
+
+    @Test
+    public void testRecordClassLoaderContextUnsupportedContext() {
+        // Record a secondary dex file.
+        assertTrue(record(mFooSecondary1User0));
+        // Now update its context.
+        TestData unsupportedContext = mFooSecondary1User0.updateClassLoaderContext(
+                PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT);
+        assertTrue(record(unsupportedContext));
+
+        assertPackageDexUsage(null, unsupportedContext);
+        writeAndReadBack();
+        assertPackageDexUsage(null, unsupportedContext);
+    }
+
+    @Test
+    public void testRecordClassLoaderContextTransitionFromUnknown() {
+        // Record a secondary dex file.
+        TestData unknownContext = mFooSecondary1User0.updateClassLoaderContext(
+                PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT);
+        assertTrue(record(unknownContext));
+
+        assertPackageDexUsage(null, unknownContext);
+        writeAndReadBack();
+        assertPackageDexUsage(null, unknownContext);
+
+        // Now update the secondary dex record with a class loader context. This simulates the
+        // version 2 to version 3 upgrade.
+
+        assertTrue(record(mFooSecondary1User0));
+
+        assertPackageDexUsage(null, mFooSecondary1User0);
+        writeAndReadBack();
+        assertPackageDexUsage(null, mFooSecondary1User0);
+    }
+
+
+    @Test
+    public void testDexUsageClassLoaderContext() {
+        final boolean isUsedByOtherApps = false;
+        final int userId = 0;
+        PackageDexUsage.DexUseInfo validContext = new DexUseInfo(isUsedByOtherApps, userId,
+                "valid_context", "arm");
+        assertFalse(validContext.isUnknownClassLoaderContext());
+        assertFalse(validContext.isUnsupportedClassLoaderContext());
+        assertFalse(validContext.isVariableClassLoaderContext());
+
+        PackageDexUsage.DexUseInfo unsupportedContext = new DexUseInfo(isUsedByOtherApps, userId,
+                PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT, "arm");
+        assertFalse(unsupportedContext.isUnknownClassLoaderContext());
+        assertTrue(unsupportedContext.isUnsupportedClassLoaderContext());
+        assertFalse(unsupportedContext.isVariableClassLoaderContext());
+
+        PackageDexUsage.DexUseInfo variableContext = new DexUseInfo(isUsedByOtherApps, userId,
+                PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT, "arm");
+        assertFalse(variableContext.isUnknownClassLoaderContext());
+        assertFalse(variableContext.isUnsupportedClassLoaderContext());
+        assertTrue(variableContext.isVariableClassLoaderContext());
+
+        PackageDexUsage.DexUseInfo unknownContext = new DexUseInfo(isUsedByOtherApps, userId,
+                PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT, "arm");
+        assertTrue(unknownContext.isUnknownClassLoaderContext());
+        assertFalse(unknownContext.isUnsupportedClassLoaderContext());
+        assertFalse(unknownContext.isVariableClassLoaderContext());
+    }
+
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
         assertPackageDexUsage(mPackageDexUsage, null, primary, secondaries);
     }
@@ -382,7 +465,7 @@ public class PackageDexUsageTests {
     private void assertPackageDexUsage(PackageDexUsage packageDexUsage, Set<String> users,
             TestData primary, TestData... secondaries) {
         String packageName = primary == null ? secondaries[0].mPackageName : primary.mPackageName;
-        boolean primaryUsedByOtherApps = primary == null ? false : primary.mUsedByOtherApps;
+        boolean primaryUsedByOtherApps = primary != null && primary.mUsedByOtherApps;
         PackageUseInfo pInfo = packageDexUsage.getPackageUseInfo(packageName);
 
         // Check package use info
@@ -406,13 +489,15 @@ public class PackageDexUsageTests {
             if (users != null) {
                  assertEquals(dInfo.getLoadingPackages(), users);
             }
+
+            assertEquals(testData.mClassLoaderContext, dInfo.getClassLoaderContext());
         }
     }
 
     private boolean record(TestData testData) {
         return mPackageDexUsage.record(testData.mPackageName, testData.mDexFile,
                testData.mOwnerUserId, testData.mLoaderIsa, testData.mUsedByOtherApps,
-               testData.mPrimaryOrSplit, testData.mUsedBy);
+               testData.mPrimaryOrSplit, testData.mUsedBy, testData.mClassLoaderContext);
     }
 
     private boolean record(PackageDexUsage packageDexUsage, TestData testData, Set<String> users) {
@@ -420,7 +505,7 @@ public class PackageDexUsageTests {
         for (String user : users) {
             result = result && packageDexUsage.record(testData.mPackageName, testData.mDexFile,
                     testData.mOwnerUserId, testData.mLoaderIsa, testData.mUsedByOtherApps,
-                    testData.mPrimaryOrSplit, user);
+                    testData.mPrimaryOrSplit, user, testData.mClassLoaderContext);
         }
         return result;
     }
@@ -451,9 +536,16 @@ public class PackageDexUsageTests {
         private final boolean mUsedByOtherApps;
         private final boolean mPrimaryOrSplit;
         private final String mUsedBy;
+        private final String mClassLoaderContext;
 
         private TestData(String packageName, String dexFile, int ownerUserId,
-                 String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit, String usedBy) {
+                String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit, String usedBy) {
+            this(packageName, dexFile, ownerUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
+                    usedBy, "DefaultClassLoaderContextFor_" + dexFile);
+        }
+        private TestData(String packageName, String dexFile, int ownerUserId,
+                String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit, String usedBy,
+                String classLoaderContext) {
             mPackageName = packageName;
             mDexFile = dexFile;
             mOwnerUserId = ownerUserId;
@@ -461,7 +553,12 @@ public class PackageDexUsageTests {
             mUsedByOtherApps = isUsedByOtherApps;
             mPrimaryOrSplit = primaryOrSplit;
             mUsedBy = usedBy;
+            mClassLoaderContext = classLoaderContext;
         }
 
+        private TestData updateClassLoaderContext(String newContext) {
+            return new TestData(mPackageName, mDexFile, mOwnerUserId, mLoaderIsa, mUsedByOtherApps,
+                    mPrimaryOrSplit, mUsedBy, newContext);
+        }
     }
 }

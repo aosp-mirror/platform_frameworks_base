@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.os.Trace;
 
 import dalvik.system.DelegateLastClassLoader;
+import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
 /**
@@ -31,6 +32,7 @@ public class ClassLoaderFactory {
     private ClassLoaderFactory() {}
 
     private static final String PATH_CLASS_LOADER_NAME = PathClassLoader.class.getName();
+    private static final String DEX_CLASS_LOADER_NAME = DexClassLoader.class.getName();
     private static final String DELEGATE_LAST_CLASS_LOADER_NAME =
             DelegateLastClassLoader.class.getName();
 
@@ -44,12 +46,14 @@ public class ClassLoaderFactory {
     }
 
     /**
-     * Returns true if {@code name} is the encoding for the PathClassLoader.
+     * Returns true if {@code name} is the encoding for either PathClassLoader or DexClassLoader.
+     * The two class loaders are grouped together because they have the same behaviour.
      */
     public static boolean isPathClassLoaderName(String name) {
         // For null values we default to PathClassLoader. This cover the case when packages
         // don't specify any value for their class loaders.
-        return name == null || PATH_CLASS_LOADER_NAME.equals(name);
+        return name == null || PATH_CLASS_LOADER_NAME.equals(name) ||
+                DEX_CLASS_LOADER_NAME.equals(name);
     }
 
     /**
