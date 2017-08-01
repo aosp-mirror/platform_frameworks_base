@@ -22,6 +22,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
@@ -56,6 +58,7 @@ public class PowerUI extends SystemUI {
     private PowerManager mPowerManager;
     private HardwarePropertiesManager mHardwarePropertiesManager;
     private WarningsUI mWarnings;
+    private final Configuration mLastConfiguration = new Configuration();
     private int mBatteryLevel = 100;
     private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
     private int mPlugType = 0;
@@ -71,6 +74,11 @@ public class PowerUI extends SystemUI {
     private int mNumTemps;
     private long mNextLogTime;
 
+    // We create a method reference here so that we are guaranteed that we can remove a callback
+    // by using the same instance (method references are not guaranteed to be the same object
+    // each time they are created).
+    private final Runnable mUpdateTempCallback = this::updateTemperatureWarning;
+
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mHardwarePropertiesManager = (HardwarePropertiesManager)
@@ -80,6 +88,7 @@ public class PowerUI extends SystemUI {
                 mContext,
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE),
                 getComponent(StatusBar.class));
+        mLastConfiguration.setTo(mContext.getResources().getConfiguration());
 
         ContentObserver obs = new ContentObserver(mHandler) {
             @Override
@@ -99,6 +108,16 @@ public class PowerUI extends SystemUI {
         showThermalShutdownDialog();
 
         initTemperatureWarning();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        final int mask = ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
+
+        // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).
+        if ((mLastConfiguration.updateFrom(newConfig) & mask) != 0) {
+            mHandler.post(this::initTemperatureWarning);
+        }
     }
 
     void updateBatteryWarningLevels() {
@@ -255,7 +274,13 @@ public class PowerUI extends SystemUI {
             }
             mThresholdTemp = throttlingTemps[0];
         }
+
         setNextLogTime();
+
+        // This initialization method may be called on a configuration change. Only one set of
+        // ongoing callbacks should be occurring, so remove any now. updateTemperatureWarning will
+        // schedule an ongoing callback.
+        mHandler.removeCallbacks(mUpdateTempCallback);
 
         // We have passed all of the checks, start checking the temp
         updateTemperatureWarning();
@@ -288,7 +313,7 @@ public class PowerUI extends SystemUI {
 
         logTemperatureStats();
 
-        mHandler.postDelayed(this::updateTemperatureWarning, TEMPERATURE_INTERVAL);
+        mHandler.postDelayed(mUpdateTempCallback, TEMPERATURE_INTERVAL);
     }
 
     private void logAtTemperatureThreshold(float temp) {
