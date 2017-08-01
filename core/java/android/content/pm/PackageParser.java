@@ -50,8 +50,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageParserCacheHelper.ReadHelper;
-import android.content.pm.PackageParserCacheHelper.WriteHelper;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -1026,17 +1024,11 @@ public class PackageParser {
 
     @VisibleForTesting
     protected Package fromCacheEntry(byte[] bytes) throws IOException {
-        final ReadHelper helper = new ReadHelper();
-
-        final Parcel p = Parcel.obtain();
-        p.setReadWriteHelper(helper);
-
+        Parcel p = Parcel.obtain();
         p.unmarshall(bytes, 0, bytes.length);
         p.setDataPosition(0);
 
-        helper.start(p);
         PackageParser.Package pkg = new PackageParser.Package(p);
-
         p.recycle();
 
         return pkg;
@@ -1044,15 +1036,8 @@ public class PackageParser {
 
     @VisibleForTesting
     protected byte[] toCacheEntry(Package pkg) throws IOException {
-        final WriteHelper helper = new WriteHelper();
-
-        final Parcel p = Parcel.obtain();
-        p.setReadWriteHelper(helper);
-
+        Parcel p = Parcel.obtain();
         pkg.writeToParcel(p, 0 /* flags */);
-
-        helper.finish(p);
-
         byte[] serialized = p.marshall();
         p.recycle();
 
