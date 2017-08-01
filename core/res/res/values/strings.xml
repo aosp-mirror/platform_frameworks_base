@@ -270,7 +270,7 @@
     </string-array>
     <!-- WFC Operator Error Messages showed as notifications -->
     <string-array name="wfcOperatorErrorNotificationMessages">
-        <item>Register with your carrier</item>
+        <item>Register with your carrier (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
     </string-array>
     <!-- Template for showing mobile network operator name while WFC is active -->
     <string-array name="wfcSpnFormats">
