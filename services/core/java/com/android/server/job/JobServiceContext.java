@@ -219,6 +219,10 @@ public final class JobServiceContext implements ServiceConnection {
                     isDeadlineExpired, triggeredUris, triggeredAuthorities);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
+            // Once we'e begun executing a job, we by definition no longer care whether
+            // it was inflated from disk with not-yet-coherent delay/deadline bounds.
+            job.clearPersistedUtcTimes();
+
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
