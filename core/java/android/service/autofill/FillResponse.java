@@ -210,9 +210,9 @@ public final class FillResponse implements Parcelable {
          * <p><b>Note: </b> on Android {@link android.os.Build.VERSION_CODES#O}, the total number of
          * datasets is limited by the Binder transaction size, so it's recommended to keep it
          * small (in the range of 10-20 at most) and use pagination by adding a fake
-         * {@link Dataset.Builder#setAuthentication(IntentSender) authenticated} at the end with
-         * a presentation string like "Next 10" that would return a new {@link FillResponse} with
-         * the next 10 datasets, and so on. This limitation was lifted on
+         * {@link Dataset.Builder#setAuthentication(IntentSender) authenticated dataset} at the end
+         * with a presentation string like "Next 10" that would return a new {@link FillResponse}
+         * with the next 10 datasets, and so on. This limitation was lifted on
          * Android {@link android.os.Build.VERSION_CODES#O_MR1}, although the Binder transaction
          * size can still be reached if each dataset itself is too big.
          *
