@@ -19,8 +19,8 @@
 #include <jni.h>
 #include <log/log.h>
 #include <nativehelper/JNIHelp.h>
-#include <ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <JankTracker.h>
 #include <service/GraphicsStatsService.h>
 

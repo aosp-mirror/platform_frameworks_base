@@ -22,7 +22,7 @@
 #include "JNIHelp.h"
 #include "jni.h"
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include <limits.h>
 
