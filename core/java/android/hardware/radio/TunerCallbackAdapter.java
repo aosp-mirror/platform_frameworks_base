@@ -49,7 +49,7 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         synchronized (mLock) {
             if (mTuner != null) throw new IllegalStateException();
             mTuner = tuner;
-            if (mPendingProgramInfoChanged) onProgramInfoChanged();
+            if (mPendingProgramInfoChanged) onCurrentProgramInfoChanged();
         }
     }
 
@@ -64,7 +64,7 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     }
 
     @Override
-    public void onProgramInfoChanged() {
+    public void onCurrentProgramInfoChanged() {
         synchronized (mLock) {
             if (mTuner == null) {
                 mPendingProgramInfoChanged = true;
