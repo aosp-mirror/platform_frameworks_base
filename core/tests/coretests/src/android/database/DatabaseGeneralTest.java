@@ -25,6 +25,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteException;
 import android.os.Parcel;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -1185,4 +1187,38 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
             fail("unexpected");
         }
     }
+
+    @MediumTest
+    public void testCloseIdleConnection() throws Exception {
+        mDatabase.close();
+        SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                .setIdleConnectionTimeout(1000).build();
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile.getPath(), params);
+        // Wait a bit and check that connection is still open
+        Thread.sleep(100);
+        String output = executeShellCommand("dumpsys dbinfo " + getContext().getPackageName());
+        assertTrue("Connection #0 should be open. Output: " + output,
+                output.contains("Connection #0:"));
+
+        // Now cause idle timeout and check that connection is closed
+        Thread.sleep(1000);
+        output = executeShellCommand("dumpsys dbinfo " + getContext().getPackageName());
+        assertFalse("Connection #0 should be closed. Output: " + output,
+                output.contains("Connection #0:"));
+    }
+
+    @SmallTest
+    public void testSetIdleConnectionTimeoutValidation() throws Exception {
+        try {
+            new SQLiteDatabase.OpenParams.Builder().setIdleConnectionTimeout(-1).build();
+            fail("Negative timeout should be rejected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    private String executeShellCommand(String cmd) throws Exception {
+        return UiDevice.getInstance(
+                InstrumentationRegistry.getInstrumentation()).executeShellCommand(cmd);
+    }
+
 }

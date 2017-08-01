@@ -195,6 +195,26 @@ public abstract class SQLiteOpenHelper {
     }
 
     /**
+     * Sets the maximum number of milliseconds that SQLite connection is allowed to be idle
+     * before it is closed and removed from the pool.
+     *
+     * <p>This method should be called from the constructor of the subclass,
+     * before opening the database
+     *
+     * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE} value
+     * to allow unlimited idle connections.
+     */
+    public void setIdleConnectionTimeout(@IntRange(from = 0) final long idleConnectionTimeoutMs) {
+        synchronized (this) {
+            if (mDatabase != null && mDatabase.isOpen()) {
+                throw new IllegalStateException(
+                        "Connection timeout setting cannot be changed after opening the database");
+            }
+            mOpenParamsBuilder.setIdleConnectionTimeout(idleConnectionTimeoutMs);
+        }
+    }
+
+    /**
      * Create and/or open a database that will be used for reading and writing.
      * The first time this is called, the database will be opened and
      * {@link #onCreate}, {@link #onUpgrade} and/or {@link #onOpen} will be
