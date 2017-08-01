@@ -291,7 +291,7 @@ public final class Parcel {
     private static native void nativeWriteFloat(long nativePtr, float val);
     @FastNative
     private static native void nativeWriteDouble(long nativePtr, double val);
-    static native void nativeWriteString(long nativePtr, String val);
+    private static native void nativeWriteString(long nativePtr, String val);
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     private static native long nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
@@ -306,7 +306,7 @@ public final class Parcel {
     private static native float nativeReadFloat(long nativePtr);
     @CriticalNative
     private static native double nativeReadDouble(long nativePtr);
-    static native String nativeReadString(long nativePtr);
+    private static native String nativeReadString(long nativePtr);
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
@@ -339,33 +339,6 @@ public final class Parcel {
     };
 
     /**
-     * @hide
-     */
-    public static class ReadWriteHelper {
-        public static final ReadWriteHelper DEFAULT = new ReadWriteHelper();
-
-        /**
-         * Called when writing a string to a parcel. Subclasses wanting to write a string
-         * must use {@link #writeStringNoHelper(String)} to avoid
-         * infinity recursive calls.
-         */
-        public void writeString(Parcel p, String s) {
-            nativeWriteString(p.mNativePtr, s);
-        }
-
-        /**
-         * Called when reading a string to a parcel. Subclasses wanting to read a string
-         * must use {@link #readStringNoHelper()} to avoid
-         * infinity recursive calls.
-         */
-        public String readString(Parcel p) {
-            return nativeReadString(p.mNativePtr);
-        }
-    }
-
-    private ReadWriteHelper mReadWriteHelper = ReadWriteHelper.DEFAULT;
-
-    /**
      * Retrieve a new Parcel object from the pool.
      */
     public static Parcel obtain() {
@@ -379,7 +352,6 @@ public final class Parcel {
                     if (DEBUG_RECYCLE) {
                         p.mStack = new RuntimeException();
                     }
-                    p.mReadWriteHelper = ReadWriteHelper.DEFAULT;
                     return p;
                 }
             }
@@ -411,16 +383,6 @@ public final class Parcel {
                 }
             }
         }
-    }
-
-    /**
-     * Set a {@link ReadWriteHelper}, which can be used to avoid having duplicate strings, for
-     * example.
-     *
-     * @hide
-     */
-    public void setReadWriteHelper(ReadWriteHelper helper) {
-        mReadWriteHelper = helper != null ? helper : ReadWriteHelper.DEFAULT;
     }
 
     /** @hide */
@@ -663,17 +625,6 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeString(String val) {
-        mReadWriteHelper.writeString(this, val);
-    }
-
-    /**
-     * Write a string without going though a {@link ReadWriteHelper}.  Subclasses of
-     * {@link ReadWriteHelper} must use this method instead of {@link #writeString} to avoid
-     * infinity recursive calls.
-     *
-     * @hide
-     */
-    public void writeStringNoHelper(String val) {
         nativeWriteString(mNativePtr, val);
     }
 
@@ -2045,17 +1996,6 @@ public final class Parcel {
      * Read a string value from the parcel at the current dataPosition().
      */
     public final String readString() {
-        return mReadWriteHelper.readString(this);
-    }
-
-    /**
-     * Read a string without going though a {@link ReadWriteHelper}.  Subclasses of
-     * {@link ReadWriteHelper} must use this method instead of {@link #readString} to avoid
-     * infinity recursive calls.
-     *
-     * @hide
-     */
-    public String readStringNoHelper() {
         return nativeReadString(mNativePtr);
     }
 
@@ -3056,7 +2996,6 @@ public final class Parcel {
         if (mOwnsNativeParcelObject) {
             updateNativeSize(nativeFreeBuffer(mNativePtr));
         }
-        mReadWriteHelper = ReadWriteHelper.DEFAULT;
     }
 
     private void destroy() {
@@ -3067,7 +3006,6 @@ public final class Parcel {
             }
             mNativePtr = 0;
         }
-        mReadWriteHelper = null;
     }
 
     @Override
