@@ -76,6 +76,7 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.DeviceIdleController;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobStatusFunctor;
 import com.android.server.job.controllers.AppIdleController;
@@ -919,7 +920,56 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(AppIdleController.get(this));
         mControllers.add(ContentObserverController.get(this));
         mControllers.add(DeviceIdleJobsController.get(this));
+
+        // If the job store determined that it can't yet reschedule persisted jobs,
+        // we need to start watching the clock.
+        if (!mJobs.jobTimesInflatedValid()) {
+            Slog.w(TAG, "!!! RTC not yet good; tracking time updates for job scheduling");
+            context.registerReceiver(mTimeSetReceiver, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+        }
     }
+
+    private final BroadcastReceiver mTimeSetReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
+                // When we reach clock sanity, recalculate the temporal windows
+                // of all affected jobs.
+                if (mJobs.clockNowValidToInflate(System.currentTimeMillis())) {
+                    Slog.i(TAG, "RTC now valid; recalculating persisted job windows");
+
+                    // We've done our job now, so stop watching the time.
+                    context.unregisterReceiver(this);
+
+                    // And kick off the work to update the affected jobs, using a secondary
+                    // thread instead of chugging away here on the main looper thread.
+                    FgThread.getHandler().post(mJobTimeUpdater);
+                }
+            }
+        }
+    };
+
+    private final Runnable mJobTimeUpdater = () -> {
+        final ArrayList<JobStatus> toRemove = new ArrayList<>();
+        final ArrayList<JobStatus> toAdd = new ArrayList<>();
+        synchronized (mLock) {
+            // Note: we intentionally both look up the existing affected jobs and replace them
+            // with recalculated ones inside the same lock lifetime.
+            getJobStore().getRtcCorrectedJobsLocked(toAdd, toRemove);
+
+            // Now, at each position [i], we have both the existing JobStatus
+            // and the one that replaces it.
+            final int N = toAdd.size();
+            for (int i = 0; i < N; i++) {
+                final JobStatus oldJob = toRemove.get(i);
+                final JobStatus newJob = toAdd.get(i);
+                if (DEBUG) {
+                    Slog.v(TAG, "  replacing " + oldJob + " with " + newJob);
+                }
+                cancelJobImplLocked(oldJob, newJob, "deferred rtc calculation");
+            }
+        }
+    };
 
     @Override
     public void onStart() {

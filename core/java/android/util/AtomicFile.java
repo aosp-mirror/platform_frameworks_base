@@ -214,10 +214,10 @@ public class AtomicFile {
      * Gets the last modified time of the atomic file.
      * {@hide}
      *
-     * @return last modified time in milliseconds since epoch.
-     * @throws IOException
+     * @return last modified time in milliseconds since epoch.  Returns zero if
+     *     the file does not exist or an I/O error is encountered.
      */
-    public long getLastModifiedTime() throws IOException {
+    public long getLastModifiedTime() {
         if (mBackupName.exists()) {
             return mBackupName.lastModified();
         }
