@@ -2110,7 +2110,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean shouldShowImeSwitcherLocked(int visibility) {
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mSwitchingDialog != null) return false;
-        if (isScreenLocked()) return false;
+        if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
+                && mKeyguardManager != null && mKeyguardManager.isKeyguardSecure()) return false;
         if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
         if (mWindowManagerInternal.isHardKeyboardAvailable()) {
             if (mHardKeyboardBehavior == HardKeyboardBehavior.WIRELESS_AFFORDANCE) {
