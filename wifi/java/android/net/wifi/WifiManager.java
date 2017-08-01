@@ -1633,6 +1633,12 @@ public class WifiManager {
 
     /**
      * Return dynamic information about the current Wi-Fi connection, if any is active.
+     * <p>
+     * In the connected state, access to the SSID and BSSID requires
+     * the same permissions as {@link #getScanResults}. If such access is not allowed,
+     * {@link WifiInfo#getSSID} will return {@code "<unknown ssid>"} and
+     * {@link WifiInfo#getBSSID} will return {@code "02:00:00:00:00:00"}.
+     *
      * @return the Wi-Fi information, contained in {@link WifiInfo}.
      */
     public WifiInfo getConnectionInfo() {
@@ -2330,7 +2336,7 @@ public class WifiManager {
         /** WPS start succeeded */
         public abstract void onStarted(String pin);
 
-        /** WPS operation completed succesfully */
+        /** WPS operation completed successfully */
         public abstract void onSucceeded();
 
         /**
@@ -3213,7 +3219,7 @@ public class WifiManager {
      * Normally the Wifi stack filters out packets not explicitly
      * addressed to this device.  Acquring a MulticastLock will
      * cause the stack to receive packets addressed to multicast
-     * addresses.  Processing these extra packets can cause a noticable
+     * addresses.  Processing these extra packets can cause a noticeable
      * battery drain and should be disabled when not needed.
      */
     public class MulticastLock {
