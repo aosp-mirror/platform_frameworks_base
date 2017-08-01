@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
@@ -35,6 +36,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
@@ -1651,7 +1653,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (options.getLaunchTaskId() != INVALID_STACK_ID) {
                 final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
                         callingPid, callingUid);
-                if (startInTaskPerm != PERMISSION_GRANTED) {
+                if (startInTaskPerm == PERMISSION_DENIED) {
                     final String msg = "Permission Denial: starting " + intent.toString()
                             + " from " + callerApp + " (pid=" + callingPid
                             + ", uid=" + callingUid + ") with launchTaskId="
@@ -1704,14 +1706,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return true;
         }
 
-        if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL
-                && activityDisplay.mDisplay.getOwnerUid() != SYSTEM_UID
-                && activityDisplay.mDisplay.getOwnerUid() != aInfo.applicationInfo.uid) {
+        final int displayOwnerUid = activityDisplay.mDisplay.getOwnerUid();
+        if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
+                && displayOwnerUid != aInfo.applicationInfo.uid) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
             if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                         + " disallow launch on virtual display for not-embedded activity.");
+                return false;
+            }
+            // Check if the caller is allowed to embed activities from other apps.
+            if (mService.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
+                    == PERMISSION_DENIED) {
+                if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                        + " disallow activity embedding without permission.");
                 return false;
             }
         }
@@ -1724,7 +1733,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Check if the caller is the owner of the display.
-        if (activityDisplay.mDisplay.getOwnerUid() == callingUid) {
+        if (displayOwnerUid == callingUid) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                     + " allow launch for owner of the display");
             return true;
@@ -1769,7 +1778,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             String callingPackage, int callingPid, int callingUid, boolean ignoreTargetSecurity) {
         if (!ignoreTargetSecurity && mService.checkComponentPermission(activityInfo.permission,
                 callingPid, callingUid, activityInfo.applicationInfo.uid, activityInfo.exported)
-                == PackageManager.PERMISSION_DENIED) {
+                == PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
         }
 
@@ -1816,8 +1825,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.checkPermission(permission, callingPid, callingUid) ==
-                PackageManager.PERMISSION_DENIED) {
+        if (mService.checkPermission(permission, callingPid, callingUid) == PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
         }
 
