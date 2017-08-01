@@ -3044,6 +3044,8 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionProfileDvheStn = 0x20;
         public static final int DolbyVisionProfileDvheDth = 0x40;
         public static final int DolbyVisionProfileDvheDtb = 0x80;
+        public static final int DolbyVisionProfileDvheSt = 0x100;
+        public static final int DolbyVisionProfileDvavSe = 0x200;
 
         // from OMX_VIDEO_DOLBYVISIONLEVELTYPE
         public static final int DolbyVisionLevelHd24    = 0x1;
