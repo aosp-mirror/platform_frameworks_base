@@ -122,7 +122,7 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
 
     // read from mFilename and pump buffer to incident_helper
     status_t err = NO_ERROR;
-    int fd = open(mFilename, O_RDONLY, 0444);
+    int fd = open(mFilename, O_RDONLY);
     if (fd == -1) {
        ALOGW("FileSection '%s' failed to open file", this->name.string());
        return -errno;
