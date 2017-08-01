@@ -6901,6 +6901,11 @@ public class PackageParser {
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_INSTANT;
         }
+        if (state.virtualPreload) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
+        } else {
+            ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
+        }
         if (state.hidden) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         } else {
