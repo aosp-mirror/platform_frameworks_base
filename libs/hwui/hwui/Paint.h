@@ -17,6 +17,8 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H_
 #define ANDROID_GRAPHICS_PAINT_H_
 
+#include "Typeface.h"
+
 #include <cutils/compiler.h>
 
 #include <SkPaint.h>
@@ -101,6 +103,14 @@ public:
         return mHyphenEdit;
     }
 
+    void setAndroidTypeface(Typeface* typeface) {
+        mTypeface = typeface;
+    }
+
+    const Typeface* getAndroidTypeface() const {
+        return mTypeface;
+    }
+
 private:
     float mLetterSpacing = 0;
     float mWordSpacing = 0;
@@ -108,6 +118,10 @@ private:
     uint32_t mMinikinLangListId;
     minikin::FontVariant mFontVariant;
     uint32_t mHyphenEdit = 0;
+    // The native Typeface object has the same lifetime of the Java Typeface object. The Java Paint
+    // object holds a strong reference to the Java Typeface object. Thus, following pointer can
+    // never be a dangling pointer. Note that nullptr is valid: it means the default typeface.
+    const Typeface* mTypeface = nullptr;
 };
 
 }  // namespace android

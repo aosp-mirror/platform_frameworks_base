@@ -27,7 +27,7 @@
 namespace android {
 
 minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-        const Paint* paint, Typeface* typeface) {
+        const Paint* paint, const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     minikin::FontStyle resolved = resolvedFace->fStyle;
 
@@ -52,7 +52,7 @@ minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* mini
 }
 
 minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
-        Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
+        const Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
         size_t bufSize) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
@@ -62,16 +62,16 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
     return layout;
 }
 
-float MinikinUtils::measureText(const Paint* paint, int bidiFlags, Typeface* typeface,
+float MinikinUtils::measureText(const Paint* paint, int bidiFlags, const Typeface* typeface,
         const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
-    Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
+    const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinStyle,
             minikinPaint, resolvedTypeface->fFontCollection, advances);
 }
 
-bool MinikinUtils::hasVariationSelector(Typeface* typeface, uint32_t codepoint, uint32_t vs) {
+bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);
 }

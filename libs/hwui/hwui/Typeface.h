@@ -41,7 +41,7 @@ struct ANDROID_API Typeface {
     // style used for constructing and querying Typeface objects
     SkTypeface::Style fSkiaStyle;
 
-    static Typeface* resolveDefault(Typeface* src);
+    static const Typeface* resolveDefault(const Typeface* src);
 
     // The following three functions create new Typeface from an existing Typeface with a different
     // style. There is a base weight concept which is used for calculating relative style from an
@@ -78,7 +78,7 @@ struct ANDROID_API Typeface {
             std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
             int weight, int italic);
 
-    static void setDefault(Typeface* face);
+    static void setDefault(const Typeface* face);
 
     // Sets roboto font as the default typeface for testing purpose.
     static void setRobotoTypefaceForTest();
