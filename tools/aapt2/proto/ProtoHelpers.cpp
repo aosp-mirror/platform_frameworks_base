@@ -18,8 +18,7 @@
 
 namespace aapt {
 
-void SerializeStringPoolToPb(const StringPool& pool,
-                             pb::StringPool* out_pb_pool) {
+void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool) {
   BigBuffer buffer(1024);
   StringPool::FlattenUtf8(&buffer, pool);
 
@@ -28,14 +27,12 @@ void SerializeStringPoolToPb(const StringPool& pool,
 
   size_t offset = 0;
   for (const BigBuffer::Block& block : buffer) {
-    data->insert(data->begin() + offset, block.buffer.get(),
-                 block.buffer.get() + block.size);
+    data->insert(data->begin() + offset, block.buffer.get(), block.buffer.get() + block.size);
     offset += block.size;
   }
 }
 
-void SerializeSourceToPb(const Source& source, StringPool* src_pool,
-                         pb::Source* out_pb_source) {
+void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source* out_pb_source) {
   StringPool::Ref ref = src_pool->MakeRef(source.path);
   out_pb_source->set_path_idx(static_cast<uint32_t>(ref.index()));
   if (source.line) {
@@ -43,8 +40,7 @@ void SerializeSourceToPb(const Source& source, StringPool* src_pool,
   }
 }
 
-void DeserializeSourceFromPb(const pb::Source& pb_source,
-                             const android::ResStringPool& src_pool,
+void DeserializeSourceFromPb(const pb::Source& pb_source, const android::ResStringPool& src_pool,
                              Source* out_source) {
   if (pb_source.has_path_idx()) {
     out_source->path = util::GetString(src_pool, pb_source.path_idx());
@@ -80,8 +76,7 @@ SymbolState DeserializeVisibilityFromPb(
   return SymbolState::kUndefined;
 }
 
-void SerializeConfig(const ConfigDescription& config,
-                     pb::ConfigDescription* out_pb_config) {
+void SerializeConfig(const ConfigDescription& config, pb::ConfigDescription* out_pb_config) {
   android::ResTable_config flat_config = config;
   flat_config.size = sizeof(flat_config);
   flat_config.swapHtoD();
@@ -99,8 +94,7 @@ bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
     return false;
   }
 
-  config = reinterpret_cast<const android::ResTable_config*>(
-      pb_config.data().data());
+  config = reinterpret_cast<const android::ResTable_config*>(pb_config.data().data());
   out_config->copyFromDtoH(*config);
   return true;
 }

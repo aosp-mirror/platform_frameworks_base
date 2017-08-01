@@ -195,8 +195,7 @@ class PackagePbDeserializer {
           spans++;
         }
         return util::make_unique<StyledString>(pool->MakeRef(
-            style_str,
-            StringPool::Context(StringPool::Context::kStylePriority, config)));
+            style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
       }
       return util::make_unique<String>(
           pool->MakeRef(str, StringPool::Context(config)));
