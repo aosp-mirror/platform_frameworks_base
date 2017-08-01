@@ -28,6 +28,7 @@ import android.content.pm.PackageParser.Permission;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.SystemProperties;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -398,8 +399,19 @@ public class PackageParserTest {
                 "key2", "this_is_provider");
     }
 
+    /**
+     * Determines if the current device supports multi-package APKs.
+     */
+    private boolean supportsMultiPackageApk() {
+        return SystemProperties.getBoolean("persist.sys.child_packages_enabled", false);
+    }
+
     @Test
     public void testMultiPackageComponents() throws Exception {
+        // TODO(gboyer): Remove once we decide to launch multi-package APKs.
+        if (!supportsMultiPackageApk()) {
+            return;
+        }
         String parentName = "com.android.frameworks.coretests.install_multi_package";
         String firstChildName =
                 "com.android.frameworks.coretests.install_multi_package.first_child";
