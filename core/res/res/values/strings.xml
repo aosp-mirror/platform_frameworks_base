@@ -3183,9 +3183,9 @@
     <!-- See USB_PREFERENCES. This is the message. -->
     <string name="usb_notification_message">Tap for more options.</string>
     <!-- USB_PREFERENCES: Notification for when a type-c USB audio accessory is attached but not supported.  This is the title -->
-    <string name="usb_unsupported_audio_accessory_title">Audio accessory not supported</string>
+    <string name="usb_unsupported_audio_accessory_title">Analog audio accessory detected</string>
     <!-- Message of notification shown when a type-c USB audio accessory is attached but not supported. -->
-    <string name="usb_unsupported_audio_accessory_message">Tap for more info</string>
+    <string name="usb_unsupported_audio_accessory_message">The attached device is not compatible with this phone. Tap to learn more.</string>
 
 
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
