@@ -24,7 +24,7 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <FrameLayout
+    <com.android.systemui.statusbar.phone.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -44,7 +44,7 @@
             android:orientation="vertical"
             android:clipChildren="false" />
 
-    </FrameLayout>
+    </com.android.systemui.statusbar.phone.NearestTouchFrame>
 
     <com.android.systemui.statusbar.policy.DeadZone
         android:id="@+id/deadzone"
