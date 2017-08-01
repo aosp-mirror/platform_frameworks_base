@@ -41,6 +41,10 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Beskikbaar via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Gekoppel, geen internet nie"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Toegangspunt is tydelik vol"</string>
+    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
+    <skip />
+    <!-- no translation found for available_via_carrier (1469036129740799053) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Baie stadig"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Stadig"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
