@@ -1265,13 +1265,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @param subId that has its associated NetworkPolicy updated if necessary
      * @return if any policies were updated
      */
-    private boolean maybeUpdateMobilePolicyCycleNL(int subId) {
-        if (LOGV) Slog.v(TAG, "maybeUpdateMobilePolicyCycleNL()");
-        final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
-
-        if (config == null) {
-            return false;
-        }
+    private boolean maybeUpdateMobilePolicyCycleAL(int subId) {
+        if (LOGV) Slog.v(TAG, "maybeUpdateMobilePolicyCycleAL()");
 
         boolean policyUpdated = false;
         final String subscriberId = TelephonyManager.from(mContext).getSubscriberId(subId);
@@ -1282,48 +1277,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
-                NetworkPolicy policy = mNetworkPolicy.valueAt(i);
-
-                // only update the policy if the user didn't change any of the defaults.
-                if (!policy.inferred) {
-                    // TODO: inferred could be split, so that if a user changes their data limit or
-                    // warning, it doesn't prevent their cycle date from being updated.
-                    if (LOGD) Slog.v(TAG, "Didn't update NetworkPolicy because policy.inferred");
-                    continue;
-                }
-
-                final int currentCycleDay;
-                if (policy.cycleRule.isMonthly()) {
-                    currentCycleDay = policy.cycleRule.start.getDayOfMonth();
-                } else {
-                    currentCycleDay = NetworkPolicy.CYCLE_NONE;
-                }
-
-                final int cycleDay = getCycleDayFromCarrierConfig(config, currentCycleDay);
-                final long warningBytes = getWarningBytesFromCarrierConfig(config,
-                        policy.warningBytes);
-                final long limitBytes = getLimitBytesFromCarrierConfig(config,
-                        policy.limitBytes);
-
-                if (currentCycleDay == cycleDay &&
-                        policy.warningBytes == warningBytes &&
-                        policy.limitBytes == limitBytes) {
-                    continue;
-                }
-
-                policyUpdated = true;
-                policy.cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.systemDefault());
-                policy.warningBytes = warningBytes;
-                policy.limitBytes = limitBytes;
-
-                if (LOGD) {
-                    Slog.d(TAG, "Updated NetworkPolicy " + policy + " which matches subscriber "
-                            + NetworkIdentity.scrubSubscriberId(subscriberId)
-                            + " from CarrierConfigManager");
-                }
+                final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
+                policyUpdated |= updateDefaultMobilePolicyAL(subId, policy);
             }
         }
-
         return policyUpdated;
     }
 
@@ -1445,7 +1402,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 synchronized (mNetworkPoliciesSecondLock) {
                     final boolean added = ensureActiveMobilePolicyAL(subId, subscriberId);
                     if (added) return;
-                    final boolean updated = maybeUpdateMobilePolicyCycleNL(subId);
+                    final boolean updated = maybeUpdateMobilePolicyCycleAL(subId);
                     if (!updated) return;
                     // update network and notification rules, as the data cycle changed and it's
                     // possible that we should be triggering warnings/limits now
@@ -1602,12 +1559,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final NetworkPolicy policy = mNetworkRules.keyAt(i);
             final String[] ifaces = mNetworkRules.valueAt(i);
 
-            final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
-                    .cycleIterator(policy).next();
-            final long start = cycle.first.toInstant().toEpochMilli();
-            final long end = cycle.second.toInstant().toEpochMilli();
-            final long totalBytes = getTotalBytes(policy.template, start, end);
-
             if (LOGD) {
                 Slog.d(TAG, "applying policy " + policy + " to ifaces " + Arrays.toString(ifaces));
             }
@@ -1616,19 +1567,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
             if (hasLimit || policy.metered) {
                 final long quotaBytes;
-                if (!hasLimit) {
+                if (hasLimit && policy.hasCycle()) {
+                    final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                            .cycleIterator(policy).next();
+                    final long start = cycle.first.toInstant().toEpochMilli();
+                    final long end = cycle.second.toInstant().toEpochMilli();
+                    final long totalBytes = getTotalBytes(policy.template, start, end);
+
+                    if (policy.lastLimitSnooze >= start) {
+                        // snoozing past quota, but we still need to restrict apps,
+                        // so push really high quota.
+                        quotaBytes = Long.MAX_VALUE;
+                    } else {
+                        // remaining "quota" bytes are based on total usage in
+                        // current cycle. kernel doesn't like 0-byte rules, so we
+                        // set 1-byte quota and disable the radio later.
+                        quotaBytes = Math.max(1, policy.limitBytes - totalBytes);
+                    }
+                } else {
                     // metered network, but no policy limit; we still need to
                     // restrict apps, so push really high quota.
                     quotaBytes = Long.MAX_VALUE;
-                } else if (policy.lastLimitSnooze >= start) {
-                    // snoozing past quota, but we still need to restrict apps,
-                    // so push really high quota.
-                    quotaBytes = Long.MAX_VALUE;
-                } else {
-                    // remaining "quota" bytes are based on total usage in
-                    // current cycle. kernel doesn't like 0-byte rules, so we
-                    // set 1-byte quota and disable the radio later.
-                    quotaBytes = Math.max(1, policy.limitBytes - totalBytes);
                 }
 
                 if (ifaces.length > 1) {
@@ -1743,20 +1702,80 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @VisibleForTesting
     public NetworkPolicy buildDefaultMobilePolicy(int subId, String subscriberId) {
-        PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
-
-        final int cycleDay = getCycleDayFromCarrierConfig(config,
-                ZonedDateTime.now().getDayOfMonth());
-        final long warningBytes = getWarningBytesFromCarrierConfig(config,
-                getPlatformDefaultWarningBytes());
-        final long limitBytes = getLimitBytesFromCarrierConfig(config,
-                getPlatformDefaultLimitBytes());
-
         final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
-        final RecurrenceRule cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.systemDefault());
+        final RecurrenceRule cycleRule = NetworkPolicy
+                .buildRule(ZonedDateTime.now().getDayOfMonth(), ZoneId.systemDefault());
         final NetworkPolicy policy = new NetworkPolicy(template, cycleRule,
-                warningBytes, limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, true);
+                getPlatformDefaultWarningBytes(), getPlatformDefaultLimitBytes(),
+                SNOOZE_NEVER, SNOOZE_NEVER, true, true);
+        synchronized (mUidRulesFirstLock) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                updateDefaultMobilePolicyAL(subId, policy);
+            }
+        }
         return policy;
+    }
+
+    /**
+     * Update the given {@link NetworkPolicy} based on any carrier-provided
+     * defaults via {@link SubscriptionPlan} or {@link CarrierConfigManager}.
+     * Leaves policy untouched if the user has modified it.
+     *
+     * @return if the policy was modified
+     */
+    private boolean updateDefaultMobilePolicyAL(int subId, NetworkPolicy policy) {
+        if (!policy.inferred) {
+            if (LOGD) Slog.d(TAG, "Ignoring user-defined policy " + policy);
+            return false;
+        }
+
+        final NetworkPolicy original = new NetworkPolicy(policy.template, policy.cycleRule,
+                policy.warningBytes, policy.limitBytes, policy.lastWarningSnooze,
+                policy.lastLimitSnooze, policy.metered, policy.inferred);
+
+        final SubscriptionPlan[] plans = mSubscriptionPlans.get(subId);
+        if (!ArrayUtils.isEmpty(plans)) {
+            final SubscriptionPlan plan = plans[0];
+            policy.cycleRule = plan.getCycleRule();
+            final long planLimitBytes = plan.getDataLimitBytes();
+            if (planLimitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
+                policy.warningBytes = getPlatformDefaultWarningBytes();
+                policy.limitBytes = getPlatformDefaultLimitBytes();
+            } else if (planLimitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
+                policy.warningBytes = NetworkPolicy.WARNING_DISABLED;
+                policy.limitBytes = NetworkPolicy.LIMIT_DISABLED;
+            } else {
+                policy.warningBytes = (planLimitBytes * 9) / 10;
+                switch (plan.getDataLimitBehavior()) {
+                    case SubscriptionPlan.LIMIT_BEHAVIOR_BILLED:
+                    case SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED:
+                        policy.limitBytes = planLimitBytes;
+                        break;
+                    default:
+                        policy.limitBytes = NetworkPolicy.LIMIT_DISABLED;
+                        break;
+                }
+            }
+        } else {
+            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            final int currentCycleDay;
+            if (policy.cycleRule.isMonthly()) {
+                currentCycleDay = policy.cycleRule.start.getDayOfMonth();
+            } else {
+                currentCycleDay = NetworkPolicy.CYCLE_NONE;
+            }
+            final int cycleDay = getCycleDayFromCarrierConfig(config, currentCycleDay);
+            policy.cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.systemDefault());
+            policy.warningBytes = getWarningBytesFromCarrierConfig(config, policy.warningBytes);
+            policy.limitBytes = getLimitBytesFromCarrierConfig(config, policy.limitBytes);
+        }
+
+        if (policy.equals(original)) {
+            return false;
+        } else {
+            Slog.d(TAG, "Updated " + original + " to " + policy);
+            return true;
+        }
     }
 
     private void readPolicyAL() {
@@ -2790,8 +2809,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 synchronized (mNetworkPoliciesSecondLock) {
                     mSubscriptionPlans.put(subId, plans);
                     mSubscriptionPlansOwner.put(subId, callingPackage);
-                    // TODO: update any implicit details from newly defined plans
-                    handleNetworkPoliciesUpdateAL(false);
+
+                    final String subscriberId = mContext.getSystemService(TelephonyManager.class)
+                            .getSubscriberId(subId);
+                    ensureActiveMobilePolicyAL(subId, subscriberId);
+                    maybeUpdateMobilePolicyCycleAL(subId);
+                    handleNetworkPoliciesUpdateAL(true);
                 }
             }
         } finally {
@@ -2827,6 +2850,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict background: "); fout.println(mRestrictBackground);
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
+                fout.print("Metered ifaces: "); fout.println(String.valueOf(mMeteredIfaces));
+
+                fout.println();
                 fout.println("Network policies:");
                 fout.increaseIndent();
                 for (int i = 0; i < mNetworkPolicy.size(); i++) {
@@ -2834,8 +2860,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
-                fout.print("Metered ifaces: "); fout.println(String.valueOf(mMeteredIfaces));
+                fout.println();
+                fout.println("Subscription plans:");
+                fout.increaseIndent();
+                for (int i = 0; i < mSubscriptionPlans.size(); i++) {
+                    final int subId = mSubscriptionPlans.keyAt(i);
+                    fout.println("Subscriber ID " + subId + ":");
+                    fout.increaseIndent();
+                    final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
+                    if (!ArrayUtils.isEmpty(plans)) {
+                        for (SubscriptionPlan plan : plans) {
+                            fout.println(plan);
+                        }
+                    }
+                    fout.decreaseIndent();
+                }
+                fout.decreaseIndent();
 
+                fout.println();
                 fout.println("Policy for UIDs:");
                 fout.increaseIndent();
                 int size = mUidPolicy.size();
