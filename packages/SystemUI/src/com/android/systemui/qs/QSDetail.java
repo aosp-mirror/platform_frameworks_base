@@ -287,11 +287,17 @@ public class QSDetail extends LinearLayout {
         mScanState = state;
         final Animatable anim = (Animatable) mQsDetailHeaderProgress.getDrawable();
         if (state) {
-            mQsDetailHeaderProgress.animate().alpha(1f);
-            anim.start();
+            mQsDetailHeaderProgress.animate().cancel();
+            mQsDetailHeaderProgress.animate()
+                    .alpha(1)
+                    .withEndAction(anim::start)
+                    .start();
         } else {
-            mQsDetailHeaderProgress.animate().alpha(0f);
-            anim.stop();
+            mQsDetailHeaderProgress.animate().cancel();
+            mQsDetailHeaderProgress.animate()
+                    .alpha(0f)
+                    .withEndAction(anim::stop)
+                    .start();
         }
     }
 
