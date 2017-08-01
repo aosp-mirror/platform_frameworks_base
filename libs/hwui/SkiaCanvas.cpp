@@ -25,7 +25,6 @@
 
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
-// TODO remove me!
 #include <SkColorSpaceXformCanvas.h>
 #include <SkDrawable.h>
 #include <SkDeque.h>
@@ -48,25 +47,28 @@ Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
     return new SkiaCanvas(bitmap);
 }
 
-Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas, XformToSRGB xformToSRGB) {
-    return new SkiaCanvas(skiaCanvas, xformToSRGB);
+Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas) {
+    return new SkiaCanvas(skiaCanvas);
 }
 
 SkiaCanvas::SkiaCanvas() {}
 
-SkiaCanvas::SkiaCanvas(SkCanvas* canvas, XformToSRGB xformToSRGB)
-    : mCanvas(canvas)
-{
-    LOG_ALWAYS_FATAL_IF(XformToSRGB::kImmediate == xformToSRGB);
-}
+SkiaCanvas::SkiaCanvas(SkCanvas* canvas) : mCanvas(canvas) {}
 
 SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     sk_sp<SkColorSpace> cs = bitmap.refColorSpace();
     mCanvasOwned =
             std::unique_ptr<SkCanvas>(new SkCanvas(bitmap, SkCanvas::ColorBehavior::kLegacy));
-    mCanvasWrapper = SkCreateColorSpaceXformCanvas(mCanvasOwned.get(),
-            cs == nullptr ? SkColorSpace::MakeSRGB() : std::move(cs));
-    mCanvas = mCanvasWrapper.get();
+    if (cs.get() == nullptr || cs->isSRGB()) {
+        mCanvas = mCanvasOwned.get();
+    } else {
+        /** The wrapper is needed if we are drawing into a non-sRGB destination, since
+         *  we need to transform all colors (not just bitmaps via filters) into the
+         *  destination's colorspace.
+         */
+        mCanvasWrapper = SkCreateColorSpaceXformCanvas(mCanvasOwned.get(), std::move(cs));
+        mCanvas = mCanvasWrapper.get();
+    }
 }
 
 SkiaCanvas::~SkiaCanvas() {}
@@ -75,6 +77,7 @@ void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
     if (mCanvas != skiaCanvas) {
         mCanvas = skiaCanvas;
         mCanvasOwned.reset();
+        mCanvasWrapper.reset();
     }
     mSaveStack.reset(nullptr);
     mHighContrastText = false;
@@ -88,13 +91,15 @@ void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     sk_sp<SkColorSpace> cs = bitmap.refColorSpace();
     std::unique_ptr<SkCanvas> newCanvas =
             std::unique_ptr<SkCanvas>(new SkCanvas(bitmap, SkCanvas::ColorBehavior::kLegacy));
-    std::unique_ptr<SkCanvas> newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(),
-            cs == nullptr ? SkColorSpace::MakeSRGB() : std::move(cs));
+    std::unique_ptr<SkCanvas> newCanvasWrapper;
+    if (cs.get() != nullptr && !cs->isSRGB()) {
+        newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(), std::move(cs));
+    }
 
     // deletes the previously owned canvas (if any)
     mCanvasOwned = std::move(newCanvas);
     mCanvasWrapper = std::move(newCanvasWrapper);
-    mCanvas = mCanvasWrapper.get();
+    mCanvas = mCanvasWrapper ? mCanvasWrapper.get() : mCanvasOwned.get();
 
     // clean up the old save stack
     mSaveStack.reset(nullptr);
@@ -531,13 +536,27 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
 // Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-inline static const SkPaint* addFilter(const SkPaint* origPaint, SkPaint* tmpPaint,
-        sk_sp<SkColorFilter> colorFilter) {
-    if (colorFilter) {
+const SkPaint* SkiaCanvas::addFilter(const SkPaint* origPaint, SkPaint* tmpPaint,
+        sk_sp<SkColorFilter> colorSpaceFilter) {
+    /* We don't apply the colorSpace filter if this canvas is already wrapped with
+     * a SkColorSpaceXformCanvas since it already takes care of converting the
+     * contents of the bitmap into the appropriate colorspace.  The mCanvasWrapper
+     * should only be used if this canvas is backed by a surface/bitmap that is known
+     * to have a non-sRGB colorspace.
+     */
+    if (!mCanvasWrapper && colorSpaceFilter) {
         if (origPaint) {
             *tmpPaint = *origPaint;
         }
-        tmpPaint->setColorFilter(colorFilter);
+
+        if (tmpPaint->getColorFilter()) {
+            tmpPaint->setColorFilter(SkColorFilter::MakeComposeFilter(
+                    tmpPaint->refColorFilter(), colorSpaceFilter));
+            LOG_ALWAYS_FATAL_IF(!tmpPaint->getColorFilter());
+        } else {
+            tmpPaint->setColorFilter(colorSpaceFilter);
+        }
+
         return tmpPaint;
     } else {
         return origPaint;
