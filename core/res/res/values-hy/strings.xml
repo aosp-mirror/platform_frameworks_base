@@ -267,7 +267,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS-ները"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"Թույլ տալ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ուղարկել և դիտել SMS հաղորդագրություններ"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Հիշողություն"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Տարածք"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
     <string name="permgrouprequest_storage" msgid="7429669910547860218">"Թույլ տալ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել սարքում պահված լուսանկարները, մեդիան և ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Խոսափող"</string>
