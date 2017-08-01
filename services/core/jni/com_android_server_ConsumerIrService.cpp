@@ -17,7 +17,7 @@
 #define LOG_TAG "ConsumerIrService"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <stdlib.h>
@@ -25,7 +25,7 @@
 #include <utils/Log.h>
 #include <hardware/hardware.h>
 #include <hardware/consumerir.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 namespace android {
 
