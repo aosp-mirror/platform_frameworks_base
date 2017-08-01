@@ -31,5 +31,4 @@ oneway interface IRecentsSystemUserCallbacks {
     void sendRecentsDrawnEvent();
     void sendDockingTopTaskEvent(int dragMode, in Rect initialRect);
     void sendLaunchRecentsEvent();
-    void setWaitingForTransitionStartEvent(boolean waitingForTransitionStart);
 }
