@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.service.quicksettings.Tile;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -32,6 +34,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.R.string;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -101,11 +104,9 @@ public class CellularTile extends QSTileImpl<SignalState> {
     protected void handleClick() {
         if (mDataController.isMobileDataEnabled()) {
             if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    showDisableDialog();
-                });
+                mActivityStarter.postQSRunnableDismissingKeyguard(this::showDisableDialog);
             } else {
-                showDisableDialog();
+                mUiHandler.post(this::showDisableDialog);
             }
         } else {
             mDataController.setMobileDataEnabled(true);
@@ -114,13 +115,18 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private void showDisableDialog() {
         mHost.collapsePanels();
-        SystemUIDialog.applyFlags(new AlertDialog.Builder(mContext)
-                .setMessage(R.string.data_usage_disable_mobile)
+        AlertDialog dialog = new Builder(mContext)
+                .setMessage(string.data_usage_disable_mobile)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(
                         com.android.internal.R.string.alert_windows_notification_turn_off_action,
                         (d, w) -> mDataController.setMobileDataEnabled(false))
-                .create()).show();
+                .create();
+        dialog.getWindow().setType(LayoutParams.TYPE_KEYGUARD_DIALOG);
+        SystemUIDialog.setShowForAllUsers(dialog, true);
+        SystemUIDialog.registerDismissListener(dialog);
+        SystemUIDialog.setWindowOnTop(dialog);
+        dialog.show();
     }
 
     @Override
