@@ -187,6 +187,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 if (newName != null) {
                     storeNameAndAddress(newName, null);
                 }
+            } else if (BluetoothAdapter.ACTION_BLUETOOTH_ADDRESS_CHANGED.equals(action)) {
+                String newAddress = intent.getStringExtra(BluetoothAdapter.EXTRA_BLUETOOTH_ADDRESS);
+                if (newAddress != null) {
+                    if (DBG) Slog.d(TAG, "Bluetooth Adapter address changed to " + newAddress);
+                    storeNameAndAddress(null, newAddress);
+                } else {
+                    if (DBG) Slog.e(TAG, "No Bluetooth Adapter address parameter found");
+                }
             } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
                 synchronized(mReceiver) {
                     if (isBluetoothPersistedStateOn()) {
@@ -273,6 +281,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
         registerForAirplaneMode(filter);
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiver(mReceiver, filter);
+        filter = new IntentFilter(BluetoothAdapter.ACTION_BLUETOOTH_ADDRESS_CHANGED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mReceiver, filter);
         loadStoredNameAndAddress();
