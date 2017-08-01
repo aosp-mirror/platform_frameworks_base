@@ -113,6 +113,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         setBackground(mRipple);
     }
 
+    @Override
+    public boolean isClickable() {
+        return mCode != 0 || super.isClickable();
+    }
+
     public void setCode(int code) {
         mCode = code;
     }
