@@ -760,6 +760,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
         // update header text
         Util.setText(row.header, getStreamLabelH(ss));
+        row.slider.setContentDescription(row.header.getText());
         mConfigurableTexts.add(row.header, ss.name);
 
         // update icon
