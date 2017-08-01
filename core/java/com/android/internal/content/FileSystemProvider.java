@@ -28,7 +28,6 @@ import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileObserver;
@@ -73,7 +72,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     private Handler mHandler;
 
-    private static final String MIMETYPE_PDF = "application/pdf";
     private static final String MIMETYPE_JPEG = "image/jpeg";
     private static final String MIMETYPE_JPG = "image/jpg";
     private static final String MIMETYPE_OCTET_STREAM = "application/octet-stream";
@@ -430,13 +428,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             String documentId, Point sizeHint, CancellationSignal signal)
             throws FileNotFoundException {
         final File file = getFileForDocId(documentId);
-        if (getTypeForFile(file).equals(MIMETYPE_PDF)) {
-            try {
-                return PdfUtils.openPdfThumbnail(file, sizeHint);
-            } catch (Exception e) {
-                Log.v(TAG, "Could not load PDF's thumbnail", e);
-            }
-        }
         return DocumentsContract.openImageThumbnail(file);
     }
 
@@ -466,9 +457,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         final String mimeType = getTypeForFile(file);
         final String displayName = file.getName();
-        // As of right now, we aren't sure on the performance affect of loading all PDF Thumbnails
-        // Until a solution is found, it will be behind a debuggable flag.
-        if (mimeType.startsWith("image/") || mimeType.equals(MIMETYPE_PDF)) {
+        if (mimeType.startsWith("image/")) {
             flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
 
