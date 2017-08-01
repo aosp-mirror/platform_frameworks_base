@@ -23,7 +23,7 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingLibRobolectricTestRunner;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 
 import org.junit.Before;
@@ -34,7 +34,7 @@ import org.robolectric.shadows.ShadowApplication;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class FooterPreferenceTest {
 

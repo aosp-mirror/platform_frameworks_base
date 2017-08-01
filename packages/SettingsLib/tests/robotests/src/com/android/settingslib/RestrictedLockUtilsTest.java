@@ -43,7 +43,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class RestrictedLockUtilsTest {
 

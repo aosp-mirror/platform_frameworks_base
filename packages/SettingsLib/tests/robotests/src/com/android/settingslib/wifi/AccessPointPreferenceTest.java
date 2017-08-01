@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 
 import org.junit.Test;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class AccessPointPreferenceTest {
 

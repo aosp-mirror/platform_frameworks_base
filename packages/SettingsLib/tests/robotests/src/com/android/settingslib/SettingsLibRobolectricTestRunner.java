@@ -24,9 +24,9 @@ import org.robolectric.res.ResourcePath;
 
 import java.util.List;
 
-public class SettingLibRobolectricTestRunner extends RobolectricTestRunner {
+public class SettingsLibRobolectricTestRunner extends RobolectricTestRunner {
 
-    public SettingLibRobolectricTestRunner(Class<?> testClass) throws InitializationError {
+    public SettingsLibRobolectricTestRunner(Class<?> testClass) throws InitializationError {
         super(testClass);
     }
 
@@ -43,7 +43,7 @@ public class SettingLibRobolectricTestRunner extends RobolectricTestRunner {
             @Override
             public List<ResourcePath> getIncludedResourcePaths() {
                 List<ResourcePath> paths = super.getIncludedResourcePaths();
-                SettingLibRobolectricTestRunner.getIncludedResourcePaths(getPackageName(), paths);
+                SettingsLibRobolectricTestRunner.getIncludedResourcePaths(getPackageName(), paths);
                 return paths;
             }
         };
