@@ -20,11 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.LocaleList;
+import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.ActionMode;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
@@ -33,6 +36,8 @@ import android.widget.Editor.SelectionModifierCursorController;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -50,6 +55,8 @@ final class SelectionActionModeHelper {
     // TODO: Consider making this a ViewConfiguration.
     private static final int TIMEOUT_DURATION = 200;
 
+    private static final boolean SMART_SELECT_ANIMATION_ENABLED = false;
+
     private final Editor mEditor;
     private final TextClassificationHelper mTextClassificationHelper;
 
@@ -57,6 +64,7 @@ final class SelectionActionModeHelper {
     private AsyncTask mTextClassificationAsyncTask;
 
     private final SelectionTracker mSelectionTracker;
+    private final SmartSelectSprite mSmartSelectSprite;
 
     SelectionActionModeHelper(@NonNull Editor editor) {
         mEditor = Preconditions.checkNotNull(editor);
@@ -64,6 +72,12 @@ final class SelectionActionModeHelper {
         mTextClassificationHelper = new TextClassificationHelper(
                 textView.getTextClassifier(), textView.getText(), 0, 1, textView.getTextLocales());
         mSelectionTracker = new SelectionTracker(textView.getTextClassifier());
+
+        if (SMART_SELECT_ANIMATION_ENABLED) {
+            mSmartSelectSprite = new SmartSelectSprite(textView);
+        } else {
+            mSmartSelectSprite = null;
+        }
     }
 
     public void startActionModeAsync(boolean adjustSelection) {
@@ -79,7 +93,9 @@ final class SelectionActionModeHelper {
                     adjustSelection
                             ? mTextClassificationHelper::suggestSelection
                             : mTextClassificationHelper::classifyText,
-                    this::startActionMode)
+                    mSmartSelectSprite != null
+                            ? this::startActionModeWithSmartSelectAnimation
+                            : this::startActionMode)
                     .execute();
         }
     }
@@ -116,6 +132,7 @@ final class SelectionActionModeHelper {
     }
 
     public void onDestroyActionMode() {
+        cancelSmartSelectAnimation();
         mSelectionTracker.onSelectionDestroyed();
         cancelAsyncTask();
     }
@@ -165,7 +182,66 @@ final class SelectionActionModeHelper {
         mTextClassificationAsyncTask = null;
     }
 
+    private void startActionModeWithSmartSelectAnimation(@Nullable SelectionResult result) {
+        final TextView textView = mEditor.getTextView();
+        final Layout layout = textView.getLayout();
+
+        final Runnable onAnimationEndCallback = () -> startActionMode(result);
+        // TODO do not trigger the animation if the change included only non-printable characters
+        final boolean didSelectionChange =
+                textView.getSelectionStart() != result.mStart
+                        || textView.getSelectionEnd() != result.mEnd;
+
+        if (!didSelectionChange) {
+            onAnimationEndCallback.run();
+            return;
+        }
+
+        final List<RectF> selectionRectangles =
+                convertSelectionToRectangles(layout, result.mStart, result.mEnd);
+
+        /*
+         * TODO Figure out a more robust approach for this
+         * We have to translate all the generated rectangles by the top-left padding of the
+         * TextView because the padding influences the rendering of the ViewOverlay, but is not
+         * taken into account when generating the selection path rectangles.
+         */
+        for (RectF rectangle : selectionRectangles) {
+            rectangle.left += textView.getPaddingLeft();
+            rectangle.right += textView.getPaddingLeft();
+            rectangle.top += textView.getPaddingTop();
+            rectangle.bottom += textView.getPaddingTop();
+        }
+
+        final RectF firstRectangle = selectionRectangles.get(0);
+
+        // TODO use the original touch point instead of the hardcoded point generated here
+        final Pair<Float, Float> halfPoint = new Pair<>(
+                firstRectangle.centerX(),
+                firstRectangle.centerY());
+
+        mSmartSelectSprite.startAnimation(
+                // TODO replace with colorControlActivated taken from the view attributes
+                // Color GBLUE700
+                0xFF3367D6,
+                halfPoint,
+                selectionRectangles,
+                onAnimationEndCallback);
+    }
+
+    private List<RectF> convertSelectionToRectangles(final Layout layout, final int start,
+            final int end) {
+        final List<RectF> result = new ArrayList<>();
+        // TODO filter out invalid rectangles
+        // getSelection might give us overlapping and zero-dimension rectangles which will interfere
+        // with the Smart Select animation
+        layout.getSelection(start, end, (left, top, right, bottom) ->
+                result.add(new RectF(left, top, right, bottom)));
+        return result;
+    }
+
     private void invalidateActionMode(@Nullable SelectionResult result) {
+        cancelSmartSelectAnimation();
         mTextClassification = result != null ? result.mClassification : null;
         final ActionMode actionMode = mEditor.getTextActionMode();
         if (actionMode != null) {
@@ -183,6 +259,12 @@ final class SelectionActionModeHelper {
         mTextClassificationHelper.reset(textView.getTextClassifier(), textView.getText(),
                 textView.getSelectionStart(), textView.getSelectionEnd(),
                 resetSelectionTag, textView.getTextLocales());
+    }
+
+    private void cancelSmartSelectAnimation() {
+        if (mSmartSelectSprite != null) {
+            mSmartSelectSprite.cancelAnimation();
+        }
     }
 
     /**
