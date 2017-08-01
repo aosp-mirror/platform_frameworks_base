@@ -516,6 +516,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         } else {
             scrim.setAlpha(alpha1);
         }
+        dispatchScrimsVisible();
     }
 
     private void startScrimAnimation(final View scrim, float target) {
@@ -548,6 +549,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 }
                 scrim.setTag(TAG_KEY_ANIM, null);
                 scrim.setTag(TAG_KEY_ANIM_TARGET, null);
+                dispatchScrimsVisible();
             }
         });
         anim.start();
