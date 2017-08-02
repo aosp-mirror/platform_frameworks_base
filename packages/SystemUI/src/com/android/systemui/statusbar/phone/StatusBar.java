@@ -4213,6 +4213,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void showKeyguard() {
         mKeyguardRequested = true;
         updateIsKeyguard();
+        mAssistManager.onLockscreenShown();
     }
 
     public boolean hideKeyguard() {
@@ -4268,7 +4269,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mDraggedDownRow = null;
         }
         mPendingRemoteInputView = null;
-        mAssistManager.onLockscreenShown();
     }
 
     private void updatePanelExpansionForKeyguard() {
