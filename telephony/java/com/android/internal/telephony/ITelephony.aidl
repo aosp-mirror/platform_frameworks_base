@@ -377,13 +377,6 @@ interface ITelephony {
     Bundle getCellLocation(String callingPkg);
 
     /**
-     * Returns the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code).
-     * @see android.telephony.TelephonyManager#getNetworkCountryIso
-     */
-    String getNetworkCountryIsoForPhone(int phoneId);
-
-    /**
      * Returns the neighboring cell information of the device.
      */
     List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);

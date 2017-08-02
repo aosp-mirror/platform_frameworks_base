@@ -1654,7 +1654,8 @@ public class TelephonyManager {
      * @hide
      */
     public String getNetworkCountryIso(int subId) {
-        return getNetworkCountryIsoForPhone(getPhoneId(subId));
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+        return getNetworkCountryIsoForPhone(phoneId);
     }
 
     /**
@@ -1669,14 +1670,7 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public String getNetworkCountryIsoForPhone(int phoneId) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return "";
-            return telephony.getNetworkCountryIsoForPhone(phoneId);
-        } catch (RemoteException ex) {
-                return "";
-        }
+        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
     }
 
     /** Network type is unknown */
