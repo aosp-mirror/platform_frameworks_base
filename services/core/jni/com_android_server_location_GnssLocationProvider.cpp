@@ -18,7 +18,7 @@
 
 #define LOG_NDEBUG 0
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "hardware/hardware.h"
 #include "hardware/gps_internal.h"
