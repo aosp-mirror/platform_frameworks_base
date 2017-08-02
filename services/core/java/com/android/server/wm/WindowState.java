@@ -2043,7 +2043,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             super(inputChannel, mService.mH.getLooper());
         }
         @Override
-        public void onInputEvent(InputEvent event) {
+        public void onInputEvent(InputEvent event, int displayId) {
             finishInputEvent(event, true);
         }
     }
