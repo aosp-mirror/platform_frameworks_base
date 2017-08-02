@@ -70,6 +70,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private boolean mHasItemsInStableShelf;
     private NotificationIconContainer mCollapsedIcons;
     private int mScrollFastThreshold;
+    private int mIconSize;
     private int mStatusBarState;
     private float mMaxShelfEnd;
     private int mRelativeOffset;
@@ -135,6 +136,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShelfIcons.setPadding(padding, 0, padding, 0);
         mScrollFastThreshold = res.getDimensionPixelOffset(R.dimen.scroll_fast_threshold);
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
+        mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
         if (!mShowNotificationShelf) {
             setVisibility(GONE);
@@ -501,12 +503,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         notificationIconPosition += iconTopPadding;
         float shelfIconPosition = getTranslationY() + icon.getTop();
-        shelfIconPosition += ((1.0f - icon.getIconScale()) * icon.getHeight()) / 2.0f;
+        shelfIconPosition += (icon.getHeight() - icon.getIconScale() * mIconSize) / 2.0f;
         float iconYTranslation = NotificationUtils.interpolate(
                 notificationIconPosition - shelfIconPosition,
                 0,
                 transitionAmount);
-        float shelfIconSize = icon.getHeight() * icon.getIconScale();
+        float shelfIconSize = mIconSize * icon.getIconScale();
         float alpha = 1.0f;
         boolean noIcon = !row.isShowingIcon();
         if (noIcon) {
@@ -518,7 +520,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float newSize = NotificationUtils.interpolate(notificationIconSize, shelfIconSize,
                 transitionAmount);
         if (iconState != null) {
-            iconState.scaleX = newSize / icon.getHeight() / icon.getIconScale();
+            iconState.scaleX = newSize / shelfIconSize;
             iconState.scaleY = iconState.scaleX;
             iconState.hidden = transitionAmount == 0.0f && !iconState.isAnimating(icon);
             boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
