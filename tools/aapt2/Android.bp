@@ -92,7 +92,9 @@ cc_library_host_static {
         "flatten/XmlFlattener.cpp",
         "io/BigBufferStreams.cpp",
         "io/File.cpp",
+        "io/FileInputStream.cpp",
         "io/FileSystem.cpp",
+        "io/StringInputStream.cpp",
         "io/Util.cpp",
         "io/ZipArchive.cpp",
         "link/AutoVersioner.cpp",
@@ -164,6 +166,7 @@ cc_library_host_shared {
 cc_test_host {
     name: "aapt2_tests",
     srcs: [
+        "test/Builders.cpp",
         "test/Common.cpp",
         "**/*_test.cpp",
     ],

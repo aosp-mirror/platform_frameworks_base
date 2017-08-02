@@ -22,13 +22,14 @@
 #include <memory>
 #include <utility>
 
-#include <android-base/file.h>
-#include <android-base/logging.h>
+#include "android-base/file.h"
+#include "android-base/logging.h"
 
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "io/File.h"
 #include "io/FileSystem.h"
+#include "io/StringInputStream.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
@@ -49,6 +50,7 @@ using ::aapt::configuration::Group;
 using ::aapt::configuration::Locale;
 using ::aapt::io::IFile;
 using ::aapt::io::RegularFile;
+using ::aapt::io::StringInputStream;
 using ::aapt::util::TrimWhitespace;
 using ::aapt::xml::Element;
 using ::aapt::xml::FindRootElement;
@@ -182,8 +184,7 @@ ConfigurationParser::ConfigurationParser(std::string contents)
 }
 
 Maybe<PostProcessingConfiguration> ConfigurationParser::Parse() {
-  std::istringstream in(contents_);
-
+  StringInputStream in(contents_);
   auto doc = xml::Inflate(&in, diag_, Source("config.xml"));
   if (!doc) {
     return {};
