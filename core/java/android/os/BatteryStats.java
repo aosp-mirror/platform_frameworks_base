@@ -206,8 +206,15 @@ public abstract class BatteryStats implements Parcelable {
      *   - CPU frequency time per uid
      * New in version 22:
      *   - BLE scan result background count, BLE unoptimized scan time
+     *   - Background partial wakelock time & count
+     * New in version 23:
+     *   - Logging smeared power model values
+     * New in version 24:
+     *   - Fixed bugs in background timers and BLE scan time
+     * New in version 25:
+     *   - Package wakeup alarms are now on screen-off timebase
      */
-    static final String CHECKIN_VERSION = "24";
+    static final String CHECKIN_VERSION = "25";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
