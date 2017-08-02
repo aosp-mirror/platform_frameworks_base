@@ -571,14 +571,14 @@ public class StatusBarIconView extends AnimatedImageView {
 
     /**
      * Updates {@param array} such that it represents a matrix that changes RGB to {@param color}
-     * and multiplies A with 1+{@param alphaBoost}.
+     * and multiplies the alpha channel with the color's alpha+{@param alphaBoost}.
      */
     private static void updateTintMatrix(float[] array, int color, float alphaBoost) {
         Arrays.fill(array, 0);
         array[4] = Color.red(color);
         array[9] = Color.green(color);
         array[14] = Color.blue(color);
-        array[18] = 1 + alphaBoost;
+        array[18] = Color.alpha(color) / 255f + alphaBoost;
     }
 
     public void setIconColor(int iconColor, boolean animate) {
