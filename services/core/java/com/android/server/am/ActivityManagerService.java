@@ -13321,6 +13321,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r != null) {
                     final ActivityOptions activityOptions = r.pendingOptions;
+                    r.pendingOptions = null;
                     return activityOptions == null ? null : activityOptions.toBundle();
                 }
                 return null;
@@ -23879,7 +23880,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
                 return;
             }
-            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
+            synchronized (ActivityManagerService.this) {
+                ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
+            }
         }
 
         @Override

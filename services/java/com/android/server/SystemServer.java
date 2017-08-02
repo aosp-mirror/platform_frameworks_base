@@ -34,6 +34,7 @@ import android.os.FactoryTest;
 import android.os.FileUtils;
 import android.os.IIncidentManager;
 import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -463,7 +464,20 @@ public final class SystemServer {
                     }
                 }
             }
-            ShutdownThread.rebootOrShutdown(null, reboot, reason);
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (this) {
+                        ShutdownThread.rebootOrShutdown(null, reboot, reason);
+                    }
+                }
+            };
+
+            // ShutdownThread must run on a looper capable of displaying the UI.
+            Message msg = Message.obtain(UiThread.getHandler(), runnable);
+            msg.setAsynchronous(true);
+            UiThread.getHandler().sendMessage(msg);
+
         }
     }
 
@@ -1203,7 +1217,7 @@ public final class SystemServer {
             if (startRulesManagerService) {
                 traceBeginAndSlog("StartTimeZoneRulesManagerService");
                 mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                traceEnd();
             }
 
             traceBeginAndSlog("StartAudioService");

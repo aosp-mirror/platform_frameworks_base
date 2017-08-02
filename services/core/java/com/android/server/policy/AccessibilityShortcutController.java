@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -212,7 +213,9 @@ public class AccessibilityShortcutController {
         final String warningMessage = String.format(
                 mContext.getString(R.string.accessibility_shortcut_toogle_warning),
                 serviceInfo.getResolveInfo().loadLabel(mContext.getPackageManager()).toString());
-        final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(mContext)
+        final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(
+                // Use SystemUI context so we pick up any theme set in a vendor overlay
+                ActivityThread.currentActivityThread().getSystemUiContext())
                 .setTitle(R.string.accessibility_shortcut_warning_dialog_title)
                 .setMessage(warningMessage)
                 .setCancelable(false)
