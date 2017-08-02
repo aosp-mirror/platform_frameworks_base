@@ -61,12 +61,6 @@ import android.content.IntentSender;
  *  {@hide}
  */
 interface IPackageManager {
-    // Since these transactions are also called from native code, these must be kept in sync with
-    // the ones in frameworks/native/include/binder/IPackageManager.h
-    // =============== Beginning of transactions used on native side as well ======================
-    String[] getNamesForUids(in int[] uids);
-    // =============== End of transactions used on native side as well ============================
-
     void checkPackageStartable(String packageName, int userId);
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
@@ -134,6 +128,7 @@ interface IPackageManager {
     String[] getPackagesForUid(int uid);
 
     String getNameForUid(int uid);
+    String[] getNamesForUids(in int[] uids);
 
     int getUidForSharedUser(String sharedUserName);
 
