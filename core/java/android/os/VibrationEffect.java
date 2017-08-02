@@ -149,14 +149,43 @@ public abstract class VibrationEffect implements Parcelable {
      * provide a better experience than you could otherwise build using the generic building
      * blocks.
      *
+     * This will fallback to a generic pattern if one exists and there does not exist a
+     * hardware-specific implementation of the effect.
+     *
      * @param effectId The ID of the effect to perform:
-     * {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}.
+     *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
      *
      * @return The desired effect.
      * @hide
      */
     public static VibrationEffect get(int effectId) {
-        VibrationEffect effect = new Prebaked(effectId);
+        return get(effectId, true);
+    }
+
+    /**
+     * Get a predefined vibration effect.
+     *
+     * Predefined effects are a set of common vibration effects that should be identical, regardless
+     * of the app they come from, in order to provide a cohesive experience for users across
+     * the entire device. They also may be custom tailored to the device hardware in order to
+     * provide a better experience than you could otherwise build using the generic building
+     * blocks.
+     *
+     * Some effects you may only want to play if there's a hardware specific implementation because
+     * they may, for example, be too disruptive to the user without tuning. The {@code fallback}
+     * parameter allows you to decide whether you want to fallback to the generic implementation or
+     * only play if there's a tuned, hardware specific one available.
+     *
+     * @param effectId The ID of the effect to perform:
+     *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
+     * @param fallback Whether to fallback to a generic pattern if a hardware specific
+     *                 implementation doesn't exist.
+     *
+     * @return The desired effect.
+     * @hide
+     */
+    public static VibrationEffect get(int effectId, boolean fallback) {
+        VibrationEffect effect = new Prebaked(effectId, fallback);
         effect.validate();
         return effect;
     }
@@ -374,17 +403,27 @@ public abstract class VibrationEffect implements Parcelable {
     /** @hide */
     public static class Prebaked extends VibrationEffect implements Parcelable {
         private int mEffectId;
+        private boolean mFallback;
 
         public Prebaked(Parcel in) {
-            this(in.readInt());
+            this(in.readInt(), in.readByte() != 0);
         }
 
-        public Prebaked(int effectId) {
+        public Prebaked(int effectId, boolean fallback) {
             mEffectId = effectId;
+            mFallback = fallback;
         }
 
         public int getId() {
             return mEffectId;
+        }
+
+        /**
+         * Whether the effect should fall back to a generic pattern if there's no hardware specific
+         * implementation of it.
+         */
+        public boolean shouldFallback() {
+            return mFallback;
         }
 
         @Override
@@ -406,7 +445,7 @@ public abstract class VibrationEffect implements Parcelable {
                 return false;
             }
             VibrationEffect.Prebaked other = (VibrationEffect.Prebaked) o;
-            return mEffectId == other.mEffectId;
+            return mEffectId == other.mEffectId && mFallback == other.mFallback;
         }
 
         @Override
@@ -416,7 +455,7 @@ public abstract class VibrationEffect implements Parcelable {
 
         @Override
         public String toString() {
-            return "Prebaked{mEffectId=" + mEffectId + "}";
+            return "Prebaked{mEffectId=" + mEffectId + ", mFallback=" + mFallback + "}";
         }
 
 
@@ -424,6 +463,7 @@ public abstract class VibrationEffect implements Parcelable {
         public void writeToParcel(Parcel out, int flags) {
             out.writeInt(PARCEL_TOKEN_EFFECT);
             out.writeInt(mEffectId);
+            out.writeByte((byte) (mFallback ? 1 : 0));
         }
 
         public static final Parcelable.Creator<Prebaked> CREATOR =
