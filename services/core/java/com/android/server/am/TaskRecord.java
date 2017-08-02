@@ -1159,6 +1159,17 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return null;
     }
 
+    void getAllRunningVisibleActivitiesLocked(ArrayList<ActivityRecord> outActivities) {
+        if (mStack != null) {
+            for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = mActivities.get(activityNdx);
+                if (!r.finishing && r.okToShowLocked() && r.visible) {
+                    outActivities.add(r);
+                }
+            }
+        }
+    }
+
     ActivityRecord topRunningActivityWithStartingWindowLocked() {
         if (mStack != null) {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
