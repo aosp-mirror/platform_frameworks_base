@@ -604,7 +604,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public String getSecurityString(boolean concise) {
         Context context = mContext;
-        if (mConfig != null && mConfig.isPasspoint()) {
+        if (isPasspoint() || isPasspointConfig()) {
             return concise ? context.getString(R.string.wifi_security_short_eap) :
                 context.getString(R.string.wifi_security_eap);
         }
