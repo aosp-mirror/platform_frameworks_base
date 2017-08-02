@@ -535,13 +535,9 @@ public class TileUtilsTest {
             info.activityInfo.metaData.putString("com.android.settings.summary_uri", summaryUri);
         }
         if (titleResId != 0) {
-            info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
+            info.activityInfo.metaData.putInt(TileUtils.META_DATA_PREFERENCE_TITLE, titleResId);
         } else if (title != null) {
             info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
-        }
-        if (titleResId != 0) {
-            info.activityInfo.metaData.putInt(
-                    TileUtils.META_DATA_PREFERENCE_TITLE_RES_ID, titleResId);
         }
         info.activityInfo.applicationInfo = new ApplicationInfo();
         if (systemApp) {
