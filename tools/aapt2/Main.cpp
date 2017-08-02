@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+#ifdef _WIN32
+// clang-format off
+#include <windows.h>
+#include <shellapi.h>
+// clang-format on
+#endif
+
 #include <iostream>
 #include <vector>
 
+#include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
@@ -43,7 +51,7 @@ extern int Optimize(const std::vector<android::StringPiece>& args);
 
 }  // namespace aapt
 
-int main(int argc, char** argv) {
+int MainImpl(int argc, char** argv) {
   if (argc >= 2) {
     argv += 1;
     argc -= 1;
@@ -74,7 +82,31 @@ int main(int argc, char** argv) {
     std::cerr << "no command specified\n";
   }
 
-  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|version] ..."
-            << std::endl;
+  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|version] ..." << std::endl;
   return 1;
+}
+
+int main(int argc, char** argv) {
+#ifdef _WIN32
+  LPWSTR* wide_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+  CHECK(wide_argv != nullptr) << "invalid command line parameters passed to process";
+
+  std::vector<std::string> utf8_args;
+  for (int i = 0; i < argc; i++) {
+    std::string utf8_arg;
+    if (!::android::base::WideToUTF8(wide_argv[i], &utf8_arg)) {
+      std::cerr << "error converting input arguments to UTF-8" << std::endl;
+      return 1;
+    }
+    utf8_args.push_back(std::move(utf8_arg));
+  }
+  LocalFree(wide_argv);
+
+  std::unique_ptr<char* []> utf8_argv(new char*[utf8_args.size()]);
+  for (int i = 0; i < argc; i++) {
+    utf8_argv[i] = const_cast<char*>(utf8_args[i].c_str());
+  }
+  argv = utf8_argv.get();
+#endif
+  return MainImpl(argc, argv);
 }

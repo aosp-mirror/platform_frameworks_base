@@ -31,6 +31,7 @@
 #include "androidfw/StringPiece.h"
 
 #include "Resource.h"
+#include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Maybe.h"
 #include "xml/XmlUtil.h"
@@ -64,7 +65,7 @@ class XmlPullParser : public IPackageDeclStack {
   static bool SkipCurrentElement(XmlPullParser* parser);
   static bool IsGoodEvent(Event event);
 
-  explicit XmlPullParser(std::istream& in);
+  explicit XmlPullParser(io::InputStream* in);
   ~XmlPullParser();
 
   /**
@@ -169,9 +170,8 @@ class XmlPullParser : public IPackageDeclStack {
     std::vector<Attribute> attributes;
   };
 
-  std::istream& in_;
+  io::InputStream* in_;
   XML_Parser parser_;
-  char buffer_[16384];
   std::queue<EventData> event_queue_;
   std::string error_;
   const std::string empty_;
@@ -228,18 +228,15 @@ inline ::std::ostream& operator<<(::std::ostream& out,
   return out;
 }
 
-inline bool XmlPullParser::NextChildNode(XmlPullParser* parser,
-                                         size_t start_depth) {
+inline bool XmlPullParser::NextChildNode(XmlPullParser* parser, size_t start_depth) {
   Event event;
 
   // First get back to the start depth.
-  while (IsGoodEvent(event = parser->Next()) &&
-         parser->depth() > start_depth + 1) {
+  while (IsGoodEvent(event = parser->Next()) && parser->depth() > start_depth + 1) {
   }
 
   // Now look for the first good node.
-  while ((event != Event::kEndElement || parser->depth() > start_depth) &&
-         IsGoodEvent(event)) {
+  while ((event != Event::kEndElement || parser->depth() > start_depth) && IsGoodEvent(event)) {
     switch (event) {
       case Event::kText:
       case Event::kComment:
