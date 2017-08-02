@@ -41,6 +41,7 @@ public class GpsXtraDownloader {
     private static final long MAXIMUM_CONTENT_LENGTH_BYTES = 1000000;  // 1MB.
     private static final String DEFAULT_USER_AGENT = "Android";
     private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(30);
+    private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(60);
 
     private final String[] mXtraServers;
     // to load balance our server requests
@@ -123,6 +124,7 @@ public class GpsXtraDownloader {
                     "x-wap-profile",
                     "http://www.openmobilealliance.org/tech/profiles/UAPROF/ccppschema-20021212#");
             connection.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+            connection.setReadTimeout(READ_TIMEOUT_MS);
 
             connection.connect();
             int statusCode = connection.getResponseCode();
