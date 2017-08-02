@@ -220,7 +220,7 @@ public:
     /**
      * Draws a VectorDrawable onto the canvas.
      */
-    virtual void drawVectorDrawable(VectorDrawableRoot* tree);
+    virtual void drawVectorDrawable(VectorDrawableRoot* tree) = 0;
 
     /**
      * Converts utf16 text to glyphs, calculating position and boundary,
