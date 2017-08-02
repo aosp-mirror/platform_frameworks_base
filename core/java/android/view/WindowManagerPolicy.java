@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -616,7 +617,16 @@ public interface WindowManagerPolicy {
          * 2. motionEvent will be recycled after onPointerEvent returns so if it is needed later a
          * copy() must be made and the copy must be recycled.
          **/
-        public void onPointerEvent(MotionEvent motionEvent);
+        void onPointerEvent(MotionEvent motionEvent);
+
+        /**
+         * @see #onPointerEvent(MotionEvent)
+         **/
+        default void onPointerEvent(MotionEvent motionEvent, int displayId) {
+            if (displayId == DEFAULT_DISPLAY) {
+                onPointerEvent(motionEvent);
+            }
+        }
     }
 
     /** Window has been added to the screen. */

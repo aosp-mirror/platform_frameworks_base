@@ -65,7 +65,7 @@ public class InputConsumerController {
         }
 
         @Override
-        public void onInputEvent(InputEvent event) {
+        public void onInputEvent(InputEvent event, int displayId) {
             boolean handled = true;
             try {
                 // To be implemented for input handling over Pip windows

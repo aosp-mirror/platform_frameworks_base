@@ -18,6 +18,10 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
+
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -39,6 +43,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Display;
 import android.view.IWindowManager;
+import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
@@ -91,7 +96,14 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
                 }).when(am).notifyKeyguardFlagsChanged(any());
             }
 
-            sWm = WindowManagerService.main(context, mock(InputManagerService.class), true, false,
+            InputManagerService ims = mock(InputManagerService.class);
+            // InputChannel is final and can't be mocked.
+            InputChannel[] input = InputChannel.openInputChannelPair(TAG_WM);
+            if (input != null && input.length > 1) {
+                doReturn(input[1]).when(ims).monitorInput(anyString());
+            }
+
+            sWm = WindowManagerService.main(context, ims, true, false,
                     false, new TestWindowManagerPolicy());
         }
         return sWm;
