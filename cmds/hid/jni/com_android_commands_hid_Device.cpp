@@ -27,8 +27,8 @@
 #include <unistd.h>
 
 #include <jni.h>
-#include <JNIHelp.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <ScopedUtfChars.h>
 #include <android/looper.h>
 #include <android/log.h>

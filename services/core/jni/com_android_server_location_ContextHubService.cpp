@@ -38,7 +38,7 @@
 #include <cutils/log.h>
 
 #include "core_jni_helpers.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 using android::hardware::contexthub::V1_0::AsyncEventType;
 using android::hardware::contexthub::V1_0::ContextHub;

@@ -17,14 +17,14 @@
 #define LOG_TAG "ConsumerIrService"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <stdlib.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 #include <android/hardware/ir/1.0/IConsumerIr.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 using ::android::hardware::ir::V1_0::IConsumerIr;
 using ::android::hardware::ir::V1_0::ConsumerIrFreqRange;

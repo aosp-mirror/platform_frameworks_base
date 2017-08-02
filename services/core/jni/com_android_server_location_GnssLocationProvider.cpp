@@ -20,7 +20,7 @@
 
 #include <android/hardware/gnss/1.0/IGnss.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "hardware_legacy/power.h"
 #include "utils/Log.h"
