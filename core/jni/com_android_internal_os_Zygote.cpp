@@ -108,13 +108,9 @@ static void SigChldHandler(int /*signal_number*/) {
      // changes its locking strategy or its use of syscalls within the
      // lazy-init critical section, its use here may become unsafe.
     if (WIFEXITED(status)) {
-      if (WEXITSTATUS(status)) {
-        ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
-      }
+      ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
     } else if (WIFSIGNALED(status)) {
-      if (WTERMSIG(status) != SIGKILL) {
-        ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
-      }
+      ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
       if (WCOREDUMP(status)) {
         ALOGI("Process %d dumped core.", pid);
       }
