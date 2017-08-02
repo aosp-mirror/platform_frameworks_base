@@ -249,14 +249,28 @@ public class StackScrollAlgorithm {
         state.paddingMap.clear();
         int notGoneIndex = 0;
         ExpandableView lastView = null;
+        int firstHiddenIndex = ambientState.isDark()
+                ? (ambientState.hasPulsingNotifications() ? 1 : 0)
+                : childCount;
+
+        // The goal here is to fill the padding map, by iterating over how much padding each child
+        // needs. The map is thereby reused, by first filling it with the padding amount and when
+        // iterating over it again, it's filled with the actual resolved value.
+
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 if (v == ambientState.getShelf()) {
                     continue;
                 }
+                if (i >= firstHiddenIndex) {
+                    // we need normal padding now, to be in sync with what the stack calculates
+                    lastView = null;
+                    ExpandableViewState viewState = resultState.getViewStateForView(v);
+                    viewState.hidden = true;
+                }
                 notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
-                float increasedPadding = v.getIncreasedPaddingAmount();;
+                float increasedPadding = v.getIncreasedPaddingAmount();
                 if (increasedPadding != 0.0f) {
                     state.paddingMap.put(v, increasedPadding);
                     if (lastView != null) {
@@ -279,6 +293,8 @@ public class StackScrollAlgorithm {
                         state.paddingMap.put(lastView, newValue);
                     }
                 } else if (lastView != null) {
+
+                    // Let's now resolve the value to an actual padding
                     float newValue = getPaddingForValue(state.paddingMap.get(lastView));
                     state.paddingMap.put(lastView, newValue);
                 }
