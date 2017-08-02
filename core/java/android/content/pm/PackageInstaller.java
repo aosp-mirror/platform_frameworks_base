@@ -1406,8 +1406,9 @@ public class PackageInstaller {
                 // Icon may have been omitted for calls that return bulk session
                 // lists, so try fetching the specific icon.
                 try {
-                    appIcon = AppGlobals.getPackageManager().getPackageInstaller()
-                            .getSessionInfo(sessionId).appIcon;
+                    final SessionInfo info = AppGlobals.getPackageManager().getPackageInstaller()
+                            .getSessionInfo(sessionId);
+                    appIcon = (info != null) ? info.appIcon : null;
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
