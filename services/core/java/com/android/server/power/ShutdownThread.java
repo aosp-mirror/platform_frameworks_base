@@ -57,6 +57,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.server.RescueParty;
 import com.android.server.pm.PackageManagerService;
 
 import java.io.File;
@@ -293,11 +294,20 @@ public final class ShutdownThread extends Thread {
                             com.android.internal.R.string.reboot_to_update_reboot));
             }
         } else if (mReason != null && mReason.equals(PowerManager.REBOOT_RECOVERY)) {
-            // Factory reset path. Set the dialog message accordingly.
-            pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
-            pd.setMessage(context.getText(
-                        com.android.internal.R.string.reboot_to_reset_message));
-            pd.setIndeterminate(true);
+            if (RescueParty.isAttemptingFactoryReset()) {
+                // We're not actually doing a factory reset yet; we're rebooting
+                // to ask the user if they'd like to reset, so give them a less
+                // scary dialog message.
+                pd.setTitle(context.getText(com.android.internal.R.string.power_off));
+                pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
+                pd.setIndeterminate(true);
+            } else {
+                // Factory reset path. Set the dialog message accordingly.
+                pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
+                pd.setMessage(context.getText(
+                            com.android.internal.R.string.reboot_to_reset_message));
+                pd.setIndeterminate(true);
+            }
         } else if (mReason != null && mReason.equals(PowerManager.SHUTDOWN_USER_REQUESTED)) {
             Dialog d = new Dialog(context);
             d.setContentView(com.android.internal.R.layout.shutdown_dialog);
