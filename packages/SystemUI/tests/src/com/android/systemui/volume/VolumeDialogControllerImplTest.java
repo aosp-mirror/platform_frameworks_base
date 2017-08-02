@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.session.MediaSession;
 import android.support.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -71,6 +72,18 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+    }
+
+    @Test
+    public void testOnRemoteVolumeChanged_newStream_noNullPointer() {
+        MediaSession.Token token = new MediaSession.Token(null);
+        mVolumeController.mMediaSessionsCallbacksW.onRemoteVolumeChanged(token, 0);
+    }
+
+    @Test
+    public void testOnRemoteRemove_newStream_noNullPointer() {
+        MediaSession.Token token = new MediaSession.Token(null);
+        mVolumeController.mMediaSessionsCallbacksW.onRemoteRemoved(token);
     }
 
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
