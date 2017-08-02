@@ -234,8 +234,11 @@ public class KeyguardBouncer {
     }
 
     protected void ensureView() {
-        mHandler.removeCallbacks(mRemoveViewRunnable);
-        if (mRoot == null) {
+        // Removal of the view might be deferred to reduce unlock latency,
+        // in this case we need to force the removal, otherwise we'll
+        // end up in an unpredictable state.
+        boolean forceRemoval = mHandler.hasCallbacks(mRemoveViewRunnable);
+        if (mRoot == null || forceRemoval) {
             inflateView();
         }
     }
