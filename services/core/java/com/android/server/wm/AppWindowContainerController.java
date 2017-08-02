@@ -487,9 +487,8 @@ public class AppWindowContainerController
             }
 
             final WindowState mainWin = mContainer.findMainWindow();
-            if (mainWin != null && mainWin.isVisible() && mainWin.isDrawnLw()) {
-                // App already has a visible window that is drawn...why would you want a starting
-                // window?
+            if (mainWin != null && mainWin.mWinAnimator.getShown()) {
+                // App already has a visible window...why would you want a starting window?
                 return false;
             }
 
