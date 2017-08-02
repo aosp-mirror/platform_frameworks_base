@@ -152,7 +152,7 @@ public class Instrument {
                 System.out.println(pretty);
             } else {
                 if (results != null) {
-                    for (String key : results.keySet()) {
+                    for (String key : sorted(results.keySet())) {
                         System.out.println(
                                 "INSTRUMENTATION_RESULT: " + key + "=" + results.get(key));
                     }
@@ -163,6 +163,10 @@ public class Instrument {
 
         @Override
         public void onError(String errorText, boolean commandError) {
+            if (mRawMode) {
+                System.out.println("onError: commandError=" + commandError + " message="
+                        + errorText);
+            }
             // The regular BaseCommand error printing will print the commandErrors.
             if (!commandError) {
                 System.out.println(errorText);
