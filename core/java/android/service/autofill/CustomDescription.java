@@ -32,7 +32,7 @@ import com.android.internal.util.Preconditions;
  *
  * <p>This is useful when the autofill service needs to show a detailed view of what would be saved;
  * for example, when the screen contains a credit card, it could display a logo of the credit card
- * bank, the last for digits of the credit card number, and its expiration number.
+ * bank, the last four digits of the credit card number, and its expiration number.
  *
  * <p>A custom description is made of 2 parts:
  * <ul>
@@ -63,16 +63,16 @@ import com.android.internal.util.Preconditions;
  * // Image child - different logo for each bank, based on credit card prefix
  * builder.addChild(R.id.templateccLogo,
  *   new ImageTransformation.Builder(ccNumberId)
- *     .addOption("^4815.*$", R.drawable.ic_credit_card_logo1)
- *     .addOption("^1623.*$", R.drawable.ic_credit_card_logo2)
- *     .addOption("^42.*$", R.drawable.ic_credit_card_logo3);
+ *     .addOption(Pattern.compile(""^4815.*$"), R.drawable.ic_credit_card_logo1)
+ *     .addOption(Pattern.compile(""^1623.*$"), R.drawable.ic_credit_card_logo2)
+ *     .addOption(Pattern.compile(""^42.*$"), R.drawable.ic_credit_card_logo3);
  * // Masked credit card number (as .....LAST_4_DIGITS)
  * builder.addChild(R.id.templateCcNumber, new CharSequenceTransformation.Builder()
- *     .addField(ccNumberId, "^.*(\\d\\d\\d\\d)$", "...$1")
+ *     .addField(ccNumberId, Pattern.compile(""^.*(\\d\\d\\d\\d)$"), "...$1")
  * // Expiration date as MM / YYYY:
  * builder.addChild(R.id.templateExpDate, new CharSequenceTransformation.Builder()
- *     .addField(ccExpMonthId, "^(\\d\\d)$", "Exp: $1")
- *     .addField(ccExpYearId, "^(\\d\\d)$", "/$1");
+ *     .addField(ccExpMonthId, Pattern.compile(""^(\\d\\d)$"), "Exp: $1")
+ *     .addField(ccExpYearId, Pattern.compile(""^(\\d\\d)$"), "/$1");
  * </pre>
  *
  * <p>See {@link ImageTransformation}, {@link CharSequenceTransformation} for more info about these
