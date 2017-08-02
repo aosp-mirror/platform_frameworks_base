@@ -31,7 +31,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
-import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
@@ -40,6 +39,7 @@ import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -88,13 +88,14 @@ import android.util.LauncherIcons;
 import android.util.Log;
 import android.view.Display;
 
-import dalvik.system.VMRuntime;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.UserIcons;
+
+import dalvik.system.VMRuntime;
+
 import libcore.util.EmptyArray;
 
 import java.lang.ref.WeakReference;
@@ -700,6 +701,15 @@ public class ApplicationPackageManager extends PackageManager {
     public String getNameForUid(int uid) {
         try {
             return mPM.getNameForUid(uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public String[] getNamesForUids(int[] uids) {
+        try {
+            return mPM.getNamesForUids(uids);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
