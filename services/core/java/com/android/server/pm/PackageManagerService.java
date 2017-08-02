@@ -10004,6 +10004,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void shutdown() {
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
+        mDexManager.savePackageDexUsageNow();
     }
 
     @Override
