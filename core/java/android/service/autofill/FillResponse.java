@@ -205,6 +205,13 @@ public final class FillResponse implements Parcelable {
         /**
          * Adds a new {@link Dataset} to this response.
          *
+         * <p><b>Note: </b> the total number of datasets is limited by the Binder transaction size,
+         * so it's recommended to keep it small (in the range of 10-20 at most) and use pagination
+         * by adding a fake
+         * {@link Dataset.Builder#setAuthentication(IntentSender) authenticated dataset}
+         * at the end with a presentation string like "Next 10" that would return a new
+         * {@link FillResponse} with the next 10 datasets, and so on.
+         *
          * @return This builder.
          */
         public @NonNull Builder addDataset(@Nullable Dataset dataset) {
