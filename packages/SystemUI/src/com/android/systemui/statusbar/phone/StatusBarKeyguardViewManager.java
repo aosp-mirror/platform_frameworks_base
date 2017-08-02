@@ -404,6 +404,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void onOverlayChanged() {
         mBouncer.hide(true /* destroyView */);
+        mBouncer.prepare();
     }
 
     private void animateScrimControllerKeyguardFadingOut(long delay, long duration,
