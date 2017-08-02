@@ -268,7 +268,7 @@ public abstract class WallpaperService extends Service {
             }
 
             @Override
-            public void onInputEvent(InputEvent event) {
+            public void onInputEvent(InputEvent event, int displayId) {
                 boolean handled = false;
                 try {
                     if (event instanceof MotionEvent
