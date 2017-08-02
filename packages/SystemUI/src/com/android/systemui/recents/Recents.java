@@ -54,6 +54,7 @@ import com.android.systemui.plugins.PluginActivityManager;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -612,6 +613,14 @@ public class Recents extends SystemUI
                 }
             });
         }
+
+        // This will catch the cases when a user launches from recents to another app
+        // (and vice versa) that is not in the recents stack (such as home or bugreport) and it
+        // would not reset the wait for transition flag. This will catch it and make sure that the
+        // flag is reset.
+        if (!event.visible) {
+            mImpl.setWaitingForTransitionStart(false);
+        }
     }
 
     /**
@@ -682,6 +691,11 @@ public class Recents extends SystemUI
                 }
             });
         }
+    }
+
+    public final void onBusEvent(LaunchTaskFailedEvent event) {
+        // Reset the transition when tasks fail to launch
+        mImpl.setWaitingForTransitionStart(false);
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
