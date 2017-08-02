@@ -1423,8 +1423,11 @@ public class IpManager extends StateMachine {
             boolean filter802_3Frames =
                     mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
 
+            int[] ethTypeBlackList = mContext.getResources().getIntArray(
+                    R.array.config_apfEthTypeBlackList);
+
             mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
-                    mCallback, mMulticastFiltering, filter802_3Frames);
+                    mCallback, mMulticastFiltering, filter802_3Frames, ethTypeBlackList);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
             if (mApfFilter == null) {
