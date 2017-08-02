@@ -2306,40 +2306,76 @@ class ActivityStarter {
         return didSomething;
     }
 
-    void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "ActivityStarter:");
+    void dump(PrintWriter pw, String prefix, String dumpPackage) {
         prefix = prefix + "  ";
 
-        pw.println(prefix + "mCurrentUser=" + mSupervisor.mCurrentUser);
-        pw.println(prefix + "mLastStartReason=" + mLastStartReason);
-        pw.println(prefix + "mLastStartActivityTimeMs="
-                + DateFormat.getDateTimeInstance().format(new Date(mLastStartActivityTimeMs)));
-        pw.println(prefix + "mLastStartActivityResult=" + mLastStartActivityResult);
+        if (dumpPackage != null) {
+            if ((mLastStartActivityRecord[0] == null ||
+                    !dumpPackage.equals(mLastHomeActivityStartRecord[0].packageName)) &&
+                    (mLastHomeActivityStartRecord[0] == null ||
+                    !dumpPackage.equals(mLastHomeActivityStartRecord[0].packageName)) &&
+                    (mStartActivity == null || !dumpPackage.equals(mStartActivity.packageName))) {
+                pw.print(prefix);
+                pw.println("(nothing)");
+                return;
+            }
+        }
+
+        pw.print(prefix);
+        pw.print("mCurrentUser=");
+        pw.println(mSupervisor.mCurrentUser);
+        pw.print(prefix);
+        pw.print("mLastStartReason=");
+        pw.println(mLastStartReason);
+        pw.print(prefix);
+        pw.print("mLastStartActivityTimeMs=");
+        pw.println(DateFormat.getDateTimeInstance().format(new Date(mLastStartActivityTimeMs)));
+        pw.print(prefix);
+        pw.print("mLastStartActivityResult=");
+        pw.println(mLastStartActivityResult);
         ActivityRecord r = mLastStartActivityRecord[0];
         if (r != null) {
-            pw.println(prefix + "mLastStartActivityRecord:");
-            r.dump(pw, prefix + " ");
+            pw.print(prefix);
+            pw.println("mLastStartActivityRecord:");
+            r.dump(pw, prefix + "  ");
         }
-        pw.println(prefix + "mLastHomeActivityStartResult=" + mLastHomeActivityStartResult);
+        pw.print(prefix);
+        pw.print("mLastHomeActivityStartResult=");
+        pw.println(mLastHomeActivityStartResult);
         r = mLastHomeActivityStartRecord[0];
         if (r != null) {
-            pw.println(prefix + "mLastHomeActivityStartRecord:");
-            r.dump(pw, prefix + " ");
+            pw.print(prefix);
+            pw.println("mLastHomeActivityStartRecord:");
+            r.dump(pw, prefix + "  ");
         }
         if (mStartActivity != null) {
-            pw.println(prefix + "mStartActivity:");
-            mStartActivity.dump(pw, prefix + " ");
+            pw.print(prefix);
+            pw.println("mStartActivity:");
+            mStartActivity.dump(pw, prefix + "  ");
         }
         if (mIntent != null) {
-            pw.println(prefix + "mIntent=" + mIntent);
+            pw.print(prefix);
+            pw.print("mIntent=");
+            pw.println(mIntent);
         }
         if (mOptions != null) {
-            pw.println(prefix + "mOptions=" + mOptions);
+            pw.print(prefix);
+            pw.print("mOptions=");
+            pw.println(mOptions);
         }
-        pw.println(prefix + "mLaunchSingleTop=" + mLaunchSingleTop
-                + " mLaunchSingleInstance=" + mLaunchSingleInstance
-                + " mLaunchSingleTask=" + mLaunchSingleTask
-                + " mLaunchFlags=0x" + Integer.toHexString(mLaunchFlags)
-                + " mDoResume=" + mDoResume + " mAddingToTask=" + mAddingToTask);
+        pw.print(prefix);
+        pw.print("mLaunchSingleTop=");
+        pw.print(mLaunchSingleTop);
+        pw.print(" mLaunchSingleInstance=");
+        pw.print(mLaunchSingleInstance);
+        pw.print(" mLaunchSingleTask=");
+        pw.println(mLaunchSingleTask);
+        pw.print(prefix);
+        pw.print("mLaunchFlags=0x");
+        pw.print(Integer.toHexString(mLaunchFlags));
+        pw.print(" mDoResume=");
+        pw.print(mDoResume);
+        pw.print(" mAddingToTask=");
+        pw.println(mAddingToTask);
     }
 }
