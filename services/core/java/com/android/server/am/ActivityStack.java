@@ -659,6 +659,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return topRunningActivityLocked(false /* focusableOnly */);
     }
 
+    void getAllRunningVisibleActivitiesLocked(ArrayList<ActivityRecord> outActivities) {
+        outActivities.clear();
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            mTaskHistory.get(taskNdx).getAllRunningVisibleActivitiesLocked(outActivities);
+        }
+    }
+
     private ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
