@@ -40,6 +40,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -59,12 +60,14 @@ import android.net.NetworkRequest;
 import android.net.util.SharedLog;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -557,6 +560,90 @@ public class TetheringTest {
         verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
     }
+
+    private void userRestrictionsListenerBehaviour(
+        boolean currentDisallow, boolean nextDisallow, String[] activeTetheringIfacesList,
+        int expectedInteractionsWithShowNotification) throws  Exception {
+        final int userId = 0;
+        final Bundle currRestrictions = new Bundle();
+        final Bundle newRestrictions = new Bundle();
+        Tethering tethering = mock(Tethering.class);
+        Tethering.TetheringUserRestrictionListener turl =
+                new Tethering.TetheringUserRestrictionListener(tethering);
+
+        currRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_TETHERING, currentDisallow);
+        newRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_TETHERING, nextDisallow);
+        when(tethering.getTetheredIfaces()).thenReturn(activeTetheringIfacesList);
+
+        turl.onUserRestrictionsChanged(userId, newRestrictions, currRestrictions);
+
+        verify(tethering, times(expectedInteractionsWithShowNotification))
+                .showTetheredNotification(anyInt(), eq(false));
+
+        verify(tethering, times(expectedInteractionsWithShowNotification)).untetherAll();
+    }
+
+    @Test
+    public void testDisallowTetheringWhenNoTetheringInterfaceIsActive() throws Exception {
+        final String[] emptyActiveIfacesList = new String[]{};
+        final boolean currDisallow = false;
+        final boolean nextDisallow = true;
+        final int expectedInteractionsWithShowNotification = 0;
+
+        userRestrictionsListenerBehaviour(currDisallow, nextDisallow, emptyActiveIfacesList,
+                expectedInteractionsWithShowNotification);
+    }
+
+    @Test
+    public void testDisallowTetheringWhenAtLeastOneTetheringInterfaceIsActive() throws Exception {
+        final String[] nonEmptyActiveIfacesList = new String[]{mTestIfname};
+        final boolean currDisallow = false;
+        final boolean nextDisallow = true;
+        final int expectedInteractionsWithShowNotification = 1;
+
+        userRestrictionsListenerBehaviour(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+                expectedInteractionsWithShowNotification);
+    }
+
+    @Test
+    public void testAllowTetheringWhenNoTetheringInterfaceIsActive() throws Exception {
+        final String[] nonEmptyActiveIfacesList = new String[]{};
+        final boolean currDisallow = true;
+        final boolean nextDisallow = false;
+        final int expectedInteractionsWithShowNotification = 0;
+
+        userRestrictionsListenerBehaviour(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+                expectedInteractionsWithShowNotification);
+    }
+
+    @Test
+    public void testAllowTetheringWhenAtLeastOneTetheringInterfaceIsActive() throws Exception {
+        final String[] nonEmptyActiveIfacesList = new String[]{mTestIfname};
+        final boolean currDisallow = true;
+        final boolean nextDisallow = false;
+        final int expectedInteractionsWithShowNotification = 0;
+
+        userRestrictionsListenerBehaviour(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+                expectedInteractionsWithShowNotification);
+    }
+
+    @Test
+    public void testDisallowTetheringUnchanged() throws Exception {
+        final String[] nonEmptyActiveIfacesList = new String[]{mTestIfname};
+        final int expectedInteractionsWithShowNotification = 0;
+        boolean currDisallow = true;
+        boolean nextDisallow = true;
+
+        userRestrictionsListenerBehaviour(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+                expectedInteractionsWithShowNotification);
+
+        currDisallow = false;
+        nextDisallow = false;
+
+        userRestrictionsListenerBehaviour(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+                expectedInteractionsWithShowNotification);
+    }
+
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an
     // already operating tethering mode interface.
