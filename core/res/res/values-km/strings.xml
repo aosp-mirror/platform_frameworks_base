@@ -118,7 +118,7 @@
     <item msgid="3910386316304772394">"ដើម្បីហៅទូរសព្ទ និងផ្ញើសារតាម Wi-Fi អ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនបម្រើសេវាទូរសព្ទរបស់អ្នកដំឡើងសេវាកម្មនេះជាមុនសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតនៅក្នុងការកំណត់។ (លេខកូដបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"ចុះឈ្មោះជាមួយក្រុមហ៊ុនរបស់អ្នក"</item>
+    <item msgid="7472393097168811593">"ចុះឈ្មោះ​ជាមួយ​ក្រុមហ៊ុន​បម្រើសេវា​ទូរសព្ទរបស់អ្នក (លេខកូដ​មានបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -1177,8 +1177,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB សម្រាប់ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"មិនស្គាល់គ្រឿងបរិក្ខារសំឡេងទេ"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"ចុចដើម្បីទទួលព័ត៌មានបន្ថែម"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុសយូអេសប៊ី"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ជ្រើស​ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
