@@ -441,6 +441,11 @@ public class Binder implements IBinder {
      *
      * <p>If you want to call this, call transact().
      *
+     * <p>Implementations that are returning a result should generally use
+     * {@link Parcel#writeNoException() Parcel.writeNoException} and
+     * {@link Parcel#writeException(Exception) Parcel.writeException} to propagate
+     * exceptions back to the caller.</p>
+     *
      * @param code The action to perform.  This should
      * be a number between {@link #FIRST_CALL_TRANSACTION} and
      * {@link #LAST_CALL_TRANSACTION}.
