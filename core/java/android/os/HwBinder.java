@@ -71,4 +71,13 @@ public abstract class HwBinder implements IHwBinder {
     }
 
     private long mNativeContext;
+
+    private static native void native_report_sysprop_change();
+
+    /**
+     * Notifies listeners that a system property has changed
+     */
+    public static void reportSyspropChanged() {
+        native_report_sysprop_change();
+    }
 }
