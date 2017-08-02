@@ -244,9 +244,11 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
     }
 }
 
-static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option)
+static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
+        JNIEnv *env, jobject thiz, jlong timeUs, jint option, jint dst_width, jint dst_height)
 {
-    ALOGV("getFrameAtTime: %lld us option: %d", (long long)timeUs, option);
+    ALOGV("getFrameAtTime: %lld us option: %d dst width: %d heigh: %d",
+            (long long)timeUs, option, dst_width, dst_height);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
@@ -274,15 +276,19 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                         fields.createConfigMethod,
                         GraphicsJNI::colorTypeToLegacyBitmapConfig(kRGB_565_SkColorType));
 
-    uint32_t width, height;
+    uint32_t width, height, displayWidth, displayHeight;
     bool swapWidthAndHeight = false;
     if (videoFrame->mRotationAngle == 90 || videoFrame->mRotationAngle == 270) {
         width = videoFrame->mHeight;
         height = videoFrame->mWidth;
         swapWidthAndHeight = true;
+        displayWidth = videoFrame->mDisplayHeight;
+        displayHeight = videoFrame->mDisplayWidth;
     } else {
         width = videoFrame->mWidth;
         height = videoFrame->mHeight;
+        displayWidth = videoFrame->mDisplayWidth;
+        displayHeight = videoFrame->mDisplayHeight;
     }
 
     jobject jBitmap = env->CallStaticObjectMethod(
@@ -308,22 +314,26 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
            videoFrame->mHeight,
            videoFrame->mRotationAngle);
 
-    if (videoFrame->mDisplayWidth  != videoFrame->mWidth ||
-        videoFrame->mDisplayHeight != videoFrame->mHeight) {
-        uint32_t displayWidth = videoFrame->mDisplayWidth;
-        uint32_t displayHeight = videoFrame->mDisplayHeight;
-        if (swapWidthAndHeight) {
-            displayWidth = videoFrame->mDisplayHeight;
-            displayHeight = videoFrame->mDisplayWidth;
-        }
+    if (dst_width <= 0 || dst_height <= 0) {
+        dst_width = displayWidth;
+        dst_height = displayHeight;
+    } else {
+        float factor = std::min((float)dst_width / (float)displayWidth,
+                (float)dst_height / (float)displayHeight);
+        dst_width = std::round(displayWidth * factor);
+        dst_height = std::round(displayHeight * factor);
+    }
+
+    if ((uint32_t)dst_width != videoFrame->mWidth ||
+        (uint32_t)dst_height != videoFrame->mHeight) {
         ALOGV("Bitmap dimension is scaled from %dx%d to %dx%d",
-                width, height, displayWidth, displayHeight);
+                width, height, dst_width, dst_height);
         jobject scaledBitmap = env->CallStaticObjectMethod(fields.bitmapClazz,
-                                    fields.createScaledBitmapMethod,
-                                    jBitmap,
-                                    displayWidth,
-                                    displayHeight,
-                                    true);
+                                fields.createScaledBitmapMethod,
+                                jBitmap,
+                                dst_width,
+                                dst_height,
+                                true);
         return scaledBitmap;
     }
 
@@ -474,7 +484,7 @@ static const JNINativeMethod nativeMethods[] = {
 
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_setDataSource",   "(Landroid/media/MediaDataSource;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
-        {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
+        {"_getFrameAtTime", "(JIII)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
         {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
         {"release",         "()V", (void *)android_media_MediaMetadataRetriever_release},
