@@ -714,7 +714,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardShowing();
+                && !mKeyguardController.isKeyguardShowing()
+                && !(UserManager.isDeviceInDemoMode(mContext)
+                        && mUserController.getCurrentUser().isDemo());
     }
 
     private static ThreadPriorityBooster sThreadPriorityBooster = new ThreadPriorityBooster(
