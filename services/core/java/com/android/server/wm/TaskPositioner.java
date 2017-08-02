@@ -133,7 +133,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
 
         @Override
-        public void onInputEvent(InputEvent event) {
+        public void onInputEvent(InputEvent event, int displayId) {
             if (!(event instanceof MotionEvent)
                     || (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
                 return;

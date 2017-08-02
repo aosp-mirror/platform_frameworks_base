@@ -79,6 +79,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
@@ -357,6 +358,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
     boolean mKeyguardGoingAway;
+    // VR Vr2d Display Id.
+    int mVr2dDisplayId = INVALID_DISPLAY;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -764,7 +767,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void onInputEvent(InputEvent event) {
+        public void onInputEvent(InputEvent event, int displayId) {
             boolean handled = false;
             try {
                 if (mDragState == null) {
@@ -7540,6 +7543,16 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (accessibilityController != null) {
                 accessibilityController.performComputeChangedWindowsNotLocked();
+            }
+        }
+
+        @Override
+        public void setVr2dDisplayId(int vr2dDisplayId) {
+            if (DEBUG_DISPLAY) {
+                Slog.d(TAG, "setVr2dDisplayId called for: " + vr2dDisplayId);
+            }
+            synchronized (WindowManagerService.this) {
+                mVr2dDisplayId = vr2dDisplayId;
             }
         }
     }
