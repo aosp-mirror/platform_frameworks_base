@@ -150,8 +150,17 @@ inline static const SkPaint* bitmapPaint(const SkPaint* origPaint, SkPaint* tmpP
         if (origPaint) {
             *tmpPaint = *origPaint;
         }
+
+        sk_sp<SkColorFilter> filter;
+        if (colorFilter && tmpPaint->getColorFilter()) {
+            filter = SkColorFilter::MakeComposeFilter(tmpPaint->refColorFilter(), colorFilter);
+            LOG_ALWAYS_FATAL_IF(!filter);
+        } else {
+            filter = colorFilter;
+        }
+
         tmpPaint->setAntiAlias(false);
-        tmpPaint->setColorFilter(colorFilter);
+        tmpPaint->setColorFilter(filter);
         return tmpPaint;
     } else {
         return origPaint;
