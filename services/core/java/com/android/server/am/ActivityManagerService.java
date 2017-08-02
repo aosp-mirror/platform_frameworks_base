@@ -14984,7 +14984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if ("starter".equals(cmd)) {
                 synchronized (this) {
-                    dumpActivityStarterLocked(pw);
+                    dumpActivityStarterLocked(pw, dumpPackage);
                 }
             } else if ("recents".equals(cmd) || "r".equals(cmd)) {
                 synchronized (this) {
@@ -15219,7 +15219,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpActivityStarterLocked(pw);
+                dumpActivityStarterLocked(pw, dumpPackage);
                 pw.println();
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
@@ -15289,7 +15289,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpActivityStarterLocked(pw);
+                dumpActivityStarterLocked(pw, dumpPackage);
                 pw.println();
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
@@ -15313,7 +15313,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void dumpLastANRLocked(PrintWriter pw) {
-        pw.println("ACTIVITY MANAGER ACTIVITIES (dumpsys activity lastanr)");
+        pw.println("ACTIVITY MANAGER LAST ANR (dumpsys activity lastanr)");
         if (mLastANRState == null) {
             pw.println("  <no ANR has occurred since boot>");
         } else {
@@ -15321,9 +15321,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private void dumpActivityStarterLocked(PrintWriter pw) {
-        pw.println("ACTIVITY MANAGER ACTIVITIES (dumpsys activity starter)");
-        mActivityStarter.dump(pw, "");
+    private void dumpActivityStarterLocked(PrintWriter pw, String dumpPackage) {
+        pw.println("ACTIVITY MANAGER STARTER (dumpsys activity starter)");
+        mActivityStarter.dump(pw, "", dumpPackage);
     }
 
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -22825,11 +22825,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     uidRec.lastBackgroundTime = 0;
                 }
                 final boolean wasCached = uidRec.setProcState
-                        > ActivityManager.PROCESS_STATE_RECEIVER && uidRec.setProcState
-                        != ActivityManager.PROCESS_STATE_NONEXISTENT;
+                        > ActivityManager.PROCESS_STATE_RECEIVER;
                 final boolean isCached = uidRec.curProcState
                         > ActivityManager.PROCESS_STATE_RECEIVER;
-                if (wasCached != isCached) {
+                if (wasCached != isCached ||
+                        uidRec.setProcState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
                     uidChange |= isCached ? UidRecord.CHANGE_CACHED : UidRecord.CHANGE_UNCACHED;
                 }
                 uidRec.setProcState = uidRec.curProcState;
@@ -24090,7 +24090,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("  Reason: " + reason);
                 }
                 pw.println();
-                mActivityStarter.dump(pw, "  ");
+                mActivityStarter.dump(pw, "  ", null);
                 pw.println();
                 pw.println("-------------------------------------------------------------------------------");
                 dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
