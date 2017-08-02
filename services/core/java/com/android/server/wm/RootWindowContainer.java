@@ -747,12 +747,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            // TODO(multi-display): Update rotation for different displays separately.
-            final int displayId = defaultDisplay.getDisplayId();
-            if (defaultDisplay.updateRotationUnchecked(false /* inTransaction */)) {
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
-            } else {
-                mUpdateRotation = false;
+
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mChildren.get(displayNdx);
+                final int displayId = displayContent.getDisplayId();
+                if (displayContent.updateRotationUnchecked(false /* inTransaction */)) {
+                    mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
+                } else if (displayId == DEFAULT_DISPLAY) {
+                    // TODO(multi-display): Track rotation updates for different displays separately
+                    mUpdateRotation = false;
+                }
             }
         }
 
