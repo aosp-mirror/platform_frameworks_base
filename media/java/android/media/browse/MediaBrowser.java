@@ -445,6 +445,9 @@ public final class MediaBrowser {
         ResultReceiver receiver = new ResultReceiver(mHandler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (!isConnected()) {
+                    return;
+                }
                 if (resultCode != 0 || resultData == null
                         || !resultData.containsKey(MediaBrowserService.KEY_MEDIA_ITEM)) {
                     cb.onError(mediaId);
