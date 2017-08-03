@@ -15,7 +15,7 @@
 #
 # Generic key layout file for full alphabetic US English PC style external keyboards.
 #
-# This file is intentionally very generic and is intended to support a broad rang of keyboards.
+# This file is intentionally very generic and is intended to support a broad range of keyboards.
 # Do not edit the generic key layout to support a specific keyboard; instead, create
 # a new key layout file with the required keyboard configuration.
 #

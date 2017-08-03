@@ -441,6 +441,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     final ActivityMetricsLogger mActivityMetricsLogger;
 
+    private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
+
     @Override
     protected int getChildCount() {
         return mActivityDisplays.size();
@@ -954,17 +956,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 if (!isFocusedStack(stack)) {
                     continue;
                 }
-                ActivityRecord hr = stack.topRunningActivityLocked();
-                if (hr != null) {
-                    if (hr.app == null && app.uid == hr.info.applicationInfo.uid
-                            && processName.equals(hr.processName)) {
+                stack.getAllRunningVisibleActivitiesLocked(mTmpActivityList);
+                final ActivityRecord top = stack.topRunningActivityLocked();
+                final int size = mTmpActivityList.size();
+                for (int i = 0; i < size; i++) {
+                    final ActivityRecord activity = mTmpActivityList.get(i);
+                    if (activity.app == null && app.uid == activity.info.applicationInfo.uid
+                            && processName.equals(activity.processName)) {
                         try {
-                            if (realStartActivityLocked(hr, app, true, true)) {
+                            if (realStartActivityLocked(activity, app,
+                                    top == activity /* andResume */, true /* checkConfig */)) {
                                 didSomething = true;
                             }
                         } catch (RemoteException e) {
                             Slog.w(TAG, "Exception in new application when starting activity "
-                                  + hr.intent.getComponent().flattenToShortString(), e);
+                                    + top.intent.getComponent().flattenToShortString(), e);
                             throw e;
                         }
                     }

@@ -6402,17 +6402,40 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
-            if (obj instanceof SharedUserSetting) {
-                final SharedUserSetting sus = (SharedUserSetting) obj;
-                return sus.name + ":" + sus.userId;
-            } else if (obj instanceof PackageSetting) {
-                final PackageSetting ps = (PackageSetting) obj;
-                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
-                    return null;
-                }
-                return ps.name;
+            return getNameForUidLocked(callingUid, uid);
+        }
+    }
+
+    @Override
+    public String[] getNamesForUids(int[] uids) {
+        if (uids == null || uids.length == 0) {
+            return null;
+        }
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        final String[] names = new String[uids.length];
+        synchronized (mPackages) {
+            for (int i = uids.length - 1; i >= 0; i--) {
+                final int uid = uids[i];
+                names[i] = getNameForUidLocked(callingUid, uid);
             }
+        }
+        return names;
+    }
+
+    private String getNameForUidLocked(int callingUid, int uid) {
+        Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+        if (obj instanceof SharedUserSetting) {
+            final SharedUserSetting sus = (SharedUserSetting) obj;
+            return sus.name + ":" + sus.userId;
+        } else if (obj instanceof PackageSetting) {
+            final PackageSetting ps = (PackageSetting) obj;
+            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                return null;
+            }
+            return ps.name;
         }
         return null;
     }
@@ -9981,6 +10004,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void shutdown() {
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
+        mDexManager.savePackageDexUsageNow();
     }
 
     @Override
@@ -13025,6 +13049,23 @@ public class PackageManagerService extends IPackageManager.Stub
         return allowed;
     }
 
+    /**
+     * Determines whether a package is whitelisted for a particular privapp permission.
+     *
+     * <p>Does NOT check whether the package is a privapp, just whether it's whitelisted.
+     *
+     * <p>This handles parent/child apps.
+     */
+    private boolean hasPrivappWhitelistEntry(String perm, PackageParser.Package pkg) {
+        ArraySet<String> wlPermissions = SystemConfig.getInstance()
+                .getPrivAppPermissions(pkg.packageName);
+        // Let's check if this package is whitelisted...
+        boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
+        // If it's not, we'll also tail-recurse to the parent.
+        return whitelisted ||
+                pkg.parentPackage != null && hasPrivappWhitelistEntry(perm, pkg.parentPackage);
+    }
+
     private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
             BasePermission bp, PermissionsState origPermissions) {
         boolean privilegedPermission = (bp.protectionLevel
@@ -13035,10 +13076,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean platformPackage = PLATFORM_PACKAGE_NAME.equals(pkg.packageName);
         if (!privappPermissionsDisable && privilegedPermission && pkg.isPrivilegedApp()
                 && !platformPackage && platformPermission) {
-            ArraySet<String> wlPermissions = SystemConfig.getInstance()
-                    .getPrivAppPermissions(pkg.packageName);
-            boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
-            if (!whitelisted) {
+            if (!hasPrivappWhitelistEntry(perm, pkg)) {
                 Slog.w(TAG, "Privileged permission " + perm + " for package "
                         + pkg.packageName + " - not in privapp-permissions whitelist");
                 // Only report violations for apps on system image
@@ -13080,6 +13118,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         // now get the new permission if the ancestral apk is
                         // privileged to get it.
                         if (sysPs != null && sysPs.pkg != null && sysPs.isPrivileged()) {
+                            // TODO(gboyer): This is the same as isPackageRequestingPermission().
                             for (int j = 0; j < sysPs.pkg.requestedPermissions.size(); j++) {
                                 if (perm.equals(sysPs.pkg.requestedPermissions.get(j))) {
                                     allowed = true;

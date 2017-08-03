@@ -34,6 +34,7 @@ import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.provider.MetadataReader;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 
@@ -899,6 +900,9 @@ class MtpDatabase {
                 MtpDeviceRecord.isWritingSupported(operationsSupported) &&
                 protectionState == MtpConstants.PROTECTION_STATUS_NONE) {
             flag |= Document.FLAG_DIR_SUPPORTS_CREATE;
+        }
+        if (MetadataReader.isSupportedMimeType(mimeType)) {
+            flag |= Document.FLAG_SUPPORTS_METADATA;
         }
         if (thumbnailSize > 0) {
             flag |= Document.FLAG_SUPPORTS_THUMBNAIL;

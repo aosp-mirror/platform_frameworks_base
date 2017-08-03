@@ -117,9 +117,7 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fi-ի միջոցով զանգեր կատարելու և հաղորդագրություններ ուղարկելու համար նախ դիմեք ձեր օպերատորին՝ այս ծառայությունը կարգավորելու համար: Այնուհետև նորից միացրեք «Զանգեր Wi-Fi-ի միջոցով» ընտրանքը Կարգավորումներից: (Սխալի կոդ՝ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-  <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Գրանցվեք օպերատորի մոտ"</item>
-  </string-array>
+    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Wi-Fi զանգեր"</item>
@@ -267,7 +265,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS-ները"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"Թույլ տալ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ուղարկել և դիտել SMS հաղորդագրություններ"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Հիշողություն"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Տարածք"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
     <string name="permgrouprequest_storage" msgid="7429669910547860218">"Թույլ տալ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել սարքում պահված լուսանկարները, մեդիան և ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Խոսափող"</string>
@@ -1185,8 +1183,10 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI-ի USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Կապակցված է USB լրասարքի"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Հպեք՝ լրացուցիչ ընտրանքների համար:"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Աուդիո սարքը չի աջակցվում"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Հպեք՝ լրացուցիչ տեղեկություններ ստանալու համար"</string>
+    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
+    <skip />
+    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
+    <skip />
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB վրիպազերծումը միացված է"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Հպեք՝ USB վրիպազերծումն անջատելու համար:"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Ընտրել` USB կարգաբերումը կասեցնելու համար:"</string>

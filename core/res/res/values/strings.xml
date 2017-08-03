@@ -218,7 +218,7 @@
     </string-array>
     <!-- WFC Operator Error Messages showed as notifications -->
     <string-array name="wfcOperatorErrorNotificationMessages">
-        <item>Register with your carrier</item>
+        <item>Register with your carrier (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
     </string-array>
     <!-- Template for showing mobile network operator name while WFC is active -->
     <string-array name="wfcSpnFormats">
@@ -3161,9 +3161,9 @@
     <!-- See USB_PREFERENCES. This is the message. -->
     <string name="usb_notification_message">Tap for more options.</string>
     <!-- USB_PREFERENCES: Notification for when a type-c USB audio accessory is attached but not supported.  This is the title -->
-    <string name="usb_unsupported_audio_accessory_title">Audio accessory not supported</string>
+    <string name="usb_unsupported_audio_accessory_title">Analog audio accessory detected</string>
     <!-- Message of notification shown when a type-c USB audio accessory is attached but not supported. -->
-    <string name="usb_unsupported_audio_accessory_message">Tap for more info</string>
+    <string name="usb_unsupported_audio_accessory_message">The attached device is not compatible with this phone. Tap to learn more.</string>
 
 
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
@@ -3470,6 +3470,13 @@
     <!-- Shown when the device is tethered -->
     <string name="tethered_notification_title">Tethering or hotspot active</string>
     <string name="tethered_notification_message">Tap to set up.</string>
+
+    <!-- Strings for tether disabling notification -->
+    <!-- This notification is shown when tethering has been disabled on a user's device.
+    The device is managed by the user's employer. Tethering can't be turned on unless the
+    IT administrator allows it. The noun "admin" is another reference for "IT administrator." -->
+    <string name="disable_tether_notification_title">Tethering is disabled</string>
+    <string name="disable_tether_notification_message">Contact your admin for details</string>
 
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>

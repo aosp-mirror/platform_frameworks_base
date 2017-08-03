@@ -149,13 +149,6 @@ public class TileUtils {
     public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
 
     /**
-     * @deprecated Use {@link #META_DATA_PREFERENCE_TITLE} with {@code android:resource}
-     */
-    @Deprecated
-    public static final String META_DATA_PREFERENCE_TITLE_RES_ID =
-            "com.android.settings.title.resid";
-
-    /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the summary text that should be displayed for the preference.
      */
@@ -176,7 +169,7 @@ public class TileUtils {
      * custom view which should be displayed for the preference. The custom view will be inflated
      * as a remote view.
      *
-     * This also can be used with {@link META_DATA_PREFERENCE_SUMMARY_URI} above, by setting the id
+     * This also can be used with {@link #META_DATA_PREFERENCE_SUMMARY_URI}, by setting the id
      * of the summary TextView to '@android:id/summary'.
      */
     public static final String META_DATA_PREFERENCE_CUSTOM_VIEW =
@@ -411,14 +404,7 @@ public class TileUtils {
                                     metaData.getBoolean(META_DATA_PREFERENCE_ICON_TINTABLE);
                         }
                     }
-                    int resId = 0;
-                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE_RES_ID)) {
-                        resId = metaData.getInt(META_DATA_PREFERENCE_TITLE_RES_ID);
-                        if (resId != 0) {
-                            title = res.getString(resId);
-                        }
-                    }
-                    if ((resId == 0) && metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
                         if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                             title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
                         } else {
@@ -464,12 +450,14 @@ public class TileUtils {
             }
 
             // Set the icon
-            if (iconFromUri != null) {
-                tile.icon = Icon.createWithResource(iconFromUri.first, iconFromUri.second);
-            } else {
-                if (icon == 0) {
+            if (icon == 0) {
+                // Only fallback to activityinfo.icon if metadata does not contain ICON_URI.
+                // ICON_URI should be loaded in app UI when need the icon object.
+                if (!tile.metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
                     icon = activityInfo.icon;
                 }
+            }
+            if (icon != 0) {
                 tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
             }
 
@@ -492,7 +480,7 @@ public class TileUtils {
 
     /**
      * Gets the icon package name and resource id from content provider.
-     * @param Context context
+     * @param context context
      * @param packageName package name of the target activity
      * @param uriString URI for the content provider
      * @param providerMap Maps URI authorities to providers
@@ -522,7 +510,7 @@ public class TileUtils {
 
     /**
      * Gets text associated with the input key from the content provider.
-     * @param Context context
+     * @param context context
      * @param uriString URI for the content provider
      * @param providerMap Maps URI authorities to providers
      * @param key Key mapping to the text in bundle returned by the content provider

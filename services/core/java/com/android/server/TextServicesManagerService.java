@@ -77,11 +77,14 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private static final boolean DBG = false;
 
     private final Context mContext;
-    private boolean mSystemReady;
+    private boolean mIsCurrentUserUnlockingOrUnlocked;
     private final TextServicesMonitor mMonitor;
     private final HashMap<String, SpellCheckerInfo> mSpellCheckerMap = new HashMap<>();
     private final ArrayList<SpellCheckerInfo> mSpellCheckerList = new ArrayList<>();
     private final HashMap<String, SpellCheckerBindGroup> mSpellCheckerBindGroups = new HashMap<>();
+    @UserIdInt
+    private int mCurrentUserId;
+    private int[] mCurrentProfileIds = new int[0];
     private final TextServicesSettings mSettings;
     @NonNull
     private final UserManager mUserManager;
@@ -108,15 +111,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         @Override
-        public void onBootPhase(int phase) {
-            // Called on the system server's main looper thread.
-            // TODO: Dispatch this to a worker thread as needed.
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemRunning();
-            }
-        }
-
-        @Override
         public void onUnlockUser(@UserIdInt int userHandle) {
             // Called on the system server's main looper thread.
             // TODO: Dispatch this to a worker thread as needed.
@@ -124,33 +118,32 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    void systemRunning() {
-        synchronized (mLock) {
-            if (!mSystemReady) {
-                mSystemReady = true;
-                resetInternalStateLocked(mSettings.getCurrentUserId());
-            }
-        }
-    }
-
     void onSwitchUser(@UserIdInt int userId) {
         synchronized (mLock) {
+            mIsCurrentUserUnlockingOrUnlocked = mUserManager.isUserUnlockingOrUnlocked(userId);
             resetInternalStateLocked(userId);
+            if (mIsCurrentUserUnlockingOrUnlocked) {
+                initializeInternalStateLocked(mCurrentUserId);
+            }
         }
     }
 
     void onUnlockUser(@UserIdInt int userId) {
         synchronized (mLock) {
-            final int currentUserId = mSettings.getCurrentUserId();
+            final int currentUserId = mCurrentUserId;
             if (userId != currentUserId) {
                 return;
             }
-            resetInternalStateLocked(currentUserId);
+            if (!mIsCurrentUserUnlockingOrUnlocked) {
+                mIsCurrentUserUnlockingOrUnlocked = true;
+                resetInternalStateLocked(mCurrentUserId);
+                initializeInternalStateLocked(mCurrentUserId);
+            }
         }
     }
 
     public TextServicesManagerService(Context context) {
-        mSystemReady = false;
+        mIsCurrentUserUnlockingOrUnlocked = false;
         mContext = context;
 
         mUserManager = mContext.getSystemService(UserManager.class);
@@ -168,22 +161,21 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         mMonitor = new TextServicesMonitor();
         mMonitor.register(context, null, true);
-        final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(userId);
-        mSettings = new TextServicesSettings(context.getContentResolver(), userId,
-                useCopyOnWriteSettings);
-
-        // "resetInternalStateLocked" initializes the states for the foreground user
-        resetInternalStateLocked(userId);
+        mCurrentUserId = userId;
+        mCurrentProfileIds = mUserManager.getProfileIdsWithDisabled(userId);
+        mSettings = new TextServicesSettings(context.getContentResolver());
     }
 
     private void resetInternalStateLocked(@UserIdInt int userId) {
-        final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(userId);
-        mSettings.switchCurrentUser(userId, useCopyOnWriteSettings);
-        updateCurrentProfileIds();
+        mCurrentUserId = userId;
+        mCurrentProfileIds = mUserManager.getProfileIdsWithDisabled(userId);
         unbindServiceLocked();
-        buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
+        mSpellCheckerList.clear();
+        mSpellCheckerMap.clear();
+    }
+
+    private void initializeInternalStateLocked(@UserIdInt int userId) {
+        buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap, mCurrentUserId);
         SpellCheckerInfo sci = getCurrentSpellChecker(null);
         if (sci == null) {
             sci = findAvailSpellCheckerLocked(null);
@@ -196,15 +188,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    void updateCurrentProfileIds() {
-        mSettings.setCurrentProfileIds(
-                mUserManager.getProfileIdsWithDisabled(mSettings.getCurrentUserId()));
-    }
-
     private final class TextServicesMonitor extends PackageMonitor {
         private boolean isChangingPackagesOfCurrentUser() {
             final int userId = getChangingUserId();
-            final boolean retval = userId == mSettings.getCurrentUserId();
+            final boolean retval = userId == mCurrentUserId;
             if (DBG) {
                 Slog.d(TAG, "--- ignore this call back from a background user: " + userId);
             }
@@ -220,7 +207,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 // TODO: Update for each locale
                 SpellCheckerInfo sci = getCurrentSpellChecker(null);
                 buildSpellCheckerMapLocked(
-                        mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
+                        mContext, mSpellCheckerList, mSpellCheckerMap, mCurrentUserId);
                 // If no spell checker is enabled, just return. The user should explicitly
                 // enable the spell checker.
                 if (sci == null) return;
@@ -246,7 +233,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             final String action = intent.getAction();
             if (Intent.ACTION_USER_ADDED.equals(action)
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
-                updateCurrentProfileIds();
+                synchronized (mLock) {
+                    mCurrentProfileIds = mUserManager.getProfileIdsWithDisabled(mCurrentUserId);
+                }
                 return;
             }
             Slog.w(TAG, "Unexpected intent " + intent);
@@ -255,7 +244,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     private static void buildSpellCheckerMapLocked(Context context,
             ArrayList<SpellCheckerInfo> list, HashMap<String, SpellCheckerInfo> map,
-            TextServicesSettings settings) {
+            @UserIdInt int userId) {
         list.clear();
         map.clear();
         final PackageManager pm = context.getPackageManager();
@@ -264,7 +253,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         // services depending on the unlock state for the specified user.
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(SpellCheckerService.SERVICE_INTERFACE), PackageManager.GET_META_DATA,
-                settings.getCurrentUserId());
+                userId);
         final int N = services.size();
         for (int i = 0; i < N; ++i) {
             final ResolveInfo ri = services.get(i);
@@ -301,14 +290,22 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     // Check whether or not this is a valid IPC. Assumes an IPC is valid when either
     // 1) it comes from the system process
     // 2) the calling process' user id is identical to the current user id TSMS thinks.
+    // We ignore requests for when the current user has not unlocked or been unlocking.
     private boolean calledFromValidUser() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(uid);
+        final boolean isCurrentProfile;
+        synchronized (mLock) {
+            if (!mIsCurrentUserUnlockingOrUnlocked) {
+                return false;
+            }
+            isCurrentProfile = isCurrentProfileLocked(userId);
+        }
         if (DBG) {
             Slog.d(TAG, "--- calledFromForegroundUserOrSystemProcess ? "
                     + "calling uid = " + uid + " system uid = " + Process.SYSTEM_UID
                     + " calling userId = " + userId + ", foreground user id = "
-                    + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid());
+                    + mCurrentUserId + ", calling pid = " + Binder.getCallingPid());
             try {
                 final String[] packageNames = AppGlobals.getPackageManager().getPackagesForUid(uid);
                 for (int i = 0; i < packageNames.length; ++i) {
@@ -320,7 +317,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
         }
 
-        if (uid == Process.SYSTEM_UID || userId == mSettings.getCurrentUserId()) {
+        if (uid == Process.SYSTEM_UID || userId == mCurrentUserId) {
             return true;
         }
 
@@ -328,11 +325,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         // one. This is a tentative solution and should be replaced with fully functional multiuser
         // support.
         // TODO: Implement multiuser support in TSMS.
-        final boolean isCurrentProfile = mSettings.isCurrentProfile(userId);
         if (DBG) {
             Slog.d(TAG, "--- userId = "+ userId + " isCurrentProfile = " + isCurrentProfile);
         }
-        if (mSettings.isCurrentProfile(userId)) {
+        if (isCurrentProfile) {
             final SpellCheckerInfo spellCheckerInfo = getCurrentSpellCheckerWithoutVerification();
             if (spellCheckerInfo != null) {
                 final ServiceInfo serviceInfo = spellCheckerInfo.getServiceInfo();
@@ -364,8 +360,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.e(TAG, "--- bind failed: service = " + service + ", conn = " + conn);
             return false;
         }
-        return mContext.bindServiceAsUser(service, conn, flags,
-                new UserHandle(mSettings.getCurrentUserId()));
+        return mContext.bindServiceAsUser(service, conn, flags, UserHandle.of(mCurrentUserId));
     }
 
     private void unbindServiceLocked() {
@@ -443,7 +438,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     private SpellCheckerInfo getCurrentSpellCheckerWithoutVerification() {
         synchronized (mLock) {
-            final String curSpellCheckerId = mSettings.getSelectedSpellChecker();
+            final String curSpellCheckerId = mSettings.getSelectedSpellChecker(mCurrentUserId);
             if (DBG) {
                 Slog.w(TAG, "getCurrentSpellChecker: " + curSpellCheckerId);
             }
@@ -468,7 +463,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         final Locale systemLocale;
         synchronized (mLock) {
             subtypeHashCode =
-                    mSettings.getSelectedSpellCheckerSubtype(SpellCheckerSubtype.SUBTYPE_ID_NONE);
+                    mSettings.getSelectedSpellCheckerSubtype(SpellCheckerSubtype.SUBTYPE_ID_NONE,
+                            mCurrentUserId);
             if (DBG) {
                 Slog.w(TAG, "getCurrentSpellCheckerSubtype: " + subtypeHashCode);
             }
@@ -541,9 +537,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         if (!calledFromValidUser()) {
             return;
         }
-        if (!mSystemReady) {
-            return;
-        }
         if (TextUtils.isEmpty(sciId) || tsListener == null || scListener == null) {
             Slog.e(TAG, "getSpellCheckerService: Invalid input.");
             return;
@@ -571,7 +564,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             // Start getISpellCheckerSession async IPC, or just queue the request until the spell
             // checker service is bound.
             bindGroup.getISpellCheckerSessionOrQueueLocked(
-                     new SessionRequest(uid, locale, tsListener, scListener, bundle));
+                    new SessionRequest(uid, locale, tsListener, scListener, bundle));
         }
     }
 
@@ -651,7 +644,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            mSettings.putSelectedSpellChecker(sciId);
+            mSettings.putSelectedSpellChecker(sciId, mCurrentUserId);
             setCurrentSpellCheckerSubtypeLocked(0);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -672,7 +665,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            mSettings.putSelectedSpellCheckerSubtype(tempHashCode);
+            mSettings.putSelectedSpellCheckerSubtype(tempHashCode, mCurrentUserId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -681,7 +674,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private boolean isSpellCheckerEnabledLocked() {
         final long ident = Binder.clearCallingIdentity();
         try {
-            final boolean retval = mSettings.isSpellCheckerEnabled();
+            final boolean retval = mSettings.isSpellCheckerEnabled(mCurrentUserId);
             if (DBG) {
                 Slog.w(TAG, "getSpellCheckerEnabled: " + retval);
             }
@@ -742,8 +735,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 }
             }
             pw.println("");
-            pw.println("  mSettings:");
-            mSettings.dumpLocked(pw, "    ");
+            pw.println("    " + "mCurrentUserId=" + mCurrentUserId);
+            pw.println("    " + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
+            pw.println("    " + "mIsCurrentUserUnlockingOrUnlocked="
+                    + mIsCurrentUserUnlockingOrUnlocked);
         }
     }
 
@@ -991,140 +986,71 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
+    private boolean isCurrentProfileLocked(@UserIdInt int userId) {
+        if (userId == mCurrentUserId) return true;
+        for (int i = 0; i < mCurrentProfileIds.length; i++) {
+            if (userId == mCurrentProfileIds[i]) return true;
+        }
+        return false;
+    }
+
     private static final class TextServicesSettings {
         private final ContentResolver mResolver;
-        @UserIdInt
-        private int mCurrentUserId;
-        @GuardedBy("mLock")
-        private int[] mCurrentProfileIds = new int[0];
-        private Object mLock = new Object();
 
-        /**
-         * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
-         */
-        private final HashMap<String, String> mCopyOnWriteDataStore = new HashMap<>();
-        private boolean mCopyOnWrite = false;
-
-        public TextServicesSettings(ContentResolver resolver, @UserIdInt int userId,
-                boolean copyOnWrite) {
+        public TextServicesSettings(ContentResolver resolver) {
             mResolver = resolver;
-            switchCurrentUser(userId, copyOnWrite);
         }
 
-        /**
-         * Must be called when the current user is changed.
-         *
-         * @param userId The user ID.
-         * @param copyOnWrite If {@code true}, for each settings key
-         * (e.g. {@link Settings.Secure#SELECTED_SPELL_CHECKER}) we use the actual settings on the
-         * {@link Settings.Secure} until we do the first write operation.
-         */
-        public void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
-            if (DBG) {
-                Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to "
-                        + userId + ", new ime = " + getSelectedSpellChecker());
-            }
-            if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
-                mCopyOnWriteDataStore.clear();
-                // TODO: mCurrentProfileIds should be cleared here.
-            }
-            // TSMS settings are kept per user, so keep track of current user
-            mCurrentUserId = userId;
-            mCopyOnWrite = copyOnWrite;
-            // TODO: mCurrentProfileIds should be updated here.
-        }
-
-        private void putString(final String key, final String str) {
-            if (mCopyOnWrite) {
-                mCopyOnWriteDataStore.put(key, str);
-            } else {
-                Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
-            }
+        private void putString(final String key, final String str, @UserIdInt int userId) {
+            Settings.Secure.putStringForUser(mResolver, key, str, userId);
         }
 
         @Nullable
-        private String getString(@NonNull final String key, @Nullable final String defaultValue) {
+        private String getString(@NonNull final String key, @Nullable final String defaultValue,
+                @UserIdInt int userId) {
             final String result;
-            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                result = mCopyOnWriteDataStore.get(key);
-            } else {
-                result = Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
-            }
+            result = Settings.Secure.getStringForUser(mResolver, key, userId);
             return result != null ? result : defaultValue;
         }
 
-        private void putInt(final String key, final int value) {
-            if (mCopyOnWrite) {
-                mCopyOnWriteDataStore.put(key, String.valueOf(value));
-            } else {
-                Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
-            }
+        private void putInt(final String key, final int value, @UserIdInt int userId) {
+            Settings.Secure.putIntForUser(mResolver, key, value, userId);
         }
 
-        private int getInt(final String key, final int defaultValue) {
-            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? Integer.parseInt(result) : 0;
-            }
-            return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
+        private int getInt(final String key, final int defaultValue, @UserIdInt int userId) {
+            return Settings.Secure.getIntForUser(mResolver, key, defaultValue, userId);
         }
 
-        private boolean getBoolean(final String key, final boolean defaultValue) {
-            return getInt(key, defaultValue ? 1 : 0) == 1;
+        private boolean getBoolean(final String key, final boolean defaultValue,
+                @UserIdInt int userId) {
+            return getInt(key, defaultValue ? 1 : 0, userId) == 1;
         }
 
-        public void setCurrentProfileIds(int[] currentProfileIds) {
-            synchronized (mLock) {
-                mCurrentProfileIds = currentProfileIds;
-            }
-        }
-
-        public boolean isCurrentProfile(@UserIdInt int userId) {
-            synchronized (mLock) {
-                if (userId == mCurrentUserId) return true;
-                for (int i = 0; i < mCurrentProfileIds.length; i++) {
-                    if (userId == mCurrentProfileIds[i]) return true;
-                }
-                return false;
-            }
-        }
-
-        @UserIdInt
-        public int getCurrentUserId() {
-            return mCurrentUserId;
-        }
-
-        public void putSelectedSpellChecker(@Nullable String sciId) {
+        public void putSelectedSpellChecker(@Nullable String sciId, @UserIdInt int userId) {
             if (TextUtils.isEmpty(sciId)) {
                 // OK to coalesce to null, since getSelectedSpellChecker() can take care of the
                 // empty data scenario.
-                putString(Settings.Secure.SELECTED_SPELL_CHECKER, null);
+                putString(Settings.Secure.SELECTED_SPELL_CHECKER, null, userId);
             } else {
-                putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
+                putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId, userId);
             }
         }
 
-        public void putSelectedSpellCheckerSubtype(int hashCode) {
-            putInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, hashCode);
+        public void putSelectedSpellCheckerSubtype(int hashCode, @UserIdInt int userId) {
+            putInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, hashCode, userId);
         }
 
         @NonNull
-        public String getSelectedSpellChecker() {
-            return getString(Settings.Secure.SELECTED_SPELL_CHECKER, "");
+        public String getSelectedSpellChecker(@UserIdInt int userId) {
+            return getString(Settings.Secure.SELECTED_SPELL_CHECKER, "", userId);
         }
 
-        public int getSelectedSpellCheckerSubtype(final int defaultValue) {
-            return getInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, defaultValue);
+        public int getSelectedSpellCheckerSubtype(final int defaultValue, @UserIdInt int userId) {
+            return getInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, defaultValue, userId);
         }
 
-        public boolean isSpellCheckerEnabled() {
-            return getBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, true);
-        }
-
-        public void dumpLocked(final PrintWriter pw, final String prefix) {
-            pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
-            pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
-            pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
+        public boolean isSpellCheckerEnabled(@UserIdInt int userId) {
+            return getBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, true, userId);
         }
     }
 

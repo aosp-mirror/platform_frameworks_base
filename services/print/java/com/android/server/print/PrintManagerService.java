@@ -782,14 +782,18 @@ public final class PrintManagerService extends SystemService {
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
                             false /* enforceUserUnlockingOrUnlocked */);
 
+                    boolean prunePrintServices = false;
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)
                                 || hasPrintService(packageName)) {
                             userState.updateIfNeededLocked();
+                            prunePrintServices = true;
                         }
                     }
 
-                    userState.prunePrintServices();
+                    if (prunePrintServices) {
+                        userState.prunePrintServices();
+                    }
                 }
 
                 @Override
@@ -798,13 +802,17 @@ public final class PrintManagerService extends SystemService {
                     UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
                             false /* enforceUserUnlockingOrUnlocked */);
 
+                    boolean prunePrintServices = false;
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)) {
                             userState.updateIfNeededLocked();
+                            prunePrintServices = true;
                         }
                     }
 
-                    userState.prunePrintServices();
+                    if (prunePrintServices) {
+                        userState.prunePrintServices();
+                    }
                 }
 
                 @Override

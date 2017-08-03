@@ -50,8 +50,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageParserCacheHelper.ReadHelper;
-import android.content.pm.PackageParserCacheHelper.WriteHelper;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -66,6 +64,7 @@ import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -147,13 +146,14 @@ public class PackageParser {
     private static final boolean DEBUG_JAR = false;
     private static final boolean DEBUG_PARSER = false;
     private static final boolean DEBUG_BACKUP = false;
+    private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
+    private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
 
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
 
-    // TODO: Decide the correct default before O-MR1.
     private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
-            SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, true);
+            SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
 
     private static final int MAX_PACKAGES_PER_APK = 5;
 
@@ -995,14 +995,23 @@ public class PackageParser {
             return parsed;
         }
 
+        long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         if (packageFile.isDirectory()) {
             parsed = parseClusterPackage(packageFile, flags);
         } else {
             parsed = parseMonolithicPackage(packageFile, flags);
         }
 
+        long cacheTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         cacheResult(packageFile, flags, parsed);
-
+        if (LOG_PARSE_TIMINGS) {
+            parseTime = cacheTime - parseTime;
+            cacheTime = SystemClock.uptimeMillis() - cacheTime;
+            if (parseTime + cacheTime > LOG_PARSE_TIMINGS_THRESHOLD_MS) {
+                Slog.i(TAG, "Parse times for '" + packageFile + "': parse=" + parseTime
+                        + "ms, update_cache=" + cacheTime + " ms");
+            }
+        }
         return parsed;
     }
 
@@ -1026,17 +1035,11 @@ public class PackageParser {
 
     @VisibleForTesting
     protected Package fromCacheEntry(byte[] bytes) throws IOException {
-        final ReadHelper helper = new ReadHelper();
-
-        final Parcel p = Parcel.obtain();
-        p.setReadWriteHelper(helper);
-
+        Parcel p = Parcel.obtain();
         p.unmarshall(bytes, 0, bytes.length);
         p.setDataPosition(0);
 
-        helper.start(p);
         PackageParser.Package pkg = new PackageParser.Package(p);
-
         p.recycle();
 
         return pkg;
@@ -1044,15 +1047,8 @@ public class PackageParser {
 
     @VisibleForTesting
     protected byte[] toCacheEntry(Package pkg) throws IOException {
-        final WriteHelper helper = new WriteHelper();
-
-        final Parcel p = Parcel.obtain();
-        p.setReadWriteHelper(helper);
-
+        Parcel p = Parcel.obtain();
         pkg.writeToParcel(p, 0 /* flags */);
-
-        helper.finish(p);
-
         byte[] serialized = p.marshall();
         p.recycle();
 

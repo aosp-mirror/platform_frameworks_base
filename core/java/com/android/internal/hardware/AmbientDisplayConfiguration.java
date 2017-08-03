@@ -94,8 +94,8 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean alwaysOnEnabled(int user) {
-        return boolSettingDefaultOn(Settings.Secure.DOZE_ALWAYS_ON, user)
-                && alwaysOnAvailable();
+        return boolSettingDefaultOn(Settings.Secure.DOZE_ALWAYS_ON, user) && alwaysOnAvailable()
+                && !accessibilityInversionEnabled(user);
     }
 
     public boolean alwaysOnAvailable() {
@@ -103,8 +103,16 @@ public class AmbientDisplayConfiguration {
                 && ambientDisplayAvailable();
     }
 
+    public boolean alwaysOnAvailableForUser(int user) {
+        return alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+    }
+
     public String ambientDisplayComponent() {
         return mContext.getResources().getString(R.string.config_dozeComponent);
+    }
+
+    private boolean accessibilityInversionEnabled(int user) {
+        return boolSettingDefaultOff(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, user);
     }
 
     private boolean ambientDisplayAvailable() {

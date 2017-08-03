@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * This is the implementation of the Typeface object. Historically, it has
- * just been SkTypeface, but we are migrating to Minikin. For the time
- * being, that choice is hidden under the USE_MINIKIN compile-time flag.
- */
-
 #include "Typeface.h"
 
 #include <pthread.h>

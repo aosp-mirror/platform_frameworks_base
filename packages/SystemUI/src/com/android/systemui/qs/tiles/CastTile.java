@@ -34,6 +34,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 
 import com.android.internal.app.MediaRouteChooserDialog;
@@ -50,6 +51,7 @@ import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -139,22 +141,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         Dependency.get(ActivityStarter.class)
                                 .postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
                     });
-            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+            mDialog.getWindow().setType(LayoutParams.TYPE_KEYGUARD_DIALOG);
+            SystemUIDialog.setShowForAllUsers(mDialog, true);
+            SystemUIDialog.registerDismissListener(mDialog);
+            SystemUIDialog.setWindowOnTop(mDialog);
             mUiHandler.post(() -> mDialog.show());
-            registerReceiver();
             mHost.collapsePanels();
-        });
-    }
-
-    private void registerReceiver() {
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.CURRENT,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null, null);
-        mRegistered = true;
-        mDialog.setOnDismissListener(dialog -> {
-            if (mRegistered) {
-                mContext.unregisterReceiver(mReceiver);
-                mRegistered = false;
-            }
         });
     }
 
@@ -220,15 +212,6 @@ public class CastTile extends QSTileImpl<BooleanState> {
         @Override
         public void onKeyguardShowingChanged() {
             refreshState();
-        }
-    };
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (mDialog != null) {
-                mDialog.dismiss();
-            }
         }
     };
 

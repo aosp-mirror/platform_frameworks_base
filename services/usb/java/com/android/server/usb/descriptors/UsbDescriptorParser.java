@@ -123,21 +123,27 @@ public class UsbDescriptorParser {
 
         ByteStream stream = new ByteStream(descriptors);
         while (stream.available() > 0) {
-            UsbDescriptor descriptor = allocDescriptor(stream);
+            UsbDescriptor descriptor = null;
+            try {
+                descriptor = allocDescriptor(stream);
+            } catch (Exception ex) {
+                Log.e(TAG, "Exception allocating USB descriptor.", ex);
+            }
+
             if (descriptor != null) {
                 // Parse
                 try {
                     descriptor.parseRawDescriptors(stream);
+
+                    // Its OK to add the invalid descriptor as the postParse()
+                    // routine will mark it as invalid.
+                    mDescriptors.add(descriptor);
+
+                    // Clean up
+                    descriptor.postParse(stream);
                 } catch (Exception ex) {
                     Log.e(TAG, "Exception parsing USB descriptors.", ex);
                 }
-
-                // Its OK to add the invalid descriptor as the postParse()
-                // routine will mark it as invalid.
-                mDescriptors.add(descriptor);
-
-                // Clean up
-                descriptor.postParse(stream);
             }
         }
     }

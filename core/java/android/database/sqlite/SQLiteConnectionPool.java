@@ -16,7 +16,6 @@
 
 package android.database.sqlite;
 
-import android.app.ActivityManager;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -24,7 +23,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.OperationCanceledException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.util.PrefixPrinter;
 import android.util.Printer;
@@ -83,15 +81,6 @@ public final class SQLiteConnectionPool implements Closeable {
     // Amount of time to wait in milliseconds before unblocking acquireConnection
     // and logging a message about the connection pool being busy.
     private static final long CONNECTION_POOL_BUSY_MILLIS = 30 * 1000; // 30 seconds
-
-    // TODO b/63398887 Move to SQLiteGlobal
-    private static final long IDLE_CONNECTION_CLOSE_DELAY_MILLIS = SystemProperties
-            .getInt("persist.debug.sqlite.idle_connection_close_delay", 30000);
-
-    // TODO b/63398887 STOPSHIP.
-    // Temporarily enabled for testing across a broader set of dogfood devices.
-    private static final boolean CLOSE_IDLE_CONNECTIONS = SystemProperties
-            .getBoolean("persist.debug.sqlite.close_idle_connections", true);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -167,16 +156,12 @@ public final class SQLiteConnectionPool implements Closeable {
 
     private SQLiteConnectionPool(SQLiteDatabaseConfiguration configuration) {
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
-        // Disable lookaside allocator on low-RAM devices
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            mConfiguration.lookasideSlotCount = 0;
-            mConfiguration.lookasideSlotSize = 0;
-        }
         setMaxConnectionPoolSizeLocked();
-
-        // Do not close idle connections for in-memory databases
-        if (CLOSE_IDLE_CONNECTIONS && !configuration.isInMemoryDb()) {
-            setupIdleConnectionHandler(Looper.getMainLooper(), IDLE_CONNECTION_CLOSE_DELAY_MILLIS);
+        // If timeout is set, setup idle connection handler
+        // In case of MAX_VALUE - idle connections are never closed
+        if (mConfiguration.idleConnectionTimeoutMs != Long.MAX_VALUE) {
+            setupIdleConnectionHandler(Looper.getMainLooper(),
+                    mConfiguration.idleConnectionTimeoutMs);
         }
     }
 
@@ -214,6 +199,12 @@ public final class SQLiteConnectionPool implements Closeable {
         // This might throw if the database is corrupt.
         mAvailablePrimaryConnection = openConnectionLocked(mConfiguration,
                 true /*primaryConnection*/); // might throw
+        // Mark it released so it can be closed after idle timeout
+        synchronized (mLock) {
+            if (mIdleConnectionHandler != null) {
+                mIdleConnectionHandler.connectionReleased(mAvailablePrimaryConnection);
+            }
+        }
 
         // Mark the pool as being open for business.
         mIsOpen = true;
@@ -1023,12 +1014,12 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     /**
-     * Set up the handler based on the provided looper and delay.
+     * Set up the handler based on the provided looper and timeout.
      */
     @VisibleForTesting
-    public void setupIdleConnectionHandler(Looper looper, long delayMs) {
+    public void setupIdleConnectionHandler(Looper looper, long timeoutMs) {
         synchronized (mLock) {
-            mIdleConnectionHandler = new IdleConnectionHandler(looper, delayMs);
+            mIdleConnectionHandler = new IdleConnectionHandler(looper, timeoutMs);
         }
     }
 
@@ -1088,6 +1079,10 @@ public final class SQLiteConnectionPool implements Closeable {
             if (mConfiguration.isLookasideConfigSet()) {
                 printer.println("  Lookaside config: sz=" + mConfiguration.lookasideSlotSize
                         + " cnt=" + mConfiguration.lookasideSlotCount);
+            }
+            if (mConfiguration.idleConnectionTimeoutMs != Long.MAX_VALUE) {
+                printer.println(
+                        "  Idle connection timeout: " + mConfiguration.idleConnectionTimeoutMs);
             }
             printer.println("  Available primary connection:");
             if (mAvailablePrimaryConnection != null) {
@@ -1155,11 +1150,11 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     private class IdleConnectionHandler extends Handler {
-        private final long mDelay;
+        private final long mTimeout;
 
-        IdleConnectionHandler(Looper looper, long delay) {
+        IdleConnectionHandler(Looper looper, long timeout) {
             super(looper);
-            mDelay = delay;
+            mTimeout = timeout;
         }
 
         @Override
@@ -1172,14 +1167,14 @@ public final class SQLiteConnectionPool implements Closeable {
                 if (closeAvailableConnectionLocked(msg.what)) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
                         Log.d(TAG, "Closed idle connection " + mConfiguration.label + " " + msg.what
-                                + " after " + mDelay);
+                                + " after " + mTimeout);
                     }
                 }
             }
         }
 
         void connectionReleased(SQLiteConnection con) {
-            sendEmptyMessageDelayed(con.getConnectionId(), mDelay);
+            sendEmptyMessageDelayed(con.getConnectionId(), mTimeout);
         }
 
         void connectionAcquired(SQLiteConnection con) {

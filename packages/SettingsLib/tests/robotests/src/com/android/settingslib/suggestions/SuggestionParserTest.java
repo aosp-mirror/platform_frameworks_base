@@ -26,7 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 import com.android.settingslib.drawer.Tile;
 import com.android.settingslib.drawer.TileUtilsTest;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class SuggestionParserTest {
 

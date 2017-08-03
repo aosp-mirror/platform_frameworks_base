@@ -22,9 +22,7 @@ import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
-import static android.content.Context.KEYGUARD_SERVICE;
 import static android.os.Process.SYSTEM_UID;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -109,7 +107,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
  */
-final class UserController {
+class UserController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
 
     // Maximum number of users we allow to be running at a time.
@@ -1602,7 +1600,7 @@ final class UserController {
      * Returns whether the given user requires credential entry at this time. This is used to
      * intercept activity launches for work apps when the Work Challenge is present.
      */
-    boolean shouldConfirmCredentials(int userId) {
+    protected boolean shouldConfirmCredentials(int userId) {
         synchronized (mLock) {
             if (mStartedUsers.get(userId) == null) {
                 return false;

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Debug;
@@ -243,12 +244,24 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     displayId, displayInfo);
             mService.configureDisplayPolicyLocked(dc);
 
-            // TODO(multi-display): Create an input channel for each display with touch capability.
-            if (displayId == DEFAULT_DISPLAY && mService.canDispatchPointerEvents()) {
-                dc.mTapDetector = new TaskTapPointerEventListener(
-                        mService, dc);
+            // Tap Listeners are supported for:
+            // 1. All physical displays (multi-display).
+            // 2. VirtualDisplays that support virtual touch input. (Only VR for now)
+            // TODO(multi-display): Support VirtualDisplays with no virtual touch input.
+            if ((display.getType() != Display.TYPE_VIRTUAL
+                    || (display.getType() == Display.TYPE_VIRTUAL
+                        // Only VR VirtualDisplays
+                        && displayId == mService.mVr2dDisplayId))
+                    && mService.canDispatchPointerEvents()) {
+                if (DEBUG_DISPLAY) {
+                    Slog.d(TAG,
+                            "Registering PointerEventListener for DisplayId: " + displayId);
+                }
+                dc.mTapDetector = new TaskTapPointerEventListener(mService, dc);
                 mService.registerPointerEventListener(dc.mTapDetector);
-                mService.registerPointerEventListener(mService.mMousePositionTracker);
+                if (displayId == DEFAULT_DISPLAY) {
+                    mService.registerPointerEventListener(mService.mMousePositionTracker);
+                }
             }
         }
 
@@ -747,12 +760,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            // TODO(multi-display): Update rotation for different displays separately.
-            final int displayId = defaultDisplay.getDisplayId();
-            if (defaultDisplay.updateRotationUnchecked(false /* inTransaction */)) {
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
-            } else {
-                mUpdateRotation = false;
+
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mChildren.get(displayNdx);
+                final int displayId = displayContent.getDisplayId();
+                if (displayContent.updateRotationUnchecked(false /* inTransaction */)) {
+                    mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
+                } else if (displayId == DEFAULT_DISPLAY) {
+                    // TODO(multi-display): Track rotation updates for different displays separately
+                    mUpdateRotation = false;
+                }
             }
         }
 

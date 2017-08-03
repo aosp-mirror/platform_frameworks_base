@@ -246,7 +246,7 @@ public class MediaMetadataRetriever
      * {@link #OPTION_CLOSEST} often has larger performance overhead compared
      * to the other options if there is no sync frame located at timeUs.
      *
-     * @return A Bitmap containing a representative video frame, which 
+     * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.
      */
     public Bitmap getFrameAtTime(long timeUs, int option) {
@@ -255,7 +255,58 @@ public class MediaMetadataRetriever
             throw new IllegalArgumentException("Unsupported option: " + option);
         }
 
-        return _getFrameAtTime(timeUs, option);
+        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/);
+    }
+
+    /**
+     * Retrieve a video frame near a given timestamp scaled to a desired size.
+     * Call this method after setDataSource(). This method finds a representative
+     * frame close to the given time position by considering the given option
+     * if possible, and returns it as a bitmap with same aspect ratio as the source
+     * while scaling it so that it fits into the desired size of dst_width by dst_height.
+     * This is useful for generating a thumbnail for an input data source or just to
+     * obtain a scaled frame at the given time position.
+     *
+     * @param timeUs The time position in microseconds where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarantee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @param option a hint on how the frame is found. Use
+     * {@link #OPTION_PREVIOUS_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp earlier than or the same as timeUs. Use
+     * {@link #OPTION_NEXT_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp later than or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp closest to or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST} if one wants to retrieve a frame that may
+     * or may not be a sync frame but is closest to or the same as timeUs.
+     * {@link #OPTION_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at timeUs.
+     *
+     * @param dst_width expected output bitmap width
+     * @param dst_height expected output bitmap height
+     * @return A Bitmap of size not larger than dst_width by dst_height containing a
+     *         scaled video frame, which can be null, if such a frame cannot be retrieved.
+     * @throws IllegalArgumentException if passed in invalid option or width by height
+     *         is less than or equal to 0.
+     */
+    public Bitmap getScaledFrameAtTime(
+            long timeUs, int option, int dst_width, int dst_height) {
+        if (option < OPTION_PREVIOUS_SYNC ||
+            option > OPTION_CLOSEST) {
+            throw new IllegalArgumentException("Unsupported option: " + option);
+        }
+        if (dst_width <= 0) {
+            throw new IllegalArgumentException("Invalid width: " + dst_width);
+        }
+        if (dst_height <= 0) {
+            throw new IllegalArgumentException("Invalid height: " + dst_height);
+        }
+
+        return _getFrameAtTime(timeUs, option, dst_width, dst_height);
     }
 
     /**
@@ -273,8 +324,8 @@ public class MediaMetadataRetriever
      * negative, time position and option will ignored, and any frame
      * that the implementation considers as representative may be returned.
      *
-     * @return A Bitmap containing a representative video frame, which
-     *         can be null, if such a frame cannot be retrieved.
+     * @return A Bitmap of size dst_widthxdst_height containing a representative
+     *         video frame, which can be null, if such a frame cannot be retrieved.
      *
      * @see #getFrameAtTime(long, int)
      */
@@ -297,17 +348,16 @@ public class MediaMetadataRetriever
      * @see #getFrameAtTime(long, int)
      */
     public Bitmap getFrameAtTime() {
-        return getFrameAtTime(-1, OPTION_CLOSEST_SYNC);
+        return _getFrameAtTime(-1, OPTION_CLOSEST_SYNC, -1 /*dst_width*/, -1 /*dst_height*/);
     }
 
-    private native Bitmap _getFrameAtTime(long timeUs, int option);
+    private native Bitmap _getFrameAtTime(long timeUs, int option, int width, int height);
 
-    
     /**
      * Call this method after setDataSource(). This method finds the optional
      * graphic or album/cover art associated associated with the data source. If
      * there are more than one pictures, (any) one of them is returned.
-     * 
+     *
      * @return null if no such graphic is found.
      */
     public byte[] getEmbeddedPicture() {

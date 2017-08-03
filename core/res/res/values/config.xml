@@ -525,6 +525,9 @@
     <!-- Integers specifying the max packet Tx/Rx rates for full scan -->
     <integer translatable="false" name="config_wifi_framework_max_tx_rate_for_full_scan">8</integer>
     <integer translatable="false" name="config_wifi_framework_max_rx_rate_for_full_scan">16</integer>
+    <!-- Integers specifying the min packet Tx/Rx rates in packets per second for staying on the same network -->
+    <integer translatable="false" name="config_wifi_framework_min_tx_rate_for_staying_on_network">16</integer>
+    <integer translatable="false" name="config_wifi_framework_min_rx_rate_for_staying_on_network">16</integer>
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
@@ -1388,6 +1391,7 @@
     <!-- The package name of the default network recommendation app.
          A network recommendation provider must:
              * Be granted the SCORE_NETWORKS permission.
+             * Be granted the ACCESS_COARSE_LOCATION permission.
              * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
                protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
 
@@ -1672,6 +1676,10 @@
          to keep the WAL file relatively small to avoid long delays.
          The size of the WAL file is also constrained by 'db_journal_size_limit'. -->
     <integer name="db_wal_autocheckpoint">100</integer>
+
+    <!-- The number of milliseconds that SQLite connection is allowed to be idle before it
+         is closed and removed from the pool -->
+    <integer name="db_default_idle_connection_timeout">30000</integer>
 
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,

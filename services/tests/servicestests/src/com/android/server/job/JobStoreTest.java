@@ -10,6 +10,7 @@ import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -63,7 +64,7 @@ public class JobStoreTest extends AndroidTestCase {
         Thread.sleep(IO_WAIT);
         // Manually load tasks from xml file.
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
 
         assertEquals("Didn't get expected number of persisted tasks.", 1, jobStatusSet.size());
         final JobStatus loadedTaskStatus = jobStatusSet.getAllJobs().get(0);
@@ -98,7 +99,7 @@ public class JobStoreTest extends AndroidTestCase {
         Thread.sleep(IO_WAIT);
 
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 2, jobStatusSet.size());
         Iterator<JobStatus> it = jobStatusSet.getAllJobs().iterator();
         JobStatus loaded1 = it.next();
@@ -146,7 +147,7 @@ public class JobStoreTest extends AndroidTestCase {
         Thread.sleep(IO_WAIT);
 
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertTasksEqual(task, loaded.getJob());
@@ -164,7 +165,7 @@ public class JobStoreTest extends AndroidTestCase {
         Thread.sleep(IO_WAIT);
 
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Source package not equal.", loaded.getSourcePackageName(),
@@ -185,7 +186,7 @@ public class JobStoreTest extends AndroidTestCase {
         Thread.sleep(IO_WAIT);
 
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Period not equal.", loaded.getJob().getIntervalMillis(),
@@ -200,20 +201,23 @@ public class JobStoreTest extends AndroidTestCase {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setPeriodic(TWO_HOURS, ONE_HOUR)
                 .setPersisted(true);
+        final long rtcNow = System.currentTimeMillis();
         final long invalidLateRuntimeElapsedMillis =
                 SystemClock.elapsedRealtime() + (TWO_HOURS * ONE_HOUR) + TWO_HOURS;  // > period+flex
         final long invalidEarlyRuntimeElapsedMillis =
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
+        final Pair<Long, Long> persistedExecutionTimesUTC = new Pair<>(rtcNow, rtcNow + ONE_HOUR);
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
                 0 /* sourceUserId */, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
-                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
+                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
+                persistedExecutionTimesUTC);
 
         mTaskStoreUnderTest.add(js);
         Thread.sleep(IO_WAIT);
 
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
 
@@ -236,7 +240,7 @@ public class JobStoreTest extends AndroidTestCase {
         mTaskStoreUnderTest.add(js);
         Thread.sleep(IO_WAIT);
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Priority not correctly persisted.", 42, loaded.getPriority());
     }
@@ -257,7 +261,7 @@ public class JobStoreTest extends AndroidTestCase {
         mTaskStoreUnderTest.add(jsPersisted);
         Thread.sleep(IO_WAIT);
         final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Job count is incorrect.", 1, jobStatusSet.size());
         JobStatus jobStatus = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Wrong job persisted.", 43, jobStatus.getJobId());

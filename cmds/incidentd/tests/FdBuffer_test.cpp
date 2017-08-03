@@ -201,7 +201,7 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
 
 TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
     const std::string testFile = kTestDataPath + "morethan4MB.txt";
-    int fd = open(testFile.c_str(), O_RDONLY, 0444);
+    int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_NE(fd, -1);
     int pid = fork();
     ASSERT_TRUE(pid != -1);
