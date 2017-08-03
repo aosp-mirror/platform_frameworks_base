@@ -256,7 +256,13 @@ public final class MediaBrowser {
      */
     private void forceCloseConnection() {
         if (mServiceConnection != null) {
-            mContext.unbindService(mServiceConnection);
+            try {
+                mContext.unbindService(mServiceConnection);
+            } catch (IllegalArgumentException e) {
+                if (DBG) {
+                    Log.d(TAG, "unbindService failed", e);
+                }
+            }
         }
         mState = CONNECT_STATE_DISCONNECTED;
         mServiceConnection = null;
