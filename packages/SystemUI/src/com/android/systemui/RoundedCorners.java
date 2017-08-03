@@ -119,7 +119,7 @@ public class RoundedCorners extends SystemUI implements Tunable {
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS
-                | WindowManager.LayoutParams.PRIVATE_FLAG_NO_MAGNIFICATION_REGION_EFFECT;
+                | WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
         lp.setTitle("RoundedOverlay");
         lp.gravity = Gravity.TOP;
         return lp;

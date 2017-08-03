@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MAGNIFICATION_REGION_EFFECT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -539,7 +539,7 @@ final class AccessibilityController {
                     WindowState windowState = visibleWindows.valueAt(i);
                     if ((windowState.mAttrs.type == TYPE_MAGNIFICATION_OVERLAY)
                             || ((windowState.mAttrs.privateFlags
-                            & PRIVATE_FLAG_NO_MAGNIFICATION_REGION_EFFECT) != 0)) {
+                            & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0)) {
                         continue;
                     }
 
