@@ -219,6 +219,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private boolean mResetToInitialStateWhenResized;
     private int mLastWidth;
     private int mLastHeight;
+    private boolean mStackActionButtonVisible;
 
     // We keep track of the task view focused by user interaction and draw a frame around it in the
     // grid layout.
@@ -287,6 +288,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mDividerSize = ssp.getDockedDividerSize(context);
         mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
         mDisplayRect = ssp.getDisplayRect();
+        mStackActionButtonVisible = false;
 
         // Create a frame to draw around the focused task view
         if (Recents.getConfiguration().isGridEnabled) {
@@ -1159,7 +1161,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Task focusedTask = getAccessibilityFocusedTask();
             info.setScrollable(true);
             int focusedTaskIndex = mStack.indexOfStackTask(focusedTask);
-            if (focusedTaskIndex > 0) {
+            if (focusedTaskIndex > 0 || !mStackActionButtonVisible) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
             if (0 <= focusedTaskIndex && focusedTaskIndex < mStack.getTaskCount() - 1) {
@@ -1809,6 +1811,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mStack.getTaskCount() > 0) {
             Task mostRecentTask = mStack.getStackFrontMostTask(true /* includeFreefromTasks */);
             launchTask(mostRecentTask);
+        }
+    }
+
+    public final void onBusEvent(ShowStackActionButtonEvent event) {
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButtonVisible = true;
+        }
+    }
+
+    public final void onBusEvent(HideStackActionButtonEvent event) {
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButtonVisible = false;
         }
     }
 
