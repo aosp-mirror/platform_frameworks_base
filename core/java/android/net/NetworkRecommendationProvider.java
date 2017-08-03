@@ -35,6 +35,7 @@ import java.util.concurrent.Executor;
  * A network recommendation provider is any application which:
  * <ul>
  * <li>Is granted the {@link permission#SCORE_NETWORKS} permission.
+ * <li>Is granted the {@link permission#ACCESS_COARSE_LOCATION} permission.
  * <li>Includes a Service for the {@link NetworkScoreManager#ACTION_RECOMMEND_NETWORKS} intent
  *     which is protected by the {@link permission#BIND_NETWORK_RECOMMENDATION_SERVICE} permission.
  * </ul>

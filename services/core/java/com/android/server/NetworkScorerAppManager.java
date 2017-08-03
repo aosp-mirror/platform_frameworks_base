@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.Manifest.permission;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -79,7 +80,7 @@ public class NetworkScorerAppManager {
         List<NetworkScorerAppData> appDataList = new ArrayList<>();
         for (int i = 0; i < resolveInfos.size(); i++) {
             final ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
-            if (hasPermissions(serviceInfo.packageName)) {
+            if (hasPermissions(serviceInfo.applicationInfo.uid, serviceInfo.packageName)) {
                 if (VERBOSE) {
                     Log.v(TAG, serviceInfo.packageName + " is a valid scorer/recommender.");
                 }
@@ -197,10 +198,31 @@ public class NetworkScorerAppManager {
         return null;
     }
 
-    private boolean hasPermissions(String packageName) {
+    private boolean hasPermissions(final int uid, final String packageName) {
+        return hasScoreNetworksPermission(packageName)
+                && canAccessLocation(uid, packageName);
+    }
+
+    private boolean hasScoreNetworksPermission(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
         return pm.checkPermission(permission.SCORE_NETWORKS, packageName)
                 == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean canAccessLocation(int uid, String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        final AppOpsManager appOpsManager =
+                (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        return isLocationModeEnabled()
+                && pm.checkPermission(permission.ACCESS_COARSE_LOCATION, packageName)
+                == PackageManager.PERMISSION_GRANTED
+                && appOpsManager.noteOp(AppOpsManager.OP_COARSE_LOCATION, uid, packageName)
+                == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private boolean isLocationModeEnabled() {
+        return mSettingsFacade.getSecureInt(mContext, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF;
     }
 
     /**
@@ -270,23 +292,20 @@ public class NetworkScorerAppManager {
             return;
         }
 
-        // the active scorer isn't valid, revert to the default if it's different
+        int newEnabledSetting = NetworkScoreManager.RECOMMENDATIONS_ENABLED_OFF;
+        // the active scorer isn't valid, revert to the default if it's different and valid
         final String defaultPackageName = getDefaultPackageSetting();
-        if (!TextUtils.equals(currentPackageName, defaultPackageName)) {
-            setNetworkRecommendationsPackage(defaultPackageName);
+        if (!TextUtils.equals(currentPackageName, defaultPackageName)
+                && getScorer(defaultPackageName) != null) {
             if (DEBUG) {
-                Log.d(TAG, "Defaulted the network recommendations app to: " + defaultPackageName);
+                Log.d(TAG, "Defaulting the network recommendations app to: "
+                        + defaultPackageName);
             }
-            if (getScorer(defaultPackageName) != null) { // the default is valid
-                if (DEBUG) Log.d(TAG, defaultPackageName + " is now the active scorer.");
-                setNetworkRecommendationsEnabledSetting(
-                        NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON);
-            } else { // the default isn't valid either, we're disabled at this point
-                if (DEBUG) Log.d(TAG, defaultPackageName + " is not an active scorer.");
-                setNetworkRecommendationsEnabledSetting(
-                        NetworkScoreManager.RECOMMENDATIONS_ENABLED_OFF);
-            }
+            setNetworkRecommendationsPackage(defaultPackageName);
+            newEnabledSetting = NetworkScoreManager.RECOMMENDATIONS_ENABLED_ON;
         }
+
+        setNetworkRecommendationsEnabledSetting(newEnabledSetting);
     }
 
     /**
@@ -352,6 +371,9 @@ public class NetworkScorerAppManager {
     private void setNetworkRecommendationsPackage(String packageName) {
         mSettingsFacade.putString(mContext,
                 Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, packageName);
+        if (VERBOSE) {
+            Log.d(TAG, Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE + " set to " + packageName);
+        }
     }
 
     private int getNetworkRecommendationsEnabledSetting() {
@@ -361,6 +383,9 @@ public class NetworkScorerAppManager {
     private void setNetworkRecommendationsEnabledSetting(int value) {
         mSettingsFacade.putInt(mContext,
                 Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, value);
+        if (VERBOSE) {
+            Log.d(TAG, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED + " set to " + value);
+        }
     }
 
     /**
@@ -381,6 +406,10 @@ public class NetworkScorerAppManager {
 
         public int getInt(Context context, String name, int defaultValue) {
             return Settings.Global.getInt(context.getContentResolver(), name, defaultValue);
+        }
+
+        public int getSecureInt(Context context, String name, int defaultValue) {
+            return Settings.Secure.getInt(context.getContentResolver(), name, defaultValue);
         }
     }
 }
