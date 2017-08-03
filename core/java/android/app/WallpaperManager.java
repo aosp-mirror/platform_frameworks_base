@@ -307,13 +307,14 @@ public class WallpaperManager {
          * changes its colors.
          * @param callback Listener
          * @param handler Thread to call it from. Main thread if null.
+         * @param userId Owner of the wallpaper or UserHandle.USER_ALL
          */
         public void addOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
-                @Nullable Handler handler) {
+                @Nullable Handler handler, int userId) {
             synchronized (this) {
                 if (!mColorCallbackRegistered) {
                     try {
-                        mService.registerWallpaperColorsCallback(this);
+                        mService.registerWallpaperColorsCallback(this, userId);
                         mColorCallbackRegistered = true;
                     } catch (RemoteException e) {
                         // Failed, service is gone
@@ -328,15 +329,17 @@ public class WallpaperManager {
          * Stop listening to wallpaper color events.
          *
          * @param callback listener
+         * @param userId Owner of the wallpaper or UserHandle.USER_ALL
          */
-        public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback) {
+        public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
+                int userId) {
             synchronized (this) {
                 mColorListeners.removeIf(pair -> pair.first == callback);
 
                 if (mColorListeners.size() == 0 && mColorCallbackRegistered) {
                     mColorCallbackRegistered = false;
                     try {
-                        mService.unregisterWallpaperColorsCallback(this);
+                        mService.unregisterWallpaperColorsCallback(this, userId);
                     } catch (RemoteException e) {
                         // Failed, service is gone
                         Log.w(TAG, "Can't unregister color updates", e);
@@ -346,7 +349,7 @@ public class WallpaperManager {
         }
 
         @Override
-        public void onWallpaperColorsChanged(WallpaperColors colors, int which) {
+        public void onWallpaperColorsChanged(WallpaperColors colors, int which, int userId) {
             synchronized (this) {
                 for (Pair<OnColorsChangedListener, Handler> listener : mColorListeners) {
                     Handler handler = listener.second;
@@ -361,21 +364,21 @@ public class WallpaperManager {
                             stillExists = mColorListeners.contains(listener);
                         }
                         if (stillExists) {
-                            listener.first.onColorsChanged(colors, which);
+                            listener.first.onColorsChanged(colors, which, userId);
                         }
                     });
                 }
             }
         }
 
-        WallpaperColors getWallpaperColors(int which) {
+        WallpaperColors getWallpaperColors(int which, int userId) {
             if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
                 throw new IllegalArgumentException(
                         "Must request colors for exactly one kind of wallpaper");
             }
 
             try {
-                return mService.getWallpaperColors(which);
+                return mService.getWallpaperColors(which, userId);
             } catch (RemoteException e) {
                 // Can't get colors, connection lost.
             }
@@ -857,7 +860,7 @@ public class WallpaperManager {
      * @param listener A listener to register
      */
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener) {
-        sGlobals.addOnColorsChangedListener(listener, null);
+        addOnColorsChangedListener(listener, null);
     }
 
     /**
@@ -868,25 +871,61 @@ public class WallpaperManager {
      */
     public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
             @NonNull Handler handler) {
-        sGlobals.addOnColorsChangedListener(listener, handler);
+        addOnColorsChangedListener(listener, handler, mContext.getUserId());
+    }
+
+    /**
+     * Registers a listener to get notified when the wallpaper colors change
+     * @param listener A listener to register
+     * @param handler Where to call it from. Will be called from the main thread
+     *                if null.
+     * @param userId Owner of the wallpaper or UserHandle.USER_ALL.
+     * @hide
+     */
+    public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener,
+            @NonNull Handler handler, int userId) {
+        sGlobals.addOnColorsChangedListener(listener, handler, userId);
     }
 
     /**
      * Stop listening to color updates.
-     * @param callback A callback to unsubscribe
+     * @param callback A callback to unsubscribe.
      */
     public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback) {
-        sGlobals.removeOnColorsChangedListener(callback);
+        removeOnColorsChangedListener(callback, mContext.getUserId());
+    }
+
+    /**
+     * Stop listening to color updates.
+     * @param callback A callback to unsubscribe.
+     * @param userId Owner of the wallpaper or UserHandle.USER_ALL.
+     * @hide
+     */
+    public void removeOnColorsChangedListener(@NonNull OnColorsChangedListener callback,
+            int userId) {
+        sGlobals.removeOnColorsChangedListener(callback, userId);
     }
 
     /**
      * Get the primary colors of a wallpaper
      * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
      *     {@link #FLAG_LOCK}
-     * @return a list of colors ordered by priority
+     * @return {@link WallpaperColors} or null if colors are unknown.
      */
     public @Nullable WallpaperColors getWallpaperColors(int which) {
-        return sGlobals.getWallpaperColors(which);
+        return getWallpaperColors(which, mContext.getUserId());
+    }
+
+    /**
+     * Get the primary colors of a wallpaper
+     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}
+     * @param userId Owner of the wallpaper.
+     * @return {@link WallpaperColors} or null if colors are unknown.
+     * @hide
+     */
+    public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
+        return sGlobals.getWallpaperColors(which, userId);
     }
 
     /**
@@ -1902,9 +1941,9 @@ public class WallpaperManager {
         }
 
         @Override
-        public void onWallpaperColorsChanged(WallpaperColors colors, int which)
+        public void onWallpaperColorsChanged(WallpaperColors colors, int which, int userId)
             throws RemoteException {
-            sGlobals.onWallpaperColorsChanged(colors, which);
+            sGlobals.onWallpaperColorsChanged(colors, which, userId);
         }
     }
 
@@ -1921,5 +1960,19 @@ public class WallpaperManager {
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
          */
         void onColorsChanged(WallpaperColors colors, int which);
+
+        /**
+         * Called when colors change.
+         * A {@link android.app.WallpaperColors} object containing a simplified
+         * color histogram will be given.
+         *
+         * @param colors Wallpaper color info
+         * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
+         * @param userId Owner of the wallpaper
+         * @hide
+         */
+        default void onColorsChanged(WallpaperColors colors, int which, int userId) {
+            onColorsChanged(colors, which);
+        }
     }
 }

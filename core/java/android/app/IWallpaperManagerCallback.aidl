@@ -34,6 +34,6 @@ oneway interface IWallpaperManagerCallback {
     /**
      * Called when wallpaper colors change
      */
-    void onWallpaperColorsChanged(in WallpaperColors colors, int which);
+    void onWallpaperColorsChanged(in WallpaperColors colors, int which, int userId);
 
 }
