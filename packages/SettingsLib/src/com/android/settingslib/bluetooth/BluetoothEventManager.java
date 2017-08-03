@@ -97,7 +97,6 @@ public class BluetoothEventManager {
 
         // Pairing broadcasts
         addHandler(BluetoothDevice.ACTION_BOND_STATE_CHANGED, new BondStateChangedHandler());
-        addHandler(BluetoothDevice.ACTION_PAIRING_CANCEL, new PairingCancelHandler());
 
         // Fine-grained state broadcasts
         addHandler(BluetoothDevice.ACTION_CLASS_CHANGED, new ClassChangedHandler());
@@ -341,24 +340,6 @@ public class BluetoothEventManager {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             mDeviceManager.onUuidChanged(device);
-        }
-    }
-
-    private class PairingCancelHandler implements Handler {
-        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
-            if (device == null) {
-                Log.e(TAG, "ACTION_PAIRING_CANCEL with no EXTRA_DEVICE");
-                return;
-            }
-            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
-            if (cachedDevice == null) {
-                Log.e(TAG, "ACTION_PAIRING_CANCEL with no cached device");
-                return;
-            }
-            int errorMsg = R.string.bluetooth_pairing_error_message;
-            if (context != null && cachedDevice != null) {
-                Utils.showError(context, cachedDevice.getName(), errorMsg);
-            }
         }
     }
 
