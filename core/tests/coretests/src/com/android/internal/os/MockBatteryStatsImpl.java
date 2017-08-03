@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import java.util.ArrayList;
+
 /**
  * Mocks a BatteryStatsImpl object.
  */
@@ -47,6 +49,46 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public TimeBase getOnBatteryScreenOffBackgroundTimeBase(int uid) {
         return getUidStatsLocked(uid).mOnBatteryScreenOffBackgroundTimeBase;
+    }
+
+    public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
+        mPowerProfile = powerProfile;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setKernelUidCpuFreqTimeReader(KernelUidCpuFreqTimeReader reader) {
+        mKernelUidCpuFreqTimeReader = reader;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setKernelUidCpuTimeReader(KernelUidCpuTimeReader reader) {
+        mKernelUidCpuTimeReader = reader;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setKernelCpuSpeedReaders(KernelCpuSpeedReader[] readers) {
+        mKernelCpuSpeedReaders = readers;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setUserInfoProvider(UserInfoProvider provider) {
+        mUserInfoProvider = provider;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setPartialTimers(ArrayList<StopwatchTimer> partialTimers) {
+        mPartialTimers = partialTimers;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setLastPartialTimers(ArrayList<StopwatchTimer> lastPartialTimers) {
+        mLastPartialTimers = lastPartialTimers;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setOnBatteryInternal(boolean onBatteryInternal) {
+        mOnBatteryInternal = onBatteryInternal;
+        return this;
     }
 }
 
