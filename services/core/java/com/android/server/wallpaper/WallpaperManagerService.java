@@ -2307,15 +2307,35 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     private void migrateFromOld() {
-        File oldWallpaper = new File(WallpaperBackupHelper.WALLPAPER_IMAGE_KEY);
-        File oldInfo = new File(WallpaperBackupHelper.WALLPAPER_INFO_KEY);
-        if (oldWallpaper.exists()) {
-            File newWallpaper = new File(getWallpaperDir(0), WALLPAPER);
-            oldWallpaper.renameTo(newWallpaper);
-        }
-        if (oldInfo.exists()) {
-            File newInfo = new File(getWallpaperDir(0), WALLPAPER_INFO);
-            oldInfo.renameTo(newInfo);
+        // Pre-N, what existed is the one we're now using as the display crop
+        File preNWallpaper = new File(getWallpaperDir(0), WALLPAPER_CROP);
+        // In the very-long-ago, imagery lived with the settings app
+        File originalWallpaper = new File(WallpaperBackupHelper.WALLPAPER_IMAGE_KEY);
+        File newWallpaper = new File(getWallpaperDir(0), WALLPAPER);
+
+        // Migrations from earlier wallpaper image storage schemas
+        if (preNWallpaper.exists()) {
+            if (!newWallpaper.exists()) {
+                // we've got the 'wallpaper' crop file but not the nominal source image,
+                // so do the simple "just take everything" straight copy of legacy data
+                if (DEBUG) {
+                    Slog.i(TAG, "Migrating wallpaper schema");
+                }
+                FileUtils.copyFile(preNWallpaper, newWallpaper);
+            } // else we're in the usual modern case: both source & crop exist
+        } else if (originalWallpaper.exists()) {
+            // VERY old schema; make sure things exist and are in the right place
+            if (DEBUG) {
+                Slog.i(TAG, "Migrating antique wallpaper schema");
+            }
+            File oldInfo = new File(WallpaperBackupHelper.WALLPAPER_INFO_KEY);
+            if (oldInfo.exists()) {
+                File newInfo = new File(getWallpaperDir(0), WALLPAPER_INFO);
+                oldInfo.renameTo(newInfo);
+            }
+
+            FileUtils.copyFile(originalWallpaper, preNWallpaper);
+            originalWallpaper.renameTo(newWallpaper);
         }
     }
 
@@ -2376,12 +2396,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         JournaledFile journal = makeJournaledFile(userId);
         FileInputStream stream = null;
         File file = journal.chooseForRead();
-        if (!file.exists()) {
-            // This should only happen one time, when upgrading from a legacy system
-            migrateFromOld();
-        }
+
         WallpaperData wallpaper = mWallpaperMap.get(userId);
         if (wallpaper == null) {
+            // Do this once per boot
+            migrateFromOld();
+
             wallpaper = new WallpaperData(userId, WALLPAPER, WALLPAPER_CROP);
             wallpaper.allowBackup = true;
             mWallpaperMap.put(userId, wallpaper);
