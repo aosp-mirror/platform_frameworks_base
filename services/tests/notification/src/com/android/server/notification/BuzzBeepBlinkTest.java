@@ -30,12 +30,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -57,6 +52,8 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.server.lights.Light;
 
@@ -77,8 +74,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     @Mock android.media.IRingtonePlayer mRingtonePlayer;
     @Mock Light mLight;
     @Mock Handler mHandler;
-    @Mock
-    NotificationUsageStats mUsageStats;
+    @Mock NotificationUsageStats mUsageStats;
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -111,6 +107,9 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
     @Before
     public void setUp() {
+        // Magic to allow spying package-private methods on system classes
+        System.setProperty("dexmaker.share_classloader", "true");
+
         MockitoAnnotations.initMocks(this);
 
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
@@ -120,7 +119,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
 
-        mService = new NotificationManagerService(getContext());
+        mService = spy(new NotificationManagerService(getContext()));
+        doNothing().when(mService).sendAccessibilityEvent((Notification) any(), anyString());
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);
@@ -358,6 +358,16 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
                 eq(CUSTOM_LIGHT_COLOR), anyInt(), eq(CUSTOM_LIGHT_ON), eq(CUSTOM_LIGHT_OFF));
     }
 
+    private void verifySendAccessibilityEvent() {
+        verify(mService, times(1))
+                .sendAccessibilityEvent((Notification) anyObject(), anyString());
+    }
+
+    private void verifyNoAccessibilityEvent() {
+        verify(mService, never())
+                .sendAccessibilityEvent((Notification) anyObject(), anyString());
+    }
+
     //
     // Tests
     //
@@ -380,6 +390,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         verifyBeepLooped();
         verifyNeverVibrate();
+        verifySendAccessibilityEvent();
     }
 
     @Test
@@ -389,6 +400,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         mService.buzzBeepBlinkLocked(r);
 
         verifyBeep();
+        verifySendAccessibilityEvent();
     }
 
     @Test
@@ -409,6 +421,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         verifyNeverBeep();
         verifyNeverVibrate();
+        verifyNoAccessibilityEvent();
     }
 
     @Test
@@ -420,6 +433,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         verifyNeverBeep();
         verifyNeverVibrate();
+        verifyNoAccessibilityEvent();
     }
 
     @Test
@@ -445,10 +459,12 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         // set up internal state
         mService.buzzBeepBlinkLocked(r);
         Mockito.reset(mRingtonePlayer);
+        Mockito.reset(mService);
 
         // update should not beep
         mService.buzzBeepBlinkLocked(s);
         verifyNeverBeep();
+        verifyNoAccessibilityEvent();
     }
 
     @Test
@@ -591,6 +607,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         verifyNeverBeep();
         verifyVibrate();
+        verifySendAccessibilityEvent();
     }
 
     @Test
@@ -689,10 +706,12 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         // set up internal state
         mService.buzzBeepBlinkLocked(r);
         Mockito.reset(mVibrator);
+        Mockito.reset(mService);
 
         // update should not beep
         mService.buzzBeepBlinkLocked(s);
         verifyNeverVibrate();
+        verifyNoAccessibilityEvent();
     }
 
     @Test

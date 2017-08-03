@@ -134,7 +134,7 @@
     <item msgid="3910386316304772394">"ওয়াই-ফাই এর মাধ্যমে কল করতে ও মেসেজ পাঠাতে, প্রথমে আপনার পরিষেবা প্রদানকারীকে এই পরিষেবার সেট-আপ করতে বলুন। তারপর আবার সেটিংস থেকে ওয়াই-ফাই কলিং চালু করুন। (ত্রুটি কোড: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"আপনার পরিষেবা প্রদানকারীকে নথিভুক্ত করুন"</item>
+    <item msgid="7472393097168811593">"আপনার পরিষেবা প্রদানকারীর সাথে রেজিস্টার করুন (ত্রুটি কোড: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -1191,8 +1191,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI এর জন্য USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"একটি USB যন্ত্রাংশতে সংযুক্ত হয়েছে"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"আরো বিকল্পের জন্য আলতো চাপুন৷"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"অডিও অ্যাক্সেসরি সমর্থিত নয়"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"আরও তথ্যের জন্য ট্যাপ করুন"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"অ্যানালগ অডিও অ্যাক্সেসরি শনাক্ত করা হয়েছে"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"সংযুক্ত ডিভাইসটি এই ফোনের সাথে ব্যবহার করা যাবে না। আরও জানতে ট্যাপ করুন।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ডিবাগিং সংযুক্ত হয়েছে"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ডিবাগিং অক্ষম করতে আলতো চাপুন৷"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ডিবাগিং অক্ষম করতে বেছে নিন।"</string>

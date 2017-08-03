@@ -3741,13 +3741,16 @@ public class NotificationManagerService extends SystemService {
         boolean hasValidVibrate = false;
         boolean hasValidSound = false;
 
-        if (aboveThreshold && isNotificationForCurrentUser(record)) {
-            // If the notification will appear in the status bar, it should send an accessibility
-            // event
-            if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
+        if (isNotificationForCurrentUser(record)) {
+            // If the notification icon will appear in the status bar, AND it hasn't been blocked
+            // by do-not-disturb, it should generate an accessibility event
+            if (!record.isUpdate
+                    && !record.isIntercepted()
+                    && record.getImportance() > IMPORTANCE_MIN) {
                 sendAccessibilityEvent(notification, record.sbn.getPackageName());
             }
-            if (mSystemReady && mAudioManager != null) {
+            if (aboveThreshold && mSystemReady && mAudioManager != null) {
+                // this notification wants to make noise & is allowed to make noise
                 Uri soundUri = record.getSound();
                 hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
 
@@ -4261,9 +4264,11 @@ public class NotificationManagerService extends SystemService {
         return (x < low) ? low : ((x > high) ? high : x);
     }
 
+    @VisibleForTesting
     void sendAccessibilityEvent(Notification notification, CharSequence packageName) {
-        AccessibilityManager manager = AccessibilityManager.getInstance(getContext());
-        if (!manager.isEnabled()) {
+        final AccessibilityManager accessibilityManager
+                = AccessibilityManager.getInstance(getContext());
+        if (accessibilityManager == null || !accessibilityManager.isEnabled()) {
             return;
         }
 
@@ -4277,7 +4282,7 @@ public class NotificationManagerService extends SystemService {
             event.getText().add(tickerText);
         }
 
-        manager.sendAccessibilityEvent(event);
+        accessibilityManager.sendAccessibilityEvent(event);
     }
 
     /**
