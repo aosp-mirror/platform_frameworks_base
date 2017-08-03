@@ -1,63 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (C) 2015 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="root"
-    android:alpha="1.0"
-    android:height="42dp"
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="ic_signal_workmode_disable"
     android:width="42dp"
-    android:viewportHeight="42"
-    android:viewportWidth="42" >
+    android:viewportWidth="42"
+    android:height="42dp"
+    android:viewportHeight="42" >
     <group
-        android:name="ic_signal_briefcase"
-        android:translateX="21.9995"
-        android:translateY="25.73401" >
+        android:name="suitcase"
+        android:translateX="21"
+        android:translateY="36.9375"
+        android:scaleX="0.1"
+        android:scaleY="0.1" >
         <group
-            android:name="ic_signal_briefcase_pivot"
-            android:translateX="-23.21545"
-            android:translateY="-18.86649" >
+            android:name="suitcase_pivot"
+            android:translateY="-158" >
             <clip-path
-                android:name="mask"
-                android:pathData="M 37.8337860107,-40.4599914551 c 0.0,0.0 -35.8077850342,31.5523681641 -35.8077850342,31.5523681641 c 0.0,0.0 9.55097961426,9.55285644531 9.55097961426,9.55285644531 c 0.0,0.0 -2.61698913574,2.09387207031 -2.61698913574,2.09387207031 c 0.0,0.0 -9.75096130371,-9.56428527832 -9.75096130371,-9.56428527832 c 0.0,0.0 -34.6200408936,25.4699249268 -34.6200408936,25.4699249268 c 0.0,0.0 55.9664764404,69.742401123 55.9664764404,69.742401123 c 0.0,0.0 73.2448120117,-59.1047973633 73.2448120117,-59.1047973633 c 0.0,0.0 -55.9664916992,-69.7423400879 -55.9664916992,-69.7423400879 Z" />
+                android:name="mask_1"
+                android:pathData="M 366.5,-269.5 c 0.0,0.0 -578.0,2.0 -578.0,2.0 c 0.0,0.0 65.7498321533,68.2501220703 65.7498321533,68.2501220703 c 0.0,0.0 -20.7500457764,20.7500610352 -20.7500457764,20.7500610352 c 0.0,0.0 -65.749786377,-68.2501983643 -65.749786377,-68.2501983643 c 0.0,0.0 -7.25,539.250015259 -7.25,539.250015259 c 0.0,0.0 606.0,0.0 606.0,0.0 c 0.0,0.0 0.0,-562.0 0.0,-562.0 Z" />
             <group
-                android:name="cross" >
+                android:name="whole"
+                android:translateX="-1.11523"
+                android:translateY="32.0918" >
                 <path
-                    android:name="cross_1"
-                    android:pathData="M 7.54049682617,3.9430847168 c 0.0,0.0 0.324981689453,0.399978637695 0.324981689453,0.399978637695 "
+                    android:name="rectangle_path_1"
                     android:strokeColor="#FFFFFFFF"
-                    android:strokeAlpha="0"
-                    android:strokeWidth="3.5"
-                    android:fillColor="#00000000" />
+                    android:strokeWidth="65"
+                    android:pathData="M 0.0,-66.5 l 0.0,0.0 c 36.7269358617,0.0 66.5,29.7730641383 66.5,66.5 l 0.0,0.0 c 0.0,36.7269358617 -29.7730641383,66.5 -66.5,66.5 l 0.0,0.0 c -36.7269358617,0.0 -66.5,-29.7730641383 -66.5,-66.5 l 0.0,0.0 c 0.0,-36.7269358617 29.7730641383,-66.5 66.5,-66.5 Z" />
             </group>
             <group
-                android:name="briefcase"
-                android:translateX="23.481"
-                android:translateY="18.71151" >
+                android:name="handle"
+                android:translateY="-100" >
                 <path
-                    android:fillColor="#FFFFFFFF"
-                    android:fillAlpha="1"
-                    android:pathData="M-4.83333,-14.3333 L-7.16667,-11.8333 L-7.16667,-9.5 L-4.83333,-9.5 L-4.83333,-11.8333 L4.83333,-11.8333 L4.83333,-9.5 L7.16667,-9.5 L7.16667,-11.8333 L4.83333,-14.3333 Z" />
-                <path
-                    android:fillColor="#FFFFFFFF"
-                    android:fillAlpha="1"
-                    android:pathData="M13.1667,-9.5 L-13.1667,-9.5 C-14.5,-9.5,-15.5,-8.5,-15.5,-7.16666 L-15.5,0.00000286102 C-15.5,1.33334,-14.5,2.33334,-13.1667,2.33334 L-3.66667,2.33334 L-3.66667,0.00000286102 L3.5,0.00000286102 L3.5,2.33334 L13,2.33334 C14.3333,2.33334,15.3333,1.33334,15.3333,0 L15.3333,-7.16666 C15.5,-8.5,14.3333,-9.5,13.1667,-9.5 Z" />
-                <path
-                    android:fillColor="#FFFFFFFF"
-                    android:fillAlpha="1"
-                    android:pathData="M-3.5,7.16667 L-3.5,4.83334 L-14.3333,4.83334 L-14.3333,10.8333 C-14.3333,12.1667,-13.3333,13.1667,-12,13.1667 L11.8333,13.1667 C13.1667,13.1667,14.1667,12.1667,14.1667,10.8333 L14.1667,4.83334 L3.5,4.83334 L3.5,7.16667 L-3.5,7.16667 Z" />
+                    android:name="rectangle_path_2"
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeWidth="35"
+                    android:pathData="M -34.0,-50.0 l 68.0,0.0 c 8.8365559968,0.0 16.0,7.1634440032 16.0,16.0 l 0.0,68.0 c 0.0,8.8365559968 -7.1634440032,16.0 -16.0,16.0 l -68.0,0.0 c -8.8365559968,0.0 -16.0,-7.1634440032 -16.0,-16.0 l 0.0,-68.0 c 0.0,-8.8365559968 7.1634440032,-16.0 16.0,-16.0 Z" />
+            </group>
+            <group
+                android:name="case"
+                android:translateY="32.68518" >
+                <group
+                    android:name="case_pivot"
+                    android:translateY="-32.68518" >
+                    <group
+                        android:name="bottom"
+                        android:translateY="-97.62964" >
+                        <group
+                            android:name="bottom_pivot"
+                            android:translateY="40" >
+                            <group
+                                android:name="rectangle_path_3_position" >
+                                <path
+                                    android:name="rectangle_path_3"
+                                    android:fillColor="#FFFFFFFF"
+                                    android:pathData="M -143.0,-40.0 l 286.0,0.0 c 17.6731119936,0.0 32.0,14.3268880064 32.0,32.0 l 0.0,16.0 c 0.0,17.6731119936 -14.3268880064,32.0 -32.0,32.0 l -286.0,0.0 c -17.6731119936,0.0 -32.0,-14.3268880064 -32.0,-32.0 l 0.0,-16.0 c 0.0,-17.6731119936 14.3268880064,-32.0 32.0,-32.0 Z" />
+                            </group>
+                        </group>
+                    </group>
+                    <group
+                        android:name="top"
+                        android:translateY="163" >
+                        <group
+                            android:name="top_pivot"
+                            android:translateY="-40" >
+                            <group
+                                android:name="rectangle_path_4_position" >
+                                <path
+                                    android:name="rectangle_path_4"
+                                    android:fillColor="#FFFFFFFF"
+                                    android:pathData="M -143.0,-40.0 l 286.0,0.0 c 17.6731119936,0.0 32.0,14.3268880064 32.0,32.0 l 0.0,16.0 c 0.0,17.6731119936 -14.3268880064,32.0 -32.0,32.0 l -286.0,0.0 c -17.6731119936,0.0 -32.0,-14.3268880064 -32.0,-32.0 l 0.0,-16.0 c 0.0,-17.6731119936 14.3268880064,-32.0 32.0,-32.0 Z" />
+                            </group>
+                        </group>
+                    </group>
+                    <group
+                        android:name="left"
+                        android:translateX="-175.00635"
+                        android:translateY="30" >
+                        <group
+                            android:name="left_pivot"
+                            android:translateX="50.00635" >
+                            <path
+                                android:name="rectangle_path_5"
+                                android:fillColor="#FFFFFFFF"
+                                android:pathData="M -50.0,-88.0 l 100.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,176.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l -100.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,-176.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                        </group>
+                    </group>
+                    <group
+                        android:name="right"
+                        android:translateX="174.97778"
+                        android:translateY="30" >
+                        <group
+                            android:name="right_pivot"
+                            android:translateX="-49.97778" >
+                            <path
+                                android:name="rectangle_path_6"
+                                android:fillColor="#FFFFFFFF"
+                                android:pathData="M -50.0,-88.0 l 100.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,176.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l -100.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,-176.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                        </group>
+                    </group>
+                </group>
+            </group>
+            <group
+                android:name="stick"
+                android:translateX="-166.59082"
+                android:translateY="-156.51367"
+                android:scaleY="0"
+                android:rotation="-45" >
+                <group
+                    android:name="stick_pivot"
+                    android:translateX="0.18161"
+                    android:translateY="243.8158" >
+                    <path
+                        android:name="stickito"
+                        android:fillColor="#FFFFFFFF"
+                        android:pathData="M -16.5,-243.999885 l 33.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,487.99977 c 0.0,0.0 0.0,0.0 0.0,0.0 l -33.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,-487.99977 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+                </group>
             </group>
         </group>
     </group>
