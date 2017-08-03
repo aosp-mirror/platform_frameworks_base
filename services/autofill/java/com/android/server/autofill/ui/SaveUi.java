@@ -21,9 +21,14 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.service.autofill.CustomDescription;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
@@ -31,15 +36,17 @@ import android.text.Html;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Gravity;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.RemoteViews;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.IAutoFillManagerClient;
+import android.widget.RemoteViews;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.server.UiThread;
@@ -109,12 +116,15 @@ final class SaveUi {
 
     private final CharSequence mTitle;
     private final CharSequence mSubTitle;
+    private final PendingUi mPendingUi;
 
     private boolean mDestroyed;
 
-    SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
+    SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
+           @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
            @NonNull ValueFinder valueFinder, @NonNull OverlayControl overlayControl,
-           @NonNull OnSaveListener listener) {
+           @NonNull IAutoFillManagerClient client, @NonNull OnSaveListener listener) {
+        mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
 
@@ -171,8 +181,49 @@ final class SaveUi {
 
             final RemoteViews presentation = customDescription.getPresentation(valueFinder);
             if (presentation != null) {
+                final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
+                    @Override
+                    public boolean onClickHandler(View view, PendingIntent pendingIntent,
+                            Intent intent) {
+                        // We need to hide the Save UI before launching the pending intent, and
+                        // restore back it once the activity is finished, and that's achieved by
+                        // adding a custom extra in the activity intent.
+                        if (pendingIntent != null) {
+                            if (intent == null) {
+                                Slog.w(TAG,
+                                        "remote view on custom description does not have intent");
+                                return false;
+                            }
+                            if (!pendingIntent.isActivity()) {
+                                Slog.w(TAG, "ignoring custom description pending intent that's not "
+                                        + "for an activity: " + pendingIntent);
+                                return false;
+                            }
+                            if (sVerbose) {
+                                Slog.v(TAG,
+                                        "Intercepting custom description intent: " + intent);
+                            }
+                            final IBinder token = mPendingUi.getToken();
+                            intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+                            try {
+                                client.startIntentSender(pendingIntent.getIntentSender(),
+                                        intent);
+                                mPendingUi.setState(PendingUi.STATE_PENDING);
+                                if (sDebug) {
+                                    Slog.d(TAG, "hiding UI until restored with token " + token);
+                                }
+                                hide();
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "error triggering pending intent: " + intent);
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                };
+
                 try {
-                    final View customSubtitleView = presentation.apply(context, null);
+                    final View customSubtitleView = presentation.apply(context, null, handler);
                     subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
                     subtitleContainer.addView(customSubtitleView);
                     subtitleContainer.setVisibility(View.VISIBLE);
@@ -202,7 +253,7 @@ final class SaveUi {
         } else {
             noButton.setText(R.string.autofill_save_no);
         }
-        View.OnClickListener cancelListener =
+        final View.OnClickListener cancelListener =
                 (v) -> mListener.onCancel(info.getNegativeActionListener());
         noButton.setOnClickListener(cancelListener);
 
@@ -211,6 +262,9 @@ final class SaveUi {
 
         mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
         mDialog.setContentView(view);
+
+        // Dialog can be dismissed when touched outside.
+        mDialog.setOnDismissListener((d) -> mListener.onCancel(info.getNegativeActionListener()));
 
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
@@ -227,9 +281,50 @@ final class SaveUi {
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
 
+        show();
+    }
+
+    /**
+     * Update the pending UI, if any.
+     *
+     * @param operation how to update it.
+     * @param token token associated with the pending UI - if it doesn't match the pending token,
+     * the operation will be ignored.
+     */
+    void onPendingUi(int operation, @NonNull IBinder token) {
+        if (!mPendingUi.matches(token)) {
+            Slog.w(TAG, "restore(" + operation + "): got token " + token + " instead of "
+                    + mPendingUi.getToken());
+            return;
+        }
+        switch (operation) {
+            case AutofillManager.PENDING_UI_OPERATION_RESTORE:
+                if (sDebug) Slog.d(TAG, "Restoring save dialog for " + token);
+                show();
+                break;
+            case AutofillManager.PENDING_UI_OPERATION_CANCEL:
+                if (sDebug) Slog.d(TAG, "Cancelling pending save dialog for " + token);
+                hide();
+                break;
+            default:
+                Slog.w(TAG, "restore(): invalid operation " + operation);
+        }
+        mPendingUi.setState(PendingUi.STATE_FINISHED);
+    }
+
+    private void show() {
         Slog.i(TAG, "Showing save dialog: " + mTitle);
         mDialog.show();
         mOverlayControl.hideOverlays();
+   }
+
+    void hide() {
+        if (sVerbose) Slog.v(TAG, "Hiding save dialog.");
+        try {
+            mDialog.hide();
+        } finally {
+            mOverlayControl.showOverlays();
+        }
     }
 
     void destroy() {
@@ -238,7 +333,6 @@ final class SaveUi {
             throwIfDestroyed();
             mListener.onDestroy();
             mHandler.removeCallbacksAndMessages(mListener);
-            if (sVerbose) Slog.v(TAG, "destroy(): dismissing dialog");
             mDialog.dismiss();
             mDestroyed = true;
         } finally {
@@ -260,6 +354,7 @@ final class SaveUi {
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("title: "); pw.println(mTitle);
         pw.print(prefix); pw.print("subtitle: "); pw.println(mSubTitle);
+        pw.print(prefix); pw.print("pendingUi: "); pw.println(mPendingUi);
 
         final View view = mDialog.getWindow().getDecorView();
         final int[] loc = view.getLocationOnScreen();
