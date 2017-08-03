@@ -3544,6 +3544,7 @@ public abstract class BatteryStats implements Parcelable {
                     if (name.indexOf(',') >= 0) {
                         name = name.replace(',', '_');
                     }
+                    name = name.replaceAll("[\\n|\\r]+", "");
                     dumpLine(pw, uid, category, WAKELOCK_DATA, name, sb.toString());
                 }
             }
