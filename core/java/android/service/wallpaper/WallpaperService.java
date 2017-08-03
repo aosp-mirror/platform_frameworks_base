@@ -105,6 +105,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_WINDOW_RESIZED = 10030;
     private static final int MSG_WINDOW_MOVED = 10035;
     private static final int MSG_TOUCH_EVENT = 10040;
+    private static final int MSG_REQUEST_WALLPAPER_COLORS = 10050;
     
     private final ArrayList<Engine> mActiveEngines
             = new ArrayList<Engine>();
@@ -1194,6 +1195,11 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        public void requestWallpaperColors() {
+            Message msg = mCaller.obtainMessage(MSG_REQUEST_WALLPAPER_COLORS);
+            mCaller.sendMessage(msg);
+        }
+
         public void destroy() {
             Message msg = mCaller.obtainMessage(DO_DETACH);
             mCaller.sendMessage(msg);
@@ -1212,7 +1218,6 @@ public abstract class WallpaperService extends Service {
                     mEngine = engine;
                     mActiveEngines.add(engine);
                     engine.attach(this);
-                    engine.invalidateColors();
                     return;
                 }
                 case DO_DETACH: {
@@ -1269,6 +1274,16 @@ public abstract class WallpaperService extends Service {
                         mEngine.onTouchEvent(ev);
                     }
                     ev.recycle();
+                } break;
+                case MSG_REQUEST_WALLPAPER_COLORS: {
+                    if (mConnection == null) {
+                        break;
+                    }
+                    try {
+                        mConnection.onWallpaperColorsChanged(mEngine.onComputeWallpaperColors());
+                    } catch (RemoteException e) {
+                        // Connection went away, nothing to do in here.
+                    }
                 } break;
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);
