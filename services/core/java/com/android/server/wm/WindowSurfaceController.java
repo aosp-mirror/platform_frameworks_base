@@ -52,7 +52,7 @@ class WindowSurfaceController {
 
     final WindowStateAnimator mAnimator;
 
-    private SurfaceControl mSurfaceControl;
+    private SurfaceControlWithBackground mSurfaceControl;
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
@@ -99,15 +99,10 @@ class WindowSurfaceController {
         mWindowType = windowType;
         mWindowSession = win.mSession;
 
-        if (DEBUG_SURFACE_TRACE) {
-            mSurfaceControl = new SurfaceTrace(
-                    s, name, w, h, format, flags, windowType, ownerUid);
-        } else {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
-            mSurfaceControl = new SurfaceControl(
-                    s, name, w, h, format, flags, windowType, ownerUid);
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
+        mSurfaceControl = new SurfaceControlWithBackground(
+                s, name, w, h, format, flags, windowType, ownerUid, this);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
         if (mService.mRoot.mSurfaceTraceEnabled) {
             mSurfaceControl = new RemoteSurfaceTrace(
@@ -120,7 +115,7 @@ class WindowSurfaceController {
     }
 
     void removeRemoteTrace() {
-        mSurfaceControl = new SurfaceControl(mSurfaceControl);
+        mSurfaceControl = new SurfaceControlWithBackground(mSurfaceControl);
     }
 
 
@@ -293,30 +288,30 @@ class WindowSurfaceController {
         mSurfaceControl.setGeometryAppliesWithResize();
     }
 
-    void setMatrixInTransaction(float dsdx, float dtdx, float dsdy, float dtdy,
+    void setMatrixInTransaction(float dsdx, float dtdx, float dtdy, float dsdy,
             boolean recoveringMemory) {
         final boolean matrixChanged = mLastDsdx != dsdx || mLastDtdx != dtdx ||
-                                      mLastDsdy != dsdy || mLastDtdy != dtdy;
+                                      mLastDtdy != dtdy || mLastDsdy != dsdy;
         if (!matrixChanged) {
             return;
         }
 
         mLastDsdx = dsdx;
         mLastDtdx = dtdx;
-        mLastDsdy = dsdy;
         mLastDtdy = dtdy;
+        mLastDsdy = dsdy;
 
         try {
             if (SHOW_TRANSACTIONS) logSurface(
-                    "MATRIX [" + dsdx + "," + dtdx + "," + dsdy + "," + dtdy + "]", null);
+                    "MATRIX [" + dsdx + "," + dtdx + "," + dtdy + "," + dsdy + "]", null);
             mSurfaceControl.setMatrix(
-                    dsdx, dtdx, dsdy, dtdy);
+                    dsdx, dtdx, dtdy, dsdy);
         } catch (RuntimeException e) {
             // If something goes wrong with the surface (such
             // as running out of memory), don't take down the
             // entire system.
             Slog.e(TAG, "Error setting matrix on surface surface" + title
-                    + " MATRIX [" + dsdx + "," + dtdx + "," + dsdy + "," + dtdy + "]", null);
+                    + " MATRIX [" + dsdx + "," + dtdx + "," + dtdy + "," + dsdy + "]", null);
             if (!recoveringMemory) {
                 mAnimator.reclaimSomeSurfaceMemory("matrix", true);
             }
@@ -421,6 +416,10 @@ class WindowSurfaceController {
             mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
         }
+    }
+
+    void getContainerRect(Rect rect) {
+        mAnimator.getContainerRect(rect);
     }
 
     boolean showRobustlyInTransaction() {

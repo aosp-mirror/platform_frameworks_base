@@ -65,7 +65,8 @@ public class SurfaceControl {
     private static native void nativeSetSize(long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long nativeObject, Region region);
     private static native void nativeSetAlpha(long nativeObject, float alpha);
-    private static native void nativeSetMatrix(long nativeObject, float dsdx, float dtdx, float dsdy, float dtdy);
+    private static native void nativeSetMatrix(long nativeObject, float dsdx, float dtdx,
+            float dtdy, float dsdy);
     private static native void nativeSetFlags(long nativeObject, int flags, int mask);
     private static native void nativeSetWindowCrop(long nativeObject, int l, int t, int r, int b);
     private static native void nativeSetFinalCrop(long nativeObject, int l, int t, int r, int b);
