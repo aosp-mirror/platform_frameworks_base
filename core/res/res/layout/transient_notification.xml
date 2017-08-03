@@ -34,8 +34,6 @@
         android:layout_gravity="center_horizontal"
         android:textAppearance="@style/TextAppearance.Toast"
         android:textColor="@color/primary_text_default_material_light"
-        android:shadowColor="#BB000000"
-        android:shadowRadius="2.75"
         />
 
 </LinearLayout>
