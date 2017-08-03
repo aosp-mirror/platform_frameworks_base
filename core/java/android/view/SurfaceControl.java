@@ -272,6 +272,15 @@ public class SurfaceControl {
     public static final int POWER_MODE_DOZE_SUSPEND = 3;
 
     /**
+     * A value for windowType used to indicate that the window should be omitted from screenshots
+     * and display mirroring. A temporary workaround until we express such things with
+     * the hierarchy.
+     * TODO: b/64227542
+     * @hide
+     */
+    public static final int WINDOW_TYPE_DONT_SCREENSHOT = 441731;
+
+    /**
      * Create a surface with a name.
      * <p>
      * The surface creation flags specify what kind of surface to create and
