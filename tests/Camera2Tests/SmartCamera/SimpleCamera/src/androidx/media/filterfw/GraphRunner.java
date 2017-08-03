@@ -203,7 +203,7 @@ public final class GraphRunner {
 
         public void pushWakeEvent(Event event) {
             // This is of course not race-condition proof. The worst case is that the event
-            // is pushed even though the queue was not empty, which is acceptible for our cases.
+            // is pushed even though the queue was not empty, which is acceptable for our cases.
             if (mEventQueue.isEmpty()) {
                 pushEvent(event);
             }
