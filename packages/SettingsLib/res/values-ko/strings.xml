@@ -41,6 +41,10 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s을(를) 통해 사용 가능"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"인터넷을 사용하지 않고 연결됨"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"액세스 포인트가 일시적으로 가득 참"</string>
+    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
+    <skip />
+    <!-- no translation found for available_via_carrier (1469036129740799053) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"매우 느림"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"느림"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"확인"</string>

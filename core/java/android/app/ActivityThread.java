@@ -5718,6 +5718,7 @@ public final class ActivityThread {
         // probably end up doing the same disk access.
         Application app;
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
+        final StrictMode.ThreadPolicy writesAllowedPolicy = StrictMode.getThreadPolicy();
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
@@ -5745,17 +5746,21 @@ public final class ActivityThread {
                     "Exception thrown in onCreate() of "
                     + data.instrumentationName + ": " + e.toString(), e);
             }
+            try {
+                mInstrumentation.callApplicationOnCreate(app);
+            } catch (Exception e) {
+                if (!mInstrumentation.onException(app, e)) {
+                    throw new RuntimeException(
+                      "Unable to create application " + app.getClass().getName()
+                      + ": " + e.toString(), e);
+                }
+            }
         } finally {
-            StrictMode.setThreadPolicy(savedPolicy);
-        }
-
-        try {
-            mInstrumentation.callApplicationOnCreate(app);
-        } catch (Exception e) {
-            if (!mInstrumentation.onException(app, e)) {
-                throw new RuntimeException(
-                    "Unable to create application " + app.getClass().getName()
-                    + ": " + e.toString(), e);
+            // If the app targets < O-MR1, or doesn't change the thread policy
+            // during startup, clobber the policy to maintain behavior of b/36951662
+            if (data.appInfo.targetSdkVersion <= Build.VERSION_CODES.O
+                    || StrictMode.getThreadPolicy().equals(writesAllowedPolicy)) {
+                StrictMode.setThreadPolicy(savedPolicy);
             }
         }
 

@@ -4184,7 +4184,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        public void onInputEvent(InputEvent event) {
+        public void onInputEvent(InputEvent event, int displayId) {
             boolean handled = false;
             try {
                 if (event instanceof MotionEvent
@@ -7049,6 +7049,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Ignore sensor when demo rotation lock is enabled.
                 // Note that the dock orientation and HDMI rotation lock override this.
                 preferredRotation = mDemoRotation;
+            } else if (mPersistentVrModeEnabled) {
+                // While in VR, apps always prefer a portrait rotation. This does not change
+                // any apps that explicitly set landscape, but does cause sensors be ignored,
+                // and ignored any orientation lock that the user has set (this conditional
+                // should remain above the ORIENTATION_LOCKED conditional below).
+                preferredRotation = mPortraitRotation;
             } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
                 // Application just wants to remain locked in the last rotation.
                 preferredRotation = lastRotation;
@@ -7079,13 +7085,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || mAllowAllRotations == 1
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                         || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
-                    // In VrMode, we report the sensor as always being in default orientation so:
-                    // 1) The orientation doesn't change as the user moves their head.
-                    // 2) 2D apps within VR show in the device's default orientation.
-                    // This only overwrites the sensor-provided orientation and does not affect any
-                    // explicit orientation preferences specified by any activities.
-                    preferredRotation =
-                            mPersistentVrModeEnabled ? Surface.ROTATION_0 : sensorRotation;
+                    preferredRotation = sensorRotation;
                 } else {
                     preferredRotation = lastRotation;
                 }

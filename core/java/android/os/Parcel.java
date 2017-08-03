@@ -1782,6 +1782,7 @@ public final class Parcel {
      * <li>{@link IllegalStateException}
      * <li>{@link NullPointerException}
      * <li>{@link SecurityException}
+     * <li>{@link UnsupportedOperationException}
      * <li>{@link NetworkOnMainThreadException}
      * </ul>
      *

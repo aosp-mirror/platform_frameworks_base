@@ -6402,17 +6402,40 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
-            if (obj instanceof SharedUserSetting) {
-                final SharedUserSetting sus = (SharedUserSetting) obj;
-                return sus.name + ":" + sus.userId;
-            } else if (obj instanceof PackageSetting) {
-                final PackageSetting ps = (PackageSetting) obj;
-                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
-                    return null;
-                }
-                return ps.name;
+            return getNameForUidLocked(callingUid, uid);
+        }
+    }
+
+    @Override
+    public String[] getNamesForUids(int[] uids) {
+        if (uids == null || uids.length == 0) {
+            return null;
+        }
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+        final String[] names = new String[uids.length];
+        synchronized (mPackages) {
+            for (int i = uids.length - 1; i >= 0; i--) {
+                final int uid = uids[i];
+                names[i] = getNameForUidLocked(callingUid, uid);
             }
+        }
+        return names;
+    }
+
+    private String getNameForUidLocked(int callingUid, int uid) {
+        Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+        if (obj instanceof SharedUserSetting) {
+            final SharedUserSetting sus = (SharedUserSetting) obj;
+            return sus.name + ":" + sus.userId;
+        } else if (obj instanceof PackageSetting) {
+            final PackageSetting ps = (PackageSetting) obj;
+            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                return null;
+            }
+            return ps.name;
         }
         return null;
     }

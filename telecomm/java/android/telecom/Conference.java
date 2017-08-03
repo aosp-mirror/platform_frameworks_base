@@ -454,10 +454,6 @@ public abstract class Conference extends Conferenceable {
      * @param conferenceableConnections The set of connections this connection can conference with.
      */
     public final void setConferenceableConnections(List<Connection> conferenceableConnections) {
-        if (Objects.equals(mConferenceableConnections, conferenceableConnections)) {
-            return;
-        }
-
         clearConferenceableList();
         for (Connection c : conferenceableConnections) {
             // If statement checks for duplicates in input. It makes it N^2 but we're dealing with a

@@ -179,11 +179,18 @@ import com.android.internal.os.SomeArgs;
  * should not contain fields for username, password, and credit card information. The reason for
  * this rule is that a malicious app could draft a view structure where the credit card fields
  * are not visible, so when the user selects a dataset from the username UI, the credit card info is
- * released to the application without the user knowledge. Similar, it's recommended to always
+ * released to the application without the user knowledge. Similarly, it's recommended to always
  * protect a dataset that contains sensitive information by requiring dataset authentication
- * (see {@link Dataset.Builder#setAuthentication(android.content.IntentSender)}).
+ * (see {@link Dataset.Builder#setAuthentication(android.content.IntentSender)}), and to include
+ * info about the "primary" field of the partition in the custom presentation for "secondary"
+ * fields &mdash; that would prevent a malicious app from getting the "primary" fields without the
+ * user realizing they're being released (for example, a malicious app could have fields for a
+ * credit card number, verification code, and expiration date crafted in a way that just the latter
+ * is visible; by explicitly indicating the expiration date is related to a given credit card
+ * number, the service would be providing a visual clue for the users to check what would be
+ * released upon selecting that field).
  *
- * <p>When the service detects that a screen have multiple partitions, it should return a
+ * <p>When the service detects that a screen has multiple partitions, it should return a
  * {@link FillResponse} with just the datasets for the partition that originated the request (i.e.,
  * the partition that has the {@link android.app.assist.AssistStructure.ViewNode} whose
  * {@link android.app.assist.AssistStructure.ViewNode#isFocused()} returns {@code true}); then if
@@ -235,6 +242,36 @@ import com.android.internal.os.SomeArgs;
  *
  * <p>When the service returns multiple {@link FillResponse}, the last one overrides the previous;
  * that's why the {@link SaveInfo} in the 2nd request above has the info for both partitions.
+ *
+ * <h3>Package verification</h3>
+ *
+ * <p>When autofilling app-specific data (like username and password), the service must verify
+ * the authenticity of the request by obtaining all signing certificates of the app being
+ * autofilled, and only fulfilling the request when they match the values that were
+ * obtained when the data was first saved &mdash; such verification is necessary to avoid phishing
+ * attempts by apps that were sideloaded in the device with the same package name of another app.
+ * Here's an example on how to achieve that by hashing the signing certificates:
+ *
+ * <pre class="prettyprint">
+ * private String getCertificatesHash(String packageName) throws Exception {
+ *   PackageManager pm = mContext.getPackageManager();
+ *   PackageInfo info = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+ *   ArrayList<String> hashes = new ArrayList<>(info.signatures.length);
+ *   for (Signature sig : info.signatures) {
+ *     byte[] cert = sig.toByteArray();
+ *     MessageDigest md = MessageDigest.getInstance("SHA-256");
+ *     md.update(cert);
+ *     hashes.add(toHexString(md.digest()));
+ *   }
+ *   Collections.sort(hashes);
+ *   StringBuilder hash = new StringBuilder();
+ *   for (int i = 0; i < hashes.size(); i++) {
+ *     hash.append(hashes.get(i));
+ *   }
+ *   return hash.toString();
+ * }
+ *
+ * </pre>
  *
  * <h3>Ignoring views</h3>
  *

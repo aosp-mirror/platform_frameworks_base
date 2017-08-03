@@ -16,7 +16,9 @@
 
 package android.text;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
 
@@ -64,7 +66,8 @@ public interface InputFilter
          * Constructs a locale-specific AllCaps filter, to make sure capitalization rules of that
          * locale are used for transforming the sequence.
          */
-        public AllCaps(@Nullable Locale locale) {
+        public AllCaps(@NonNull Locale locale) {
+            Preconditions.checkNotNull(locale);
             mLocale = locale;
         }
 
