@@ -33,6 +33,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -40,16 +41,20 @@ public class DateUtilsTest {
 
     private static final LocaleList LOCALE_LIST_US = new LocaleList(Locale.US);
     private LocaleList mOriginalLocales;
+    private TimeZone mOriginalTimeZone;
 
     @Before
     public void setup() {
         mOriginalLocales = Resources.getSystem().getConfiguration().getLocales();
         setLocales(LOCALE_LIST_US);
+        mOriginalTimeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
     }
 
     @After
     public void teardown() {
         setLocales(mOriginalLocales);
+        TimeZone.setDefault(mOriginalTimeZone);
     }
 
     @Test
