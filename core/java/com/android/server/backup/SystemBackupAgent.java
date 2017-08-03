@@ -35,7 +35,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Backup agent for various system-managed data, currently just the system wallpaper
+ * Backup agent for various system-managed data.  Wallpapers are now handled by a
+ * separate package, but we still process restores from legacy datasets here.
  */
 public class SystemBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SystemBackupAgent";
@@ -61,16 +62,19 @@ public class SystemBackupAgent extends BackupAgentHelper {
     // TODO: http://b/22388012
     private static final String WALLPAPER_IMAGE_DIR =
             Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM).getAbsolutePath();
-    private static final String WALLPAPER_IMAGE = WallpaperBackupHelper.WALLPAPER_IMAGE;
+    public static final String WALLPAPER_IMAGE =
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
+                    "wallpaper").getAbsolutePath();
 
     // TODO: Will need to change if backing up non-primary user's wallpaper
     // TODO: http://b/22388012
     private static final String WALLPAPER_INFO_DIR =
             Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM).getAbsolutePath();
-    private static final String WALLPAPER_INFO = WallpaperBackupHelper.WALLPAPER_INFO;
+    public static final String WALLPAPER_INFO =
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
+                    "wallpaper_info.xml").getAbsolutePath();
     // Use old keys to keep legacy data compatibility and avoid writing two wallpapers
     private static final String WALLPAPER_IMAGE_KEY = WallpaperBackupHelper.WALLPAPER_IMAGE_KEY;
-    private static final String WALLPAPER_INFO_KEY = WallpaperBackupHelper.WALLPAPER_INFO_KEY;
 
     private WallpaperBackupHelper mWallpaperHelper = null;
 
@@ -98,13 +102,11 @@ public class SystemBackupAgent extends BackupAgentHelper {
         // Slot in a restore helper for the older wallpaper backup schema to support restore
         // from devices still generating data in that format.
         mWallpaperHelper = new WallpaperBackupHelper(this,
-                new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO },
-                new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} );
+                new String[] { WALLPAPER_IMAGE_KEY} );
         addHelper(WALLPAPER_HELPER, mWallpaperHelper);
 
         // On restore, we also support a long-ago wallpaper data schema "system_files"
         addHelper("system_files", new WallpaperBackupHelper(this,
-                new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
 
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
@@ -115,27 +117,12 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper());
         addHelper(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper());
 
-        try {
-            super.onRestore(data, appVersionCode, newState);
-
-            IWallpaperManager wallpaper = (IWallpaperManager) ServiceManager.getService(
-                    Context.WALLPAPER_SERVICE);
-            if (wallpaper != null) {
-                try {
-                    wallpaper.settingsRestored();
-                } catch (RemoteException re) {
-                    Slog.e(TAG, "Couldn't restore settings\n" + re);
-                }
-            }
-        } catch (IOException ex) {
-            // If there was a failure, delete everything for the wallpaper, this is too aggressive,
-            // but this is hopefully a rare failure.
-            Slog.d(TAG, "restore failed", ex);
-            (new File(WALLPAPER_IMAGE)).delete();
-            (new File(WALLPAPER_INFO)).delete();
-        }
+        super.onRestore(data, appVersionCode, newState);
     }
 
+    /**
+     * Support for 'adb restore' of legacy archives
+     */
     @Override
     public void onRestoreFile(ParcelFileDescriptor data, long size,
             int type, String domain, String path, long mode, long mtime)
@@ -181,14 +168,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 (new File(WALLPAPER_IMAGE)).delete();
                 (new File(WALLPAPER_INFO)).delete();
             }
-        }
-    }
-
-    @Override
-    public void onRestoreFinished() {
-        // helper will be null following 'adb restore' or other full-data operation
-        if (mWallpaperHelper != null) {
-            mWallpaperHelper.onRestoreFinished();
         }
     }
 }
