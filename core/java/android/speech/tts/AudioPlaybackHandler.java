@@ -106,6 +106,7 @@ class AudioPlaybackHandler {
             final PlaybackQueueItem item = it.next();
             if (item.getCallerIdentity() == callerIdentity) {
                 it.remove();
+                stop(item);
             }
         }
     }

@@ -21,6 +21,7 @@ import android.media.AudioTrack;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -70,6 +71,11 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
     // wait for the next one.
     private ConcurrentLinkedQueue<ProgressMarker> markerList = new ConcurrentLinkedQueue<>();
 
+    private static final int NOT_RUN = 0;
+    private static final int RUN_CALLED = 1;
+    private static final int STOP_CALLED = 2;
+    private final AtomicInteger mRunState = new AtomicInteger(NOT_RUN);
+
     SynthesisPlaybackQueueItem(AudioOutputParams audioParams, int sampleRate,
             int audioFormat, int channelCount, UtteranceProgressDispatcher dispatcher,
             Object callerIdentity, AbstractEventLogger logger) {
@@ -88,6 +94,11 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
 
     @Override
     public void run() {
+        if (!mRunState.compareAndSet(NOT_RUN, RUN_CALLED)) {
+            // stop() was already called before run(). Do nothing and just finish.
+            return;
+        }
+
         final UtteranceProgressDispatcher dispatcher = getDispatcher();
         dispatcher.dispatchOnStart();
 
@@ -120,6 +131,12 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
 
         mAudioTrack.waitAndRelease();
 
+        dispatchEndStatus();
+    }
+
+    private void dispatchEndStatus() {
+        final UtteranceProgressDispatcher dispatcher = getDispatcher();
+
         if (mStatusCode == TextToSpeech.SUCCESS) {
             dispatcher.dispatchOnSuccess();
         } else if(mStatusCode == TextToSpeech.STOPPED) {
@@ -139,6 +156,13 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
             // Update our internal state.
             mStopped = true;
             mStatusCode = statusCode;
+
+            if (mRunState.getAndSet(STOP_CALLED) == NOT_RUN) {
+                // Dispatch the status code and just finish without signaling
+                // if run() has not even started.
+                dispatchEndStatus();
+                return;
+            }
 
             // Wake up the audio playback thread if it was waiting on take().
             // take() will return null since mStopped was true, and will then
