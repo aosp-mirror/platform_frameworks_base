@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -629,6 +630,10 @@ class WindowStateAnimator {
 
         if (mSurfaceController != null) {
             return mSurfaceController;
+        }
+
+        if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
+            windowType = SurfaceControl.WINDOW_TYPE_DONT_SCREENSHOT;
         }
 
         w.setHasSurface(false);
