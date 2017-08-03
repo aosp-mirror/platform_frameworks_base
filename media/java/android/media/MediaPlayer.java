@@ -73,6 +73,8 @@ import java.lang.Runnable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -1004,19 +1006,28 @@ public class MediaPlayer extends PlayerBase
     /**
      * Sets the data source as a content Uri.
      *
-     * @param context the Context to use when resolving the Uri
-     * @param uri the Content URI of the data you want to play
-     * @param headers the headers to be sent together with the request for the data
-     *                The headers must not include cookies. Instead, use the cookies param.
-     * @param cookies the cookies to be sent together with the request
-     * @throws IllegalStateException if it is called in an invalid state
-     * @throws NullPointerException  if context or uri is null
-     * @throws IOException           if uri has a file scheme and an I/O error occurs
+     * To provide cookies for the subsequent HTTP requests, you can install your own default cookie
+     * handler and use other variants of setDataSource APIs instead. Alternatively, you can use
+     * this API to pass the cookies as a list of HttpCookie. If the app has not installed
+     * a CookieHandler already, this API creates a CookieManager and populates its CookieStore with
+     * the provided cookies. If the app has installed its own handler already, this API requires the
+     * handler to be of CookieManager type such that the API can update the manager’s CookieStore.
      *
      * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
      * but that can be changed with key/value pairs through the headers parameter with
      * "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value to
      * disallow or allow cross domain redirection.
+     *
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @param headers the headers to be sent together with the request for the data
+     *                The headers must not include cookies. Instead, use the cookies param.
+     * @param cookies the cookies to be sent together with the request
+     * @throws IllegalArgumentException if cookies are provided and the installed handler is not
+     *                                  a CookieManager
+     * @throws IllegalStateException    if it is called in an invalid state
+     * @throws NullPointerException     if context or uri is null
+     * @throws IOException              if uri has a file scheme and an I/O error occurs
      */
     public void setDataSource(@NonNull Context context, @NonNull Uri uri,
             @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies)
@@ -1027,6 +1038,14 @@ public class MediaPlayer extends PlayerBase
 
         if (uri == null) {
             throw new NullPointerException("uri param can not be null.");
+        }
+
+        if (cookies != null) {
+            CookieHandler cookieHandler = CookieHandler.getDefault();
+            if (cookieHandler != null && !(cookieHandler instanceof CookieManager)) {
+                throw new IllegalArgumentException("The cookie handler has to be of CookieManager "
+                        + "type when cookies are provided.");
+            }
         }
 
         // The context and URI usually belong to the calling user. Get a resolver for that user
@@ -1064,15 +1083,15 @@ public class MediaPlayer extends PlayerBase
     /**
      * Sets the data source as a content Uri.
      *
-     * @param context the Context to use when resolving the Uri
-     * @param uri the Content URI of the data you want to play
-     * @param headers the headers to be sent together with the request for the data
-     * @throws IllegalStateException if it is called in an invalid state
-     *
      * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
      * but that can be changed with key/value pairs through the headers parameter with
      * "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value to
      * disallow or allow cross domain redirection.
+     *
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @param headers the headers to be sent together with the request for the data
+     * @throws IllegalStateException if it is called in an invalid state
      */
     public void setDataSource(@NonNull Context context, @NonNull Uri uri,
             @Nullable Map<String, String> headers)
@@ -1093,15 +1112,15 @@ public class MediaPlayer extends PlayerBase
     /**
      * Sets the data source (file-path or http/rtsp URL) to use.
      *
-     * @param path the path of the file, or the http/rtsp URL of the stream you want to play
-     * @throws IllegalStateException if it is called in an invalid state
-     *
      * <p>When <code>path</code> refers to a local file, the file may actually be opened by a
      * process other than the calling application.  This implies that the pathname
      * should be an absolute path (as any other process runs with unspecified current working
      * directory), and that the pathname should reference a world-readable file.
      * As an alternative, the application could first open the file for reading,
      * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
+     *
+     * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @throws IllegalStateException if it is called in an invalid state
      */
     public void setDataSource(String path)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
