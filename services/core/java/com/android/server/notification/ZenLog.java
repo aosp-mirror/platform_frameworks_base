@@ -186,7 +186,12 @@ public class ZenLog {
     private static String hintsToString(int hints) {
         switch (hints) {
             case 0 : return "none";
-            case NotificationListenerService.HINT_HOST_DISABLE_EFFECTS : return "disable_effects";
+            case NotificationListenerService.HINT_HOST_DISABLE_EFFECTS:
+                    return "disable_effects";
+            case NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS:
+                    return "disable_call_effects";
+            case NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS:
+                    return "disable_notification_effects";
             default: return Integer.toString(hints);
         }
     }
