@@ -204,7 +204,12 @@ public class NotificationManager {
     public static final int IMPORTANCE_NONE = 0;
 
     /**
-     * Min notification importance: only shows in the shade, below the fold.
+     * Min notification importance: only shows in the shade, below the fold.  This should
+     * not be used with {@link Service#startForeground(int, Notification) Service.startForeground}
+     * since a foreground service is supposed to be something the user cares about so it does
+     * not make semantic sense to mark its notification as minimum importance.  If you do this
+     * as of Android version {@link android.os.Build.VERSION_CODES#O}, the system will show
+     * a higher-priority notification about your app running in the background.
      */
     public static final int IMPORTANCE_MIN = 1;
 
