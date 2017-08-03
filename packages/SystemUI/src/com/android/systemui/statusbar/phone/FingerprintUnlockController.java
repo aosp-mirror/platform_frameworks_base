@@ -29,6 +29,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.LatencyTracker;
 import com.android.systemui.Dependency;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 /**
@@ -101,6 +102,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private final Context mContext;
     private int mPendingAuthenticatedUserId = -1;
     private boolean mPendingShowBouncer;
+    private boolean mHasScreenTurnedOnSinceAuthenticating;
 
     public FingerprintUnlockController(Context context,
             DozeScrimController dozeScrimController,
@@ -113,6 +115,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mUpdateMonitor.registerCallback(this);
         Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
+        Dependency.get(ScreenLifecycle.class).addObserver(mScreenObserver);
         mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
@@ -186,6 +189,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         }
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = calculateMode();
+        mHasScreenTurnedOnSinceAuthenticating = false;
         if (mMode == MODE_WAKE_AND_UNLOCK_PULSING && pulsingOrAod()) {
             // If we are waking the device up while we are pulsing the clock and the
             // notifications would light up first, creating an unpleasant animation.
@@ -228,6 +232,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                             true /* allowEnterAnimation */);
                 } else {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK");
+
                     mDozeScrimController.abortDoze();
                 }
                 mStatusBarWindowManager.setStatusBarFocusable(false);
@@ -354,4 +359,16 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             }
         }
     };
+
+    private final ScreenLifecycle.Observer mScreenObserver =
+            new ScreenLifecycle.Observer() {
+                @Override
+                public void onScreenTurnedOn() {
+                    mHasScreenTurnedOnSinceAuthenticating = true;
+                }
+            };
+
+    public boolean hasScreenTurnedOnSinceAuthenticating() {
+        return mHasScreenTurnedOnSinceAuthenticating;
+    }
 }
