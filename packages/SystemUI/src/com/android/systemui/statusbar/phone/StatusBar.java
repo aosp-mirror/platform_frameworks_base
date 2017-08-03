@@ -142,6 +142,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.MetricsLogger;
@@ -748,7 +749,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private SysuiColorExtractor mColorExtractor;
     private ForegroundServiceController mForegroundServiceController;
     private ScreenLifecycle mScreenLifecycle;
-    private WakefulnessLifecycle mWakefulnessLifecycle;
+    @VisibleForTesting WakefulnessLifecycle mWakefulnessLifecycle;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -3776,6 +3777,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
+        if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_ASLEEP
+                && mUnlockMethodCache.canSkipBouncer()
+                && isPulsing()) {
+            // Reuse the fingerprint wake-and-unlock transition if we dismiss keyguard from a pulse.
+            // TODO: Factor this transition out of FingerprintUnlockController.
+            mFingerprintUnlockController.startWakeAndUnlock(
+                    FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING);
+        }
         if (mStatusBarKeyguardViewManager.isShowing()) {
             mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
                     afterKeyguardGone);
