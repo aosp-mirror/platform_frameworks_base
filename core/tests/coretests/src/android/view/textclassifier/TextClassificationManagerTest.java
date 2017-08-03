@@ -32,9 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
-import java.util.Locale;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationManagerTest {
@@ -177,20 +174,6 @@ public class TextClassificationManagerTest {
     }
 
     @Test
-    public void testLanguageDetection() {
-        if (isTextClassifierDisabled()) return;
-
-        String text = "This is a piece of English text";
-        assertThat(mTcm.detectLanguages(text), isDetectedLanguage("en"));
-
-        text = "Das ist ein deutscher Text";
-        assertThat(mTcm.detectLanguages(text), isDetectedLanguage("de"));
-
-        text = "これは日本語のテキストです";
-        assertThat(mTcm.detectLanguages(text), isDetectedLanguage("ja"));
-    }
-
-    @Test
     public void testSetTextClassifier() {
         TextClassifier classifier = mock(TextClassifier.class);
         mTcm.setTextClassifier(classifier);
@@ -267,32 +250,6 @@ public class TextClassificationManagerTest {
                 description.appendText("text=").appendValue(text)
                         .appendText(", type=").appendValue(type)
                         .appendText(", intent.data=").appendValue(intentUri);
-            }
-        };
-    }
-
-    private static Matcher<List<TextLanguage>> isDetectedLanguage(final String language) {
-        return new BaseMatcher<List<TextLanguage>>() {
-            @Override
-            public boolean matches(Object o) {
-                if (o instanceof List) {
-                    List languages = (List) o;
-                    if (!languages.isEmpty()) {
-                        Object o1 = languages.get(0);
-                        if (o1 instanceof TextLanguage) {
-                            TextLanguage lang = (TextLanguage) o1;
-                            return lang.getLanguageCount() > 0
-                                    && new Locale(language).getLanguage()
-                                            .equals(lang.getLanguage(0).getLanguage());
-                        }
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendValue(String.format("%s", language));
             }
         };
     }
