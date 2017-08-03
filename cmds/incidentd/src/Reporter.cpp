@@ -35,7 +35,7 @@
 /**
  * The directory where the incident reports are stored.
  */
-static const String8 INCIDENT_DIRECTORY("/data/incidents");
+static const String8 INCIDENT_DIRECTORY("/data/misc/incidents");
 
 // ================================================================================
 static status_t write_all(int fd, uint8_t const* buf, size_t size)

@@ -10,7 +10,7 @@ cc_defaults {
 
     srcs: [
         "IncidentHelper.cpp",
-        "strutil.cpp",
+        "ih_util.cpp",
     ],
 
     shared_libs: [
@@ -38,6 +38,7 @@ cc_test {
 
     srcs: [
         "tests/IncidentHelper_test.cpp",
+        "tests/ih_util_test.cpp",
     ],
 
     data: [

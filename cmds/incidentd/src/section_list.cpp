@@ -21,6 +21,7 @@
  */
 const Section* SECTION_LIST[] = {
     // Linux Services
+    new CommandSection(2000, "/system/xbin/procrank", NULL),
     new FileSection(2002, "/d/wakeup_sources"),
 
     // System Services

@@ -22,6 +22,8 @@
 #include <gtest/gtest.h>
 #include <string.h>
 
+const int QUICK_TIMEOUT_MS = 100;
+
 using namespace android::base;
 using namespace std;
 using ::testing::StrEq;
@@ -62,7 +64,56 @@ TEST(SectionTest, FileSection) {
 TEST(SectionTest, FileSectionTimeout) {
     TemporaryFile tf;
     // id -1 is timeout parser
-    FileSection fs(-1, tf.path);
+    FileSection fs(-1, tf.path, QUICK_TIMEOUT_MS);
     ReportRequestSet requests;
     ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+}
+
+TEST(SectionTest, CommandSectionConstructor) {
+    CommandSection cs1(1, "echo", "\"this is a test\"", "ooo", NULL);
+    CommandSection cs2(2, "single_command", NULL);
+    CommandSection cs3(1, 3123, "echo", "\"this is a test\"", "ooo", NULL);
+    CommandSection cs4(2, 43214, "single_command", NULL);
+
+    EXPECT_THAT(cs1.name.string(), StrEq("echo \"this is a test\" ooo"));
+    EXPECT_THAT(cs2.name.string(), StrEq("single_command"));
+    EXPECT_EQ(3123, cs3.timeoutMs);
+    EXPECT_EQ(43214, cs4.timeoutMs);
+    EXPECT_THAT(cs3.name.string(), StrEq("echo \"this is a test\" ooo"));
+    EXPECT_THAT(cs4.name.string(), StrEq("single_command"));
+}
+
+TEST(SectionTest, CommandSectionEcho) {
+    CommandSection cs(0, "/system/bin/echo", "about", NULL);
+    ReportRequestSet requests;
+    requests.setMainFd(STDOUT_FILENO);
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\x06\ntuoba"));
+}
+
+TEST(SectionTest, CommandSectionCommandTimeout) {
+    CommandSection cs(0, QUICK_TIMEOUT_MS, "/system/bin/yes", NULL);
+    ReportRequestSet requests;
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
+}
+
+TEST(SectionTest, CommandSectionIncidentHelperTimeout) {
+    CommandSection cs(-1, QUICK_TIMEOUT_MS, "/system/bin/echo", "about", NULL);
+    ReportRequestSet requests;
+    requests.setMainFd(STDOUT_FILENO);
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
+}
+
+TEST(SectionTest, CommandSectionBadCommand) {
+    CommandSection cs(0, "echo", "about", NULL);
+    ReportRequestSet requests;
+    ASSERT_EQ(NAME_NOT_FOUND, cs.Execute(&requests));
+}
+
+TEST(SectionTest, CommandSectionBadCommandAndTimeout) {
+    CommandSection cs(-1, QUICK_TIMEOUT_MS, "nonexistcommand", "-opt", NULL);
+    ReportRequestSet requests;
+    // timeout will return first
+    ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
 }
