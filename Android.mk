@@ -602,8 +602,10 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(framework_res_R_stamp)
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp bouncycastle ext
 
-LOCAL_STATIC_JAVA_LIBRARIES :=                          \
-    framework-protos                                    \
+LOCAL_STATIC_JAVA_LIBRARIES :=                           \
+    framework-protos                                     \
+    android.hidl.base-V1.0-java                          \
+    android.hardware.cas-V1.0-java                       \
     android.hardware.health-V1.0-java-constants          \
     android.hardware.thermal-V1.0-java-constants         \
     android.hardware.tv.input-V1.0-java-constants        \
@@ -612,8 +614,6 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     android.hardware.vibrator-V1.0-java-constants        \
     android.hardware.vibrator-V1.1-java-constants        \
     android.hardware.wifi-V1.0-java-constants            \
-
-include hardware/interfaces/cas/1.0/CasHal.mk
 
 # Loaded with System.loadLibrary by android.view.textclassifier
 LOCAL_REQUIRED_MODULES += libtextclassifier
