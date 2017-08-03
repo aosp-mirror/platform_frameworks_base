@@ -296,7 +296,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jS
 
     auto selector = convert::ProgramSelectorToHal(env, jSelector);
     if (halTuner11 != nullptr) {
-        convert::ThrowIfFailed(env, halTuner11->tune_1_1(selector));
+        convert::ThrowIfFailed(env, halTuner11->tuneByProgramSelector(selector));
     } else {
         uint32_t channel, subChannel;
         if (!V1_1::utils::getLegacyChannel(selector, &channel, &subChannel)) {
