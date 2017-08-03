@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
@@ -31,6 +32,10 @@ import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
+
+import static com.google.common.base.Preconditions.checkElementIndex;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * This visitor does two things:
@@ -140,10 +145,26 @@ class LockFindingClassVisitor extends ClassVisitor {
                     if (operand instanceof LockTargetState) {
                         LockTargetState state = (LockTargetState) operand;
                         for (int j = 0; j < state.getTargets().size(); j++) {
+                            // The instruction after a monitor_exit should be a label for the end of the implicit
+                            // catch block that surrounds the synchronized block to call monitor_exit when an exception
+                            // occurs.
+                            checkState(instructions.get(i + 1).getType() == AbstractInsnNode.LABEL,
+                                "Expected to find label after monitor exit");
+
+                            int labelIndex = i + 1;
+                            checkElementIndex(labelIndex, instructions.size());
+
+                            LabelNode label = (LabelNode)instructions.get(labelIndex);
+
+                            checkNotNull(handlersMap.get(i));
+                            checkElementIndex(0, handlersMap.get(i).size());
+                            checkState(handlersMap.get(i).get(0).end == label,
+                                "Expected label to be the end of monitor exit's try block");
+
                             LockTarget target = state.getTargets().get(j);
                             MethodInsnNode call = new MethodInsnNode(Opcodes.INVOKESTATIC,
                                     target.getPostOwner(), target.getPostMethod(), "()V", false);
-                            insertMethodCallAfter(mn, frameMap, handlersMap, s, i, call);
+                            insertMethodCallAfter(mn, frameMap, handlersMap, label, labelIndex, call);
                         }
                     }
                 }
