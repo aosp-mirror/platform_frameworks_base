@@ -21,6 +21,8 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 import android.view.IWallpaperVisibilityListener;
@@ -31,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
@@ -75,6 +78,14 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
                 Log.w(TAG, "Can't listen to wallpaper visibility changes", e);
             }
         }
+
+        WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
+        if (wallpaperManager != null) {
+            // Listen to all users instead of only the current one.
+            wallpaperManager.removeOnColorsChangedListener(this);
+            wallpaperManager.addOnColorsChangedListener(this, null /* handler */,
+                    UserHandle.USER_ALL);
+        }
     }
 
     private void updateDefaultGradients(WallpaperColors colors) {
@@ -82,7 +93,12 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
     }
 
     @Override
-    public void onColorsChanged(WallpaperColors colors, int which) {
+    public void onColorsChanged(WallpaperColors colors, int which, int userId) {
+        if (userId != KeyguardUpdateMonitor.getCurrentUser()) {
+            // Colors do not belong to current user, ignoring.
+            return;
+        }
+
         super.onColorsChanged(colors, which);
 
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {

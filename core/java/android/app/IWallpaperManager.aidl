@@ -144,15 +144,15 @@ interface IWallpaperManager {
      * or {@link WallpaperManager#FLAG_SYSTEM}
      * @return colors of chosen wallpaper
      */
-    WallpaperColors getWallpaperColors(int which);
+    WallpaperColors getWallpaperColors(int which, int userId);
 
     /**
      * Register a callback to receive color updates
      */
-    void registerWallpaperColorsCallback(IWallpaperManagerCallback cb);
+    void registerWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId);
 
     /**
      * Unregister a callback that was receiving color updates
      */
-    void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb);
+    void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId);
 }
