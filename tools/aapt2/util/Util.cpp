@@ -520,11 +520,10 @@ bool Tokenizer::iterator::operator!=(const iterator& rhs) const {
   return !(*this == rhs);
 }
 
-Tokenizer::iterator::iterator(StringPiece s, char sep, StringPiece tok,
-                              bool end)
+Tokenizer::iterator::iterator(const StringPiece& s, char sep, const StringPiece& tok, bool end)
     : str_(s), separator_(sep), token_(tok), end_(end) {}
 
-Tokenizer::Tokenizer(StringPiece str, char sep)
+Tokenizer::Tokenizer(const StringPiece& str, char sep)
     : begin_(++iterator(str, sep, StringPiece(str.begin() - 1, 0), false)),
       end_(str, sep, StringPiece(str.end(), 0), true) {}
 

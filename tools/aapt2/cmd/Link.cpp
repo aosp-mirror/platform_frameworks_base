@@ -915,7 +915,7 @@ class LinkCommand {
 
   bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
                      const StringPiece& out_package, const JavaClassGeneratorOptions& java_options,
-                     const Maybe<std::string> out_text_symbols_path = {}) {
+                     const Maybe<std::string>& out_text_symbols_path = {}) {
     if (!options_.generate_java_class_path) {
       return true;
     }
