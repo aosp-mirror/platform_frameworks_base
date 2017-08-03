@@ -87,25 +87,29 @@ public class DozeSensors {
                         mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION),
                         null /* setting */,
                         dozeParameters.getPulseOnSigMotion(),
-                        DozeLog.PULSE_REASON_SENSOR_SIGMOTION, false /* touchCoords */),
+                        DozeLog.PULSE_REASON_SENSOR_SIGMOTION, false /* touchCoords */,
+                        false /* touchscreen */),
                 mPickupSensor = new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PULSE_ON_PICK_UP,
                         config.pulseOnPickupAvailable(),
-                        DozeLog.PULSE_REASON_SENSOR_PICKUP, false /* touchCoords */),
+                        DozeLog.PULSE_REASON_SENSOR_PICKUP, false /* touchCoords */,
+                        false /* touchscreen */),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
                         true /* configured */,
                         DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
-                        dozeParameters.doubleTapReportsTouchCoordinates()),
+                        dozeParameters.doubleTapReportsTouchCoordinates(),
+                        true /* touchscreen */),
                 new TriggerSensor(
                         findSensorWithType(config.longPressSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                         false /* settingDef */,
                         true /* configured */,
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
-                        true /* reports touch coordinates */),
+                        true /* reports touch coordinates */,
+                        true /* touchscreen */),
         };
 
         mProxSensor = new ProxSensor();
@@ -138,6 +142,15 @@ public class DozeSensors {
         }
         if (!listen) {
             mResolver.unregisterContentObserver(mSettingsObserver);
+        }
+    }
+
+    /** Set the listening state of only the sensors that require the touchscreen. */
+    public void setTouchscreenSensorsListening(boolean listening) {
+        for (TriggerSensor sensor : mSensors) {
+            if (sensor.mRequiresTouchscreen) {
+                sensor.setListening(listening);
+            }
         }
     }
 
@@ -278,25 +291,28 @@ public class DozeSensors {
         final String mSetting;
         final boolean mReportsTouchCoordinates;
         final boolean mSettingDefault;
+        final boolean mRequiresTouchscreen;
 
         private boolean mRequested;
         private boolean mRegistered;
         private boolean mDisabled;
 
         public TriggerSensor(Sensor sensor, String setting, boolean configured, int pulseReason,
-                boolean reportsTouchCoordinates) {
+                boolean reportsTouchCoordinates, boolean requiresTouchscreen) {
             this(sensor, setting, true /* settingDef */, configured, pulseReason,
-                    reportsTouchCoordinates);
+                    reportsTouchCoordinates, requiresTouchscreen);
         }
 
         public TriggerSensor(Sensor sensor, String setting, boolean settingDef,
-                boolean configured, int pulseReason, boolean reportsTouchCoordinates) {
+                boolean configured, int pulseReason, boolean reportsTouchCoordinates,
+                boolean requiresTouchscreen) {
             mSensor = sensor;
             mSetting = setting;
             mSettingDefault = settingDef;
             mConfigured = configured;
             mPulseReason = pulseReason;
             mReportsTouchCoordinates = reportsTouchCoordinates;
+            mRequiresTouchscreen = requiresTouchscreen;
         }
 
         public void setListening(boolean listen) {
