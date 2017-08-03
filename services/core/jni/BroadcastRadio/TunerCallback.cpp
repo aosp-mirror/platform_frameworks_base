@@ -58,7 +58,7 @@ static struct {
         jmethodID handleHwFailure;
         jmethodID onError;
         jmethodID onConfigurationChanged;
-        jmethodID onProgramInfoChanged;
+        jmethodID onCurrentProgramInfoChanged;
         jmethodID onTrafficAnnouncement;
         jmethodID onEmergencyAnnouncement;
         jmethodID onAntennaState;
@@ -111,7 +111,7 @@ public:
     virtual Return<void> backgroundScanAvailable(bool isAvailable);
     virtual Return<void> backgroundScanComplete(ProgramListResult result);
     virtual Return<void> programListChanged();
-    virtual Return<void> programInfoChanged();
+    virtual Return<void> currentProgramInfoChanged();
 };
 
 struct TunerCallbackContext {
@@ -192,7 +192,7 @@ Return<void> NativeCallback::tuneComplete_1_1(Result result, const ProgramSelect
 
     mCallbackThread.enqueue([result, this](JNIEnv *env) {
         if (result == Result::OK) {
-            env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
+            env->CallVoidMethod(mJCallback, gjni.TunerCallback.onCurrentProgramInfoChanged);
         } else {
             TunerError cause = TunerError::CANCELLED;
             if (result == Result::TIMEOUT) cause = TunerError::SCAN_TIMEOUT;
@@ -254,7 +254,7 @@ Return<void> NativeCallback::newMetadata(uint32_t channel, uint32_t subChannel,
     }
 
     mCallbackThread.enqueue([this, metadata](JNIEnv *env) {
-        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onCurrentProgramInfoChanged);
     });
 
     return Return<void>();
@@ -297,11 +297,11 @@ Return<void> NativeCallback::programListChanged() {
     return Return<void>();
 }
 
-Return<void> NativeCallback::programInfoChanged() {
+Return<void> NativeCallback::currentProgramInfoChanged() {
     ALOGV("%s", __func__);
 
     mCallbackThread.enqueue([this](JNIEnv *env) {
-        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onCurrentProgramInfoChanged);
     });
 
     return Return<void>();
@@ -379,8 +379,8 @@ void register_android_server_broadcastradio_TunerCallback(JavaVM *vm, JNIEnv *en
     gjni.TunerCallback.onError = GetMethodIDOrDie(env, tunerCbClass, "onError", "(I)V");
     gjni.TunerCallback.onConfigurationChanged = GetMethodIDOrDie(env, tunerCbClass,
             "onConfigurationChanged", "(Landroid/hardware/radio/RadioManager$BandConfig;)V");
-    gjni.TunerCallback.onProgramInfoChanged = GetMethodIDOrDie(env, tunerCbClass,
-            "onProgramInfoChanged", "()V");
+    gjni.TunerCallback.onCurrentProgramInfoChanged = GetMethodIDOrDie(env, tunerCbClass,
+            "onCurrentProgramInfoChanged", "()V");
     gjni.TunerCallback.onTrafficAnnouncement = GetMethodIDOrDie(env, tunerCbClass,
             "onTrafficAnnouncement", "(Z)V");
     gjni.TunerCallback.onEmergencyAnnouncement = GetMethodIDOrDie(env, tunerCbClass,
