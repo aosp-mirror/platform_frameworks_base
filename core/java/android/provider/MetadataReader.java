@@ -43,13 +43,15 @@ public final class MetadataReader {
             ExifInterface.TAG_COPYRIGHT,
             ExifInterface.TAG_DATETIME,
             ExifInterface.TAG_EXPOSURE_TIME,
+            ExifInterface.TAG_FOCAL_LENGTH,
             ExifInterface.TAG_F_NUMBER,
             ExifInterface.TAG_GPS_LATITUDE,
             ExifInterface.TAG_GPS_LATITUDE_REF,
             ExifInterface.TAG_GPS_LONGITUDE,
             ExifInterface.TAG_GPS_LONGITUDE_REF,
-            ExifInterface.TAG_IMAGE_WIDTH,
             ExifInterface.TAG_IMAGE_LENGTH,
+            ExifInterface.TAG_IMAGE_WIDTH,
+            ExifInterface.TAG_ISO_SPEED_RATINGS,
             ExifInterface.TAG_MAKE,
             ExifInterface.TAG_MODEL,
             ExifInterface.TAG_ORIENTATION,
@@ -221,19 +223,7 @@ public final class MetadataReader {
      * @param stream InputStream containing a file
      * @param mimeType type of the given file
      * @param tags a variable amount of keys to differentiate which tags the user wants
-     *             if null, returns a default set of data from the following keys:
-     *             Exif data:
-     *             ExifInterface.TAG_IMAGE_WIDTH,
-     *             ExifInterface.TAG_IMAGE_LENGTH,
-     *             ExifInterface.TAG_DATETIME,
-     *             ExifInterface.TAG_GPS_LATITUDE,
-     *             ExifInterface.TAG_GPS_LATITUDE_REF,
-     *             ExifInterface.TAG_GPS_LONGITUDE,
-     *             ExifInterface.TAG_GPS_LONGITUDE_REF,
-     *             ExifInterface.TAG_MAKE,
-     *             ExifInterface.TAG_MODEL,
-     *             ExifInterface.TAG_APERTURE,
-     *             ExifInterface.TAG_SHUTTER_SPEED_VALUE
+     *             if null, returns a default set of data. See {@link DEFAULT_EXIF_TAGS}.
      * @throws IOException when the file doesn't exist
      */
     public static void getMetadata(Bundle metadata, InputStream stream, String mimeType,
@@ -257,18 +247,7 @@ public final class MetadataReader {
      *
      * @param stream the input stream from which to extra data.
      * @param tags a list of ExifInterface tags that are used to retrieve data.
-     *             if null, returns a default set of data from the following keys:
-     *             ExifInterface.TAG_IMAGE_WIDTH,
-     *             ExifInterface.TAG_IMAGE_LENGTH,
-     *             ExifInterface.TAG_DATETIME,
-     *             ExifInterface.TAG_GPS_LATITUDE,
-     *             ExifInterface.TAG_GPS_LATITUDE_REF,
-     *             ExifInterface.TAG_GPS_LONGITUDE,
-     *             ExifInterface.TAG_GPS_LONGITUDE_REF,
-     *             ExifInterface.TAG_MAKE,
-     *             ExifInterface.TAG_MODEL,
-     *             ExifInterface.TAG_APERTURE,
-     *             ExifInterface.TAG_SHUTTER_SPEED_VALUE
+     *             if null, returns a default set of data. See {@link DEFAULT_EXIF_TAGS}.
      */
     private static Bundle getExifData(InputStream stream, @Nullable String[] tags)
             throws IOException {
