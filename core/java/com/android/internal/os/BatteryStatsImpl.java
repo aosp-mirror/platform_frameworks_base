@@ -3652,7 +3652,12 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteUidProcessStateLocked(int uid, int state) {
-        uid = mapUid(uid);
+        int parentUid = mapUid(uid);
+        if (uid != parentUid) {
+            // Isolated UIDs process state is already rolled up into parent, so no need to track
+            // Otherwise the parent's process state will get downgraded incorrectly
+            return;
+        }
         getUidStatsLocked(uid).updateUidProcessStateLocked(state);
     }
 
