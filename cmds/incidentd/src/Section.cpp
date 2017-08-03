@@ -119,7 +119,7 @@ FileSection::~FileSection() {}
 status_t FileSection::Execute(ReportRequestSet* requests) const {
     // read from mFilename first, make sure the file is available
     // add O_CLOEXEC to make sure it is closed when exec incident helper
-    int fd = open(mFilename, O_RDONLY | O_CLOEXEC, 0444);
+    int fd = open(mFilename, O_RDONLY | O_CLOEXEC);
     if (fd == -1) {
        ALOGW("FileSection '%s' failed to open file", this->name.string());
        return -errno;
