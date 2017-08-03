@@ -53,6 +53,8 @@ public class TestAccessPointBuilder {
     private int mSecurity = AccessPoint.SECURITY_NONE;
     private WifiConfiguration mWifiConfig;
     private WifiInfo mWifiInfo;
+    private boolean mIsCarrierAp = false;
+    private String mCarrierName = null;
 
     Context mContext;
     private ArrayList<ScanResult> mScanResultCache;
@@ -85,6 +87,10 @@ public class TestAccessPointBuilder {
         }
         bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
         bundle.putInt(AccessPoint.KEY_SPEED, mSpeed);
+        bundle.putBoolean(AccessPoint.KEY_IS_CARRIER_AP, mIsCarrierAp);
+        if (mCarrierName != null) {
+            bundle.putString(AccessPoint.KEY_CARRIER_NAME, mCarrierName);
+        }
 
         AccessPoint ap = new AccessPoint(mContext, bundle);
         ap.setRssi(mRssi);
@@ -220,6 +226,16 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setScanResultCache(ArrayList<ScanResult> scanResultCache) {
         mScanResultCache = scanResultCache;
+        return this;
+    }
+
+    public TestAccessPointBuilder setIsCarrierAp(boolean isCarrierAp) {
+        mIsCarrierAp = isCarrierAp;
+        return this;
+    }
+
+    public TestAccessPointBuilder setCarrierName(String carrierName) {
+        mCarrierName = carrierName;
         return this;
     }
 }
