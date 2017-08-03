@@ -28,6 +28,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.DirectByteBuffer;
+import java.nio.NioUtils;
 
 import sun.misc.Cleaner;
 
@@ -191,11 +192,16 @@ public final class SharedMemory implements Parcelable, Closeable {
     }
 
     /**
-     * Creates an mmap of the SharedMemory with the specified prot, offset, and length.
+     * Creates an mmap of the SharedMemory with the specified prot, offset, and length. This will
+     * always produce a new ByteBuffer window to the backing shared memory region. Every call
+     * to map() may be paired with a call to {@link #unmap(ByteBuffer)} when the ByteBuffer
+     * returned by map() is no longer needed.
      *
      * @param prot A bitwise-or'd combination of PROT_READ, PROT_WRITE, PROT_EXEC, or PROT_NONE.
-     * @param offset The offset into the shared memory to begin mapping
-     * @param length The length of the region to map
+     * @param offset The offset into the shared memory to begin mapping. Must be >= 0 and less than
+     *         getSize().
+     * @param length The length of the region to map. Must be > 0 and offset + length must not
+     *         exceed getSize().
      * @return A ByteBuffer mapping.
      * @throws ErrnoException if the mmap call failed.
      */
@@ -203,7 +209,7 @@ public final class SharedMemory implements Parcelable, Closeable {
         checkOpen();
         validateProt(prot);
         if (offset < 0) {
-            throw new IllegalArgumentException("Offset must be > 0");
+            throw new IllegalArgumentException("Offset must be >= 0");
         }
         if (length <= 0) {
             throw new IllegalArgumentException("Length must be > 0");
@@ -218,15 +224,16 @@ public final class SharedMemory implements Parcelable, Closeable {
     }
 
     /**
-     * Unmaps a buffer previously returned by {@link #map(int, int, int)}
+     * Unmaps a buffer previously returned by {@link #map(int, int, int)}. This will immediately
+     * release the backing memory of the ByteBuffer, invalidating all references to it. Only
+     * call this method if there are no duplicates of the ByteBuffer in use and don't
+     * access the ByteBuffer after calling this method.
+     *
      * @param buffer The buffer to unmap
      */
     public static void unmap(@NonNull ByteBuffer buffer) {
         if (buffer instanceof DirectByteBuffer) {
-            Cleaner cleaner = ((DirectByteBuffer) buffer).cleaner();
-            if (cleaner != null) {
-                cleaner.clean();
-            }
+            NioUtils.freeDirectBuffer(buffer);
         } else {
             throw new IllegalArgumentException(
                     "ByteBuffer wasn't created by #map(int, int, int); can't unmap");
