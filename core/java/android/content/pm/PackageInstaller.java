@@ -1103,6 +1103,26 @@ public class PackageInstaller {
         }
 
         /**
+         * Check if there are hidden options set.
+         *
+         * <p>Hidden options are those options that cannot be verified via public or system-api
+         * methods on {@link SessionInfo}.
+         *
+         * @return {@code true} if any hidden option is set.
+         *
+         * @hide
+         */
+        public boolean areHiddenOptionsSet() {
+            return (installFlags & (PackageManager.INSTALL_ALLOW_DOWNGRADE
+                    | PackageManager.INSTALL_DONT_KILL_APP
+                    | PackageManager.INSTALL_INSTANT_APP
+                    | PackageManager.INSTALL_FULL_APP
+                    | PackageManager.INSTALL_VIRTUAL_PRELOAD
+                    | PackageManager.INSTALL_ALLOCATE_AGGRESSIVE)) != installFlags
+                    || abiOverride != null || volumeUuid != null;
+        }
+
+        /**
          * Provide value of {@link PackageInfo#installLocation}, which may be used
          * to determine where the app will be staged. Defaults to
          * {@link PackageInfo#INSTALL_LOCATION_INTERNAL_ONLY}.
@@ -1362,6 +1382,19 @@ public class PackageInstaller {
         public CharSequence appLabel;
 
         /** {@hide} */
+        public int installLocation;
+        /** {@hide} */
+        public Uri originatingUri;
+        /** {@hide} */
+        public int originatingUid;
+        /** {@hide} */
+        public Uri referrerUri;
+        /** {@hide} */
+        public String[] grantedRuntimePermissions;
+        /** {@hide} */
+        public int installFlags;
+
+        /** {@hide} */
         public SessionInfo() {
         }
 
@@ -1380,6 +1413,13 @@ public class PackageInstaller {
             appPackageName = source.readString();
             appIcon = source.readParcelable(null);
             appLabel = source.readString();
+
+            installLocation = source.readInt();
+            originatingUri = source.readParcelable(null);
+            originatingUid = source.readInt();
+            referrerUri = source.readParcelable(null);
+            grantedRuntimePermissions = source.readStringArray();
+            installFlags = source.readInt();
         }
 
         /**
@@ -1503,6 +1543,130 @@ public class PackageInstaller {
             return intent;
         }
 
+        /**
+         * Get the mode of the session as set in the constructor of the {@link SessionParams}.
+         *
+         * @return One of {@link SessionParams#MODE_FULL_INSTALL}
+         *         or {@link SessionParams#MODE_INHERIT_EXISTING}
+         */
+        public int getMode() {
+            return mode;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setInstallLocation(int)}.
+         */
+        public int getInstallLocation() {
+            return installLocation;
+        }
+
+        /**
+         * Get the value as set in {@link SessionParams#setSize(long)}.
+         *
+         * <p>The value is a hint and does not have to match the actual size.
+         */
+        public long getSize() {
+            return sizeBytes;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setOriginatingUri(Uri)}.
+         */
+        public @Nullable Uri getOriginatingUri() {
+            return originatingUri;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setOriginatingUid(int)}.
+         */
+        public int getOriginatingUid() {
+            return originatingUid;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setReferrerUri(Uri)}
+         */
+        public @Nullable Uri getReferrerUri() {
+            return referrerUri;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setGrantedRuntimePermissions(String[])}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public @Nullable String[] getGrantedRuntimePermissions() {
+            return grantedRuntimePermissions;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setAllowDowngrade(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getAllowDowngrade() {
+            return (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setDontKillApp(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getDontKillApp() {
+            return (installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0;
+        }
+
+        /**
+         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code true},
+         * return true. If it was called with {@code false} or if it was not called return false.
+         *
+         * @hide
+         *
+         * @see #getInstallAsFullApp
+         */
+        @SystemApi
+        public boolean getInstallAsInstantApp(boolean isInstantApp) {
+            return (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+        }
+
+        /**
+         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code false},
+         * return true. If it was called with {@code true} or if it was not called return false.
+         *
+         * @hide
+         *
+         * @see #getInstallAsInstantApp
+         */
+        @SystemApi
+        public boolean getInstallAsFullApp(boolean isInstantApp) {
+            return (installFlags & PackageManager.INSTALL_FULL_APP) != 0;
+        }
+
+        /**
+         * Get if {@link SessionParams#setInstallAsVirtualPreload()} was called.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getInstallAsVirtualPreload() {
+            return (installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setAllocateAggressive(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getAllocateAggressive() {
+            return (installFlags & PackageManager.INSTALL_ALLOCATE_AGGRESSIVE) != 0;
+        }
+
+
         /** {@hide} */
         @Deprecated
         public @Nullable Intent getDetailsIntent() {
@@ -1529,6 +1693,13 @@ public class PackageInstaller {
             dest.writeString(appPackageName);
             dest.writeParcelable(appIcon, flags);
             dest.writeString(appLabel != null ? appLabel.toString() : null);
+
+            dest.writeInt(installLocation);
+            dest.writeParcelable(originatingUri, flags);
+            dest.writeInt(originatingUid);
+            dest.writeParcelable(referrerUri, flags);
+            dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeInt(installFlags);
         }
 
         public static final Parcelable.Creator<SessionInfo>

@@ -388,6 +388,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 info.appIcon = params.appIcon;
             }
             info.appLabel = params.appLabel;
+
+            info.installLocation = params.installLocation;
+            info.originatingUri = params.originatingUri;
+            info.originatingUid = params.originatingUid;
+            info.referrerUri = params.referrerUri;
+            info.grantedRuntimePermissions = params.grantedRuntimePermissions;
+            info.installFlags = params.installFlags;
         }
         return info;
     }
@@ -759,6 +766,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final PackageInfo installedPkgInfo = mPm.getPackageInfo(
                 params.appPackageName, PackageManager.GET_SIGNATURES
                         | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
+
+        // Only install flags that can be verified by the app the session is transferred to are
+        // allowed. The parameters can be read via PackageInstaller.SessionInfo.
+        if (!params.areHiddenOptionsSet()) {
+            throw new SecurityException("Can only transfer sessions that use public options");
+        }
 
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
