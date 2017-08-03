@@ -548,29 +548,7 @@ public class Typeface {
             final int weight = (mWeight == RESOLVE_BY_FONT_TABLE) ? base.mWeight : mWeight;
             final boolean italic =
                     (mItalic == RESOLVE_BY_FONT_TABLE) ? (base.mStyle & ITALIC) != 0 : mItalic == 1;
-            final int key = weight << 1 | (italic ? 1 : 0);
-
-            Typeface typeface;
-            synchronized(sLock) {
-                SparseArray<Typeface> innerCache = sTypefaceCache.get(base.native_instance);
-                if (innerCache != null) {
-                    typeface = innerCache.get(key);
-                    if (typeface != null) {
-                        return typeface;
-                    }
-                }
-
-                typeface = new Typeface(
-                        nativeCreateFromTypefaceWithExactStyle(
-                                base.native_instance, weight, italic));
-
-                if (innerCache == null) {
-                    innerCache = new SparseArray<>(4); // [regular, bold] x [upright, italic]
-                    sTypefaceCache.put(base.native_instance, innerCache);
-                }
-                innerCache.put(key, typeface);
-            }
-            return typeface;
+            return createWeightStyle(base, weight, italic);
         }
 
         /**
@@ -688,7 +666,8 @@ public class Typeface {
      * style from the same family of an existing typeface object. If family is
      * null, this selects from the default font's family.
      *
-     * @param family May be null. The name of the existing type face.
+     * @param family An existing {@link Typeface} object. In case of {@code null}, the default
+     *               typeface is used instead.
      * @param style  The style (normal, bold, italic) of the typeface.
      *               e.g. NORMAL, BOLD, ITALIC, BOLD_ITALIC
      * @return The best matching typeface.
@@ -724,6 +703,53 @@ public class Typeface {
         }
         styles.put(style, typeface);
 
+        return typeface;
+    }
+
+    /**
+     * Creates a typeface object that best matches the specified existing typeface and the specified
+     * weight and italic style
+     *
+     * @param family An existing {@link Typeface} object. In case of {@code null}, the default
+     *               typeface is used instead.
+     * @param weight The desired weight to be drawn.
+     * @param italic {@code true} if italic style is desired to be drawn. Otherwise, {@code false}
+     * @return A {@link Typeface} object for drawing specified weight and italic style. Never
+     *         returns {@code null}
+     */
+    public static @NonNull Typeface create(@Nullable Typeface family,
+            @IntRange(from = 1, to = 1000) int weight, boolean italic) {
+        Preconditions.checkArgumentInRange(weight, 0, 1000, "weight");
+        if (family == null) {
+            family = sDefaultTypeface;
+        }
+        return createWeightStyle(family, weight, italic);
+    }
+
+    private static @NonNull Typeface createWeightStyle(@NonNull Typeface base,
+            @IntRange(from = 1, to = 1000) int weight, boolean italic) {
+        final int key = weight << 1 | (italic ? 1 : 0);
+
+        Typeface typeface;
+        synchronized(sLock) {
+            SparseArray<Typeface> innerCache = sTypefaceCache.get(base.native_instance);
+            if (innerCache != null) {
+                typeface = innerCache.get(key);
+                if (typeface != null) {
+                    return typeface;
+                }
+            }
+
+            typeface = new Typeface(
+                    nativeCreateFromTypefaceWithExactStyle(
+                            base.native_instance, weight, italic));
+
+            if (innerCache == null) {
+                innerCache = new SparseArray<>(4); // [regular, bold] x [upright, italic]
+                sTypefaceCache.put(base.native_instance, innerCache);
+            }
+            innerCache.put(key, typeface);
+        }
         return typeface;
     }
 
