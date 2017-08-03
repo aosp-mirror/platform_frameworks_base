@@ -290,7 +290,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         boolean nowGone = mReportedVisibilityResults.nowGone;
 
         boolean nowDrawn = numInteresting > 0 && numDrawn >= numInteresting;
-        boolean nowVisible = numInteresting > 0 && numVisible >= numInteresting;
+        boolean nowVisible = numInteresting > 0 && numVisible >= numInteresting && !hidden;
         if (!nowGone) {
             // If the app is not yet gone, then it can only become visible/drawn.
             if (!nowDrawn) {
