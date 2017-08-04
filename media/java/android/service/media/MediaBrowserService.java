@@ -700,6 +700,13 @@ public abstract class MediaBrowserService extends Service {
                 new Result<MediaBrowser.MediaItem>(itemId) {
             @Override
             void onResultSent(MediaBrowser.MediaItem item, @ResultFlags int flag) {
+                if (mConnections.get(connection.callbacks.asBinder()) != connection) {
+                    if (DBG) {
+                        Log.d(TAG, "Not sending onLoadItem result for connection that has"
+                                + " been disconnected. pkg=" + connection.pkg + " id=" + itemId);
+                    }
+                    return;
+                }
                 if ((flag & RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED) != 0) {
                     receiver.send(RESULT_ERROR, null);
                     return;
