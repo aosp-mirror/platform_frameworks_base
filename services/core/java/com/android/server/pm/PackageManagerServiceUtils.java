@@ -27,7 +27,6 @@ import com.android.internal.util.ArrayUtils;
 import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
@@ -144,8 +143,9 @@ public class PackageManagerServiceUtils {
                 sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
+        DexManager dexManager = packageManagerService.getDexManager();
         applyPackageFilter((pkg) ->
-                packageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName), result,
+                dexManager.getPackageUseInfoOrDefault(pkg.packageName).isUsedByOtherApps(), result,
                 remainingPkgs, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
