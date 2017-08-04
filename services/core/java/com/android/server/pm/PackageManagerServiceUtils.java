@@ -25,7 +25,6 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
@@ -137,8 +136,9 @@ public class PackageManagerServiceUtils {
                 sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
+        DexManager dexManager = packageManagerService.getDexManager();
         applyPackageFilter((pkg) ->
-                packageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName), result,
+                dexManager.getPackageUseInfoOrDefault(pkg.packageName).isUsedByOtherApps(), result,
                 remainingPkgs, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
@@ -209,12 +209,10 @@ public class PackageManagerServiceUtils {
 
         // If the app was active in background during the threshold period and was used
         // by other packages.
-        // If packageUseInfo is null, it can be said that the package was not used by other
-        // packages.
         boolean isActiveInBackgroundAndUsedByOtherPackages = ((currentTimeInMillis
                 - latestPackageUseTimeInMillis)
                 < thresholdTimeinMillis)
-                && (packageUseInfo != null && packageUseInfo.isUsedByOtherApps());
+                && packageUseInfo.isUsedByOtherApps();
 
         return !isActiveInBackgroundAndUsedByOtherPackages;
     }

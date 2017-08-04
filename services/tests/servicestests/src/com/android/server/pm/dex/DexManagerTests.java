@@ -106,7 +106,7 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, mFooUser0.getBaseAndSplitDexPaths(), mUser0);
 
         // Package is not used by others, so we should get nothing back.
-        assertNull(getPackageUseInfo(mFooUser0));
+        assertNoUseInfo(mFooUser0);
     }
 
     @Test
@@ -116,7 +116,6 @@ public class DexManagerTests {
 
         // Bar is used by others now and should be in our records
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertTrue(pui.isUsedByOtherApps());
         assertTrue(pui.getDexUseInfoMap().isEmpty());
     }
@@ -128,7 +127,6 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
@@ -141,7 +139,6 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, barSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(barSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, barSecondaries, /*isUsedByOtherApps*/true, mUser0);
@@ -165,7 +162,6 @@ public class DexManagerTests {
 
         // Check bar usage. Should be used by other app (for primary and barSecondaries).
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertTrue(pui.isUsedByOtherApps());
         assertEquals(barSecondaries.size() + barSecondariesForOwnUse.size(),
                 pui.getDexUseInfoMap().size());
@@ -176,7 +172,6 @@ public class DexManagerTests {
 
         // Check foo usage. Should not be used by other app.
         pui = getPackageUseInfo(mFooUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
@@ -185,14 +180,14 @@ public class DexManagerTests {
     @Test
     public void testPackageUseInfoNotFound() {
         // Assert we don't get back data we did not previously record.
-        assertNull(getPackageUseInfo(mFooUser0));
+        assertNoUseInfo(mFooUser0);
     }
 
     @Test
     public void testInvalidIsa() {
         // Notifying with an invalid ISA should be ignored.
         notifyDexLoad(mInvalidIsa, mInvalidIsa.getSecondaryDexPaths(), mUser0);
-        assertNull(getPackageUseInfo(mInvalidIsa));
+        assertNoUseInfo(mInvalidIsa);
     }
 
     @Test
@@ -200,7 +195,7 @@ public class DexManagerTests {
         // Notifying about the load of a package which was previously not
         // register in DexManager#load should be ignored.
         notifyDexLoad(mDoesNotExist, mDoesNotExist.getBaseAndSplitDexPaths(), mUser0);
-        assertNull(getPackageUseInfo(mDoesNotExist));
+        assertNoUseInfo(mDoesNotExist);
     }
 
     @Test
@@ -208,7 +203,7 @@ public class DexManagerTests {
         // Bar from User1 tries to load secondary dex files from User0 Bar.
         // Request should be ignored.
         notifyDexLoad(mBarUser1, mBarUser0.getSecondaryDexPaths(), mUser1);
-        assertNull(getPackageUseInfo(mBarUser1));
+        assertNoUseInfo(mBarUser1);
     }
 
     @Test
@@ -217,7 +212,7 @@ public class DexManagerTests {
         // Note that the PackageManagerService already filters this out but we
         // still check that nothing goes unexpected in DexManager.
         notifyDexLoad(mBarUser0, mFooUser0.getBaseAndSplitDexPaths(), mUser1);
-        assertNull(getPackageUseInfo(mBarUser1));
+        assertNoUseInfo(mBarUser1);
     }
 
     @Test
@@ -229,7 +224,7 @@ public class DexManagerTests {
         // Before we notify about the installation of the newPackage if mFoo
         // is trying to load something from it we should not find it.
         notifyDexLoad(mFooUser0, newSecondaries, mUser0);
-        assertNull(getPackageUseInfo(newPackage));
+        assertNoUseInfo(newPackage);
 
         // Notify about newPackage install and let mFoo load its dexes.
         mDexManager.notifyPackageInstalled(newPackage.mPackageInfo, mUser0);
@@ -237,7 +232,6 @@ public class DexManagerTests {
 
         // We should get back the right info.
         PackageUseInfo pui = getPackageUseInfo(newPackage);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/true, mUser0);
@@ -254,7 +248,6 @@ public class DexManagerTests {
         notifyDexLoad(newPackage, newSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(newPackage);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/false, mUser0);
@@ -267,7 +260,6 @@ public class DexManagerTests {
 
         // Bar is used by others now and should be in our records.
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertTrue(pui.isUsedByOtherApps());
         assertTrue(pui.getDexUseInfoMap().isEmpty());
 
@@ -278,7 +270,6 @@ public class DexManagerTests {
 
         // The usedByOtherApps flag should be clear now.
         pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
     }
 
@@ -291,8 +282,7 @@ public class DexManagerTests {
 
         // We shouldn't find yet the new split as we didn't notify the package update.
         notifyDexLoad(mFooUser0, newSplits, mUser0);
-        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNull(pui);
+        assertNoUseInfo(mBarUser0);
 
         // Notify that bar is updated. splitSourceDirs will contain the updated path.
         mDexManager.notifyPackageUpdated(mBarUser0.getPackageName(),
@@ -301,7 +291,7 @@ public class DexManagerTests {
 
         // Now, when the split is loaded we will find it and we should mark Bar as usedByOthers.
         notifyDexLoad(mFooUser0, newSplits, mUser0);
-        pui = getPackageUseInfo(mBarUser0);
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
         assertNotNull(pui);
         assertTrue(pui.isUsedByOtherApps());
     }
@@ -335,7 +325,6 @@ public class DexManagerTests {
         // Foo should still be around since it's used by other apps but with no
         // secondary dex info.
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertNotNull(pui);
         assertTrue(pui.isUsedByOtherApps());
         assertTrue(pui.getDexUseInfoMap().isEmpty());
     }
@@ -350,8 +339,7 @@ public class DexManagerTests {
 
         // Foo should not be around since all its secondary dex info were deleted
         // and it is not used by other apps.
-        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertNull(pui);
+        assertNoUseInfo(mFooUser0);
     }
 
     @Test
@@ -363,8 +351,7 @@ public class DexManagerTests {
         mDexManager.notifyPackageDataDestroyed(mBarUser0.getPackageName(), UserHandle.USER_ALL);
 
         // Bar should not be around since it was removed for all users.
-        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNull(pui);
+        assertNoUseInfo(mBarUser0);
     }
 
     @Test
@@ -373,7 +360,7 @@ public class DexManagerTests {
         // Load a dex file from framework.
         notifyDexLoad(mFooUser0, Arrays.asList(frameworkDex), mUser0);
         // The dex file should not be recognized as a package.
-        assertNull(mDexManager.getPackageUseInfo(frameworkDex));
+        assertFalse(mDexManager.hasInfoOnPackage(frameworkDex));
     }
 
     @Test
@@ -383,7 +370,6 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
@@ -395,7 +381,6 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         // We expect that all the contexts are unsupported.
@@ -413,7 +398,6 @@ public class DexManagerTests {
 
         notifyDexLoad(mBarUser0, secondaries, mUser0);
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
@@ -422,7 +406,6 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0DelegateLastClassLoader, secondaries, mUser0);
 
         pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         // We expect that all the contexts to be changed to variable now.
@@ -439,7 +422,6 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertNotNull(pui);
         assertFalse(pui.isUsedByOtherApps());
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         // We expect that all the contexts are unsupported.
@@ -499,7 +481,12 @@ public class DexManagerTests {
     }
 
     private PackageUseInfo getPackageUseInfo(TestData testData) {
-        return mDexManager.getPackageUseInfo(testData.mPackageInfo.packageName);
+        assertTrue(mDexManager.hasInfoOnPackage(testData.mPackageInfo.packageName));
+        return mDexManager.getPackageUseInfoOrDefault(testData.mPackageInfo.packageName);
+    }
+
+    private void assertNoUseInfo(TestData testData) {
+        assertFalse(mDexManager.hasInfoOnPackage(testData.mPackageInfo.packageName));
     }
 
     private static PackageInfo getMockPackageInfo(String packageName, int userId) {

@@ -81,6 +81,19 @@ public class DexManager {
     private static int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
+    /**
+     * We do not record packages that have no secondary dex files or that are not used by other
+     * apps. This is an optimization to reduce the amount of data that needs to be written to
+     * disk (apps will not usually be shared so this trims quite a bit the number we record).
+     *
+     * To make this behaviour transparent to the callers which need use information on packages,
+     * DexManager will return this DEFAULT instance from
+     * {@link DexManager#getPackageUseInfoOrDefault}. It has no data about secondary dex files and
+     * is marked as not being used by other apps. This reflects the intended behaviour when we don't
+     * find the package in the underlying data file.
+     */
+    private final static PackageUseInfo DEFAULT_USE_INFO = new PackageUseInfo();
+
     public DexManager(IPackageManager pms, PackageDexOptimizer pdo,
             Installer installer, Object installLock) {
       mPackageCodeLocationsCache = new HashMap<>();
@@ -321,10 +334,29 @@ public class DexManager {
 
     /**
      * Get the package dex usage for the given package name.
-     * @return the package data or null if there is no data available for this package.
+     * If there is no usage info the method will return a default {@code PackageUseInfo} with
+     * no data about secondary dex files and marked as not being used by other apps.
+     *
+     * Note that no use info means the package was not used or it was used but not by other apps.
+     * Also, note that right now we might prune packages which are not used by other apps.
+     * TODO(calin): maybe we should not (prune) so we can have an accurate view when we try
+     * to access the package use.
      */
-    public PackageUseInfo getPackageUseInfo(String packageName) {
-        return mPackageDexUsage.getPackageUseInfo(packageName);
+    public PackageUseInfo getPackageUseInfoOrDefault(String packageName) {
+        PackageUseInfo useInfo = mPackageDexUsage.getPackageUseInfo(packageName);
+        return useInfo == null ? DEFAULT_USE_INFO : useInfo;
+    }
+
+    /**
+     * Return whether or not the manager has usage information on the give package.
+     *
+     * Note that no use info means the package was not used or it was used but not by other apps.
+     * Also, note that right now we might prune packages which are not used by other apps.
+     * TODO(calin): maybe we should not (prune) so we can have an accurate view when we try
+     * to access the package use.
+     */
+    /*package*/ boolean hasInfoOnPackage(String packageName) {
+        return mPackageDexUsage.getPackageUseInfo(packageName) != null;
     }
 
     /**
@@ -343,7 +375,7 @@ public class DexManager {
                 ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
                 : mPackageDexOptimizer;
         String packageName = options.getPackageName();
-        PackageUseInfo useInfo = getPackageUseInfo(packageName);
+        PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
                 Slog.d(TAG, "No secondary dex use for package:" + packageName);
@@ -387,7 +419,7 @@ public class DexManager {
      * deleted, update the internal records and delete any generated oat files.
      */
     public void reconcileSecondaryDexFiles(String packageName) {
-        PackageUseInfo useInfo = getPackageUseInfo(packageName);
+        PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
                 Slog.d(TAG, "No secondary dex use for package:" + packageName);
@@ -516,23 +548,6 @@ public class DexManager {
      */
     public Set<String> getAllPackagesWithSecondaryDexFiles() {
         return mPackageDexUsage.getAllPackagesWithSecondaryDexFiles();
-    }
-
-    /**
-     * Return true if the profiling data collected for the given app indicate
-     * that the apps's APK has been loaded by another app.
-     * Note that this returns false for all apps without any collected profiling data.
-    */
-    public boolean isUsedByOtherApps(String packageName) {
-        PackageUseInfo useInfo = getPackageUseInfo(packageName);
-        if (useInfo == null) {
-            // No use info, means the package was not used or it was used but not by other apps.
-            // Note that right now we might prune packages which are not used by other apps.
-            // TODO(calin): maybe we should not (prune) so we can have an accurate view when we try
-            // to access the package use.
-            return false;
-        }
-        return useInfo.isUsedByOtherApps();
     }
 
     /**

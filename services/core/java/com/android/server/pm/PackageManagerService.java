@@ -9868,17 +9868,19 @@ public class PackageManagerService extends IPackageManager.Stub
         Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
+            DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
+                    options.getCompilerFilter(), options.getSplitName(),
+                    options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
                         getOrCreateCompilerPackageStats(depPackage),
-                        true /* isUsedByOtherApps */,
-                        options);
+                    mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets,
                 getOrCreateCompilerPackageStats(p),
-                mDexManager.isUsedByOtherApps(p.packageName), options);
+                mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
 
     /**
@@ -18553,7 +18555,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                         null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
-                        mDexManager.isUsedByOtherApps(pkg.packageName),
+                        mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
                         dexoptOptions);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
@@ -25376,8 +25378,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 if (ps == null) {
                     continue;
                 }
-                PackageDexUsage.PackageUseInfo packageUseInfo = getDexManager().getPackageUseInfo(
-                        pkg.packageName);
+                PackageDexUsage.PackageUseInfo packageUseInfo =
+                      getDexManager().getPackageUseInfoOrDefault(pkg.packageName);
                 if (PackageManagerServiceUtils
                         .isUnusedSinceTimeInMillis(ps.firstInstallTime, currentTimeInMillis,
                                 downgradeTimeThresholdMillis, packageUseInfo,
