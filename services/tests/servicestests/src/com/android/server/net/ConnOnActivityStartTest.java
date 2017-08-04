@@ -20,7 +20,6 @@ import static android.util.DebugUtils.valueToString;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -37,8 +36,6 @@ import android.content.IntentSender;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -101,11 +98,9 @@ public class ConnOnActivityStartTest {
 
     private static final long WAIT_FOR_INSTALL_TIMEOUT_MS = 2000; // 2 sec
 
-    private static final long NETWORK_CHECK_TIMEOUT_MS = 6000; // 6 sec
+    private static final long NETWORK_CHECK_TIMEOUT_MS = 4000; // 4 sec
 
     private static final long SCREEN_ON_DELAY_MS = 500; // 0.5 sec
-
-    private static final String NETWORK_STATUS_SEPARATOR = "\\|";
 
     private static final int REPEAT_TEST_COUNT = 5;
 
@@ -113,7 +108,6 @@ public class ConnOnActivityStartTest {
     private static UiDevice mUiDevice;
     private static int mTestPkgUid;
     private static BatteryManager mBatteryManager;
-    private static ConnectivityManager mConnectivityManager;
 
     @BeforeClass
     public static void setUpOnce() throws Exception {
@@ -126,8 +120,6 @@ public class ConnOnActivityStartTest {
         mTestPkgUid = mContext.getPackageManager().getPackageUid(TEST_PKG, 0);
 
         mBatteryManager = (BatteryManager) mContext.getSystemService(Context.BATTERY_SERVICE);
-        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
     }
 
     @AfterClass
@@ -144,9 +136,6 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_batterySaver() throws Exception {
-        if (!isNetworkAvailable()) {
-            fail("Device doesn't have network connectivity");
-        }
         setBatterySaverMode(true);
         try {
             testConnOnActivityStart("testStartActivity_batterySaver");
@@ -157,9 +146,6 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_dataSaver() throws Exception {
-        if (!isNetworkAvailable()) {
-            fail("Device doesn't have network connectivity");
-        }
         setDataSaverMode(true);
         try {
             testConnOnActivityStart("testStartActivity_dataSaver");
@@ -170,9 +156,6 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_dozeMode() throws Exception {
-        if (!isNetworkAvailable()) {
-            fail("Device doesn't have network connectivity");
-        }
         setDozeMode(true);
         try {
             testConnOnActivityStart("testStartActivity_dozeMode");
@@ -183,9 +166,6 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_appStandby() throws Exception {
-        if (!isNetworkAvailable()) {
-            fail("Device doesn't have network connectivity");
-        }
         try{
             turnBatteryOff();
             setAppIdle(true);
@@ -200,9 +180,6 @@ public class ConnOnActivityStartTest {
 
     @Test
     public void testStartActivity_backgroundRestrict() throws Exception {
-        if (!isNetworkAvailable()) {
-            fail("Device doesn't have network connectivity");
-        }
         updateRestrictBackgroundBlacklist(true);
         try {
             testConnOnActivityStart("testStartActivity_backgroundRestrict");
@@ -347,11 +324,6 @@ public class ConnOnActivityStartTest {
                 + maxTries + " attempts. Last result: '" + result + "'");
     }
 
-    private boolean isNetworkAvailable() throws Exception {
-        final NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
-    }
-
     private void startActivityAndCheckNetworkAccess() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         final Intent launchIntent = new Intent().setComponent(
@@ -361,15 +333,15 @@ public class ConnOnActivityStartTest {
         extras.putBinder(EXTRA_NETWORK_STATE_OBSERVER, new INetworkStateObserver.Stub() {
             @Override
             public void onNetworkStateChecked(String resultData) {
-                errors[0] = checkForAvailability(resultData);
+                errors[0] = resultData;
                 latch.countDown();
             }
         });
         launchIntent.putExtras(extras);
         mContext.startActivity(launchIntent);
         if (latch.await(NETWORK_CHECK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-            if (!errors[0].isEmpty()) {
-                fail("Network not available for test app " + mTestPkgUid);
+            if (errors[0] != null) {
+                fail("Network not available for test app " + mTestPkgUid + ". " + errors[0]);
             }
         } else {
             fail("Timed out waiting for network availability status from test app " + mTestPkgUid);
@@ -381,43 +353,6 @@ public class ConnOnActivityStartTest {
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcast(finishIntent);
     }
-
-    private String checkForAvailability(String resultData) {
-        if (resultData == null) {
-            assertNotNull("Network status from app2 is null, Uid: " + mTestPkgUid, resultData);
-        }
-        // Network status format is described on MyBroadcastReceiver.checkNetworkStatus()
-        final String[] parts = resultData.split(NETWORK_STATUS_SEPARATOR);
-        assertEquals("Wrong network status: " + resultData + ", Uid: " + mTestPkgUid,
-                5, parts.length); // Sanity check
-        final NetworkInfo.State state = parts[0].equals("null")
-                ? null : NetworkInfo.State.valueOf(parts[0]);
-        final NetworkInfo.DetailedState detailedState = parts[1].equals("null")
-                ? null : NetworkInfo.DetailedState.valueOf(parts[1]);
-        final boolean connected = Boolean.valueOf(parts[2]);
-        final String connectionCheckDetails = parts[3];
-        final String networkInfo = parts[4];
-
-        final StringBuilder errors = new StringBuilder();
-        final NetworkInfo.State expectedState = NetworkInfo.State.CONNECTED;
-        final NetworkInfo.DetailedState expectedDetailedState = NetworkInfo.DetailedState.CONNECTED;
-
-        if (true != connected) {
-            errors.append(String.format("External site connection failed: expected %s, got %s\n",
-                    true, connected));
-        }
-        if (expectedState != state || expectedDetailedState != detailedState) {
-            errors.append(String.format("Connection state mismatch: expected %s/%s, got %s/%s\n",
-                    expectedState, expectedDetailedState, state, detailedState));
-        }
-
-        if (errors.length() > 0) {
-            errors.append("\tnetworkInfo: " + networkInfo + "\n");
-            errors.append("\tconnectionCheckDetails: " + connectionCheckDetails + "\n");
-        }
-        return errors.toString();
-    }
-
     private static void installAppAndAssertInstalled() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         final int[] result = {PackageInstaller.STATUS_SUCCESS};

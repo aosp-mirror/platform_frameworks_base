@@ -72,4 +72,6 @@ interface INetworkPolicyManager {
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
 
     void factoryReset(String subscriber);
+
+    boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork);
 }

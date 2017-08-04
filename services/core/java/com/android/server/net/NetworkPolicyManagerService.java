@@ -4315,6 +4315,47 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean isUidNetworkingBlocked(int uid, boolean isNetworkMetered) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        return isUidNetworkingBlockedInternal(uid, isNetworkMetered);
+    }
+
+    private boolean isUidNetworkingBlockedInternal(int uid, boolean isNetworkMetered) {
+        final int uidRules;
+        final boolean isBackgroundRestricted;
+        synchronized (mUidRulesFirstLock) {
+            uidRules = mUidRules.get(uid, RULE_NONE);
+            isBackgroundRestricted = mRestrictBackground;
+        }
+        if (hasRule(uidRules, RULE_REJECT_ALL)) {
+            if (LOGV) logUidStatus(uid, "blocked by power restrictions");
+            return true;
+        }
+        if (!isNetworkMetered) {
+            if (LOGV) logUidStatus(uid, "allowed on unmetered network");
+            return false;
+        }
+        if (hasRule(uidRules, RULE_REJECT_METERED)) {
+            if (LOGV) logUidStatus(uid, "blacklisted on metered network");
+            return true;
+        }
+        if (hasRule(uidRules, RULE_ALLOW_METERED)) {
+            if (LOGV) logUidStatus(uid, "whitelisted on metered network");
+            return false;
+        }
+        if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
+            if (LOGV) logUidStatus(uid, "temporary whitelisted on metered network");
+            return false;
+        }
+        if (isBackgroundRestricted) {
+            if (LOGV) logUidStatus(uid, "blocked when background is restricted");
+            return true;
+        }
+        if (LOGV) logUidStatus(uid, "allowed by default");
+        return false;
+    }
+
     private class NetworkPolicyManagerInternalImpl extends NetworkPolicyManagerInternal {
 
         @Override
@@ -4352,42 +4393,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
          */
         @Override
         public boolean isUidNetworkingBlocked(int uid, String ifname) {
-            final int uidRules;
-            final boolean isBackgroundRestricted;
             final boolean isNetworkMetered;
-            synchronized (mUidRulesFirstLock) {
-                uidRules = mUidRules.get(uid, RULE_NONE);
-                isBackgroundRestricted = mRestrictBackground;
-                synchronized (mNetworkPoliciesSecondLock) {
-                    isNetworkMetered = mMeteredIfaces.contains(ifname);
-                }
+            synchronized (mNetworkPoliciesSecondLock) {
+                isNetworkMetered = mMeteredIfaces.contains(ifname);
             }
-            if (hasRule(uidRules, RULE_REJECT_ALL)) {
-                if (LOGV) logUidStatus(uid, "blocked by power restrictions");
-                return true;
-            }
-            if (!isNetworkMetered) {
-                if (LOGV) logUidStatus(uid, "allowed on unmetered network");
-                return false;
-            }
-            if (hasRule(uidRules, RULE_REJECT_METERED)) {
-                if (LOGV) logUidStatus(uid, "blacklisted on metered network");
-                return true;
-            }
-            if (hasRule(uidRules, RULE_ALLOW_METERED)) {
-                if (LOGV) logUidStatus(uid, "whitelisted on metered network");
-                return false;
-            }
-            if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
-                if (LOGV) logUidStatus(uid, "temporary whitelisted on metered network");
-                return false;
-            }
-            if (isBackgroundRestricted) {
-                if (LOGV) logUidStatus(uid, "blocked when background is restricted");
-                return true;
-            }
-            if (LOGV) logUidStatus(uid, "allowed by default");
-            return false;
+            return isUidNetworkingBlockedInternal(uid, isNetworkMetered);
         }
     }
 
