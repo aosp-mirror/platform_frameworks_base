@@ -18,10 +18,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -43,7 +45,29 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mNearestTouchFrame = new NearestTouchFrame(mContext, null);
+        Configuration c = new Configuration(mContext.getResources().getConfiguration());
+        c.smallestScreenWidthDp = 500;
+        mNearestTouchFrame = new NearestTouchFrame(mContext, null, c);
+    }
+
+    @Test
+    public void testNoActionOnLargeDevices() {
+        Configuration c = new Configuration(mContext.getResources().getConfiguration());
+        c.smallestScreenWidthDp = 700;
+        mNearestTouchFrame = new NearestTouchFrame(mContext, null, c);
+
+        View left = mockViewAt(0, 0, 10, 10);
+        View right = mockViewAt(20, 0, 10, 10);
+
+        mNearestTouchFrame.addView(left);
+        mNearestTouchFrame.addView(right);
+        mNearestTouchFrame.onMeasure(0, 0);
+
+        MotionEvent ev = MotionEvent.obtain(0, 0, 0,
+                12 /* x */, 5 /* y */, 0);
+        mNearestTouchFrame.onTouchEvent(ev);
+        verify(left, never()).onTouchEvent(eq(ev));
+        ev.recycle();
     }
 
     @Test
