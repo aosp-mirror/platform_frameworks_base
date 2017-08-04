@@ -8128,10 +8128,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final boolean ephemeral = (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0;
         final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
                 && UserManager.isDeviceInDemoMode(mContext);
-        if (ephemeral && !mInjector.userManagerIsSplitSystemUser() && !demo) {
-            throw new IllegalArgumentException(
-                    "Ephemeral users are only supported on systems with a split system user.");
-        }
         // Create user.
         UserHandle user = null;
         synchronized (this) {
