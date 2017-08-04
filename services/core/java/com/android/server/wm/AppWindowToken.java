@@ -193,6 +193,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     Task mLastParent;
 
+    /**
+     * See {@link #canTurnScreenOn()}
+     */
+    private boolean mCanTurnScreenOn = true;
+
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
@@ -644,6 +649,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppResumed: wasStopped=" + wasStopped
                 + " " + this);
         mAppStopped = false;
+        // Allow the window to turn the screen on once the app is resumed again.
+        setCanTurnScreenOn(true);
         if (!wasStopped) {
             destroySurfaces(true /*cleanupOnResume*/);
         }
@@ -1638,6 +1645,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     void setDisablePreviewScreenshots(boolean disable) {
         mDisablePreviewScreenshots = disable;
+    }
+
+    /**
+     * Sets whether the current launch can turn the screen on. See {@link #canTurnScreenOn()}
+     */
+    void setCanTurnScreenOn(boolean canTurnScreenOn) {
+        mCanTurnScreenOn = canTurnScreenOn;
+    }
+
+    /**
+     * Indicates whether the current launch can turn the screen on. This is to prevent multiple
+     * relayouts from turning the screen back on. The screen should only turn on at most
+     * once per activity resume.
+     *
+     * @return true if the screen can be turned on.
+     */
+    boolean canTurnScreenOn() {
+        return mCanTurnScreenOn;
     }
 
     /**
