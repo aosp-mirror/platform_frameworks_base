@@ -8116,6 +8116,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int des = -1;
         boolean fromexisting = false;
+        final float widthLimit = (widthMode == MeasureSpec.AT_MOST)
+                ?  (float) widthSize : Float.MAX_VALUE;
 
         if (widthMode == MeasureSpec.EXACTLY) {
             // Parent has told us how big to be. So be it.
@@ -8136,8 +8138,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    des = (int) Math.ceil(Layout.getDesiredWidth(mTransformed, 0,
-                            mTransformed.length(), mTextPaint, mTextDir));
+                    des = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mTransformed, 0,
+                            mTransformed.length(), mTextPaint, mTextDir, widthLimit));
                 }
                 width = des;
             } else {
@@ -8167,8 +8169,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
-                        hintDes = (int) Math.ceil(Layout.getDesiredWidth(mHint, 0, mHint.length(),
-                                mTextPaint, mTextDir));
+                        hintDes = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mHint, 0,
+                                mHint.length(), mTextPaint, mTextDir, widthLimit));
                     }
                     hintWidth = hintDes;
                 } else {
