@@ -1164,7 +1164,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         if (mStack != null) {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = mActivities.get(activityNdx);
-                if (!r.finishing && r.okToShowLocked() && r.visible) {
+                if (!r.finishing && r.okToShowLocked() && r.visibleIgnoringKeyguard) {
                     outActivities.add(r);
                 }
             }
