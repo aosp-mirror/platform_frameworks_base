@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -328,6 +329,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                     mBar.showGlobalActionsMenu();
                 } catch (RemoteException ex) {}
             }
+        }
+
+        @Override
+        public boolean showShutdownUi(boolean isReboot, String reason) {
+            if (!mContext.getResources().getBoolean(R.bool.config_showSysuiShutdown)) {
+                return false;
+            }
+            if (mBar != null) {
+                try {
+                    mBar.showShutdownUi(isReboot, reason);
+                    return true;
+                } catch (RemoteException ex) {}
+            }
+            return false;
         }
     };
 

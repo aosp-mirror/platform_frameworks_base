@@ -80,6 +80,8 @@ public interface StatusBarManagerInternal {
     void setGlobalActionsListener(GlobalActionsListener listener);
     void showGlobalActions();
 
+    boolean showShutdownUi(boolean isReboot, String requestString);
+
     public interface GlobalActionsListener {
         /**
          * Called when sysui starts and connects its status bar, or when the status bar binder

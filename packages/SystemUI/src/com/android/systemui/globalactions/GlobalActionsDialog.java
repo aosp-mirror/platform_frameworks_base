@@ -116,8 +116,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     private static final String GLOBAL_ACTION_KEY_RESTART = "restart";
 
-    private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
-
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
     private final AudioManager mAudioManager;
@@ -682,10 +680,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     /** {@inheritDoc} */
     public void onClick(DialogInterface dialog, int which) {
         Action item = mAdapter.getItem(which);
-        if ((item instanceof PowerAction)
-                || (item instanceof RestartAction)) {
-            if (mDialog != null) mDialog.fadeOut();
-        } else if (!(item instanceof SilentModeTriStateAction)) {
+        if (!(item instanceof SilentModeTriStateAction)) {
             dialog.dismiss();
         }
         item.onPress();
@@ -1321,23 +1316,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                         int alpha = (int) ((1f - (Float) animation.getAnimatedValue())
                                 * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
                         mGradientDrawable.setAlpha(alpha);
-                    })
-                    .start();
-        }
-
-        public void fadeOut() {
-            mHardwareLayout.setTranslationX(0);
-            mHardwareLayout.setAlpha(1);
-            mListView.animate()
-                    .alpha(0)
-                    .translationX(getAnimTranslation())
-                    .setDuration(300)
-                    .setInterpolator(new LogAccelerateInterpolator())
-                    .setUpdateListener(animation -> {
-                        float frac = animation.getAnimatedFraction();
-                        float alpha = NotificationUtils.interpolate(
-                                ScrimController.GRADIENT_SCRIM_ALPHA, SHUTDOWN_SCRIM_ALPHA, frac);
-                        mGradientDrawable.setAlpha((int) (alpha * 255));
                     })
                     .start();
         }
