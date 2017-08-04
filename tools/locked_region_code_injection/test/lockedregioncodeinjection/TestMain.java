@@ -228,4 +228,26 @@ public class TestMain {
         Assert.assertEquals(TestTarget.unboostCount, 1);
         Assert.assertEquals(TestTarget.invokeCount, 1);
     }
+
+    @Test
+    public void testUnboostThatThrows() {
+        TestTarget.resetCount();
+        TestTarget t = new TestTarget();
+        boolean asserted = false;
+
+        Assert.assertEquals(TestTarget.boostCount, 0);
+        Assert.assertEquals(TestTarget.unboostCount, 0);
+
+        try {
+            t.synchronizedThrowsOnUnboost();
+        } catch (RuntimeException e) {
+            asserted = true;
+        }
+
+        Assert.assertEquals(asserted, true);
+        Assert.assertEquals(TestTarget.boostCount, 1);
+        Assert.assertEquals(TestTarget.unboostCount, 0);
+        Assert.assertEquals(TestTarget.invokeCount, 1);
+    }
+
 }
