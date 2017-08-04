@@ -34,7 +34,7 @@ import java.util.Set;
  * {@link StreamingServiceInfo} or FileServiceInfo TODO: add link once that's unhidden
  * @hide
  */
-public class ServiceInfo implements Parcelable {
+public class ServiceInfo {
     // arbitrary limit on the number of locale -> name pairs we support
     final static int MAP_LIMIT = 1000;
 
@@ -68,19 +68,6 @@ public class ServiceInfo implements Parcelable {
         sessionEndTime = (Date)end.clone();
     }
 
-    public static final Parcelable.Creator<ServiceInfo> CREATOR =
-            new Parcelable.Creator<ServiceInfo>() {
-        @Override
-        public ServiceInfo createFromParcel(Parcel source) {
-            return new ServiceInfo(source);
-        }
-
-        @Override
-        public ServiceInfo[] newArray(int size) {
-            return new ServiceInfo[size];
-        }
-    };
-
     /** @hide */
     protected ServiceInfo(Parcel in) {
         int mapCount = in.readInt();
@@ -108,7 +95,7 @@ public class ServiceInfo implements Parcelable {
         sessionEndTime = (java.util.Date) in.readSerializable();
     }
 
-    @Override
+    /** @hide */
     public void writeToParcel(Parcel dest, int flags) {
         Set<Locale> keySet = names.keySet();
         dest.writeInt(keySet.size());
@@ -125,11 +112,6 @@ public class ServiceInfo implements Parcelable {
         dest.writeString(serviceId);
         dest.writeSerializable(sessionStartTime);
         dest.writeSerializable(sessionEndTime);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     /**
