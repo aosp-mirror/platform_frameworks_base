@@ -32,22 +32,28 @@ import com.android.systemui.R;
 public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListener {
     private final Context mContext;
     private final DozeMachine.Service mDozeService;
+    private final DozeHost mDozeHost;
     private final Handler mHandler;
     private final SensorManager mSensorManager;
     private final Sensor mLightSensor;
     private final int[] mSensorToBrightness;
+    private final int[] mSensorToScrimOpacity;
     private boolean mRegistered;
 
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
-            SensorManager sensorManager, Sensor lightSensor, Handler handler) {
+            SensorManager sensorManager, Sensor lightSensor, DozeHost host,
+            Handler handler) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
         mLightSensor = lightSensor;
+        mDozeHost = host;
         mHandler = handler;
 
         mSensorToBrightness = context.getResources().getIntArray(
                 R.array.config_doze_brightness_sensor_to_brightness);
+        mSensorToScrimOpacity = context.getResources().getIntArray(
+                R.array.config_doze_brightness_sensor_to_scrim_opacity);
     }
 
     @Override
@@ -74,11 +80,24 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mRegistered) {
-            int brightness = computeBrightness((int) event.values[0]);
+            int sensorValue = (int) event.values[0];
+            int brightness = computeBrightness(sensorValue);
             if (brightness > 0) {
                 mDozeService.setDozeScreenBrightness(brightness);
             }
+
+            int scrimOpacity = computeScrimOpacity(sensorValue);
+            if (scrimOpacity >= 0) {
+                mDozeHost.setAodDimmingScrim(scrimOpacity / 255f);
+            }
         }
+    }
+
+    private int computeScrimOpacity(int sensorValue) {
+        if (sensorValue < 0 || sensorValue >= mSensorToScrimOpacity.length) {
+            return -1;
+        }
+        return mSensorToScrimOpacity[sensorValue];
     }
 
     private int computeBrightness(int sensorValue) {

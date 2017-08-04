@@ -56,6 +56,8 @@ public class DozeScrimController {
     private boolean mWakeAndUnlocking;
     private boolean mFullyPulsing;
 
+    private float mAodFrontScrimOpacity = 0;
+
     public DozeScrimController(ScrimController scrimController, Context context) {
         mContext = context;
         mScrimController = scrimController;
@@ -70,7 +72,8 @@ public class DozeScrimController {
             mDozingAborted = false;
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() ? 0f : 1f);
+            mScrimController.setDozeInFrontAlpha(
+                    mDozeParameters.getAlwaysOn() ? mAodFrontScrimOpacity : 1f);
         } else {
             cancelPulsing();
             if (animate) {
@@ -85,6 +88,19 @@ public class DozeScrimController {
                 mScrimController.setDozeBehindAlpha(0f);
                 mScrimController.setDozeInFrontAlpha(0f);
             }
+        }
+    }
+
+    /**
+     * Set the opacity of the front scrim when showing AOD1
+     *
+     * Used to emulate lower brightness values than the hardware supports natively.
+     */
+    public void setAodDimmingScrim(float scrimOpacity) {
+        mAodFrontScrimOpacity = scrimOpacity;
+        if (mDozing && !isPulsing() && !mDozingAborted && !mWakeAndUnlocking
+                && mDozeParameters.getAlwaysOn()) {
+            mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
         }
     }
 
@@ -126,7 +142,8 @@ public class DozeScrimController {
         if (mDozing && !mWakeAndUnlocking) {
             mScrimController.setDozeBehindAlpha(1f);
             mScrimController.setDozeInFrontAlpha(
-                    mDozeParameters.getAlwaysOn() && !mDozingAborted ? 0f : 1f);
+                    mDozeParameters.getAlwaysOn() && !mDozingAborted ?
+                            mAodFrontScrimOpacity : 1f);
         }
     }
 
@@ -337,7 +354,7 @@ public class DozeScrimController {
             // Signal that the pulse is all finished so we can turn the screen off now.
             pulseFinished();
             if (mDozeParameters.getAlwaysOn()) {
-                mScrimController.setDozeInFrontAlpha(0);
+                mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
             }
         }
     };
