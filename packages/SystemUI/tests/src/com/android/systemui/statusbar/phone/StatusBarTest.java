@@ -65,6 +65,7 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.CommandQueue;
@@ -500,6 +501,14 @@ public class StatusBarTest extends SysuiTestCase {
             mSystemServicesProxy = ssp;
             mNotificationPanel = panelView;
             mBarService = barService;
+            mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
+        }
+
+        private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
+            WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
+            wakefulnessLifecycle.dispatchStartedWakingUp();
+            wakefulnessLifecycle.dispatchFinishedWakingUp();
+            return wakefulnessLifecycle;
         }
 
         public void setBarStateForTest(int state) {
