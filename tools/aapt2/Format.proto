@@ -67,21 +67,12 @@ message CompiledFile {
 
 // Top level message representing a resource table.
 message ResourceTable {
-  // The string pool containing string values (strings that actually end up in the binary ARSC
-  // file) referenced throughout the resource table.
-  optional StringPool string_pool = 1;
-
   // The string pool containing source paths referenced throughout the resource table. This does
   // not end up in the final binary ARSC file.
-  optional StringPool source_pool = 2;
-
-  // The string pool containing the names of unresolved symbols. This does not end up in the final
-  // binary ARSC file. Unresolved symbols are just resource names that haven't had a resource ID
-  // assigned to them, therefore can't be referenced by resource ID.
-  optional StringPool symbol_pool = 3;
+  optional StringPool source_pool = 1;
 
   // Resource definitions corresponding to an Android package.
-  repeated Package packages = 4;
+  repeated Package packages = 2;
 }
 
 // Defines resources for an Android package.
@@ -202,9 +193,10 @@ message Item {
   optional Reference ref = 1;
   optional String str = 2;
   optional RawString raw_str = 3;
-  optional FileReference file = 4;
-  optional Id id = 5;
-  optional Primitive prim = 6;
+  optional StyledString styled_str = 4;
+  optional FileReference file = 5;
+  optional Id id = 6;
+  optional Primitive prim = 7;
 }
 
 // A CompoundValue is an abstract type. It represents a value that is a made of other values.
@@ -233,10 +225,8 @@ message Reference {
   // The resource ID (0xPPTTEEEE) of the resource being referred.
   optional uint32 id = 2;
 
-  // If the resource ID is not resolved, the index into the symbol string pool where the name of
-  // the reference is stored. The symbol string pool is located at the top level ResourceTable
-  // message.
-  optional uint32 symbol_idx = 3;
+  // The optional resource name.
+  optional string name = 3;
 
   // Whether this reference is referencing a private resource (@*package:type/entry).
   optional bool private = 4;
@@ -249,23 +239,41 @@ message Id {
 
 // A value that is a string.
 message String {
-  // The index into the values string pool, located at the top level ResourceTable message.
-  optional uint32 idx = 1;
+  optional string value = 1;
 }
 
 // A value that is a raw string, which is unescaped/uninterpreted. This is typically used to
 // represent the value of a style attribute before the attribute is compiled and the set of
 // allowed values is known.
 message RawString {
-  // The index into the values string pool, located at the top level ResourceTable message.
-  optional uint32 idx = 1;
+  optional string value = 1;
+}
+
+// A string with styling information, like html tags that specify boldness, italics, etc.
+message StyledString {
+  // The raw text of the string.
+  optional string value = 1;
+
+  // A Span marks a region of the string text that is styled.
+  message Span {
+    // The name of the tag, and its attributes, encoded as follows:
+    // tag_name;attr1=value1;attr2=value2;[...]
+    optional string tag = 1;
+
+    // The first character position this span applies to, in UTF-16 offset.
+    optional uint32 first_char = 2;
+
+    // The last character position this span applies to, in UTF-16 offset.
+    optional uint32 last_char = 3;
+  }
+
+  repeated Span span = 2;
 }
 
 // A value that is a reference to an external entity, like an XML file or a PNG.
 message FileReference {
-  // The index into the values string pool, located at the top level ResourceTable message. This
-  // represents the path to the file within an APK (typically res/type-config/entry.ext).
-  optional uint32 path_idx = 1;
+  // Path to a file within the APK (typically res/type-config/entry.ext).
+  optional string path = 1;
 }
 
 // A value that represents a primitive data type (float, int, boolean, etc.).

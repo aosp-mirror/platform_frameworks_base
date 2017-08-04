@@ -55,15 +55,10 @@ class ReferenceIdToNameVisitor : public ValueVisitor {
 
 class PackagePbDeserializer {
  public:
-  PackagePbDeserializer(const android::ResStringPool* valuePool,
-                        const android::ResStringPool* sourcePool,
-                        const android::ResStringPool* symbolPool,
-                        const Source& source, IDiagnostics* diag)
-      : value_pool_(valuePool),
-        source_pool_(sourcePool),
-        symbol_pool_(symbolPool),
-        source_(source),
-        diag_(diag) {}
+  PackagePbDeserializer(const android::ResStringPool* sourcePool, const Source& source,
+                        IDiagnostics* diag)
+      : source_pool_(sourcePool), source_(source), diag_(diag) {
+  }
 
  public:
   bool DeserializeFromPb(const pb::Package& pbPackage, ResourceTable* table) {
@@ -87,8 +82,7 @@ class PackagePbDeserializer {
       for (const pb::Entry& pbEntry : pbType.entries()) {
         ResourceEntry* entry = type->FindOrCreateEntry(pbEntry.name());
 
-        // Deserialize the symbol status (public/private with source and
-        // comments).
+        // Deserialize the symbol status (public/private with source and comments).
         if (pbEntry.has_symbol_status()) {
           const pb::SymbolStatus& pbStatus = pbEntry.symbol_status();
           if (pbStatus.has_source()) {
@@ -161,8 +155,7 @@ class PackagePbDeserializer {
 
  private:
   std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
-                                              const ConfigDescription& config,
-                                              StringPool* pool) {
+                                              const ConfigDescription& config, StringPool* pool) {
     if (pb_item.has_ref()) {
       const pb::Reference& pb_ref = pb_item.ref();
       std::unique_ptr<Reference> ref = util::make_unique<Reference>();
@@ -173,45 +166,32 @@ class PackagePbDeserializer {
 
     } else if (pb_item.has_prim()) {
       const pb::Primitive& pb_prim = pb_item.prim();
-      android::Res_value prim = {};
-      prim.dataType = static_cast<uint8_t>(pb_prim.type());
-      prim.data = pb_prim.data();
-      return util::make_unique<BinaryPrimitive>(prim);
+      return util::make_unique<BinaryPrimitive>(static_cast<uint8_t>(pb_prim.type()),
+                                                pb_prim.data());
 
     } else if (pb_item.has_id()) {
       return util::make_unique<Id>();
 
     } else if (pb_item.has_str()) {
-      const uint32_t idx = pb_item.str().idx();
-      const std::string str = util::GetString(*value_pool_, idx);
-
-      const android::ResStringPool_span* spans = value_pool_->styleAt(idx);
-      if (spans && spans->name.index != android::ResStringPool_span::END) {
-        StyleString style_str = {str};
-        while (spans->name.index != android::ResStringPool_span::END) {
-          style_str.spans.push_back(
-              Span{util::GetString(*value_pool_, spans->name.index),
-                   spans->firstChar, spans->lastChar});
-          spans++;
-        }
-        return util::make_unique<StyledString>(pool->MakeRef(
-            style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
-      }
       return util::make_unique<String>(
-          pool->MakeRef(str, StringPool::Context(config)));
+          pool->MakeRef(pb_item.str().value(), StringPool::Context(config)));
 
     } else if (pb_item.has_raw_str()) {
-      const uint32_t idx = pb_item.raw_str().idx();
-      const std::string str = util::GetString(*value_pool_, idx);
       return util::make_unique<RawString>(
-          pool->MakeRef(str, StringPool::Context(config)));
+          pool->MakeRef(pb_item.raw_str().value(), StringPool::Context(config)));
+
+    } else if (pb_item.has_styled_str()) {
+      const pb::StyledString& pb_str = pb_item.styled_str();
+      StyleString style_str{pb_str.value()};
+      for (const pb::StyledString::Span& pb_span : pb_str.span()) {
+        style_str.spans.push_back(Span{pb_span.tag(), pb_span.first_char(), pb_span.last_char()});
+      }
+      return util::make_unique<StyledString>(pool->MakeRef(
+          style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
 
     } else if (pb_item.has_file()) {
-      const uint32_t idx = pb_item.file().path_idx();
-      const std::string str = util::GetString(*value_pool_, idx);
       return util::make_unique<FileReference>(pool->MakeRef(
-          str,
-          StringPool::Context(StringPool::Context::kHighPriority, config)));
+          pb_item.file().path(), StringPool::Context(StringPool::Context::kHighPriority, config)));
 
     } else {
       diag_->Error(DiagMessage(source_) << "unknown item");
@@ -255,15 +235,13 @@ class PackagePbDeserializer {
         std::unique_ptr<Style> style = util::make_unique<Style>();
         if (pb_style.has_parent()) {
           style->parent = Reference();
-          if (!DeserializeReferenceFromPb(pb_style.parent(),
-                                          &style->parent.value())) {
+          if (!DeserializeReferenceFromPb(pb_style.parent(), &style->parent.value())) {
             return {};
           }
 
           if (pb_style.has_parent_source()) {
             Source parent_source;
-            DeserializeSourceFromPb(pb_style.parent_source(), *source_pool_,
-                                    &parent_source);
+            DeserializeSourceFromPb(pb_style.parent_source(), *source_pool_, &parent_source);
             style->parent.value().SetSource(std::move(parent_source));
           }
         }
@@ -300,8 +278,7 @@ class PackagePbDeserializer {
         const pb::Array& pb_array = pb_compound_value.array();
         std::unique_ptr<Array> array = util::make_unique<Array>();
         for (const pb::Array_Entry& pb_entry : pb_array.entries()) {
-          std::unique_ptr<Item> item =
-              DeserializeItemFromPb(pb_entry.item(), config, pool);
+          std::unique_ptr<Item> item = DeserializeItemFromPb(pb_entry.item(), config, pool);
           if (!item) {
             return {};
           }
@@ -316,8 +293,7 @@ class PackagePbDeserializer {
         std::unique_ptr<Plural> plural = util::make_unique<Plural>();
         for (const pb::Plural_Entry& pb_entry : pb_plural.entries()) {
           size_t pluralIdx = DeserializePluralEnumFromPb(pb_entry.arity());
-          plural->values[pluralIdx] =
-              DeserializeItemFromPb(pb_entry.item(), config, pool);
+          plural->values[pluralIdx] = DeserializeItemFromPb(pb_entry.item(), config, pool);
           if (!plural->values[pluralIdx]) {
             return {};
           }
@@ -350,11 +326,10 @@ class PackagePbDeserializer {
       out_ref->id = ResourceId(pb_ref.id());
     }
 
-    if (pb_ref.has_symbol_idx()) {
-      const std::string str_symbol = util::GetString(*symbol_pool_, pb_ref.symbol_idx());
+    if (pb_ref.has_name()) {
       ResourceNameRef name_ref;
-      if (!ResourceUtils::ParseResourceName(str_symbol, &name_ref, nullptr)) {
-        diag_->Error(DiagMessage(source_) << "invalid reference name '" << str_symbol << "'");
+      if (!ResourceUtils::ParseResourceName(pb_ref.name(), &name_ref, nullptr)) {
+        diag_->Error(DiagMessage(source_) << "invalid reference name '" << pb_ref.name() << "'");
         return false;
       }
 
@@ -377,60 +352,32 @@ class PackagePbDeserializer {
   }
 
  private:
-  const android::ResStringPool* value_pool_;
   const android::ResStringPool* source_pool_;
-  const android::ResStringPool* symbol_pool_;
   const Source source_;
   IDiagnostics* diag_;
 };
 
 }  // namespace
 
-std::unique_ptr<ResourceTable> DeserializeTableFromPb(
-    const pb::ResourceTable& pb_table, const Source& source,
-    IDiagnostics* diag) {
-  // We import the android namespace because on Windows NO_ERROR is a macro, not
-  // an enum, which
+std::unique_ptr<ResourceTable> DeserializeTableFromPb(const pb::ResourceTable& pb_table,
+                                                      const Source& source, IDiagnostics* diag) {
+  // We import the android namespace because on Windows NO_ERROR is a macro, not an enum, which
   // causes errors when qualifying it with android::
   using namespace android;
 
   std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
 
-  if (!pb_table.has_string_pool()) {
-    diag->Error(DiagMessage(source) << "no string pool found");
-    return {};
-  }
-
-  ResStringPool value_pool;
-  status_t result = value_pool.setTo(pb_table.string_pool().data().data(),
-                                     pb_table.string_pool().data().size());
-  if (result != NO_ERROR) {
-    diag->Error(DiagMessage(source) << "invalid string pool");
-    return {};
-  }
-
   ResStringPool source_pool;
   if (pb_table.has_source_pool()) {
-    result = source_pool.setTo(pb_table.source_pool().data().data(),
-                               pb_table.source_pool().data().size());
+    status_t result = source_pool.setTo(pb_table.source_pool().data().data(),
+                                        pb_table.source_pool().data().size());
     if (result != NO_ERROR) {
       diag->Error(DiagMessage(source) << "invalid source pool");
       return {};
     }
   }
 
-  ResStringPool symbol_pool;
-  if (pb_table.has_symbol_pool()) {
-    result = symbol_pool.setTo(pb_table.symbol_pool().data().data(),
-                               pb_table.symbol_pool().data().size());
-    if (result != NO_ERROR) {
-      diag->Error(DiagMessage(source) << "invalid symbol pool");
-      return {};
-    }
-  }
-
-  PackagePbDeserializer package_pb_deserializer(&value_pool, &source_pool,
-                                                &symbol_pool, source, diag);
+  PackagePbDeserializer package_pb_deserializer(&source_pool, source, diag);
   for (const pb::Package& pb_package : pb_table.packages()) {
     if (!package_pb_deserializer.DeserializeFromPb(pb_package, table.get())) {
       return {};
