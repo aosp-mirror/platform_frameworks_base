@@ -116,7 +116,7 @@ public class DexManagerTests {
 
         // Bar is used by others now and should be in our records
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertTrue(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, true);
         assertTrue(pui.getDexUseInfoMap().isEmpty());
     }
 
@@ -127,7 +127,7 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
     }
@@ -139,7 +139,7 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, barSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, false);
         assertEquals(barSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, barSecondaries, /*isUsedByOtherApps*/true, mUser0);
     }
@@ -162,7 +162,7 @@ public class DexManagerTests {
 
         // Check bar usage. Should be used by other app (for primary and barSecondaries).
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertTrue(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, true);
         assertEquals(barSecondaries.size() + barSecondariesForOwnUse.size(),
                 pui.getDexUseInfoMap().size());
 
@@ -172,7 +172,7 @@ public class DexManagerTests {
 
         // Check foo usage. Should not be used by other app.
         pui = getPackageUseInfo(mFooUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
     }
@@ -191,7 +191,7 @@ public class DexManagerTests {
     }
 
     @Test
-    public void testNotExistingPackate() {
+    public void testNotExistingPackage() {
         // Notifying about the load of a package which was previously not
         // register in DexManager#load should be ignored.
         notifyDexLoad(mDoesNotExist, mDoesNotExist.getBaseAndSplitDexPaths(), mUser0);
@@ -232,7 +232,7 @@ public class DexManagerTests {
 
         // We should get back the right info.
         PackageUseInfo pui = getPackageUseInfo(newPackage);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(newPackage, pui, false);
         assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/true, mUser0);
     }
@@ -248,7 +248,7 @@ public class DexManagerTests {
         notifyDexLoad(newPackage, newSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(newPackage);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(newPackage, pui, false);
         assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/false, mUser0);
     }
@@ -260,7 +260,7 @@ public class DexManagerTests {
 
         // Bar is used by others now and should be in our records.
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertTrue(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, true);
         assertTrue(pui.getDexUseInfoMap().isEmpty());
 
         // Notify that bar is updated.
@@ -270,7 +270,7 @@ public class DexManagerTests {
 
         // The usedByOtherApps flag should be clear now.
         pui = getPackageUseInfo(mBarUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, false);
     }
 
     @Test
@@ -293,7 +293,7 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, newSplits, mUser0);
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
         assertNotNull(pui);
-        assertTrue(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(newSplits, pui, true);
     }
 
     @Test
@@ -325,7 +325,7 @@ public class DexManagerTests {
         // Foo should still be around since it's used by other apps but with no
         // secondary dex info.
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertTrue(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mFooUser0, pui, true);
         assertTrue(pui.getDexUseInfoMap().isEmpty());
     }
 
@@ -370,7 +370,7 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
     }
@@ -381,7 +381,7 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0UnsupportedClassLoader, pui, false);
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         // We expect that all the contexts are unsupported.
         String[] expectedContexts =
@@ -398,7 +398,7 @@ public class DexManagerTests {
 
         notifyDexLoad(mBarUser0, secondaries, mUser0);
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, false);
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
 
@@ -406,7 +406,7 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0DelegateLastClassLoader, secondaries, mUser0);
 
         pui = getPackageUseInfo(mBarUser0);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0, pui, false);
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         // We expect that all the contexts to be changed to variable now.
         String[] expectedContexts =
@@ -422,7 +422,7 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
 
         PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertFalse(pui.isUsedByOtherApps());
+        assertIsUsedByOtherApps(mBarUser0UnsupportedClassLoader, pui, false);
         assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
         // We expect that all the contexts are unsupported.
         String[] expectedContexts =
@@ -466,6 +466,17 @@ public class DexManagerTests {
                 expectedContexts);
     }
 
+    private void assertIsUsedByOtherApps(TestData testData, PackageUseInfo pui,
+            boolean isUsedByOtherApps) {
+        assertIsUsedByOtherApps(testData.getBaseAndSplitDexPaths(), pui, isUsedByOtherApps);
+    }
+
+    private void assertIsUsedByOtherApps(List<String> codePaths, PackageUseInfo pui,
+            boolean isUsedByOtherApps) {
+        for (String codePath : codePaths) {
+            assertEquals(codePath, isUsedByOtherApps, pui.isUsedByOtherApps(codePath));
+        }
+    }
     private void notifyDexLoad(TestData testData, List<String> dexPaths, int loaderUserId) {
         // By default, assume a single class loader in the chain.
         // This makes writing tests much easier.
