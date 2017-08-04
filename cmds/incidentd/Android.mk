@@ -79,7 +79,10 @@ LOCAL_SRC_FILES := \
     src/Reporter.cpp \
     src/Section.cpp \
     src/protobuf.cpp \
+    src/report_directory.cpp \
+    src/section_list.cpp \
     tests/FdBuffer_test.cpp \
+    tests/Reporter_test.cpp \
     tests/Section_test.cpp \
 
 LOCAL_STATIC_LIBRARIES := \

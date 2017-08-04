@@ -153,7 +153,6 @@ ReportHandler::run_report()
             break;
         }
         reporter->batch.add(request);
-        reporter->args.merge(request->args);
     }
 
     // Take the report, which might take a while. More requests might queue
@@ -235,7 +234,7 @@ IncidentService::systemRunning()
         return Status::fromExceptionCode(Status::EX_SECURITY,
                 "Only system uid can call systemRunning");
     }
-    
+
     // When system_server is up and running, schedule the dropbox task to run.
     mHandler->scheduleSendBacklogToDropbox();
 
