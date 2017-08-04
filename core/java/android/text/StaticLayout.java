@@ -608,6 +608,8 @@ public class StaticLayout extends Layout {
         b.setLocales(paint.getTextLocales());
 
         mLineCount = 0;
+        mEllipsized = false;
+        mMaxLineHeight = DEFAULT_MAX_LINE_HEIGHT;
 
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
@@ -1366,7 +1368,7 @@ public class StaticLayout extends Layout {
      * The value is the same as getLineTop(maxLines) for ellipsized version where structurally no
      * more than maxLines is contained.
      */
-    private int mMaxLineHeight = -1;
+    private int mMaxLineHeight = DEFAULT_MAX_LINE_HEIGHT;
 
     private static final int COLUMNS_NORMAL = 4;
     private static final int COLUMNS_ELLIPSIZE = 6;
@@ -1393,6 +1395,8 @@ public class StaticLayout extends Layout {
     private static final char CHAR_NEW_LINE = '\n';
 
     private static final double EXTRA_ROUNDING = 0.5;
+
+    private static final int DEFAULT_MAX_LINE_HEIGHT = -1;
 
     // This is used to return three arrays from a single JNI call when
     // performing line breaking
