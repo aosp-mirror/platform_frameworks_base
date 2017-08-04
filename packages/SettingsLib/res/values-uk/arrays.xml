@@ -138,25 +138,25 @@
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Вимкнено"</item>
-    <item msgid="1593289376502312923">"64 Кб"</item>
-    <item msgid="487545340236145324">"256 Кб"</item>
-    <item msgid="2423528675294333831">"1 Мб"</item>
-    <item msgid="180883774509476541">"4 Мб"</item>
-    <item msgid="2803199102589126938">"16 Мб"</item>
+    <item msgid="1593289376502312923">"64 КБ"</item>
+    <item msgid="487545340236145324">"256 КБ"</item>
+    <item msgid="2423528675294333831">"1 МБ"</item>
+    <item msgid="180883774509476541">"4 МБ"</item>
+    <item msgid="2803199102589126938">"16 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="6089470720451068364">"Вимкнено"</item>
-    <item msgid="4622460333038586791">"64 Кб"</item>
-    <item msgid="2212125625169582330">"256 Кб"</item>
-    <item msgid="1704946766699242653">"1 Мб"</item>
+    <item msgid="4622460333038586791">"64 КБ"</item>
+    <item msgid="2212125625169582330">"256 КБ"</item>
+    <item msgid="1704946766699242653">"1 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Вимкнено"</item>
-    <item msgid="2969458029344750262">"Буфер журналу: 64 Кб"</item>
-    <item msgid="1342285115665698168">"Буфер журналу: 256 Кб"</item>
-    <item msgid="1314234299552254621">"Буфер журналу: 1 Мб"</item>
-    <item msgid="3606047780792894151">"Буфер журналу: 4 Мб"</item>
-    <item msgid="5431354956856655120">"Буфер журналу: 16 Мб"</item>
+    <item msgid="2969458029344750262">"Буфер журналу: 64 КБ"</item>
+    <item msgid="1342285115665698168">"Буфер журналу: 256 КБ"</item>
+    <item msgid="1314234299552254621">"Буфер журналу: 1 МБ"</item>
+    <item msgid="3606047780792894151">"Буфер журналу: 4 МБ"</item>
+    <item msgid="5431354956856655120">"Буфер журналу: 16 МБ"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Вимкнено"</item>
