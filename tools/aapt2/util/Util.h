@@ -240,7 +240,7 @@ class Tokenizer {
    private:
     friend class Tokenizer;
 
-    iterator(android::StringPiece s, char sep, android::StringPiece tok, bool end);
+    iterator(const android::StringPiece& s, char sep, const android::StringPiece& tok, bool end);
 
     android::StringPiece str_;
     char separator_;
@@ -248,7 +248,7 @@ class Tokenizer {
     bool end_;
   };
 
-  Tokenizer(android::StringPiece str, char sep);
+  Tokenizer(const android::StringPiece& str, char sep);
 
   iterator begin() { return begin_; }
 
