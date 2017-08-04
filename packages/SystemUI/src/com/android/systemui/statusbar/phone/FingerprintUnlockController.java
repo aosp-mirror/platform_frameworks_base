@@ -187,8 +187,12 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             Trace.endSection();
             return;
         }
+        startWakeAndUnlock(calculateMode());
+    }
+
+    public void startWakeAndUnlock(int mode) {
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
-        mMode = calculateMode();
+        mMode = mode;
         mHasScreenTurnedOnSinceAuthenticating = false;
         if (mMode == MODE_WAKE_AND_UNLOCK_PULSING && pulsingOrAod()) {
             // If we are waking the device up while we are pulsing the clock and the
