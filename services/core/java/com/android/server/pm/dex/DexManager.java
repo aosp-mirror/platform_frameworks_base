@@ -36,6 +36,8 @@ import com.android.server.pm.PackageManagerServiceCompilerMapping;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -310,6 +312,8 @@ public class DexManager {
 
     private void loadInternal(Map<Integer, List<PackageInfo>> existingPackages) {
         Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
+        Map<String, Set<String>> packageToCodePaths = new HashMap<>();
+
         // Cache the code locations for the installed packages. This allows for
         // faster lookups (no locks) when finding what package owns the dex file.
         for (Map.Entry<Integer, List<PackageInfo>> entry : existingPackages.entrySet()) {
@@ -319,17 +323,26 @@ public class DexManager {
                 // Cache the code locations.
                 cachePackageInfo(pi, userId);
 
-                // Cache a map from package name to the set of user ids who installed the package.
+                // Cache two maps:
+                //   - from package name to the set of user ids who installed the package.
+                //   - from package name to the set of code paths.
                 // We will use it to sync the data and remove obsolete entries from
                 // mPackageDexUsage.
                 Set<Integer> users = putIfAbsent(
                         packageToUsersMap, pi.packageName, new HashSet<>());
                 users.add(userId);
+
+                Set<String> codePaths = putIfAbsent(
+                    packageToCodePaths, pi.packageName, new HashSet<>());
+                codePaths.add(pi.applicationInfo.sourceDir);
+                if (pi.applicationInfo.splitSourceDirs != null) {
+                    Collections.addAll(codePaths, pi.applicationInfo.splitSourceDirs);
+                }
             }
         }
 
         mPackageDexUsage.read();
-        mPackageDexUsage.syncData(packageToUsersMap);
+        mPackageDexUsage.syncData(packageToUsersMap, packageToCodePaths);
     }
 
     /**
@@ -608,9 +621,9 @@ public class DexManager {
     }
 
     /**
-     * Saves the in-memory package dex usage to disk right away.
+     * Writes the in-memory package dex usage to disk right away.
      */
-    public void savePackageDexUsageNow() {
+    public void writePackageDexUsageNow() {
         mPackageDexUsage.writeNow();
     }
 

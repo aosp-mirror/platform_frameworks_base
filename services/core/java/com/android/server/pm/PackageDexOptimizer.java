@@ -166,7 +166,7 @@ public class PackageDexOptimizer {
             }
 
             final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
-                    || packageUseInfo.isUsedByOtherApps();
+                    || packageUseInfo.isUsedByOtherApps(path);
             final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
                 options.getCompilerFilter(), isUsedByOtherApps);
             final boolean profileUpdated = options.isCheckForProfileUpdates() &&

@@ -138,8 +138,9 @@ public class PackageManagerServiceUtils {
         // Give priority to apps used by other apps.
         DexManager dexManager = packageManagerService.getDexManager();
         applyPackageFilter((pkg) ->
-                dexManager.getPackageUseInfoOrDefault(pkg.packageName).isUsedByOtherApps(), result,
-                remainingPkgs, sortTemp, packageManagerService);
+                dexManager.getPackageUseInfoOrDefault(pkg.packageName)
+                        .isAnyCodePathUsedByOtherApps(),
+                result, remainingPkgs, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
@@ -212,7 +213,7 @@ public class PackageManagerServiceUtils {
         boolean isActiveInBackgroundAndUsedByOtherPackages = ((currentTimeInMillis
                 - latestPackageUseTimeInMillis)
                 < thresholdTimeinMillis)
-                && packageUseInfo.isUsedByOtherApps();
+                && packageUseInfo.isAnyCodePathUsedByOtherApps();
 
         return !isActiveInBackgroundAndUsedByOtherPackages;
     }
