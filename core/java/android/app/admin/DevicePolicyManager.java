@@ -6764,6 +6764,7 @@ public class DevicePolicyManager {
         return null;
     }
 
+    // STOPSHIP: Remove reference to CUR_DEVELOPMENT before shipping
     /**
      * Called by a device owner to disable the keyguard altogether.
      * <p>
@@ -6771,6 +6772,10 @@ public class DevicePolicyManager {
      * type. However, this call has no effect if a password, pin or pattern is currently set. If a
      * password, pin or pattern is set after the keyguard was disabled, the keyguard stops being
      * disabled.
+     *
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#CUR_DEVELOPMENT}, this call also dismisses the
+     * keyguard if it is currently shown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the keyguard, {@code false} reenables it.

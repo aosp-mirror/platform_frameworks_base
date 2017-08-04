@@ -9077,6 +9077,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return false;
             }
             mLockPatternUtils.setLockScreenDisabled(disabled, userId);
+            mInjector.getIWindowManager().dismissKeyguard(null);
+        } catch (RemoteException e) {
+            // Same process, does not happen.
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
