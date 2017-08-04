@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the RadioTuner interface by forwarding calls to radio service.
@@ -222,9 +223,10 @@ class TunerAdapter extends RadioTuner {
     }
 
     @Override
-    public @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter) {
+    public @NonNull List<RadioManager.ProgramInfo>
+            getProgramList(@Nullable Map<String, String> vendorFilter) {
         try {
-            return mTuner.getProgramList(filter);
+            return mTuner.getProgramList(vendorFilter);
         } catch (RemoteException e) {
             throw new RuntimeException("service died", e);
         }
