@@ -45,8 +45,7 @@ OPENGL_PIPELINE_TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
         // record the same text draw into a SkPicture and replay it into a Recording canvas
         SkPictureRecorder recorder;
         SkCanvas* skCanvas = recorder.beginRecording(200, 200, NULL, 0);
-        std::unique_ptr<Canvas> pictCanvas(Canvas::create_canvas(skCanvas,
-                Canvas::XformToSRGB::kDefer));
+        std::unique_ptr<Canvas> pictCanvas(Canvas::create_canvas(skCanvas));
         TestUtils::drawUtf8ToCanvas(pictCanvas.get(), text, paint, 25, 25);
         sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
@@ -65,7 +64,7 @@ OPENGL_PIPELINE_TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
 
 TEST(SkiaCanvas, drawShadowLayer) {
     auto surface = SkSurface::MakeRasterN32Premul(10, 10);
-    SkiaCanvas canvas(surface->getCanvas(), Canvas::XformToSRGB::kDefer);
+    SkiaCanvas canvas(surface->getCanvas());
 
     // clear to white
     canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrc);
@@ -108,27 +107,14 @@ TEST(SkiaCanvas, colorSpaceXform) {
     // The result should be less than fully red, since we convert to Adobe RGB at draw time.
     ASSERT_EQ(0xFF0000DC, *adobeSkBitmap.getAddr32(0, 0));
 
-    // Now try in kDefer mode.  This is a little strange given that, in practice, all software
-    // canvases are kImmediate.
-    SkCanvas skCanvas(skBitmap);
-    SkiaCanvas deferCanvas(&skCanvas, Canvas::XformToSRGB::kDefer);
-    deferCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
-    // The result should be as before, since we deferred the conversion to sRGB.
-    ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
-
-    // Test picture recording.  We will kDefer the xform at recording time, but handle it when
-    // we playback to the software canvas.
+    // Test picture recording.
     SkPictureRecorder recorder;
     SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
-    SkiaCanvas picCanvas(skPicCanvas, Canvas::XformToSRGB::kDefer);
+    SkiaCanvas picCanvas(skPicCanvas);
     picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
-    // Playback to a deferred canvas.  The result should be as before.
-    deferCanvas.asSkCanvas()->drawPicture(picture);
-    ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
-
-    // Playback to an immediate canvas.  The result should be fully red.
+    // Playback to an software canvas.  The result should be fully red.
     canvas.asSkCanvas()->drawPicture(picture);
     ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
 }
@@ -155,7 +141,7 @@ TEST(SkiaCanvas, captureCanvasState) {
     // Create a picture canvas.
     SkPictureRecorder recorder;
     SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
-    SkiaCanvas picCanvas(skPicCanvas, Canvas::XformToSRGB::kDefer);
+    SkiaCanvas picCanvas(skPicCanvas);
     state = picCanvas.captureCanvasState();
 
     // Verify that we cannot get the CanvasState.

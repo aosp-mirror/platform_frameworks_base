@@ -44,7 +44,7 @@ Canvas* Picture::beginRecording(int width, int height) {
     mWidth = width;
     mHeight = height;
     SkCanvas* canvas = mRecorder->beginRecording(SkIntToScalar(width), SkIntToScalar(height));
-    return Canvas::create_canvas(canvas, Canvas::XformToSRGB::kDefer);
+    return Canvas::create_canvas(canvas);
 }
 
 void Picture::endRecording() {
