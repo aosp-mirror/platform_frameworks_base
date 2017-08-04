@@ -133,6 +133,7 @@ import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
+import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -3305,8 +3306,11 @@ public class NotificationManagerService extends SystemService {
     private boolean checkDisqualifyingFeatures(int userId, int callingUid, int id, String tag,
             NotificationRecord r) {
         final String pkg = r.sbn.getPackageName();
+        final String dialerPackage =
+                getContext().getSystemService(TelecomManager.class).getSystemDialerPackage();
         final boolean isSystemNotification =
-                isUidSystemOrPhone(callingUid) || ("android".equals(pkg));
+                isUidSystemOrPhone(callingUid) || ("android".equals(pkg))
+                || TextUtils.equals(pkg, dialerPackage);
         final boolean isNotificationFromListener = mListeners.isListenerPackage(pkg);
 
         // Limit the number of notifications that any given package except the android
