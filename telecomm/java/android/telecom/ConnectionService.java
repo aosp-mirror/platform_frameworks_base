@@ -1405,6 +1405,7 @@ public abstract class ConnectionService extends Service {
                         connection.isRingbackRequested(),
                         connection.getAudioModeIsVoip(),
                         connection.getConnectTimeMillis(),
+                        connection.getConnectElapsedTimeMillis(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
                         createIdList(connection.getConferenceables()),
@@ -1822,6 +1823,7 @@ public abstract class ConnectionService extends Service {
                             null : conference.getVideoProvider().getInterface(),
                     conference.getVideoState(),
                     conference.getConnectTimeMillis(),
+                    conference.getConnectElapsedTime(),
                     conference.getStatusHints(),
                     conference.getExtras());
 
@@ -1887,6 +1889,7 @@ public abstract class ConnectionService extends Service {
                     connection.isRingbackRequested(),
                     connection.getAudioModeIsVoip(),
                     connection.getConnectTimeMillis(),
+                    connection.getConnectElapsedTimeMillis(),
                     connection.getStatusHints(),
                     connection.getDisconnectCause(),
                     emptyList,
