@@ -74,12 +74,13 @@ interface ITuner {
     boolean startBackgroundScan();
 
     /**
+     * @param vendorFilter Vendor-specific filter, must be Map<String, String>
      * @returns the list, or null if scan is in progress
      * @throws IllegalArgumentException if invalid arguments are passed
      * @throws IllegalStateException if the scan has not been started, client may
      *         call startBackgroundScan to fix this.
      */
-    List<RadioManager.ProgramInfo> getProgramList(String filter);
+    List<RadioManager.ProgramInfo> getProgramList(in Map vendorFilter);
 
     /**
      * @throws IllegalStateException if the switch is not supported at current

@@ -35,7 +35,9 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -117,6 +119,25 @@ public class RadioManager {
      * @see BandDescriptor */
     public static final int REGION_KOREA  = 4;
 
+    private static void writeStringMap(@NonNull Parcel dest, @NonNull Map<String, String> map) {
+        dest.writeInt(map.size());
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            dest.writeString(entry.getKey());
+            dest.writeString(entry.getValue());
+        }
+    }
+
+    private static @NonNull Map<String, String> readStringMap(@NonNull Parcel in) {
+        int size = in.readInt();
+        Map<String, String> map = new HashMap<>();
+        while (size-- > 0) {
+            String key = in.readString();
+            String value = in.readString();
+            map.put(key, value);
+        }
+        return map;
+    }
+
     /*****************************************************************************
      * Lists properties, options and radio bands supported by a given broadcast radio module.
      * Each module has a unique ID used to address it when calling RadioManager APIs.
@@ -138,14 +159,14 @@ public class RadioManager {
         private final boolean mIsBgScanSupported;
         private final Set<Integer> mSupportedProgramTypes;
         private final Set<Integer> mSupportedIdentifierTypes;
-        private final String mVendorInfo;
+        @NonNull private final Map<String, String> mVendorInfo;
 
         ModuleProperties(int id, String serviceName, int classId, String implementor,
                 String product, String version, String serial, int numTuners, int numAudioSources,
                 boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
                 @ProgramSelector.ProgramType int[] supportedProgramTypes,
                 @ProgramSelector.IdentifierType int[] supportedIdentifierTypes,
-                String vendorInfo) {
+                Map<String, String> vendorInfo) {
             mId = id;
             mServiceName = TextUtils.isEmpty(serviceName) ? "default" : serviceName;
             mClassId = classId;
@@ -160,7 +181,7 @@ public class RadioManager {
             mIsBgScanSupported = isBgScanSupported;
             mSupportedProgramTypes = arrayToSet(supportedProgramTypes);
             mSupportedIdentifierTypes = arrayToSet(supportedIdentifierTypes);
-            mVendorInfo = vendorInfo;
+            mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
 
         private static Set<Integer> arrayToSet(int[] arr) {
@@ -287,17 +308,17 @@ public class RadioManager {
         }
 
         /**
-         * Opaque vendor-specific string, passed from HAL without changes.
-         * Format of this string can vary across vendors.
+         * A map of vendor-specific opaque strings, passed from HAL without changes.
+         * Format of these strings can vary across vendors.
          *
          * It may be used for extra features, that's not supported by a platform,
-         * for example: "preset-slots=6;ultra-hd-capable=false".
+         * for example: preset-slots=6; ultra-hd-capable=false.
          *
-         * Client application MUST verify vendor/product name from the
-         * ModuleProperties class before doing any interpretation of this value.
+         * Keys must be prefixed with unique vendor Java-style namespace,
+         * eg. 'com.somecompany.parameter1'.
          */
-        public @NonNull String getVendorInfo() {
-            return mVendorInfo == null ? "" : mVendorInfo;
+        public @NonNull Map<String, String> getVendorInfo() {
+            return mVendorInfo;
         }
 
         /** List of descriptors for all bands supported by this module.
@@ -327,7 +348,7 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
-            mVendorInfo = in.readString();
+            mVendorInfo = readStringMap(in);
         }
 
         public static final Parcelable.Creator<ModuleProperties> CREATOR
@@ -357,7 +378,7 @@ public class RadioManager {
             dest.writeInt(mIsBgScanSupported ? 1 : 0);
             dest.writeIntArray(setToArray(mSupportedProgramTypes));
             dest.writeIntArray(setToArray(mSupportedIdentifierTypes));
-            dest.writeString(mVendorInfo);
+            writeStringMap(dest, mVendorInfo);
         }
 
         @Override
@@ -394,7 +415,7 @@ public class RadioManager {
             result = prime * result + (mIsCaptureSupported ? 1 : 0);
             result = prime * result + Arrays.hashCode(mBands);
             result = prime * result + (mIsBgScanSupported ? 1 : 0);
-            result = prime * result + ((mVendorInfo == null) ? 0 : mVendorInfo.hashCode());
+            result = prime * result + mVendorInfo.hashCode();
             return result;
         }
 
@@ -440,7 +461,7 @@ public class RadioManager {
                 return false;
             if (mIsBgScanSupported != other.isBackgroundScanningSupported())
                 return false;
-            if (!TextUtils.equals(mVendorInfo, other.mVendorInfo)) return false;
+            if (!mVendorInfo.equals(other.mVendorInfo)) return false;
             return true;
         }
     }
@@ -1324,11 +1345,11 @@ public class RadioManager {
         private final int mFlags;
         private final int mSignalStrength;
         private final RadioMetadata mMetadata;
-        private final String mVendorInfo;
+        @NonNull private final Map<String, String> mVendorInfo;
 
         ProgramInfo(@NonNull ProgramSelector selector, boolean tuned, boolean stereo,
                 boolean digital, int signalStrength, RadioMetadata metadata, int flags,
-                String vendorInfo) {
+                Map<String, String> vendorInfo) {
             mSelector = selector;
             mTuned = tuned;
             mStereo = stereo;
@@ -1336,7 +1357,7 @@ public class RadioManager {
             mFlags = flags;
             mSignalStrength = signalStrength;
             mMetadata = metadata;
-            mVendorInfo = vendorInfo;
+            mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
 
         /**
@@ -1447,17 +1468,17 @@ public class RadioManager {
         }
 
         /**
-         * Opaque vendor-specific string, passed from HAL without changes.
-         * Format of this string can vary across vendors.
+         * A map of vendor-specific opaque strings, passed from HAL without changes.
+         * Format of these strings can vary across vendors.
          *
          * It may be used for extra features, that's not supported by a platform,
-         * for example: "paid-service=true;bitrate=320kbps".
+         * for example: paid-service=true; bitrate=320kbps.
          *
-         * Client application MUST verify vendor/product name from the
-         * ModuleProperties class before doing any interpretation of this value.
+         * Keys must be prefixed with unique vendor Java-style namespace,
+         * eg. 'com.somecompany.parameter1'.
          */
-        public @NonNull String getVendorInfo() {
-            return mVendorInfo == null ? "" : mVendorInfo;
+        public @NonNull Map<String, String> getVendorInfo() {
+            return mVendorInfo;
         }
 
         private ProgramInfo(Parcel in) {
@@ -1472,7 +1493,7 @@ public class RadioManager {
                 mMetadata = null;
             }
             mFlags = in.readInt();
-            mVendorInfo = in.readString();
+            mVendorInfo = readStringMap(in);
         }
 
         public static final Parcelable.Creator<ProgramInfo> CREATOR
@@ -1500,7 +1521,7 @@ public class RadioManager {
                 mMetadata.writeToParcel(dest, flags);
             }
             dest.writeInt(mFlags);
-            dest.writeString(mVendorInfo);
+            writeStringMap(dest, mVendorInfo);
         }
 
         @Override
@@ -1528,7 +1549,7 @@ public class RadioManager {
             result = prime * result + mFlags;
             result = prime * result + mSignalStrength;
             result = prime * result + ((mMetadata == null) ? 0 : mMetadata.hashCode());
-            result = prime * result + ((mVendorInfo == null) ? 0 : mVendorInfo.hashCode());
+            result = prime * result + mVendorInfo.hashCode();
             return result;
         }
 
@@ -1555,7 +1576,7 @@ public class RadioManager {
                     return false;
             } else if (!mMetadata.equals(other.getMetadata()))
                 return false;
-            if (!TextUtils.equals(mVendorInfo, other.mVendorInfo)) return false;
+            if (!mVendorInfo.equals(other.mVendorInfo)) return false;
             return true;
         }
     }
