@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import java.util.List;
+import java.util.Map;
 
 class Tuner extends ITuner.Stub {
     private static final String TAG = "BroadcastRadioService.Tuner";
@@ -86,7 +87,7 @@ class Tuner extends ITuner.Stub {
     private native RadioManager.ProgramInfo nativeGetProgramInformation(long nativeContext);
     private native boolean nativeStartBackgroundScan(long nativeContext);
     private native List<RadioManager.ProgramInfo> nativeGetProgramList(long nativeContext,
-            String filter);
+            Map<String, String> vendorFilter);
 
     private native byte[] nativeGetImage(long nativeContext, int id);
 
@@ -242,10 +243,11 @@ class Tuner extends ITuner.Stub {
     }
 
     @Override
-    public List<RadioManager.ProgramInfo> getProgramList(String filter) {
+    public List<RadioManager.ProgramInfo> getProgramList(Map vendorFilter) {
+        Map<String, String> sFilter = vendorFilter;
         synchronized (mLock) {
             checkNotClosedLocked();
-            List<RadioManager.ProgramInfo> list = nativeGetProgramList(mNativeContext, filter);
+            List<RadioManager.ProgramInfo> list = nativeGetProgramList(mNativeContext, sFilter);
             if (list == null) {
                 throw new IllegalStateException("Program list is not ready");
             }
