@@ -15,7 +15,9 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -42,8 +44,13 @@ public class NearestTouchFrame extends FrameLayout {
     private View mTouchingChild;
 
     public NearestTouchFrame(Context context, AttributeSet attrs) {
+        this(context, attrs, context.getResources().getConfiguration());
+    }
+
+    @VisibleForTesting
+    NearestTouchFrame(Context context, AttributeSet attrs, Configuration c) {
         super(context, attrs);
-        mIsActive = context.getResources().getConfiguration().smallestScreenWidthDp < 600;
+        mIsActive = c.smallestScreenWidthDp < 600;
     }
 
     @Override
