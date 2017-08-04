@@ -538,7 +538,7 @@
   <java-symbol type="string" name="notification_channel_network_alert" />
   <java-symbol type="string" name="notification_channel_call_forward" />
   <java-symbol type="string" name="notification_channel_emergency_callback" />
-  <java-symbol type="string" name="notification_channel_mobile_data_alert" />
+  <java-symbol type="string" name="notification_channel_mobile_data_status" />
   <java-symbol type="string" name="notification_channel_sms" />
   <java-symbol type="string" name="notification_channel_voice_mail" />
   <java-symbol type="string" name="notification_channel_wfc" />
