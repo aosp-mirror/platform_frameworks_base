@@ -19,6 +19,7 @@ package android.telephony.mbms.vendor;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.mbms.IMbmsStreamingManagerCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
@@ -59,23 +60,42 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @hide
      */
     @Override
-    public final int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+    public final int initialize(IMbmsStreamingManagerCallback listener, final int subscriptionId)
             throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        listener.asBinder().linkToDeath(new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                onAppCallbackDied(uid, subscriptionId);
+            }
+        }, 0);
+
         return initialize(new MbmsStreamingManagerCallback() {
             @Override
-            public void error(int errorCode, String message) throws RemoteException {
-                listener.error(errorCode, message);
+            public void onError(int errorCode, String message) {
+                try {
+                    listener.error(errorCode, message);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void streamingServicesUpdated(List<StreamingServiceInfo> services) throws
-                    RemoteException {
-                listener.streamingServicesUpdated(services);
+            public void onStreamingServicesUpdated(List<StreamingServiceInfo> services) {
+                try {
+                    listener.streamingServicesUpdated(services);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void middlewareReady() throws RemoteException {
-                listener.middlewareReady();
+            public void onMiddlewareReady() {
+                try {
+                    listener.middlewareReady();
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
         }, subscriptionId);
     }
@@ -129,32 +149,59 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     @Override
     public int startStreaming(int subscriptionId, String serviceId,
             IStreamingServiceCallback listener) throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        listener.asBinder().linkToDeath(new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                onAppCallbackDied(uid, subscriptionId);
+            }
+        }, 0);
+
         return startStreaming(subscriptionId, serviceId, new StreamingServiceCallback() {
             @Override
-            public void error(int errorCode, String message) throws RemoteException {
-                listener.error(errorCode, message);
+            public void onError(int errorCode, String message) {
+                try {
+                    listener.error(errorCode, message);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void streamStateUpdated(@StreamingService.StreamingState int state,
-                    @StreamingService.StreamingStateChangeReason int reason)
-                    throws RemoteException {
-                listener.streamStateUpdated(state, reason);
+            public void onStreamStateUpdated(@StreamingService.StreamingState int state,
+                    @StreamingService.StreamingStateChangeReason int reason) {
+                try {
+                    listener.streamStateUpdated(state, reason);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void mediaDescriptionUpdated() throws RemoteException {
-                listener.mediaDescriptionUpdated();
+            public void onMediaDescriptionUpdated() {
+                try {
+                    listener.mediaDescriptionUpdated();
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void broadcastSignalStrengthUpdated(int signalStrength) throws RemoteException {
-                listener.broadcastSignalStrengthUpdated(signalStrength);
+            public void onBroadcastSignalStrengthUpdated(int signalStrength) {
+                try {
+                    listener.broadcastSignalStrengthUpdated(signalStrength);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void streamMethodUpdated(int methodType) throws RemoteException {
-                listener.streamMethodUpdated(methodType);
+            public void onStreamMethodUpdated(int methodType) {
+                try {
+                    listener.streamMethodUpdated(methodType);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
         });
     }
@@ -220,5 +267,13 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      */
     @Override
     public void dispose(int subscriptionId) throws RemoteException {
+    }
+
+    /**
+     * Indicates that the app identified by the given UID and subscription ID has died.
+     * @param uid the UID of the app, as returned by {@link Binder#getCallingUid()}.
+     * @param subscriptionId The subscription ID the app is using.
+     */
+    public void onAppCallbackDied(int uid, int subscriptionId) {
     }
 }
