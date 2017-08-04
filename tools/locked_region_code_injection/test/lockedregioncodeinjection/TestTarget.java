@@ -17,12 +17,17 @@ public class TestTarget {
   public static int boostCount = 0;
   public static int unboostCount = 0;
   public static int invokeCount = 0;
+  public static boolean nextUnboostThrows = false;
 
   public static void boost() {
     boostCount++;
   }
 
   public static void unboost() {
+    if (nextUnboostThrows) {
+      nextUnboostThrows = false;
+      throw new RuntimeException();
+    }
     unboostCount++;
   }
 
@@ -48,5 +53,12 @@ public class TestTarget {
   public synchronized Object synchronizedCallReturnObject() {
     invoke();
     return this;
+  }
+
+  public void synchronizedThrowsOnUnboost() {
+    nextUnboostThrows = true;
+    synchronized(this) {
+      invoke();
+    }
   }
 }

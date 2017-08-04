@@ -9,7 +9,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     asm-5.2 \
     asm-commons-5.2 \
     asm-tree-5.2 \
-    asm-analysis-5.2
-
+    asm-analysis-5.2 \
+    guava-20.0 \
 
 include $(BUILD_HOST_JAVA_LIBRARY)
