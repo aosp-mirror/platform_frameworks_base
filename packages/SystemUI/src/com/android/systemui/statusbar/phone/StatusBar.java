@@ -5555,6 +5555,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStatusBarWindowManager.setDozeScreenBrightness(value);
         }
 
+        @Override
+        public void setAodDimmingScrim(float scrimOpacity) {
+            mDozeScrimController.setAodDimmingScrim(scrimOpacity);
+        }
+
         public void dispatchDoubleTap(float viewX, float viewY) {
             dispatchTap(mAmbientIndicationContainer, viewX, viewY);
             dispatchTap(mAmbientIndicationContainer, viewX, viewY);
