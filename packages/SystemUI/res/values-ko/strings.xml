@@ -674,7 +674,7 @@
     <string name="left_icon" msgid="3096287125959387541">"왼쪽 아이콘"</string>
     <string name="right_icon" msgid="3952104823293824311">"오른쪽 아이콘"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"드래그하여 타일 추가"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"삭제하려면 여기를 드래그"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"여기로 드래그하여 삭제"</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>
     <string name="tuner_time" msgid="6572217313285536011">"시간"</string>
   <string-array name="clock_options">
