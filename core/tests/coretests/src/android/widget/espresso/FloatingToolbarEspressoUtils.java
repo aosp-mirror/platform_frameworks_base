@@ -19,6 +19,7 @@ package android.widget.espresso;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -58,7 +59,9 @@ public class FloatingToolbarEspressoUtils {
 
     private static ViewInteraction onFloatingToolBar() {
         return onView(withTagValue(is(TAG)))
-                .inRoot(withDecorView(hasDescendant(withTagValue(is(TAG)))));
+                .inRoot(allOf(
+                        isPlatformPopup(),
+                        withDecorView(hasDescendant(withTagValue(is(TAG))))));
     }
 
     /**
