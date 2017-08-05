@@ -52,7 +52,7 @@ public class VendorUtils {
      * The MBMS middleware should send this when it wishes to request {@code content://} URIs to
      * serve as temp files for downloads or when it wishes to resume paused downloads. Mandatory
      * extras are
-     * {@link #EXTRA_REQUEST}
+     * {@link #EXTRA_SERVICE_ID}
      *
      * Optional extras are
      * {@link #EXTRA_FD_COUNT} (0 if not present)
@@ -133,12 +133,12 @@ public class VendorUtils {
     public static final String EXTRA_FINAL_URI = "android.telephony.mbms.extra.FINAL_URI";
 
     /**
-     * Extra containing an instance of {@link android.telephony.mbms.ServiceInfo}, used by
+     * Extra containing a String representing a service ID, used by
      * file-descriptor requests and cleanup requests to specify which service they want to
      * request temp files or clean up temp files for, respectively.
      */
-    public static final String EXTRA_SERVICE_INFO =
-            "android.telephony.mbms.extra.SERVICE_INFO";
+    public static final String EXTRA_SERVICE_ID =
+            "android.telephony.mbms.extra.SERVICE_ID";
 
     /**
      * Retrieves the {@link ComponentName} for the {@link android.content.BroadcastReceiver} that

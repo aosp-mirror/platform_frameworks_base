@@ -182,8 +182,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 return false;
             }
         } else if (VendorUtils.ACTION_FILE_DESCRIPTOR_REQUEST.equals(intent.getAction())) {
-            if (!intent.hasExtra(VendorUtils.EXTRA_SERVICE_INFO)) {
-                Log.w(LOG_TAG, "Temp file request did not include the associated service info." +
+            if (!intent.hasExtra(VendorUtils.EXTRA_SERVICE_ID)) {
+                Log.w(LOG_TAG, "Temp file request did not include the associated service id." +
                         " Ignoring.");
                 return false;
             }
@@ -192,8 +192,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 return false;
             }
         } else if (VendorUtils.ACTION_CLEANUP.equals(intent.getAction())) {
-            if (!intent.hasExtra(VendorUtils.EXTRA_SERVICE_INFO)) {
-                Log.w(LOG_TAG, "Cleanup request did not include the associated service info." +
+            if (!intent.hasExtra(VendorUtils.EXTRA_SERVICE_ID)) {
+                Log.w(LOG_TAG, "Cleanup request did not include the associated service id." +
                         " Ignoring.");
                 return false;
             }
@@ -270,10 +270,9 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void generateTempFiles(Context context, Intent intent) {
-        FileServiceInfo serviceInfo =
-                intent.getParcelableExtra(VendorUtils.EXTRA_SERVICE_INFO);
-        if (serviceInfo == null) {
-            Log.w(LOG_TAG, "Temp file request did not include the associated service info. " +
+        String serviceId = intent.getStringExtra(VendorUtils.EXTRA_SERVICE_ID);
+        if (serviceId == null) {
+            Log.w(LOG_TAG, "Temp file request did not include the associated service id. " +
                     "Ignoring.");
             setResultCode(RESULT_MALFORMED_INTENT);
             return;
@@ -289,9 +288,9 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         ArrayList<UriPathPair> freshTempFiles =
-                generateFreshTempFiles(context, serviceInfo, fdCount);
+                generateFreshTempFiles(context, serviceId, fdCount);
         ArrayList<UriPathPair> pausedFiles =
-                generateUrisForPausedFiles(context, serviceInfo, pausedList);
+                generateUrisForPausedFiles(context, serviceId, pausedList);
 
         Bundle result = new Bundle();
         result.putParcelableArrayList(VendorUtils.EXTRA_FREE_URI_LIST, freshTempFiles);
@@ -300,11 +299,9 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         setResultExtras(result);
     }
 
-    private ArrayList<UriPathPair> generateFreshTempFiles(Context context,
-            FileServiceInfo serviceInfo,
+    private ArrayList<UriPathPair> generateFreshTempFiles(Context context, String serviceId,
             int freshFdCount) {
-        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
-                serviceInfo.getServiceId());
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceId);
         if (!tempFileDir.exists()) {
             tempFileDir.mkdirs();
         }
@@ -348,14 +345,14 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private ArrayList<UriPathPair> generateUrisForPausedFiles(Context context,
-            FileServiceInfo serviceInfo, List<Uri> pausedFiles) {
+            String serviceId, List<Uri> pausedFiles) {
         if (pausedFiles == null) {
             return new ArrayList<>(0);
         }
         ArrayList<UriPathPair> result = new ArrayList<>(pausedFiles.size());
 
         for (Uri fileUri : pausedFiles) {
-            if (!verifyTempFilePath(context, serviceInfo.getServiceId(), fileUri)) {
+            if (!verifyTempFilePath(context, serviceId, fileUri)) {
                 Log.w(LOG_TAG, "Supplied file " + fileUri + " is not a valid temp file to resume");
                 setResultCode(RESULT_TEMP_FILE_GENERATION_ERROR);
                 continue;
@@ -377,10 +374,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void cleanupTempFiles(Context context, Intent intent) {
-        FileServiceInfo serviceInfo =
-                intent.getParcelableExtra(VendorUtils.EXTRA_SERVICE_INFO);
-        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
-                serviceInfo.getServiceId());
+        String serviceId = intent.getStringExtra(VendorUtils.EXTRA_SERVICE_ID);
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceId);
         final List<Uri> filesInUse =
                 intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_FILES_IN_USE);
         File[] filesToDelete = tempFileDir.listFiles(new FileFilter() {
