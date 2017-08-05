@@ -21,6 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="134047986446577723">"Integreret billede"</string>
     <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(Program uden titel)"</string>
-    <string name="pip_close" msgid="3480680679023423574">"Luk PIP"</string>
+    <string name="pip_close" msgid="3480680679023423574">"Luk integreret billede"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Fuld skærm"</string>
 </resources>
