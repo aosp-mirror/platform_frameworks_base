@@ -36,161 +36,72 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.List;
 
 /**
- * The ShortcutManager manages an app's <em>shortcuts</em>. Shortcuts provide users
- * with quick access to activities other than an app's main activity in the currently-active
- * launcher.  For example,
- * an email app may publish the "compose new email" action, which will directly open the
- * compose activity.  The {@link ShortcutInfo} class contains information about each of the
- * shortcuts themselves.
+ * The ShortcutManager manages an app's <em>shortcuts</em>. Shortcuts provide users with quick
+ * access to activities other than an app's main activity in the currently-active launcher, provided
+ * that the launcher supports app shortcuts.  For example, an email app may publish the "compose new
+ * email" action, which will directly open the compose activity.  The {@link ShortcutInfo} class
+ * contains information about each of the shortcuts themselves.
  *
- * <h3>Static Shortcuts and Dynamic Shortcuts</h3>
+ * <p>This page discusses the implementation details of the <code>ShortcutManager</code> class. For
+ * guidance on performing operations on app shortcuts within your app, see the
+ * <a href="/guide/topics/ui/shortcuts.html">App Shortcuts</a> feature guide.
  *
- * <p>
- * There are several different types of shortcuts:
+ * <h3>Shortcut characteristics</h3>
  *
- * <ul>
- * <li><p>Static shortcuts are declared in a resource XML file, which is referenced in the publisher
- * app's <code>AndroidManifest.xml</code> file. These shortcuts are visually associated with an
- * app's launcher icon.
- * <p>Static shortcuts are published when an app is installed, and the details of these shortcuts
- * change when an app is upgraded with an updated XML file. Static shortcuts are immutable, and
- * their definitions, such as icons and labels, cannot be changed dynamically without upgrading the
- * publisher app.</li>
+ * This section describes in-depth details about each shortcut type's usage and availability.
  *
- * <li>Dynamic shortcuts are published at runtime using this class's APIs. These shortcuts are
- * visually associated with an app's launcher icon. Apps can publish, update, and remove dynamic
- * shortcuts at runtime.
- * </ul>
+ * <p class="note"><b>Important security note:</b> All shortcut information is stored in
+ * <a href="/training/articles/direct-boot.html">credential encrypted storage</a>, so your app
+ * cannot access a user's shortcuts until after they've unlocked the device.
  *
- * <p>Only main activities&mdash;activities that handle the {@code MAIN} action and the
- * {@code LAUNCHER} category&mdash;can have shortcuts.
- * If an app has multiple main activities, these activities have different sets
- * of shortcuts.
+ * <h4>Static and dynamic shortcuts</h4>
  *
  * <p>Static shortcuts and dynamic shortcuts are shown in a supported launcher when the user
- * long-presses on an app's launcher icon. Note that the actual gesture may be different
- * depending on the launcher app.
+ * performs a specific gesture. On currently-supported launchers, the gesture is a long-press on the
+ * app's launcher icon, but the actual gesture may be different on other launcher apps.
  *
- * <p>Each launcher icon can have at most {@link #getMaxShortcutCountPerActivity()} number of
- * static and dynamic shortcuts combined.
+ * <p>The {@link LauncherApps} class provides APIs for launcher apps to access shortcuts.
  *
+ * <h4>Pinned shortcuts</h4>
  *
- * <h3>Pinning Shortcuts</h3>
+ * <p>Because pinned shortcuts appear in the launcher itself, they're always visible. A pinned
+ * shortcut is removed from the launcher only in the following situations:
+ * <ul>
+ *     <li>The user removes it.
+ *     <li>The publisher app associated with the shortcut is uninstalled.
+ *     <li>The user performs the clear data action on the publisher app from the device's
+ *     <b>Settings</b> app.
+ * </ul>
  *
- * <p>Apps running in the foreground can also <em>pin</em> shortcuts at runtime, subject to user
- * permission, using this class's APIs. Each pinned shortcut is a copy of a static shortcut or a
- * dynamic shortcut. Although users can pin a shortcut multiple times, the system calls the pinning
- * API only once to complete the pinning process. Unlike static and dynamic shortcuts, pinned
- * shortcuts appear as separate icons, visually distinct from the app's launcher icon, in the
- * launcher. There is no limit to the number of pinned shortcuts that an app can create.
+ * <p>Because the system performs
+ * <a href="/guide/topics/ui/shortcuts.html#backup-and-restore">backup and restore</a> on pinned
+ * shortcuts automatically, these shortcuts' IDs should contain either stable, constant strings or
+ * server-side identifiers, rather than identifiers generated locally that might not make sense on
+ * other devices.
  *
- * <p>Pinned shortcuts <strong>cannot</strong> be removed by publisher apps. They're removed only
- * when the user removes them, when the publisher app is uninstalled, or when the user performs the
- * clear data action on the publisher app from the device's <b>Settings</b> app.
+ * <h3>Shortcut display order</h3>
  *
- * <p>However, the publisher app can <em>disable</em> pinned shortcuts so they cannot be started.
- * See the following sections for details.
+ * <p>When the launcher displays an app's shortcuts, they should appear in the following order:
  *
- * <h3>Updating and Disabling Shortcuts</h3>
+ * <ul>
+ *   <li>Static shortcuts (if {@link ShortcutInfo#isDeclaredInManifest()} is {@code true}),
+ *   and then show dynamic shortcuts (if {@link ShortcutInfo#isDynamic()} is {@code true}).
+ *   <li>Within each shortcut type (static and dynamic), sort the shortcuts in order of increasing
+ *   rank according to {@link ShortcutInfo#getRank()}.
+ * </ul>
  *
- * <p>When a dynamic shortcut is pinned, even when the publisher removes it as a dynamic shortcut,
- * the pinned shortcut will still be visible and launchable.  This allows an app to have
- * more than {@link #getMaxShortcutCountPerActivity()} number of shortcuts.
+ * <p>Shortcut ranks are non-negative, sequential integers that determine the order in which
+ * shortcuts appear, assuming that the shortcuts are all in the same category. You can update ranks
+ * of existing shortcuts when you call {@link #updateShortcuts(List)},
+ * {@link #addDynamicShortcuts(List)}, or {@link #setDynamicShortcuts(List)}.
  *
- * <p>For example, suppose {@link #getMaxShortcutCountPerActivity()} is 5:
- * <ol>
- *     <li>A chat app publishes 5 dynamic shortcuts for the 5 most recent
- *     conversations (c1, c2, ..., c5).
+ * <p class="note"><b>Note:</b> Ranks are auto-adjusted so that they're unique for each type of
+ * shortcut (static or dynamic). For example, if there are 3 dynamic shortcuts with ranks 0, 1 and
+ * 2, adding another dynamic shortcut with a rank of 1 represents a request to place this shortcut
+ * at the second position. In response, the third and fourth shortcuts move closer to the bottom of
+ * the shortcut list, with their ranks changing to 2 and 3, respectively.
  *
- *     <li>The user pins all 5 of the shortcuts.
- *
- *     <li>Later, the user has started 3 additional conversations (c6, c7, and c8),
- *     so the publisher app
- *     re-publishes its dynamic shortcuts.  The new dynamic shortcut list is:
- *     c4, c5, ..., c8.
- *     The publisher app has to remove c1, c2, and c3 because it can't have more than
- *     5 dynamic shortcuts.
- *
- *     <li>However, even though c1, c2, and c3 are no longer dynamic shortcuts, the pinned
- *     shortcuts for these conversations are still available and launchable.
- *
- *     <li>At this point, the user can access a total of 8 shortcuts that link to activities in
- *     the publisher app, including the 3 pinned
- *     shortcuts, even though an app can have at most 5 dynamic shortcuts.
- *
- *     <li>The app can use {@link #updateShortcuts(List)} to update <em>any</em> of the existing
- *     8 shortcuts, when, for example, the chat peers' icons have changed.
- * </ol>
- * The {@link #addDynamicShortcuts(List)} and {@link #setDynamicShortcuts(List)} methods
- * can also be used
- * to update existing shortcuts with the same IDs, but they <b>cannot</b> be used
- * for updating non-dynamic, pinned shortcuts because these two methods try to convert the given
- * lists of shortcuts to dynamic shortcuts.
- *
- *
- * <h4>Disabling Static Shortcuts</h4>
- * <p>When an app is upgraded and the new version
- * no longer uses a static shortcut that appeared in the previous version, this deprecated
- * shortcut isn't published as a static shortcut.
- *
- * <p>If the deprecated shortcut is pinned, then the pinned shortcut will remain on the launcher,
- * but it's disabled automatically. When a pinned shortcut is disabled, this class's APIs cannot
- * update it.
- *
- * <h4>Disabling Dynamic Shortcuts</h4>
- * Sometimes pinned shortcuts become obsolete and may not be usable.  For example, a pinned shortcut
- * to a group chat becomes unusable when the associated group chat is deleted.  In cases like this,
- * apps should use {@link #disableShortcuts(List)}, which removes the specified dynamic
- * shortcuts and also makes any specified pinned shortcuts un-launchable.
- * The {@link #disableShortcuts(List, CharSequence)} method can also be used to disable shortcuts
- * and show users a custom error message when they attempt to launch the disabled shortcuts.
- *
- *
- * <h3>Publishing Static Shortcuts</h3>
- *
- * <p>
- * In order to add static shortcuts to your app, first add
- * {@code <meta-data android:name="android.app.shortcuts" />} to your main activity in
- * AndroidManifest.xml:
- * <pre>
- *&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
- *             package="com.example.myapplication"&gt;
- *  &lt;application ... &gt;
- *    &lt;activity android:name="Main"&gt;
- *      &lt;intent-filter&gt;
- *        &lt;action android:name="android.intent.action.MAIN" /&gt;
- *        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
- *      &lt;/intent-filter&gt;
- *      <strong>&lt;meta-data android:name="android.app.shortcuts"
- *                 android:resource="@xml/shortcuts" /&gt;</strong>
- *    &lt;/activity&gt;
- *  &lt;/application&gt;
- *&lt;/manifest&gt;
- * </pre>
- *
- * Then, define your app's static shortcuts in the <code>res/xml/shortcuts.xml</code>
- * file:
- * <pre>
- *&lt;shortcuts xmlns:android="http://schemas.android.com/apk/res/android"&gt;
- *  &lt;shortcut
- *    android:shortcutId="compose"
- *    android:enabled="true"
- *    android:icon="@drawable/compose_icon"
- *    android:shortcutShortLabel="@string/compose_shortcut_short_label1"
- *    android:shortcutLongLabel="@string/compose_shortcut_long_label1"
- *    android:shortcutDisabledMessage="@string/compose_disabled_message1"&gt;
- *    &lt;intent
- *      android:action="android.intent.action.VIEW"
- *      android:targetPackage="com.example.myapplication"
- *      android:targetClass="com.example.myapplication.ComposeActivity" /&gt;
- *    &lt;!-- If your shortcut is associated with multiple intents, include them
- *         here. The last intent in the list is what the user sees when they
- *         launch this shortcut. --&gt;
- *    &lt;categories android:name="android.shortcut.conversation" /&gt;
- *  &lt;/shortcut&gt;
- *  &lt;!-- Specify more shortcuts here. --&gt;
- *&lt;/shortcuts&gt;
- * </pre>
+ * <h3>Options for static shortcuts</h3>
  *
  * The following list includes descriptions for the different attributes within a static shortcut:
  * <dl>
@@ -236,9 +147,10 @@ import java.util.List;
  *   {@code android:action} is mandatory.
  *   See <a href="{@docRoot}guide/topics/ui/settings.html#Intents">Using intents</a> for the
  *   other supported tags.
- *   You can provide multiple intents for a single shortcut so that the last defined activity is launched
- *   with the other activities in the <a href="/guide/components/tasks-and-back-stack.html">back stack</a>.
- *   See {@link android.app.TaskStackBuilder} for details.
+ *   <p>You can provide multiple intents for a single shortcut so that the last defined activity is
+ *   launched with the other activities in the
+ *   <a href="/guide/components/tasks-and-back-stack.html">back stack</a>. See
+ *   {@link android.app.TaskStackBuilder} for details.
  *   <p><b>Note:</b> String resources may not be used within an {@code <intent>} element.
  *   </dd>
  *   <dt>{@code categories}</dt>
@@ -247,337 +159,92 @@ import java.util.List;
  *   </dd>
  * </dl>
  *
- * <h3>Publishing Dynamic Shortcuts</h3>
+ * <h3>Updating shortcuts</h3>
  *
- * <p>
- * Apps can publish dynamic shortcuts with {@link #setDynamicShortcuts(List)}
- * or {@link #addDynamicShortcuts(List)}.  The {@link #updateShortcuts(List)} method can also be
- * used to update existing, mutable shortcuts.
- * Use {@link #removeDynamicShortcuts(List)} or {@link #removeAllDynamicShortcuts()} to remove
- * dynamic shortcuts.
- *
- * <p>The following code snippet shows how to create a single dynamic shortcut:
- * <pre>
- *ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
- *
- *ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "id1")
- *    .setShortLabel("Web site")
- *    .setLongLabel("Open the web site")
- *    .setIcon(Icon.createWithResource(context, R.drawable.icon_website))
- *    .setIntent(new Intent(Intent.ACTION_VIEW,
- *                   Uri.parse("https://www.mysite.example.com/")))
- *    .build();
- *
- *shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
- * </pre>
- *
- * <h3>Publishing Pinned Shortcuts</h3>
- *
- * <p>Apps can pin an existing shortcut (either static or dynamic) or an entirely new shortcut to a
- * supported launcher programatically using {@link #requestPinShortcut(ShortcutInfo, IntentSender)}.
- * You pass two arguments into this method:
- *
- * <ul>
- *   <li>A {@link ShortcutInfo} object &ndash; If the shortcut already exists, this object should
- *   contain only the shortcut's ID. Otherwise, the new {@link ShortcutInfo} object must contain an
- *   ID, an intent, and a short label for the new shortcut.
- *   <li><p>A {@link android.app.PendingIntent} object &ndash; This intent represents the callback
- *   that your app receives if the shortcut is successfully pinned to the device's launcher.
- *   <p><b>Note:</b> If the user doesn't allow the shortcut to be pinned to the launcher, the
- *   pinning process fails, and the {@link Intent} object that is passed into this
- *   {@link android.app.PendingIntent} object isn't executed.
- *   <div class="note"><p><b>Note:</b> Due to background execution limits introduced in Android
- *   {@link VERSION_CODES#O}, it's best to use a
- *   <a href="{@docRoot}guide/components/broadcasts.html#manifest-declared_receivers">
- *   manifest-declared receiver</a> to receive a callback.
- *   <p>Also, to prevent other apps from invoking the receiver, add the attribute assignment
- *   <code>android:exported="false"</code> to the receiver's manifest entry.</p></div>
- * </ul>
- *
- * The following code snippet shows how to pin a single shortcut that already exists and is enabled:
- *
- * <pre>
- *ShortcutManager mShortcutManager =
- *        context.getSystemService(ShortcutManager.class);
- *
- *if (mShortcutManager.isRequestPinShortcutSupported()) {
- *
- *    // This example defines a new shortcut; that is, this shortcut hasn't
- *    // been published before.
- *    ShortcutInfo pinShortcutInfo = new ShortcutInfo.Builder()
- *            .setIcon(myIcon)
- *            .setShortLabel("My awesome shortcut")
- *            .setIntent(myIntent)
- *            .build();
- *
- *    PendingIntent resultPendingIntent = null;
- *
- *    // Create the following Intent and PendingIntent objects only if your app
- *    // needs to be notified that the user allowed the shortcut to be pinned.
- *    // Use a boolean value, such as "appNeedsNotifying", to define this behavior.
- *    if (appNeedsNotifying) {
- *        // We assume here the app has a manifest-declared receiver "MyReceiver".
- *        Intent pinnedShortcutCallbackIntent = new Intent(context, MyReceiver.class);
- *
- *        // Configure the intent so that your app's broadcast receiver gets
- *        // the callback successfully.
- *        PendingIntent successCallback = PendingIntent.createBroadcast(context, 0,
- *                pinnedShortcutCallbackIntent);
- *
- *        resultPendingIntent = successCallback.getIntentSender();
- *    }
- *
- *    mShortcutManager.requestPinShortcut(pinShortcutInfo, resultPendingIntent);
- *}
- * </pre>
- *
- * <p class="note"><strong>Note:</strong> As you add logic in your app to make requests to pin
- * shortcuts, keep in mind that not all launchers support pinning of shortcuts. To determine whether
- * your app can complete this process on a particular device, check the return value of
- * {@link #isRequestPinShortcutSupported()}. Based on this return value, you might decide to hide
- * the option in your app that allows users to pin a shortcut.
- *
- * <p class="note"><strong>Note:</strong> See also the support library APIs
- * {@link android.support.v4.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
- * Context)} and
- * {@link android.support.v4.content.pm.ShortcutManagerCompat#requestPinShortcut(
- * Context, ShortcutInfoCompat, IntentSender)}, which works on Android versions lower than
- * {@link VERSION_CODES#O} by falling back to the deprecated private intent
- * {@code com.android.launcher.action.INSTALL_SHORTCUT}.
- *
- * <h4>Custom Activity for Pinning Shortcuts</h4>
- *
- * <p>You can also create a specialized activity that helps users create shortcuts, complete with
- * custom options and a confirmation button. In your app's manifest file, add
- * {@link Intent#ACTION_CREATE_SHORTCUT} to the activity's <code>&lt;intent-filter&gt;</code>
- * element, as shown in the following snippet:
- *
- * <pre>
- *&lt;manifest&gt;
- *    ...
- *    &lt;application&gt;
- *        &lt;activity android:name="com.example.MyCustomPromptToPinShortcut" ... &gt;
- *            &lt;intent-filter
- *                    action android:name="android.intent.action.ACTION_CREATE_SHORTCUT"&gt;
- *            ...
- *            &lt;/intent-filter&gt;
- *        &lt;/activity&gt;
- *        ...
- *    &lt;/application&gt;
- *&lt;/manifest&gt;
- * </pre>
- *
- * <p>When you use this specialized activity in your app, the following sequence of steps takes
- * place:</p>
- *
+ * <p>As an example, suppose {@link #getMaxShortcutCountPerActivity()} is 5:
  * <ol>
- *   <li>The user attempts to create a shortcut, triggering the system to start the specialized
- *   activity.</li>
- *   <li>The user sets options for the shortcut.</li>
- *   <li>The user selects the confirmation button, allowing your app to create the shortcut using
- *   the {@link #createShortcutResultIntent(ShortcutInfo)} method. This method returns an
- *   {@link Intent}, which your app relays back to the previously-executing activity using
- *   {@link Activity#setResult(int)}.</li>
- *   <li>Your app calls {@link Activity#finish()} on the activity used for creating the customized
- *   shortcut.</li>
+ *     <li>A chat app publishes 5 dynamic shortcuts for the 5 most recent
+ *     conversations (c1, c2, ..., c5).
+ *
+ *     <li>The user pins all 5 of the shortcuts.
+ *
+ *     <li>Later, the user has started 3 additional conversations (c6, c7, and c8),
+ *     so the publisher app
+ *     re-publishes its dynamic shortcuts.  The new dynamic shortcut list is:
+ *     c4, c5, ..., c8.
+ *     The publisher app has to remove c1, c2, and c3 because it can't have more than
+ *     5 dynamic shortcuts.
+ *
+ *     <li>However, even though c1, c2, and c3 are no longer dynamic shortcuts, the pinned
+ *     shortcuts for these conversations are still available and launchable.
+ *
+ *     <li>At this point, the user can access a total of 8 shortcuts that link to activities in
+ *     the publisher app, including the 3 pinned shortcuts, even though an app can have at most 5
+ *     dynamic shortcuts.
+ *
+ *     <li>The app can use {@link #updateShortcuts(List)} to update <em>any</em> of the existing
+ *     8 shortcuts, when, for example, the chat peers' icons have changed.
+ *     <p>The {@link #addDynamicShortcuts(List)} and {@link #setDynamicShortcuts(List)} methods
+ *     can also be used to update existing shortcuts with the same IDs, but they <b>cannot</b> be
+ *     used for updating non-dynamic, pinned shortcuts because these 2 methods try to convert the
+ *     given lists of shortcuts to dynamic shortcuts.
  * </ol>
  *
- * <h3>Shortcut Intents</h3>
+ * <h3>Shortcut intents</h3>
+ *
  * <p>
  * Dynamic shortcuts can be published with any set of {@link Intent#addFlags Intent} flags.
  * Typically, {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} is specified, possibly along with other
  * flags; otherwise, if the app is already running, the app is simply brought to
  * the foreground, and the target activity may not appear.
  *
- * <p>The {@link ShortcutInfo.Builder#setIntents(Intent[])} method can be used instead of
- * {@link ShortcutInfo.Builder#setIntent(Intent)} with {@link android.app.TaskStackBuilder}
- * in order to launch an activity with other activities in the back stack.
- * When the user selects a shortcut to load an activity with a back stack,
- * then presses the back key, a parent activity from the same app will be shown
- * instead of the user being navigated back to the launcher.
- *
- * <p>Static shortcuts can also have multiple intents to achieve the same effect.
- * In order to associate multiple {@link Intent} objects with a shortcut, simply list multiple
- * <code>&lt;intent&gt;</code> elements within a single <code>&lt;shortcut&gt;</code> element.
- * The last intent specifies what the user sees when they launch a shortcut.
- *
  * <p>Static shortcuts <b>cannot</b> have custom intent flags.
  * The first intent of a static shortcut will always have {@link Intent#FLAG_ACTIVITY_NEW_TASK}
- * and {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} set.
- * This means, when the app is already running, all the existing activities will be
- * destroyed when a static shortcut is launched.
- * If this behavior is not desirable, you can use a <em>trampoline activity</em>,
- * or an invisible activity that starts another activity in {@link Activity#onCreate},
- * then calls {@link Activity#finish()}.
- * The first activity should include an attribute setting
- * of {@code android:taskAffinity=""} in the app's <code>AndroidManifest.xml</code>
- * file, and the intent within the static shortcut should point at this first activity.
+ * and {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} set. This means, when the app is already running, all
+ * the existing activities in your app will be destroyed when a static shortcut is launched.
+ * If this behavior is not desirable, you can use a <em>trampoline activity</em>, or an invisible
+ * activity that starts another activity in {@link Activity#onCreate}, then calls
+ * {@link Activity#finish()}:
+ * <ol>
+ *     <li>In the <code>AndroidManifest.xml</code> file, the trampoline activity should include the
+ *     attribute assignment {@code android:taskAffinity=""}.
+ *     <li>In the shortcuts resource file, the intent within the static shortcut should point at
+ *     the trampoline activity.
+ * </ol>
  *
+ * <h3>Handling system locale changes</h3>
  *
- * <h3>Showing New Information in a Shortcut</h3>
- * <p>
- * In order to avoid confusion, you should not use {@link #updateShortcuts(List)} to update
- * a shortcut so that it contains conceptually different information.
+ * <p>Apps should update dynamic and pinned shortcuts when the system locale changes using the
+ * {@link Intent#ACTION_LOCALE_CHANGED} broadcast. When the system locale changes,
+ * <a href="/guide/topics/ui/shortcuts.html#rate-limit">rate limiting</a> is reset, so even
+ * background apps can add and update dynamic shortcuts until the rate limit is reached again.
  *
- * <p>For example, a phone app may publish the most frequently called contact as a dynamic
- * shortcut.  Over time, this contact may change. When it does, the app should
- * represent the changed contact with a new shortcut that contains a different ID, using either
- * {@link #setDynamicShortcuts(List)} or {@link #addDynamicShortcuts(List)}, rather than updating
- * the existing shortcut with {@link #updateShortcuts(List)}.
- * This is because when the shortcut is pinned, changing
- * it to reference a different contact will likely confuse the user.
+ * <h3>Shortcut limits</h3>
  *
- * <p>On the other hand, when the
- * contact's information has changed, such as the name or picture, the app should
- * use {@link #updateShortcuts(List)} so that the pinned shortcut is updated too.
+ * <p>Only main activities&mdash;activities that handle the {@code MAIN} action and the
+ * {@code LAUNCHER} category&mdash;can have shortcuts. If an app has multiple main activities, you
+ * need to define the set of shortcuts for <em>each</em> activity.
  *
+ * <p>Each launcher icon can have at most {@link #getMaxShortcutCountPerActivity()} number of
+ * static and dynamic shortcuts combined. There is no limit to the number of pinned shortcuts that
+ * an app can create.
  *
- * <h3>Shortcut Display Order</h3>
- * When the launcher displays the shortcuts that are associated with a particular launcher icon,
- * the shortcuts should appear in the following order:
- * <ul>
- *   <li>First show static shortcuts
- *   (if {@link ShortcutInfo#isDeclaredInManifest()} is {@code true}),
- *   and then show dynamic shortcuts (if {@link ShortcutInfo#isDynamic()} is {@code true}).
- *   <li>Within each category of shortcuts (static and dynamic), sort the shortcuts in order
- *   of increasing rank according to {@link ShortcutInfo#getRank()}.
- * </ul>
- * <p>Shortcut ranks are non-negative, sequential integers
- * that determine the order in which shortcuts appear, assuming that the shortcuts are all in
- * the same category.
- * Ranks of existing shortcuts can be updated with
- * {@link #updateShortcuts(List)}. You can also use {@link #addDynamicShortcuts(List)} and
- * {@link #setDynamicShortcuts(List)}.
+ * <p>When a dynamic shortcut is pinned, even when the publisher removes it as a dynamic shortcut,
+ * the pinned shortcut is still visible and launchable.  This allows an app to have more than
+ * {@link #getMaxShortcutCountPerActivity()} number of shortcuts.
  *
- * <p>Ranks are auto-adjusted so that they're unique for each target activity in each category
- * (static or dynamic).  For example, if there are 3 dynamic shortcuts with ranks 0, 1 and 2,
- * adding another dynamic shortcut with a rank of 1 represents a request to place this shortcut at
- * the second position.
- * In response, the third and fourth shortcuts move closer to the bottom of the shortcut list,
- * with their ranks changing to 2 and 3, respectively.
+ * <h4>Rate limiting</h4>
  *
- * <h3>Rate Limiting</h3>
+ * <p>When <a href="/guide/topics/ui/shortcuts.html#rate-limit">rate limiting</a> is active,
+ * {@link #isRateLimitingActive()} returns {@code true}.
  *
- * <p>
- * Calls to {@link #setDynamicShortcuts(List)}, {@link #addDynamicShortcuts(List)}, and
- * {@link #updateShortcuts(List)} may be rate-limited when called by <em>background apps</em>, or
- * apps with no foreground activity or service.  When you attempt to call these methods
- * from a background app after exceeding the rate limit, these APIs return {@code false}.
- *
- * <p>Apps with a foreground activity or service are not rate-limited.
- *
- * <p>Rate-limiting is reset upon certain events, so that even background apps
- * can call these APIs until the rate limit is reached again.
- * These events include the following:
+ * <p>Rate limiting is reset upon certain events, so even background apps can call these APIs until
+ * the rate limit is reached again. These events include the following:
  * <ul>
  *   <li>An app comes to the foreground.
  *   <li>The system locale changes.
  *   <li>The user performs the <strong>inline reply</strong> action on a notification.
  * </ul>
- *
- * <p>When rate-limiting is active, {@link #isRateLimitingActive()} returns {@code true}.
- *
- * <h4>Resetting rate-limiting for testing</h4>
- *
- * <p>
- * If your app is rate-limited during development or testing, you can use the
- * <strong>Reset ShortcutManager rate-limiting</strong> development option or
- * the following {@code adb} command to reset it:
- * <pre class="no-pretty-print">
- *$ adb shell cmd shortcut reset-throttling [ --user USER-ID ]
- * </pre>
- *
- * <h3>Handling System Locale Changes</h3>
- *
- * <p>
- * Apps should update dynamic and pinned shortcuts when the system locale changes
- * using the {@link Intent#ACTION_LOCALE_CHANGED} broadcast.
- *
- * <p>When the system locale changes, rate-limiting is reset, so even background apps
- * can add and update dynamic shortcuts until the rate limit is reached again.
- *
- *
- * <h3>Backup and Restore</h3>
- *
- * <p>
- * When an app has the {@code android:allowBackup="true"} attribute assignment included
- * in its <code>AndroidManifest.xml</code> file, pinned shortcuts are
- * backed up automatically and are restored when the user sets up a new device.
- *
- * <h4>Categories of shortcuts that are backed up</h4>
- *
- * <ul>
- *  <li>Pinned shortcuts are backed up.  Bitmap icons are not backed up by the system,
- *  so launcher apps should back them up and restore them so that the user still sees icons
- *  for pinned shortcuts on the launcher.  Apps can always use
- *  {@link #updateShortcuts(List)} to re-publish icons.
- *
- *  <li>Static shortcuts aren't backed up, but when an app is re-installed on a new
- *  device, they are re-published from the <code>AndroidManifest.xml</code> file.
- *
- *  <li>Dynamic shortcuts <b>aren't</b> backed up.
- * </ul>
- *
- * <p>Because dynamic shortcuts are not restored, it is recommended that apps check
- * currently-published dynamic shortcuts using {@link #getDynamicShortcuts()}
- * each time they are launched, and they should re-publish
- * dynamic shortcuts when necessary.
- *
- * <pre>
- *public class MainActivity extends Activity {
- *    public void onCreate(Bundle savedInstanceState) {
- *        super.onCreate(savedInstanceState);
- *        ShortcutManager shortcutManager =
- *                getSystemService(ShortcutManager.class);
- *
- *        if (shortcutManager.getDynamicShortcuts().size() == 0) {
- *            // Application restored. Need to re-publish dynamic shortcuts.
- *            if (shortcutManager.getPinnedShortcuts().size() > 0) {
- *                // Pinned shortcuts have been restored. Use
- *                // updateShortcuts() to make sure they contain
- *                // up-to-date information.
- *            }
- *        }
- *    }
- *    // ...
- *}
- * </pre>
- *
- *
- * <h4>Backup/restore and shortcut IDs</h4>
- * <p>
- * Because pinned shortcuts are backed up and restored on new devices, shortcut IDs
- * should contain either stable, constant strings or server-side identifiers,
- * rather than identifiers generated locally that might not make sense on other devices.
- *
- *
- * <h3>Report Shortcut Usage and Prediction</h3>
- * <p>
- * Launcher apps may be capable of predicting which shortcuts will most likely be
- * used at a given time by examining the shortcut usage history data.
- *
- * <p>In order to provide launchers with such data, publisher apps should
- * report the shortcuts that are used with {@link #reportShortcutUsed(String)}
- * when a shortcut is selected,
- * <b>or when an action equivalent to a shortcut is taken by the user even if it wasn't started
- * with the shortcut</b>.
- *
- * <p>For example, suppose a navigation app supports "navigate to work" as a shortcut.
- * It should then report when the user selects this shortcut <b>and</b> when the user chooses
- * to navigate to work within the app itself.
- * This helps the launcher app
- * learn that the user wants to navigate to work at a certain time every
- * weekday, and it can then show this shortcut in a suggestion list at the right time.
- *
- * <h3>Launcher API</h3>
- *
- * The {@link LauncherApps} class provides APIs for launcher apps to access shortcuts.
- *
- *
- * <h3>Direct Boot and Shortcuts</h3>
- *
- * All shortcut information is stored in credential encrypted storage, so no shortcuts can be
- * accessed when the user is locked.
  */
 @SystemService(Context.SHORTCUT_SERVICE)
 public class ShortcutManager {
