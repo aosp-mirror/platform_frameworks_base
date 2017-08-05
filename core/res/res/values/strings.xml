@@ -160,8 +160,8 @@
     <string name="notification_channel_call_forward">Call forwarding</string>
     <!-- Telephony notification channel name for a channel containing emergency callback mode notifications. -->
     <string name="notification_channel_emergency_callback">Emergency callback mode</string>
-    <!-- Telephony notification channel name for a channel containing mobile data alert notifications. -->
-    <string name="notification_channel_mobile_data_alert">Mobile data alerts</string>
+    <!-- Telephony notification channel name for a channel containing mobile data status notifications. -->
+    <string name="notification_channel_mobile_data_status">Mobile data status</string>
     <!-- Telephony notification channel name for a channel containing sms notifications. -->
     <string name="notification_channel_sms">SMS messages</string>
     <!-- Telephony notification channel name for a channel containing voice mail notifications. -->
