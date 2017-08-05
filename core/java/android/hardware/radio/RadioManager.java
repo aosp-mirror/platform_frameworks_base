@@ -1656,7 +1656,6 @@ public class RadioManager {
             Log.e(TAG, "Failed to open tuner");
             return null;
         }
-        halCallback.attachTuner(tuner);
         return new TunerAdapter(tuner, config != null ? config.getType() : BAND_INVALID);
     }
 
