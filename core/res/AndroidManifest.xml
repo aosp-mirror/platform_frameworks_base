@@ -2547,7 +2547,6 @@
     <!-- Allows applications to get the installed and enabled print services.
          @hide
          @SystemApi
-         @TestApi
          <p>Protection level: signature|preinstalled
     -->
     <permission android:name="android.permission.READ_PRINT_SERVICES"
