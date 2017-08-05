@@ -29,7 +29,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.mbms.DownloadProgressListener;
+import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
@@ -99,7 +99,7 @@ public class MbmsDownloadManager {
 
     /**
      * The default directory name for all MBMS temp files. If you call
-     * {@link #download(DownloadRequest, DownloadProgressListener)} without first calling
+     * {@link #download(DownloadRequest, DownloadStateCallback)} without first calling
      * {@link #setTempFileRootDirectory(File)}, this directory will be created for you under the
      * path returned by {@link Context#getFilesDir()}.
      */
@@ -329,7 +329,7 @@ public class MbmsDownloadManager {
      * local instance of {@link android.content.SharedPreferences} and by the middleware.
      *
      * If this method is not called at least once before calling
-     * {@link #download(DownloadRequest, DownloadProgressListener)}, the framework
+     * {@link #download(DownloadRequest, DownloadStateCallback)}, the framework
      * will default to a directory formed by the concatenation of the app's files directory and
      * {@link MbmsDownloadManager#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
      *
@@ -380,7 +380,7 @@ public class MbmsDownloadManager {
     /**
      * Retrieves the currently configured temp file root directory. Returns the file that was
      * configured via {@link #setTempFileRootDirectory(File)} or the default directory
-     * {@link #download(DownloadRequest, DownloadProgressListener)} was called without ever setting
+     * {@link #download(DownloadRequest, DownloadStateCallback)} was called without ever setting
      * the temp file root. If neither method has been called since the last time the app's shared
      * preferences were reset, returns null.
      *
@@ -400,11 +400,6 @@ public class MbmsDownloadManager {
     /**
      * Requests a download of a file that is available via multicast.
      *
-     * downloadListener is an optional callback object which can be used to get progress reports
-     *     of a currently occuring download.  Note this can only run while the calling app
-     *     is running, so future downloads will simply result in resultIntents being sent
-     *     for completed or errored-out downloads.  A NULL indicates no callbacks are needed.
-     *
      * May throw an {@link IllegalArgumentException}
      *
      * If {@link #setTempFileRootDirectory(File)} has not called after the app has been installed,
@@ -416,9 +411,10 @@ public class MbmsDownloadManager {
      *
      * @param request The request that specifies what should be downloaded
      * @param progressListener Optional listener that will be provided progress updates
-     *                         if the app is running.
+     *                         if the app is running. If {@code null}, no callbacks will be
+     *                         provided.
      */
-    public void download(DownloadRequest request, DownloadProgressListener progressListener)
+    public void download(DownloadRequest request, @Nullable DownloadStateCallback progressListener)
             throws MbmsException {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
@@ -448,7 +444,7 @@ public class MbmsDownloadManager {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from this application.
      * A pending request is one that was issued via
-     * {@link #download(DownloadRequest, DownloadProgressListener)} but not cancelled through
+     * {@link #download(DownloadRequest, DownloadStateCallback)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * @return A list, possibly empty, of {@link DownloadRequest}s
      */
