@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Mtoa Huduma za Simu"</string>
-    <string name="portal_notification_id" msgid="5155057562457079297">"Data ya simu za mkononi imekwisha"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Data ya mtandao wa simu imekwisha"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Data yako ya mtandao wa simu imezimwa"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Gonga ili utembelee tovuti ya %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Tafadhali wasiliana na mtoa huduma wako %s"</string>
