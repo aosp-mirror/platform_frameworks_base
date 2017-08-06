@@ -27,6 +27,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -64,7 +65,7 @@ import java.util.List;
  * A service that receives calls from the system when new notifications are
  * posted or removed, or their ranking changed.
  * <p>To extend this class, you must declare the service in your manifest file with
- * the {@link Manifest.permission#BIND_NOTIFICATION_LISTENER_SERVICE} permission
+ * the {@link android.Manifest.permission#BIND_NOTIFICATION_LISTENER_SERVICE} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
  * <pre>
  * &lt;service android:name=".NotificationListener"

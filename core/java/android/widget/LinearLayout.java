@@ -66,7 +66,7 @@ import java.lang.annotation.RetentionPolicy;
  * both horizontal and vertical alignment of all child views within the single row or column.</p>
  *
  * <p>You can set
- * {@link LinearLayout.LayoutParams.html#attr_android:layout_weight android:layout_weight}
+ * {@link android.R.styleable#LinearLayout_Layout_layout_weight android:layout_weight}
  * on individual child views to specify how linear layout divides remaining space amongst
  * the views it contains. See the
  * <a href="https://developer.android.com/guide/topics/ui/layout/linear.html">Linear Layout</a>

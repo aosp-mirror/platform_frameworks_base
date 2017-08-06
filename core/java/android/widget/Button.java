@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.widget.RemoteViews.RemoteView;
@@ -54,7 +55,7 @@ import android.widget.RemoteViews.RemoteView;
  *     }
  * }</pre>
  *
- * <p>The above snippet creates an instance of {@link View.OnClickListener} and wires
+ * <p>The above snippet creates an instance of {@link android.view.View.OnClickListener} and wires
  * the listener to the button using
  * {@link #setOnClickListener setOnClickListener(View.OnClickListener)}.
  * As a result, the system executes the code you write in {@code onClick(View)} after the
@@ -77,15 +78,8 @@ import android.widget.RemoteViews.RemoteView;
  * {@link android.R.styleable#Button Button Attributes},
  * {@link android.R.styleable#TextView TextView Attributes},
  * {@link android.R.styleable#View View Attributes}.  See the
- * {@link <a href="{@docRoot}guide/topics/ui/themes.html#ApplyingStyles">Styles and Themes</a>
+ * <a href="{@docRoot}guide/topics/ui/themes.html#ApplyingStyles">Styles and Themes</a>
  * guide to learn how to implement and organize overrides to style-related attributes.</p>
- *
- * @see
- * <a href="{@docRoot}guide/topics/ui/controls/button.html">Buttons Guide</a>
- * {@link android.R.styleable#Button Styleable Button Attributes},
- * {@link android.R.styleable#TextView Styleable TextView Attributes},
- * {@link android.R.styleable#View Styleable View Attributes},
- *
  */
 @RemoteView
 public class Button extends TextView {

@@ -298,7 +298,9 @@ public class KeyguardManager {
     }
 
     /**
-     * Callback passed to {@link KeyguardManager#dismissKeyguard} to notify caller of result.
+     * Callback passed to
+     * {@link KeyguardManager#requestDismissKeyguard(Activity, KeyguardDismissCallback)}
+     * to notify caller of result.
      */
     public static abstract class KeyguardDismissCallback {
 
