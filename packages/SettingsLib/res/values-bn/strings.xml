@@ -41,10 +41,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"সংযুক্ত, ইন্টারনেট নেই"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
-    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
-    <skip />
-    <!-- no translation found for available_via_carrier (1469036129740799053) -->
-    <skip />
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"খুব ধীরে"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ধীরে"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ঠিক আছে"</string>
