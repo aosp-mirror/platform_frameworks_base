@@ -532,6 +532,8 @@
   <java-symbol type="string" name="PwdMmi" />
   <java-symbol type="string" name="NetworkPreferenceSwitchSummary" />
   <java-symbol type="string" name="NetworkPreferenceSwitchTitle" />
+  <java-symbol type="string" name="EmergencyCallWarningTitle" />
+  <java-symbol type="string" name="EmergencyCallWarningSummary" />
   <java-symbol type="string" name="RestrictedOnAllVoiceTitle" />
   <java-symbol type="string" name="RestrictedOnDataTitle" />
   <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
