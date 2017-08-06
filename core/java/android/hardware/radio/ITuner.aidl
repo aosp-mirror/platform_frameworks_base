@@ -68,14 +68,14 @@ interface ITuner {
     Bitmap getImage(int id);
 
     /**
-     * @returns {@code true} if the scan was properly scheduled,
+     * @return {@code true} if the scan was properly scheduled,
      *          {@code false} if the scan feature is unavailable
      */
     boolean startBackgroundScan();
 
     /**
      * @param vendorFilter Vendor-specific filter, must be Map<String, String>
-     * @returns the list, or null if scan is in progress
+     * @return the list, or null if scan is in progress
      * @throws IllegalArgumentException if invalid arguments are passed
      * @throws IllegalStateException if the scan has not been started, client may
      *         call startBackgroundScan to fix this.

@@ -612,7 +612,7 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Get the controller for fingerprint gestures. This feature requires {@link
-     * AccessibilityServiceInfo#CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES}.
+     * AccessibilityServiceInfo#CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES}.
      *
      *<strong>Note: </strong> The service must be connected before this method is called.
      *

@@ -561,19 +561,19 @@
          to be set for all windows of this activity -->
     <attr name="showForAllUsers" format="boolean" />
 
-    <!-- Specifies whether an {@link Activity} should be shown on top of the the lock screen
+    <!-- Specifies whether an {@link android.app.Activity} should be shown on top of the the lock screen
          whenever the lockscreen is up and the activity is resumed. Normally an activity will be
          transitioned to the stopped state if it is started while the lockscreen is up, but with
          this flag set the activity will remain in the resumed state visible on-top of the lock
          screen.
 
-         <p>This should be used instead of {@link android.view.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
+         <p>This should be used instead of {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
          flag set for Windows. When using the Window flag during activity startup, there may not be
          time to add it before the system stops your activity for being behind the lock-screen.
          This leads to a double life-cycle as it is then restarted.</p> -->
     <attr name="showWhenLocked" format="boolean" />
 
-    <!-- Specifies whether the screen should be turned on when the {@link Activity} is resumed.
+    <!-- Specifies whether the screen should be turned on when the {@link android.app.Activity} is resumed.
          Normally an activity will be transitioned to the stopped state if it is started while the
          screen if off, but with this flag set the activity will cause the screen to turn on if the
          activity will be visible and resumed due to the screen coming on. The screen will not be
@@ -581,10 +581,10 @@
          normally used in conjunction with the {@link android.R.attr#showWhenLocked} flag to make
          sure the activity is visible after the screen is turned on when the lockscreen is up. In
          addition, if this flag is set and the activity calls
-         {@link KeyguardManager#requestDismissKeyguard(Activity, KeyguardManager.KeyguardDismissCallback)}
+         {@link android.app.KeyguardManager#requestDismissKeyguard}
          the screen will turn on.
 
-         <p>This should be used instead of {@link android.view.LayoutParams.FLAG_TURN_SCREEN_ON}
+         <p>This should be used instead of {@link android.view.WindowManager.LayoutParams#FLAG_TURN_SCREEN_ON}
          flag set for Windows. When using the Window flag during activity startup, there may not be
          time to add it before the system stops your activity because the screen has not yet turned
          on. This leads to a double life-cycle as it is then restarted.</p> -->

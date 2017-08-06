@@ -99,6 +99,8 @@ public class FingerprintManager {
     /**
      * The {@link FingerprintManager#remove} call failed. Typically this will happen when the
      * provided fingerprint id was incorrect.
+     *
+     * @hide
      */
     public static final int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
 
