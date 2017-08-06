@@ -496,6 +496,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mEndCallKeyHandled;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
     volatile boolean mGoingToSleep;
+    volatile boolean mRequestedOrGoingToSleep;
     volatile boolean mRecentsVisible;
     volatile boolean mPictureInPictureVisible;
     // Written by vr manager thread, only read in this class.
@@ -1274,7 +1275,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (gestureService != null) {
             gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event, interactive,
                     mTmpBoolean);
-            if (mTmpBoolean.value && mGoingToSleep) {
+            if (mTmpBoolean.value && mRequestedOrGoingToSleep) {
                 mCameraGestureTriggeredDuringGoingToSleep = true;
             }
         }
@@ -1402,17 +1403,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
                 case SHORT_PRESS_POWER_GO_TO_SLEEP:
-                    mPowerManager.goToSleep(eventTime,
-                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                    goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                     break;
                 case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
-                    mPowerManager.goToSleep(eventTime,
-                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
+                    goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                     break;
                 case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
-                    mPowerManager.goToSleep(eventTime,
-                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
+                    goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                     launchHomeFromHotKey();
                     break;
@@ -1435,6 +1433,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
+    }
+
+    private void goToSleep(long eventTime, int reason, int flags) {
+        mRequestedOrGoingToSleep = true;
+        mPowerManager.goToSleep(eventTime, reason, flags);
     }
 
     private void shortPressPowerGoHome() {
@@ -1469,8 +1472,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Settings.Global.THEATER_MODE_ON, 1);
 
                     if (mGoToSleepOnButtonPressTheaterMode && interactive) {
-                        mPowerManager.goToSleep(eventTime,
-                                PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                        goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                     }
                 }
                 break;
@@ -1553,8 +1555,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP:
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME:
                 Slog.i(TAG, "sleepRelease() calling goToSleep(GO_TO_SLEEP_REASON_SLEEP_BUTTON)");
-                mPowerManager.goToSleep(eventTime,
-                       PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
+                goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
                 break;
         }
     }
@@ -6060,7 +6061,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             }
                             if ((mEndcallBehavior
                                     & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
-                                mPowerManager.goToSleep(event.getEventTime(),
+                                goToSleep(event.getEventTime(),
                                         PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                                 isWakeKey = false;
                             }
@@ -6569,8 +6570,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void startedGoingToSleep(int why) {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Started going to sleep... (why=" + why + ")");
-        mCameraGestureTriggeredDuringGoingToSleep = false;
+
         mGoingToSleep = true;
+        mRequestedOrGoingToSleep = true;
+
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onStartedGoingToSleep(why);
         }
@@ -6584,6 +6587,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
         mGoingToSleep = false;
+        mRequestedOrGoingToSleep = false;
 
         // We must get this work done here because the power manager will drop
         // the wake lock and let the system suspend once this function returns.
@@ -7498,8 +7502,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void applyLidSwitchState() {
         if (mLidState == LID_CLOSED && mLidControlsSleep) {
-            mPowerManager.goToSleep(SystemClock.uptimeMillis(),
-                    PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH,
+            goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH,
                     PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
         } else if (mLidState == LID_CLOSED && mLidControlsScreenLock) {
             mWindowManagerFuncs.lockDeviceNow();

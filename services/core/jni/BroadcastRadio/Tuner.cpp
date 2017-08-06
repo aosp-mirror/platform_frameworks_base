@@ -296,7 +296,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jS
 
     auto selector = convert::ProgramSelectorToHal(env, jSelector);
     if (halTuner11 != nullptr) {
-        convert::ThrowIfFailed(env, halTuner11->tune_1_1(selector));
+        convert::ThrowIfFailed(env, halTuner11->tuneByProgramSelector(selector));
     } else {
         uint32_t channel, subChannel;
         if (!V1_1::utils::getLegacyChannel(selector, &channel, &subChannel)) {
@@ -374,7 +374,7 @@ static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeCont
     return !convert::ThrowIfFailed(env, halResult);
 }
 
-static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContext, jstring jFilter) {
+static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContext, jobject jVendorFilter) {
     ALOGV("%s", __func__);
     auto halTuner = getHalTuner11(nativeContext);
     if (halTuner == nullptr) {
@@ -384,7 +384,7 @@ static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContex
 
     JavaRef<jobject> jList;
     ProgramListResult halResult = ProgramListResult::NOT_INITIALIZED;
-    auto filter = env->GetStringUTFChars(jFilter, nullptr);
+    auto filter = convert::VendorInfoToHal(env, jVendorFilter);
     auto hidlResult = halTuner->getProgramList(filter,
             [&](ProgramListResult result, const hidl_vec<V1_1::ProgramInfo>& programList) {
         halResult = result;
@@ -505,7 +505,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
             (void*)nativeGetProgramInformation },
     { "nativeStartBackgroundScan", "(J)Z", (void*)nativeStartBackgroundScan },
-    { "nativeGetProgramList", "(JLjava/lang/String;)Ljava/util/List;",
+    { "nativeGetProgramList", "(JLjava/util/Map;)Ljava/util/List;",
             (void*)nativeGetProgramList },
     { "nativeGetImage", "(JI)[B", (void*)nativeGetImage},
     { "nativeIsAnalogForced", "(J)Z", (void*)nativeIsAnalogForced },

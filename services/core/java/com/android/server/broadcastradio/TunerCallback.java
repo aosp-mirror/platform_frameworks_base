@@ -86,8 +86,8 @@ class TunerCallback implements ITunerCallback {
     }
 
     @Override
-    public void onProgramInfoChanged() {
-        dispatch(() -> mClientCallback.onProgramInfoChanged());
+    public void onCurrentProgramInfoChanged(RadioManager.ProgramInfo info) {
+        dispatch(() -> mClientCallback.onCurrentProgramInfoChanged(info));
     }
 
     @Override

@@ -8341,7 +8341,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean suggestedSizeFitsInSpace(int suggestedSizeInPx, RectF availableSpace) {
-        final CharSequence text = getText();
+        final CharSequence text = mTransformed != null
+                ? mTransformed
+                : getText();
         final int maxLines = getMaxLines();
         if (mTempTextPaint == null) {
             mTempTextPaint = new TextPaint();
