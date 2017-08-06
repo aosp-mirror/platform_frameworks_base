@@ -183,7 +183,7 @@ public abstract class RadioTuner {
      * The operation is asynchronous and {@link Callback} onProgramInfoChanged() will be called
      * when tune completes or onError() when cancelled or on timeout.
      *
-     * @thows IllegalArgumentException if the provided selector is invalid
+     * @throws IllegalArgumentException if the provided selector is invalid
      */
     public abstract void tune(@NonNull ProgramSelector selector);
 

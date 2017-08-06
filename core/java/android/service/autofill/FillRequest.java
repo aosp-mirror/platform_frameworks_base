@@ -61,9 +61,8 @@ public final class FillRequest implements Parcelable {
      * <p>An explicit autofill request is triggered when the
      * {@link android.view.autofill.AutofillManager#requestAutofill(View)} or
      * {@link android.view.autofill.AutofillManager#requestAutofill(View, int, android.graphics.Rect)}
-     * is called. For example, standard {@link android.widget.TextView} views that use
-     * an {@link android.widget.Editor} shows an {@code AUTOFILL} option in the overflow menu that
-     * triggers such request.
+     * is called. For example, standard {@link android.widget.TextView} views show an
+     * {@code AUTOFILL} option in the overflow menu that triggers such request.
      */
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 

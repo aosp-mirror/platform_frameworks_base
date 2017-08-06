@@ -338,7 +338,7 @@ public abstract class BroadcastReceiver {
      * before they system will consider them non-responsive and ANR the app.  Since these usually
      * execute on the app's main thread, they are already bound by the ~5 second time limit
      * of various operations that can happen there (not to mention just avoiding UI jank), so
-     * the receive limit is generally not of concern.  However, once you use {@goAsync}, though
+     * the receive limit is generally not of concern.  However, once you use {@code goAsync}, though
      * able to be off the main thread, the broadcast execution limit still applies, and that
      * includes the time spent between calling this method and ultimately
      * {@link PendingResult#finish() PendingResult.finish()}.</p>
