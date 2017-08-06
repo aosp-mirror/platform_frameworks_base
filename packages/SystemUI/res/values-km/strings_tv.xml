@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="134047986446577723">"រូបភាពក្នុងរូបភាព"</string>
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"រូបក្នុងរូប"</string>
     <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(កម្មវិធី​គ្មានចំណងជើង)"</string>
     <string name="pip_close" msgid="3480680679023423574">"បិទ PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"ពេញអេក្រង់"</string>

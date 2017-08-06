@@ -230,7 +230,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ಪರಸ್ಪರ ಸಂವಹನ ವರದಿ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ಹೆಚ್ಚಿನ ಸಂದರ್ಭಗಳಲ್ಲಿ ಇದನ್ನು ಬಳಸಿ. ಇದು ವರದಿಯ ಪ್ರಗತಿಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಸಮಸ್ಯೆ ಕುರಿತು ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಮತ್ತು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ. ಇದು ವರದಿ ಮಾಡಲು ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುವಂತಹ ಕೆಲವು ಕಡಿಮೆ ಬಳಸಲಾದ ವಿಭಾಗಗಳನ್ನು ತ್ಯಜಿಸಬಹುದು."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ಪೂರ್ಣ ವರದಿ"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಟ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಠ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
       <item quantity="other">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
@@ -1599,7 +1599,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ಹೊಸ ಪಿನ್‌ ದೃಢೀಕರಿಸಿ"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"ನಿರ್ಬಂಧಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಪಿನ್‌ ರಚಿಸಿ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"ಪಿನ್‌ ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಟ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಠ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</item>

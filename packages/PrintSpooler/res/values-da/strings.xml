@@ -100,7 +100,7 @@
   </string-array>
   <string-array name="orientation_labels">
     <item msgid="4061931020926489228">"Stående"</item>
-    <item msgid="3199660090246166812">"Liggende"</item>
+    <item msgid="3199660090246166812">"Liggende format"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Der kunne ikke skrives til filen"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"Det virkede desværre ikke. Prøv igen."</string>

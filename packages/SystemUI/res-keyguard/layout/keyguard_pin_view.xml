@@ -62,7 +62,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:src="@drawable/ic_backspace_24dp"
+                    android:src="@drawable/ic_backspace_black_24dp"
                     android:clickable="true"
                     android:paddingTop="8dip"
                     android:paddingBottom="8dip"
@@ -73,6 +73,7 @@
                     android:layout_alignEnd="@+id/pinEntry"
                     android:layout_alignParentRight="true"
                     android:tint="@color/pin_delete_color"
+                    android:tintMode="src_in"
                     />
             <View
                     android:id="@+id/divider"
@@ -204,7 +205,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:paddingBottom="11sp"
-                    android:src="@drawable/ic_done_wht"
+                    android:src="@drawable/ic_done_black_24dp"
                     style="@style/Keyguard.ImageButton.NumPadEnter"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/keyboardview_keycode_enter"
