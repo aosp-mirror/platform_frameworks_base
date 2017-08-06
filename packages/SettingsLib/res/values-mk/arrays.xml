@@ -58,12 +58,16 @@
     <item msgid="3878793616631049349">"Користи ХДЦП проверка само за ДРМ содржина"</item>
     <item msgid="45075631231212732">"Секогаш користи ХДЦП проверка"</item>
   </string-array>
-    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
-    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
-    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (Стандардно)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Користи избор на системот (стандардно)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
@@ -71,6 +75,8 @@
     <item msgid="8910200421843557332">"aptX"</item>
     <item msgid="8434403964359457768">"aptX HD"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Овозможување на „Кодеци по избор“"</item>
+    <item msgid="3304843301758635896">"Оневозможување на „Кодеци по избор“"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"Користи избор на системот (стандардно)"</item>
@@ -79,6 +85,8 @@
     <item msgid="2279916056363477395">"aptX"</item>
     <item msgid="6641171061200063516">"aptX HD"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Овозможи ја „Кодеци по избор“"</item>
+    <item msgid="741805482892725657">"Оневозможи ја „Кодеци по избор“"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Користи избор на системот (стандардно)"</item>
@@ -120,11 +128,13 @@
     <item msgid="7158319962230727476">"Оптимизирано за квалитет на аудиото (990 кб/с - 909 кб/с)"</item>
     <item msgid="2921767058740704969">"Балансиран квалитет на звукот и врската (660 kb/s/606 kb/s)"</item>
     <item msgid="8860982705384396512">"Оптимизирано за квалитет на врската (330 кб/с - 303 кб/с)"</item>
+    <item msgid="4414060457677684127">"Најдобар напор (приспособлива стапка на битови)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Оптимизирано за квалитет на аудиото"</item>
     <item msgid="4327143584633311908">"Балансиран квалитет на звукот и врската"</item>
     <item msgid="4681409244565426925">"Оптимизирано за квалитет на врската"</item>
+    <item msgid="364670732877872677">"Најдобар напор (приспособлива стапка на битови)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Исклучено"</item>
@@ -238,7 +248,7 @@
     <item msgid="488237561639712799">"Се полни"</item>
     <item msgid="5220695614993094977">"МТП (Протокол за трансфер на медиуми)"</item>
     <item msgid="2086000968159047375">"ПТП (Протокол за трансфер на слика)"</item>
-    <item msgid="7398830860950841822">"РНДИС (УСБ за етернет)"</item>
+    <item msgid="7398830860950841822">"РНДИС (USB за етернет)"</item>
     <item msgid="1718924214939774352">"Аудиоизвор"</item>
     <item msgid="8126315616613006284">"МИДИ"</item>
   </string-array>

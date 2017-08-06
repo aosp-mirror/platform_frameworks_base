@@ -31,11 +31,9 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ընդգրկույթից դուրս է"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Չի միանա ավտոմատ"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Ինտերնետ կապ չկա"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Պահել է հետևյալ օգտատերը՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="saved_network" msgid="4352716707126620811">"Պահել է՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Հասանելի է %1$s-ի միջոցով"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Կապակցված է առանց համացանցի"</string>
@@ -44,7 +42,7 @@
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Միանում է..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Միացված է"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Զուգակցում..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Միացված (առանց հեռախոսի)"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Միացված է (առանց հեռախոսի)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Միացված է (առանց մեդիա)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Միացված է (հաղորդագրությանը մուտք չկա)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Միացված է (առանց հեռախոսի և մեդիայի)"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ինտերնետ կապի տարածում"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Մուտք հաղորդագրություն"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM քարտի հասանելիություն"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Օգտագործել բարձրորակ ձայն՝ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Օգտագործել բարձրորակ ձայն"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Միացված է մեդիա աուդիոյին"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Միացված է հեռախոսի ձայնային տվյալներին"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Միացված է ֆայլերի փոխանցման սերվերին"</string>
@@ -91,32 +91,32 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Հեռացված ծրագրեր"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Հեռացված հավելվածներն ու օգտատերերը"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB միացում"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB մոդեմ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Դյուրակիր թեժ կետ"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-ը կապվում է"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Միացում"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Միացում և շարժական թեժ կետ"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth մոդեմ"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Մոդեմի ռեժիմ"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Մոդեմի ռեժիմ"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Բոլոր աշխատանքային հավելվածները"</string>
     <string name="user_guest" msgid="8475274842845401871">"Հյուր"</string>
     <string name="unknown" msgid="1592123443519355854">"Անհայտ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Օտատեր՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Կանխադրված կարգավորումներ չկան"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Տեքստից-խոսք կարգավորումներ"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Տեքստի հնչեցման կարգավորումներ"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Տեքստի հնչեցում"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"Խոսքի գնահատական"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Խոսքի արագությունը"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Տեքստի արտասանման արագությունը"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Բարձրություն"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Ձայնի բարձրությունը"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Ազդում է սինթեզած խոսքի ձայներանգի վրա"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Լեզու"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Օգտագործել համակարգի լեզուն"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Լեզուն ընտրված չէ"</string>
-    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Կարգավորում է լեզվին բնորոշ ձայնը արտասանվող տեքստի համար"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Ընտրում է լեզուն՝ տեքստն ընթերցելու համար"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Լսել օրինակը"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Կարճ հնչեցնել խոսքի սինթեզը"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Տեղադրել ձայնային տվյալները"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Տեղադրել անհրաժեշտ ձայնային տվյալները` խոսքը սինթեզելու համար"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Այս խոսքային սինթեզի գործիքը կարող է հավաքագրել այն ամենը, ինչ արտասանված է, այդ թվում` անձնական տվյալներ, ինչպիսիք են գաղտնաբառն ու բանկային քարտի համարները: Սկզբնաբյուրը <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> շարժիչն է: Միացնե՞լ խոսքի սինթեզի շարժիչի օգտագործումը:"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Այս խոսքային սինթեզի գործիքը կարող է հավաքել այն ամենը, ինչ արտասանված է, այդ թվում` անձնական տվյալներ, ինչպիսիք են գաղտնաբառն ու բանկային քարտի համարները: Սկզբնաբյուրը <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> շարժիչն է: Միացնե՞լ խոսքի սինթեզի շարժիչի օգտագործումը:"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Այս լեզուն պահանջում է աշխատող ցանցային կապ գրվածքից խոսք ելքի համար:"</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Սա խոսքային սինթեզի մի նմուշ է:"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Լռելյայն լեզվի կարգավիճակը"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"Չափազանց արագ"</item>
     <item msgid="9085102246155045744">"Ամենաարագ"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Ընտրել պրոֆիլ"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Ընտրեք պրոֆիլ"</string>
     <string name="category_personal" msgid="1299663247844969448">"Անձնական"</string>
     <string name="category_work" msgid="8699184680584175622">"Աշխատանքային"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Ծրագրավորողի ընտրանքներ"</string>
@@ -149,7 +149,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-ի կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Միակցման կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Այս օգտատերը չի կարող փոխել մոդեմի ռեժիմի կարգավորումները"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Մատչման կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB վրիպազերծում"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Կարգաբերել ռեժիմը, երբ USB-ն միացված է"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Ցանց"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Անլար էկրանի վկայագրում"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Միացնել Wi‑Fi մանրամասն գրանցամատյանները"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi-Fi-ից կտրուկ անցում բջջային ինտերնետի"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Միշտ թույլատրել Wi‑Fi ռոումինգի որոնումը"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Բջջային ինտերնետը միշտ ակտիվ է"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Միացնել ներխմբային զանգը"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP տարբերակը"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth աուդիո կոդեկ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Ընտրեք Bluetooth աուդիո կոդեկը"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth աուդիոյի Ընդհատավորման հաճախականությունը"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Հեռարձակում՝ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի հավաստագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Եթե այս գործառույթը միացված է, Wi-Fi-ի թույլ ազդանշանի դեպքում Wi‑Fi ինտերնետից բջջային ինտերնետի անցումը ավելի կտրուկ կկատարվի"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Թույլատրել/արգելել Wi‑Fi ռոումինգի որոնումը՝ կախված միջերեսում տվյալների երթևեկի ծավալից"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Տեղեկամատյանի պահնակի չափերը"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Ընտրեք տեղեկամատյանի չափը մեկ պահնակի համար"</string>
@@ -216,10 +212,11 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ստուգել հավելվածները USB-ի նկատմամբ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Ստուգեք տեղադրված հավելվածը ADB/ADT-ի միջոցով կասկածելի աշխատանքի պատճառով:"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ՝ երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Ընձեռել հեռախոսի բոլոր զանգերանգների Bluetooth ականջակալներով նվագարկումը"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Տեղային տերմինալ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Միացնել տերմինալային հավելվածը, որն առաջարկում է մուտք տեղային խեցի"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ստուգում"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Կարգավորել HDCP ստուգման վարքագիծը"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP-ի ստուգման կարգը"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Վրիպազերծում"</string>
     <string name="debug_app" msgid="8349591734751384446">"Ընտրել վրիպազերծման հավելվածը"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Վրիպազերծման ծրագիրը կարգավորված չէ"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Հետնաշերտի գործընթացի սահմանաչափ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Ցույց տալ բոլոր ANR-երը"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Ցուցադրել այն ծրագիրը, որը չի արձագանքում երկխոսությունը հետնաշերտի ծրագրերի համար"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ցուցադրել ծանուցումների ալիքի զգուշացումները"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Էկրանին ցուցադրվում է զգուշացում, երբ որևէ հավելված փակցնում է ծանուցում առանց վավեր ալիքի"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Միշտ թույլատրել ծրագրեր արտաքին պահեստում"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ստիպել, որ ակտիվությունների չափերը լինեն փոփոխելի"</string>
@@ -297,22 +296,20 @@
     <item msgid="8280754435979370728">"Բնական գույներ"</item>
     <item msgid="5363960654009010371">"Թվային բովանդակության համար հարմարեցված գույներ"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Միացրած հավելվածներ"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Անգործուն հավելվածներ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ակտիվ չէ: Հպեք՝ փոխելու համար:"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ակտիվ է: Հպեք՝ փոխելու համար:"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Աշխատեցվող ծառայություններ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Դիտել և վերահսկել ընթացիկ աշխատեցվող ծառայությունները"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Բազմագործընթաց WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Գործարկել WebView-ի մշակիչներն առանձին"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-ի իրականացում"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ծառայություն"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ընտրեք WebView-ի իրականացումը"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Այս ընտրանքն այլևս վավեր չէ: Փորձեք նորից:"</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Վերածել ֆայլային գաղտնագրման"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Անցում ֆայլերի գաղտնագրման"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Փոխարկել…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Ֆայլային գաղտնագրումն արդեն կատարվել է"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Վերածում ֆայլային գաղտնագրման"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Ստեղծեք ֆայլային գաղտնագրում՝ փոխարկելով տվյալների բաժինը:\n !!Ուշադրություն!! Ձեր բոլոր տվյալները կջնջվեն:\n Այս գործառույթը դեռ գտնվում է փորձարկման փուլում և հնարավոր է ճիշտ չաշխատի:\n Շարունակելու համար սեղմեք «Սրբել և փոխարկել...» կոճակը:"</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"Սրբել և փոխարկել…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Անցնել առանձին ֆայլերի գաղտնագրման։\n Ուշադրությո՛ւն։ Ձեր բոլոր տվյալները կջնջվեն:\n Այս գործառույթը դեռ գտնվում է փորձարկման փուլում և, հնարավոր է, ճիշտ չաշխատի:\n Շարունակելու համար սեղմեք «Սրբել և անցնել...» կոճակը:"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Սրբել և անցնել…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Նկարի գունային ռեժիմ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Օգտագործել sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Կասեցված է"</string>
@@ -320,41 +317,30 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Դեյտերանոմալիա (կարմիր-կանաչ)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Պրոտանոմալիա (կարմիր-կանաչ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Տրիտանոմալիա (կապույտ-դեղին)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Գունային կարգաբերում"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Սա փորձնական գործառույթ է և կարող է ազդել աշխատանքի վրա:"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Գունաշտկում"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Սա փորձնական գործառույթ է և կարող է ազդել սարքի աշխատանքի վրա:"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Գերազանցված է <xliff:g id="TITLE">%1$s</xliff:g>-ից"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Մնացել է մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Մնացել է մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Մինչև լրիվ լիցքավորումը մնացել է <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Մնացել է <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – մնացել է մոտ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - մնացել է <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> մինչև լրիվ լիցքավորումը"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Անհայտ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Լիցքավորում"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Լիցքավորում AC-ով"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Լիցքավորում"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Լիցքավորում USB-ով"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Լիցքավորում"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Անլար լիցքավորում"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Լիցքավորում"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"լիցքավորում"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Լիցքավորված"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Միացված է ադմինիստրատորի կողմից"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Կասեցված է ադմինիստրատորի կողմից"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Միացված է ադմինիստրատորի կողմից"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Անջատվել է ադմինիստրատորի կողմից"</string>
+    <string name="disabled" msgid="9206776641295849915">"Կասեցված է"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Թույլատրված է"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Արգելված է"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Անհայտ հավելվածների տեղադրում"</string>
     <string name="home" msgid="3256884684164448244">"Կարգավորումների գլխավոր էջ"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Պահանջվում է գաղտնաբառ"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Մուտքագրման ակտիվ տարբերակներ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Օգտագործել համակարգի լեզուները"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Չստացվեց ցույց տալ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>-ի տվյալները"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Այս ներմուծման եղանակը հնարավորություն է տալիս հավաքել ձեր մուտքագրած ողջ տեքստը՝ ընդգրկելով անձնական տեղեկություններ, ինչպես գաղտնաբառն ու բանկային քարտի համարները: Սկզբնաղբյուրը <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> հավելվածն է: Կիրառե՞լ այս եղանակը:"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Ուշադրություն. Վերաբեռնումից հետո այս հավելվածը չի գործարկվի մինչև չապակողպեք հեռախոսը"</string>
 </resources>

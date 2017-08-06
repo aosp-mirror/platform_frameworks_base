@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"സ്വയമേവ കണക്‌റ്റുചെയ്യില്ല"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"ഇന്റർനെറ്റ് ആക്‌സസ്സ് ഇല്ല"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> സംരക്ഷിച്ചത്"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s വഴി സ്വയമേവ ബന്ധിപ്പിച്ചു"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"നെറ്റ്‌വർക്ക് റേറ്റിംഗ് ദാതാവുമായി സ്വയം കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s വഴി ബന്ധിപ്പിച്ചു"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s വഴി ലഭ്യം"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"കണക്റ്റുചെയ്തിരിക്കുന്നു, ഇന്റർനെറ്റില്ല"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"ആക്‌സസ്സ് നിയന്ത്രിക്കുക"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ആക്സസ്"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"ഉയർന്ന നിലവാരമുള്ള ഓഡിയോ ഉപയോഗിക്കുക: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"ഉയർന്ന നിലവാരമുള്ള ഓഡിയോ ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"മീഡിയ ഓഡിയോയിലേക്ക് കണ‌ക്റ്റുചെയ്‌തു"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ഫോൺ ഓഡിയോയിൽ കണ‌ക്റ്റുചെ‌യ്‌തു"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ഫയൽ കൈമാറ്റ സെർവറിലേക്ക് കണ‌ക്റ്റുചെ‌യ്‌തു"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"വളരെ ശീഘ്രം"</item>
     <item msgid="9085102246155045744">"ഏറ്റവും വേഗത്തിൽ"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
     <string name="category_personal" msgid="1299663247844969448">"വ്യക്തിഗതം"</string>
     <string name="category_work" msgid="8699184680584175622">"ഔദ്യോഗികം"</string>
     <string name="development_settings_title" msgid="215179176067683667">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"മൊബൈൽ ഹാൻഡ്ഓവറിലേക്ക് വൈഫൈ സക്രിയമാക്കുക"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"എപ്പോഴും വൈഫൈ റോം സ്‌‌കാൻ അനുവദിക്കൂ"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"അബ്‌സൊല്യൂട്ട് വോളിയം പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ഇൻ-ബാൻഡ് റിംഗുചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP പതിപ്പ്"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP പതിപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth ഓഡിയോ കോഡെക്"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth ഓഡിയോ കോഡെക് തിരഞ്ഞെടുക്കുക"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth ഓഡിയോ സാമ്പിൾ നിരക്ക്"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"സ്ട്രീമിംഗ്: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"പ്രവർത്തനക്ഷമമായിരിക്കുമ്പോൾ, വൈഫൈ സിഗ്‌നൽ കുറവായിരിക്കുന്ന സമയത്ത് മൊബൈലിലേക്ക് ഡാറ്റ കണക്ഷൻ വഴി കൈമാറുന്നതിൽ വൈഫൈ കൂടുതൽ സക്രിയമായിരിക്കും"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ഇന്റർഫേസിലെ ഡാറ്റ ട്രാഫിക്ക് സാന്നിദ്ധ്യത്തിന്റെ കണക്ക് അടിസ്ഥാനമാക്കി വൈഫൈ റോം സ്‌കാനുകൾ അനുവദിക്കുക/അനുവദിക്കാതിരിക്കുക"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ലോഗർ ബഫർ വലുപ്പം"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ഓരോ ലോഗ് ബഫറിനും വലുപ്പം തിരഞ്ഞെടുക്കൂ"</string>
@@ -216,6 +212,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB വഴി ആപ്സ് പരിശോധിച്ചുറപ്പിക്കൂ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ADB/ADT വഴി ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ പരിശോധിക്കുക."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"അസ്വീകാര്യമായ തരത്തിൽ ഉയർന്ന വോളിയമോ ശബ്ദ നിയന്ത്രണത്തിന്റെ അഭാവമോ പോലെ, വിദൂര ഉപകരണങ്ങളുമായി ബന്ധപ്പെട്ട വോളിയം പ്രശ്നങ്ങൾ ഉണ്ടാകുന്ന സാഹചര്യത്തിൽ, Bluetooth അബ്‌സൊല്യൂട്ട് വോളിയം ഫീച്ചർ പ്രവർത്തനരഹിതമാക്കുന്നു."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ഫോണിലെ റിംഗ്‌ടോണുകൾ Bluetooth ഹെഡ്‌സെറ്റുകളിൽ പ്ലേ ചെയ്യാനായി അനുവദിക്കുക"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP പരിശോധന"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"പശ്ചാത്തല പ്രോസ‌സ്സ് പരിധി"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"എല്ലാ ANR-കളും ദൃശ്യമാക്കുക"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"പ‌ശ്ചാത്തല അപ്ലിക്കേഷനുകൾക്ക് അപ്ലിക്കേഷൻ പ്രതികരിക്കുന്നില്ല എന്ന ഡയലോഗ് കാണിക്കുക"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ചാനൽ മുന്നറിയിപ്പ് കാണിക്കൂ"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"സാധുതയുള്ള ചാനലില്ലാതെ ഒരു ആപ്പ്, അറിയിപ്പ് പോസ്റ്റുചെയ്യുമ്പോൾ ഓൺ-സ്‌ക്രീൻ മുന്നറിയിപ്പ് ‌പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"വലിപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
@@ -297,13 +296,11 @@
     <item msgid="8280754435979370728">"നമ്മൾ കാണുന്നത് പോലെയുള്ള സ്വാഭാവിക വർണ്ണങ്ങൾ"</item>
     <item msgid="5363960654009010371">"ഡിജിറ്റൽ ഉള്ളടക്കത്തിനായി വർണ്ണങ്ങൾ ഒപ്റ്റിമൈസ് ചെയ്തു"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പ്‌സ്"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പുകൾ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"നിഷ്‌ക്രിയം. മാറ്റുന്നതിനു ടാപ്പുചെയ്യുക."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"മൾട്ടിപ്രോസസ്സ് WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView റെൻഡററുകൾ പ്രത്യേകമായി റൺ ചെയ്യുക"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ഈ തിരഞ്ഞെടുപ്പിന് തുടർന്നങ്ങോട്ട് സാധുതയില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ഈ ഫീച്ചർ പരീക്ഷണാത്മകമായതിനാൽ പ്രകടനത്തെ ബാധിച്ചേക്കാം."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"മുഴുവൻ ചാർജാകാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഏതാണ്ട് <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഫുൾ ചാർജാകാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC-യിൽ ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB-യിലൂടെ ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"വയർലെസ്സ് കണക്ഷനിലൂടെ ചാർജ്ജുചെയ്യുന്നു"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"നിറഞ്ഞു"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"അഡ്‌മിൻ നിയന്ത്രിക്കുന്നത്"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"അഡ്‌മിനിസ്ട്രേറ്റർ പ്രവർത്തനക്ഷമമാക്കി"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"അഡ്‌മിനിസ്ട്രേറ്റർ പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"അഡ്‌മിൻ പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"അഡ്‌മിൻ പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="disabled" msgid="9206776641295849915">"പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"അനുവദനീയം"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"അനുവദിച്ചിട്ടില്ല"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"അറിഞ്ഞുകൂടാത്ത ആപ്‌സ് ഇൻസ്റ്റാളുചെയ്യുക"</string>
     <string name="home" msgid="3256884684164448244">"ക്രമീകരണ ഹോം"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"പാസ്‌വേഡ് ആവശ്യമാണ്"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"സജീവ ടൈപ്പുചെയ്യൽ രീതികൾ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"സിസ്റ്റം ഭാഷകൾ ഉപയോഗിക്കുക"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> എന്നതിനായുള്ള ക്രമീകരണങ്ങൾ തുറക്കുന്നതിൽ പരാജയപ്പെട്ടു"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"പാസ്‌വേഡുകൾ, ക്രെഡിറ്റ് കാർഡ് നമ്പറുകൾ എന്നിവ പോലുള്ള വ്യക്തിഗതമായ ഡാറ്റയുൾപ്പെടെ നിങ്ങൾ ടൈപ്പുചെയ്യുന്ന എല്ലാ വാചകവും ഈ ടൈപ്പുചെയ്യൽ രീതിയ്‌ക്ക് ശേഖരിക്കാനായേക്കും. ഇത് <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> അപ്ലിക്കേഷനിൽ നിന്നും വരുന്നു. ഈ ടൈപ്പുചെയ്യൽ രീതി ഉപയോഗിക്കണോ?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ശ്രദ്ധിക്കുക: റീബൂട്ടിന് ശേഷം, ഫോൺ അൺലോക്കുചെയ്യുന്നത് വരെ ഈ ആപ്പ് ആരംഭിക്കാൻ കഴിയില്ല"</string>
 </resources>

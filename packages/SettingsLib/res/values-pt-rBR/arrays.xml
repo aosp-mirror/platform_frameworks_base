@@ -58,12 +58,16 @@
     <item msgid="3878793616631049349">"Usar a verificação HDCP somente para conteúdo DRM"</item>
     <item msgid="45075631231212732">"Sempre usar a verificação HDCP"</item>
   </string-array>
-    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
-    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
-    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (padrão)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Usar seleção do sistema (padrão)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
@@ -71,6 +75,8 @@
     <item msgid="8910200421843557332">"aptX"</item>
     <item msgid="8434403964359457768">"aptX HD"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Ativar codecs opcionais"</item>
+    <item msgid="3304843301758635896">"Desativar codecs opcionais"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"Usar seleção do sistema (padrão)"</item>
@@ -79,6 +85,8 @@
     <item msgid="2279916056363477395">"aptX"</item>
     <item msgid="6641171061200063516">"aptX HD"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Ativar codecs opcionais"</item>
+    <item msgid="741805482892725657">"Desativar codecs opcionais"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Usar seleção do sistema (padrão)"</item>
@@ -120,11 +128,13 @@
     <item msgid="7158319962230727476">"Otimizado para qualidade de áudio (990 kbps/909 kbps)"</item>
     <item msgid="2921767058740704969">"Qualidade de áudio e de conexão balanceada (660 kbps/606 kbps)"</item>
     <item msgid="8860982705384396512">"Otimizado para qualidade de conexão (330 kbps/303 kbps)"</item>
+    <item msgid="4414060457677684127">"Melhor resultado (Taxa de bits adaptável)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Otimizado para qualidade de áudio"</item>
     <item msgid="4327143584633311908">"Qualidade de áudio e de conexão balanceada"</item>
     <item msgid="4681409244565426925">"Otimizado para qualidade de conexão"</item>
+    <item msgid="364670732877872677">"Melhor resultado (Taxa de bits adaptável)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Desativado"</item>
@@ -180,9 +190,9 @@
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"Animação desativada"</item>
-    <item msgid="1138649021950863198">"Escala de animação 5x"</item>
+    <item msgid="1138649021950863198">"Escala de animação 0,5x"</item>
     <item msgid="4394388961370833040">"Escala de animação 1x"</item>
-    <item msgid="8125427921655194973">"Escala de animação 1.5 x"</item>
+    <item msgid="8125427921655194973">"Escala de animação 1,5x"</item>
     <item msgid="3334024790739189573">"Escala de animação 2x"</item>
     <item msgid="3170120558236848008">"Escala de animação 5x"</item>
     <item msgid="1069584980746680398">"Escala de animação 10x"</item>

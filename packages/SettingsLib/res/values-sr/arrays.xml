@@ -58,12 +58,16 @@
     <item msgid="3878793616631049349">"Користи HDCP проверу само за DRM садржај"</item>
     <item msgid="45075631231212732">"Увек користи HDCP проверу"</item>
   </string-array>
-    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
-    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
-    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (подразумевано)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Користи избор система (подразумевано)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
@@ -71,6 +75,8 @@
     <item msgid="8910200421843557332">"aptX"</item>
     <item msgid="8434403964359457768">"aptX HD"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Омогући опционалне кодеке"</item>
+    <item msgid="3304843301758635896">"Онемогући опционалне кодеке"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"Користи избор система (подразумевано)"</item>
@@ -79,6 +85,8 @@
     <item msgid="2279916056363477395">"aptX"</item>
     <item msgid="6641171061200063516">"aptX HD"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Омогући опционалне кодеке"</item>
+    <item msgid="741805482892725657">"Онемогући опционалне кодеке"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Користи избор система (подразумевано)"</item>
@@ -120,11 +128,13 @@
     <item msgid="7158319962230727476">"Оптимизовано за квалитет звука (990 kb/s/909 kb/s)"</item>
     <item msgid="2921767058740704969">"Уједначен квалитет звука и везе (660 kb/s/606 kb/s)"</item>
     <item msgid="8860982705384396512">"Оптимизовано за квалитет везе (330 kb/s/303 kb/s)"</item>
+    <item msgid="4414060457677684127">"Најбоље могуће (прилагодљива брзина преноса)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Оптимизовано за квалитет звука"</item>
     <item msgid="4327143584633311908">"Уједначен квалитет звука и везе"</item>
     <item msgid="4681409244565426925">"Оптимизовано за квалитет везе"</item>
+    <item msgid="364670732877872677">"Најбоље могуће (прилагодљива брзина преноса)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Искључено"</item>
@@ -188,7 +198,7 @@
     <item msgid="1069584980746680398">"Размера анимације 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"Ниједно"</item>
+    <item msgid="1606809880904982133">"Ништа"</item>
     <item msgid="9033194758688161545">"480 пиксела"</item>
     <item msgid="1025306206556583600">"480 пиксела (безбедно)"</item>
     <item msgid="1853913333042744661">"720 пиксела"</item>

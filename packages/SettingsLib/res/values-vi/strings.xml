@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Sẽ không tự động kết nối"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Không có quyền truy cập Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Được lưu bởi <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Tự động được kết nối qua %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Tự động được kết nối qua nhà cung cấp dịch vụ xếp hạng mạng"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Được kết nối qua %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Có sẵn qua %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Đã kết nối, không có Internet"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Truy cập tin nhắn"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Quyền truy cập SIM"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Sử dụng âm thanh chất lượng cao: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Sử dụng âm thanh chất lượng cao"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Đã kết nối với âm thanh phương tiện"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Đã kết nối với âm thanh điện thoại"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Đã kết nối với máy chủ chuyển tệp"</string>
@@ -91,9 +91,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Hệ điều hành Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Ứng dụng đã xóa"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Ứng dụng và người dùng bị xóa"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Truy cập Internet qua USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Chia sẻ kết nối Internet qua USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Điểm phát sóng di động"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Truy cập Internet qua Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Chia sẻ kết nối Internet qua Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Đang dùng làm điểm truy cập Internet"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"USB Internet &amp; điểm truy cập di động"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Tất cả ứng dụng làm việc"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"Rất nhanh"</item>
     <item msgid="9085102246155045744">"Nhanh nhất"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Chọn hồ sơ"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Chọn hồ sơ"</string>
     <string name="category_personal" msgid="1299663247844969448">"Cá nhân"</string>
     <string name="category_work" msgid="8699184680584175622">"Cơ quan"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Tùy chọn nhà phát triển"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mạng"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Chuyển vùng Wi‑Fi tích cực sang mạng DĐ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Luôn cho phép quét chuyển vùng Wi‑Fi"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hiện hoạt"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Vô hiệu hóa âm lượng tuyệt đối"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bật đổ chuông trong dải"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth phiên bản AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Chọn Bluetooth phiên bản AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec âm thanh Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Chọn Codec âm thanh Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Tốc độ lấy mẫu âm thanh Bluetooth"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Truyền trực tuyến: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Khi được bật, Wi‑Fi sẽ tích cực hơn trong việc chuyển vùng kết nối dữ liệu sang mạng di động khi tín hiệu Wi‑Fi yếu"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Cho phép/Không cho phép quét chuyển vùng Wi‑Fi dựa trên lưu lượng truy cập dữ liệu có tại giao diện"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Kích cỡ tải trình ghi"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Chọn kích thước Trình ghi/lần tải nhật ký"</string>
@@ -216,6 +212,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Xác minh ứng dụng qua USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kiểm tra các ứng dụng được cài đặt qua ADB/ADT để xem có hoạt động gây hại hay không."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Vô hiệu hóa tính năng âm lượng tuyệt đối qua Bluetooth trong trường hợp xảy ra sự cố về âm lượng với các thiết bị từ xa, chẳng hạn như âm lượng lớn không thể chấp nhận được hoặc thiếu kiểm soát."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Cho phép nhạc chuông trên điện thoại được phát trên tai nghe Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Dòng lệnh cục bộ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Bật ứng dụng dòng lệnh cung cấp quyền truy cập vỏ cục bộ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kiểm tra HDCP"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Giới hạn quá trình nền"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Hiển thị tất cả ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Hiện hộp thoại Ứng dụng ko đáp ứng cho ứng dụng nền"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Hiện cảnh báo kênh th.báo"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Hiện cảnh báo trên m.hình khi ƯD đăng th.báo ko có kênh hợp lệ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Buộc cho phép các ứng dụng trên bộ nhớ ngoài"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Giúp mọi ứng dụng đủ điều kiện để được ghi vào bộ nhớ ngoài, bất kể giá trị tệp kê khai là gì"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Buộc các hoạt động có thể thay đổi kích thước"</string>
@@ -302,8 +301,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Hiện hoạt. Nhấn để chuyển đổi."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Các dịch vụ đang hoạt động"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Xem và kiểm soát các dịch vụ hiện đang hoạt động"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView đa quy trình"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Chạy riêng kết xuất đồ họa WebView"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Triển khai WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Đặt triển khai WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Lựa chọn này không còn hợp lệ nữa. Hãy thử lại."</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Sửa màu"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Tính năng này là tính năng thử nghiệm và có thể ảnh hưởng đến hoạt động."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Còn khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Còn khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Còn <xliff:g id="TIME">%1$s</xliff:g> cho tới khi được sạc đầy"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Còn lại <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - còn khoảng <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - còn lại <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> cho tới khi được sạc đầy"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Đang sạc"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Sạc trên AC"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Đang sạc"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Sạc qua USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Đang sạc"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Sạc không dây"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Đang sạc"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"đang sạc"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Hiện không sạc"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Hiện không sạc"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Đầy"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Do quản trị viên kiểm soát"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Được bật bởi quản trị viên"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Bị tắt bởi quản trị viên"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Kích hoạt bởi quản trị viên"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Bị quản trị viên vô hiệu hóa"</string>
+    <string name="disabled" msgid="9206776641295849915">"Đã tắt"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Được phép"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Không được phép"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"C.đặt ư.dụng ko xác định"</string>
     <string name="home" msgid="3256884684164448244">"Trang chủ cài đặt"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Yêu cầu mật khẩu"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Phương pháp nhập liệu hoạt động"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Sử dụng ngôn ngữ hệ thống"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Không thể mở cài đặt cho <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Phương thức nhập này có thể thu thập tất cả văn bản bạn nhập, bao gồm dữ liệu cá nhân như mật khẩu và số thẻ tín dụng. Phương thức nhập này đến từ ứng dụng <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Sử dụng phương thức nhập này?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Lưu ý: Sau khi khởi động lại, ứng dụng này không thể khởi động cho đến khi bạn mở khóa điện thoại"</string>
 </resources>

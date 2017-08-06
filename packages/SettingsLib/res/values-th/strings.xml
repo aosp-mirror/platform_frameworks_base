@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"จะไม่เชื่อมต่อโดยอัตโนมัติ"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"ไม่สามารถเข้าถึงอินเทอร์เน็ต"</string>
     <string name="saved_network" msgid="4352716707126620811">"บันทึกโดย <xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"เชื่อมต่ออัตโนมัติผ่าน %1$s แล้ว"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"เชื่อมต่ออัตโนมัติผ่านผู้ให้บริการการจัดอันดับเครือข่าย"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"เชื่อมต่อผ่าน %1$s แล้ว"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"พร้อมใช้งานผ่านทาง %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"เชื่อมต่อแล้ว ไม่พบอินเทอร์เน็ต"</string>
@@ -48,7 +46,7 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"เชื่อมต่อแล้ว (ยกเว้นเสียงสื่อ)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"เชื่อมต่อแล้ว (ไม่มีการเข้าถึงข้อความ)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"เชื่อมต่อ (ยกเว้นเสียงโทรศัพท์หรือสื่อ)"</string>
-    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"เสียงสื่อ"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"เสียงของสื่อ"</string>
     <string name="bluetooth_profile_headset" msgid="8658779596261212609">"เสียงโทรศัพท์"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"การถ่ายโอนไฟล์"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"อุปกรณ์อินพุต"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"การแชร์การเชื่อมต่ออินเทอร์เน็ต"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"การเข้าถึงข้อความ"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"การเข้าถึงซิม"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"ใช้เสียงคุณภาพสูง: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"ใช้เสียงคุณภาพสูง"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"เชื่อมต่อกับระบบเสียงของสื่อแล้ว"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"เชื่อมต่อกับระบบเสียงของโทรศัพท์แล้ว"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"เชื่อมต่อกับเซิร์ฟเวอร์สำหรับโอนไฟล์แล้ว"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"เร็วมาก"</item>
     <item msgid="9085102246155045744">"เร็วที่สุด"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"เลือกโปรไฟล์"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"เลือกโปรไฟล์"</string>
     <string name="category_personal" msgid="1299663247844969448">"ส่วนตัว"</string>
     <string name="category_work" msgid="8699184680584175622">"ที่ทำงาน"</string>
     <string name="development_settings_title" msgid="215179176067683667">"สำหรับนักพัฒนาซอฟต์แวร์"</string>
@@ -163,23 +163,20 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"การปลดล็อก OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"อนุญาตการปลดล็อก OEM ไหม"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: คุณลักษณะการปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: ฟีเจอร์การปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองตำแหน่ง"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองตำแหน่ง"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองตำแหน่ง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"เครือข่าย"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"สลับ Wi‑Fi เป็นมือถือเมื่อสัญญาณอ่อน"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ใช้การสแกน Wi-Fi ข้ามเครือข่ายเสมอ"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"เปิดใช้อินเทอร์เน็ตมือถือเสมอ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"เปิดใช้การส่งเสียงในช่องสัญญาณเดียวกัน"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"เวอร์ชันของบลูทูธ AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"เลือกตัวแปลงรหัสเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"อัตราตัวอย่างเสียงบลูทูธ"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"สตรีมมิง: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"เมื่อเปิดใช้แล้ว Wi-Fi จะส่งผ่านการเชื่อมต่อข้อมูลไปยังเครือข่ายมือถือเมื่อสัญญาณ Wi-Fi อ่อน"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"อนุญาต/ไม่อนุญาตการสแกน Wi-Fi ข้ามเครือข่าย ตามปริมาณข้อมูลการเข้าชมที่ปรากฏในอินเทอร์เฟซ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ขนาดบัฟเฟอร์ของ Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"เลือกขนาด Logger ต่อบัฟเฟอร์ไฟล์บันทึก"</string>
@@ -215,7 +211,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"การตั้งค่านี้มีไว้เพื่อการพัฒนาเท่านั้น จึงอาจทำให้อุปกรณ์และแอปพลิเคชันที่มีอยู่เสียหายหรือทำงานผิดพลาดได้"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้คุณลักษณะการควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้ฟีเจอร์การควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ให้เสียงเรียกเข้าในโทรศัพท์เล่นในชุดหูฟังบลูทูธ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"ขีดจำกัดกระบวนการพื้นหลัง"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"แสดง ANR ทั้งหมด"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"แสดงหน้าต่างแอปไม่ตอบสนอง สำหรับแอปพื้นหลัง"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ทำให้สามารถเขียนแอปใดๆ ก็ตามไปยังพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"บังคับให้กิจกรรมปรับขนาดได้"</string>
@@ -302,8 +301,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ใช้งานอยู่ แตะเพื่อสลับ"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"บริการที่ทำงานอยู่"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ดูและควบคุมบริการที่ทำงานอยู่"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView แบบหลายขั้นตอน"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"เรียกใช้โหมดแสดงภาพ WebView แยกต่างหาก"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"การใช้งาน WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ตั้งค่าการใช้งาน WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ตัวเลือกนี้ใช้ไม่ได้อีกต่อไป โปรดลองอีกครั้ง"</string>
@@ -311,7 +308,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"แปลง…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"เข้ารหัสไฟล์แล้ว"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"การแปลงเป็นการเข้ารหัสตามไฟล์"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"แปลงพาร์ทิชันข้อมูลเป็นการเข้ารหัสแบบไฟล์\n !!คำเตือน!! การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ\n คุณลักษณะนี้เป็นแบบอัลฟา และอาจทำงานไม่เป็นปกติ\n กด \"ลบและแปลง...\" เพื่อดำเนินการต่อ"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"แปลงพาร์ทิชันข้อมูลเป็นการเข้ารหัสแบบไฟล์\n !!คำเตือน!! การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ\n ฟีเจอร์นี้เป็นแบบอัลฟา และอาจทำงานไม่เป็นปกติ\n กด \"ลบและแปลง...\" เพื่อดำเนินการต่อ"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"ลบและแปลง…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"โหมดสีของรูปภาพ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"ใช้ sRGB"</string>
@@ -321,40 +318,29 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"ตาบอดจางสีแดง (สีแดง/เขียว)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ตาบอดจางสีน้ำเงิน (สีน้ำเงิน/เหลือง)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"การแก้สี"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"คุณลักษณะนี้เป็นแบบทดลองและอาจส่งผลต่อประสิทธิภาพการทำงาน"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ฟีเจอร์นี้เป็นแบบทดลองและอาจส่งผลต่อประสิทธิภาพการทำงาน"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"แทนที่โดย <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"เหลืออีกประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"อีกประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"อีก <xliff:g id="TIME">%1$s</xliff:g> จึงจะชาร์จเต็ม"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"เหลืออีก <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - เหลือเวลาประมาณ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - เหลืออีก <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> จนกว่าจะชาร์จเต็ม"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"กำลังชาร์จ"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"กำลังชาร์จไฟ AC"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"กำลังชาร์จ"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"กำลังชาร์จผ่าน USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"กำลังชาร์จ"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"กำลังชาร์จแบบไร้สาย"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"กำลังชาร์จ"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"กำลังชาร์จ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ไม่ได้ชาร์จ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ไม่ได้ชาร์จ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"เต็ม"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ผู้ดูแลระบบเป็นผู้ควบคุม"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"เปิดใช้โดยผู้ดูแลระบบ"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"ปิดใช้โดยผู้ดูแลระบบ"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"เปิดใช้โดยผู้ดูแลระบบ"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"ปิดใช้โดยผู้ดูแลระบบ"</string>
+    <string name="disabled" msgid="9206776641295849915">"ปิดอยู่"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"อนุญาต"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"ไม่อนุญาต"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"ติดตั้งแอปที่ไม่รู้จัก"</string>
     <string name="home" msgid="3256884684164448244">"หน้าแรกของการตั้งค่า"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"ต้องป้อนรหัสผ่าน"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"วิธีการป้อนข้อมูลที่ใช้งาน"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"ใช้ภาษาของระบบ"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"ไม่สามารถเปิดการตั้งค่าสำหรับ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"วิธีการป้อนข้อมูลนี้อาจเก็บข้อความทั้งหมดที่คุณพิมพ์ รวมถึงข้อมูลส่วนบุคคล เช่น รหัสผ่านและหมายเลขบัตรเครดิต โดยมาจากแอปพลิเคชัน <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ใช้วิธีการป้อนข้อมูลนี้หรือไม่"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"หมายเหตุ: หลังจากเริ่มต้นใหม่ แอปนี้จะไม่สามารถเริ่มการทำงานได้จนกว่าคุณจะปลดล็อกโทรศัพท์"</string>
 </resources>
