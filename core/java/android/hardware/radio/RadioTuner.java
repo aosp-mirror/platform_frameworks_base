@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * RadioTuner interface provides methods to control a radio tuner on the device: selecting and
@@ -270,16 +271,18 @@ public abstract class RadioTuner {
     /**
      * Get the list of discovered radio stations.
      *
-     * To get the full list, set filter to null or empty string. Otherwise, client application
-     * must verify vendor product/name before setting this parameter to anything else.
+     * To get the full list, set filter to null or empty map.
+     * Keys must be prefixed with unique vendor Java-style namespace,
+     * eg. 'com.somecompany.parameter1'.
      *
-     * @param filter vendor-specific selector for radio stations.
+     * @param vendorFilter vendor-specific selector for radio stations.
      * @return a list of radio stations.
      * @throws IllegalStateException if the scan is in progress or has not been started,
      *         startBackgroundScan() call may fix it.
-     * @throws IllegalArgumentException if the filter argument is not valid.
+     * @throws IllegalArgumentException if the vendorFilter argument is not valid.
      */
-    public abstract @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
+    public abstract @NonNull List<RadioManager.ProgramInfo>
+            getProgramList(@Nullable Map<String, String> vendorFilter);
 
     /**
      * Checks, if the analog playback is forced, see setAnalogForced.

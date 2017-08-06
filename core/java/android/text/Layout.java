@@ -152,6 +152,17 @@ public abstract class Layout {
      */
     public static float getDesiredWidth(CharSequence source, int start, int end, TextPaint paint,
             TextDirectionHeuristic textDir) {
+        return getDesiredWidthWithLimit(source, start, end, paint, textDir, Float.MAX_VALUE);
+    }
+    /**
+     * Return how wide a layout must be in order to display the
+     * specified text slice with one line per paragraph.
+     *
+     * If the measured width exceeds given limit, returns limit value instead.
+     * @hide
+     */
+    public static float getDesiredWidthWithLimit(CharSequence source, int start, int end,
+            TextPaint paint, TextDirectionHeuristic textDir, float upperLimit) {
         float need = 0;
 
         int next;
@@ -163,6 +174,9 @@ public abstract class Layout {
 
             // note, omits trailing paragraph char
             float w = measurePara(paint, source, i, next, textDir);
+            if (w > upperLimit) {
+                return upperLimit;
+            }
 
             if (w > need)
                 need = w;
@@ -2067,9 +2081,11 @@ public abstract class Layout {
 
         final String ellipsisString = TextUtils.getEllipsisString(method);
         final int ellipsisStringLen = ellipsisString.length();
+        // Use the ellipsis string only if there are that at least as many characters to replace.
+        final boolean useEllipsisString = ellipsisCount >= ellipsisStringLen;
         for (int i = 0; i < ellipsisCount; i++) {
             final char c;
-            if (i < ellipsisStringLen && ellipsisCount <= ellipsisStringLen) {
+            if (useEllipsisString && i < ellipsisStringLen) {
                 c = ellipsisString.charAt(i);
             } else {
                 c = TextUtils.ELLIPSIS_FILLER;

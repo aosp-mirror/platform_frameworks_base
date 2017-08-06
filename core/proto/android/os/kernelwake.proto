@@ -26,6 +26,7 @@ message KernelWakeSources {
     repeated WakeupSourceProto wakeup_sources = 1;
 }
 
+// Next Tag: 11
 message WakeupSourceProto {
     // Name of the event which triggers application processor
     string name = 1;

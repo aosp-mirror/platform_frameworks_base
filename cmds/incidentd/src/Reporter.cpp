@@ -35,7 +35,7 @@
 /**
  * The directory where the incident reports are stored.
  */
-static const String8 INCIDENT_DIRECTORY("/data/incidents");
+static const char* INCIDENT_DIRECTORY = "/data/misc/incidents/";
 
 // ================================================================================
 static status_t write_all(int fd, uint8_t const* buf, size_t size)
@@ -68,6 +68,7 @@ ReportRequest::~ReportRequest()
 // ================================================================================
 ReportRequestSet::ReportRequestSet()
     :mRequests(),
+     mSections(),
      mWritableCount(0),
      mMainFd(-1)
 {
@@ -77,10 +78,12 @@ ReportRequestSet::~ReportRequestSet()
 {
 }
 
+// TODO: dedup on exact same args and fd, report the status back to listener!
 void
 ReportRequestSet::add(const sp<ReportRequest>& request)
 {
     mRequests.push_back(request);
+    mSections.merge(request->args);
     mWritableCount++;
 }
 
@@ -122,11 +125,16 @@ ReportRequestSet::write(uint8_t const* buf, size_t size)
     return mWritableCount > 0 ? NO_ERROR : err;
 }
 
+bool
+ReportRequestSet::containsSection(int id) {
+    return mSections.containsSection(id);
+}
 
 // ================================================================================
-Reporter::Reporter()
-    :args(),
-     batch()
+Reporter::Reporter() : Reporter(INCIDENT_DIRECTORY) { isTest = false; };
+
+Reporter::Reporter(const char* directory)
+    :batch()
 {
     char buf[100];
 
@@ -134,10 +142,15 @@ Reporter::Reporter()
     mMaxSize = 100 * 1024 * 1024;
     mMaxCount = 100;
 
+    // string ends up with '/' is a directory
+    String8 dir = String8(directory);
+    if (directory[dir.size() - 1] != '/') dir += "/";
+    mIncidentDirectory = dir.string();
+
     // There can't be two at the same time because it's on one thread.
     mStartTime = time(NULL);
-    strftime(buf, sizeof(buf), "/incident-%Y%m%d-%H%M%S", localtime(&mStartTime));
-    mFilename = INCIDENT_DIRECTORY + buf;
+    strftime(buf, sizeof(buf), "incident-%Y%m%d-%H%M%S", localtime(&mStartTime));
+    mFilename = mIncidentDirectory + buf;
 }
 
 Reporter::~Reporter()
@@ -161,7 +174,7 @@ Reporter::runReport()
     }
     if (needMainFd) {
         // Create the directory
-        err = create_directory(INCIDENT_DIRECTORY);
+        if (!isTest) err = create_directory(mIncidentDirectory);
         if (err != NO_ERROR) {
             goto done;
         }
@@ -169,7 +182,7 @@ Reporter::runReport()
         // If there are too many files in the directory (for whatever reason),
         // delete the oldest ones until it's under the limit. Doing this first
         // does mean that we can go over, so the max size is not a hard limit.
-        clean_directory(INCIDENT_DIRECTORY, mMaxSize, mMaxCount);
+        if (!isTest) clean_directory(mIncidentDirectory, mMaxSize, mMaxCount);
 
         // Open the file.
         err = create_file(&mainFd);
@@ -214,7 +227,7 @@ Reporter::runReport()
         const int id = (*section)->id;
         ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
 
-        if (this->args.containsSection(id)) {
+        if (this->batch.containsSection(id)) {
             // Notify listener of starting
             for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
@@ -270,7 +283,7 @@ done:
         // If the status was ok, delete the file. If not, leave it around until the next
         // boot or the next checkin. If the directory gets too big older files will
         // be rotated out.
-        unlink(mFilename.c_str());
+        if(!isTest) unlink(mFilename.c_str());
     }
 
     return REPORT_FINISHED;
@@ -284,7 +297,7 @@ Reporter::create_file(int* fd)
 {
     const char* filename = mFilename.c_str();
 
-    *fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0660);
+    *fd = open(filename, O_CREAT | O_TRUNC | O_RDWR | O_CLOEXEC, 0660);
     if (*fd < 0) {
         ALOGE("Couldn't open incident file: %s (%s)", filename, strerror(errno));
         return -errno;
@@ -303,20 +316,24 @@ Reporter::create_file(int* fd)
     return NO_ERROR;
 }
 
-// ================================================================================
 Reporter::run_report_status_t
 Reporter::upload_backlog()
 {
     DIR* dir;
     struct dirent* entry;
     struct stat st;
+    status_t err;
 
-    if ((dir = opendir(INCIDENT_DIRECTORY.string())) == NULL) {
-        ALOGE("Couldn't open incident directory: %s", INCIDENT_DIRECTORY.string());
+    if ((err = create_directory(INCIDENT_DIRECTORY)) != NO_ERROR) {
+        ALOGE("directory doesn't exist: %s", strerror(-err));
+        return REPORT_FINISHED;
+    }
+
+    if ((dir = opendir(INCIDENT_DIRECTORY)) == NULL) {
+        ALOGE("Couldn't open incident directory: %s", INCIDENT_DIRECTORY);
         return REPORT_NEEDS_DROPBOX;
     }
 
-    String8 dirbase(INCIDENT_DIRECTORY + "/");
     sp<DropBoxManager> dropbox = new DropBoxManager();
 
     // Enumerate, count and add up size
@@ -324,7 +341,7 @@ Reporter::upload_backlog()
         if (entry->d_name[0] == '.') {
             continue;
         }
-        String8 filename = dirbase + entry->d_name;
+        String8 filename = String8(INCIDENT_DIRECTORY) + entry->d_name;
         if (stat(filename.string(), &st) != 0) {
             ALOGE("Unable to stat file %s", filename.string());
             continue;

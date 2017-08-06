@@ -17,6 +17,7 @@
 #include "GLFunctorDrawable.h"
 #include "GlFunctorLifecycleListener.h"
 #include "RenderNode.h"
+#include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
 #include <private/hwui/DrawGlInfo.h>
 #include <GrContext.h>
@@ -49,8 +50,6 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         return;
     }
 
-    canvas->flush();
-
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         canvas->clear(SK_ColorRED);
         return;
@@ -72,39 +71,48 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     info.height = canvasInfo.height();
     mat4.asColMajorf(&info.transform[0]);
 
+    bool clearStencilAfterFunctor = false;
+
     //apply a simple clip with a scissor or a complex clip with a stencil
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
     if (CC_UNLIKELY(clipRegion.isComplex())) {
-        //It is only a temporary solution to use a scissor to draw the stencil.
-        //There is a bug 31489986 to implement efficiently non-rectangular clips.
         glDisable(GL_SCISSOR_TEST);
-        glDisable(GL_STENCIL_TEST);
-        glStencilMask(0xff);
+        glStencilMask(0x1);
         glClearStencil(0);
         glClear(GL_STENCIL_BUFFER_BIT);
-        glEnable(GL_SCISSOR_TEST);
-        SkRegion::Cliperator it(clipRegion, ibounds);
-        while (!it.done()) {
-            setScissor(info.height, it.rect());
-            glClearStencil(0x1);
-            glClear(GL_STENCIL_BUFFER_BIT);
-            it.next();
+        bool stencilWritten = SkAndroidFrameworkUtils::clipWithStencil(canvas);
+        canvas->flush();
+        if (stencilWritten) {
+            glStencilMask(0x1);
+            glStencilFunc(GL_EQUAL, 0x1, 0x1);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            clearStencilAfterFunctor = true;
+            glEnable(GL_STENCIL_TEST);
+        } else {
+            glDisable(GL_STENCIL_TEST);
         }
-        glDisable(GL_SCISSOR_TEST);
-        glStencilFunc(GL_EQUAL, 0x1, 0xff);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glEnable(GL_STENCIL_TEST);
     } else if (clipRegion.isEmpty()) {
+        canvas->flush();
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_SCISSOR_TEST);
     } else {
+        canvas->flush();
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_SCISSOR_TEST);
         setScissor(info.height, clipRegion.getBounds());
     }
 
     (*mFunctor)(DrawGlInfo::kModeDraw, &info);
+
+    if (clearStencilAfterFunctor) {
+        //clear stencil buffer as it may be used by Skia
+        glDisable(GL_SCISSOR_TEST);
+        glDisable(GL_STENCIL_TEST);
+        glStencilMask(0x1);
+        glClearStencil(0);
+        glClear(GL_STENCIL_BUFFER_BIT);
+    }
 
     canvas->getGrContext()->resetContext();
  }

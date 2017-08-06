@@ -25,6 +25,7 @@
 
 const int READ_TIMEOUT = 5 * 1000;
 const int BUFFER_SIZE = 16 * 1024;
+const int QUICK_TIMEOUT_MS = 100;
 const std::string HEAD = "[OK]";
 
 using namespace android;
@@ -101,11 +102,11 @@ TEST_F(FdBufferTest, ReadTimeout) {
             write(c2pPipe.writeFd(), "poo", 3);
             sleep(1);
         }
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     } else {
         close(c2pPipe.writeFd());
 
-        status_t status = buffer.read(c2pPipe.readFd(), 500);
+        status_t status = buffer.read(c2pPipe.readFd(), QUICK_TIMEOUT_MS);
         ASSERT_EQ(NO_ERROR, status);
         EXPECT_TRUE(buffer.timedOut());
 
@@ -129,7 +130,7 @@ TEST_F(FdBufferTest, ReadInStreamAndWrite) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
         // Must exit here otherwise the child process will continue executing the test binary.
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     } else {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
@@ -161,7 +162,7 @@ TEST_F(FdBufferTest, ReadInStreamAndWriteAllAtOnce) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
         // Must exit here otherwise the child process will continue executing the test binary.
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     } else {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
@@ -186,7 +187,7 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
         ASSERT_TRUE(DoDataStream(p2cPipe.readFd(), c2pPipe.writeFd()));
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     } else {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
@@ -212,7 +213,7 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
         ASSERT_TRUE(DoDataStream(p2cPipe.readFd(), c2pPipe.writeFd()));
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     } else {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
@@ -239,13 +240,13 @@ TEST_F(FdBufferTest, ReadInStreamTimeOut) {
         while (true) {
             sleep(1);
         }
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     } else {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
 
         ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd,
-            p2cPipe.writeFd(), c2pPipe.readFd(), 100));
+            p2cPipe.writeFd(), c2pPipe.readFd(), QUICK_TIMEOUT_MS));
         EXPECT_TRUE(buffer.timedOut());
         kill(pid, SIGKILL); // reap the child process
     }

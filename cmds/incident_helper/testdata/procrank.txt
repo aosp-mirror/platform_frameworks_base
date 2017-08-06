@@ -1,0 +1,8 @@
+  PID       Vss      Rss      Pss      Uss     Swap    PSwap    USwap    ZSwap  cmdline
+ 1119  2607640K  339564K  180278K  114216K    1584K      46K       0K      10K  system_server
+  649    11016K    1448K      98K      48K     472K     342K     212K      75K  /vendor/bin/qseecomd
+                           ------   ------   ------   ------   ------   ------  ------
+                          1201993K  935300K   88164K   31069K   27612K    6826K  TOTAL
+
+ZRAM: 6828K physical used for 31076K in swap (524284K total swap)
+ RAM: 3843972K total, 281424K free, 116764K buffers, 1777452K cached, 1136K shmem, 217916K slab

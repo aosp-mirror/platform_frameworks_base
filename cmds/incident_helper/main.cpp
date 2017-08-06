@@ -27,12 +27,11 @@ using namespace android::base;
 using namespace std;
 
 static void usage(FILE* out) {
-    fprintf(out, "incident_helper is not designed to run manually, see README.md\n");
-    fprintf(out, "usage: incident_helper -s SECTION -i INPUT -o OUTPUT\n");
+    fprintf(out, "incident_helper is not designed to run manually,");
+    fprintf(out, "it reads from stdin and writes to stdout, see README.md for details.\n");
+    fprintf(out, "usage: incident_helper -s SECTION\n");
     fprintf(out, "REQUIRED:\n");
     fprintf(out, "  -s           section id, must be positive\n");
-    fprintf(out, "  -i           (default stdin) input fd\n");
-    fprintf(out, "  -o           (default stdout) output fd\n");
 }
 
 //=============================================================================
@@ -45,6 +44,8 @@ static TextParserBase* selectParser(int section) {
             return new ReverseParser();
 /* ========================================================================= */
         // IDs larger than 0 are reserved in incident.proto
+        case 2000:
+            return new ProcrankParser();
         case 2002:
             return new KernelWakesParser();
         default:
@@ -59,9 +60,7 @@ int main(int argc, char** argv) {
     // Parse the args
     int opt;
     int sectionID = 0;
-    int inputFd = STDIN_FILENO;
-    int outputFd = STDOUT_FILENO;
-    while ((opt = getopt(argc, argv, "hs:i:o:")) != -1) {
+    while ((opt = getopt(argc, argv, "hs:")) != -1) {
         switch (opt) {
             case 'h':
                 usage(stdout);
@@ -69,30 +68,14 @@ int main(int argc, char** argv) {
             case 's':
                 sectionID = atoi(optarg);
                 break;
-            case 'i':
-                inputFd = atoi(optarg);
-                break;
-            case 'o':
-                outputFd = atoi(optarg);
-                break;
         }
-    }
-
-    // Check mandatory parameters:
-    if (inputFd < 0) {
-        fprintf(stderr, "invalid input fd: %d\n", inputFd);
-        return 1;
-    }
-    if (outputFd < 0) {
-        fprintf(stderr, "invalid output fd: %d\n", outputFd);
-        return 1;
     }
 
     fprintf(stderr, "Pasring section %d...\n", sectionID);
     TextParserBase* parser = selectParser(sectionID);
     if (parser != NULL) {
         fprintf(stderr, "Running parser: %s\n", parser->name.string());
-        status_t err = parser->Parse(inputFd, outputFd);
+        status_t err = parser->Parse(STDIN_FILENO, STDOUT_FILENO);
         if (err != NO_ERROR) {
             fprintf(stderr, "Parse error in section %d: %s\n", sectionID, strerror(-err));
             return -1;

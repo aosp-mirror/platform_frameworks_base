@@ -50,6 +50,7 @@ struct Target {
 
     int testPassCount;
     int testFailCount;
+    int unknownFailureCount; // unknown failure == "Process crashed", etc.
     bool actionsWithNoTests;
 
     Target(bool b, bool i, bool t, const string& p);
@@ -63,6 +64,7 @@ Target::Target(bool b, bool i, bool t, const string& p)
      testActionCount(0),
      testPassCount(0),
      testFailCount(0),
+     unknownFailureCount(0),
      actionsWithNoTests(false)
 {
 }
@@ -188,8 +190,13 @@ public:
      */
     void SetCurrentAction(TestAction* action);
 
+    bool IsSuccess();
+
+    string GetErrorMessage();
+
 private:
     TestAction* m_currentAction;
+    SessionStatus m_sessionStatus;
 };
 
 void
@@ -241,8 +248,10 @@ TestResults::OnTestStatus(TestStatus& status)
         }
         line << ": " << m_currentAction->target->name << ':' << className << "\\#" << testName;
         print_one_line("%s", line.str().c_str());
-    } else if (resultCode == -2) {
+    } else if ((resultCode == -1) || (resultCode == -2)) {
         // test failed
+        // Note -2 means an assertion failure, and -1 means other exceptions.  We just treat them
+        // all as "failures".
         m_currentAction->failCount++;
         m_currentAction->target->testFailCount++;
         printf("%s\n%sFailed: %s:%s\\#%s%s\n", g_escapeClearLine, g_escapeRedBold,
@@ -257,9 +266,13 @@ TestResults::OnTestStatus(TestStatus& status)
 }
 
 void
-TestResults::OnSessionStatus(SessionStatus& /*status*/)
+TestResults::OnSessionStatus(SessionStatus& status)
 {
     //status.PrintDebugString();
+    m_sessionStatus = status;
+    if (m_currentAction && !IsSuccess()) {
+        m_currentAction->target->unknownFailureCount++;
+    }
 }
 
 void
@@ -267,6 +280,24 @@ TestResults::SetCurrentAction(TestAction* action)
 {
     m_currentAction = action;
 }
+
+bool
+TestResults::IsSuccess()
+{
+    return m_sessionStatus.result_code() == -1; // Activity.RESULT_OK.
+}
+
+string
+TestResults::GetErrorMessage()
+{
+    bool found;
+    string shortMsg = get_bundle_string(m_sessionStatus.results(), &found, "shortMsg", NULL);
+    if (!found) {
+        return IsSuccess() ? "" : "Unknown failure";
+    }
+    return shortMsg;
+}
+
 
 /**
  * Prints the usage statement / help text.
@@ -568,7 +599,7 @@ check_device_property(const string& property, const string& expected)
 /**
  * Run the build, install, and test actions.
  */
-void
+bool
 run_phases(vector<Target*> targets, const Options& options)
 {
     int err = 0;
@@ -837,6 +868,10 @@ run_phases(vector<Target*> targets, const Options& options)
                 printf("%s%d passed%s, %d failed\n", g_escapeGreenBold, action.passCount,
                         g_escapeEndColor, action.failCount);
             }
+            if (!testResults.IsSuccess()) {
+                printf("\n%sTest didn't finish successfully: %s%s\n", g_escapeRedBold,
+                        testResults.GetErrorMessage().c_str(), g_escapeEndColor);
+            }
         }
     }
 
@@ -907,6 +942,7 @@ run_phases(vector<Target*> targets, const Options& options)
     }
 
     // Tests
+    bool hasErrors = false;
     if (testActions.size() > 0) {
         printf("%sRan tests:%s\n", g_escapeBold, g_escapeEndColor);
         size_t maxNameLength = 0;
@@ -924,12 +960,18 @@ run_phases(vector<Target*> targets, const Options& options)
             Target* target = targets[i];
             if (target->testActionCount > 0) {
                 printf("   %s%s", target->name.c_str(), padding.c_str() + target->name.length());
-                if (target->actionsWithNoTests) {
+                if (target->unknownFailureCount > 0) {
+                    printf("     %sUnknown failure, see above message.%s\n",
+                            g_escapeRedBold, g_escapeEndColor);
+                    hasErrors = true;
+                } else if (target->actionsWithNoTests) {
                     printf("     %s%d passed, %d failed%s\n", g_escapeYellowBold,
                             target->testPassCount, target->testFailCount, g_escapeEndColor);
+                    hasErrors = true;
                 } else if (target->testFailCount > 0) {
                     printf("     %d passed, %s%d failed%s\n", target->testPassCount,
                             g_escapeRedBold, target->testFailCount, g_escapeEndColor);
+                    hasErrors = true;
                 } else {
                     printf("     %s%d passed%s, %d failed\n", g_escapeGreenBold,
                             target->testPassCount, g_escapeEndColor, target->testFailCount);
@@ -944,6 +986,7 @@ run_phases(vector<Target*> targets, const Options& options)
     }
 
     printf("%s--------------------------------------------%s\n", g_escapeBold, g_escapeEndColor);
+    return !hasErrors;
 }
 
 /**
@@ -991,7 +1034,7 @@ main(int argc, const char** argv)
         exit(0);
     } else {
         // Normal run
-        run_phases(options.targets, options);
+        exit(run_phases(options.targets, options) ? 0 : 1);
     }
 
     return 0;

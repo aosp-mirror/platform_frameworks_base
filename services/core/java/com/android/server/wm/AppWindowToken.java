@@ -193,6 +193,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     Task mLastParent;
 
+    /**
+     * See {@link #canTurnScreenOn()}
+     */
+    private boolean mCanTurnScreenOn = true;
+
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
@@ -290,7 +295,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         boolean nowGone = mReportedVisibilityResults.nowGone;
 
         boolean nowDrawn = numInteresting > 0 && numDrawn >= numInteresting;
-        boolean nowVisible = numInteresting > 0 && numVisible >= numInteresting;
+        boolean nowVisible = numInteresting > 0 && numVisible >= numInteresting && !hidden;
         if (!nowGone) {
             // If the app is not yet gone, then it can only become visible/drawn.
             if (!nowDrawn) {
@@ -448,7 +453,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     mChildren.get(i).mWinAnimator.hide("immediately hidden");
                 }
                 SurfaceControl.closeTransaction();
-                removeStartingWindow();
             }
 
             if (!mService.mClosingApps.contains(this) && !mService.mOpeningApps.contains(this)) {
@@ -526,12 +530,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return super.checkCompleteDeferredRemoval();
     }
 
-    private void removeStartingWindow() {
-        if (startingData != null && getController() != null) {
-            getController().removeStartingWindow();
-        }
-    }
-
     void onRemovedFromDisplay() {
         if (mRemovingFromDisplay) {
             return;
@@ -559,7 +557,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
                 + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
 
-        removeStartingWindow();
+        if (startingData != null && getController() != null) {
+            getController().removeStartingWindow();
+        }
 
         // If this window was animating, then we need to ensure that the app transition notifies
         // that animations have completed in WMS.handleAnimatingStoppedAndTransitionLocked(), so
@@ -649,6 +649,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppResumed: wasStopped=" + wasStopped
                 + " " + this);
         mAppStopped = false;
+        // Allow the window to turn the screen on once the app is resumed again.
+        setCanTurnScreenOn(true);
         if (!wasStopped) {
             destroySurfaces(true /*cleanupOnResume*/);
         }
@@ -1643,6 +1645,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     void setDisablePreviewScreenshots(boolean disable) {
         mDisablePreviewScreenshots = disable;
+    }
+
+    /**
+     * Sets whether the current launch can turn the screen on. See {@link #canTurnScreenOn()}
+     */
+    void setCanTurnScreenOn(boolean canTurnScreenOn) {
+        mCanTurnScreenOn = canTurnScreenOn;
+    }
+
+    /**
+     * Indicates whether the current launch can turn the screen on. This is to prevent multiple
+     * relayouts from turning the screen back on. The screen should only turn on at most
+     * once per activity resume.
+     *
+     * @return true if the screen can be turned on.
+     */
+    boolean canTurnScreenOn() {
+        return mCanTurnScreenOn;
     }
 
     /**

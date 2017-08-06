@@ -25,6 +25,7 @@ import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -63,6 +64,7 @@ import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInterface;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -331,11 +333,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    private void notifyWallpaperColorsChanged(WallpaperData wallpaper, int which) {
+    private void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper, int which) {
         boolean needsExtraction;
         synchronized (mLock) {
-            if (mColorsChangedListeners.getRegisteredCallbackCount() == 0)
+            final RemoteCallbackList<IWallpaperManagerCallback> currentUserColorListeners =
+                    mColorsChangedListeners.get(wallpaper.userId);
+            final RemoteCallbackList<IWallpaperManagerCallback> userAllColorListeners =
+                    mColorsChangedListeners.get(UserHandle.USER_ALL);
+            // No-op until someone is listening to it.
+            if (emptyCallbackList(currentUserColorListeners)  &&
+                    emptyCallbackList(userAllColorListeners)) {
                 return;
+            }
 
             if (DEBUG) {
                 Slog.v(TAG, "notifyWallpaperColorsChanged " + which);
@@ -346,40 +355,66 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         // Let's notify the current values, it's fine if it's null, it just means
         // that we don't know yet.
-        notifyColorListeners(wallpaper.primaryColors, which);
+        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId);
 
         if (needsExtraction) {
             extractColors(wallpaper);
-            notifyColorListeners(wallpaper.primaryColors, which);
+            synchronized (mLock) {
+                // Don't need to notify if nothing changed.
+                if (wallpaper.primaryColors == null) {
+                    return;
+                }
+            }
+            notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId);
         }
     }
 
-    private void notifyColorListeners(WallpaperColors wallpaperColors, int which) {
-        final IWallpaperManagerCallback[] listeners;
+    private static <T extends IInterface> boolean emptyCallbackList(RemoteCallbackList<T> list) {
+        return (list == null || list.getRegisteredCallbackCount() == 0);
+    }
+
+    private void notifyColorListeners(@NonNull WallpaperColors wallpaperColors, int which,
+            int userId) {
         final IWallpaperManagerCallback keyguardListener;
+        final RemoteCallbackList<IWallpaperManagerCallback> currentUserColorListeners;
+        final RemoteCallbackList<IWallpaperManagerCallback> userAllColorListeners;
         synchronized (mLock) {
-            // Make a synchronized copy of the listeners to avoid concurrent list modification.
-            int callbackCount = mColorsChangedListeners.beginBroadcast();
-            listeners = new IWallpaperManagerCallback[callbackCount];
-            for (int i = 0; i < callbackCount; i++) {
-                listeners[i] = mColorsChangedListeners.getBroadcastItem(i);
-            }
-            mColorsChangedListeners.finishBroadcast();
+            currentUserColorListeners = mColorsChangedListeners.get(userId);
+            userAllColorListeners = mColorsChangedListeners.get(UserHandle.USER_ALL);
             keyguardListener = mKeyguardListener;
         }
 
-        for (int i = 0; i < listeners.length; i++) {
-            try {
-                listeners[i].onWallpaperColorsChanged(wallpaperColors, which);
-            } catch (RemoteException e) {
-                // Callback is gone, it's not necessary to unregister it since
-                // RemoteCallbackList#getBroadcastItem will take care of it.
+        if (currentUserColorListeners != null) {
+            int count = currentUserColorListeners.beginBroadcast();
+            for (int i = 0; i < count; i++) {
+                try {
+                    currentUserColorListeners.getBroadcastItem(i)
+                            .onWallpaperColorsChanged(wallpaperColors, which, userId);
+                } catch (RemoteException e) {
+                    // Callback is gone, it's not necessary to unregister it since
+                    // RemoteCallbackList#getBroadcastItem will take care of it.
+                }
             }
+            currentUserColorListeners.finishBroadcast();
+        }
+
+        if (userAllColorListeners != null) {
+            int count = userAllColorListeners.beginBroadcast();
+            for (int i = 0; i < count; i++) {
+                try {
+                    userAllColorListeners.getBroadcastItem(i)
+                            .onWallpaperColorsChanged(wallpaperColors, which, userId);
+                } catch (RemoteException e) {
+                    // Callback is gone, it's not necessary to unregister it since
+                    // RemoteCallbackList#getBroadcastItem will take care of it.
+                }
+            }
+            userAllColorListeners.finishBroadcast();
         }
 
         if (keyguardListener != null) {
             try {
-                keyguardListener.onWallpaperColorsChanged(wallpaperColors, which);
+                keyguardListener.onWallpaperColorsChanged(wallpaperColors, which, userId);
             } catch (RemoteException e) {
                 // Oh well it went away; no big deal
             }
@@ -595,7 +630,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     final IPackageManager mIPackageManager;
     final MyPackageMonitor mMonitor;
     final AppOpsManager mAppOpsManager;
-    final RemoteCallbackList<IWallpaperManagerCallback> mColorsChangedListeners;
+    /**
+     * Map of color listeners per user id.
+     * The key will be the id of a user or UserHandle.USER_ALL - for wildcard listeners.
+     */
+    final SparseArray<RemoteCallbackList<IWallpaperManagerCallback>> mColorsChangedListeners;
     WallpaperData mLastWallpaper;
     IWallpaperManagerCallback mKeyguardListener;
     boolean mWaitingForUnlock;
@@ -858,11 +897,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
          */
         @Override
         public void onWallpaperColorsChanged(WallpaperColors primaryColors) {
-            // Do not override default color extraction if API isn't implemented.
-            if (primaryColors == null) {
-                return;
-            }
-
             int which;
             synchronized (mLock) {
                 // Do not broadcast changes on ImageWallpaper since it's handled
@@ -876,7 +910,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 // Live wallpapers always are system wallpapers.
                 which = FLAG_SYSTEM;
                 // It's also the lock screen wallpaper when we don't have a bitmap in there
-                WallpaperData lockedWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+                WallpaperData lockedWallpaper = mLockWallpaperMap.get(mWallpaper.userId);
                 if (lockedWallpaper == null) {
                     which |= FLAG_LOCK;
                 }
@@ -905,6 +939,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         Slog.w(TAG, "Failed to set wallpaper padding", e);
                     }
                     mPaddingChanged = false;
+                }
+                try {
+                    // This will trigger onComputeColors in the wallpaper engine.
+                    // It's fine to be locked in here since the binder is oneway.
+                    mEngine.requestWallpaperColors();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to request wallpaper colors", e);
                 }
             }
         }
@@ -1096,7 +1137,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mMonitor.register(context, null, UserHandle.ALL, true);
         getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
         loadSettingsLocked(UserHandle.USER_SYSTEM, false);
-        mColorsChangedListeners = new RemoteCallbackList<>();
+        mColorsChangedListeners = new SparseArray<>();
     }
 
     private static File getWallpaperDir(int userId) {
@@ -1252,16 +1293,24 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     void switchUser(int userId, IRemoteCallback reply) {
+        WallpaperData systemWallpaper;
+        WallpaperData lockWallpaper;
         synchronized (mLock) {
             mCurrentUserId = userId;
-            WallpaperData wallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-            // Not started watching yet, in case wallpaper data was loaded for other reasons.
-            if (wallpaper.wallpaperObserver == null) {
-                wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
-                wallpaper.wallpaperObserver.startWatching();
+            systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+            lockWallpaper = mLockWallpaperMap.get(userId);
+            if (lockWallpaper == null) {
+                lockWallpaper = systemWallpaper;
             }
-            switchWallpaper(wallpaper, reply);
+            // Not started watching yet, in case wallpaper data was loaded for other reasons.
+            if (systemWallpaper.wallpaperObserver == null) {
+                systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
+                systemWallpaper.wallpaperObserver.startWatching();
+            }
+            switchWallpaper(systemWallpaper, reply);
         }
+        notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
+        notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
     }
 
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {
@@ -1634,16 +1683,30 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public void registerWallpaperColorsCallback(IWallpaperManagerCallback cb) {
+    public void registerWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, "registerWallpaperColorsCallback", null);
         synchronized (mLock) {
-            mColorsChangedListeners.register(cb);
+            RemoteCallbackList<IWallpaperManagerCallback> userColorsChangedListeners =
+                    mColorsChangedListeners.get(userId);
+            if (userColorsChangedListeners == null) {
+                userColorsChangedListeners = new RemoteCallbackList<>();
+                mColorsChangedListeners.put(userId, userColorsChangedListeners);
+            }
+            userColorsChangedListeners.register(cb);
         }
     }
 
     @Override
-    public void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb) {
+    public void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, "unregisterWallpaperColorsCallback", null);
         synchronized (mLock) {
-            mColorsChangedListeners.unregister(cb);
+            final RemoteCallbackList<IWallpaperManagerCallback> userColorsChangedListeners =
+                    mColorsChangedListeners.get(userId);
+            if (userColorsChangedListeners != null) {
+                userColorsChangedListeners.unregister(cb);
+            }
         }
     }
 
@@ -1657,23 +1720,25 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public WallpaperColors getWallpaperColors(int which) throws RemoteException {
+    public WallpaperColors getWallpaperColors(int which, int userId) throws RemoteException {
         if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
             throw new IllegalArgumentException("which should be either FLAG_LOCK or FLAG_SYSTEM");
         }
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, true, "getWallpaperColors", null);
 
         WallpaperData wallpaperData = null;
         boolean shouldExtract;
 
         synchronized (mLock) {
             if (which == FLAG_LOCK) {
-                wallpaperData = mLockWallpaperMap.get(mCurrentUserId);
+                wallpaperData = mLockWallpaperMap.get(userId);
             }
 
             // Try to get the system wallpaper anyway since it might
             // also be the lock screen wallpaper
             if (wallpaperData == null) {
-                wallpaperData = mWallpaperMap.get(mCurrentUserId);
+                wallpaperData = mWallpaperMap.get(userId);
             }
 
             if (wallpaperData == null) {
@@ -1872,8 +1937,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
             try {
                 wallpaper.imageWallpaperPending = false;
+                boolean same = changingToSame(name, wallpaper);
                 if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
-                    wallpaper.primaryColors = null;
+                    if (!same) {
+                        wallpaper.primaryColors = null;
+                    }
                     wallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(wallpaper);
                     shouldNotifyColors = true;
@@ -1888,26 +1956,31 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    private boolean changingToSame(ComponentName componentName, WallpaperData wallpaper) {
+        if (wallpaper.connection != null) {
+            if (wallpaper.wallpaperComponent == null) {
+                if (componentName == null) {
+                    if (DEBUG) Slog.v(TAG, "changingToSame: still using default");
+                    // Still using default wallpaper.
+                    return true;
+                }
+            } else if (wallpaper.wallpaperComponent.equals(componentName)) {
+                // Changing to same wallpaper.
+                if (DEBUG) Slog.v(TAG, "same wallpaper");
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean bindWallpaperComponentLocked(ComponentName componentName, boolean force,
             boolean fromUser, WallpaperData wallpaper, IRemoteCallback reply) {
         if (DEBUG_LIVE) {
             Slog.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
         }
         // Has the component changed?
-        if (!force) {
-            if (wallpaper.connection != null) {
-                if (wallpaper.wallpaperComponent == null) {
-                    if (componentName == null) {
-                        if (DEBUG) Slog.v(TAG, "bindWallpaperComponentLocked: still using default");
-                        // Still using default wallpaper.
-                        return true;
-                    }
-                } else if (wallpaper.wallpaperComponent.equals(componentName)) {
-                    // Changing to same wallpaper.
-                    if (DEBUG) Slog.v(TAG, "same wallpaper");
-                    return true;
-                }
-            }
+        if (!force && changingToSame(componentName, wallpaper)) {
+            return true;
         }
 
         try {
@@ -2234,15 +2307,35 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     private void migrateFromOld() {
-        File oldWallpaper = new File(WallpaperBackupHelper.WALLPAPER_IMAGE_KEY);
-        File oldInfo = new File(WallpaperBackupHelper.WALLPAPER_INFO_KEY);
-        if (oldWallpaper.exists()) {
-            File newWallpaper = new File(getWallpaperDir(0), WALLPAPER);
-            oldWallpaper.renameTo(newWallpaper);
-        }
-        if (oldInfo.exists()) {
-            File newInfo = new File(getWallpaperDir(0), WALLPAPER_INFO);
-            oldInfo.renameTo(newInfo);
+        // Pre-N, what existed is the one we're now using as the display crop
+        File preNWallpaper = new File(getWallpaperDir(0), WALLPAPER_CROP);
+        // In the very-long-ago, imagery lived with the settings app
+        File originalWallpaper = new File(WallpaperBackupHelper.WALLPAPER_IMAGE_KEY);
+        File newWallpaper = new File(getWallpaperDir(0), WALLPAPER);
+
+        // Migrations from earlier wallpaper image storage schemas
+        if (preNWallpaper.exists()) {
+            if (!newWallpaper.exists()) {
+                // we've got the 'wallpaper' crop file but not the nominal source image,
+                // so do the simple "just take everything" straight copy of legacy data
+                if (DEBUG) {
+                    Slog.i(TAG, "Migrating wallpaper schema");
+                }
+                FileUtils.copyFile(preNWallpaper, newWallpaper);
+            } // else we're in the usual modern case: both source & crop exist
+        } else if (originalWallpaper.exists()) {
+            // VERY old schema; make sure things exist and are in the right place
+            if (DEBUG) {
+                Slog.i(TAG, "Migrating antique wallpaper schema");
+            }
+            File oldInfo = new File(WallpaperBackupHelper.WALLPAPER_INFO_KEY);
+            if (oldInfo.exists()) {
+                File newInfo = new File(getWallpaperDir(0), WALLPAPER_INFO);
+                oldInfo.renameTo(newInfo);
+            }
+
+            FileUtils.copyFile(originalWallpaper, preNWallpaper);
+            originalWallpaper.renameTo(newWallpaper);
         }
     }
 
@@ -2303,12 +2396,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         JournaledFile journal = makeJournaledFile(userId);
         FileInputStream stream = null;
         File file = journal.chooseForRead();
-        if (!file.exists()) {
-            // This should only happen one time, when upgrading from a legacy system
-            migrateFromOld();
-        }
+
         WallpaperData wallpaper = mWallpaperMap.get(userId);
         if (wallpaper == null) {
+            // Do this once per boot
+            migrateFromOld();
+
             wallpaper = new WallpaperData(userId, WALLPAPER, WALLPAPER_CROP);
             wallpaper.allowBackup = true;
             mWallpaperMap.put(userId, wallpaper);

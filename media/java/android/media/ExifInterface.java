@@ -2102,9 +2102,7 @@ public class ExifInterface {
     private int getMimeType(BufferedInputStream in) throws IOException {
         in.mark(SIGNATURE_CHECK_SIZE);
         byte[] signatureCheckBytes = new byte[SIGNATURE_CHECK_SIZE];
-        if (in.read(signatureCheckBytes) != SIGNATURE_CHECK_SIZE) {
-            throw new EOFException();
-        }
+        in.read(signatureCheckBytes);
         in.reset();
         if (isJpegFormat(signatureCheckBytes)) {
             return IMAGE_TYPE_JPEG;

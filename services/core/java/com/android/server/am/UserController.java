@@ -669,12 +669,6 @@ class UserController {
         }
 
         if (stopped) {
-            // Evict the user's credential encryption key
-            try {
-                getStorageManager().lockUserKey(userId);
-            } catch (RemoteException re) {
-                throw re.rethrowAsRuntimeException();
-            }
             mInjector.systemServiceManagerCleanupUser(userId);
             synchronized (mLock) {
                 mInjector.getActivityStackSupervisor().removeUserLocked(userId);
@@ -682,6 +676,12 @@ class UserController {
             // Remove the user if it is ephemeral.
             if (getUserInfo(userId).isEphemeral()) {
                 mInjector.getUserManager().removeUser(userId);
+            }
+            // Evict the user's credential encryption key.
+            try {
+                getStorageManager().lockUserKey(userId);
+            } catch (RemoteException re) {
+                throw re.rethrowAsRuntimeException();
             }
         }
     }

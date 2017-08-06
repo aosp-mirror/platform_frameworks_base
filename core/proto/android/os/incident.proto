@@ -31,6 +31,7 @@ import "frameworks/base/core/proto/android/service/power.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/procrank.proto";
 
 package android.os;
 
@@ -53,7 +54,7 @@ message IncidentProto {
     //SystemProperties system_properties = 1000;
 
     // Linux services
-    //Procrank procrank = 2000;
+    Procrank procrank = 2000;
     //PageTypeInfo page_type_info = 2001;
     KernelWakeSources kernel_wake_sources = 2002;
 

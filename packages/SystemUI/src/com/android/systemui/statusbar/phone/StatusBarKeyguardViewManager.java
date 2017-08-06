@@ -156,7 +156,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing) {
         if (mBouncer.needsFullscreenBouncer() && !mDozing) {
-
             // The keyguard might be showing (already). So we need to hide it.
             mStatusBar.hideKeyguard();
             mBouncer.show(true /* resetSecuritySelection */);
@@ -167,6 +166,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mBouncer.prepare();
             }
         }
+        updateStates();
     }
 
     private void showBouncer() {
@@ -201,7 +201,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void reset(boolean hideBouncerWhenShowing) {
         if (mShowing) {
-            if (mOccluded) {
+            if (mOccluded && !mDozing) {
                 mStatusBar.hideKeyguard();
                 mStatusBar.stopWaitingForKeyguardExit();
                 mBouncer.hide(false /* destroyView */);
@@ -250,7 +250,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void setDozing(boolean dozing) {
         if (mDozing != dozing) {
             mDozing = dozing;
-            reset(dozing /* hideBouncerWhenShowing */);
+            if (dozing || mBouncer.needsFullscreenBouncer() || mOccluded) {
+                reset(dozing /* hideBouncerWhenShowing */);
+            }
             updateStates();
         }
     }
@@ -292,9 +294,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
 
-        // If Keyguard is reshown, don't hide the bouncer as it might just have been requested by
-        // a FLAG_DISMISS_KEYGUARD_ACTIVITY.
-        reset(false /* hideBouncerWhenShowing*/);
+        // setDozing(false) will call reset once we stop dozing.
+        if (!mDozing) {
+            // If Keyguard is reshown, don't hide the bouncer as it might just have been requested
+            // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
+            reset(false /* hideBouncerWhenShowing*/);
+        }
         if (animate && !occluded && mShowing) {
             mStatusBar.animateKeyguardUnoccluding();
         }

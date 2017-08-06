@@ -119,6 +119,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.ActionMode;
@@ -855,22 +856,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mTransformation = null;
 
-        int textColorHighlight = 0;
-        ColorStateList textColor = null;
-        ColorStateList textColorHint = null;
-        ColorStateList textColorLink = null;
-        int textSize = 15;
-        String fontFamily = null;
-        Typeface fontTypeface = null;
-        boolean fontFamilyExplicit = false;
-        int typefaceIndex = -1;
-        int styleIndex = -1;
-        boolean allCaps = false;
-        int shadowcolor = 0;
-        float dx = 0, dy = 0, r = 0;
-        boolean elegant = false;
-        float letterSpacing = 0;
-        String fontFeatureSettings = null;
+        final TextAppearanceAttributes attributes = new TextAppearanceAttributes();
+        attributes.mTextColor = ColorStateList.valueOf(0xFF000000);
+        attributes.mTextSize = 15;
         mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
         mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
         mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
@@ -894,87 +882,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     ap, com.android.internal.R.styleable.TextAppearance);
         }
         if (appearance != null) {
-            int n = appearance.getIndexCount();
-            for (int i = 0; i < n; i++) {
-                int attr = appearance.getIndex(i);
-
-                switch (attr) {
-                    case com.android.internal.R.styleable.TextAppearance_textColorHighlight:
-                        textColorHighlight = appearance.getColor(attr, textColorHighlight);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_textColor:
-                        textColor = appearance.getColorStateList(attr);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_textColorHint:
-                        textColorHint = appearance.getColorStateList(attr);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_textColorLink:
-                        textColorLink = appearance.getColorStateList(attr);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_textSize:
-                        textSize = appearance.getDimensionPixelSize(attr, textSize);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_typeface:
-                        typefaceIndex = appearance.getInt(attr, -1);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_fontFamily:
-                        if (!context.isRestricted() && context.canLoadUnsafeResources()) {
-                            try {
-                                fontTypeface = appearance.getFont(attr);
-                            } catch (UnsupportedOperationException
-                                    | Resources.NotFoundException e) {
-                                // Expected if it is not a font resource.
-                            }
-                        }
-                        if (fontTypeface == null) {
-                            fontFamily = appearance.getString(attr);
-                        }
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_textStyle:
-                        styleIndex = appearance.getInt(attr, -1);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_textAllCaps:
-                        allCaps = appearance.getBoolean(attr, false);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_shadowColor:
-                        shadowcolor = appearance.getInt(attr, 0);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_shadowDx:
-                        dx = appearance.getFloat(attr, 0);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_shadowDy:
-                        dy = appearance.getFloat(attr, 0);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_shadowRadius:
-                        r = appearance.getFloat(attr, 0);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_elegantTextHeight:
-                        elegant = appearance.getBoolean(attr, false);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_letterSpacing:
-                        letterSpacing = appearance.getFloat(attr, 0);
-                        break;
-
-                    case com.android.internal.R.styleable.TextAppearance_fontFeatureSettings:
-                        fontFeatureSettings = appearance.getString(attr);
-                        break;
-                }
-            }
-
+            readTextAppearance(context, appearance, attributes, false /* styleArray */);
+            attributes.mFontFamilyExplicit = false;
             appearance.recycle();
         }
 
@@ -1004,6 +913,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int inputType = EditorInfo.TYPE_NULL;
         a = theme.obtainStyledAttributes(
                     attrs, com.android.internal.R.styleable.TextView, defStyleAttr, defStyleRes);
+
+        readTextAppearance(context, a, attributes, true /* styleArray */);
 
         int n = a.getIndexCount();
 
@@ -1195,67 +1106,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mFreezesText = a.getBoolean(attr, false);
                     break;
 
-                case com.android.internal.R.styleable.TextView_shadowColor:
-                    shadowcolor = a.getInt(attr, 0);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_shadowDx:
-                    dx = a.getFloat(attr, 0);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_shadowDy:
-                    dy = a.getFloat(attr, 0);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_shadowRadius:
-                    r = a.getFloat(attr, 0);
-                    break;
-
                 case com.android.internal.R.styleable.TextView_enabled:
                     setEnabled(a.getBoolean(attr, isEnabled()));
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textColorHighlight:
-                    textColorHighlight = a.getColor(attr, textColorHighlight);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textColor:
-                    textColor = a.getColorStateList(attr);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textColorHint:
-                    textColorHint = a.getColorStateList(attr);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textColorLink:
-                    textColorLink = a.getColorStateList(attr);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textSize:
-                    textSize = a.getDimensionPixelSize(attr, textSize);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_typeface:
-                    typefaceIndex = a.getInt(attr, typefaceIndex);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textStyle:
-                    styleIndex = a.getInt(attr, styleIndex);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_fontFamily:
-                    if (!context.isRestricted() && context.canLoadUnsafeResources()) {
-                        try {
-                            fontTypeface = a.getFont(attr);
-                        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-                            // Expected if it is not a resource reference or if it is a reference to
-                            // another resource type.
-                        }
-                    }
-                    if (fontTypeface == null) {
-                        fontFamily = a.getString(attr);
-                    }
-                    fontFamilyExplicit = true;
                     break;
 
                 case com.android.internal.R.styleable.TextView_password:
@@ -1343,22 +1195,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextView_textIsSelectable:
                     setTextIsSelectable(a.getBoolean(attr, false));
-                    break;
-
-                case com.android.internal.R.styleable.TextView_textAllCaps:
-                    allCaps = a.getBoolean(attr, false);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_elegantTextHeight:
-                    elegant = a.getBoolean(attr, false);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_letterSpacing:
-                    letterSpacing = a.getFloat(attr, 0);
-                    break;
-
-                case com.android.internal.R.styleable.TextView_fontFeatureSettings:
-                    fontFeatureSettings = a.getString(attr);
                     break;
 
                 case com.android.internal.R.styleable.TextView_breakStrategy:
@@ -1592,38 +1428,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
         }
 
-        setTextColor(textColor != null ? textColor : ColorStateList.valueOf(0xFF000000));
-        setHintTextColor(textColorHint);
-        setLinkTextColor(textColorLink);
-        if (textColorHighlight != 0) {
-            setHighlightColor(textColorHighlight);
-        }
-        setRawTextSize(textSize, true /* shouldRequestLayout */);
-        setElegantTextHeight(elegant);
-        setLetterSpacing(letterSpacing);
-        setFontFeatureSettings(fontFeatureSettings);
-
-        if (allCaps) {
-            setTransformationMethod(new AllCapsTransformationMethod(getContext()));
-        }
-
-        if (password || passwordInputType || webPasswordInputType || numberPasswordInputType) {
-            setTransformationMethod(PasswordTransformationMethod.getInstance());
-            typefaceIndex = MONOSPACE;
-        } else if (mEditor != null
+        final boolean isPassword = password || passwordInputType || webPasswordInputType
+                || numberPasswordInputType;
+        final boolean isMonospaceEnforced = isPassword || (mEditor != null
                 && (mEditor.mInputType
-                        & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION))
-                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
-            typefaceIndex = MONOSPACE;
+                & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION))
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD));
+        if (isMonospaceEnforced) {
+            attributes.mTypefaceIndex = MONOSPACE;
         }
 
-        if (typefaceIndex != -1 && !fontFamilyExplicit) {
-            fontFamily = null;
-        }
-        setTypefaceFromAttrs(fontTypeface, fontFamily, typefaceIndex, styleIndex);
+        applyTextAppearance(attributes);
 
-        if (shadowcolor != 0) {
-            setShadowLayer(r, dx, dy, shadowcolor);
+        if (isPassword) {
+            setTransformationMethod(PasswordTransformationMethod.getInstance());
         }
 
         if (maxlength >= 0) {
@@ -3397,79 +3215,244 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Deprecated
     public void setTextAppearance(Context context, @StyleRes int resId) {
         final TypedArray ta = context.obtainStyledAttributes(resId, R.styleable.TextAppearance);
+        final TextAppearanceAttributes attributes = new TextAppearanceAttributes();
+        readTextAppearance(context, ta, attributes, false /* styleArray */);
+        ta.recycle();
+        applyTextAppearance(attributes);
+    }
 
-        final int textColorHighlight = ta.getColor(
-                R.styleable.TextAppearance_textColorHighlight, 0);
-        if (textColorHighlight != 0) {
-            setHighlightColor(textColorHighlight);
+    /**
+     * Set of attributes that can be defined in a Text Appearance. This is used to simplify the code
+     * that reads these attributes in the constructor and in {@link #setTextAppearance}.
+     */
+    private static class TextAppearanceAttributes {
+        int mTextColorHighlight = 0;
+        ColorStateList mTextColor = null;
+        ColorStateList mTextColorHint = null;
+        ColorStateList mTextColorLink = null;
+        int mTextSize = 0;
+        String mFontFamily = null;
+        Typeface mFontTypeface = null;
+        boolean mFontFamilyExplicit = false;
+        int mTypefaceIndex = -1;
+        int mStyleIndex = -1;
+        boolean mAllCaps = false;
+        int mShadowColor = 0;
+        float mShadowDx = 0, mShadowDy = 0, mShadowRadius = 0;
+        boolean mHasElegant = false;
+        boolean mElegant = false;
+        boolean mHasLetterSpacing = false;
+        float mLetterSpacing = 0;
+        String mFontFeatureSettings = null;
+
+        @Override
+        public String toString() {
+            return "TextAppearanceAttributes {\n"
+                    + "    mTextColorHighlight:" + mTextColorHighlight + "\n"
+                    + "    mTextColor:" + mTextColor + "\n"
+                    + "    mTextColorHint:" + mTextColorHint + "\n"
+                    + "    mTextColorLink:" + mTextColorLink + "\n"
+                    + "    mTextSize:" + mTextSize + "\n"
+                    + "    mFontFamily:" + mFontFamily + "\n"
+                    + "    mFontTypeface:" + mFontTypeface + "\n"
+                    + "    mFontFamilyExplicit:" + mFontFamilyExplicit + "\n"
+                    + "    mTypefaceIndex:" + mTypefaceIndex + "\n"
+                    + "    mStyleIndex:" + mStyleIndex + "\n"
+                    + "    mAllCaps:" + mAllCaps + "\n"
+                    + "    mShadowColor:" + mShadowColor + "\n"
+                    + "    mShadowDx:" + mShadowDx + "\n"
+                    + "    mShadowDy:" + mShadowDy + "\n"
+                    + "    mShadowRadius:" + mShadowRadius + "\n"
+                    + "    mHasElegant:" + mHasElegant + "\n"
+                    + "    mElegant:" + mElegant + "\n"
+                    + "    mHasLetterSpacing:" + mHasLetterSpacing + "\n"
+                    + "    mLetterSpacing:" + mLetterSpacing + "\n"
+                    + "    mFontFeatureSettings:" + mFontFeatureSettings + "\n"
+                    + "}";
         }
+    }
 
-        final ColorStateList textColor = ta.getColorStateList(R.styleable.TextAppearance_textColor);
-        if (textColor != null) {
-            setTextColor(textColor);
-        }
+    // Maps styleable attributes that exist both in TextView style and TextAppearance.
+    private static final SparseIntArray sAppearanceValues = new SparseIntArray();
+    static {
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColorHighlight,
+                com.android.internal.R.styleable.TextAppearance_textColorHighlight);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColor,
+                com.android.internal.R.styleable.TextAppearance_textColor);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColorHint,
+                com.android.internal.R.styleable.TextAppearance_textColorHint);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColorLink,
+                com.android.internal.R.styleable.TextAppearance_textColorLink);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textSize,
+                com.android.internal.R.styleable.TextAppearance_textSize);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_typeface,
+                com.android.internal.R.styleable.TextAppearance_typeface);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontFamily,
+                com.android.internal.R.styleable.TextAppearance_fontFamily);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textStyle,
+                com.android.internal.R.styleable.TextAppearance_textStyle);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textAllCaps,
+                com.android.internal.R.styleable.TextAppearance_textAllCaps);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_shadowColor,
+                com.android.internal.R.styleable.TextAppearance_shadowColor);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_shadowDx,
+                com.android.internal.R.styleable.TextAppearance_shadowDx);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_shadowDy,
+                com.android.internal.R.styleable.TextAppearance_shadowDy);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_shadowRadius,
+                com.android.internal.R.styleable.TextAppearance_shadowRadius);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_elegantTextHeight,
+                com.android.internal.R.styleable.TextAppearance_elegantTextHeight);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_letterSpacing,
+                com.android.internal.R.styleable.TextAppearance_letterSpacing);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontFeatureSettings,
+                com.android.internal.R.styleable.TextAppearance_fontFeatureSettings);
+    }
 
-        final int textSize = ta.getDimensionPixelSize(R.styleable.TextAppearance_textSize, 0);
-        if (textSize != 0) {
-            setRawTextSize(textSize, true /* shouldRequestLayout */);
-        }
-
-        final ColorStateList textColorHint = ta.getColorStateList(
-                R.styleable.TextAppearance_textColorHint);
-        if (textColorHint != null) {
-            setHintTextColor(textColorHint);
-        }
-
-        final ColorStateList textColorLink = ta.getColorStateList(
-                R.styleable.TextAppearance_textColorLink);
-        if (textColorLink != null) {
-            setLinkTextColor(textColorLink);
-        }
-
-        Typeface fontTypeface = null;
-        String fontFamily = null;
-        if (!context.isRestricted() && context.canLoadUnsafeResources()) {
-            try {
-                fontTypeface = ta.getFont(R.styleable.TextAppearance_fontFamily);
-            } catch (UnsupportedOperationException | Resources.NotFoundException e) {
-                // Expected if it is not a font resource.
+    /**
+     * Read the Text Appearance attributes from a given TypedArray and set its values to the given
+     * set. If the TypedArray contains a value that was already set in the given attributes, that
+     * will be overriden.
+     *
+     * @param context The Context to be used
+     * @param appearance The TypedArray to read properties from
+     * @param attributes the TextAppearanceAttributes to fill in
+     * @param styleArray Whether the given TypedArray is a style or a TextAppearance. This defines
+     *                   what attribute indexes will be used to read the properties.
+     */
+    private void readTextAppearance(Context context, TypedArray appearance,
+            TextAppearanceAttributes attributes, boolean styleArray) {
+        final int n = appearance.getIndexCount();
+        for (int i = 0; i < n; i++) {
+            final int attr = appearance.getIndex(i);
+            int index = attr;
+            // Translate style array index ids to TextAppearance ids.
+            if (styleArray) {
+                index = sAppearanceValues.get(attr, -1);
+                if (index == -1) {
+                    // This value is not part of a Text Appearance and should be ignored.
+                    continue;
+                }
+            }
+            switch (index) {
+                case com.android.internal.R.styleable.TextAppearance_textColorHighlight:
+                    attributes.mTextColorHighlight =
+                            appearance.getColor(attr, attributes.mTextColorHighlight);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textColor:
+                    attributes.mTextColor = appearance.getColorStateList(attr);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textColorHint:
+                    attributes.mTextColorHint = appearance.getColorStateList(attr);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textColorLink:
+                    attributes.mTextColorLink = appearance.getColorStateList(attr);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textSize:
+                    attributes.mTextSize =
+                            appearance.getDimensionPixelSize(attr, attributes.mTextSize);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_typeface:
+                    attributes.mTypefaceIndex = appearance.getInt(attr, attributes.mTypefaceIndex);
+                    if (attributes.mTypefaceIndex != -1 && !attributes.mFontFamilyExplicit) {
+                        attributes.mFontFamily = null;
+                    }
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_fontFamily:
+                    if (!context.isRestricted() && context.canLoadUnsafeResources()) {
+                        try {
+                            attributes.mFontTypeface = appearance.getFont(attr);
+                        } catch (UnsupportedOperationException | Resources.NotFoundException e) {
+                            // Expected if it is not a font resource.
+                        }
+                    }
+                    if (attributes.mFontTypeface == null) {
+                        attributes.mFontFamily = appearance.getString(attr);
+                    }
+                    attributes.mFontFamilyExplicit = true;
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textStyle:
+                    attributes.mStyleIndex = appearance.getInt(attr, attributes.mStyleIndex);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textAllCaps:
+                    attributes.mAllCaps = appearance.getBoolean(attr, attributes.mAllCaps);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_shadowColor:
+                    attributes.mShadowColor = appearance.getInt(attr, attributes.mShadowColor);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_shadowDx:
+                    attributes.mShadowDx = appearance.getFloat(attr, attributes.mShadowDx);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_shadowDy:
+                    attributes.mShadowDy = appearance.getFloat(attr, attributes.mShadowDy);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_shadowRadius:
+                    attributes.mShadowRadius = appearance.getFloat(attr, attributes.mShadowRadius);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_elegantTextHeight:
+                    attributes.mHasElegant = true;
+                    attributes.mElegant = appearance.getBoolean(attr, attributes.mElegant);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_letterSpacing:
+                    attributes.mHasLetterSpacing = true;
+                    attributes.mLetterSpacing =
+                            appearance.getFloat(attr, attributes.mLetterSpacing);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_fontFeatureSettings:
+                    attributes.mFontFeatureSettings = appearance.getString(attr);
+                    break;
+                default:
             }
         }
-        if (fontTypeface == null) {
-            fontFamily = ta.getString(R.styleable.TextAppearance_fontFamily);
-        }
-        final int typefaceIndex = ta.getInt(R.styleable.TextAppearance_typeface, -1);
-        final int styleIndex = ta.getInt(R.styleable.TextAppearance_textStyle, -1);
-        setTypefaceFromAttrs(fontTypeface, fontFamily, typefaceIndex, styleIndex);
+    }
 
-        final int shadowColor = ta.getInt(R.styleable.TextAppearance_shadowColor, 0);
-        if (shadowColor != 0) {
-            final float dx = ta.getFloat(R.styleable.TextAppearance_shadowDx, 0);
-            final float dy = ta.getFloat(R.styleable.TextAppearance_shadowDy, 0);
-            final float r = ta.getFloat(R.styleable.TextAppearance_shadowRadius, 0);
-            setShadowLayer(r, dx, dy, shadowColor);
+    private void applyTextAppearance(TextAppearanceAttributes attributes) {
+        if (attributes.mTextColor != null) {
+            setTextColor(attributes.mTextColor);
         }
 
-        if (ta.getBoolean(R.styleable.TextAppearance_textAllCaps, false)) {
+        if (attributes.mTextColorHint != null) {
+            setHintTextColor(attributes.mTextColorHint);
+        }
+
+        if (attributes.mTextColorLink != null) {
+            setLinkTextColor(attributes.mTextColorLink);
+        }
+
+        if (attributes.mTextColorHighlight != 0) {
+            setHighlightColor(attributes.mTextColorHighlight);
+        }
+
+        if (attributes.mTextSize != 0) {
+            setRawTextSize(attributes.mTextSize, true /* shouldRequestLayout */);
+        }
+
+        if (attributes.mTypefaceIndex != -1 && !attributes.mFontFamilyExplicit) {
+            attributes.mFontFamily = null;
+        }
+        setTypefaceFromAttrs(attributes.mFontTypeface, attributes.mFontFamily,
+                attributes.mTypefaceIndex, attributes.mStyleIndex);
+
+        if (attributes.mShadowColor != 0) {
+            setShadowLayer(attributes.mShadowRadius, attributes.mShadowDx, attributes.mShadowDy,
+                    attributes.mShadowColor);
+        }
+
+        if (attributes.mAllCaps) {
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
         }
 
-        if (ta.hasValue(R.styleable.TextAppearance_elegantTextHeight)) {
-            setElegantTextHeight(ta.getBoolean(
-                    R.styleable.TextAppearance_elegantTextHeight, false));
+        if (attributes.mHasElegant) {
+            setElegantTextHeight(attributes.mElegant);
         }
 
-        if (ta.hasValue(R.styleable.TextAppearance_letterSpacing)) {
-            setLetterSpacing(ta.getFloat(
-                    R.styleable.TextAppearance_letterSpacing, 0));
+        if (attributes.mHasLetterSpacing) {
+            setLetterSpacing(attributes.mLetterSpacing);
         }
 
-        if (ta.hasValue(R.styleable.TextAppearance_fontFeatureSettings)) {
-            setFontFeatureSettings(ta.getString(
-                    R.styleable.TextAppearance_fontFeatureSettings));
+        if (attributes.mFontFeatureSettings != null) {
+            setFontFeatureSettings(attributes.mFontFeatureSettings);
         }
-
-        ta.recycle();
     }
 
     /**
@@ -3744,6 +3727,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param elegant set the paint's elegant metrics flag.
      *
+     * @see Paint#isElegantTextHeight(boolean)
+     *
      * @attr ref android.R.styleable#TextView_elegantTextHeight
      */
     public void setElegantTextHeight(boolean elegant) {
@@ -3755,6 +3740,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Get the value of the TextView's elegant height metrics flag. This setting selects font
+     * variants that have not been compacted to fit Latin-based vertical
+     * metrics, and also increases top and bottom bounds to provide more space.
+     * @return {@code true} if the elegant height metrics flag is set.
+     *
+     * @see #setElegantTextHeight(boolean)
+     * @see Paint#setElegantTextHeight(boolean)
+     */
+    public boolean isElegantTextHeight() {
+        return mTextPaint.isElegantTextHeight();
     }
 
     /**
@@ -4946,20 +4944,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void updateTextColors() {
         boolean inval = false;
-        int color = mTextColor.getColorForState(getDrawableState(), 0);
+        final int[] drawableState = getDrawableState();
+        int color = mTextColor.getColorForState(drawableState, 0);
         if (color != mCurTextColor) {
             mCurTextColor = color;
             inval = true;
         }
         if (mLinkTextColor != null) {
-            color = mLinkTextColor.getColorForState(getDrawableState(), 0);
+            color = mLinkTextColor.getColorForState(drawableState, 0);
             if (color != mTextPaint.linkColor) {
                 mTextPaint.linkColor = color;
                 inval = true;
             }
         }
         if (mHintTextColor != null) {
-            color = mHintTextColor.getColorForState(getDrawableState(), 0);
+            color = mHintTextColor.getColorForState(drawableState, 0);
             if (color != mCurHintTextColor) {
                 mCurHintTextColor = color;
                 if (mText.length() == 0) {
@@ -8117,6 +8116,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int des = -1;
         boolean fromexisting = false;
+        final float widthLimit = (widthMode == MeasureSpec.AT_MOST)
+                ?  (float) widthSize : Float.MAX_VALUE;
 
         if (widthMode == MeasureSpec.EXACTLY) {
             // Parent has told us how big to be. So be it.
@@ -8137,8 +8138,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    des = (int) Math.ceil(Layout.getDesiredWidth(mTransformed, 0,
-                            mTransformed.length(), mTextPaint, mTextDir));
+                    des = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mTransformed, 0,
+                            mTransformed.length(), mTextPaint, mTextDir, widthLimit));
                 }
                 width = des;
             } else {
@@ -8168,8 +8169,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
-                        hintDes = (int) Math.ceil(Layout.getDesiredWidth(mHint, 0, mHint.length(),
-                                mTextPaint, mTextDir));
+                        hintDes = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mHint, 0,
+                                mHint.length(), mTextPaint, mTextDir, widthLimit));
                     }
                     hintWidth = hintDes;
                 } else {
@@ -8346,7 +8347,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean suggestedSizeFitsInSpace(int suggestedSizeInPx, RectF availableSpace) {
-        final CharSequence text = getText();
+        final CharSequence text = mTransformed != null
+                ? mTransformed
+                : getText();
         final int maxLines = getMaxLines();
         if (mTempTextPaint == null) {
             mTempTextPaint = new TextPaint();
@@ -9017,6 +9020,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             setTransformationMethod(null);
         }
+    }
+
+    /**
+     *
+     * Checks whether the transformation method applied to this TextView is set to ALL CAPS. This
+     * settings is internally ignored if this field is editable or selectable.
+     * @return Whether the current transformation method is for ALL CAPS.
+     *
+     * @see #setAllCaps(boolean)
+     * @see #setTransformationMethod(TransformationMethod)
+     */
+    public boolean isAllCaps() {
+        final TransformationMethod method = getTransformationMethod();
+        return method != null && method instanceof AllCapsTransformationMethod;
     }
 
     /**
