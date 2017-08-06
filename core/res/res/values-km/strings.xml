@@ -83,7 +83,8 @@
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"ការជូនដំណឹង​អំពី​ទិន្នន័យ​ទូរសព្ទ​ចល័ត"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"សារ SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"សារ​ជា​សំឡេង"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ការហៅ​ទូរសព្ទ​តាម Wi-Fi"</string>

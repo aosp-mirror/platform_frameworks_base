@@ -83,7 +83,8 @@
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"알림"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"착신전환"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"긴급 콜백 모드"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"모바일 데이터 알림"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS 메시지"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"음성사서함 메시지"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 통화"</string>
@@ -117,7 +118,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fi를 사용하여 전화를 걸고 메시지를 보내려면 먼저 이동통신사에 문의하여 서비스를 설정해야 합니다. 그런 다음 설정에서 Wi-Fi 통화를 사용 설정하시기 바랍니다. (오류 코드: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"이동통신사에 등록하세요(오류 코드: <xliff:g id="CODE">%1$s</xliff:g>)."</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Wi-Fi 통화"</item>
@@ -1173,10 +1176,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI용 USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB 액세서리에 연결됨"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"옵션을 더 보려면 탭하세요."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"아날로그 오디오 액세서리가 감지됨"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"연결된 기기가 이 휴대전화와 호환되지 않습니다. 자세히 알아보려면 탭하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB 디버깅을 사용하지 않으려면 탭하세요."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
