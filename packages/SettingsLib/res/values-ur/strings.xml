@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"خودکار طور پر منسلک نہیں ہو گا"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"انٹرنیٹ تک کوئی رسائی نہیں"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> کی جانب سے محفوظ کردہ"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"‏‎%1$s کے ذریعے از خود منسلک کردہ"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"نیٹ ورک درجہ بندی کے فراہم کنندہ کے ذریعے از خود منسلک"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏منسلک بذریعہ ‎%1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"منسلک، انٹرنیٹ نہیں ہے"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"انٹرنیٹ کنکشن کا اشتراک کرنا"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"پیغام تک رسائی"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"‏SIM رسائی"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"اعلی معیار کی آڈیو استعمال کریں: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"اعلی معیار کی آڈیو استعمال کریں"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"میڈیا آڈیو سے مربوط"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"فون آڈیو سے مربوط"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"فائل منتقلی سرور سے مربوط ہو گیا ہے"</string>
@@ -91,11 +91,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ہٹائی گئی ایپس"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ہٹائی گئی ایپس اور صارفین"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏USB مربوط کرنا"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏USB ٹیتھرنگ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"پورٹیبل ہاٹ اسپاٹ"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"بلوٹوتھ مربوط کرنا"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"مربوط کرنا"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"مربوط کرنا اور پورٹیبل ہاٹ اسپاٹ"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"بلوٹوتھ ٹیتھرنگ"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ٹیتھرنگ"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"ٹیتھرنگ و پورٹیبل ہاٹ اسپاٹ"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"تمام کام کی ایپس"</string>
     <string name="user_guest" msgid="8475274842845401871">"مہمان"</string>
     <string name="unknown" msgid="1592123443519355854">"نامعلوم"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"کافی تیز"</item>
     <item msgid="9085102246155045744">"تیز ترین"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"پروفائل منتخب کریں"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"پروفائل منتخب کریں"</string>
     <string name="category_personal" msgid="1299663247844969448">"ذاتی"</string>
     <string name="category_work" msgid="8699184680584175622">"دفتر"</string>
     <string name="development_settings_title" msgid="215179176067683667">"ڈویلپر کے اختیارات"</string>
@@ -149,7 +149,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"ایپ ڈویلپمنٹ کیلئے اختیارات سیٹ کریں"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"اس صارف کیلئے ڈیولپر کے اختیارات دستیاب نہیں ہیں"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏VPN ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ربط کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ٹیتھرنگ ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"رسائی کی جگہ کے نام کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="enable_adb" msgid="7982306934419797485">"‏USB ڈیبگ کرنا"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"‏USB مربوط ہونے پر ڈيبگ کرنے کی وضع"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"نیٹ ورکنگ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"وائرلیس ڈسپلے سرٹیفیکیشن"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏Wi‑Fi وربوس لاگنگ فعال کریں"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"‏Wi‑Fi سے موبائل کو جارحانہ ہینڈ اوور"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏ہمیشہ Wi‑Fi روم اسکینز کی اجازت دیں"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"مطلق والیوم کو غیر فعال کریں"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ان بینڈ رنگنگ فعال کریں"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏بلوٹوتھ AVRCP ورژن"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏بلوٹوتھ AVRCP ورژن منتخب کریں"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"بلوٹوتھ آڈیو کوڈیک"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"بلوٹوتھ آڈیو کوڈیک منتخب کریں"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"بلوٹوتھ آڈیو کے نمونے کی شرح"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"سلسلہ بندی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"‏فعال کئے جانے پر، جب Wi‑Fi سگنل کمزور ہوگا، تو Wi‑Fi موبائل پر ڈیٹا کنکشن بھیجنے کیلئے مزید جارحانہ کارروائی کرے گا"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"‏انٹرفیس پر موجود ڈیٹا ٹریفک کی مقدار کی بنیاد پر Wi‑Fi روم اسکینز کی اجازت دیں/اجازت نہ دیں"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"لاگر بفر کے سائز"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"فی لاگ بفر لاگر کے سائز منتخب کریں"</string>
@@ -216,6 +212,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏USB پر ایپس کی توثیق کریں"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏نقصان دہ رویے کے مدنظر ADB/ADT کی معرفت انسٹال شدہ ایپس کی جانچ کریں۔"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ریموٹ آلات کے ساتھ والیوم کے مسائل مثلاً نا قابل قبول حد تک بلند والیوم یا کنٹرول نہ ہونے کی صورت میں بلو ٹوتھ مطلق والیوم والی خصوصیت کو غیر فعال کریں۔"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"فون پر موجود رنگ ٹونز کو بلوٹوتھ ہیڈ سیٹز پر چلنے دیں"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏HDCP چیکنگ"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"پس منظر پروسیس کی حد"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"‏سبھی ANRs کو دکھائیں"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"پس منظر کی ایپس کیلئے ایپ جواب نہیں دے رہی ہے ڈائلاگ دکھائیں"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"چینل کی اطلاعی تنبیہات دکھائیں"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"کسی ایپ کی طرف سے درست چینل کے بغیر اطلاع پوسٹ ہونے پر آن اسکرین تنبیہ ڈسپلے کرتا ہے"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"بیرونی پر ایپس کو زبردستی اجازت دیں"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"‏manifest اقدار سے قطع نظر، کسی بھی ایپ کو بیرونی اسٹوریج پر لکھے جانے کا اہل بناتا ہے"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"سرگرمیوں کو ری سائز ایبل بنائیں"</string>
@@ -302,8 +301,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال۔ ٹوگل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"چل رہی سروسز"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"فی الحال چل رہی سروسز دیکھیں اور انہیں کنٹرول کریں"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"‏ملٹی پراسیس WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"‏WebView رینڈررز کو علیحدہ علیحدہ چلائیں"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏WebView کا نفاذ سیٹ کریں"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"یہ انتخاب اب درست نہیں رہا۔ دوبارہ کوشش کریں۔"</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"رنگ کی اصلاح"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"یہ خصوصیت تجرباتی ہے اور اس کی وجہ سے کاکردگی متاثر ہو سکتی ہے۔"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"تقریبا <xliff:g id="TIME">%1$s</xliff:g> باقی ہیں"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"تقریبًا <xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"پوری طرح چارج ہونے میں <xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - تقریباً <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
     <string name="power_charging" msgid="1779532561355864267">"‎<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>‎"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> پوری طرح چارج ہونے تک"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"چارج ہو رہا ہے"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"‏AC پر چارج ہو رہی ہے"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"چارجنگ ہو رہی ہے"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"‏‫USB پر چارج ہورہی ہے"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"چارجنگ ہو رہی ہے"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"وائرلیس چارجنگ"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"چارجنگ ہو رہی ہے"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"چارج ہو رہا ہے"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"مکمل"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"کنٹرول کردہ بذریعہ منتظم"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"منتظم نے فعال کر دیا"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"منتظم نے غیر فعال کر دیا"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"منتظم کی طرف سے فعال کردہ"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"منتظم کی طرف سے غیر فعال کردہ"</string>
+    <string name="disabled" msgid="9206776641295849915">"غیر فعال"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"اجازت ہے"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"اجازت نہیں ہے"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"نامعلوم ایپس انسٹال کریں"</string>
     <string name="home" msgid="3256884684164448244">"ترتیبات ہوم"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"پاس ورڈ درکار ہے"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"فعال اندراج کے طریقے"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"سسٹم زبانیں استعمال کریں"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> کیلئے ترتیبات کھولنے میں ناکام ہوگیا"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"اندراج کا یہ طریقہ آپ کے ٹائپ کردہ سبھی متن کو جمع کر سکتا ہے، بشمول ذاتی ڈیٹا جیسے پاس ورڈز اور کریڈٹ کارڈ نمبرز۔ یہ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ایپ سے آتا ہے۔ اندراج کا یہ طریقہ استعمال کریں؟"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"نوٹ: ریبوٹ کرنے کے بعد یہ ایپ تب تک شروع نہیں ہو سکتی جب تک آپ اپنا فون غیر مقفل نہ کر لیں"</string>
 </resources>

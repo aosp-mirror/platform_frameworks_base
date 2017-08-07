@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Автоматаар холбогдохгүй"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Интернэт холболт алга"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> хадгалсан"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s-р автоматаар холбогдсон"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Сүлжээний үнэлгээ үзүүлэгчээр автоматаар холбогдох"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s-р холбогдсон"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s-р боломжтой"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Холбогдсон, интернэт байхгүй байна"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Интернэт холболтыг хуваалцах"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Зурвас хандалт"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM Хандалт"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Өндөр чанарын аудио ашиглах: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Өндөр чанарын аудио ашиглах"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Медиа аудиод холбогдсон"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Утасны аудид холбогдсон"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Файл дамжуулах серверт холбогдсон"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"Маш түргэн"</item>
     <item msgid="9085102246155045744">"Хамгийн хурдан"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Профайлаа сонгоно уу"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Профайл сонгох"</string>
     <string name="category_personal" msgid="1299663247844969448">"Хувийн"</string>
     <string name="category_work" msgid="8699184680584175622">"Ажил"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Хөгжүүлэгчийн тохиргоо"</string>
@@ -165,21 +165,18 @@
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM түгжээ тайлагчийг зөвшөөрөх үү?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"АНХААР: Энэ тохиргоо асаалттай байгаа үед тухайн төхөөрөмжийн хамгаалалтын функцүүд ажиллахгүй."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"Хуурамч байршлын апп сонгох"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Хуурамч байршлын апп-ыг тохируулаагүй байна"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Хуурамч байршлын аппыг тохируулаагүй байна"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Хуурамч байршлын апп: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Сүлжээ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Утасгүй дэлгэцийн сертификат"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose лог-г идэвхжүүлэх"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Идэвхтэй Wi‑Fi-с мобайл сүлжээнд"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi Роум сканыг байнга зөвшөөрөх"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобайл дата байнга идэвхтэй"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Үнэмлэхүй дууны түвшинг идэвхгүй болгох"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Сүлжээний хонхны аяыг идэвхжүүлэх"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP хувилбар"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP хувилбарыг сонгох"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудио кодлогч"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth аудио кодлогч сонгох"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth аудио жишээний үнэлгээ"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Дамжуулж байна: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Идэвхжүүлсэн үед Wi‑Fi холболт сул байх үед дата холболтыг мобайлд шилжүүлэхэд илүү идэвхтэй байх болно"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Интерфэйс дээрх дата трафикын хэмжээнээс хамааран Wi‑Fi Роум Скан-г зөвшөөрөх/үл зөвшөөрөх"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Логгерын буферын хэмжээ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Лог буфер бүрт ногдох логгерын хэмжээг сонгоно уу"</string>
@@ -209,25 +205,26 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Харах тохируулгын шалгалтыг идэвхжүүлэх"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi идэвхтэй байхад ч гэсэн гар утасны датаг идэвхтэй байлгадаг (сүлжээг түргэн солихын тулд)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB дебаг хийхийг зөвшөөрөх үү?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликешн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликейшн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Хөгжлийн тохиргоог зөвшөөрөх үү?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликешнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликейшнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Апп-г USB-р тулгах"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT-р суулгасан апп-уудыг хорлонтой авиртай эсэхийг шалгах."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Хэт чанга дуугаралт эсвэл муу тохиргоо зэрэг алсын зайн төхөөрөмжийн дуугаралттай холбоотой асуудлын үед Bluetooth-ийн үнэмлэхүй дууны түвшинг идэвхгүй болго."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Утасны хонхны аяыг Bluetooth чихэвчээр тоглуулахыг зөвшөөрөх"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локал терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Локал суурьт хандалт хийх боломж олгодог терминалын апп-г идэвхжүүлэх"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP шалгах"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP шалгах авирыг тохируулах"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Согог хайх"</string>
     <string name="debug_app" msgid="8349591734751384446">"Согог засах апп сонгоно уу"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Дебаг аппликешн тохируулаагүй"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"Согог засах аппликешн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="5156029161289091703">"Аппликешн сонгох"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Дебаг аппликейшн тохируулаагүй"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Согог засах аппликейшн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Аппликейшн сонгох"</string>
     <string name="no_application" msgid="2813387563129153880">"Юуг ч биш"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Согог засагчийг хүлээх"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Согог засагдсан аппликешн ажиллахын өмнө согог засагчийг хавсаргагдахыг хүлээнэ"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Согог засагдсан аппликейшн ажиллахын өмнө согог засагчийг хавсаргагдахыг хүлээнэ"</string>
     <string name="telephony_monitor_switch" msgid="1764958220062121194">"Утасны хяналт"</string>
     <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Утасны хяналт нь утас/модемын ажиллагаанд асуудал илрүүлсэн тохиолдолд лог цуглуулж, хэрэглэгчид алдааг засах мэдэгдэл илгээнэ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Оруулах"</string>
@@ -236,7 +233,7 @@
     <string name="media_category" msgid="4388305075496848353">"Медиа"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Мониторинг"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Хатуу горимыг идэвхжүүлсэн"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Апп-ууд үндсэн хэлхээс дээр удаан хугацаанд үйлдлүүд хийх үед дэлгэцийг анивчуулах"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Аппууд үндсэн хэлхээс дээр удаан хугацаанд үйлдлүүд хийх үед дэлгэцийг анивчуулах"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Чиглүүлэгчийн байршил"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Дэлгэцийн давхаргаар одоогийн хүрэлтийн өгөгдлийг харуулж байна"</string>
     <string name="show_touches" msgid="2642976305235070316">"Товшилтыг харуулах"</string>
@@ -275,7 +272,9 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Далд процессын хязгаар"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Бүх ANRs харуулах"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Далд апп-уудад Апп Хариу Өгөхгүй байна гэснийг харуулах"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Апп-ыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Мэдэгдлийн сувгийн анхааруулгыг харуулах"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Апп хүчинтэй суваггүйгээр мэдэгдэл гаргах үед дэлгэцэд сануулга харуулна"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Аппыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааны хэмжээг олон цонхонд өөрчилж болохуйц болгоно уу."</string>
@@ -302,8 +301,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Идэвхтэй байна. Унтраах/асаахын тулд дарна уу."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Олон боловсруулалттай WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView хөрвүүлэгчийг тусад нь ажиллуулах"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView хэрэгжилт"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView хэрэгжилтийг тохируулах"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Энэ сонголт хүчингүй байна. Дахин оролдоно уу."</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Өнгө тохируулах"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Энэ функц туршилтынх бөгөөд ажиллагаанд нөлөөлж болзошгүй."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Давхарласан <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Бүрэн цэнэглэх хүртэл <xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g>-с <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"бүрэн цэнэглэх хүртэл <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Тодорхойгүй"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Цэнэглэж байна"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC-р цэнэглэж байна"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Цэнэглэж байна"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB-р цэнэглэж байна"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Цэнэглэж байна"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Кабльгүйгээр цэнэглэж байна"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Цэнэглэж байна"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"цэнэглэж байна"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Цэнэглэхгүй байна"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Цэнэглэхгүй байна"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Дүүрэн"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Админ удирдсан"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Админ идэвхтэй болгосон"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Админ идэвхгүй болгосон"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Админ идэвхжүүлсэн"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Админ цуцалсан"</string>
+    <string name="disabled" msgid="9206776641295849915">"Идэвхгүйжүүлсэн"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Зөвшөөрсөн"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Зөвшөөрөөгүй"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Тодорхойгүй апп суулгах"</string>
     <string name="home" msgid="3256884684164448244">"Тохиргооны нүүр хуудас"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Нууц үг шаардлагатай"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Оруулах аргуудыг идэвхжүүлэх"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Системийн хэлүүдийг ашиглах"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>-н тохиргоог нээж чадсангүй"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Энэ оруулах арга нь таны нууц үгс, зээлийн картын дугаар гэх мэт бичсэн хувийн мэдээллийг цуглуулах боломжтой байж болно. Үүнийг <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> апп нийлүүлдэг. Энэ оруулах аргыг ашиглах уу?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Санамж: Дахин асаасны дараа энэ апп нь таныг утасны түгжээгээ тайлах хүртэл эхлэх боломжгүй"</string>
 </resources>

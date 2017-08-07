@@ -58,12 +58,16 @@
     <item msgid="3878793616631049349">"Utilizar comprobación de HDCP solo para contenido DRM"</item>
     <item msgid="45075631231212732">"Utilizar siempre comprobación de HDCP"</item>
   </string-array>
-    <!-- no translation found for bluetooth_avrcp_versions:0 (5347678900838034763) -->
-    <!-- no translation found for bluetooth_avrcp_versions:1 (2089555299377409443) -->
-    <!-- no translation found for bluetooth_avrcp_versions:2 (2895327394279434278) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:0 (2838624067805073303) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:1 (1913619118958233129) -->
-    <!-- no translation found for bluetooth_avrcp_version_values:2 (7142710449249088270) -->
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (Predeterminada)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Usar preferencia del sistema (predeter.)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
@@ -71,6 +75,8 @@
     <item msgid="8910200421843557332">"aptX"</item>
     <item msgid="8434403964359457768">"aptX HD"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Habilitar códecs opcionales"</item>
+    <item msgid="3304843301758635896">"Inhabilitar códecs opcionales"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"Usar preferencia del sistema (predeter.)"</item>
@@ -79,6 +85,8 @@
     <item msgid="2279916056363477395">"aptX"</item>
     <item msgid="6641171061200063516">"aptX HD"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Habilitar códecs opcionales"</item>
+    <item msgid="741805482892725657">"Inhabilitar códecs opcionales"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Usar preferencia del sistema (predeter.)"</item>
@@ -120,14 +128,16 @@
     <item msgid="7158319962230727476">"Optimizado para la calidad del audio (990 kbps/909 kbps)"</item>
     <item msgid="2921767058740704969">"Equilibrar la calidad del audio y de la conexión (660/606&amp;nbsp;kbps)"</item>
     <item msgid="8860982705384396512">"Optimizado para la calidad de la conexión (330 kbps/303 kbps)"</item>
+    <item msgid="4414060457677684127">"Mejor esfuerzo (tasa de bits flexible)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Se ha optimizado para la calidad del audio"</item>
     <item msgid="4327143584633311908">"Equilibrar la calidad del audio y la de la conexión"</item>
     <item msgid="4681409244565426925">"Se ha optimizado para la calidad de la conexión"</item>
+    <item msgid="364670732877872677">"Mejor esfuerzo (tasa de bits flexible)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"No"</item>
+    <item msgid="8665206199209698501">"Desactivado"</item>
     <item msgid="1593289376502312923">"64 K"</item>
     <item msgid="487545340236145324">"256 K"</item>
     <item msgid="2423528675294333831">"1 M"</item>
@@ -135,13 +145,13 @@
     <item msgid="2803199102589126938">"16 M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"No"</item>
+    <item msgid="6089470720451068364">"Desactivado"</item>
     <item msgid="4622460333038586791">"64 K"</item>
     <item msgid="2212125625169582330">"256 K"</item>
     <item msgid="1704946766699242653">"1 M"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"No"</item>
+    <item msgid="6921048829791179331">"Desactivado"</item>
     <item msgid="2969458029344750262">"64 K/búfer registro"</item>
     <item msgid="1342285115665698168">"256 K/búfer registro"</item>
     <item msgid="1314234299552254621">"1 M/búfer registro"</item>
@@ -149,13 +159,13 @@
     <item msgid="5431354956856655120">"16 M/búfer registro"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="1744840221860799971">"No"</item>
+    <item msgid="1744840221860799971">"Desactivado"</item>
     <item msgid="3054662377365844197">"Todo"</item>
     <item msgid="688870735111627832">"Todo menos señal móvil"</item>
     <item msgid="2850427388488887328">"solo kernel"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"No"</item>
+    <item msgid="2216470072500521830">"Desactivado"</item>
     <item msgid="172978079776521897">"Todos los búferes de registro"</item>
     <item msgid="3873873912383879240">"Todo excepto búferes de registro de señal móvil"</item>
     <item msgid="8489661142527693381">"solo búfer de registro del kernel"</item>
@@ -208,17 +218,17 @@
     <item msgid="1340692776955662664">"Pila de llamadas en glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"No"</item>
+    <item msgid="993742912147090253">"Desactivado"</item>
     <item msgid="675719912558941285">"Dibujar región de recorte no rectangular en azul"</item>
     <item msgid="1064373276095698656">"Resaltar comandos de dibujo probados en verde"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"No"</item>
+    <item msgid="2193584639058893150">"Desactivado"</item>
     <item msgid="2751513398307949636">"En pantalla como barras"</item>
     <item msgid="2355151170975410323">"En <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"No"</item>
+    <item msgid="8190572633763871652">"Desactivado"</item>
     <item msgid="7688197031296835369">"Mostrar áreas sobredibujadas"</item>
     <item msgid="2290859360633824369">"Mostrar áreas para deuteranomalía"</item>
   </string-array>

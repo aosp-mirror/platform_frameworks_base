@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Nuk do të lidhet automatikisht"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Nuk ka qsaje në internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"E ruajtur nga <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Lidhur automatikisht përmes %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Lidhur automatikisht nëpërmjet ofruesit të vlerësimit të rrjetit"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"E lidhur përmes %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"E mundshme përmes %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"U lidh, nuk ka internet"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ndarja e lidhjes së internetit"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Qasja në mesazhe"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Qasje në kartën SIM"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Përdor audion me cilësi të lartë: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Përdor audion me cilësi të lartë"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"U lidh me audion e medias"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"U lidh me audion e telefonit"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"U lidh me serverin e transferimit të skedarëve"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"Shumë e shpejtë"</item>
     <item msgid="9085102246155045744">"Më e shpejta"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Zgjidh profilin"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Zgjidh profilin"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personale"</string>
     <string name="category_work" msgid="8699184680584175622">"Punë"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Opsionet e zhvilluesit"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Dorëzimi agresiv i Wi‑Fi te rrjeti celular"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Lejo gjithmonë skanimet për Wi-Fi edhe kur je në lëvizje"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Çaktivizo volumin absolut"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Aktivizo zilen brenda të njëjtit brez"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versioni AVRCP i Bluetooth-it"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Zgjidh versionin AVRCP të Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeku Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Zgjidh kodekun e audios së Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Shpejtësia e shembullit të Bluetooth Audio"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmetimi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kur ky funksion aktivizohet, Wi‑Fi bëhet më agresiv në kalimin e lidhjes së të dhënave te rrjeti celular, në rastet kur sinjali Wi‑Fi është i dobët"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Lejo/Ndalo skanimet për Wi‑Fi në roaming, bazuar në sasinë e trafikut të të dhënave të pranishme në ndërfaqe"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Përzgjidh madhësitë e regjistruesit"</string>
@@ -216,6 +212,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiko apl. përmes USB-së"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollo aplikacionet e instaluara nëpërmjet ADB/ADT për sjellje të dëmshme."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Çaktivizon funksionin e volumit absolut të Bluetooth në rast të problemeve të volumit me pajisjet në largësi, si p.sh. një volum i lartë i papranueshëm ose mungesa e kontrollit."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Lejo që zilet në telefon të luhen në kufjet me \"Bluetooth\""</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminali lokal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivizo aplikacionin terminal që ofron qasje në guaskën lokale"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrolli HDCP"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Kufizimi i proceseve në sfond"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Shfaq raportet ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Shfaq raportet ANR (Aplikacioni nuk përgjigjet) për aplikacionet në sfond"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Shfaq paralajmërimet e kanalit të njoftimeve"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Shfaq paralajmërimin në ekran kur një aplikacion poston një njoftim pa një kanal të vlefshëm"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Detyro lejimin në hapësirën e jashtme"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>
@@ -302,8 +301,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trokit për ta ndryshuar."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Shërbimet në ekzekutim"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView me shumë procese"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Ekzekuto më vete interpretuesit e WebView"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Zbatimi i WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Cakto zbatimin e WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Kjo zgjedhje nuk është më e vlefshme. Provo përsëri."</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ky funksion është eksperimental dhe mund të ndikojë në veprimtari."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Mbivendosur nga <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Afërsisht <xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Rreth <xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura deri në ngarkimin e plotë"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - rreth <xliff:g id="TIME">%2$s</xliff:g> të mbetura"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> të mbetura"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Po ngarkohet"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Po ngarkohet në AC"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Po ngarkohet"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Po ngarkohet me USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Po ngarkohet"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Po ngarkohet me valë"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Po ngarkohet"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"po ngarkohet"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nuk po ngarkohet"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nuk po ngarkohet"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolluar nga administratori"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Aktivizuar nga administratori"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Çaktivizuar nga administratori"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Aktivizuar nga administratori"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Çaktivizuar nga administratori"</string>
+    <string name="disabled" msgid="9206776641295849915">"Çaktivizuar"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Lejohet"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Nuk lejohet"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Instalo aplikacione të panjohura"</string>
     <string name="home" msgid="3256884684164448244">"Kreu i cilësimeve"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Kërkohet fjalëkalimi"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Metodat aktive të hyrjeve"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Përdor gjuhët e sistemit"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Dështoi në hapjen e cilësimeve për <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Kjo metodë hyrjeje mund të mbledhë të gjithë tekstin që shkruan, përfshirë të dhënat personale si fjalëkalimet dhe numrat e kartave të kreditit. Kjo vjen nga aplikacioni <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Të përdoret kjo metodë hyrjeje?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Shënim: Pas një rinisjeje, ky aplikacion nuk mund të niset derisa të shkyçësh telefonin"</string>
 </resources>

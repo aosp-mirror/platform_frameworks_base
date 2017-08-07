@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Не під’єднуватиметься автоматично"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Немає доступу до Інтернету"</string>
     <string name="saved_network" msgid="4352716707126620811">"Збережено додатком <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Автоматично під’єднано через %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Автоматично під’єднано через постачальника оцінки якості мережі"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Під’єднано через %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступ через %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Під’єднано, але немає доступу до Інтернету"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Надання доступу до Інтернету"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Доступ до повідомлень"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Доступ до SIM-карти"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Використовувати аудіо високої якості: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Використовувати аудіо високої якості"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Підключено до аудіоджерела"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Підключено до звуку телеф."</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Підключ. до сервера передачі файлів"</string>
@@ -91,11 +91,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"ОС Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Видалені програми"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Видалені програми та користувачі"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Прив\'язка USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB-модем"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Порт. точка дост."</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Прив\'язка Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Прив\'язка"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Режим модема"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Точка доступу й модем"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Усі робочі додатки"</string>
     <string name="user_guest" msgid="8475274842845401871">"Гість"</string>
     <string name="unknown" msgid="1592123443519355854">"Невідомо"</string>
@@ -103,10 +103,10 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Налаштовано деякі значення за умовчанням"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Немає значень за умовчанням"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Налашт. синтезу мовлення"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Вивід синтезу мовлення з тексту"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Синтез мовлення"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Темп мовлення"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Швидкість відтворення тексту"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Вис. зв."</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Тон"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Впливає на тон синтезованого мовлення"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Мова"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Використовувати мову системи"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"Украй швидко"</item>
     <item msgid="9085102246155045744">"Найшвидше"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Вибрати профіль"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Вибрати профіль"</string>
     <string name="category_personal" msgid="1299663247844969448">"Особисте"</string>
     <string name="category_work" msgid="8699184680584175622">"Робота"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Параметри розробника"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Мережі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертифікація бездрот. екрана"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Докладний запис у журнал Wi-Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Перемикатися з Wi-Fi на мобільну мережу"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Завжди шукати мережі Wi-Fi"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Не вимикати мобільне передавання даних"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Вимкнути абсолютну гучність"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Увімкнути внутрішньосмугові сигнали"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Виберіть версію Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодек для аудіо Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Вибрати кодек для аудіо Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частота вибірки для аудіо Bluetooth"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляція: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Примусово перемикатися на мобільну мережу, коли сигнал Wi-Fi слабкий"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дозволити чи заборонити Wi-Fi шукати роумінг на основі обсягу трафіку даних в інтерфейсі"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Розміри буфера журналу"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Виберіть розміри буфера журналу"</string>
@@ -216,6 +212,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Встановлення через USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Перевіряти безпеку додатків, установлених через ADB/ADT."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Функція абсолютної гучності Bluetooth вимикається, якщо на віддалених пристроях виникають проблеми, як-от надто висока гучність або втрата контролю."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Дозволити відтворювати сигнали дзвінка на телефоні через гарнітуру Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальний термінал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Увімк. програму-термінал, що надає локальний доступ до оболонки"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Перевірка HDCP"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Обмеження фон. процесів"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Показувати всі ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Сповіщати, коли додаток не відповідає"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Показувати застереження про канал"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"З’являється застереження, коли додаток надсилає сповіщення через недійсний канал"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Примусово записувати додатки в зовнішню пам’ять"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Можна записувати додатки в зовнішню пам’ять, незалежно від значень у маніфесті"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Примусово масштабувати активність"</string>
@@ -302,12 +301,10 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активний додаток. Торкніться, щоб дезактивувати."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені служби"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Перегляд і керування запущеними службами"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Багатопроцесний WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Запустити засоби обробки відео WebView окремим процесом"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Налаштувати застосування WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ця опція більше не дійсна. Повторіть спробу."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Конвертувати в зашифрований файл"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Перехід до шифрування файлів"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертація…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Уже конвертовано в зашифрований файл"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Конвертація в зашифрований файл"</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекція кольору"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Це експериментальна функція. Вона може вплинути на продуктивність."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Замінено на <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Залишилося приблизно <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Залишилося близько <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"До повного зарядження залишилося <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Залишилося <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – ще <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – залишилося <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до повного заряду"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Невідомо"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарядж-ся"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Заряджання з розетки"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Заряджається"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Заряджання через USB"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Заряджається"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Заряджання без дроту"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Заряджається"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Заряджається"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"заряджається"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не заряджається"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не заряджається"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Акумулятор заряджено"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Керується адміністратором"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Увімкнено адміністратором"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Вимкнено адміністратором"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Увімкнено адміністратором"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Вимкнено адміністратором"</string>
+    <string name="disabled" msgid="9206776641295849915">"Вимкнено"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Дозволено"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Заборонено"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Установлювати невідомі додатки"</string>
     <string name="home" msgid="3256884684164448244">"Головний екран налаштувань"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Потрібен пароль"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Активні методи введення"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Використовувати мови системи"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Не вдалося відкрити налаштування для програми <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Під час використання цього методу введення може записуватись весь текст, який ви вводите, зокрема паролі й номери кредитних карток. Цей метод запитує програма <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Використати цей метод введення?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Примітка: щоб запустити цей додаток після перезавантаження, спершу потрібно буде розблокувати телефон"</string>
 </resources>

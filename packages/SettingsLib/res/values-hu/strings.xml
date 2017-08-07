@@ -32,10 +32,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Nem csatlakozik automatikusan"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Nincs internet-hozzáférés"</string>
     <string name="saved_network" msgid="4352716707126620811">"Mentette: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_via_network_scorer (5713793306870815341) -->
-    <skip />
-    <!-- no translation found for connected_via_network_scorer_default (8430960324014668989) -->
-    <skip />
+    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatikusan csatlakozott a következőn keresztül: %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatikusan csatlakozott a hálózatértékelés szolgáltatóján keresztül"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Csatlakozva a következőn keresztül: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Elérhető a következőn keresztül: %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Csatlakozva, nincs internetelérés"</string>
@@ -58,6 +56,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Internetkapcsolat megosztása"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Üzenet-hozzáférés"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-elérés"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Jó audiominőség használata: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Jó audiominőség használata"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Csatlakoztatva az eszköz hangjához"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Csatlakoztatva a telefon hangjához"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Csatlakozva a fájlküldő szerverhez"</string>
@@ -141,7 +141,7 @@
     <item msgid="5194774745031751806">"Rendkívül gyors"</item>
     <item msgid="9085102246155045744">"Leggyorsabb"</item>
   </string-array>
-    <string name="choose_profile" msgid="8229363046053568878">"Profil kiválasztása"</string>
+    <string name="choose_profile" msgid="6921016979430278661">"Profil kiválasztása"</string>
     <string name="category_personal" msgid="1299663247844969448">"Személyes"</string>
     <string name="category_work" msgid="8699184680584175622">"Munkahelyi"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Fejlesztői beállítások"</string>
@@ -170,16 +170,13 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Hálózatok"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Vezeték nélküli kijelző tanúsítványa"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Részletes Wi-Fi-naplózás engedélyezése"</string>
-    <!-- no translation found for wifi_aggressive_handover (5309131983693661320) -->
-    <skip />
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresszív Wi‑Fi–mobilhálózat átadás"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi-roaming ellenőrzésének engedélyezése mindig"</string>
-    <!-- no translation found for mobile_data_always_on (8774857027458200434) -->
-    <skip />
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"A mobilhálózati kapcsolat mindig aktív"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Abszolút hangerő funkció letiltása"</string>
-    <!-- no translation found for bluetooth_select_avrcp_version_string (3750059931120293633) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_avrcp_version_dialog_title (7277329668298705702) -->
-    <skip />
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Sávon belüli csörgetés engedélyezése"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"A Bluetooth AVRCP-verziója"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"A Bluetooth AVRCP-verziójának kiválasztása"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth hang – Kodek"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth hangkodek kiválasztása"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth hang – mintavételezési gyakoriság"</string>
@@ -193,8 +190,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamelés: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
-    <!-- no translation found for wifi_aggressive_handover_summary (7266329646559808827) -->
-    <skip />
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Ha engedélyezi, a Wi-Fi agresszívebben fogja átadni az adatkapcsolatot a mobilhálózatnak gyenge Wi-Fi-jel esetén"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"A Wi-Fi-roaming ellenőrzésének engedélyezése vagy letiltása az interfészen jelen lévő adatforgalom mennyiségétől függően"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Naplózási puffer mérete"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Naplózási pufferméret kiválasztása"</string>
@@ -216,6 +212,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB-n keresztül telepített alkalmazások ellenőrzése"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Az ADB/ADT útján telepített alkalmazások ellenőrzése kártékony viselkedésre."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Letiltja a Bluetooth abszolút hangerő funkcióját a távoli eszközökkel kapcsolatos hangerőproblémák – például elfogadhatatlanul magas vagy nem vezérelhető hangerő – esetén."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"A telefonon lévő csengőhangok Bluetooth-headseteken való lejátszásának engedélyezése"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Helyi végpont"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Végalkalmazás engedélyezése a helyi rendszerhéj eléréséhez"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ellenőrzés"</string>
@@ -275,6 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Háttérfolyamat-korlátozás"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Összes ANR mutatása"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Az Alkalmazás nem válaszol ablak megjelenítése"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Értesítő csatorna figyelmeztetései"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Figyelmeztet, ha egy alkalmazás érvényes csatorna nélkül küld értesítést"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Külső tárhely alkalmazásainak engedélyezése"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Lehetővé teszi bármely alkalmazás külső tárhelyre való írását a jegyzékértékektől függetlenül"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tevékenységek átméretezésének kényszerítése"</string>
@@ -302,8 +301,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Bekapcsolva. Koppintson ide a váltáshoz."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Futó szolgáltatások"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"A jelenleg futó szolgáltatások megtekintése és vezérlése"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Többfolyamatos WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView-megjelenítők futtatása külön"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-megvalósítás"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView-megvalósítás beállítása"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ez a választás már nem érvényes. Próbálkozzon újra."</string>
@@ -323,38 +320,27 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Színkorrekció"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ez egy kísérleti funkció, és hatással lehet a teljesítményre."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Felülírva erre: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Kb. <xliff:g id="TIME">%1$s</xliff:g> van hátra"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Körülbelül <xliff:g id="TIME">%1$s</xliff:g> maradt hátra"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> a teljes töltöttségig"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> van hátra"</string>
-    <!-- no translation found for power_discharging_duration (2843747179907396142) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - körülbelül <xliff:g id="TIME">%2$s</xliff:g> van hátra"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> van hátra"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration (4676999980973411875) -->
-    <skip />
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> a teljes feltöltésig"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_ac (7341243578143555689) -->
-    <skip />
-    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_usb (3720632890882121805) -->
-    <skip />
-    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_duration_wireless (5768338238751562058) -->
-    <skip />
-    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Töltés"</string>
-    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Hálózati töltés"</string>
-    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Töltés"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB-s töltés"</string>
-    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Töltés"</string>
-    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Nem vezetékes töltés"</string>
-    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Töltés"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"töltés"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nem tölt"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nem töltődik"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Feltöltve"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Rendszergazda által irányítva"</string>
-    <string name="enabled_by_admin" msgid="2386503803463071894">"Engedélyezve a rendszergazda által"</string>
-    <string name="disabled_by_admin" msgid="3669999613095206948">"Letiltva a rendszergazda által"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"A rendszergazda bekapcsolta"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"A rendszergazda kikapcsolta"</string>
+    <string name="disabled" msgid="9206776641295849915">"Letiltva"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Engedélyezett"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Nem engedélyezett"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Ismeretlen alkalmazások telepítése"</string>
     <string name="home" msgid="3256884684164448244">"Beállítások kezdőlapja"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -377,4 +363,7 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Jelszó szükséges"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Aktív beviteli módok"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Rendszernyelvek használata"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nem sikerült megnyitni a(z) <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> beállításait."</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Ez a beviteli módszer alkalmas lehet a beírt szövegek – köztük az olyan személyes adatok, mint a jelszavak és a hitelkártyaszámok - összegyűjtésére. A <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> alkalmazás kapcsolta be. Használja ezt a módszert?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Megjegyzés: Újraindítás után ez az alkalmazás csak a telefon feloldását követően indul el"</string>
 </resources>
