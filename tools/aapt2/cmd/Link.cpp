@@ -574,6 +574,11 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
         if (file_op.xml_to_flatten) {
           std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
               LinkAndVersionXmlFile(table, &file_op);
+          if (versioned_docs.empty()) {
+            error = true;
+            continue;
+          }
+
           for (std::unique_ptr<xml::XmlResource>& doc : versioned_docs) {
             std::string dst_path = file_op.dst_path;
             if (doc->file.config != file_op.config) {
