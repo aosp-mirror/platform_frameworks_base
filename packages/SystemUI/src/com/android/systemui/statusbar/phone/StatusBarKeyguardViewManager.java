@@ -102,6 +102,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
     private boolean mDeferScrimFadeOut;
 
+    // Dismiss action to be launched when we stop dozing or the keyguard is gone.
+    private PendingDismissActionRequest mPendingDismissAction;
+
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
@@ -162,11 +165,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else {
             mStatusBar.showKeyguard();
             if (hideBouncerWhenShowing) {
-                mBouncer.hide(false /* destroyView */);
+                hideBouncer(false /* destroyView */);
                 mBouncer.prepare();
             }
         }
         updateStates();
+    }
+
+    private void hideBouncer(boolean destroyView) {
+        mBouncer.hide(destroyView);
+        cancelPendingDismissAction();
     }
 
     private void showBouncer() {
@@ -179,6 +187,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone) {
         if (mShowing) {
+            cancelPendingDismissAction();
+            // If we're dozing, this needs to be delayed until after we wake up - unless we're
+            // wake-and-unlocking, because there dozing will last until the end of the transition.
+            if (mDozing && !isWakeAndUnlocking()) {
+                mPendingDismissAction = new PendingDismissActionRequest(
+                        r, cancelAction, afterKeyguardGone);
+                return;
+            }
+
             if (!afterKeyguardGone) {
                 mBouncer.showWithDismissAction(r, cancelAction);
             } else {
@@ -187,6 +204,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
         updateStates();
+    }
+
+    private boolean isWakeAndUnlocking() {
+        int mode = mFingerprintUnlockController.getMode();
+        return mode == MODE_WAKE_AND_UNLOCK || mode == MODE_WAKE_AND_UNLOCK_PULSING;
     }
 
     /**
@@ -204,7 +226,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mOccluded && !mDozing) {
                 mStatusBar.hideKeyguard();
                 mStatusBar.stopWaitingForKeyguardExit();
-                mBouncer.hide(false /* destroyView */);
+                hideBouncer(false /* destroyView */);
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing);
             }
@@ -254,6 +276,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 reset(dozing /* hideBouncerWhenShowing */);
             }
             updateStates();
+
+            if (!dozing) {
+                launchPendingDismissAction();
+            }
         }
     }
 
@@ -329,6 +355,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
+        launchPendingDismissAction();
 
         if (KeyguardUpdateMonitor.getInstance(mContext).needsSlowUnlockTransition()) {
             fadeoutDuration = KEYGUARD_DISMISS_DURATION_LOCKED;
@@ -342,7 +369,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 public void run() {
                     mStatusBarWindowManager.setKeyguardShowing(false);
                     mStatusBarWindowManager.setKeyguardFadingAway(true);
-                    mBouncer.hide(true /* destroyView */);
+                    hideBouncer(true /* destroyView */);
                     updateStates();
                     mScrimController.animateKeyguardFadingOut(
                             StatusBar.FADE_KEYGUARD_START_DELAY,
@@ -368,7 +395,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
             mStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
             mFingerprintUnlockController.startKeyguardFadingAway();
-            mBouncer.hide(true /* destroyView */);
+            hideBouncer(true /* destroyView */);
             if (wakeUnlockPulsing) {
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
                 mStatusBar.fadeKeyguardWhilePulsing();
@@ -411,11 +438,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void onDensityOrFontScaleChanged() {
-        mBouncer.hide(true /* destroyView */);
+        hideBouncer(true /* destroyView */);
     }
 
     public void onOverlayChanged() {
-        mBouncer.hide(true /* destroyView */);
+        hideBouncer(true /* destroyView */);
         mBouncer.prepare();
     }
 
@@ -654,5 +681,39 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public ViewRootImpl getViewRootImpl() {
         return mStatusBar.getStatusBarView().getViewRootImpl();
+    }
+
+    public void launchPendingDismissAction() {
+        PendingDismissActionRequest request = mPendingDismissAction;
+        mPendingDismissAction = null;
+        if (request != null) {
+            if (mShowing) {
+                dismissWithAction(request.dismissAction, request.cancelAction,
+                        request.afterKeyguardGone);
+            } else if (request.dismissAction != null) {
+                request.dismissAction.onDismiss();
+            }
+        }
+    }
+
+    public void cancelPendingDismissAction() {
+        PendingDismissActionRequest request = mPendingDismissAction;
+        mPendingDismissAction = null;
+        if (request != null && request.cancelAction != null) {
+            request.cancelAction.run();
+        }
+    }
+
+    private static class PendingDismissActionRequest {
+        final OnDismissAction dismissAction;
+        final Runnable cancelAction;
+        final boolean afterKeyguardGone;
+
+        PendingDismissActionRequest(OnDismissAction dismissAction, Runnable cancelAction,
+                boolean afterKeyguardGone) {
+            this.dismissAction = dismissAction;
+            this.cancelAction = cancelAction;
+            this.afterKeyguardGone = afterKeyguardGone;
+        }
     }
 }
