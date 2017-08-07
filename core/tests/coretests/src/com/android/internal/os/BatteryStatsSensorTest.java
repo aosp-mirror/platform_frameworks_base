@@ -488,7 +488,7 @@ public class BatteryStatsSensorTest extends TestCase {
         bi.noteStartSensorLocked(UID, SENSOR_ID);
 
         clocks.realtime += 111;
-        clocks.uptime += 1111;
+        clocks.uptime += 111;
 
         // Timebase and timer was on so times have increased.
         assertEquals(111_000, timer.getTotalTimeLocked(1000*clocks.realtime, which));
