@@ -207,7 +207,7 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Type of a radio technology.
      *
-     * @returns program type.
+     * @return program type.
      */
     public @ProgramType int getProgramType() {
         return mProgramType;
@@ -217,7 +217,7 @@ public final class ProgramSelector implements Parcelable {
      * Primary program identifier uniquely identifies a station and is used to
      * determine equality between two ProgramSelectors.
      *
-     * @returns primary identifier.
+     * @return primary identifier.
      */
     public @NonNull Identifier getPrimaryId() {
         return mPrimaryId;
@@ -227,7 +227,7 @@ public final class ProgramSelector implements Parcelable {
      * Secondary program identifier is not required for tuning, but may make it
      * faster or more reliable.
      *
-     * @returns secondary identifier list, must not be modified.
+     * @return secondary identifier list, must not be modified.
      */
     public @NonNull Identifier[] getSecondaryIds() {
         return mSecondaryIds;

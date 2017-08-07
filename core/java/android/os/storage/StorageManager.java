@@ -1662,8 +1662,8 @@ public class StorageManager {
      * itself on the given storage volume. This value is typically larger than
      * {@link File#getUsableSpace()}, since the system may be willing to delete
      * cached files to satisfy an allocation request. You can then allocate
-     * space for yourself using {@link #allocateBytes(UUID, long, int)} or
-     * {@link #allocateBytes(FileDescriptor, long, int)}.
+     * space for yourself using {@link #allocateBytes(UUID, long)} or
+     * {@link #allocateBytes(FileDescriptor, long)}.
      * <p>
      * This method is best used as a pre-flight check, such as deciding if there
      * is enough space to store an entire music album before you allocate space
@@ -1690,8 +1690,8 @@ public class StorageManager {
      *            UUID for a specific path can be obtained using
      *            {@link #getUuidForPath(File)}.
      * @return the maximum number of new bytes that the calling app can allocate
-     *         using {@link #allocateBytes(UUID, long, int)} or
-     *         {@link #allocateBytes(FileDescriptor, long, int)}.
+     *         using {@link #allocateBytes(UUID, long)} or
+     *         {@link #allocateBytes(FileDescriptor, long)}.
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space.
      */
@@ -1724,11 +1724,11 @@ public class StorageManager {
      * files necessary to satisfy your request.
      * <p>
      * Attempts to allocate disk space beyond the value returned by
-     * {@link #getAllocatableBytes(UUID, int)} will fail.
+     * {@link #getAllocatableBytes(UUID)} will fail.
      * <p>
      * Since multiple apps can be running simultaneously, this method may be
      * subject to race conditions. If possible, consider using
-     * {@link #allocateBytes(FileDescriptor, long, int)} which will guarantee
+     * {@link #allocateBytes(FileDescriptor, long)} which will guarantee
      * that bytes are allocated to an opened file.
      * <p>
      * If you're progressively allocating an unbounded amount of storage space
@@ -1742,7 +1742,7 @@ public class StorageManager {
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space, or if the device had
      *             trouble allocating the requested space.
-     * @see #getAllocatableBytes(UUID, int)
+     * @see #getAllocatableBytes(UUID)
      */
     @WorkerThread
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes)
@@ -1772,7 +1772,7 @@ public class StorageManager {
      * necessary to satisfy your request.
      * <p>
      * Attempts to allocate disk space beyond the value returned by
-     * {@link #getAllocatableBytes(UUID, int)} will fail.
+     * {@link #getAllocatableBytes(UUID)} will fail.
      * <p>
      * This method guarantees that bytes have been allocated to the opened file,
      * otherwise it will throw if fast allocation is not possible. Fast

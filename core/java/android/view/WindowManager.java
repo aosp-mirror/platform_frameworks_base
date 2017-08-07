@@ -992,21 +992,24 @@ public interface WindowManager extends ViewManager {
         @Deprecated
         public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
 
-        /** Window flag: when set the window will cause the keyguard to
-         * be dismissed, only if it is not a secure lock keyguard. Because such
-         * a keyguard is not needed for security, it will never re-appear if
-         * the user navigates to another window (in contrast to
-         * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily
-         * hide both secure and non-secure keyguards but ensure they reappear
-         * when the user moves to another UI that doesn't hide them).
-         * If the keyguard is currently active and is secure (requires an
-         * unlock credential) than the user will still need to confirm it before
-         * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
-         * also been set.
-         * @deprecated Use {@link #FLAG_SHOW_WHEN_LOCKED} or {@link KeyguardManager#dismissKeyguard}
-         * instead. Since keyguard was dismissed all the time as long as an activity with this flag
-         * on its window was focused, keyguard couldn't guard against unintentional touches on the
-         * screen, which isn't desired.
+        /**
+         * Window flag: when set the window will cause the keyguard to be
+         * dismissed, only if it is not a secure lock keyguard. Because such a
+         * keyguard is not needed for security, it will never re-appear if the
+         * user navigates to another window (in contrast to
+         * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily hide both
+         * secure and non-secure keyguards but ensure they reappear when the
+         * user moves to another UI that doesn't hide them). If the keyguard is
+         * currently active and is secure (requires an unlock credential) than
+         * the user will still need to confirm it before seeing this window,
+         * unless {@link #FLAG_SHOW_WHEN_LOCKED} has also been set.
+         *
+         * @deprecated Use {@link #FLAG_SHOW_WHEN_LOCKED} or
+         *             {@link KeyguardManager#requestDismissKeyguard} instead.
+         *             Since keyguard was dismissed all the time as long as an
+         *             activity with this flag on its window was focused,
+         *             keyguard couldn't guard against unintentional touches on
+         *             the screen, which isn't desired.
          */
         @Deprecated
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
