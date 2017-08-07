@@ -3219,6 +3219,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !isInMultiWindowMode();
     }
 
+    /** @return true when the window is in fullscreen task, but has non-fullscreen bounds set. */
+    boolean isLetterboxedAppWindow() {
+        final Task task = getTask();
+        final boolean taskIsFullscreen = task != null && task.isFullscreen();
+        final boolean appWindowIsFullscreen = mAppToken != null && !mAppToken.hasBounds();
+
+        return taskIsFullscreen && !appWindowIsFullscreen;
+    }
+
     /** Returns the appropriate bounds to use for computing frames. */
     private void getContainerBounds(Rect outBounds) {
         if (isInMultiWindowMode()) {
