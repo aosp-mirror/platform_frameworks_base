@@ -24,6 +24,7 @@ import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -130,7 +131,8 @@ public class MediaRouteChooserDialog extends Dialog {
 
         // Must be called after setContentView.
         getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
-                R.drawable.ic_media_route_off_holo_dark);
+                isLightTheme(getContext()) ? R.drawable.ic_media_route_off_holo_light
+                    : R.drawable.ic_media_route_off_holo_dark);
 
         mAdapter = new RouteAdapter(getContext());
         mListView = (ListView)findViewById(R.id.media_route_list);
@@ -174,6 +176,12 @@ public class MediaRouteChooserDialog extends Dialog {
         if (mAttachedToWindow) {
             mAdapter.update();
         }
+    }
+
+    static boolean isLightTheme(Context context) {
+        TypedValue value = new TypedValue();
+        return context.getTheme().resolveAttribute(R.attr.isLightTheme, value, true)
+                && value.data != 0;
     }
 
     private final class RouteAdapter extends ArrayAdapter<MediaRouter.RouteInfo>
