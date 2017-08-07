@@ -19,15 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"Obraz w obrazie"</string>
+    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(Program bez tytułu)"</string>
     <string name="pip_close" msgid="3480680679023423574">"Zamknij PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Pełny ekran"</string>
-    <string name="pip_play" msgid="674145557658227044">"Odtwórz"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"Wstrzymaj"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"Przytrzymaj "<b>"EKRAN GŁÓWNY"</b>", by sterować PIP"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Obraz w obrazie"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"W tym trybie film pozostaje na ekranie do czasu, aż odtworzysz kolejny. Aby sterować trybem, przytrzymaj przycisk "<b>"EKRAN GŁÓWNY"</b>"."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Zamknij"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

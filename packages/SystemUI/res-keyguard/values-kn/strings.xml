@@ -36,7 +36,7 @@
     <string name="keyguard_low_battery" msgid="9218432555787624490">"ನಿಮ್ಮ ಚಾರ್ಜರ್ ಸಂಪರ್ಕಗೊಳಿಸಿ."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ನೆಟ್‌ವರ್ಕ್ ಲಾಕ್ ಆಗಿದೆ"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"ಯಾವುದೇ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ಪೋನ್‌ನಲ್ಲಿ ಯಾವುದೇ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಸೇರಿಸಿ."</string>
@@ -114,7 +114,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"ನೀವು ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"ನೀವು ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"ನೀವು ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಪಾಸ್‌ವರ್ಡ್‌ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"ಸಾಧನ ನಿರ್ವಾಹಕರು ಸಾಧನವನ್ನು ಲಾಕ್‌ ಮಾಡಿದ್ದಾರೆ"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"ನಿರ್ವಾಹಕರು ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಿದ್ದಾರೆ"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ಸಾಧನವನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಲಾಕ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳವರೆಗೆ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿರಲಿಲ್ಲ. ಪ್ಯಾಟರ್ನ್‌ ಖಚಿತಪಡಿಸಿ.</item>

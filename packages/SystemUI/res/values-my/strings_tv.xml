@@ -19,15 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"တစ်ခုပေါ်တစ်ခု ထပ်၍ ဖွင့်ခြင်း"</string>
+    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(ခေါင်းစဉ်မဲ့ အစီအစဉ်)"</string>
     <string name="pip_close" msgid="3480680679023423574">"PIP ကိုပိတ်ပါ"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"မျက်နှာပြင် အပြည့်"</string>
-    <string name="pip_play" msgid="674145557658227044">"ဖွင့်ပါ"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"ဆိုင်းငံ့ပါ"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"PIP ကိုထိန်းချုပ်ရန် "<b>"ပင်မ"</b>" ခလုတ်ကို ဖိထားပါ"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"ပုံထဲမှပုံ"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"နောက်တစ်ခုမဖွင့်မချင်း သင့်ဗီဒီယိုကို ပြသထားပါမည်။ ၎င်းကိုထိန်းချုပ်ရန် "<b>"ပင်မ"</b>" ခလုတ်ကို နှိပ်ပြီးဖိထားပါ။"</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"ရပါပြီ"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"ပယ်ရန်"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

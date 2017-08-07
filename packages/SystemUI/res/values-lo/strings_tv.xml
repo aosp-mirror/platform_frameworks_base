@@ -19,15 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"ສະແດງຜົນຫຼາຍຢ່າງພ້ອມກັນ"</string>
+    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(ໂປຣແກຣມບໍ່ມີຊື່)"</string>
     <string name="pip_close" msgid="3480680679023423574">"ປິດ PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"ເຕັມໜ້າຈໍ"</string>
-    <string name="pip_play" msgid="674145557658227044">"ຫຼິ້ນ"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"ຢຸດຊົ່ວຄາວ"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"ກົດ "<b>"HOME"</b>" ຄ້າງໄວ້ເພື່ອຄວບຄຸມ PIP"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"ສະແດງຜົນຫຼາຍຢ່າງພ້ອມກັນ"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"ນີ້ຈະເປັນການເຮັດໃຫ້ວິດີໂອຂອງທ່ານຢູ່ໃນມຸມມອງຈົນກວ່າທ່ານຈະຫຼິ້ນວິດີໂອອື່ນ. ໃຫ້ກົດປຸ່ມ "<b>"HOME"</b>" ຄ້າງໄວ້ເພື່ອຄວບຄຸມມັນ."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"ເຂົ້າໃຈແລ້ວ"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"ປິດໄວ້"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

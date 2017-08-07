@@ -103,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"Utendakazi wa PUK ya SIM haujafanikiwa!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Nambari Imekubaliwa!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Hakuna mtandao."</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Badilisha mbinu ya kuingiza data"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Kubadili mbinu ya kuingiza data"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"Hali ya ndegeni"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Unafaa kuchora mchoro baada ya kuwasha kifaa upya"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Unafaa kuweka PIN baada ya kuwasha kifaa upya"</string>
@@ -114,7 +114,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Mchoro unahitajika unapobadili wasifu"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"PIN inahitajika unapobadili wasifu"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Nenosiri linahitajika unapobadili wasifu"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"Msimamizi wa kifaa amekifunga"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Msimamizi amefunga kifaa"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Umefunga kifaa mwenyewe"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="other">Hujafungua kifaa kwa saa <xliff:g id="NUMBER_1">%d</xliff:g>. Thibitisha mchoro.</item>

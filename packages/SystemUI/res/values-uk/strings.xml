@@ -77,7 +77,7 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"Не вдалося зробити знімок екрана."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Не вдалося зберегти знімок екрана."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Не вдалося зберегти знімок екрана через обмежений обсяг пам’яті."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Додаток або ваша організація не дозволяють робити знімки екрана."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Парам.передав.файлів через USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Підключити як медіапрогравач (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Підключити як камеру (PTP)"</string>
@@ -92,7 +92,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Номер телефону"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Голосові підказки"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Розблокувати"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Кнопка розблокування. Очікується цифровий відбиток"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Очікується відбиток пальця"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Розблокувати без цифрового відбитка"</string>
     <string name="unlock_label" msgid="8779712358041029439">"розблокувати"</string>
     <string name="phone_label" msgid="2320074140205331708">"відкрити телефон"</string>
@@ -154,11 +154,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Немає SIM-карти."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобільний трафік"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Мобільний трафік увімкнено"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобільний трафік вимкнено"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Прив’язка Bluetooth."</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобільне передавання даних"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобільне передавання даних увімкнено"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобільне передавання даних вимкнено"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим польоту."</string>
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"Мережу VPN увімкнено."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Немає SIM-карти."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Змінення мережі оператора."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Відкрити деталі акумулятора"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="accessibility_settings_button" msgid="799583911231893380">"Налаштування системи."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Сповіщення."</string>
-    <string name="notification_shelf_content_description" msgid="5511922384591583913">"Додатковий контейнер для сповіщень"</string>
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"Переглянути всі сповіщення"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Очистити сповіщення."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS увімкнено."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Встановлення зв’язку з GPS."</string>
@@ -240,13 +241,12 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Заощадження трафіку вимкнено."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Заощадження трафіку ввімкнено."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Яскравість дисплея"</string>
-    <!-- no translation found for accessibility_ambient_display_charging (9084521679384069087) -->
-    <skip />
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Заряджається"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Передавання даних 2G–3G призупинено"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Передавання даних 4G призупинено"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Передавання мобільних даних призупинено"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Мобільне передавання даних призупинено"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Передавання даних призупинено"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Ви досягнули вказаного ліміту даних. Мобільний трафік вимкнено.\n\nЯкщо продовжите, може стягуватися плата за використання трафіку."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Досягнуто вказаного обмеження обсягу даних. Мобільне передавання даних вимкнено.\n\nЯкщо ввімкнути його, може стягуватися плата за використання трафіку."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Відновити"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Немає з’єднання"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi під’єднано"</string>
@@ -283,7 +283,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яскравість"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматичне обертання"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Автоматично обертати екран"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Вибрано: <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"Режим \"<xliff:g id="ID_1">%s</xliff:g>\""</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Обертання заблоковано"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Книжкова орієнтація"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Альбомна орієнтація"</string>
@@ -321,7 +321,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Точка доступу"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Сповіщення"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Ліхтарик"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобільні дані"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобільне передавання даних"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Використання даних"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Залишилося даних"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Обмеження перевищено"</string>
@@ -341,7 +341,6 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Не вдалося запустити <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Додаток <xliff:g id="APP">%s</xliff:g> вимкнено в безпечному режимі."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Очистити все"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Додаток не підтримує розділення екрана"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Перетягніть сюди, щоб увімкнути режим розділеного екрана"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Розділити горизонтально"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Розділити вертикально"</string>
@@ -359,7 +358,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Пошук"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведіть пальцем угору, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведіть пальцем ліворуч, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Ви отримуватимете звукові й вібросигнали лише для вибраних сповіщень, нагадувань, повідомлень про події та викликів абонентів."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Ви отримуватиме звукові та вібросигнали лише для вибраних будильників, нагадувань, подій і абонентів. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Ви отримуватиме звукові та вібросигнали лише для будильників. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Налаштувати"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Блокуватимуться ВСІ звукові та вібросигнали, зокрема будильники, музика, відео й ігри. Ви зможете телефонувати."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Блокуватимуться ВСІ звукові та вібросигнали, зокрема будильники, музика, відео й ігри."</string>
@@ -367,7 +367,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Менше термінових сповіщень нижче"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Торкніться знову, щоб відкрити"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Проведіть пальцем угору, щоб розблокувати"</string>
-    <string name="do_disclosure_generic" msgid="8498005633306135779">"Цим пристроєм керує адміністратор"</string>
+    <string name="do_disclosure_generic" msgid="5615898451805157556">"Цим пристроєм керує адміністратор вашої організації"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Цим пристроєм керує організація <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведіть пальцем від значка"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Голосові підказки: проведіть пальцем від значка"</string>
@@ -420,13 +420,40 @@
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профіль може відстежуватись"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Дії в мережі можуть відстежуватися"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Мережа може відстежуватися"</string>
-    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Відстеження дій на пристрої"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"Адміністратор вашої організації керує цим пристроєм і може відстежувати мережевий трафік"</string>
+    <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"Адміністратор організації <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> керує цим пристроєм і може відстежувати мережевий трафік"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"Цим пристроєм керує адміністратор вашої організації. Пристрій під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"Пристроєм керує адміністратор організації <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>. Пристрій під’єднано до додатка <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"Пристроєм керує адміністратор вашої організації"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"Цим пристроєм керує адміністратор організації <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"Пристроєм керує адміністратор вашої організації. Пристрій під’єднано до мереж VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"Цим пристроєм керує адміністратор організації <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>. Пристрій під’єднано до мереж VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"Адміністратор вашої організації може відстежувати мережевий трафік у вашому робочому профілі"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"Адміністратор організації <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> мож відстежувати мережевий трафік у вашому робочому профілі"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Мережевий трафік може відстежуватися"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Пристрої, під’єднані до мереж VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Робочий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Особистий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Пристрій під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Керування пристроями"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Відстеження профілю"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Відстеження дій у мережі"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"Мережа VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Реєстрація в мережі"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"Реєстрація в мережі"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"Сертифікати центру сертифікації"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Вимкнути VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Від’єднатися від мережі VPN"</string>
+    <string name="monitoring_button_view_policies" msgid="100913612638514424">"Переглянути правила"</string>
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"Вашим пристроєм керує адміністратор організації \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nВін може відстежувати та контролювати налаштування, корпоративний доступ, додатки, дані пристрою й інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"Вашим пристроєм керує адміністратор організації.\n\nВін може відстежувати та контролювати налаштування, корпоративний доступ, додатки, дані пристрою й інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"Адміністратор організації встановив центр сертифікації на цьому пристрої. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"Адміністратор організації встановив центр сертифікації у вашому робочому профілі. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
+    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"На цьому пристрої встановлено центр сертифікації. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
+    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік."</string>
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Під’єднано додатки <xliff:g id="VPN_APP_1">%2$s</xliff:g> та <xliff:g id="VPN_APP_0">%1$s</xliff:g>, які можуть відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Ваш робочий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Ваш особистий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Вашим пристроєм керує додаток <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"Компанія <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> керує вашим пристроєм за допомогою додатка <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Адміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки й дані, зв’язані з пристроєм, а також геодані пристрою."</string>
@@ -435,22 +462,24 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от доступ до електронної пошти, додатків і веб-сайтів."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Відкрити налаштування мережі VPN"</string>
+    <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Відкрити надійні облікові дані"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Ви дозволили додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nВін може відстежувати ваші дії в мережі, зокрема електронні листи, додатки та веб-сайти.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором.\n\nВаш пристрій також під’єднано до мережі VPN, у якій можна відстежувати ваші дії в мережі."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
+    <string name="monitoring_description_app" msgid="1828472472674709532">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу особисту активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу особисту активність у мережі, зокрема доступ до електронної пошти, додатків і веб-сайтів."</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Профіль зв’язано з додатком <xliff:g id="APPLICATION">%2$s</xliff:g>, у якому можна відстежувати ваші дії в мережі, зокрема електронні листи, додатки та веб-сайти.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Вашим робочим профілем керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Профіль під’єднано до додатка <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, який може відстежувати вашу робочу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nВаш профіль також під’єднано до додатка <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, який може відстежувати вашу особисту активність у мережі."</string>
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Цей профіль під’єднано до додатка <xliff:g id="APPLICATION">%2$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
+    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Цей профіль під’єднано до додатка <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема а електронній пошті, додатках і на веб-сайтах.\n\nВаш профіль також під’єднано до додатка <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, який може відстежувати вашу особисту активність у мережі."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Пристрій залишатиметься заблокованим, доки ви не розблокуєте його вручну"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Швидше отримуйте сповіщення"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Переглядайте сповіщення, перш ніж розблокувати екран"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ні, дякую"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Налаштув."</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Закрити"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Вимкнути"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Розгорнути"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Згорнути"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екран закріплено"</string>
@@ -474,10 +503,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
-    <!-- no translation found for volume_stream_content_description_vibrate_a11y (6427727603978431301) -->
-    <skip />
-    <!-- no translation found for volume_stream_content_description_mute_a11y (8995013018414535494) -->
-    <skip />
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Торкніться, щоб налаштувати вібросигнал."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Торкніться, щоб вимкнути звук."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Показано регуляторів гучності: %s. Проведіть пальцем угору, щоб закрити."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Регулятори гучності сховано"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
@@ -528,14 +555,27 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"За допомогою елементів керування сповіщеннями ви можете налаштувати пріоритет сповіщень додатка – від 0 до 5 рівня. \n\n"<b>"Рівень 5"</b>\n"- Показувати сповіщення вгорі списку \n- Виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 4"</b>\n"- Не виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 3"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n\n"<b>"Рівень 2"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n\n"<b>"Рівень 1"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n- Не показувати на заблокованому екрані та в рядку стану \n- Показувати сповіщення внизу списку \n\n"<b>"Рівень 0"</b>\n"- Блокувати всі сповіщення з додатка"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Сповіщення"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ви більше не отримуватимете ці сповіщення."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
-      <item quantity="one">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії з цього додатка</item>
-      <item quantity="few">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій із цього додатка</item>
-      <item quantity="many">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій із цього додатка</item>
-      <item quantity="other">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії з цього додатка</item>
+    <string name="notification_num_channels" msgid="2048144408999179471">"Категорії сповіщень (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
+    <string name="notification_default_channel_desc" msgid="2506053815870808359">"У цьому додатку немає категорій сповіщень"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
+      <item quantity="one">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії сповіщень із цього додатка</item>
+      <item quantity="few">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій сповіщень із цього додатка</item>
+      <item quantity="many">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій сповіщень із цього додатка</item>
+      <item quantity="other">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії сповіщень із цього додатка</item>
     </plurals>
+    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
+    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
+    </plurals>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> відкрито"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> закрито"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Дозволити сповіщення з цього каналу"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"Усі категорії"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Більше налаштувань"</string>
+    <string name="notification_app_settings" msgid="3743278649182392015">"Налаштувати: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"елементи керування сповіщеннями"</string>
@@ -543,7 +583,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 хвилин"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 хвилин"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 годину"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Не відкладати"</string>
+    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2 години"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ВІДМІНИТИ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Відкладено на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>
@@ -625,7 +665,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Вибір клавіатури"</string>
     <string name="save" msgid="2311877285724540644">"Зберегти"</string>
-    <string name="reset" msgid="2448168080964209908">"Віднов."</string>
+    <string name="reset" msgid="2448168080964209908">"Скинути"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Змінити ширину кнопки"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буфер обміну"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Спеціальна кнопка навігації"</string>
@@ -671,6 +711,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Сповіщення <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Додаток може не працювати в режимі розділеного екрана."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Додаток не підтримує розділення екрана."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Додаток може не працювати на додатковому екрані."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Додаток не підтримує запуск на додаткових екранах."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Відкрити налаштування."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Відкрити швидкі налаштування."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Закрити швидкі налаштування."</string>
@@ -685,6 +727,17 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Розгорнути"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Згорнути"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрити"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Перетягніть униз, щоб закрити"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Меню \"Картинка в картинці\""</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"У додатку <xliff:g id="NAME">%s</xliff:g> є функція \"Картинка в картинці\""</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"Щоб у додатку <xliff:g id="NAME">%s</xliff:g> не працювала ця функція, вимкніть її в налаштуваннях."</string>
+    <string name="pip_play" msgid="1417176722760265888">"Відтворити"</string>
+    <string name="pip_pause" msgid="8881063404466476571">"Призупинити"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"Перейти далі"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"Перейти назад"</string>
+    <string name="thermal_shutdown_title" msgid="4458304833443861111">"Телефон перегрівся й вимкнувся"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"Зараз телефон працює, як зазвичай"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"Телефон перегрівся, тому вимкнувся, щоб охолонути. Зараз він працює, як зазвичай.\n\nТелефон перегрівається, якщо ви:\n	• використовуєте ресурсомісткі додатки (ігри, відео, навігація)\n	• завантажуєте великі файли на телефон або з нього\n	• використовуєте телефон за високої температури"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон нагрівається"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Під час охолодження деякі функції обмежуються"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш телефон охолоджуватиметься автоматично. Ви можете далі користуватися телефоном, але він може працювати повільніше.\n\nКоли телефон охолоне, він працюватиме належним чином."</string>
@@ -707,9 +760,19 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Загальні повідомлення"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Пам’ять"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Додатки з миттєвим запуском"</string>
-    <!-- no translation found for pip_menu_title (3328510504196964712) -->
-    <skip />
     <string name="instant_apps_message" msgid="8116608994995104836">"Додатки з миттєвим запуском не потрібно встановлювати."</string>
     <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"Перейти на веб-сайт"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобільний трафік"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi вимкнено"</string>
+    <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth вимкнено"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"Режим \"Не турбувати\" вимкнено"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Автоматичне правило ввімкнуло режим \"Не турбувати\" (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Додаток увімкнув режим \"Не турбувати\" (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Автоматичне правило або додаток увімкнули режим \"Не турбувати\"."</string>
+    <string name="qs_dnd_until" msgid="3469471136280079874">"До <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"Залишити"</string>
+    <string name="qs_dnd_replace" msgid="8019520786644276623">"Замінити"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Додатки, які працюють у фоновому режимі"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
 </resources>
