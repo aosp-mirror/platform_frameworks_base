@@ -1200,7 +1200,8 @@ class WindowStateAnimator {
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Applying decor to crop win=" + w + " mDecorFrame="
                 + w.mDecorFrame + " mSystemDecorRect=" + mSystemDecorRect);
 
-        final boolean fullscreen = w.fillsDisplay();
+        final Task task = w.getTask();
+        final boolean fullscreen = w.fillsDisplay() || (task != null && task.isFullscreen());
         final boolean isFreeformResizing =
                 w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
 
@@ -1523,6 +1524,19 @@ class WindowStateAnimator {
             mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
             w.applyDimLayerIfNeeded();
+        }
+    }
+
+    /**
+     * Get rect of the task this window is currently in. If there is no task, rect will be set to
+     * empty.
+     */
+    void getContainerRect(Rect rect) {
+        final Task task = mWin.getTask();
+        if (task != null) {
+            task.getDimBounds(rect);
+        } else {
+            rect.left = rect.top = rect.right = rect.bottom = 0;
         }
     }
 
