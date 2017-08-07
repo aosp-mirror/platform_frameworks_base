@@ -370,7 +370,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     private void unbindServiceLocked() {
         for (SpellCheckerBindGroup scbg : mSpellCheckerBindGroups.values()) {
-            scbg.removeAll();
+            scbg.removeAllLocked();
         }
         mSpellCheckerBindGroups.clear();
     }
@@ -788,29 +788,25 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             mListeners = new InternalDeathRecipients(this);
         }
 
-        public void onServiceConnected(ISpellCheckerService spellChecker) {
+        public void onServiceConnectedLocked(ISpellCheckerService spellChecker) {
             if (DBG) {
-                Slog.d(TAG, "onServiceConnected");
+                Slog.d(TAG, "onServiceConnectedLocked");
             }
 
-            synchronized (mLock) {
-                mSpellChecker = spellChecker;
-                mConnected = true;
-                // Dispatch pending getISpellCheckerSession requests.
-                mPendingSessionRequests.forEach(this::getISpellCheckerSessionLocked);
-                mPendingSessionRequests.clear();
-            }
+            mSpellChecker = spellChecker;
+            mConnected = true;
+            // Dispatch pending getISpellCheckerSession requests.
+            mPendingSessionRequests.forEach(this::getISpellCheckerSessionLocked);
+            mPendingSessionRequests.clear();
         }
 
-        public void onServiceDisconnected() {
+        public void onServiceDisconnectedLocked() {
             if (DBG) {
-                Slog.d(TAG, "onServiceDisconnected");
+                Slog.d(TAG, "onServiceDisconnectedLocked");
             }
 
-            synchronized (mLock) {
-                mSpellChecker = null;
-                mConnected = false;
-            }
+            mSpellChecker = null;
+            mConnected = false;
         }
 
         public void removeListener(ISpellCheckerSessionListener listener) {
@@ -853,17 +849,15 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             mUnbindCalled = true;
         }
 
-        public void removeAll() {
+        public void removeAllLocked() {
             Slog.e(TAG, "Remove the spell checker bind unexpectedly.");
-            synchronized (mLock) {
-                final int size = mListeners.getRegisteredCallbackCount();
-                for (int i = size - 1; i >= 0; --i) {
-                    mListeners.unregister(mListeners.getRegisteredCallbackItem(i));
-                }
-                mPendingSessionRequests.clear();
-                mOnGoingSessionRequests.clear();
-                cleanLocked();
+            final int size = mListeners.getRegisteredCallbackCount();
+            for (int i = size - 1; i >= 0; --i) {
+                mListeners.unregister(mListeners.getRegisteredCallbackItem(i));
             }
+            mPendingSessionRequests.clear();
+            mOnGoingSessionRequests.clear();
+            cleanLocked();
         }
 
         public void getISpellCheckerSessionOrQueueLocked(@NonNull SessionRequest request) {
@@ -888,7 +882,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 mOnGoingSessionRequests.add(request);
             } catch(RemoteException e) {
                 // The target spell checker service is not available.  Better to reset the state.
-                removeAll();
+                removeAllLocked();
             }
             cleanLocked();
         }
@@ -930,13 +924,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         private void onServiceConnectedInnerLocked(ComponentName name, IBinder service) {
             if (DBG) {
-                Slog.w(TAG, "onServiceConnected: " + name);
+                Slog.w(TAG, "onServiceConnectedInnerLocked: " + name);
             }
             final ISpellCheckerService spellChecker =
                     ISpellCheckerService.Stub.asInterface(service);
             final SpellCheckerBindGroup group = mSpellCheckerBindGroups.get(mSciId);
             if (group != null && this == group.mInternalConnection) {
-                group.onServiceConnected(spellChecker);
+                group.onServiceConnectedLocked(spellChecker);
             }
         }
 
@@ -949,11 +943,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         private void onServiceDisconnectedInnerLocked(ComponentName name) {
             if (DBG) {
-                Slog.w(TAG, "onServiceDisconnected: " + name);
+                Slog.w(TAG, "onServiceDisconnectedInnerLocked: " + name);
             }
             final SpellCheckerBindGroup group = mSpellCheckerBindGroups.get(mSciId);
             if (group != null && this == group.mInternalConnection) {
-                group.onServiceDisconnected();
+                group.onServiceDisconnectedLocked();
             }
         }
     }
