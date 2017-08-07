@@ -1219,8 +1219,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // TODO(b/62846907): Checking against {@link mLastReportedConfiguration} could be flaky as
         //                   this is not necessarily what the client has processed yet. Find a
         //                   better indicator consistent with the client.
-        return mOrientationChanging || (isVisible()
-                && getConfiguration().orientation != mLastReportedConfiguration.orientation);
+        return (mOrientationChanging || (isVisible()
+                && getConfiguration().orientation != mLastReportedConfiguration.orientation))
+                && !mSeamlesslyRotated;
     }
 
     void setOrientationChanging(boolean changing) {
