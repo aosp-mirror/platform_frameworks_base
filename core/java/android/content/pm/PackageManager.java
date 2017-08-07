@@ -2295,9 +2295,7 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint and all
-     * Passpoint related APIs in {@link WifiManager} are supported. Refer to
-     * {@link WifiManager#addOrUpdatePasspointConfiguration} for more info.
+     * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
