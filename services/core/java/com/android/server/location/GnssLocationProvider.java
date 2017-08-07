@@ -543,7 +543,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     loadPropertiesFromResource(context, mProperties);
                     String lpp_profile = mProperties.getProperty("LPP_PROFILE");
                     // set the persist property LPP_PROFILE for the value
-                    SystemProperties.set(LPP_PROFILE, lpp_profile);
+                    if (lpp_profile != null) {
+                        SystemProperties.set(LPP_PROFILE, lpp_profile);
+                    }
                 } else {
                     // reset the persist property
                     SystemProperties.set(LPP_PROFILE, "");
