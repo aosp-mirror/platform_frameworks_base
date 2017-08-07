@@ -700,7 +700,7 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
           spans++;
         }
         return util::make_unique<StyledString>(dst_pool->MakeRef(
-            style_str, StringPool::Context(StringPool::Context::kStylePriority, config)));
+            style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
       } else {
         if (type != ResourceType::kString && util::StartsWith(str, "res/")) {
           // This must be a FileReference.

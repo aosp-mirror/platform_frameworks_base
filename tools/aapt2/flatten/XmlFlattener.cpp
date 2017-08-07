@@ -180,8 +180,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
     flatNode->lineNumber = util::HostToDevice32(node->line_number);
     flatNode->comment.index = util::HostToDevice32(-1);
 
-    ResXMLTree_namespaceExt* flat_ns =
-        writer.NextBlock<ResXMLTree_namespaceExt>();
+    ResXMLTree_namespaceExt* flat_ns = writer.NextBlock<ResXMLTree_namespaceExt>();
     AddString(node->namespace_prefix, kLowPriority, &flat_ns->prefix);
     AddString(node->namespace_uri, kLowPriority, &flat_ns->uri);
 
@@ -289,8 +288,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
   BigBuffer* buffer_;
   XmlFlattenerOptions options_;
 
-  // Scratch vector to filter attributes. We avoid allocations
-  // making this a member.
+  // Scratch vector to filter attributes. We avoid allocations making this a member.
   std::vector<xml::Attribute*> filtered_attrs_;
 };
 
@@ -307,10 +305,9 @@ bool XmlFlattener::Flatten(IAaptContext* context, xml::Node* node) {
   }
 
   // Sort the string pool so that attribute resource IDs show up first.
-  visitor.pool.Sort(
-      [](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
-        return a.context.priority < b.context.priority;
-      });
+  visitor.pool.Sort([](const StringPool::Context& a, const StringPool::Context& b) -> int {
+    return util::compare(a.priority, b.priority);
+  });
 
   // Now we flatten the string pool references into the correct places.
   for (const auto& ref_entry : visitor.string_refs) {
@@ -328,15 +325,13 @@ bool XmlFlattener::Flatten(IAaptContext* context, xml::Node* node) {
     // Write the array of resource IDs, indexed by StringPool order.
     ChunkWriter res_id_map_writer(buffer_);
     res_id_map_writer.StartChunk<ResChunk_header>(RES_XML_RESOURCE_MAP_TYPE);
-    for (const auto& str : visitor.pool) {
-      ResourceId id = {str->context.priority};
-      if (id.id == kLowPriority || !id.is_valid()) {
-        // When we see the first non-resource ID,
-        // we're done.
+    for (const auto& str : visitor.pool.strings()) {
+      ResourceId id(str->context.priority);
+      if (str->context.priority == kLowPriority || !id.is_valid()) {
+        // When we see the first non-resource ID, we're done.
         break;
       }
-
-      *res_id_map_writer.NextBlock<uint32_t>() = id.id;
+      *res_id_map_writer.NextBlock<uint32_t>() = util::HostToDevice32(id.id);
     }
     res_id_map_writer.Finish();
   }
