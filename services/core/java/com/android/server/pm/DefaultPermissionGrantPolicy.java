@@ -30,6 +30,7 @@ import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.content.pm.PackageParser;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -699,6 +700,16 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(companionDeviceDiscoveryPackage)) {
                 grantRuntimePermissionsLPw(companionDeviceDiscoveryPackage,
                         LOCATION_PERMISSIONS, true, userId);
+            }
+
+            // Ringtone Picker
+            Intent ringtonePickerIntent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+            PackageParser.Package ringtonePickerPackage =
+                    getDefaultSystemHandlerActivityPackageLPr(ringtonePickerIntent, userId);
+            if (ringtonePickerPackage != null
+                    && doesPackageSupportRuntimePermissions(ringtonePickerPackage)) {
+                grantRuntimePermissionsLPw(ringtonePickerPackage,
+                        STORAGE_PERMISSIONS, true, userId);
             }
 
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
