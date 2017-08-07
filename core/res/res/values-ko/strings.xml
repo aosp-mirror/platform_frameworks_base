@@ -89,17 +89,20 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"발신자 번호 설정을 변경할 수 없습니다."</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"데이터 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"긴급 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"음성 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"모든 음성 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"음성/데이터 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"음성/SMS 서비스가 차단되었습니다."</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"모든 음성/데이터/SMS 서비스가 차단되었습니다."</string>
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"데이터 서비스를 이용할 수 없음"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"긴급 전화 차단됨"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"음성 서비스를 이용할 수 없음"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"음성/긴급 서비스를 이용할 수 없음"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"현재 위치에서 모바일 네트워크가 서비스 제공을 일시적으로 중단했습니다."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"네트워크에 연결할 수 없습니다."</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"수신 상태를 개선하려면 시스템 &gt; 네트워크 및 인터넷 &gt; 모바일 네트워크 &gt; 기본 네트워크 유형에서 선택된 유형을 변경해 보세요."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"알림"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"착신전환"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"긴급 콜백 모드"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"모바일 데이터 알림"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS 메시지"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"음성사서함 메시지"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 통화"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"피어가 TTY 모드 FULL을 요청했습니다."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"피어가 TTY 모드 HCO를 요청했습니다."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"피어가 TTY 모드 VCO를 요청했습니다."</string>
@@ -139,8 +142,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi를 기본으로 설정"</string>
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
-    <skip />
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"모바일에 최적화됨"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi에서만"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -178,18 +180,16 @@
       <item quantity="one">인증기관 설치됨</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"알 수 없는 제3자의 모니터링"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"직장 프로필 관리자에 의해 모니터링될 수 있음"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"직장 프로필 관리자가 수행함"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>에서 모니터링"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"직장 프로필 삭제됨"</string>
-    <string name="work_profile_deleted_description" msgid="6305147513054341102">"관리 앱이 누락되어 직장 프로필이 삭제되었습니다."</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
-    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"관리 앱이 없어서 직장 프로필이 삭제되었습니다."</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"관리되는 기기"</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"조직에서 이 기기를 관리하며 네트워크 트래픽을 모니터링할 수도 있습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"관리 앱이 손상되었거나 구성요소가 없어서 사용할 수 없습니다. 이제 기기가 삭제됩니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
     <string name="me" msgid="6545696007631404292">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"태블릿 옵션"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV 옵션"</string>
@@ -257,11 +257,17 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"업데이트"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"네트워크 상태"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"네트워크 알림"</string>
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"네트워크 사용 가능"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 상태"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"기기 관리"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"소매 데모"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 연결"</string>
+    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"백그라운드에서 실행 중인 앱"</string>
+    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱이 백그라운드에서 실행 중"</string>
+    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g>개의 앱이 백그라운드에서 실행 중"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"탭하여 배터리 및 데이터 사용량 확인"</string>
+    <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"개인으로 전환"</string>
@@ -282,14 +288,12 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 및 동영상 촬영"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"신체 센서"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"인체 감지 센서"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"생체 신호에 관한 센서 데이터에 액세스"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"항목을 탭하면 소리 내어 알려주며 동작을 사용하여 화면을 탐색할 수 있습니다."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"향상된 웹 접근성 기능 사용"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"스크립트를 설치하여 앱 콘텐츠에 더 간편하게 액세스할 수 있습니다."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"입력하는 텍스트 살펴보기"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"신용카드 번호와 비밀번호 등의 개인 데이터를 포함합니다."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"디스플레이 배율 제어"</string>
@@ -374,7 +378,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"앱에서 수신 및 발신 통화 데이터를 포함하여 TV의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 삭제하거나 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"신체 센서(예: 심박수 모니터)에 액세스"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"인체 감지 센서(예: 심박수 모니터)에 액세스"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"앱이 심박수와 같은 신체 상태를 확인하는 센서의 데이터에 접근하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
@@ -410,8 +414,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"앱이 기기의 휴대전화 기능에 접근할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 전화번호 및 기기의 ID, 활성 통화인지 여부, 통화가 연결된 원격 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"시스템을 통해 통화 연결"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"통화 환경을 개선하기 위해 앱이 시스템을 통해 통화를 연결하도록 허용합니다."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"전화번호 읽기"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"앱에서 기기의 전화번호에 액세스할 수 있도록 허용합니다."</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"전화번호 읽기"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"앱에서 기기의 전화번호에 액세스하도록 허용합니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"TV의 절전 모드 전환 방지"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
@@ -484,6 +488,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"시도 횟수가 너무 많습니다. 지문 센서가 사용 중지되었습니다."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"다시 시도해 보세요."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -551,7 +556,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"앱에 알림 일시중지 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"화면 잠금 해제 시도 모니터링"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 태블릿에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"화면을 잠금 해제할 때 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많을 때 TV를 잠그거나 TV의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
@@ -970,8 +975,7 @@
     <string name="selectTextMode" msgid="1018691815143165326">"텍스트 선택"</string>
     <string name="undo" msgid="7905788502491742328">"실행취소"</string>
     <string name="redo" msgid="7759464876566803888">"다시 실행"</string>
-    <!-- no translation found for autofill (3035779615680565188) -->
-    <skip />
+    <string name="autofill" msgid="3035779615680565188">"자동완성"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"텍스트 선택"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"사전에 추가"</string>
     <string name="deleteText" msgid="6979668428458199034">"삭제"</string>
@@ -979,8 +983,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="email" msgid="4560673117055050403">"이메일"</string>
     <string name="dial" msgid="4204975095406423102">"전화"</string>
-    <string name="map" msgid="5441053548030107189">"지도"</string>
-    <string name="browse" msgid="6079864138582486027">"탐색"</string>
+    <string name="map" msgid="6068210738233985748">"지도"</string>
+    <string name="browse" msgid="6993590095938149861">"브라우저"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1094,6 +1098,14 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"알람 소리"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"알림 사운드"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"알 수 없음"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Wi-Fi 네트워크 사용 가능</item>
+      <item quantity="one">Wi-Fi 네트워크 사용 가능</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">개방형 Wi-Fi 네트워크 사용 가능</item>
+      <item quantity="one">개방형 Wi-Fi 네트워크 사용 가능</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi 네트워크에 로그인"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"네트워크에 로그인"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1103,7 +1115,13 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>(으)로 전환"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>이(가) 인터넷에 연결되지 않는 경우 기기에서 <xliff:g id="NEW_NETWORK">%1$s</xliff:g>을(를) 사용합니다. 요금이 부과될 수 있습니다."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>에서 <xliff:g id="NEW_NETWORK">%2$s</xliff:g>(으)로 전환"</string>
-    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
+  <string-array name="network_switch_type_name">
+    <item msgid="3979506840912951943">"모바일 데이터"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"블루투스"</item>
+    <item msgid="5447331121797802871">"이더넷"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"알 수 없는 네트워크 유형"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi에 연결할 수 없습니다"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 인터넷 연결 상태가 좋지 않습니다."</string>
@@ -1120,7 +1138,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"초대장을 보냈습니다."</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"연결하도록 초대"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"보낸사람:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"받는사람:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"수신:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"필수 PIN 입력:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>에 연결되어 있는 동안 일시적으로 태블릿의 Wi-Fi 연결이 해제됩니다."</string>
@@ -1173,7 +1191,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"버그 보고서 가져오는 중..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"버그 보고서를 공유하시겠습니까?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"버그 신고서 공유 중..."</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"IT 관리자가 이 기기의 문제해결을 위해 버그 보고서를 요청했습니다. 앱과 데이터가 공유될 수 있습니다."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"관리자가 이 기기의 문제해결을 위해 버그 신고를 요청했습니다. 앱과 데이터가 공유될 수 있습니다."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"공유"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"거부"</string>
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
@@ -1183,8 +1201,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"다른 앱 위에 표시"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"사용 중지"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
@@ -1282,6 +1301,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"운전 모드를 종료하려면 탭하세요."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"테더링 또는 핫스팟 사용"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"설정하려면 탭하세요."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"테더링이 사용 중지됨"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"자세한 정보는 관리자에게 문의하세요."</string>
     <string name="back_button_label" msgid="2300470004503343439">"뒤로"</string>
     <string name="next_button_label" msgid="1080555104677992408">"다음"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"건너뛰기"</string>
@@ -1359,8 +1380,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"사용량 및 설정을 보려면 탭하세요."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G 데이터 한도에 도달함"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G 데이터 한도에 도달함"</string>
-    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
-    <skip />
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"모바일 데이터 제한 도달"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi 데이터 한도에 도달함"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"나머지 주기 동안 데이터 일시중지됨"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G - 3G 데이터 제한 초과됨"</string>
@@ -1459,18 +1479,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"접근성 단축키가 사용 설정됨"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"볼륨 버튼 두 개를 3초 동안 눌러 <xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용 또는 사용 중지할 수 있습니다.\n\n이 서비스는 설정 &gt; 접근성에서 변경할 수 있습니다."</string>
-    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"단축키 사용 중지"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"계속 사용"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"접근성 단축키를 사용하시겠습니까?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"단축키가 사용 설정된 경우 두 개의 볼륨 버튼을 3초간 누르면 접근성 기능이 시작됩니다.\n\n 현재 접근성 기능:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n \'설정 &gt; 접근성\'에서 기능을 변경할 수 있습니다."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"단축키 사용 중지"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"단축키 사용"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"기능을 변경하려면 접근성 버튼을 길게 터치하세요."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"확대"</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g>님을 로그아웃하는 중…"</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"관리자가 이 변경을 허용하지 않습니다."</string>
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"관리자가 이 변경을 허용하지 않습니다."</string>
     <string name="app_not_found" msgid="3429141853498927379">"이 작업을 처리하는 애플리케이션을 찾을 수 없습니다."</string>
     <string name="revoke" msgid="5404479185228271586">"취소"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1562,7 +1585,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"인쇄 서비스 사용하지 않음"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> 서비스 설치됨"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"사용하려면 탭하세요."</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"관리자 PIN 입력"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"관리자 PIN 입력"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN 입력"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"올바르지 않은 값이 입력됨"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"현재 PIN"</string>
@@ -1590,16 +1613,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"이 화면을 고정 해제하려면 \'뒤로\' 및 \'최근 사용\'을 길게 터치하세요."</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"앱이 고정되었습니다. 이 기기에서는 고정 해제를 허용하지 않습니다."</string>
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"이 화면을 고정 해제하려면 \'뒤로\' 및 \'최근 사용\'을 길게 터치하세요."</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"이 앱은 고정 해제할 수 없습니다."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"관리자가 설치함"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
-    <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"관리자에 의해 설치되었습니다."</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"관리자에 의해 업데이트되었습니다."</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"배터리 수명 개선을 위해, 배터리 세이버는 기기의 성능을 줄이고 진동, 위치 서비스 및 대부분의 백그라운드 데이터를 제한합니다. 이메일, 메시지 및 동기화에 의존하는 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n배터리 세이버는 기기를 충전 중일 때는 자동으로 사용 중지됩니다."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 즉, 예를 들어 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
@@ -1672,7 +1695,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>개 선택됨</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"기타"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
@@ -1684,8 +1707,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"모든 언어"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"모든 지역"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"검색"</string>
-    <string name="work_mode_off_title" msgid="8954725060677558855">"직장 모드가 사용 중지됨"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"앱, 백그라운드 동기화 및 관련 기능을 포함한 직장 프로필이 작동하도록 허용"</string>
+    <string name="work_mode_off_title" msgid="2615362773958585967">"작업 모드를 사용 설정하시겠습니까?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"앱, 백그라운드 동기화 및 관련 기능을 포함한 직장 프로필이 사용 설정됩니다."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"사용 설정"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"새 메시지 있음"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"SMS 앱을 열고 확인"</string>
@@ -1728,22 +1751,32 @@
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"시간 입력"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"시간 입력을 위해 텍스트 입력 모드로 전환합니다."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"시간 입력을 위해 시계 모드로 전환합니다."</string>
-    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
-    <skip />
-    <string name="autofill_save_title" msgid="7081244500504163245">"<xliff:g id="LABEL">%1$s</xliff:g>에 저장하시겠습니까?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) <xliff:g id="LABEL">%2$s</xliff:g>에 저장하시겠습니까?"</string>
+    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"자동완성 옵션"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"자동완성에 저장"</string>
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"콘텐츠를 자동완성할 수 없습니다."</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"자동완성 추천 없음"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="other">자동완성 추천 <xliff:g id="COUNT">%1$s</xliff:g>개</item>
+      <item quantity="one">자동완성 추천 1개</item>
+    </plurals>
+    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> 및 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>을(를) &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;에 저장하시겠습니까?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"저장"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"사용 안함"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"비밀번호"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"주소"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"신용카드"</string>
-    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"사용자 이름"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"이메일 주소"</string>
+    <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"침착하게 가까운 대피소를 찾으세요."</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"즉시 해안 지대나 강가에서 떨어져 고지대 등 안전한 장소로 대피하세요."</string>
+    <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"침착하게 가까운 대피소를 찾으세요."</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"긴급 메시지 테스트"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM이 허용되지 않음"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM이 프로비저닝되지 않음"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM이 허용되지 않음"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"전화가 허용되지 않음"</string>
 </resources>

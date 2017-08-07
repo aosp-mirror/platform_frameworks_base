@@ -91,17 +91,20 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usługa nie jest świadczona."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"Usługa transmisji danych jest zablokowana."</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Usługa połączeń alarmowych jest zablokowana."</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Usługa głosowa jest zablokowana."</string>
-    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Wszystkie usługi głosowe są zablokowane."</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"Usługa SMS jest zablokowana."</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Usługi głosowe/danych są zablokowane."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Usługi głosowe/SMS są zablokowane."</string>
-    <string name="RestrictedOnAll" msgid="5643028264466092821">"Wszystkie usługi głosowe/danych/SMS są zablokowane."</string>
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Brak usługi transmisji danych"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Brak możliwości wykonywania połączeń alarmowych"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Brak usługi połączeń głosowych"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Brak usługi połączeń głosowych/alarmowych"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Usługa tymczasowo nieoferowana przez sieć komórkową w Twojej lokalizacji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Brak zasięgu sieci"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (4164230263214915351) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Aby poprawić odbiór, zmień typ sieci – wybierz System &gt; Sieć i internet &gt; Sieci komórkowe &gt; Preferowany typ sieci."</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerty"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Przekierowanie połączeń"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Tryb alarmowego połączenia zwrotnego"</string>
+    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alerty o mobilnej transmisji danych"</string>
+    <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-y"</string>
+    <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Wiadomości poczty głosowej"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"Połączenia przez Wi-Fi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Drugie urządzenie zażądało trybu „TTY pełny”"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Drugie urządzenie zażądało trybu „TTY HCO”"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Drugie urządzenie zażądało trybu „TTY VCO”"</string>
@@ -141,8 +144,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Wył."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferuj Wi-Fi"</string>
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (1988279625335345908) -->
-    <skip />
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferowane mobilne"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tylko Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nieprzekierowane"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -182,18 +184,16 @@
       <item quantity="one">Urząd certyfikacji został zainstalowany</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Przez nieznany podmiot zewnętrzny"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Przez administratora Twojego profilu do pracy"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Przez administratora Twojego profilu do pracy"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Przez <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Usunięto profil do pracy"</string>
-    <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil do pracy został usunięty z powodu braku aplikacji administracyjnej."</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"Brakuje aplikacji administracyjnej profilu do pracy lub jest ona uszkodzona. Z tego powodu Twój profil do pracy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Twój profil do pracy nie jest już dostępny na tym urządzeniu."</string>
-    <!-- no translation found for network_logging_notification_title (6399790108123704477) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (7930089249949354026) -->
-    <skip />
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Profil do pracy został usunięty z powodu braku aplikacji administratora"</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"Brakuje aplikacji administratora profilu do pracy lub jest ona uszkodzona. Dlatego Twój profil do pracy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Twój profil do pracy nie jest już dostępny na tym urządzeniu"</string>
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"Urządzenie jest zarządzane"</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"Twoja organizacja zarządza tym urządzeniem i może monitorować ruch w sieci. Kliknij, by dowiedzieć się więcej."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Twoje urządzenie zostanie wyczyszczone"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacja administracyjna nie ma wszystkich składników lub jest uszkodzona i nie można jej użyć. Twoje urządzenie zostanie teraz wyczyszczone. Skontaktuj się ze swoim administratorem, aby uzyskać pomoc."</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"Tej aplikacji administratora nie można używać. Dane z urządzenia zostaną wykasowane.\n\nJeśli masz pytania, skontaktuj się z administratorem organizacji."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcje tabletu"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Opcje telewizora"</string>
@@ -263,11 +263,17 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Aktualizacje"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Stan sieci"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alerty dotyczące sieci"</string>
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"Sieć dostępna"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Stan sieci VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administracja urządzeniem"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerty"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Tryb demo dla sklepów"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Połączenie USB"</string>
+    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikacje działające w tle"</string>
+    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> działa w tle"</string>
+    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Aplikacje (<xliff:g id="NUMBER">%1$d</xliff:g>) działają w tle"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i transmisji danych"</string>
+    <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
     <string name="android_system_label" msgid="6577375335728551336">"System Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Włącz profil osobisty"</string>
@@ -294,8 +300,6 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włączenie czytania dotykiem"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Klikane elementy będą wymawiane na głos, a ekran można przeglądać, używając gestów."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Włączenie ułatwień dostępu w internecie"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Można zainstalować skrypty, by zawartość aplikacji była łatwiej dostępna."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserwowanie wpisywanego tekstu"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obejmuje informacje osobiste, takie jak numery kart kredytowych i hasła."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Regulowanie powiększenia ekranu"</string>
@@ -416,8 +420,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pozwala aplikacji na dostęp do funkcji telefonicznych urządzenia. Aplikacja z tym uprawnieniem może odczytać numer telefonu i identyfikator urządzenia, sprawdzić, czy połączenie jest aktywne, oraz poznać numer, z którym jest nawiązane połączenie."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"przekazywanie połączeń przez system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Zezwala aplikacji na przekazywanie połączeń przez system, by poprawić ich jakość."</string>
-    <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"odczyt numeru telefonu"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Zezwala aplikacji na dostęp do numeru telefonu urządzenia."</string>
+    <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"odczytywanie numerów telefonów"</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Zezwala aplikacji na dostęp do numerów telefonów na urządzeniu."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zapobieganie przechodzeniu tabletu do trybu uśpienia"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"powstrzymywanie usypiania telewizora"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zapobieganie przejściu telefonu w stan uśpienia"</string>
@@ -490,6 +494,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zbyt wiele prób. Spróbuj ponownie później."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Zbyt wiele prób. Czytnik linii papilarnych został wyłączony."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Spróbuj ponownie."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Odcisk palca <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -557,7 +562,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"Monitoruj próby odblokowania ekranu"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoruj próby odblokowania ekranu"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorowanie, ile razy wpisano niepoprawne hasło podczas odblokowywania ekranu, oraz blokowanie telewizora albo kasowanie na nim wszystkich danych, gdy zbyt wiele razy wpisano niepoprawne hasło."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
@@ -765,7 +770,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Zaloguj się"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Błędna nazwa użytkownika lub hasło."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Nie pamiętasz nazwy użytkownika lub hasła?\nOdwiedź stronę "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Sprawdzanie…"</string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Sprawdzam…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odblokuj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Włącz dźwięk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Wyłącz dźwięk"</string>
@@ -1010,8 +1015,7 @@
     <string name="selectTextMode" msgid="1018691815143165326">"Zaznacz tekst"</string>
     <string name="undo" msgid="7905788502491742328">"Cofnij"</string>
     <string name="redo" msgid="7759464876566803888">"Ponów"</string>
-    <!-- no translation found for autofill (3035779615680565188) -->
-    <skip />
+    <string name="autofill" msgid="3035779615680565188">"Autouzupełnianie"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Zaznaczanie tekstu"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Dodaj do słownika"</string>
     <string name="deleteText" msgid="6979668428458199034">"Usuń"</string>
@@ -1019,8 +1023,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Działania na tekście"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="browse" msgid="6079864138582486027">"Przeglądarka"</string>
+    <string name="map" msgid="6068210738233985748">"Mapy"</string>
+    <string name="browse" msgid="6993590095938149861">"Internet"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Kończy się miejsce"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektóre funkcje systemu mogą nie działać"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Za mało pamięci w systemie. Upewnij się, że masz 250 MB wolnego miejsca i uruchom urządzenie ponownie."</string>
@@ -1134,6 +1138,18 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Dźwięki alarmu"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Dźwięki powiadomień"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Nieznany"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="few">Dostępne są sieci Wi-Fi</item>
+      <item quantity="many">Dostępne są sieci Wi-Fi</item>
+      <item quantity="other">Dostępne są sieci Wi-Fi</item>
+      <item quantity="one">Dostępna jest sieć Wi-Fi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="few">Dostępne są otwarte sieci Wi-Fi</item>
+      <item quantity="many">Dostępne są otwarte sieci Wi-Fi</item>
+      <item quantity="other">Dostępne są otwarte sieci Wi-Fi</item>
+      <item quantity="one">Dostępna jest otwarta sieć Wi-Fi</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Zaloguj się w sieci Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Zaloguj się do sieci"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1143,7 +1159,13 @@
     <string name="network_switch_metered" msgid="4671730921726992671">"Zmieniono na połączenie typu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Urządzenie korzysta z połączenia typu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, gdy <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nie dostępu do internetu. Mogą zostać naliczone opłaty."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Przełączono z połączenia typu <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>."</string>
-    <!-- no translation found for network_switch_type_name:0 (3979506840912951943) -->
+  <string-array name="network_switch_type_name">
+    <item msgid="3979506840912951943">"mobilna transmisja danych"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nieznany typ sieci"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nie można połączyć się z siecią Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ma powolne połączenie internetowe."</string>
@@ -1213,7 +1235,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Zgłaszam błąd…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Udostępnić raport o błędzie?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Udostępniam raport o błędzie…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Administrator poprosił o raport o błędzie, który pomoże w rozwiązaniu problemów na tym urządzeniu. Mogą zostać udostępnione aplikacje i dane."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administrator poprosił o raport o błędzie, by szybciej rozwiązać problemy na tym urządzeniu. Raport może zawierać informacje o aplikacjach i inne dane."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"UDOSTĘPNIJ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ODRZUĆ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmień klawiaturę"</string>
@@ -1223,8 +1245,9 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Kliknij, by wybrać język i układ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Wyświetlanie nad innymi aplikacjami"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Wyświetlanie aplikacji <xliff:g id="NAME">%s</xliff:g> nad innymi"</string>
-    <string name="alert_windows_notification_title" msgid="4532185840598192445">"Aplikacja <xliff:g id="NAME">%s</xliff:g> jest wyświetlana nad innymi."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"Aplikacja <xliff:g id="NAME">%s</xliff:g> jest nad innymi"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"WYŁĄCZ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Przygotowuję: <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1322,6 +1345,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Kliknij, by zakończyć tryb samochodowy."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Aktywny tethering lub punkt dostępu"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Kliknij, by skonfigurować."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering został wyłączony"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Aby uzyskać szczegółowe informacje, skontaktuj się z administratorem"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Wróć"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Dalej"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Pomiń"</string>
@@ -1401,8 +1426,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Kliknij, by wyświetlić użycie i ustawienia."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Osiągnięto limit danych 2G/3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Osiągnięto limit danych 4G"</string>
-    <!-- no translation found for data_usage_mobile_limit_title (6561099244084267376) -->
-    <skip />
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Osiągnięto limit mobilnej transmisji danych"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Osiągnięto limit danych Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Dane wstrzymane do końca cyklu"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Przekroczono limit danych 2G/3G"</string>
@@ -1429,7 +1453,7 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Zobacz wszystkie"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Wybierz działanie"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij przez:"</string>
-    <string name="sending" msgid="3245653681008218030">"Wysyłanie..."</string>
+    <string name="sending" msgid="3245653681008218030">"Wysyłam..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Odebrać połączenie?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Zawsze"</string>
@@ -1501,18 +1525,21 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Usuń"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Skrót ułatwień dostępu jest WŁĄCZONY"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Aby włączyć usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g> lub ją wyłączyć, przytrzymaj oba przyciski głośności przez 3 sekundy.\n\nUsługę możesz zmienić, klikając Ustawienia &gt; Ułatwienia dostępu."</string>
-    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Wyłącz skrót"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Pozostaw włączony"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Użyć skrótu do ułatwień dostępu?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Gdy skrót jest włączony, jednoczesne naciśnięcie przez trzy sekundy obu klawiszy sterowania głośnością uruchomi funkcję ułatwień dostępu.\n\nBieżąca funkcja ułatwień dostępu:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nFunkcję możesz zmienić, wybierając Ustawienia &gt; Ułatwienia dostępu."</string>
+    <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Wyłącz skrót"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Użyj skrótu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Skrót ułatwień dostępu wyłączył usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skrót ułatwień dostępu wyłączył usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Wybierz funkcję używaną po kliknięciu przycisku ułatwień dostępu."</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Aby zmienić funkcje, kliknij i przytrzymaj przycisk ułatwień dostępu."</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Powiększenie"</string>
     <string name="user_switched" msgid="3768006783166984410">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Przełączam na użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Wylogowuję użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Właściciel"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Błąd"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Ta zmiana nie jest dozwolona przez administratora"</string>
+    <string name="error_message_change_not_allowed" msgid="1238035947357923497">"Ta zmiana nie jest dozwolona przez administratora"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nie znaleziono aplikacji do obsługi tej akcji"</string>
     <string name="revoke" msgid="5404479185228271586">"Cofnij"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1604,7 +1631,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Nie jest włączona usługa drukowania"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Usługa <xliff:g id="NAME">%s</xliff:g> zainstalowana"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Dotknij, by włączyć"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Podaj PIN administratora"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Wpisz kod PIN administratora"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Podaj PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Nieprawidłowy"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Bieżący PIN"</string>
@@ -1634,16 +1661,16 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 3"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"Aby odpiąć ten ekran, naciśnij i przytrzymaj Wstecz oraz Przegląd."</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacja jest przypięta. Nie możesz jej odpiąć na tym urządzeniu."</string>
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"Aby odpiąć ten ekran, naciśnij i przytrzymaj Wstecz oraz Przegląd"</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Tej aplikacji nie można odpiąć"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran przypięty"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran odpięty"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Podaj PIN, aby odpiąć"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Aby odpiąć, poproś o wzór odblokowania"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Aby odpiąć, poproś o hasło"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"Zainstalowany przez administratora"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"Zaktualizowane przez administratora"</string>
-    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Usunięty przez administratora"</string>
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"Zainstalowany przez administratora"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
+    <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje, usługi lokalizacyjne i przetwarzanie większości danych w tle. Poczta, czat i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
@@ -1734,7 +1761,7 @@
       <item quantity="other">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Wybrano <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="6950908610709016902">"Inne"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Bez kategorii"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ustawiłeś ważność tych powiadomień."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ta wiadomość jest ważna ze względu na osoby uczestniczące w wątku."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
@@ -1746,8 +1773,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Wszystkie języki"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Wszystkie kraje"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Szukaj"</string>
-    <string name="work_mode_off_title" msgid="8954725060677558855">"Tryb pracy jest WYŁĄCZONY"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"Włącz profil do pracy, w tym aplikacje, synchronizację w tle i inne funkcje."</string>
+    <string name="work_mode_off_title" msgid="2615362773958585967">"Włączyć tryb do pracy?"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"Spowoduje to włączenie Twojego profilu do pracy, w tym aplikacji, synchronizacji w tle i innych funkcji."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Włącz"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Masz nowe wiadomości"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Otwórz aplikację do SMS-ów, by wyświetlić wiadomość"</string>
@@ -1783,29 +1810,41 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktywność"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Pamięć urządzenia"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Debugowanie USB"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"godzina"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minuta"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"godz."</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"min"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Ustawianie godziny"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Wpisz prawidłowy czas"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Podaj czas"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Aby wprowadzić czas, włącz tryb wprowadzania tekstu."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Aby wprowadzić czas, włącz tryb zegara."</string>
-    <!-- no translation found for autofill_picker_accessibility_title (8469043291648711535) -->
-    <skip />
-    <string name="autofill_save_title" msgid="7081244500504163245">"Zapisać w: <xliff:g id="LABEL">%1$s</xliff:g>?"</string>
-    <string name="autofill_save_title_with_type" msgid="4977385733042555659">"Zapisać element <xliff:g id="TYPE">%1$s</xliff:g> w: <xliff:g id="LABEL">%2$s</xliff:g>?"</string>
+    <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcje autouzupełniania"</string>
+    <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Zapisywanie na potrzeby Autouzupełniania"</string>
+    <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Nie można automatycznie uzupełnić treści"</string>
+    <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Brak sugestii autouzupełniania"</string>
+    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> sugestie autouzupełniania</item>
+      <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> sugestii autouzupełniania</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> sugestii autouzupełniania</item>
+      <item quantity="one">Jedna sugestia autouzupełniania</item>
+    </plurals>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Zapisać w: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> – zapisać w: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> – zapisać w: &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> – zapisać w: &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Zapisz"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nie, dziękuję"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"hasło"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adres"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"karta kredytowa"</string>
-    <!-- no translation found for etws_primary_default_message_earthquake (5541962250262769193) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_tsunami (1887685943498368548) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_earthquake_and_tsunami (998797956848445862) -->
-    <skip />
-    <!-- no translation found for etws_primary_default_message_test (2709597093560037455) -->
-    <skip />
+    <string name="autofill_save_type_username" msgid="239040540379769562">"nazwa użytkownika"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"adres e-mail"</string>
+    <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Zachowaj spokój i poszukaj schronienia w pobliżu."</string>
+    <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Niezwłocznie ewakuuj się z regionów nabrzeżnych i położonych przy rzekach w bezpieczniejsze miejsce, np. na wzniesienie."</string>
+    <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Zachowaj spokój i poszukaj schronienia w pobliżu."</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test komunikatów alarmowych"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
+    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Niedozwolona karta SIM"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Nieobsługiwana karta SIM"</string>
+    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Niedozwolona karta SIM"</string>
+    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Niedozwolony telefon"</string>
 </resources>
