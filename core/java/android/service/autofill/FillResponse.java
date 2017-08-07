@@ -170,7 +170,7 @@ public final class FillResponse implements Parcelable {
          * @param ids id of Views that when focused will display the authentication UI affordance.
          *
          * @return This builder.
-         * @throw {@link IllegalArgumentException} if {@code ids} is {@code null} or empty, or if
+         * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
          * neither {@code authentication} nor {@code presentation} is non-{@code null}.
          *
          * @see android.app.PendingIntent#getIntentSender()

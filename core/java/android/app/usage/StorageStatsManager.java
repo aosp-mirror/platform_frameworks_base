@@ -119,8 +119,7 @@ public class StorageStatsManager {
      * could be reclaimed by the system.
      * <p>
      * Apps making logical decisions about disk space should always use
-     * {@link StorageManager#getAllocatableBytes(UUID, int)} instead of this
-     * value.
+     * {@link StorageManager#getAllocatableBytes(UUID)} instead of this value.
      *
      * @param storageUuid the UUID of the storage volume you're interested in,
      *            such as {@link StorageManager#UUID_DEFAULT}.

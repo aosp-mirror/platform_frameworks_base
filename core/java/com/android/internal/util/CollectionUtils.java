@@ -34,7 +34,7 @@ import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
- * Utility methods for dealing with (typically {@link Nullable}) {@link Collection}s
+ * Utility methods for dealing with (typically {@code Nullable}) {@link Collection}s
  *
  * Unless a method specifies otherwise, a null value for a collection is treated as an empty
  * collection of that type.
