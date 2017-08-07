@@ -116,13 +116,6 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
-    // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
-    // not allowed to spawn any additional threads, but we still spawn
-    // a binder thread from userspace when we call startThreadPool().
-    // See b/36066697 for rationale
-    ProcessState::self()->setThreadPoolMaxThreadCount(0);
-    ProcessState::self()->startThreadPool();
-
     const char* pname = argv[0];
     bool png = false;
     int32_t displayId = DEFAULT_DISPLAY_ID;
@@ -182,11 +175,19 @@ int main(int argc, char** argv)
         ISurfaceComposer::eRotate90, // 3 == DISPLAY_ORIENTATION_270
     };
 
+    // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
+    // not allowed to spawn any additional threads, but we still spawn
+    // a binder thread from userspace when we call startThreadPool().
+    // See b/36066697 for rationale
+    ProcessState::self()->setThreadPoolMaxThreadCount(0);
+    ProcessState::self()->startThreadPool();
+
     ScreenshotClient screenshot;
     sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
     if (display == NULL) {
         fprintf(stderr, "Unable to get handle for display %d\n", displayId);
-        return 1;
+        // b/36066697: Avoid running static destructors.
+        _exit(1);
     }
 
     Vector<DisplayInfo> configs;
@@ -195,7 +196,8 @@ int main(int argc, char** argv)
     if (static_cast<size_t>(activeConfig) >= configs.size()) {
         fprintf(stderr, "Active config %d not inside configs (size %zu)\n",
                 activeConfig, configs.size());
-        return 1;
+        // b/36066697: Avoid running static destructors.
+        _exit(1);
     }
     uint8_t displayOrientation = configs[activeConfig].orientation;
     uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
