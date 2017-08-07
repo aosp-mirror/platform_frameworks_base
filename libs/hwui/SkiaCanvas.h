@@ -37,12 +37,8 @@ public:
      *  @param canvas SkCanvas to handle calls made to this SkiaCanvas. Must
      *      not be NULL. This constructor does not take ownership, so the caller
      *      must guarantee that it remains valid while the SkiaCanvas is valid.
-     *  @param xformToSRGB Indicates if bitmaps should be xformed to the sRGB
-     *      color space before drawing.  This makes sense for software rendering.
-     *      For the picture case, it may make more sense to leave bitmaps as is,
-     *      and handle the xform when replaying the picture.
      */
-    explicit SkiaCanvas(SkCanvas* canvas, XformToSRGB xformToSRGB);
+    explicit SkiaCanvas(SkCanvas* canvas);
 
     virtual ~SkiaCanvas();
 
@@ -181,6 +177,9 @@ private:
 
     void drawPoints(const float* points, int count, const SkPaint& paint,
             SkCanvas::PointMode mode);
+
+    const SkPaint* addFilter(const SkPaint* origPaint, SkPaint* tmpPaint,
+            sk_sp<SkColorFilter> colorSpaceFilter);
 
     class Clip;
 
