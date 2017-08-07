@@ -34,9 +34,9 @@ import java.util.regex.Pattern;
  *
  * <p>See {@link SaveInfo.Builder#setValidator(Validator)} for examples.
  */
-public final class SimpleRegexValidator extends InternalValidator implements Validator, Parcelable {
+public final class RegexValidator extends InternalValidator implements Validator, Parcelable {
 
-    private static final String TAG = "SimpleRegexValidator";
+    private static final String TAG = "RegexValidator";
 
     private final AutofillId mId;
     private final Pattern mRegex;
@@ -49,7 +49,7 @@ public final class SimpleRegexValidator extends InternalValidator implements Val
      * matches the contents of the field identified by {@code id}, it returns {@code true};
      * otherwise, it returns {@code false}.
       */
-    public SimpleRegexValidator(@NonNull AutofillId id, @NonNull Pattern regex) {
+    public RegexValidator(@NonNull AutofillId id, @NonNull Pattern regex) {
         mId = Preconditions.checkNotNull(id);
         mRegex = Preconditions.checkNotNull(regex);
     }
@@ -76,7 +76,7 @@ public final class SimpleRegexValidator extends InternalValidator implements Val
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return "SimpleRegexValidator: [id=" + mId + ", regex=" + mRegex + "]";
+        return "RegexValidator: [id=" + mId + ", regex=" + mRegex + "]";
     }
 
     /////////////////////////////////////
@@ -93,17 +93,17 @@ public final class SimpleRegexValidator extends InternalValidator implements Val
         parcel.writeSerializable(mRegex);
     }
 
-    public static final Parcelable.Creator<SimpleRegexValidator> CREATOR =
-            new Parcelable.Creator<SimpleRegexValidator>() {
+    public static final Parcelable.Creator<RegexValidator> CREATOR =
+            new Parcelable.Creator<RegexValidator>() {
         @Override
-        public SimpleRegexValidator createFromParcel(Parcel parcel) {
-            return new SimpleRegexValidator(parcel.readParcelable(null),
+        public RegexValidator createFromParcel(Parcel parcel) {
+            return new RegexValidator(parcel.readParcelable(null),
                     (Pattern) parcel.readSerializable());
         }
 
         @Override
-        public SimpleRegexValidator[] newArray(int size) {
-            return new SimpleRegexValidator[size];
+        public RegexValidator[] newArray(int size) {
+            return new RegexValidator[size];
         }
     };
 }

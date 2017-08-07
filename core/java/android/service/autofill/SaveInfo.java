@@ -470,7 +470,7 @@ public final class SaveInfo implements Parcelable {
          * <p>Validator for a credit number that must have exactly 16 digits:
          *
          * <pre class="prettyprint">
-         * Validator validator = new SimpleRegexValidator(ccNumberId, "^\\d{16}$")
+         * Validator validator = new RegexValidator(ccNumberId, Pattern.compile(""^\\d{16}$"))
          * </pre>
          *
          * <p>Validator for a credit number that must pass a Luhn checksum and either have
@@ -483,8 +483,8 @@ public final class SaveInfo implements Parcelable {
          *   and(
          *     new LuhnChecksumValidator(ccNumberId),
          *     or(
-         *       new SimpleRegexValidator(ccNumberId, "^\\d{16}$"),
-         *       new SimpleRegexValidator(ccNumberId, "^108\\d{12}$")
+         *       new RegexValidator(ccNumberId, Pattern.compile(""^\\d{16}$")),
+         *       new RegexValidator(ccNumberId, Pattern.compile(""^108\\d{12}$"))
          *     )
          *   );
          * </pre>
@@ -496,7 +496,7 @@ public final class SaveInfo implements Parcelable {
          * Validator validator =
          *   and(
          *     new LuhnChecksumValidator(ccNumberId),
-         *     new SimpleRegexValidator(ccNumberId, "^(\\d{16}|108\\d{12})$")
+         *     new RegexValidator(ccNumberId, Pattern.compile(""^(\\d{16}|108\\d{12})$"))
          *   );
          * </pre>
          *
@@ -508,10 +508,10 @@ public final class SaveInfo implements Parcelable {
          *
          * Validator validator =
          *   and(
-         *     new SimpleRegexValidator(ccNumberId1, "^\\d{4}$"),
-         *     new SimpleRegexValidator(ccNumberId2, "^\\d{4}$"),
-         *     new SimpleRegexValidator(ccNumberId3, "^\\d{4}$"),
-         *     new SimpleRegexValidator(ccNumberId4, "^\\d{4}$")
+         *     new RegexValidator(ccNumberId1, Pattern.compile(""^\\d{4}$")),
+         *     new RegexValidator(ccNumberId2, Pattern.compile(""^\\d{4}$")),
+         *     new RegexValidator(ccNumberId3, Pattern.compile(""^\\d{4}$")),
+         *     new RegexValidator(ccNumberId4, Pattern.compile(""^\\d{4}$"))
          *   );
          * </pre>
          *
