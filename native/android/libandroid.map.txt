@@ -198,6 +198,7 @@ LIBANDROID {
     ASharedMemory_create; # introduced=26
     ASharedMemory_getSize; # introduced=26
     ASharedMemory_setProt; # introduced=26
+    ASharedMemory_dupFromJava; # introduced=27
     AStorageManager_delete;
     AStorageManager_getMountedObbPath;
     AStorageManager_isObbMounted;

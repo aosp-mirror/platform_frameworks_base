@@ -219,6 +219,8 @@ public class MemoryFile {
      * The returned file descriptor is not duplicated.
      *
      * @throws IOException If the memory file has been closed.
+     *
+     * @hide
      */
     public FileDescriptor getFileDescriptor() throws IOException {
         return mSharedMemory.getFileDescriptor();
