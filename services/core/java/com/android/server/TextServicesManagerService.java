@@ -793,11 +793,27 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 Slog.d(TAG, "onServiceConnectedLocked");
             }
 
+            if (mUnbindCalled) {
+                return;
+            }
             mSpellChecker = spellChecker;
             mConnected = true;
             // Dispatch pending getISpellCheckerSession requests.
-            mPendingSessionRequests.forEach(this::getISpellCheckerSessionLocked);
-            mPendingSessionRequests.clear();
+            try {
+                final int size = mPendingSessionRequests.size();
+                for (int i = 0; i < size; ++i) {
+                    final SessionRequest request = mPendingSessionRequests.get(i);
+                    mSpellChecker.getISpellCheckerSession(
+                            request.mLocale, request.mScListener, request.mBundle,
+                            new ISpellCheckerServiceCallbackBinder(this, request));
+                    mOnGoingSessionRequests.add(request);
+                }
+                mPendingSessionRequests.clear();
+            } catch(RemoteException e) {
+                // The target spell checker service is not available.  Better to reset the state.
+                removeAllLocked();
+            }
+            cleanLocked();
         }
 
         public void onServiceDisconnectedLocked() {
@@ -866,13 +882,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
             if (!mConnected) {
                 mPendingSessionRequests.add(request);
-                return;
-            }
-            getISpellCheckerSessionLocked(request);
-        }
-
-        private void getISpellCheckerSessionLocked(@NonNull SessionRequest request) {
-            if (mUnbindCalled) {
                 return;
             }
             try {
