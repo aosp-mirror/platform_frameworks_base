@@ -26,6 +26,7 @@ import android.content.pm.PackageParser.Component;
 import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.Permission;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.FileUtils;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -39,6 +40,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.function.Function;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -271,22 +273,27 @@ public class PackageParserTest {
         assertEquals(0x0083, finalConfigChanges); // Should be 10000011.
     }
 
+    Package parsePackage(String apkFileName, int apkResourceId) throws Exception {
+        return parsePackage(apkFileName, apkResourceId, p -> p);
+    }
+
     /**
      * Attempts to parse a package.
      *
      * APKs are put into coretests/apks/packageparser_*.
      *
-     * @param apkName temporary file name to store apk extracted from resources
+     * @param apkFileName temporary file name to store apk extracted from resources
      * @param apkResourceId identifier of the apk as a resource
      */
-    Package parsePackage(String apkFileName, int apkResourceId) throws Exception {
+    Package parsePackage(String apkFileName, int apkResourceId,
+            Function<Package, Package> converter) throws Exception {
         // Copy the resource to a file.
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File outFile = new File(context.getFilesDir(), apkFileName);
         try {
             InputStream is = context.getResources().openRawResource(apkResourceId);
             assertTrue(FileUtils.copyToFile(is, outFile));
-            return new PackageParser().parsePackage(outFile, 0 /* flags */);
+            return converter.apply(new PackageParser().parsePackage(outFile, 0 /* flags */));
         } finally {
             outFile.delete();
         }
@@ -331,10 +338,39 @@ public class PackageParserTest {
         assertEquals(protectionLevel, permission.info.protectionLevel);
     }
 
+    private void assertMetadata(Bundle b, String... keysAndValues) {
+        assertTrue("Odd number of elements in keysAndValues", (keysAndValues.length % 2) == 0);
+
+        assertNotNull(b);
+        assertEquals(keysAndValues.length / 2, b.size());
+
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            final String key = keysAndValues[i];
+            final String value = keysAndValues[i + 1];
+
+            assertEquals(value, b.getString(key));
+        }
+    }
+
+    // TODO Add a "_cached" test for testMultiPackageComponents() too, after fixing b/64295061.
+    // Package.writeToParcel can't handle circular package references.
+
     @Test
-    public void testPackageWithComponents() throws Exception {
+    public void testPackageWithComponents_no_cache() throws Exception {
+        checkPackageWithComponents(p -> p);
+    }
+
+    @Test
+    public void testPackageWithComponents_cached() throws Exception {
+        checkPackageWithComponents(p ->
+                PackageParser.fromCacheEntryStatic(PackageParser.toCacheEntryStatic(p)));
+    }
+
+    private void checkPackageWithComponents(
+            Function<Package, Package> converter) throws Exception {
         Package p = parsePackage(
-                "install_complete_package_info.apk", R.raw.install_complete_package_info);
+                "install_complete_package_info.apk", R.raw.install_complete_package_info,
+                converter);
         String packageName = "com.android.frameworks.coretests.install_complete_package_info";
 
         assertEquals(packageName, p.packageName);
@@ -344,6 +380,22 @@ public class PackageParserTest {
                 packageName, PermissionInfo.PROTECTION_NORMAL, p.permissions.get(0));
 
         assertOneComponentOfEachType("com.android.frameworks.coretests.Test%s", p);
+
+        assertMetadata(p.mAppMetaData,
+                "key1", "value1",
+                "key2", "this_is_app");
+        assertMetadata(p.activities.get(0).metaData,
+                "key1", "value1",
+                "key2", "this_is_activity");
+        assertMetadata(p.services.get(0).metaData,
+                "key1", "value1",
+                "key2", "this_is_service");
+        assertMetadata(p.receivers.get(0).metaData,
+                "key1", "value1",
+                "key2", "this_is_receiver");
+        assertMetadata(p.providers.get(0).metaData,
+                "key1", "value1",
+                "key2", "this_is_provider");
     }
 
     @Test
