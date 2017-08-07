@@ -775,7 +775,7 @@ public final class NetworkCapabilities implements Parcelable {
         // TODO: consider only enforcing that capabilities are not removed, allowing addition.
         // Ignore NOT_METERED being added or removed as it is effectively dynamic. http://b/63326103
         // TODO: properly support NOT_METERED as a mutable and requestable capability.
-        final long mask = ~MUTABLE_CAPABILITIES & ~NET_CAPABILITY_NOT_METERED;
+        final long mask = ~MUTABLE_CAPABILITIES & ~(1 << NET_CAPABILITY_NOT_METERED);
         long oldImmutableCapabilities = this.mNetworkCapabilities & mask;
         long newImmutableCapabilities = that.mNetworkCapabilities & mask;
         if (oldImmutableCapabilities != newImmutableCapabilities) {
