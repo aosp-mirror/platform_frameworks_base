@@ -2042,6 +2042,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (dc == null) {
             return;
         }
+
+        // If layout is currently deferred, we want to hold of with updating the layers.
+        if (mService.mWindowPlacerLocked.isLayoutDeferred()) {
+            return;
+        }
         final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
         if (dimLayerUser != null && dc.mDimLayerController.isDimming(dimLayerUser, mWinAnimator)) {
             // Force an animation pass just to update the mDimLayer layer.
