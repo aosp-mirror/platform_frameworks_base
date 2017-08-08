@@ -60,8 +60,6 @@ public:
 /**
  * Kernel wakeup sources parser, parses text to protobuf in /d/wakeup_sources
  */
-extern const char* kernel_wake_headers[];
-
 class KernelWakesParser : public TextParserBase {
 public:
     KernelWakesParser() : TextParserBase(String8("KernelWakeSources")) {};
@@ -73,8 +71,6 @@ public:
 /**
  * Procrank parser, parses text produced by command procrank
  */
-extern const char* procrank_headers[];
-
 class ProcrankParser : public TextParserBase {
 public:
     ProcrankParser() : TextParserBase(String8("ProcrankParser")) {};
