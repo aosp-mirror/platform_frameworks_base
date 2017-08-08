@@ -34,18 +34,6 @@ public class SmsCbConstants {
     public static final int MESSAGE_ID_GSMA_ALLOCATED_CHANNEL_50
             = 0x0032;
 
-    /** Channel 911 required by Taiwan NCC. ID 0~999 is allocated by GSMA */
-    public static final int MESSAGE_ID_GSMA_ALLOCATED_CHANNEL_911
-            = 0x038F; // 911
-
-    /** Channel 919 required by Taiwan NCC and Israel. ID 0~999 is allocated by GSMA */
-    public static final int MESSAGE_ID_GSMA_ALLOCATED_CHANNEL_919
-            = 0x0397; // 919
-
-    /** Channel 928 required by Israel. ID 0~999 is allocated by GSMA */
-    public static final int MESSAGE_ID_GSMA_ALLOCATED_CHANNEL_928
-            = 0x03A0; // 928
-
     /** Start of PWS Message Identifier range (includes ETWS and CMAS). */
     public static final int MESSAGE_ID_PWS_FIRST_IDENTIFIER
             = 0x1100; // 4352
