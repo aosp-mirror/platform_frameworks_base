@@ -24,9 +24,9 @@
 
 #include "android-base/logging.h"
 
-using google::protobuf::io::CodedOutputStream;
-using google::protobuf::io::CodedInputStream;
-using google::protobuf::io::ZeroCopyOutputStream;
+using ::google::protobuf::io::CodedInputStream;
+using ::google::protobuf::io::CodedOutputStream;
+using ::google::protobuf::io::ZeroCopyOutputStream;
 
 namespace aapt {
 
@@ -36,46 +36,46 @@ class PbSerializerVisitor : public RawValueVisitor {
  public:
   using RawValueVisitor::Visit;
 
-  /**
-   * Constructor to use when expecting to serialize any value.
-   */
-  PbSerializerVisitor(StringPool* source_pool, StringPool* symbol_pool,
-                      pb::Value* out_pb_value)
-      : source_pool_(source_pool),
-        symbol_pool_(symbol_pool),
-        out_pb_value_(out_pb_value),
-        out_pb_item_(nullptr) {}
+  // Constructor to use when expecting to serialize any value.
+  PbSerializerVisitor(StringPool* source_pool, pb::Value* out_pb_value)
+      : source_pool_(source_pool), out_pb_value_(out_pb_value), out_pb_item_(nullptr) {
+  }
 
-  /**
-   * Constructor to use when expecting to serialize an Item.
-   */
-  PbSerializerVisitor(StringPool* sourcePool, StringPool* symbolPool,
-                      pb::Item* outPbItem)
-      : source_pool_(sourcePool),
-        symbol_pool_(symbolPool),
-        out_pb_value_(nullptr),
-        out_pb_item_(outPbItem) {}
+  // Constructor to use when expecting to serialize an Item.
+  PbSerializerVisitor(StringPool* sourcePool, pb::Item* outPbItem)
+      : source_pool_(sourcePool), out_pb_value_(nullptr), out_pb_item_(outPbItem) {
+  }
 
   void Visit(Reference* ref) override {
     SerializeReferenceToPb(*ref, pb_item()->mutable_ref());
   }
 
   void Visit(String* str) override {
-    pb_item()->mutable_str()->set_idx(str->value.index());
+    pb_item()->mutable_str()->set_value(*str->value);
+  }
+
+  void Visit(RawString* str) override {
+    pb_item()->mutable_raw_str()->set_value(*str->value);
   }
 
   void Visit(StyledString* str) override {
-    pb_item()->mutable_str()->set_idx(str->value.index());
+    pb::StyledString* pb_str = pb_item()->mutable_styled_str();
+    pb_str->set_value(str->value->value);
+
+    for (const StringPool::Span& span : str->value->spans) {
+      pb::StyledString::Span* pb_span = pb_str->add_span();
+      pb_span->set_tag(*span.name);
+      pb_span->set_first_char(span.first_char);
+      pb_span->set_last_char(span.last_char);
+    }
   }
 
   void Visit(FileReference* file) override {
-    pb_item()->mutable_file()->set_path_idx(file->path.index());
+    pb_item()->mutable_file()->set_path(*file->path);
   }
 
-  void Visit(Id* id) override { pb_item()->mutable_id(); }
-
-  void Visit(RawString* raw_str) override {
-    pb_item()->mutable_raw_str()->set_idx(raw_str->value.index());
+  void Visit(Id* /*id*/) override {
+    pb_item()->mutable_id();
   }
 
   void Visit(BinaryPrimitive* prim) override {
@@ -119,7 +119,7 @@ class PbSerializerVisitor : public RawValueVisitor {
 
       pb::Item* pb_item = pb_entry->mutable_item();
       SerializeItemCommonToPb(entry.key, pb_entry);
-      PbSerializerVisitor sub_visitor(source_pool_, symbol_pool_, pb_item);
+      PbSerializerVisitor sub_visitor(source_pool_, pb_item);
       entry.value->Accept(&sub_visitor);
     }
   }
@@ -138,8 +138,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     for (auto& value : array->items) {
       pb::Array_Entry* pb_entry = pb_array->add_entries();
       SerializeItemCommonToPb(*value, pb_entry);
-      PbSerializerVisitor sub_visitor(source_pool_, symbol_pool_,
-                                      pb_entry->mutable_item());
+      PbSerializerVisitor sub_visitor(source_pool_, pb_entry->mutable_item());
       value->Accept(&sub_visitor);
     }
   }
@@ -157,7 +156,7 @@ class PbSerializerVisitor : public RawValueVisitor {
       pb_entry->set_arity(SerializePluralEnumToPb(i));
       pb::Item* pb_element = pb_entry->mutable_item();
       SerializeItemCommonToPb(*plural->values[i], pb_entry);
-      PbSerializerVisitor sub_visitor(source_pool_, symbol_pool_, pb_element);
+      PbSerializerVisitor sub_visitor(source_pool_, pb_element);
       plural->values[i]->Accept(&sub_visitor);
     }
   }
@@ -179,8 +178,7 @@ class PbSerializerVisitor : public RawValueVisitor {
 
   template <typename T>
   void SerializeItemCommonToPb(const Item& item, T* pb_item) {
-    SerializeSourceToPb(item.GetSource(), source_pool_,
-                        pb_item->mutable_source());
+    SerializeSourceToPb(item.GetSource(), source_pool_, pb_item->mutable_source());
     if (!item.GetComment().empty()) {
       pb_item->set_comment(item.GetComment());
     }
@@ -192,8 +190,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
 
     if (ref.name) {
-      StringPool::Ref symbol_ref = symbol_pool_->MakeRef(ref.name.value().ToString());
-      pb_ref->set_symbol_idx(static_cast<uint32_t>(symbol_ref.index()));
+      pb_ref->set_name(ref.name.value().ToString());
     }
 
     pb_ref->set_private_(ref.private_reference);
@@ -201,7 +198,6 @@ class PbSerializerVisitor : public RawValueVisitor {
   }
 
   StringPool* source_pool_;
-  StringPool* symbol_pool_;
   pb::Value* out_pb_value_;
   pb::Item* out_pb_item_;
 };
@@ -220,9 +216,7 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
   });
 
   auto pb_table = util::make_unique<pb::ResourceTable>();
-  SerializeStringPoolToPb(table->string_pool, pb_table->mutable_string_pool());
-
-  StringPool source_pool, symbol_pool;
+  StringPool source_pool;
 
   for (auto& package : table->packages) {
     pb::Package* pb_package = pb_table->add_packages();
@@ -270,7 +264,7 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
             pb_value->set_weak(true);
           }
 
-          PbSerializerVisitor visitor(&source_pool, &symbol_pool, pb_value);
+          PbSerializerVisitor visitor(&source_pool, pb_value);
           config_value->value->Accept(&visitor);
         }
       }
@@ -278,7 +272,6 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
   }
 
   SerializeStringPoolToPb(source_pool, pb_table->mutable_source_pool());
-  SerializeStringPoolToPb(symbol_pool, pb_table->mutable_symbol_pool());
   return pb_table;
 }
 
