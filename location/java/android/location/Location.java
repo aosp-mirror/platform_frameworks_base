@@ -766,11 +766,6 @@ public class Location implements Parcelable {
      * then there is a 68% probability that the true location is inside
      * the circle.
      *
-     * <p>In statistical terms, it is assumed that location errors
-     * are random with a normal distribution, so the 68% confidence circle
-     * represents one standard deviation. Note that in practice, location
-     * errors do not always follow such a simple distribution.
-     *
      * <p>This accuracy estimation is only concerned with horizontal
      * accuracy, and does not indicate the accuracy of bearing,
      * velocity or altitude if those are included in this Location.
