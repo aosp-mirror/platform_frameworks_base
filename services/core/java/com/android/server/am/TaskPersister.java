@@ -679,100 +679,109 @@ public class TaskPersister {
                 }
                 writeTaskIdsFiles();
 
-                // If mNextWriteTime, then don't delay between each call to saveToXml().
-                final WriteQueueItem item;
-                synchronized (TaskPersister.this) {
-                    if (mNextWriteTime != FLUSH_QUEUE) {
-                        // The next write we don't have to wait so long.
-                        mNextWriteTime = SystemClock.uptimeMillis() + INTER_WRITE_DELAY_MS;
-                        if (DEBUG) Slog.d(TAG, "Next write time may be in " +
-                                INTER_WRITE_DELAY_MS + " msec. (" + mNextWriteTime + ")");
-                    }
+                processNextItem();
+            }
+        }
 
-                    while (mWriteQueue.isEmpty()) {
-                        if (mNextWriteTime != 0) {
-                            mNextWriteTime = 0; // idle.
-                            TaskPersister.this.notifyAll(); // wake up flush() if needed.
-                        }
-                        try {
-                            if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting indefinitely.");
-                            TaskPersister.this.wait();
-                        } catch (InterruptedException e) {
-                        }
-                        // Invariant: mNextWriteTime is either FLUSH_QUEUE or PRE_WRITE_DELAY_MS
-                        // from now.
-                    }
-                    item = mWriteQueue.remove(0);
+        private void processNextItem() {
+            // This part is extracted into a method so that the GC can clearly see the end of the
+            // scope of the variable 'item'.  If this part was in the loop above, the last item
+            // it processed would always "leak".
+            // See https://b.corp.google.com/issues/64438652#comment7
 
-                    long now = SystemClock.uptimeMillis();
-                    if (DEBUG) Slog.d(TAG, "LazyTaskWriter: now=" + now + " mNextWriteTime=" +
-                            mNextWriteTime + " mWriteQueue.size=" + mWriteQueue.size());
-                    while (now < mNextWriteTime) {
-                        try {
-                            if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting " +
-                                    (mNextWriteTime - now));
-                            TaskPersister.this.wait(mNextWriteTime - now);
-                        } catch (InterruptedException e) {
-                        }
-                        now = SystemClock.uptimeMillis();
-                    }
-
-                    // Got something to do.
+            // If mNextWriteTime, then don't delay between each call to saveToXml().
+            final WriteQueueItem item;
+            synchronized (TaskPersister.this) {
+                if (mNextWriteTime != FLUSH_QUEUE) {
+                    // The next write we don't have to wait so long.
+                    mNextWriteTime = SystemClock.uptimeMillis() + INTER_WRITE_DELAY_MS;
+                    if (DEBUG) Slog.d(TAG, "Next write time may be in " +
+                            INTER_WRITE_DELAY_MS + " msec. (" + mNextWriteTime + ")");
                 }
 
-                if (item instanceof ImageWriteQueueItem) {
-                    ImageWriteQueueItem imageWriteQueueItem = (ImageWriteQueueItem) item;
-                    final String filePath = imageWriteQueueItem.mFilePath;
-                    if (!createParentDirectory(filePath)) {
-                        Slog.e(TAG, "Error while creating images directory for file: " + filePath);
-                        continue;
+                while (mWriteQueue.isEmpty()) {
+                    if (mNextWriteTime != 0) {
+                        mNextWriteTime = 0; // idle.
+                        TaskPersister.this.notifyAll(); // wake up flush() if needed.
                     }
-                    final Bitmap bitmap = imageWriteQueueItem.mImage;
-                    if (DEBUG) Slog.d(TAG, "writing bitmap: filename=" + filePath);
-                    FileOutputStream imageFile = null;
                     try {
-                        imageFile = new FileOutputStream(new File(filePath));
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, imageFile);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "saveImage: unable to save " + filePath, e);
-                    } finally {
-                        IoUtils.closeQuietly(imageFile);
+                        if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting indefinitely.");
+                        TaskPersister.this.wait();
+                    } catch (InterruptedException e) {
                     }
-                } else if (item instanceof TaskWriteQueueItem) {
-                    // Write out one task.
-                    StringWriter stringWriter = null;
-                    TaskRecord task = ((TaskWriteQueueItem) item).mTask;
-                    if (DEBUG) Slog.d(TAG, "Writing task=" + task);
-                    synchronized (mService) {
-                        if (task.inRecents) {
-                            // Still there.
-                            try {
-                                if (DEBUG) Slog.d(TAG, "Saving task=" + task);
-                                stringWriter = saveToXml(task);
-                            } catch (IOException e) {
-                            } catch (XmlPullParserException e) {
-                            }
-                        }
+                    // Invariant: mNextWriteTime is either FLUSH_QUEUE or PRE_WRITE_DELAY_MS
+                    // from now.
+                }
+                item = mWriteQueue.remove(0);
+
+                long now = SystemClock.uptimeMillis();
+                if (DEBUG) Slog.d(TAG, "LazyTaskWriter: now=" + now + " mNextWriteTime=" +
+                        mNextWriteTime + " mWriteQueue.size=" + mWriteQueue.size());
+                while (now < mNextWriteTime) {
+                    try {
+                        if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting " +
+                                (mNextWriteTime - now));
+                        TaskPersister.this.wait(mNextWriteTime - now);
+                    } catch (InterruptedException e) {
                     }
-                    if (stringWriter != null) {
-                        // Write out xml file while not holding mService lock.
-                        FileOutputStream file = null;
-                        AtomicFile atomicFile = null;
+                    now = SystemClock.uptimeMillis();
+                }
+
+                // Got something to do.
+            }
+
+            if (item instanceof ImageWriteQueueItem) {
+                ImageWriteQueueItem imageWriteQueueItem = (ImageWriteQueueItem) item;
+                final String filePath = imageWriteQueueItem.mFilePath;
+                if (!createParentDirectory(filePath)) {
+                    Slog.e(TAG, "Error while creating images directory for file: " + filePath);
+                    return;
+                }
+                final Bitmap bitmap = imageWriteQueueItem.mImage;
+                if (DEBUG) Slog.d(TAG, "writing bitmap: filename=" + filePath);
+                FileOutputStream imageFile = null;
+                try {
+                    imageFile = new FileOutputStream(new File(filePath));
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, imageFile);
+                } catch (Exception e) {
+                    Slog.e(TAG, "saveImage: unable to save " + filePath, e);
+                } finally {
+                    IoUtils.closeQuietly(imageFile);
+                }
+            } else if (item instanceof TaskWriteQueueItem) {
+                // Write out one task.
+                StringWriter stringWriter = null;
+                TaskRecord task = ((TaskWriteQueueItem) item).mTask;
+                if (DEBUG) Slog.d(TAG, "Writing task=" + task);
+                synchronized (mService) {
+                    if (task.inRecents) {
+                        // Still there.
                         try {
-                            atomicFile = new AtomicFile(new File(
-                                    getUserTasksDir(task.userId),
-                                    String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
-                            file = atomicFile.startWrite();
-                            file.write(stringWriter.toString().getBytes());
-                            file.write('\n');
-                            atomicFile.finishWrite(file);
+                            if (DEBUG) Slog.d(TAG, "Saving task=" + task);
+                            stringWriter = saveToXml(task);
                         } catch (IOException e) {
-                            if (file != null) {
-                                atomicFile.failWrite(file);
-                            }
-                            Slog.e(TAG,
-                                    "Unable to open " + atomicFile + " for persisting. " + e);
+                        } catch (XmlPullParserException e) {
                         }
+                    }
+                }
+                if (stringWriter != null) {
+                    // Write out xml file while not holding mService lock.
+                    FileOutputStream file = null;
+                    AtomicFile atomicFile = null;
+                    try {
+                        atomicFile = new AtomicFile(new File(
+                                getUserTasksDir(task.userId),
+                                String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
+                        file = atomicFile.startWrite();
+                        file.write(stringWriter.toString().getBytes());
+                        file.write('\n');
+                        atomicFile.finishWrite(file);
+                    } catch (IOException e) {
+                        if (file != null) {
+                            atomicFile.failWrite(file);
+                        }
+                        Slog.e(TAG,
+                                "Unable to open " + atomicFile + " for persisting. " + e);
                     }
                 }
             }
