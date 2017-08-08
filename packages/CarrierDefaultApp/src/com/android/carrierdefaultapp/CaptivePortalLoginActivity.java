@@ -20,6 +20,9 @@ import android.app.Activity;
 import android.app.LoadedApk;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -34,6 +37,7 @@ import android.os.Bundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TypedValue;
@@ -68,7 +72,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private static final boolean DBG = true;
 
     private static final int SOCKET_TIMEOUT_MS = 10 * 1000;
-    public static final int NETWORK_REQUEST_TIMEOUT_MS = 5 * 1000;
+    private static final int NETWORK_REQUEST_TIMEOUT_MS = 5 * 1000;
 
     private URL mUrl;
     private Network mNetwork;
@@ -188,16 +192,19 @@ public class CaptivePortalLoginActivity extends Activity {
             CarrierActionUtils.applyCarrierAction(
                     CarrierActionUtils.CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS, getIntent(),
                     getApplicationContext());
-
+            CarrierActionUtils.applyCarrierAction(
+                    CarrierActionUtils.CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER, getIntent(),
+                    getApplicationContext());
+            CarrierActionUtils.applyCarrierAction(
+                    CarrierActionUtils.CARRIER_ACTION_DEREGISTER_DEFAULT_NETWORK_AVAIL, getIntent(),
+                    getApplicationContext());
         }
         finishAndRemoveTask();
     }
 
     private URL getUrlForCaptivePortal() {
         String url = getIntent().getStringExtra(TelephonyIntents.EXTRA_REDIRECTION_URL_KEY);
-        if (url.isEmpty()) {
-            url = mCm.getCaptivePortalServerUrl();
-        }
+        if (TextUtils.isEmpty(url)) url = mCm.getCaptivePortalServerUrl();
         final CarrierConfigManager configManager = getApplicationContext()
                 .getSystemService(CarrierConfigManager.class);
         final int subId = getIntent().getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
@@ -435,6 +442,27 @@ public class CaptivePortalLoginActivity extends Activity {
         if (!isFinishing()) {
             runOnUiThread(r);
         }
+    }
+
+    /**
+     * This alias presents the target activity, CaptivePortalLoginActivity, as a independent
+     * entity with its own intent filter to handle URL links. This alias will be enabled/disabled
+     * dynamically to handle url links based on the network conditions.
+     */
+    public static String getAlias(Context context) {
+        try {
+            PackageInfo p = context.getPackageManager().getPackageInfo(context.getPackageName(),
+                    PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS);
+            for (ActivityInfo activityInfo : p.activities) {
+                String targetActivity = activityInfo.targetActivity;
+                if (CaptivePortalLoginActivity.class.getName().equals(targetActivity)) {
+                    return activityInfo.name;
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static void logd(String s) {
