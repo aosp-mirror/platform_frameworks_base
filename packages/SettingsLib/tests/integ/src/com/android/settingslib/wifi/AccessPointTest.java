@@ -247,7 +247,7 @@ public class AccessPointTest {
         scanResult.BSSID = "bssid";
         scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
         scanResult.capabilities = "";
-        assertThat(ap.update(scanResult)).isTrue();
+        assertThat(ap.update(scanResult, true /* evict old scan results */)).isTrue();
 
         assertThat(ap.getRssi()).isEqualTo(expectedRssi);
     }
