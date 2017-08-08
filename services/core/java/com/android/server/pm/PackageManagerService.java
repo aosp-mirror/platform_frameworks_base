@@ -143,6 +143,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
+import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstantAppInfo;
@@ -2304,6 +2305,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 factoryTest, onlyCore);
         m.enableSystemUserPackages();
         ServiceManager.addService("package", m);
+        final PackageManagerNative pmn = m.new PackageManagerNative();
+        ServiceManager.addService("package_native", pmn);
         return m;
     }
 
@@ -6409,7 +6412,18 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         synchronized (mPackages) {
-            return getNameForUidLocked(callingUid, uid);
+            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+            if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+                return sus.name + ":" + sus.userId;
+            } else if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                    return null;
+                }
+                return ps.name;
+            }
+            return null;
         }
     }
 
@@ -6426,25 +6440,23 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             for (int i = uids.length - 1; i >= 0; i--) {
                 final int uid = uids[i];
-                names[i] = getNameForUidLocked(callingUid, uid);
+                Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+                if (obj instanceof SharedUserSetting) {
+                    final SharedUserSetting sus = (SharedUserSetting) obj;
+                    names[i] = "shared:" + sus.name;
+                } else if (obj instanceof PackageSetting) {
+                    final PackageSetting ps = (PackageSetting) obj;
+                    if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                        names[i] = null;
+                    } else {
+                        names[i] = ps.name;
+                    }
+                } else {
+                    names[i] = null;
+                }
             }
         }
         return names;
-    }
-
-    private String getNameForUidLocked(int callingUid, int uid) {
-        Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
-        if (obj instanceof SharedUserSetting) {
-            final SharedUserSetting sus = (SharedUserSetting) obj;
-            return sus.name + ":" + sus.userId;
-        } else if (obj instanceof PackageSetting) {
-            final PackageSetting ps = (PackageSetting) obj;
-            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
-                return null;
-            }
-            return ps.name;
-        }
-        return null;
     }
 
     @Override
@@ -24801,6 +24813,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             } finally {
                 mPermissionListeners.finishBroadcast();
             }
+        }
+    }
+
+    private class PackageManagerNative extends IPackageManagerNative.Stub {
+        @Override
+        public String[] getNamesForUids(int[] uids) throws RemoteException {
+            final String[] results = PackageManagerService.this.getNamesForUids(uids);
+            // massage results so they can be parsed by the native binder
+            for (int i = results.length - 1; i >= 0; --i) {
+                if (results[i] == null) {
+                    results[i] = "";
+                }
+            }
+            return results;
         }
     }
 
