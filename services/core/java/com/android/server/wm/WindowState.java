@@ -444,6 +444,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mOrientationChanging;
 
     /**
+     * Sometimes in addition to the mOrientationChanging
+     * flag we report that the orientation is changing
+     * due to a mismatch in current and reported configuration.
+     *
+     * In the case of timeout we still need to make sure we
+     * leave the orientation changing state though, so we
+     * use this as a special time out escape hatch.
+     */
+    private boolean mOrientationChangeTimedOut;
+
+    /**
      * The orientation during the last visible call to relayout. If our
      * current orientation is different, the window can't be ready
      * to be shown.
@@ -1221,11 +1232,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         //                   better indicator consistent with the client.
         return (mOrientationChanging || (isVisible()
                 && getConfiguration().orientation != mLastReportedConfiguration.orientation))
-                && !mSeamlesslyRotated;
+                && !mSeamlesslyRotated
+                && !mOrientationChangeTimedOut;
     }
 
     void setOrientationChanging(boolean changing) {
         mOrientationChanging = changing;
+        mOrientationChangeTimedOut = false;
+    }
+
+    void orientationChangeTimedOut() {
+        mOrientationChangeTimedOut = true;
     }
 
     DisplayContent getDisplayContent() {
