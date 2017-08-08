@@ -40,7 +40,8 @@ LOCAL_JNI_SHARED_LIBRARIES := libframeworksnettestsjni \
     libnetdaidl \
     libui \
     libunwind \
-    libutils
+    libutils \
+    libunwindstack
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
