@@ -58,6 +58,10 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
             }
         }
 
+        if (!record.isRecentlyIntrusive()) {
+            return null;
+        }
+
         return new RankingReconsideration(record.getKey(), HANG_TIME_MS) {
             @Override
             public void work() {
