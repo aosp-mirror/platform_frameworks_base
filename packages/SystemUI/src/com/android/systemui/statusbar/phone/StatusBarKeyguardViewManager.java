@@ -113,7 +113,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // Since we won't get a setOccluded call we have to reset the view manually such that
             // the bouncer goes away.
             if (mOccluded) {
-                reset(false /* hideBouncerWhenShowing */);
+                reset(true /* hideBouncerWhenShowing */);
             }
         }
     };
@@ -316,6 +316,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 return;
             }
         }
+        boolean isOccluding = !mOccluded && occluded;
         mOccluded = occluded;
         if (mShowing) {
             mStatusBar.updateMediaMetaData(false, animate && !occluded);
@@ -326,7 +327,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (!mDozing) {
             // If Keyguard is reshown, don't hide the bouncer as it might just have been requested
             // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
-            reset(false /* hideBouncerWhenShowing*/);
+            reset(isOccluding /* hideBouncerWhenShowing*/);
         }
         if (animate && !occluded && mShowing) {
             mStatusBar.animateKeyguardUnoccluding();
