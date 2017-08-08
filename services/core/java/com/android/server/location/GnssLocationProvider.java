@@ -461,7 +461,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 requestUtcTime();
             }
             if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
-                xtraDownloadRequest();
+                if (mSupportsXtra) {
+                    // Download only if supported, (prevents an unneccesary on-boot download)
+                    xtraDownloadRequest();
+                }
             }
             // Always on, notify HAL so it can get data it needs
             sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
