@@ -253,10 +253,9 @@ StyledString* StyledString::Clone(StringPool* new_pool) const {
 }
 
 void StyledString::Print(std::ostream* out) const {
-  *out << "(styled string) \"" << *value->str << "\"";
+  *out << "(styled string) \"" << value->value << "\"";
   for (const StringPool::Span& span : value->spans) {
-    *out << " " << *span.name << ":" << span.first_char << ","
-         << span.last_char;
+    *out << " " << *span.name << ":" << span.first_char << "," << span.last_char;
   }
 }
 

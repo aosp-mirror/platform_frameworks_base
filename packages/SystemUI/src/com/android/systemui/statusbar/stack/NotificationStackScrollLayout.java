@@ -3714,6 +3714,9 @@ public class NotificationStackScrollLayout extends ViewGroup
      * See {@link AmbientState#setDark}.
      */
     public void setDark(boolean dark, boolean animate, @Nullable PointF touchWakeUpScreenLocation) {
+        if (mAmbientState.isDark() == dark) {
+            return;
+        }
         mAmbientState.setDark(dark);
         if (animate && mAnimationsEnabled) {
             mDarkNeedsAnimation = true;

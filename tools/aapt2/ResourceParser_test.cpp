@@ -117,7 +117,7 @@ TEST_F(ResourceParserTest, ParseStyledString) {
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
 
-  EXPECT_THAT(*str->value->str, Eq("This is my aunt\u2019s fickle string"));
+  EXPECT_THAT(str->value->value, Eq("This is my aunt\u2019s fickle string"));
   EXPECT_THAT(str->value->spans, SizeIs(2));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
@@ -190,7 +190,7 @@ TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInStyledString) {
 
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(*str->value->str, Eq("There are %1$d apples"));
+  EXPECT_THAT(str->value->value, Eq("There are %1$d apples"));
   ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
 
   // We expect indices and lengths that span to include the whitespace

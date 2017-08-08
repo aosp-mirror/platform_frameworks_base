@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -27,6 +28,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import java.util.Map;
 
@@ -249,7 +252,7 @@ public class MediaMetadataRetriever
      * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.
      */
-    public Bitmap getFrameAtTime(long timeUs, int option) {
+    public Bitmap getFrameAtTime(long timeUs, @Option int option) {
         if (option < OPTION_PREVIOUS_SYNC ||
             option > OPTION_CLOSEST) {
             throw new IllegalArgumentException("Unsupported option: " + option);
@@ -286,27 +289,27 @@ public class MediaMetadataRetriever
      * {@link #OPTION_CLOSEST} often has larger performance overhead compared
      * to the other options if there is no sync frame located at timeUs.
      *
-     * @param dst_width expected output bitmap width
-     * @param dst_height expected output bitmap height
-     * @return A Bitmap of size not larger than dst_width by dst_height containing a
+     * @param dstWidth expected output bitmap width
+     * @param dstHeight expected output bitmap height
+     * @return A Bitmap of size not larger than dstWidth by dstHeight containing a
      *         scaled video frame, which can be null, if such a frame cannot be retrieved.
      * @throws IllegalArgumentException if passed in invalid option or width by height
      *         is less than or equal to 0.
      */
     public Bitmap getScaledFrameAtTime(
-            long timeUs, int option, int dst_width, int dst_height) {
+            long timeUs, @Option int option, int dstWidth, int dstHeight) {
         if (option < OPTION_PREVIOUS_SYNC ||
             option > OPTION_CLOSEST) {
             throw new IllegalArgumentException("Unsupported option: " + option);
         }
-        if (dst_width <= 0) {
-            throw new IllegalArgumentException("Invalid width: " + dst_width);
+        if (dstWidth <= 0) {
+            throw new IllegalArgumentException("Invalid width: " + dstWidth);
         }
-        if (dst_height <= 0) {
-            throw new IllegalArgumentException("Invalid height: " + dst_height);
+        if (dstHeight <= 0) {
+            throw new IllegalArgumentException("Invalid height: " + dstHeight);
         }
 
-        return _getFrameAtTime(timeUs, option, dst_width, dst_height);
+        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight);
     }
 
     /**
@@ -426,6 +429,16 @@ public class MediaMetadataRetriever
      * @see #getFrameAtTime(long, int)
      */
     public static final int OPTION_CLOSEST          = 0x03;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "OPTION_" }, value = {
+            OPTION_PREVIOUS_SYNC,
+            OPTION_NEXT_SYNC,
+            OPTION_CLOSEST_SYNC,
+            OPTION_CLOSEST,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Option {}
 
     /*
      * Do not change these metadata key values without updating their

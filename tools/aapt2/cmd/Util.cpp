@@ -179,6 +179,13 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
         xml::Attribute{"", "configForSplit", app_info.split_name.value()});
   }
 
+  // Splits may contain more configurations than originally desired (fallback densities, etc.).
+  // This makes programmatic discovery of split targetting difficult. Encode the original
+  // split constraints intended for this split.
+  std::stringstream target_config_str;
+  target_config_str << util::Joiner(constraints.configs, ",");
+  manifest_el->attributes.push_back(xml::Attribute{"", "targetConfig", target_config_str.str()});
+
   std::unique_ptr<xml::Element> application_el = util::make_unique<xml::Element>();
   application_el->name = "application";
   application_el->attributes.push_back(

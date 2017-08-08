@@ -50,6 +50,8 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageParserCacheHelper.ReadHelper;
+import android.content.pm.PackageParserCacheHelper.WriteHelper;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -121,6 +123,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 
@@ -234,6 +237,11 @@ public class PackageParser {
     }
 
     private static final boolean LOG_UNSAFE_BROADCASTS = false;
+
+    /**
+     * Total number of packages that were read from the cache.  We use it only for logging.
+     */
+    public static final AtomicInteger sCachedPackageReadCount = new AtomicInteger();
 
     // Set of broadcast actions that are safe for manifest receivers
     private static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
@@ -1035,21 +1043,45 @@ public class PackageParser {
     }
 
     @VisibleForTesting
-    protected Package fromCacheEntry(byte[] bytes) throws IOException {
-        Parcel p = Parcel.obtain();
+    protected Package fromCacheEntry(byte[] bytes) {
+        return fromCacheEntryStatic(bytes);
+    }
+
+    /** static version of {@link #fromCacheEntry} for unit tests. */
+    @VisibleForTesting
+    public static Package fromCacheEntryStatic(byte[] bytes) {
+        final Parcel p = Parcel.obtain();
         p.unmarshall(bytes, 0, bytes.length);
         p.setDataPosition(0);
 
+        final ReadHelper helper = new ReadHelper(p);
+        helper.startAndInstall();
+
         PackageParser.Package pkg = new PackageParser.Package(p);
+
         p.recycle();
+
+        sCachedPackageReadCount.incrementAndGet();
 
         return pkg;
     }
 
     @VisibleForTesting
-    protected byte[] toCacheEntry(Package pkg) throws IOException {
-        Parcel p = Parcel.obtain();
+    protected byte[] toCacheEntry(Package pkg) {
+        return toCacheEntryStatic(pkg);
+
+    }
+
+    /** static version of {@link #toCacheEntry} for unit tests. */
+    @VisibleForTesting
+    public static byte[] toCacheEntryStatic(Package pkg) {
+        final Parcel p = Parcel.obtain();
+        final WriteHelper helper = new WriteHelper(p);
+
         pkg.writeToParcel(p, 0 /* flags */);
+
+        helper.finishAndUninstall();
+
         byte[] serialized = p.marshall();
         p.recycle();
 
@@ -1146,13 +1178,7 @@ public class PackageParser {
             }
         }
 
-        final byte[] cacheEntry;
-        try {
-            cacheEntry = toCacheEntry(parsed);
-        } catch (IOException ioe) {
-            Slog.e(TAG, "Unable to serialize parsed package for: " + packageFile);
-            return;
-        }
+        final byte[] cacheEntry = toCacheEntry(parsed);
 
         if (cacheEntry == null) {
             return;
@@ -6421,8 +6447,11 @@ public class PackageParser {
 
             dest.writeStringList(requestedPermissions);
             dest.writeStringList(protectedBroadcasts);
+
+            // TODO: This doesn't work: b/64295061
             dest.writeParcelable(parentPackage, flags);
             dest.writeParcelableList(childPackages, flags);
+
             dest.writeString(staticSharedLibName);
             dest.writeInt(staticSharedLibVersion);
             dest.writeStringList(libraryNames);

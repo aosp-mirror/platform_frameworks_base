@@ -31,7 +31,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeStyledString) {
       util::make_unique<StyledString>(pool.MakeRef(original_style)).get(),
       Pseudolocalizer::Method::kNone, &pool);
 
-  EXPECT_EQ(original_style.str, *new_string->value->str);
+  EXPECT_EQ(original_style.str, new_string->value->value);
   ASSERT_EQ(original_style.spans.size(), new_string->value->spans.size());
 
   EXPECT_EQ(std::string("i"), *new_string->value->spans[0].name);
@@ -52,7 +52,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeStyledString) {
       util::make_unique<StyledString>(pool.MakeRef(original_style)).get(),
       Pseudolocalizer::Method::kAccent, &pool);
 
-  EXPECT_EQ(std::string("[Ĥéļļö ŵöŕļð¡ one two]"), *new_string->value->str);
+  EXPECT_EQ(std::string("[Ĥéļļö ŵöŕļð¡ one two]"), new_string->value->value);
   ASSERT_EQ(original_style.spans.size(), new_string->value->spans.size());
 
   EXPECT_EQ(std::u16string(u"[").size(), new_string->value->spans[0].first_char);
@@ -79,7 +79,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeAdjacentNestedTags) {
       Pseudolocalizer::Method::kAccent, &pool);
   ASSERT_NE(nullptr, new_string);
   ASSERT_EQ(2u, new_string->value->spans.size());
-  EXPECT_EQ(std::string("[ɓöļð one]"), *new_string->value->str);
+  EXPECT_EQ(std::string("[ɓöļð one]"), new_string->value->value);
 
   EXPECT_EQ(std::string("b"), *new_string->value->spans[0].name);
   EXPECT_EQ(std::u16string(u"[").size(), new_string->value->spans[0].first_char);
@@ -101,7 +101,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeAdjacentTagsUnsorted) {
       Pseudolocalizer::Method::kAccent, &pool);
   ASSERT_NE(nullptr, new_string);
   ASSERT_EQ(2u, new_string->value->spans.size());
-  EXPECT_EQ(std::string("[ɓöļð one]"), *new_string->value->str);
+  EXPECT_EQ(std::string("[ɓöļð one]"), new_string->value->value);
 
   EXPECT_EQ(std::string("b"), *new_string->value->spans[0].name);
   EXPECT_EQ(std::u16string(u"[").size(), new_string->value->spans[0].first_char);
@@ -126,7 +126,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeNestedAndAdjacentTags) {
   ASSERT_EQ(4u, new_string->value->spans.size());
   EXPECT_EQ(std::string(
                 "[Ţĥîš šéñţéñçé îš ñöţ ŵĥåţ ýöû ţĥîñķ îţ îš åţ åļļ. one two three four five six]"),
-            *new_string->value->str);
+            new_string->value->value);
 
   EXPECT_EQ(std::string("b"), *new_string->value->spans[0].name);
   EXPECT_EQ(std::u16string(u"[Ţĥîš šéñţéñçé îš").size(), new_string->value->spans[0].first_char);
@@ -165,7 +165,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizePartsOfString) {
   ASSERT_NE(nullptr, new_string);
   ASSERT_EQ(2u, new_string->value->spans.size());
   EXPECT_EQ(std::string("[Ţĥîš šĥöûļð NOT ɓé þšéûðöļöçåļîžéð. one two three four]"),
-            *new_string->value->str);
+            new_string->value->value);
 
   EXPECT_EQ(std::string("em"), *new_string->value->spans[0].name);
   EXPECT_EQ(std::u16string(u"[Ţĥîš").size(), new_string->value->spans[0].first_char);
@@ -265,7 +265,7 @@ TEST(PseudolocaleGeneratorTest, RespectUntranslateableSections) {
   ASSERT_NE(nullptr, new_styled_string);
 
   // "world" should be untranslated.
-  EXPECT_NE(std::string::npos, new_styled_string->value->str->find("world"));
+  EXPECT_NE(std::string::npos, new_styled_string->value->value.find("world"));
 
   String* new_string = test::GetValueForConfig<String>(table.get(), "android:string/bar",
                                                        test::ParseConfigOrDie("en-rXA"));

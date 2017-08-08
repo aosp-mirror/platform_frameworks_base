@@ -54,6 +54,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -117,31 +118,58 @@ public class RecentsTransitionHelper {
             final Rect windowRect = Recents.getSystemServices().getWindowRect();
             transitionFuture = getAppTransitionFuture(
                     () -> composeAnimationSpecs(task, stackView, destinationStack, windowRect));
-            animStartedListener = () -> {
-                // If we are launching into another task, cancel the previous task's
-                // window transition
-                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-                EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
-                stackView.cancelAllTaskViewAnimations();
+            animStartedListener = new OnAnimationStartedListener() {
+                private boolean mHandled;
 
-                if (screenPinningRequested) {
-                    // Request screen pinning after the animation runs
-                    mStartScreenPinningRunnable.taskId = task.key.id;
-                    mHandler.postDelayed(mStartScreenPinningRunnable, 350);
+                @Override
+                public void onAnimationStarted() {
+                    if (mHandled) {
+                        return;
+                    }
+                    mHandled = true;
+
+                    // If we are launching into another task, cancel the previous task's
+                    // window transition
+                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                    stackView.cancelAllTaskViewAnimations();
+
+                    if (screenPinningRequested) {
+                        // Request screen pinning after the animation runs
+                        mStartScreenPinningRunnable.taskId = task.key.id;
+                        mHandler.postDelayed(mStartScreenPinningRunnable, 350);
+                    }
+
+                    // Reset the state where we are waiting for the transition to start
+                    EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
                 }
             };
         } else {
             // This is only the case if the task is not on screen (scrolled offscreen for example)
             transitionFuture = null;
-            animStartedListener = () -> {
-                // If we are launching into another task, cancel the previous task's
-                // window transition
-                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-                EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
-                stackView.cancelAllTaskViewAnimations();
+            animStartedListener = new OnAnimationStartedListener() {
+                private boolean mHandled;
+
+                @Override
+                public void onAnimationStarted() {
+                    if (mHandled) {
+                        return;
+                    }
+                    mHandled = true;
+
+                    // If we are launching into another task, cancel the previous task's
+                    // window transition
+                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                    stackView.cancelAllTaskViewAnimations();
+
+                    // Reset the state where we are waiting for the transition to start
+                    EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                }
             };
         }
 
+        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(true));
         final ActivityOptions opts = ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
                 mHandler, transitionFuture != null ? transitionFuture.future : null,
                 animStartedListener, true /* scaleUp */);
