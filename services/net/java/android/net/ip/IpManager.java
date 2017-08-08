@@ -36,6 +36,7 @@ import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.NetdService;
 import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
@@ -66,9 +67,11 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
@@ -423,6 +426,10 @@ public class IpManager extends StateMachine {
         }
 
         public boolean isValid() {
+            if (ipAddresses.isEmpty()) {
+                return false;
+            }
+
             // For every IP address, there must be at least one prefix containing that address.
             for (LinkAddress addr : ipAddresses) {
                 if (!any(directlyConnectedRoutes, (p) -> p.contains(addr.getAddress()))) {
@@ -459,14 +466,47 @@ public class IpManager extends StateMachine {
             return true;
         }
 
+        /**
+         * @return true if the given list of addressess and routes satisfies provisioning for this
+         * InitialConfiguration. LinkAddresses and RouteInfo objects are not compared with equality
+         * because addresses and routes seen by Netlink will contain additional fields like flags,
+         * interfaces, and so on. If this InitialConfiguration has no IP address specified, the
+         * provisioning check always fails.
+         *
+         * If the given list of routes is null, only addresses are taken into considerations.
+         */
+        public boolean isProvisionedBy(List<LinkAddress> addresses, List<RouteInfo> routes) {
+            if (ipAddresses.isEmpty()) {
+                return false;
+            }
+
+            for (LinkAddress addr : ipAddresses) {
+                if (!any(addresses, (addrSeen) -> addr.isSameAddressAs(addrSeen))) {
+                    return false;
+                }
+            }
+
+            if (routes != null) {
+                for (IpPrefix prefix : directlyConnectedRoutes) {
+                    if (!any(routes, (routeSeen) -> isDirectlyConnectedRoute(routeSeen, prefix))) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static boolean isDirectlyConnectedRoute(RouteInfo route, IpPrefix prefix) {
+            return !route.hasGateway() && prefix.equals(route.getDestination());
+        }
+
         private static boolean isPrefixLengthCompliant(LinkAddress addr) {
-            return (addr.getAddress() instanceof Inet4Address)
-                    || isCompliantIPv6PrefixLength(addr.getPrefixLength());
+            return addr.isIPv4() || isCompliantIPv6PrefixLength(addr.getPrefixLength());
         }
 
         private static boolean isPrefixLengthCompliant(IpPrefix prefix) {
-            return (prefix.getAddress() instanceof Inet4Address)
-                    || isCompliantIPv6PrefixLength(prefix.getPrefixLength());
+            return prefix.isIPv4() || isCompliantIPv6PrefixLength(prefix.getPrefixLength());
         }
 
         private static boolean isCompliantIPv6PrefixLength(int prefixLength) {
@@ -479,28 +519,7 @@ public class IpManager extends StateMachine {
         }
 
         private static boolean isIPv6GUA(LinkAddress addr) {
-            return (addr.getAddress() instanceof Inet6Address) && addr.isGlobalPreferred();
-        }
-
-        private static <T> boolean any(Iterable<T> coll, Predicate<T> fn) {
-            for (T t : coll) {
-                if (fn.test(t)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private static <T> boolean all(Iterable<T> coll, Predicate<T> fn) {
-            return !any(coll, not(fn));
-        }
-
-        private static <T> Predicate<T> not(Predicate<T> fn) {
-            return (t) -> !fn.test(t);
-        }
-
-        private static <T> String join(String delimiter, Collection<T> coll) {
-            return coll.stream().map(Object::toString).collect(Collectors.joining(delimiter));
+            return addr.isIPv6() && addr.isGlobalPreferred();
         }
     }
 
@@ -549,6 +568,7 @@ public class IpManager extends StateMachine {
     private final LocalLog mConnectivityPacketLog;
     private final MessageHandlingLogger mMsgStateLogger;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private final INetd mNetd;
 
     private NetworkInterface mNetworkInterface;
 
@@ -568,14 +588,22 @@ public class IpManager extends StateMachine {
 
     public IpManager(Context context, String ifName, Callback callback) {
         this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)));
+                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)),
+                NetdService.getInstance());
     }
 
     /**
      * An expanded constructor, useful for dependency injection.
+     * TODO: migrate all test users to mock IpManager directly and remove this ctor.
      */
     public IpManager(Context context, String ifName, Callback callback,
             INetworkManagementService nwService) {
+        this(context, ifName, callback, nwService, NetdService.getInstance());
+    }
+
+    @VisibleForTesting
+    IpManager(Context context, String ifName, Callback callback,
+            INetworkManagementService nwService, INetd netd) {
         super(IpManager.class.getSimpleName() + "." + ifName);
         mTag = getName();
 
@@ -584,6 +612,7 @@ public class IpManager extends StateMachine {
         mClatInterfaceName = CLAT_PREFIX + ifName;
         mCallback = new LoggingCallbackWrapper(callback);
         mNwService = nwService;
+        mNetd = netd;
 
         mLog = new SharedLog(MAX_LOG_RECORDS, mTag);
         mConnectivityPacketLog = new LocalLog(MAX_PACKET_RECORDS);
@@ -886,10 +915,20 @@ public class IpManager extends StateMachine {
     }
 
     // For now: use WifiStateMachine's historical notion of provisioned.
-    private static boolean isProvisioned(LinkProperties lp) {
+    @VisibleForTesting
+    static boolean isProvisioned(LinkProperties lp, InitialConfiguration config) {
         // For historical reasons, we should connect even if all we have is
         // an IPv4 address and nothing else.
-        return lp.isProvisioned() || lp.hasIPv4Address();
+        if (lp.hasIPv4Address() || lp.isProvisioned()) {
+            return true;
+        }
+        if (config == null) {
+            return false;
+        }
+
+        // When an InitialConfiguration is specified, ignore any difference with previous
+        // properties and instead check if properties observed match the desired properties.
+        return config.isProvisionedBy(lp.getLinkAddresses(), lp.getRoutes());
     }
 
     // TODO: Investigate folding all this into the existing static function
@@ -898,12 +937,11 @@ public class IpManager extends StateMachine {
     // object that is a correct and complete assessment of what changed, taking
     // account of the asymmetries described in the comments in this function.
     // Then switch to using it everywhere (IpReachabilityMonitor, etc.).
-    private ProvisioningChange compareProvisioning(
-            LinkProperties oldLp, LinkProperties newLp) {
+    private ProvisioningChange compareProvisioning(LinkProperties oldLp, LinkProperties newLp) {
         ProvisioningChange delta;
-
-        final boolean wasProvisioned = isProvisioned(oldLp);
-        final boolean isProvisioned = isProvisioned(newLp);
+        InitialConfiguration config = mConfiguration != null ? mConfiguration.mInitialConfig : null;
+        final boolean wasProvisioned = isProvisioned(oldLp, config);
+        final boolean isProvisioned = isProvisioned(newLp, config);
 
         if (!wasProvisioned && isProvisioned) {
             delta = ProvisioningChange.GAINED_PROVISIONING;
@@ -1016,10 +1054,6 @@ public class IpManager extends StateMachine {
         return delta;
     }
 
-    private boolean linkPropertiesUnchanged(LinkProperties newLp) {
-        return Objects.equals(newLp, mLinkProperties);
-    }
-
     private LinkProperties assembleLinkProperties() {
         // [1] Create a new LinkProperties object to populate.
         LinkProperties newLp = new LinkProperties();
@@ -1066,9 +1100,26 @@ public class IpManager extends StateMachine {
             newLp.setHttpProxy(mHttpProxy);
         }
 
-        if (VDBG) {
-            Log.d(mTag, "newLp{" + newLp + "}");
+        // [5] Add data from InitialConfiguration
+        if (mConfiguration != null && mConfiguration.mInitialConfig != null) {
+            InitialConfiguration config = mConfiguration.mInitialConfig;
+            // Add InitialConfiguration routes and dns server addresses once all addresses
+            // specified in the InitialConfiguration have been observed with Netlink.
+            if (config.isProvisionedBy(newLp.getLinkAddresses(), null)) {
+                for (IpPrefix prefix : config.directlyConnectedRoutes) {
+                    newLp.addRoute(new RouteInfo(prefix, null, mInterfaceName));
+                }
+            }
+            addAllReachableDnsServers(newLp, config.dnsServers);
         }
+        final LinkProperties oldLp = mLinkProperties;
+        if (VDBG) {
+            Log.d(mTag, String.format("Netlink-seen LPs: %s, new LPs: %s; old LPs: %s",
+                    netlinkLinkProperties, newLp, oldLp));
+        }
+
+        // TODO: also learn via netlink routes specified by an InitialConfiguration and specified
+        // from a static IP v4 config instead of manually patching them in in steps [3] and [5].
         return newLp;
     }
 
@@ -1087,7 +1138,7 @@ public class IpManager extends StateMachine {
     // Returns false if we have lost provisioning, true otherwise.
     private boolean handleLinkPropertiesUpdate(boolean sendCallbacks) {
         final LinkProperties newLp = assembleLinkProperties();
-        if (linkPropertiesUnchanged(newLp)) {
+        if (Objects.equals(newLp, mLinkProperties)) {
             return true;
         }
         final ProvisioningChange delta = setLinkProperties(newLp);
@@ -1213,6 +1264,26 @@ public class IpManager extends StateMachine {
         } catch (IllegalStateException | RemoteException | ServiceSpecificException e) {
             logError("Unable to change interface settings: %s", e);
             return false;
+        }
+
+        return true;
+    }
+
+    private boolean applyInitialConfig(InitialConfiguration config) {
+        if (mNetd == null) {
+            logError("tried to add %s to %s but INetd was null", config, mInterfaceName);
+            return false;
+        }
+
+        // TODO: also support specifying a static IPv4 configuration in InitialConfiguration.
+        for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIPv6)) {
+            try {
+                mNetd.interfaceAddAddress(
+                        mInterfaceName, addr.getAddress().getHostAddress(), addr.getPrefixLength());
+            } catch (ServiceSpecificException | RemoteException e) {
+                logError("failed to add %s to %s: %s", addr, mInterfaceName, e);
+                return false;
+            }
         }
 
         return true;
@@ -1446,6 +1517,14 @@ public class IpManager extends StateMachine {
                 return;
             }
 
+            InitialConfiguration config = mConfiguration.mInitialConfig;
+            if ((config != null) && !applyInitialConfig(config)) {
+                // TODO introduce a new IpManagerEvent constant to distinguish this error case.
+                doImmediateProvisioningFailure(IpManagerEvent.ERROR_INVALID_PROVISIONING);
+                transitionTo(mStoppingState);
+                return;
+            }
+
             if (mConfiguration.mUsingIpReachabilityMonitor && !startIpReachabilityMonitor()) {
                 doImmediateProvisioningFailure(
                         IpManagerEvent.ERROR_STARTING_IPREACHABILITYMONITOR);
@@ -1651,5 +1730,40 @@ public class IpManager extends StateMachine {
             return String.format("rcvd_in=%s, proc_in=%s",
                                  receivedInState, processedInState);
         }
+    }
+
+    // TODO: extract out into CollectionUtils.
+    static <T> boolean any(Iterable<T> coll, Predicate<T> fn) {
+        for (T t : coll) {
+            if (fn.test(t)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static <T> boolean all(Iterable<T> coll, Predicate<T> fn) {
+        return !any(coll, not(fn));
+    }
+
+    static <T> Predicate<T> not(Predicate<T> fn) {
+        return (t) -> !fn.test(t);
+    }
+
+    static <T> String join(String delimiter, Collection<T> coll) {
+        return coll.stream().map(Object::toString).collect(Collectors.joining(delimiter));
+    }
+
+    static <T> T find(Iterable<T> coll, Predicate<T> fn) {
+        for (T t: coll) {
+            if (fn.test(t)) {
+              return t;
+            }
+        }
+        return null;
+    }
+
+    static <T> List<T> findAll(Collection<T> coll, Predicate<T> fn) {
+        return coll.stream().filter(fn).collect(Collectors.toList());
     }
 }
