@@ -106,35 +106,35 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/timezone/ICallback.aidl \
 	core/java/android/app/timezone/IRulesManager.aidl \
 	core/java/android/app/usage/IUsageStatsManager.aidl \
-	core/java/android/bluetooth/IBluetooth.aidl \
-	core/java/android/bluetooth/IBluetoothA2dp.aidl \
-	core/java/android/bluetooth/IBluetoothA2dpSink.aidl \
-	core/java/android/bluetooth/IBluetoothAvrcpController.aidl \
-	core/java/android/bluetooth/IBluetoothCallback.aidl \
-	core/java/android/bluetooth/IBluetoothProfileServiceConnection.aidl \
-	core/java/android/bluetooth/IBluetoothHeadset.aidl \
-	core/java/android/bluetooth/IBluetoothHeadsetPhone.aidl \
-	core/java/android/bluetooth/IBluetoothHealth.aidl \
-	core/java/android/bluetooth/IBluetoothHealthCallback.aidl \
-	core/java/android/bluetooth/IBluetoothInputDevice.aidl \
-	core/java/android/bluetooth/IBluetoothPan.aidl \
-	core/java/android/bluetooth/IBluetoothManager.aidl \
-	core/java/android/bluetooth/IBluetoothManagerCallback.aidl \
-	core/java/android/bluetooth/IBluetoothMap.aidl \
-	core/java/android/bluetooth/IBluetoothMapClient.aidl \
-	core/java/android/bluetooth/IBluetoothPbap.aidl \
-	core/java/android/bluetooth/IBluetoothPbapClient.aidl \
-	core/java/android/bluetooth/IBluetoothSap.aidl \
-	core/java/android/bluetooth/IBluetoothStateChangeCallback.aidl \
-	core/java/android/bluetooth/IBluetoothHeadsetClient.aidl \
-	core/java/android/bluetooth/IBluetoothInputHost.aidl \
-	core/java/android/bluetooth/IBluetoothHidDeviceCallback.aidl \
-	core/java/android/bluetooth/IBluetoothGatt.aidl \
-	core/java/android/bluetooth/IBluetoothGattCallback.aidl \
-	core/java/android/bluetooth/IBluetoothGattServerCallback.aidl \
-	core/java/android/bluetooth/le/IAdvertisingSetCallback.aidl \
-	core/java/android/bluetooth/le/IPeriodicAdvertisingCallback.aidl \
-	core/java/android/bluetooth/le/IScannerCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetooth.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothA2dp.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothA2dpSink.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothAvrcpController.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothProfileServiceConnection.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHeadset.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHeadsetPhone.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHealth.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHealthCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothInputDevice.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothPan.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothManager.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothManagerCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothMap.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothMapClient.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothPbap.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothPbapClient.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothSap.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothStateChangeCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHeadsetClient.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothInputHost.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHidDeviceCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothGatt.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothGattCallback.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothGattServerCallback.aidl \
+	../../system/bt/binder/android/bluetooth/le/IAdvertisingSetCallback.aidl \
+	../../system/bt/binder/android/bluetooth/le/IPeriodicAdvertisingCallback.aidl \
+	../../system/bt/binder/android/bluetooth/le/IScannerCallback.aidl \
 	core/java/android/content/IClipboard.aidl \
 	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
@@ -510,7 +510,8 @@ LOCAL_AIDL_INCLUDES += \
 LOCAL_AIDL_INCLUDES += \
 	frameworks/av/camera/aidl \
 	frameworks/native/aidl/gui \
-	system/netd/server/binder
+	system/netd/server/binder \
+	system/bt/binder
 
 LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/android/R.java \
@@ -752,16 +753,16 @@ aidl_files := \
 	frameworks/base/core/java/android/nfc/Tag.aidl \
 	frameworks/base/core/java/android/nfc/NdefRecord.aidl \
 	frameworks/base/core/java/android/nfc/NdefMessage.aidl \
-	frameworks/base/core/java/android/bluetooth/BluetoothHealthAppConfiguration.aidl \
-	frameworks/base/core/java/android/bluetooth/le/AdvertiseSettings.aidl \
-	frameworks/base/core/java/android/bluetooth/le/ScanSettings.aidl \
-	frameworks/base/core/java/android/bluetooth/le/AdvertiseData.aidl \
-	frameworks/base/core/java/android/bluetooth/le/ScanFilter.aidl \
-	frameworks/base/core/java/android/bluetooth/le/ScanResult.aidl \
-	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/database/CursorWindow.aidl \
 	frameworks/base/core/java/android/service/quicksettings/Tile.aidl \
 	frameworks/native/aidl/binder/android/os/PersistableBundle.aidl \
+	system/bt/binder/android/bluetooth/BluetoothHealthAppConfiguration.aidl \
+	system/bt/binder/android/bluetooth/le/AdvertiseSettings.aidl \
+	system/bt/binder/android/bluetooth/le/ScanSettings.aidl \
+	system/bt/binder/android/bluetooth/le/AdvertiseData.aidl \
+	system/bt/binder/android/bluetooth/le/ScanFilter.aidl \
+	system/bt/binder/android/bluetooth/le/ScanResult.aidl \
+	system/bt/binder/android/bluetooth/BluetoothDevice.aidl \
 	system/netd/server/binder/android/net/UidRange.aidl \
 	frameworks/base/telephony/java/android/telephony/PcoData.aidl \
 
