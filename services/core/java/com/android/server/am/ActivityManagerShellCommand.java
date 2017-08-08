@@ -55,7 +55,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
-import android.view.IWindowManager;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
@@ -1296,19 +1295,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    static final class MyUidObserver extends IUidObserver.Stub {
+    static final class MyUidObserver extends IUidObserver.Stub
+            implements ActivityManagerService.OomAdjObserver {
         final IActivityManager mInterface;
+        final ActivityManagerService mInternal;
         final PrintWriter mPw;
         final InputStream mInput;
+        final int mUid;
 
         static final int STATE_NORMAL = 0;
 
         int mState;
 
-        MyUidObserver(IActivityManager iam, PrintWriter pw, InputStream input) {
-            mInterface = iam;
+        MyUidObserver(ActivityManagerService service, PrintWriter pw, InputStream input, int uid) {
+            mInterface = service;
+            mInternal = service;
             mPw = pw;
             mInput = input;
+            mUid = uid;
         }
 
         @Override
@@ -1367,6 +1371,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
 
+        @Override
+        public void onOomAdjMessage(String msg) {
+            synchronized (this) {
+                mPw.print("# ");
+                mPw.println(msg);
+                mPw.flush();
+            }
+        }
+
         void printMessageForState() {
             switch (mState) {
                 case STATE_NORMAL:
@@ -1385,6 +1398,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         | ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_PROCSTATE
                         | ActivityManager.UID_OBSERVER_IDLE | ActivityManager.UID_OBSERVER_CACHED,
                         ActivityManager.PROCESS_STATE_UNKNOWN, null);
+                if (mUid >= 0) {
+                    mInternal.setOomAdjObserver(mUid, this);
+                }
                 mState = STATE_NORMAL;
 
                 InputStreamReader converter = new InputStreamReader(mInput);
@@ -1414,6 +1430,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 e.printStackTrace(mPw);
                 mPw.flush();
             } finally {
+                if (mUid >= 0) {
+                    mInternal.clearOomAdjObserver();
+                }
                 mInterface.unregisterUidObserver(this);
             }
         }
@@ -1421,12 +1440,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWatchUids(PrintWriter pw) throws RemoteException {
         String opt;
+        int uid = -1;
         while ((opt=getNextOption()) != null) {
-            getErrPrintWriter().println("Error: Unknown option: " + opt);
-            return -1;
+            if (opt.equals("--oom")) {
+                uid = Integer.parseInt(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+
+            }
         }
 
-        MyUidObserver controller = new MyUidObserver(mInterface, pw, getRawInputStream());
+        MyUidObserver controller = new MyUidObserver(mInternal, pw, getRawInputStream(), uid);
         controller.run();
         return 0;
     }
@@ -1858,8 +1883,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
                 break;
             default:
-                getErrPrintWriter().println("Error: Unknown level option: " + levelArg);
-                return -1;
+                try {
+                    level = Integer.parseInt(levelArg);
+                } catch (NumberFormatException e) {
+                    getErrPrintWriter().println("Error: Unknown level option: " + levelArg);
+                    return -1;
+                }
         }
         if (!mInterface.setProcessMemoryTrimLevel(proc, userId, level)) {
             getErrPrintWriter().println("Unknown error: failed to set trim level");
@@ -2744,8 +2773,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  monitor [--gdb <port>]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
-            pw.println("  watch-uids [--gdb <port>]");
+            pw.println("  watch-uids [--oom <uid>");
             pw.println("      Start watching for and reporting uid state changes.");
+            pw.println("      --oom: specify a uid for which to report detailed change messages.");
             pw.println("  hang [--allow-restart]");
             pw.println("      Hang the system.");
             pw.println("      --allow-restart: allow watchdog to perform normal system restart");
@@ -2804,7 +2834,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Returns the inactive state of an app.");
             pw.println("  send-trim-memory [--user <USER_ID>] <PROCESS>");
             pw.println("          [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]");
-            pw.println("      Send a memory trim event to a <PROCESS>.");
+            pw.println("      Send a memory trim event to a <PROCESS>.  May also supply a raw trim int level.");
             pw.println("  display [COMMAND] [...]: sub-commands for operating on displays.");
             pw.println("       move-stack <STACK_ID> <DISPLAY_ID>");
             pw.println("           Move <STACK_ID> from its current display to <DISPLAY_ID>.");
