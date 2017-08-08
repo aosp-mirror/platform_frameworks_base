@@ -254,6 +254,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mCarrierName = savedState.getString(KEY_CARRIER_NAME);
         }
         update(mConfig, mInfo, mNetworkInfo);
+
+        // Do not evict old scan results on initial creation
         updateRssi();
         updateSeen();
         mId = sLastId.incrementAndGet();
@@ -495,10 +497,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     private void evictOldScanResults() {
-        if (WifiTracker.sStaleScanResults) {
-            // Do not evict old scan results unless we are scanning and have fresh results.
-            return;
-        }
         long nowMs = SystemClock.elapsedRealtime();
         for (Iterator<ScanResult> iter = mScanResultCache.values().iterator(); iter.hasNext(); ) {
             ScanResult result = iter.next();
@@ -562,12 +560,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * results, returning the best RSSI for all matching AccessPoints averaged with the previous
      * value. If the access point is not connected and there are no scan results, the rssi will be
      * set to {@link #UNREACHABLE_RSSI}.
-     *
-     * <p>Old scan results will be evicted from the cache when this method is invoked.
      */
     private void updateRssi() {
-        evictOldScanResults();
-
         if (this.isActive()) {
             return;
         }
@@ -586,14 +580,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
     }
 
-    /**
-     * Updates {@link #mSeen} based on the scan result cache.
-     *
-     * <p>Old scan results will be evicted from the cache when this method is invoked.
-     */
+    /** Updates {@link #mSeen} based on the scan result cache. */
     private void updateSeen() {
-        evictOldScanResults();
-
         // TODO(sghuman): Set to now if connected
 
         long seen = 0;
@@ -1097,12 +1085,22 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mAccessPointListener = listener;
     }
 
-    boolean update(ScanResult result) {
+    /**
+     * Update the AP with the given scan result.
+     *
+     * @param result the ScanResult to add to the AccessPoint scan cache
+     * @param evictOldScanResults whether stale scan results should be removed
+     *         from the cache during this update process
+     * @return true if the scan result update caused a change in state which would impact ranking
+     *     or AccessPoint rendering (e.g. wifi level, security)
+     */
+    boolean update(ScanResult result, boolean evictOldScanResults) {
         if (matches(result)) {
             int oldLevel = getLevel();
 
             /* Add or update the scan result for the BSSID */
             mScanResultCache.put(result.BSSID, result);
+            if (evictOldScanResults) evictOldScanResults();
             updateSeen();
             updateRssi();
             int newLevel = getLevel();
