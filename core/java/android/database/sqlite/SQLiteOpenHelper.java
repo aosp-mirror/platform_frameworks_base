@@ -289,12 +289,12 @@ public abstract class SQLiteOpenHelper {
             } else if (mName == null) {
                 db = SQLiteDatabase.createInMemory(mOpenParamsBuilder.build());
             } else {
-                final String path = mContext.getDatabasePath(mName).getPath();
+                final File filePath = mContext.getDatabasePath(mName);
                 SQLiteDatabase.OpenParams params = mOpenParamsBuilder.build();
                 try {
-                    db = SQLiteDatabase.openDatabase(path, params);
+                    db = SQLiteDatabase.openDatabase(filePath, params);
                     // Keep pre-O-MR1 behavior by resetting file permissions to 660
-                    setFilePermissionsForDb(path);
+                    setFilePermissionsForDb(filePath.getPath());
                 } catch (SQLException ex) {
                     if (writable) {
                         throw ex;
@@ -302,7 +302,7 @@ public abstract class SQLiteOpenHelper {
                     Log.e(TAG, "Couldn't open " + mName
                             + " for writing (will try read-only):", ex);
                     params = params.toBuilder().addOpenFlags(SQLiteDatabase.OPEN_READONLY).build();
-                    db = SQLiteDatabase.openDatabase(path, params);
+                    db = SQLiteDatabase.openDatabase(filePath, params);
                 }
             }
 
