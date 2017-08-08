@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.content.pm.UserInfo;
 import android.hardware.weaver.V1_0.IWeaver;
 import android.hardware.weaver.V1_0.WeaverConfig;
 import android.hardware.weaver.V1_0.WeaverReadResponse;
@@ -641,6 +642,22 @@ public class SyntheticPasswordManager {
         }
     }
 
+
+    public void migrateFrpPasswordLocked(long handle, UserInfo userInfo, int requestedQuality) {
+        if (mStorage.getPersistentDataBlock() != null
+                && LockPatternUtils.userOwnsFrpCredential(userInfo)) {
+            PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle,
+                    userInfo.id));
+            if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+                int weaverSlot = loadWeaverSlot(handle, userInfo.id);
+                if (weaverSlot != INVALID_WEAVER_SLOT) {
+                    synchronizeWeaverFrpPassword(pwd, requestedQuality, userInfo.id, weaverSlot);
+                } else {
+                    synchronizeFrpPassword(pwd, requestedQuality, userInfo.id);
+                }
+            }
+        }
+    }
 
     private void synchronizeFrpPassword(PasswordData pwd,
             int requestedQuality, int userId) {
