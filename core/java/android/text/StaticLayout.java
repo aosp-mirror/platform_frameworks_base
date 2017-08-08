@@ -385,8 +385,7 @@ public class StaticLayout extends Layout {
 
         /* package */ float addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
             setLocales(paint.getTextLocales());
-            return nAddStyleRun(mNativePtr, paint.getNativeInstance(), paint.mNativeTypeface,
-                    start, end, isRtl);
+            return nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl);
         }
 
         /* package */ void addMeasuredRun(int start, int end, float[] widths) {
@@ -1455,8 +1454,8 @@ public class StaticLayout extends Layout {
             int[] variableTabStops, int defaultTabStop, int breakStrategy, int hyphenationFrequency,
             boolean isJustified);
 
-    private static native float nAddStyleRun(long nativePtr, long nativePaint,
-            long nativeTypeface, int start, int end, boolean isRtl);
+    private static native float nAddStyleRun(long nativePtr, long nativePaint, int start, int end,
+            boolean isRtl);
 
     private static native void nAddMeasuredRun(long nativePtr,
             int start, int end, float[] widths);

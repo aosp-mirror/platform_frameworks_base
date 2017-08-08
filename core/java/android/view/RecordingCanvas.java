@@ -395,7 +395,7 @@ public class RecordingCanvas extends Canvas {
             throw new IndexOutOfBoundsException();
         }
         nDrawText(mNativeCanvasWrapper, text, index, count, x, y, paint.mBidiFlags,
-                paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.getNativeInstance());
     }
 
     @Override
@@ -407,7 +407,7 @@ public class RecordingCanvas extends Canvas {
         if (text instanceof String || text instanceof SpannedString
                 || text instanceof SpannableString) {
             nDrawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
-                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance());
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                     paint);
@@ -415,7 +415,7 @@ public class RecordingCanvas extends Canvas {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
             nDrawText(mNativeCanvasWrapper, buf, 0, end - start, x, y,
-                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance());
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -423,7 +423,7 @@ public class RecordingCanvas extends Canvas {
     @Override
     public final void drawText(@NonNull String text, float x, float y, @NonNull Paint paint) {
         nDrawText(mNativeCanvasWrapper, text, 0, text.length(), x, y, paint.mBidiFlags,
-                paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.getNativeInstance());
     }
 
     @Override
@@ -433,7 +433,7 @@ public class RecordingCanvas extends Canvas {
             throw new IndexOutOfBoundsException();
         }
         nDrawText(mNativeCanvasWrapper, text, start, end, x, y, paint.mBidiFlags,
-                paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.getNativeInstance());
     }
 
     @Override
@@ -444,7 +444,7 @@ public class RecordingCanvas extends Canvas {
         }
         nDrawTextOnPath(mNativeCanvasWrapper, text, index, count,
                 path.readOnlyNI(), hOffset, vOffset,
-                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance());
     }
 
     @Override
@@ -452,7 +452,7 @@ public class RecordingCanvas extends Canvas {
             float vOffset, @NonNull Paint paint) {
         if (text.length() > 0) {
             nDrawTextOnPath(mNativeCanvasWrapper, text, path.readOnlyNI(), hOffset, vOffset,
-                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance());
         }
     }
 
@@ -473,7 +473,7 @@ public class RecordingCanvas extends Canvas {
         }
 
         nDrawTextRun(mNativeCanvasWrapper, text, index, count, contextIndex, contextCount,
-                x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+                x, y, isRtl, paint.getNativeInstance());
     }
 
     @Override
@@ -494,7 +494,7 @@ public class RecordingCanvas extends Canvas {
         if (text instanceof String || text instanceof SpannedString
                 || text instanceof SpannableString) {
             nDrawTextRun(mNativeCanvasWrapper, text.toString(), start, end, contextStart,
-                    contextEnd, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+                    contextEnd, x, y, isRtl, paint.getNativeInstance());
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, isRtl, paint);
@@ -504,7 +504,7 @@ public class RecordingCanvas extends Canvas {
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             nDrawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+                    0, contextLen, x, y, isRtl, paint.getNativeInstance());
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -614,28 +614,25 @@ public class RecordingCanvas extends Canvas {
 
     @FastNative
     private static native void nDrawText(long nativeCanvas, char[] text, int index, int count,
-            float x, float y, int flags, long nativePaint, long nativeTypeface);
+            float x, float y, int flags, long nativePaint);
 
     @FastNative
     private static native void nDrawText(long nativeCanvas, String text, int start, int end,
-            float x, float y, int flags, long nativePaint, long nativeTypeface);
+            float x, float y, int flags, long nativePaint);
 
     @FastNative
     private static native void nDrawTextRun(long nativeCanvas, String text, int start, int end,
-            int contextStart, int contextEnd, float x, float y, boolean isRtl, long nativePaint,
-            long nativeTypeface);
+            int contextStart, int contextEnd, float x, float y, boolean isRtl, long nativePaint);
 
     @FastNative
     private static native void nDrawTextRun(long nativeCanvas, char[] text, int start, int count,
-            int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint,
-            long nativeTypeface);
+            int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint);
 
     @FastNative
     private static native void nDrawTextOnPath(long nativeCanvas, char[] text, int index, int count,
-            long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint,
-            long nativeTypeface);
+            long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint);
 
     @FastNative
     private static native void nDrawTextOnPath(long nativeCanvas, String text, long nativePath,
-            float hOffset, float vOffset, int flags, long nativePaint, long nativeTypeface);
+            float hOffset, float vOffset, int flags, long nativePaint);
 }

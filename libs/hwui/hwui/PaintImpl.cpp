@@ -27,7 +27,8 @@ Paint::Paint(const Paint& paint) : SkPaint(paint),
         mLetterSpacing(paint.mLetterSpacing), mWordSpacing(paint.mWordSpacing),
         mFontFeatureSettings(paint.mFontFeatureSettings),
         mMinikinLangListId(paint.mMinikinLangListId), mFontVariant(paint.mFontVariant),
-        mHyphenEdit(paint.mHyphenEdit) {
+        mHyphenEdit(paint.mHyphenEdit),
+        mTypeface(paint.mTypeface) {
 }
 
 Paint::Paint(const SkPaint& paint) : SkPaint(paint),
@@ -46,6 +47,7 @@ Paint& Paint::operator=(const Paint& other) {
     mMinikinLangListId = other.mMinikinLangListId;
     mFontVariant = other.mFontVariant;
     mHyphenEdit = other.mHyphenEdit;
+    mTypeface = other.mTypeface;
     return *this;
 }
 
@@ -56,7 +58,8 @@ bool operator==(const Paint& a, const Paint& b) {
             && a.mFontFeatureSettings == b.mFontFeatureSettings
             && a.mMinikinLangListId == b.mMinikinLangListId
             && a.mFontVariant == b.mFontVariant
-            && a.mHyphenEdit == b.mHyphenEdit;
+            && a.mHyphenEdit == b.mHyphenEdit
+            && a.mTypeface == b.mTypeface;
 }
 
 }
