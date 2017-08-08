@@ -1036,6 +1036,26 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_RESET =
             "carrier_default_actions_on_reset_string_array";
+
+    /**
+     * Defines carrier-specific actions which act upon
+     * com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE,
+     * used for customization of the default carrier app
+     * Format:
+     * {
+     *     "true : CARRIER_ACTION_IDX_1",
+     *     "false: CARRIER_ACTION_IDX_2"
+     * }
+     * Where {@code true} is a boolean indicates default network available/unavailable
+     * Where {@code CARRIER_ACTION_IDX} is an integer defined in
+     * {@link com.android.carrierdefaultapp.CarrierActionUtils CarrierActionUtils}
+     * Example:
+     * {@link com.android.carrierdefaultapp.CarrierActionUtils
+     * #CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER enable the app as the default URL handler}
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE =
+            "carrier_default_actions_on_default_network_available_string_array";
     /**
      * Defines a list of acceptable redirection url for default carrier app
      * @hides
@@ -1712,9 +1732,10 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_SETUP_APP_STRING, "");
         sDefaults.putStringArray(KEY_CARRIER_APP_WAKE_SIGNAL_CONFIG_STRING_ARRAY,
                 new String[]{
-                        "com.android.carrierdefaultapp/.CarrierDefaultBroadcastReceiver:" +
-                                "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED," +
-                                "com.android.internal.telephony.CARRIER_SIGNAL_RESET"
+                        "com.android.carrierdefaultapp/.CarrierDefaultBroadcastReceiver:"
+                                + "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED,"
+                                + "com.android.internal.telephony.CARRIER_SIGNAL_RESET,"
+                                + "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE"
                 });
         sDefaults.putStringArray(KEY_CARRIER_APP_NO_WAKE_SIGNAL_CONFIG_STRING_ARRAY, null);
 
@@ -1722,12 +1743,22 @@ public class CarrierConfigManager {
         // Default carrier app configurations
         sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY,
                 new String[]{
-                        "4, 1"
+                        "9, 4, 1"
+                        //9: CARRIER_ACTION_REGISTER_NETWORK_AVAIL
                         //4: CARRIER_ACTION_DISABLE_METERED_APNS
                         //1: CARRIER_ACTION_SHOW_PORTAL_NOTIFICATION
                 });
         sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_RESET, new String[]{
-                "6" //6: CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS
+                "6, 8"
+                //6: CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS
+                //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
+                });
+        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE,
+                new String[] {
+                        String.valueOf(false) + ": 7",
+                        //7: CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER
+                        String.valueOf(true) + ": 8"
+                        //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
                 });
         sDefaults.putStringArray(KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY, null);
 

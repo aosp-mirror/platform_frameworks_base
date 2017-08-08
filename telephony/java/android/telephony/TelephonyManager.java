@@ -6672,6 +6672,25 @@ public class TelephonyManager {
     }
 
     /**
+     * Action set from carrier signalling broadcast receivers to start/stop reporting default
+     * network available events
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param report control start/stop reporting network status.
+     * @hide
+     */
+    public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionReportDefaultNetworkStatus(subId, report);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionReportDefaultNetworkStatus", e);
+        }
+    }
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *
