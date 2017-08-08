@@ -6943,8 +6943,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
+        final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isUserAffiliatedWithDeviceLocked(userId)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
             long token = mInjector.binderClearCallingIdentity();
             try {
                 mLockPatternUtils.setDeviceOwnerInfo(info != null ? info.toString() : null);
@@ -9236,10 +9241,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setKeyguardDisabled(ComponentName who, boolean disabled) {
         Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isUserAffiliatedWithDeviceLocked(userId)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
         }
-        final int userId = UserHandle.getCallingUserId();
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -9261,7 +9270,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean setStatusBarDisabled(ComponentName who, boolean disabled) {
         int userId = UserHandle.getCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isUserAffiliatedWithDeviceLocked(userId)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
             DevicePolicyData policy = getUserData(userId);
             if (policy.mStatusBarDisabled != disabled) {
                 boolean isLockTaskMode = false;
@@ -9525,6 +9538,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return null;
             }
             return null;
+        }
+
+        @Override
+        public boolean isUserAffiliatedWithDevice(int userId) {
+            return DevicePolicyManagerService.this.isUserAffiliatedWithDeviceLocked(userId);
         }
     }
 

@@ -41,7 +41,8 @@ import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -91,6 +92,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 
@@ -311,14 +313,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     };
 
     /**
-     * @return {@code true} iff the installing is app an device owner?
+     * @return {@code true} iff the installing is app an device owner or affiliated profile owner.
      */
-    private boolean isInstallerDeviceOwnerLocked() {
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-
-        return (dpm != null) && dpm.isDeviceOwnerAppOnCallingUser(
-                mInstallerPackageName);
+    private boolean isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked() {
+        DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        return dpmi != null && dpmi.isActiveAdminWithPolicy(mInstallerUid,
+                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) && dpmi.isUserAffiliatedWithDevice(
+                userId);
     }
 
     /**
@@ -347,10 +349,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean forcePermissionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0;
 
-        // Device owners are allowed to silently install packages, so the permission check is
-        // waived if the installer is the device owner.
+        // Device owners and affiliated profile owners  are allowed to silently install packages, so
+        // the permission check is waived if the installer is the device owner.
         return forcePermissionPrompt || !(isPermissionGranted || isInstallerRoot
-                || isInstallerDeviceOwnerLocked());
+                || isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked());
     }
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
@@ -705,7 +707,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotDestroyedLocked("commit");
 
             final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(
-                    mContext, statusReceiver, sessionId, isInstallerDeviceOwnerLocked(), userId);
+                    mContext, statusReceiver, sessionId,
+                    isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId);
             mRemoteObserver = adapter.getBinder();
 
             if (forTransfer) {
