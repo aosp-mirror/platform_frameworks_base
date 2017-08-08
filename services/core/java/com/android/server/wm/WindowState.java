@@ -1224,8 +1224,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // TODO(b/62846907): Checking against {@link mLastReportedConfiguration} could be flaky as
         //                   this is not necessarily what the client has processed yet. Find a
         //                   better indicator consistent with the client.
-        return mOrientationChanging || (isVisible()
-                && getConfiguration().orientation != mLastReportedConfiguration.orientation);
+        return (mOrientationChanging || (isVisible()
+                && getConfiguration().orientation != mLastReportedConfiguration.orientation))
+                && !mSeamlesslyRotated;
     }
 
     void setOrientationChanging(boolean changing) {
@@ -1462,8 +1463,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean canAffectSystemUiFlags() {
         final boolean shown = mWinAnimator.getShown();
-        final boolean exiting = mAnimatingExit || mDestroying
-                || mAppToken != null && mAppToken.hidden;
+
+        // We only consider the app to be exiting when the animation has started. After the app
+        // transition is executed the windows are marked exiting before the new windows have been
+        // shown. Thus, wait considering a window to be exiting after the animation has actually
+        // started.
+        final boolean appAnimationStarting = mAppToken != null
+                && mAppToken.mAppAnimator.isAnimationStarting();
+        final boolean exitingSelf = mAnimatingExit && (!mWinAnimator.isAnimationStarting()
+                && !appAnimationStarting);
+        final boolean appExiting = mAppToken != null && mAppToken.hidden && !appAnimationStarting;
+
+        final boolean exiting = exitingSelf || mDestroying || appExiting;
         final boolean translucent = mAttrs.alpha == 0.0f;
         return shown && !exiting && !translucent;
     }
@@ -2029,6 +2040,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void scheduleAnimationIfDimming() {
         final DisplayContent dc = getDisplayContent();
         if (dc == null) {
+            return;
+        }
+
+        // If layout is currently deferred, we want to hold of with updating the layers.
+        if (mService.mWindowPlacerLocked.isLayoutDeferred()) {
             return;
         }
         final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
@@ -3226,6 +3242,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         return !isInMultiWindowMode();
+    }
+
+    /** @return true when the window is in fullscreen task, but has non-fullscreen bounds set. */
+    boolean isLetterboxedAppWindow() {
+        final Task task = getTask();
+        final boolean taskIsFullscreen = task != null && task.isFullscreen();
+        final boolean appWindowIsFullscreen = mAppToken != null && !mAppToken.hasBounds();
+
+        return taskIsFullscreen && !appWindowIsFullscreen;
     }
 
     /** Returns the appropriate bounds to use for computing frames. */

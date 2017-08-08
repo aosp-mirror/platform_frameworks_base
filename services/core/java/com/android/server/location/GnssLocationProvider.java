@@ -543,7 +543,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     loadPropertiesFromResource(context, mProperties);
                     String lpp_profile = mProperties.getProperty("LPP_PROFILE");
                     // set the persist property LPP_PROFILE for the value
-                    SystemProperties.set(LPP_PROFILE, lpp_profile);
+                    if (lpp_profile != null) {
+                        SystemProperties.set(LPP_PROFILE, lpp_profile);
+                    }
                 } else {
                     // reset the persist property
                     SystemProperties.set(LPP_PROFILE, "");
@@ -1052,8 +1054,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 // download tasks overrun.
                 synchronized (mLock) {
                     if (mDownloadXtraWakeLock.isHeld()) {
-                        mDownloadXtraWakeLock.release();
-                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                        // This wakelock may have time-out, if a timeout was specified.
+                        // Catch (and ignore) any timeout exceptions.
+                        try {
+                            mDownloadXtraWakeLock.release();
+                            if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                        } catch (Exception e) {
+                            Log.i(TAG, "Wakelock timeout & release race exception in "
+                                    + "handleDownloadXtraData()", e);
+                        }
                     } else {
                         Log.e(TAG, "WakeLock expired before release in "
                                 + "handleDownloadXtraData()");

@@ -2722,14 +2722,17 @@ public class PackageManagerService extends IPackageManager.Stub
             //delete tmp files
             deleteTempPackageFiles();
 
+            final int cachedSystemApps = PackageParser.sCachedPackageReadCount.get();
+
             // Remove any shared userIDs that have no associated packages
             mSettings.pruneSharedUsersLPw();
             final long systemScanTime = SystemClock.uptimeMillis() - startTime;
             final int systemPackagesCount = mPackages.size();
             Slog.i(TAG, "Finished scanning system apps. Time: " + systemScanTime
                     + " ms, packageCount: " + systemPackagesCount
-                    + " ms, timePerPackage: "
-                    + (systemPackagesCount == 0 ? 0 : systemScanTime / systemPackagesCount));
+                    + " , timePerPackage: "
+                    + (systemPackagesCount == 0 ? 0 : systemScanTime / systemPackagesCount)
+                    + " , cached: " + cachedSystemApps);
             if (mIsUpgrade && systemPackagesCount > 0) {
                 MetricsLogger.histogram(null, "ota_package_manager_system_app_avg_scan_time",
                         ((int) systemScanTime) / systemPackagesCount);
@@ -2820,12 +2823,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 // This must be done last to ensure all stubs are replaced or disabled.
                 decompressSystemApplications(stubSystemApps, scanFlags);
 
+                final int cachedNonSystemApps = PackageParser.sCachedPackageReadCount.get()
+                                - cachedSystemApps;
+
                 final long dataScanTime = SystemClock.uptimeMillis() - systemScanTime - startTime;
                 final int dataPackagesCount = mPackages.size() - systemPackagesCount;
                 Slog.i(TAG, "Finished scanning non-system apps. Time: " + dataScanTime
                         + " ms, packageCount: " + dataPackagesCount
-                        + " ms, timePerPackage: "
-                        + (dataPackagesCount == 0 ? 0 : dataScanTime / dataPackagesCount));
+                        + " , timePerPackage: "
+                        + (dataPackagesCount == 0 ? 0 : dataScanTime / dataPackagesCount)
+                        + " , cached: " + cachedNonSystemApps);
                 if (mIsUpgrade && dataPackagesCount > 0) {
                     MetricsLogger.histogram(null, "ota_package_manager_data_app_avg_scan_time",
                             ((int) dataScanTime) / dataPackagesCount);
