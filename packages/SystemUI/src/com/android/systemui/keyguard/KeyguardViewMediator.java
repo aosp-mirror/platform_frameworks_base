@@ -560,9 +560,6 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             tryKeyguardDone();
-            if (strongAuth) {
-                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
-            }
         }
 
         @Override
@@ -591,9 +588,6 @@ public class KeyguardViewMediator extends SystemUI {
             mStatusBarKeyguardViewManager.startPreHideAnimation(mHideAnimationFinishedRunnable);
             mHandler.sendEmptyMessageDelayed(KEYGUARD_DONE_PENDING_TIMEOUT,
                     KEYGUARD_DONE_PENDING_TIMEOUT_MS);
-            if (strongAuth) {
-                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
-            }
             Trace.endSection();
         }
 
@@ -1288,7 +1282,6 @@ public class KeyguardViewMediator extends SystemUI {
                 // Without this, settings is not enabled until the lock screen first appears
                 setShowingLocked(false);
                 hideLocked();
-                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
                 return;
             }
         }
