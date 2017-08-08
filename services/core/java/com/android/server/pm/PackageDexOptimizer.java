@@ -31,6 +31,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -112,7 +113,7 @@ public class PackageDexOptimizer {
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
-            boolean isUsedByOtherApps, DexoptOptions options) {
+            PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
@@ -120,7 +121,7 @@ public class PackageDexOptimizer {
             final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets,
-                        packageStats, isUsedByOtherApps, options);
+                        packageStats, packageUseInfo, options);
             } finally {
                 releaseWakeLockLI(acquireTime);
             }
@@ -134,20 +135,12 @@ public class PackageDexOptimizer {
     @GuardedBy("mInstallLock")
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
-            boolean isUsedByOtherApps, DexoptOptions options) {
+            PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         final List<String> paths = pkg.getAllCodePaths();
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-
-        final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
-                options.getCompilerFilter(), isUsedByOtherApps);
-        final boolean profileUpdated = options.isCheckForProfileUpdates() &&
-                isProfileUpdated(pkg, sharedGid, compilerFilter);
-
-        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
-        final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
 
         // Get the class loader context dependencies.
         // For each code path in the package, this array contains the class loader context that
@@ -171,6 +164,17 @@ public class PackageDexOptimizer {
                     continue;
                 }
             }
+
+            final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
+                    || packageUseInfo.isUsedByOtherApps(path);
+            final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
+                options.getCompilerFilter(), isUsedByOtherApps);
+            final boolean profileUpdated = options.isCheckForProfileUpdates() &&
+                isProfileUpdated(pkg, sharedGid, compilerFilter);
+
+            // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
+            // flags.
+            final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
 
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
