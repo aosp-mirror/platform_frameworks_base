@@ -543,7 +543,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                     mKeyguardFadingOutInProgress = false;
                     mAnimatingDozeUnlock = false;
                 }
-                if (mWakingUpFromAodAnimationRunning) {
+                if (mWakingUpFromAodAnimationRunning && !mDeferFinishedListener) {
                     mWakingUpFromAodAnimationRunning = false;
                     mWakingUpFromAodInProgress = false;
                 }
