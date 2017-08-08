@@ -32,7 +32,6 @@ interface IPackageInstallerSession {
     void removeSplit(String splitName);
 
     void close();
-    void commit(in IntentSender statusReceiver, boolean forTransferred);
-    void transfer(in String packageName);
+    void commit(in IntentSender statusReceiver);
     void abandon();
 }
