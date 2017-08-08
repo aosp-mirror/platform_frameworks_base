@@ -921,7 +921,9 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
-                            mWakeLock.release();
+                            if (mWakeLock.isHeld()) {
+                                mWakeLock.release();
+                            }
                         }
                     });
                 } catch (DeadObjectException e) {
