@@ -297,7 +297,7 @@ public abstract class SignalController<T extends SignalController.State,
                     .append("activityIn=").append(activityIn).append(',')
                     .append("activityOut=").append(activityOut).append(',')
                     .append("rssi=").append(rssi).append(',')
-                    .append("lastModified=").append(DateFormat.format("MM-dd hh:mm:ss", time));
+                    .append("lastModified=").append(DateFormat.format("MM-dd HH:mm:ss", time));
         }
 
         @Override
