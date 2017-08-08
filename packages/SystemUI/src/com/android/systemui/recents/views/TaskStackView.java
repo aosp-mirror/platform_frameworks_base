@@ -975,6 +975,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mLayoutAlgorithm.clearUnfocusedTaskOverrides();
                 willScroll = mAnimationHelper.startScrollToFocusedTaskAnimation(newFocusedTask,
                         requestViewFocus);
+                if (willScroll) {
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                }
             } else {
                 // Focus the task view
                 TaskView newFocusedTaskView = getChildViewForTask(newFocusedTask);
