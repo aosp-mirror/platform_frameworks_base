@@ -447,6 +447,20 @@ public class TelephonyIntents {
             "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
 
     /**
+     * <p>Broadcast Action: when system default network available/unavailable with
+     * carrier-disabled mobile data. Intended for carrier apps to set/reset carrier actions when
+     * other network becomes system default network, Wi-Fi for example.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>defaultNetworkAvailable</li><dd>A boolean indicates default network available.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the default data.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
+     */
+    public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE =
+            "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
+
+    /**
      * <p>Broadcast Action: when framework reset all carrier actions on sim load or absent.
      * intended for carrier apps clean up (clear UI e.g.) and only sent to the specified carrier app
      * The intent will have the following extra values:</p>
@@ -465,7 +479,7 @@ public class TelephonyIntents {
     public static final String EXTRA_APN_PROTO_KEY = "apnProto";
     public static final String EXTRA_PCO_ID_KEY = "pcoId";
     public static final String EXTRA_PCO_VALUE_KEY = "pcoValue";
-
+    public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE_KEY = "defaultNetworkAvailable";
 
    /**
      * Broadcast action to trigger CI OMA-DM Session.
