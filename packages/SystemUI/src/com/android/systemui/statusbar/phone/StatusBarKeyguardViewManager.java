@@ -103,7 +103,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mDeferScrimFadeOut;
 
     // Dismiss action to be launched when we stop dozing or the keyguard is gone.
-    private PendingDismissActionRequest mPendingDismissAction;
+    private DismissWithActionRequest mPendingWakeupAction;
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -174,7 +174,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private void hideBouncer(boolean destroyView) {
         mBouncer.hide(destroyView);
-        cancelPendingDismissAction();
+        cancelPendingWakeupAction();
     }
 
     private void showBouncer() {
@@ -187,11 +187,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone) {
         if (mShowing) {
-            cancelPendingDismissAction();
+            cancelPendingWakeupAction();
             // If we're dozing, this needs to be delayed until after we wake up - unless we're
             // wake-and-unlocking, because there dozing will last until the end of the transition.
             if (mDozing && !isWakeAndUnlocking()) {
-                mPendingDismissAction = new PendingDismissActionRequest(
+                mPendingWakeupAction = new DismissWithActionRequest(
                         r, cancelAction, afterKeyguardGone);
                 return;
             }
@@ -280,7 +280,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             updateStates();
 
             if (!dozing) {
-                launchPendingDismissAction();
+                launchPendingWakeupAction();
             }
         }
     }
@@ -357,7 +357,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
-        launchPendingDismissAction();
+        launchPendingWakeupAction();
 
         if (KeyguardUpdateMonitor.getInstance(mContext).needsSlowUnlockTransition()) {
             fadeoutDuration = KEYGUARD_DISMISS_DURATION_LOCKED;
@@ -685,9 +685,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mStatusBar.getStatusBarView().getViewRootImpl();
     }
 
-    public void launchPendingDismissAction() {
-        PendingDismissActionRequest request = mPendingDismissAction;
-        mPendingDismissAction = null;
+    public void launchPendingWakeupAction() {
+        DismissWithActionRequest request = mPendingWakeupAction;
+        mPendingWakeupAction = null;
         if (request != null) {
             if (mShowing) {
                 dismissWithAction(request.dismissAction, request.cancelAction,
@@ -698,20 +698,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    public void cancelPendingDismissAction() {
-        PendingDismissActionRequest request = mPendingDismissAction;
-        mPendingDismissAction = null;
+    public void cancelPendingWakeupAction() {
+        DismissWithActionRequest request = mPendingWakeupAction;
+        mPendingWakeupAction = null;
         if (request != null && request.cancelAction != null) {
             request.cancelAction.run();
         }
     }
 
-    private static class PendingDismissActionRequest {
+    private static class DismissWithActionRequest {
         final OnDismissAction dismissAction;
         final Runnable cancelAction;
         final boolean afterKeyguardGone;
 
-        PendingDismissActionRequest(OnDismissAction dismissAction, Runnable cancelAction,
+        DismissWithActionRequest(OnDismissAction dismissAction, Runnable cancelAction,
                 boolean afterKeyguardGone) {
             this.dismissAction = dismissAction;
             this.cancelAction = cancelAction;
