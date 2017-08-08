@@ -18,12 +18,12 @@
 
 #include "androidfw/StringPiece.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
 void ClassMember::WriteToStream(const StringPiece& prefix, bool final, std::ostream* out) const {
-  processor_.WriteToStream(out, prefix);
+  processor_.WriteToStream(prefix, out);
 }
 
 void MethodDefinition::AppendStatement(const StringPiece& statement) {
@@ -81,9 +81,8 @@ constexpr static const char* sWarningHeader =
     " * should not be modified by hand.\n"
     " */\n\n";
 
-bool ClassDefinition::WriteJavaFile(const ClassDefinition* def,
-                                    const StringPiece& package, bool final,
-                                    std::ostream* out) {
+bool ClassDefinition::WriteJavaFile(const ClassDefinition* def, const StringPiece& package,
+                                    bool final, std::ostream* out) {
   *out << sWarningHeader << "package " << package << ";\n\n";
   def->WriteToStream("", final, out);
   return bool(*out);

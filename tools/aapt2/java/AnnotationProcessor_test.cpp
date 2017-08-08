@@ -34,7 +34,7 @@ TEST(AnnotationProcessorTest, EmitsDeprecated) {
   processor.AppendComment(comment);
 
   std::stringstream result;
-  processor.WriteToStream(&result, "");
+  processor.WriteToStream("", &result);
   std::string annotations = result.str();
 
   EXPECT_THAT(annotations, HasSubstr("@Deprecated"));
@@ -45,12 +45,25 @@ TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
   processor.AppendComment("@SystemApi This is a system API");
 
   std::stringstream result;
-  processor.WriteToStream(&result, "");
+  processor.WriteToStream("", &result);
   std::string annotations = result.str();
 
   EXPECT_THAT(annotations, HasSubstr("@android.annotation.SystemApi"));
   EXPECT_THAT(annotations, Not(HasSubstr("@SystemApi")));
   EXPECT_THAT(annotations, HasSubstr("This is a system API"));
+}
+
+TEST(AnnotationProcessorTest, EmitsTestApiAnnotationAndRemovesFromComment) {
+  AnnotationProcessor processor;
+  processor.AppendComment("@TestApi This is a test API");
+
+  std::stringstream result;
+  processor.WriteToStream("", &result);
+  std::string annotations = result.str();
+
+  EXPECT_THAT(annotations, HasSubstr("@android.annotation.TestApi"));
+  EXPECT_THAT(annotations, Not(HasSubstr("@TestApi")));
+  EXPECT_THAT(annotations, HasSubstr("This is a test API"));
 }
 
 TEST(AnnotationProcessor, ExtractsFirstSentence) {

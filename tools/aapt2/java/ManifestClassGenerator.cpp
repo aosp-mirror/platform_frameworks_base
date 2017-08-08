@@ -21,24 +21,21 @@
 #include "Source.h"
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
+#include "text/Unicode.h"
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::aapt::text::IsJavaIdentifier;
 
 namespace aapt {
 
-static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,
-                                                const Source& source,
-                                                const StringPiece& value) {
-  const StringPiece sep = ".";
-  auto iter = std::find_end(value.begin(), value.end(), sep.begin(), sep.end());
-
-  StringPiece result;
-  if (iter != value.end()) {
-    result.assign(iter + sep.size(), value.end() - (iter + sep.size()));
-  } else {
-    result = value;
+static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag, const Source& source,
+                                                const std::string& value) {
+  StringPiece result = value;
+  size_t pos = value.rfind('.');
+  if (pos != std::string::npos) {
+    result = result.substr(pos + 1);
   }
 
   if (result.empty()) {
@@ -46,33 +43,23 @@ static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,
     return {};
   }
 
-  iter = util::FindNonAlphaNumericAndNotInSet(result, "_");
-  if (iter != result.end()) {
-    diag->Error(DiagMessage(source) << "invalid character '"
-                                    << StringPiece(iter, 1) << "' in '"
-                                    << result << "'");
+  if (!IsJavaIdentifier(result)) {
+    diag->Error(DiagMessage(source) << "invalid Java identifier '" << result << "'");
     return {};
   }
-
-  if (*result.begin() >= '0' && *result.begin() <= '9') {
-    diag->Error(DiagMessage(source) << "symbol can not start with a digit");
-    return {};
-  }
-
   return result;
 }
 
-static bool WriteSymbol(const Source& source, IDiagnostics* diag,
-                        xml::Element* el, ClassDefinition* class_def) {
+static bool WriteSymbol(const Source& source, IDiagnostics* diag, xml::Element* el,
+                        ClassDefinition* class_def) {
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
   if (!attr) {
-    diag->Error(DiagMessage(source) << "<" << el->name
-                                    << "> must define 'android:name'");
+    diag->Error(DiagMessage(source) << "<" << el->name << "> must define 'android:name'");
     return false;
   }
 
-  Maybe<StringPiece> result = ExtractJavaIdentifier(
-      diag, source.WithLine(el->line_number), attr->value);
+  Maybe<StringPiece> result =
+      ExtractJavaIdentifier(diag, source.WithLine(el->line_number), attr->value);
   if (!result) {
     return false;
   }
@@ -85,8 +72,7 @@ static bool WriteSymbol(const Source& source, IDiagnostics* diag,
   return true;
 }
 
-std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
-                                                       xml::XmlResource* res) {
+std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag, xml::XmlResource* res) {
   xml::Element* el = xml::FindRootElement(res->root.get());
   if (!el) {
     diag->Error(DiagMessage(res->file.source) << "no root tag defined");
@@ -94,8 +80,7 @@ std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
   }
 
   if (el->name != "manifest" && !el->namespace_uri.empty()) {
-    diag->Error(DiagMessage(res->file.source)
-                << "no <manifest> root tag defined");
+    diag->Error(DiagMessage(res->file.source) << "no <manifest> root tag defined");
     return {};
   }
 
@@ -109,11 +94,9 @@ std::unique_ptr<ClassDefinition> GenerateManifestClass(IDiagnostics* diag,
   for (xml::Element* child_el : children) {
     if (child_el->namespace_uri.empty()) {
       if (child_el->name == "permission") {
-        error |= !WriteSymbol(res->file.source, diag, child_el,
-                              permission_class.get());
+        error |= !WriteSymbol(res->file.source, diag, child_el, permission_class.get());
       } else if (child_el->name == "permission-group") {
-        error |= !WriteSymbol(res->file.source, diag, child_el,
-                              permission_group_class.get());
+        error |= !WriteSymbol(res->file.source, diag, child_el, permission_group_class.get());
       }
     }
   }
