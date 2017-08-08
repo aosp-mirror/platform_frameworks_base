@@ -180,6 +180,11 @@ class SurfaceControlWithBackground extends SurfaceControl {
         // Compute new scaled width and height for background that will depend on current animation
         // progress. Those consist of current crop rect for the main surface + scaled areas outside
         // of letterboxed area.
+        // TODO: Because the progress is computed with low precision we're getting smaller values
+        // for background width/height then screen size at the end of the animation. Will round when
+        // the value is smaller then some empiric epsilon. However, this should be fixed by
+        // computing correct frames for letterboxed windows in WindowState.
+        d = d < 0.02f ? 0 : d;
         mWindowSurfaceController.getContainerRect(mTmpContainerRect);
         final int backgroundWidth =
                 (int) (crop.width() + (mTmpContainerRect.width() - mLastWidth) * (1 - d) + 0.5);
