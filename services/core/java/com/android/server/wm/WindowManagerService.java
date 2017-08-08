@@ -908,31 +908,46 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void closeSurfaceTransaction() {
-        closeSurfaceTransaction(true /* withLockHeld */);
-    }
-
     /**
      * Closes a surface transaction.
-     *
-     * @param withLockHeld Whether to acquire the window manager while doing so. In some cases
-     *                     holding the lock my lead to starvation in WM in case closeTransaction
-     *                     blocks and we call it repeatedly, like we do for animations.
      */
-    void closeSurfaceTransaction(boolean withLockHeld) {
+    void closeSurfaceTransaction() {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
             synchronized (mWindowMap) {
                 if (mRoot.mSurfaceTraceEnabled) {
                     mRoot.mRemoteEventTrace.closeSurfaceTransaction();
                 }
-                if (withLockHeld) {
-                    SurfaceControl.closeTransaction();
-                }
-            }
-            if (!withLockHeld) {
                 SurfaceControl.closeTransaction();
             }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    /**
+     * Executes an empty animation transaction without holding the WM lock to simulate
+     * back-pressure. See {@link WindowAnimator#animate} why this is needed.
+     */
+    void executeEmptyAnimationTransaction() {
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "openSurfaceTransaction");
+            synchronized (mWindowMap) {
+                if (mRoot.mSurfaceTraceEnabled) {
+                    mRoot.mRemoteEventTrace.openSurfaceTransaction();
+                }
+                SurfaceControl.openTransaction();
+                SurfaceControl.setAnimationTransaction();
+                if (mRoot.mSurfaceTraceEnabled) {
+                    mRoot.mRemoteEventTrace.closeSurfaceTransaction();
+                }
+            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
+            SurfaceControl.closeTransaction();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
