@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.testutis.TestUtils.assertExpectException;
+import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static com.google.common.truth.Truth.assertThat;
 
