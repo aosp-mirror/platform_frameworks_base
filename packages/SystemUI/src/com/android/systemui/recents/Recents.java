@@ -54,9 +54,11 @@ import com.android.systemui.plugins.PluginActivityManager;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -612,6 +614,14 @@ public class Recents extends SystemUI
                 }
             });
         }
+
+        // This will catch the cases when a user launches from recents to another app
+        // (and vice versa) that is not in the recents stack (such as home or bugreport) and it
+        // would not reset the wait for transition flag. This will catch it and make sure that the
+        // flag is reset.
+        if (!event.visible) {
+            mImpl.setWaitingForTransitionStart(false);
+        }
     }
 
     /**
@@ -684,6 +694,11 @@ public class Recents extends SystemUI
         }
     }
 
+    public final void onBusEvent(LaunchTaskFailedEvent event) {
+        // Reset the transition when tasks fail to launch
+        mImpl.setWaitingForTransitionStart(false);
+    }
+
     public final void onBusEvent(ConfigurationChangedEvent event) {
         // Update the configuration for the Recents component when the activity configuration
         // changes as well
@@ -708,6 +723,25 @@ public class Recents extends SystemUI
                     Log.e(TAG, "No SystemUI callbacks found for user: " + currentUser);
                 }
             }
+        }
+    }
+
+    public final void onBusEvent(SetWaitingForTransitionStartEvent event) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (sSystemServicesProxy.isSystemUser(processUser)) {
+            mImpl.setWaitingForTransitionStart(event.waitingForTransitionStart);
+        } else {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mUserToSystemCallbacks.setWaitingForTransitionStartEvent(
+                                event.waitingForTransitionStart);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
         }
     }
 

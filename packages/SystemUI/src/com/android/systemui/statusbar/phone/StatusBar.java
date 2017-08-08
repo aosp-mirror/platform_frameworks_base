@@ -5786,15 +5786,18 @@ public class StatusBar extends SystemUI implements DemoMode,
                         boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
 
                         // close the shade if it was open
-                        if (handled) {
+                        if (handled && !mNotificationPanel.isFullyCollapsed()) {
                             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                                     true /* force */);
                             visibilityChanged(false);
                             mAssistManager.hideAssist();
+
+                            // Wait for activity start.
+                            return true;
+                        } else {
+                            return false;
                         }
 
-                        // Wait for activity start.
-                        return handled;
                     }
                 }, afterKeyguardGone);
                 return true;
@@ -6844,12 +6847,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                 }.start();
 
-                // close the shade if it was open
-                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                        true /* force */, true /* delayed */);
-                visibilityChanged(false);
+                if (!mNotificationPanel.isFullyCollapsed()) {
+                    // close the shade if it was open
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                            true /* force */, true /* delayed */);
+                    visibilityChanged(false);
 
-                return true;
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }, afterKeyguardGone);
     }
@@ -7001,12 +7008,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                         new Thread(runnable).start();
                     }
 
-                    // close the shade if it was open
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                            true /* force */, true /* delayed */);
-                    visibilityChanged(false);
+                    if (!mNotificationPanel.isFullyCollapsed()) {
+                        // close the shade if it was open
+                        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                                true /* force */, true /* delayed */);
+                        visibilityChanged(false);
 
-                    return true;
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             }, afterKeyguardGone);
         }

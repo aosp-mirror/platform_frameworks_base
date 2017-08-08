@@ -198,6 +198,14 @@ public class AppWindowAnimator {
         return animation != null || mAppToken.inPendingTransaction;
     }
 
+    /**
+     * @return whether an animation is about to start, i.e. the animation is set already but we
+     *         haven't processed the first frame yet.
+     */
+    boolean isAnimationStarting() {
+        return animation != null && !animating;
+    }
+
     public int getTransit() {
         return mTransit;
     }

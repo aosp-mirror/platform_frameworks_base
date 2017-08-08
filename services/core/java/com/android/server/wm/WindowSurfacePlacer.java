@@ -127,6 +127,10 @@ class WindowSurfacePlacer {
         }
     }
 
+    boolean isLayoutDeferred() {
+        return mDeferDepth > 0;
+    }
+
     final void performSurfacePlacement() {
         performSurfacePlacement(false /* force */);
     }
