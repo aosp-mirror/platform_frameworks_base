@@ -3039,4 +3039,7 @@
 
     <!-- Enable the RingtonePickerActivity in 'com.android.providers.media'. -->
     <bool name="config_defaultRingtonePickerEnabled">true</bool>
+
+    <!-- Allow SystemUI to show the shutdown dialog -->
+    <bool name="config_showSysuiShutdown">true</bool>
 </resources>
