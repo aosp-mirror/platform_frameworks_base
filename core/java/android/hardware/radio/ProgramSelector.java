@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -73,10 +74,8 @@ public final class ProgramSelector implements Parcelable {
     /** SiriusXM Satellite Radio. */
     public static final int PROGRAM_TYPE_SXM = 7;
     /** Vendor-specific, not synced across devices. */
-    public static final int PROGRAM_TYPE_VENDOR1 = 8;
-    public static final int PROGRAM_TYPE_VENDOR2 = 9;
-    public static final int PROGRAM_TYPE_VENDOR3 = 10;
-    public static final int PROGRAM_TYPE_VENDOR4 = 11;
+    public static final int PROGRAM_TYPE_VENDOR_START = 1000;
+    public static final int PROGRAM_TYPE_VENDOR_END = 1999;
     @IntDef(prefix = { "PROGRAM_TYPE_" }, value = {
         PROGRAM_TYPE_AM,
         PROGRAM_TYPE_FM,
@@ -85,11 +84,8 @@ public final class ProgramSelector implements Parcelable {
         PROGRAM_TYPE_DAB,
         PROGRAM_TYPE_DRMO,
         PROGRAM_TYPE_SXM,
-        PROGRAM_TYPE_VENDOR1,
-        PROGRAM_TYPE_VENDOR2,
-        PROGRAM_TYPE_VENDOR3,
-        PROGRAM_TYPE_VENDOR4,
     })
+    @IntRange(from = PROGRAM_TYPE_VENDOR_START, to = PROGRAM_TYPE_VENDOR_END)
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProgramType {}
 
@@ -145,12 +141,12 @@ public final class ProgramSelector implements Parcelable {
      * Primary identifier for vendor-specific radio technology.
      * The value format is determined by a vendor.
      *
-     * It must not be used in any other programType than VENDORx.
+     * It must not be used in any other programType than corresponding VENDOR
+     * type between VENDOR_START and VENDOR_END (eg. identifier type 1015 must
+     * not be used in any program type other than 1015).
      */
-    public static final int IDENTIFIER_TYPE_VENDOR1_PRIMARY = 14;
-    public static final int IDENTIFIER_TYPE_VENDOR2_PRIMARY = 15;
-    public static final int IDENTIFIER_TYPE_VENDOR3_PRIMARY = 16;
-    public static final int IDENTIFIER_TYPE_VENDOR4_PRIMARY = 17;
+    public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = PROGRAM_TYPE_VENDOR_START;
+    public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = PROGRAM_TYPE_VENDOR_END;
     @IntDef(prefix = { "IDENTIFIER_TYPE_" }, value = {
         IDENTIFIER_TYPE_AMFM_FREQUENCY,
         IDENTIFIER_TYPE_RDS_PI,
@@ -165,11 +161,8 @@ public final class ProgramSelector implements Parcelable {
         IDENTIFIER_TYPE_DRMO_MODULATION,
         IDENTIFIER_TYPE_SXM_SERVICE_ID,
         IDENTIFIER_TYPE_SXM_CHANNEL,
-        IDENTIFIER_TYPE_VENDOR1_PRIMARY,
-        IDENTIFIER_TYPE_VENDOR2_PRIMARY,
-        IDENTIFIER_TYPE_VENDOR3_PRIMARY,
-        IDENTIFIER_TYPE_VENDOR4_PRIMARY,
     })
+    @IntRange(from = IDENTIFIER_TYPE_VENDOR_PRIMARY_START, to = IDENTIFIER_TYPE_VENDOR_PRIMARY_END)
     @Retention(RetentionPolicy.SOURCE)
     public @interface IdentifierType {}
 
