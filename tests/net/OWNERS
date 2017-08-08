@@ -1,6 +1,9 @@
 set noparent
 
 per-file Android.mk = build.master@android.com
+per-file Android.mk = ek@google.com
+per-file Android.mk = hugobenichi@google.com
+per-file Android.mk = lorenzo@google.com
 
 ek@google.com
 hugobenichi@google.com
