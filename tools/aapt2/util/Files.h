@@ -50,79 +50,56 @@ enum class FileType {
   kSocket,
 };
 
-FileType GetFileType(const android::StringPiece& path);
+FileType GetFileType(const std::string& path);
 
-/*
- * Appends a path to `base`, separated by the directory separator.
- */
+// Appends a path to `base`, separated by the directory separator.
 void AppendPath(std::string* base, android::StringPiece part);
 
-/*
- * Makes all the directories in `path`. The last element in the path
- * is interpreted as a directory.
- */
-bool mkdirs(const android::StringPiece& path);
+// Makes all the directories in `path`. The last element in the path is interpreted as a directory.
+bool mkdirs(const std::string& path);
 
-/**
- * Returns all but the last part of the path.
- */
+// Returns all but the last part of the path.
 android::StringPiece GetStem(const android::StringPiece& path);
 
-/**
- * Returns the last part of the path with extension.
- */
+// Returns the last part of the path with extension.
 android::StringPiece GetFilename(const android::StringPiece& path);
 
-/**
- * Returns the extension of the path. This is the entire string after
- * the first '.' of the last part of the path.
- */
+// Returns the extension of the path. This is the entire string after the first '.' of the last part
+// of the path.
 android::StringPiece GetExtension(const android::StringPiece& path);
 
-/**
- * Converts a package name (com.android.app) to a path: com/android/app
- */
+// Converts a package name (com.android.app) to a path: com/android/app
 std::string PackageToPath(const android::StringPiece& package);
 
-/**
- * Creates a FileMap for the file at path.
- */
-Maybe<android::FileMap> MmapPath(const android::StringPiece& path, std::string* out_error);
+// Creates a FileMap for the file at path.
+Maybe<android::FileMap> MmapPath(const std::string& path, std::string* out_error);
 
-/**
- * Reads the file at path and appends each line to the outArgList vector.
- */
+// Reads the file at path and appends each line to the outArgList vector.
 bool AppendArgsFromFile(const android::StringPiece& path, std::vector<std::string>* out_arglist,
                         std::string* out_error);
 
-/*
- * Filter that determines which resource files/directories are
- * processed by AAPT. Takes a pattern string supplied by the user.
- * Pattern format is specified in the FileFilter::SetPattern() method.
- */
+// Filter that determines which resource files/directories are
+// processed by AAPT. Takes a pattern string supplied by the user.
+// Pattern format is specified in the FileFilter::SetPattern() method.
 class FileFilter {
  public:
   explicit FileFilter(IDiagnostics* diag) : diag_(diag) {}
 
-  /*
-   * Patterns syntax:
-   * - Delimiter is :
-   * - Entry can start with the flag ! to avoid printing a warning
-   *   about the file being ignored.
-   * - Entry can have the flag "<dir>" to match only directories
-   *   or <file> to match only files. Default is to match both.
-   * - Entry can be a simplified glob "<prefix>*" or "*<suffix>"
-   *   where prefix/suffix must have at least 1 character (so that
-   *   we don't match a '*' catch-all pattern.)
-   * - The special filenames "." and ".." are always ignored.
-   * - Otherwise the full string is matched.
-   * - match is not case-sensitive.
-   */
+  // Patterns syntax:
+  // - Delimiter is :
+  // - Entry can start with the flag ! to avoid printing a warning
+  //   about the file being ignored.
+  // - Entry can have the flag "<dir>" to match only directories
+  //   or <file> to match only files. Default is to match both.
+  // - Entry can be a simplified glob "<prefix>*" or "*<suffix>"
+  //   where prefix/suffix must have at least 1 character (so that
+  //   we don't match a '*' catch-all pattern.)
+  // - The special filenames "." and ".." are always ignored.
+  // - Otherwise the full string is matched.
+  // - match is not case-sensitive.
   bool SetPattern(const android::StringPiece& pattern);
 
-  /**
-   * Applies the filter, returning true for pass, false for fail.
-   */
+  // Applies the filter, returning true for pass, false for fail.
   bool operator()(const std::string& filename, FileType type) const;
 
  private:
