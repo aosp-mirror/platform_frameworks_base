@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -708,6 +709,25 @@ public class Recents extends SystemUI
                     Log.e(TAG, "No SystemUI callbacks found for user: " + currentUser);
                 }
             }
+        }
+    }
+
+    public final void onBusEvent(SetWaitingForTransitionStartEvent event) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (sSystemServicesProxy.isSystemUser(processUser)) {
+            mImpl.setWaitingForTransitionStart(event.waitingForTransitionStart);
+        } else {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mUserToSystemCallbacks.setWaitingForTransitionStartEvent(
+                                event.waitingForTransitionStart);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
         }
     }
 
