@@ -50,6 +50,12 @@ public final class DexoptOptions {
     // save disk space.
     public static final int DEXOPT_DOWNGRADE = 1 << 5;
 
+    // When set, dexopt will compile the dex file as a shared library even if it is not actually
+    // used by other apps. This is used to force the compilation or shared libraries declared
+    // with in the manifest with ''uses-library' before we have a chance to detect they are
+    // actually shared at runtime.
+    public static final int DEXOPT_AS_SHARED_LIBRARY = 1 << 6;
+
     // The name of package to optimize.
     private final String mPackageName;
 
@@ -79,7 +85,8 @@ public final class DexoptOptions {
                 DEXOPT_BOOT_COMPLETE |
                 DEXOPT_ONLY_SECONDARY_DEX |
                 DEXOPT_ONLY_SHARED_DEX |
-                DEXOPT_DOWNGRADE;
+                DEXOPT_DOWNGRADE |
+                DEXOPT_AS_SHARED_LIBRARY;
         if ((flags & (~validityMask)) != 0) {
             throw new IllegalArgumentException("Invalid flags : " + Integer.toHexString(flags));
         }
@@ -122,7 +129,15 @@ public final class DexoptOptions {
         return (mFlags & DEXOPT_DOWNGRADE) != 0;
     }
 
+    public boolean isDexoptAsSharedLibrary() {
+        return (mFlags & DEXOPT_AS_SHARED_LIBRARY) != 0;
+    }
+
     public String getSplitName() {
         return mSplitName;
+    }
+
+    public int getFlags() {
+        return mFlags;
     }
 }
