@@ -414,9 +414,12 @@ public class TelephonyManager {
      * Open the voicemail settings activity to make changes to voicemail configuration.
      *
      * <p>
+     * The {@link #EXTRA_PHONE_ACCOUNT_HANDLE} extra indicates which {@link PhoneAccountHandle} to
+     * configure voicemail.
      * The {@link #EXTRA_HIDE_PUBLIC_SETTINGS} hides settings the dialer will modify through public
      * API if set.
      *
+     * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @see #EXTRA_HIDE_PUBLIC_SETTINGS
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -778,8 +781,9 @@ public class TelephonyManager {
             "android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION";
 
     /**
-     * The extra used with an {@link #ACTION_SHOW_VOICEMAIL_NOTIFICATION} {@code Intent} to specify
-     * the {@link PhoneAccountHandle} the notification is for.
+     * The extra used with an {@link #ACTION_CONFIGURE_VOICEMAIL} and
+     * {@link #ACTION_SHOW_VOICEMAIL_NOTIFICATION} {@code Intent} to specify the
+     * {@link PhoneAccountHandle} the configuration or notification is for.
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
      */
