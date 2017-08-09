@@ -80,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"現在地のモバイル ネットワークでは一時的に提供されていません"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"受信状態を改善するには、[設定] &gt; [ネットワークとインターネット] &gt; [モバイル ネットワーク] &gt; [優先ネットワーク タイプ] で選択したタイプを変更してみてください。"</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi 通話が有効な状態です"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"緊急通報にはモバイル ネットワークが必要です。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"電話の転送"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"緊急通報待機モード"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"モバイルデータ通知"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"モバイルデータのステータス"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS メッセージ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ボイスメール メッセージ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
@@ -1303,6 +1305,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"タップして運転モードを終了します。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"テザリングまたはアクセスポイントが有効です"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"タップしてセットアップします。"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"テザリングは無効に設定されています"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"詳しくは、管理者にお問い合わせください"</string>
     <string name="back_button_label" msgid="2300470004503343439">"戻る"</string>
     <string name="next_button_label" msgid="1080555104677992408">"次へ"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"スキップ"</string>

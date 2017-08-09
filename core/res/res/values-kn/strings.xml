@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ತಾತ್ಕಾಲಿಕವಾಗಿ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ನಿಂದ ನಿಮ್ಮ ಸ್ಥಳದಲ್ಲಿ ಒದಗಿಸುತ್ತಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕ ಪಡೆಯುವುದನ್ನು ಸುಧಾರಿಸಲು, ಆಯ್ಕೆ ಮಾಡಿರುವ ವಿಧವನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ನೆಟ್‌ವರ್ಕ್ ಮತ್ತು ಇಂಟರ್ನೆಟ್ &gt; ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳು &gt; ಆದ್ಯತೆಯ ನೆಟ್‌ವರ್ಕ್ ವಿಧದಲ್ಲಿ ಬದಲಿಸಿ ನೋಡಿ."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ತುರ್ತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ ಮೋಡ್‌"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"ಮೊಬೈಲ್ ಡೇಟಾ ಎಚ್ಚರಿಕೆಗಳು"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"ಎಸ್‌ಎಂಎಸ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ಧ್ವನಿಮೇಲ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"ವೈ-ಫೈ ಮೂಲಕ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಈ ಸೇವೆಯನ್ನು ಹೊಂದಿಸಲು ಮೊದಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ಆ ನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ವೈ-ಫೈ ಕರೆಮಾಡುವಿಕೆಯನ್ನು ಅನ್ನು ಆನ್ ಮಾಡಿ. (ದೋಷ ಕೋಡ್: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"ನಿಮ್ಮ ವಾಹಕದ ಜೊತೆಗೆ ನೋಂದಾಯಿಸಿಕೊಳ್ಳಿ (ದೋಷ ಕೋಡ್: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</item>
@@ -212,7 +219,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ಪರಸ್ಪರ ಸಂವಹನ ವರದಿ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ಹೆಚ್ಚಿನ ಸಂದರ್ಭಗಳಲ್ಲಿ ಇದನ್ನು ಬಳಸಿ. ಇದು ವರದಿಯ ಪ್ರಗತಿಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಸಮಸ್ಯೆ ಕುರಿತು ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಮತ್ತು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ. ಇದು ವರದಿ ಮಾಡಲು ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುವಂತಹ ಕೆಲವು ಕಡಿಮೆ ಬಳಸಲಾದ ವಿಭಾಗಗಳನ್ನು ತ್ಯಜಿಸಬಹುದು."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ಪೂರ್ಣ ವರದಿ"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಟ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಠ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
       <item quantity="other">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI ಗೆ USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ಪರಿಕರಕ್ಕೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"ಕಾರು ಮೋಡ್‍ನಿಂದ ನಿರ್ಗಮಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ಟೆಥರಿಂಗ್ ಅಥವಾ ಹಾಟ್‌ಸ್ಪಾಟ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ಟೆಥರಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ಹಿಂದೆ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ಮುಂದಿನದು"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ಸ್ಕಿಪ್‌"</string>
@@ -1593,7 +1600,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ಹೊಸ ಪಿನ್‌ ದೃಢೀಕರಿಸಿ"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"ನಿರ್ಬಂಧಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಪಿನ್‌ ರಚಿಸಿ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"ಪಿನ್‌ ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಟ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಠ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</item>

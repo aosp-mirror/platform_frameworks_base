@@ -82,10 +82,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"הרשת הסלולרית במיקום הזה חסמה את השירות באופן זמני"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"לא ניתן להתחבר לרשת"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"כדי לשפר את הקליטה, כדאי לנסות לשנות את סוג הרשת ב\'הגדרות\' &gt; \'רשת ואינטרנט\' &gt; \'רשתות סלולריות\' &gt; \'סוג רשת מועדף\'."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"התראות"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"העברת שיחות"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"מצב \'התקשרות חזרה בחירום\'"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"התראות לגבי חבילת הגלישה"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"‏הודעות SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"הודעות קוליות"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏שיחות Wi-Fi"</string>
@@ -119,7 +124,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"‏כדי להתקשר ולשלוח הודעות ברשת Wi-Fi, תחילה יש לבקש מהספק להגדיר את השירות. לאחר מכן, יש להפעיל שוב שיחות Wi-Fi ב\'הגדרות\'. (קוד שגיאה: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"יש להירשם אצל הספק (קוד שגיאה: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"‏שיחות Wi-Fi של %s"</item>
@@ -1227,10 +1234,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB ל-MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏מחובר לאביזר USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"הקש לקבלת אפשרויות נוספות."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"המכשיר זיהה התקן אודיו אנלוגי"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ההתקן שחיברת לא תואם לטלפון הזה. הקש למידע נוסף."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏ניפוי באגים של USB מחובר"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"‏הקש כדי להשבית ניפוי באגים של USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"‏בחר להשבית ניפוי באגים ב-USB."</string>
@@ -1347,6 +1352,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"הקש כדי לצאת ממצב מכונית."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"שיתוף אינטרנט פעיל"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"הקש כדי להגדיר."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"שיתוף האינטרנט בין ניידים מושבת"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"לפרטים, יש לפנות למנהל המערכת"</string>
     <string name="back_button_label" msgid="2300470004503343439">"הקודם"</string>
     <string name="next_button_label" msgid="1080555104677992408">"הבא"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"דילוג"</string>

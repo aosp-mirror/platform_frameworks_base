@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"​មិន​បាន​ផ្តល់​ជូន​ដោយ​បណ្តាញចល័តនៅ​ទីកន្លែងរបស់អ្នកជា​បណ្តោះ​អាសន្ន"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ដើម្បី​ធ្វើ​ឲ្យ​ការ​ទទួល​​រលក​សញ្ញា​​ប្រសើរ​ជាងមុន សូមសាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ការកំណត់ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"ការជូនដំណឹង​អំពី​ទិន្នន័យ​ទូរសព្ទ​ចល័ត"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"សារ SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"សារ​ជា​សំឡេង"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ការហៅ​ទូរសព្ទ​តាម Wi-Fi"</string>
@@ -1305,6 +1310,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"ប៉ះដើម្បីចាកចេញពីរបៀបរថយន្ត"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ភ្ជាប់ ឬ​ហតស្ពត​សកម្ម"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"ប៉ះដើម្បីកំណត់"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ការភ្ជាប់​ត្រូវបានបិទ"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ទាក់ទងអ្នកគ្រប់គ្រង​របស់អ្នកសម្រាប់​ព័ត៌មានលម្អិត"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ថយក្រោយ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"បន្ទាប់​"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"រំលង"</string>
