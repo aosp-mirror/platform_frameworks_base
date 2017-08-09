@@ -41,10 +41,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s வழியாகக் கிடைக்கிறது"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"இணைக்கப்பட்டது, இணையம் இல்லை"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"தற்காலிகமாக அணுகல் புள்ளி நிரம்பியுள்ளது"</string>
-    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
-    <skip />
-    <!-- no translation found for available_via_carrier (1469036129740799053) -->
-    <skip />
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s வழியாக இணைக்கப்பட்டது"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s வழியாகக் கிடைக்கிறது"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"மிகவும் வேகம் குறைவானது"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"வேகம் குறைவு"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"சரி"</string>
@@ -358,7 +356,8 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஏற்றப்படுகிறது"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"சார்ஜாகிறது"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"சார்ஜ் செய்யப்படவில்லை"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"சார்ஜ் ஏறவில்லை"</string>
+    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
+    <skip />
     <string name="battery_info_status_full" msgid="2824614753861462808">"முழுமை"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"நிர்வாகி இயக்கியுள்ளார்"</string>
