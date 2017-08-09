@@ -1412,7 +1412,11 @@ public final class PowerManager {
          */
         public void release(int flags) {
             synchronized (mToken) {
-                mInternalCount--;
+                if (mInternalCount > 0) {
+                    // internal count must only be decreased if it is > 0 or state of
+                    // the WakeLock object is broken.
+                    mInternalCount--;
+                }
                 if ((flags & RELEASE_FLAG_TIMEOUT) == 0) {
                     mExternalCount--;
                 }
