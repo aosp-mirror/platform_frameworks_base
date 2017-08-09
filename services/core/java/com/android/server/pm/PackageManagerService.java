@@ -449,6 +449,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_FIRST_BOOT_OR_UPGRADE = 1<<16;
     static final int SCAN_AS_INSTANT_APP = 1<<17;
     static final int SCAN_AS_FULL_APP = 1<<18;
+    static final int SCAN_AS_VIRTUAL_PRELOAD = 1<<19;
     /** Should not be with the scan flags */
     static final int FLAGS_REMOVE_CHATTY = 1<<31;
 
@@ -9404,6 +9405,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps != null && ps.getInstantApp(userId)) {
             scanFlags |= SCAN_AS_INSTANT_APP;
         }
+        if (ps != null && ps.getVirtulalPreload(userId)) {
+            scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
+        }
 
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, policyFlags, scanFlags
@@ -10656,15 +10660,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 final String parentPackageName = (pkg.parentPackage != null)
                         ? pkg.parentPackage.packageName : null;
                 final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
+                final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
                 // REMOVE SharedUserSetting from method; update in a separate call
                 pkgSetting = Settings.createNewSetting(pkg.packageName, origPackage,
                         disabledPkgSetting, realName, suid, destCodeFile, destResourceFile,
                         pkg.applicationInfo.nativeLibraryRootDir, pkg.applicationInfo.primaryCpuAbi,
                         pkg.applicationInfo.secondaryCpuAbi, pkg.mVersionCode,
                         pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags, user,
-                        true /*allowInstall*/, instantApp, parentPackageName,
-                        pkg.getChildPackageNames(), UserManagerService.getInstance(),
-                        usesStaticLibraries, pkg.usesStaticLibrariesVersions);
+                        true /*allowInstall*/, instantApp, virtualPreload,
+                        parentPackageName, pkg.getChildPackageNames(),
+                        UserManagerService.getInstance(), usesStaticLibraries,
+                        pkg.usesStaticLibrariesVersions);
                 // SIDE EFFECTS; updates system state; move elsewhere
                 if (origPackage != null) {
                     mSettings.addRenamedPackageLPw(pkg.packageName, origPackage.name);
@@ -18195,6 +18201,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
         final boolean fullApp = ((installFlags & PackageManager.INSTALL_FULL_APP) != 0);
         final boolean forceSdk = ((installFlags & PackageManager.INSTALL_FORCE_SDK) != 0);
+        final boolean virtualPreload =
+                ((installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
         boolean replace = false;
         int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.move != null) {
@@ -18209,6 +18217,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (fullApp) {
             scanFlags |= SCAN_AS_FULL_APP;
+        }
+        if (virtualPreload) {
+            scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
         }
 
         // Result object to be returned
@@ -20000,6 +20011,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /*hidden*/,
                     false /*suspended*/,
                     false /*instantApp*/,
+                    false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
                     null /*enabledComponents*/,
                     null /*disabledComponents*/,
