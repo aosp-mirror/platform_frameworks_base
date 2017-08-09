@@ -17,6 +17,7 @@
 #include "java/AnnotationProcessor.h"
 
 #include <algorithm>
+#include <array>
 
 #include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
@@ -41,30 +42,54 @@ StringPiece AnnotationProcessor::ExtractFirstSentence(const StringPiece& comment
   return comment;
 }
 
-void AnnotationProcessor::AppendCommentLine(std::string& comment) {
+struct AnnotationRule {
+  enum : uint32_t {
+    kDeprecated = 0x01,
+    kSystemApi = 0x02,
+    kTestApi = 0x04,
+  };
+
+  StringPiece doc_str;
+  uint32_t bit_mask;
+  StringPiece annotation;
+};
+
+static std::array<AnnotationRule, 2> sAnnotationRules = {{
+    {"@SystemApi", AnnotationRule::kSystemApi, "@android.annotation.SystemApi"},
+    {"@TestApi", AnnotationRule::kTestApi, "@android.annotation.TestApi"},
+}};
+
+void AnnotationProcessor::AppendCommentLine(std::string comment) {
   static const std::string sDeprecated = "@deprecated";
-  static const std::string sSystemApi = "@SystemApi";
 
+  // Treat deprecated specially, since we don't remove it from the source comment.
   if (comment.find(sDeprecated) != std::string::npos) {
-    annotation_bit_mask_ |= kDeprecated;
+    annotation_bit_mask_ |= AnnotationRule::kDeprecated;
   }
 
-  std::string::size_type idx = comment.find(sSystemApi);
-  if (idx != std::string::npos) {
-    annotation_bit_mask_ |= kSystemApi;
-    comment.erase(comment.begin() + idx,
-                  comment.begin() + idx + sSystemApi.size());
+  for (const AnnotationRule& rule : sAnnotationRules) {
+    std::string::size_type idx = comment.find(rule.doc_str.data());
+    if (idx != std::string::npos) {
+      annotation_bit_mask_ |= rule.bit_mask;
+      comment.erase(comment.begin() + idx, comment.begin() + idx + rule.doc_str.size());
+    }
   }
 
-  if (util::TrimWhitespace(comment).empty()) {
+  // Check if after removal of annotations the line is empty.
+  const StringPiece trimmed = util::TrimWhitespace(comment);
+  if (trimmed.empty()) {
     return;
+  }
+
+  // If there was trimming to do, copy the string.
+  if (trimmed.size() != comment.size()) {
+    comment = trimmed.to_string();
   }
 
   if (!has_comments_) {
     has_comments_ = true;
     comment_ << "/**";
   }
-
   comment_ << "\n * " << std::move(comment);
 }
 
@@ -73,16 +98,18 @@ void AnnotationProcessor::AppendComment(const StringPiece& comment) {
   for (StringPiece line : util::Tokenize(comment, '\n')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      std::string lineCopy = line.to_string();
-      AppendCommentLine(lineCopy);
+      AppendCommentLine(line.to_string());
     }
   }
 }
 
-void AnnotationProcessor::AppendNewLine() { comment_ << "\n *"; }
+void AnnotationProcessor::AppendNewLine() {
+  if (has_comments_) {
+    comment_ << "\n *";
+  }
+}
 
-void AnnotationProcessor::WriteToStream(std::ostream* out,
-                                        const StringPiece& prefix) const {
+void AnnotationProcessor::WriteToStream(const StringPiece& prefix, std::ostream* out) const {
   if (has_comments_) {
     std::string result = comment_.str();
     for (StringPiece line : util::Tokenize(result, '\n')) {
@@ -92,12 +119,14 @@ void AnnotationProcessor::WriteToStream(std::ostream* out,
          << "\n";
   }
 
-  if (annotation_bit_mask_ & kDeprecated) {
+  if (annotation_bit_mask_ & AnnotationRule::kDeprecated) {
     *out << prefix << "@Deprecated\n";
   }
 
-  if (annotation_bit_mask_ & kSystemApi) {
-    *out << prefix << "@android.annotation.SystemApi\n";
+  for (const AnnotationRule& rule : sAnnotationRules) {
+    if (annotation_bit_mask_ & rule.bit_mask) {
+      *out << prefix << rule.annotation << "\n";
+    }
   }
 }
 

@@ -84,6 +84,8 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
              @hide
              @SystemApi -->
         <permission android:name="android.permission.SECRET" />
+        <!-- @TestApi This is a test only permission. -->
+        <permission android:name="android.permission.TEST_ONLY" />
       </manifest>)");
 
   std::string actual;
@@ -110,6 +112,13 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
     @android.annotation.SystemApi
     public static final String SECRET="android.permission.SECRET";)";
   EXPECT_THAT(actual, HasSubstr(expected_secret));
+
+  const char* expected_test = R"(    /**
+     * This is a test only permission.
+     */
+    @android.annotation.TestApi
+    public static final String TEST_ONLY="android.permission.TEST_ONLY";)";
+  EXPECT_THAT(actual, HasSubstr(expected_test));
 }
 
 static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xml::XmlResource* res,
