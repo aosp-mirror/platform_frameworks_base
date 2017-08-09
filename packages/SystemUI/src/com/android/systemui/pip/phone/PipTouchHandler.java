@@ -42,6 +42,7 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -387,7 +388,10 @@ public class PipTouchHandler {
                 if (!mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+                    event.setImportantForAccessibility(true);
                     event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
+                    event.setWindowId(
+                            AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID);
                     mAccessibilityManager.sendAccessibilityEvent(event);
                     mSendingHoverAccessibilityEvents = true;
                 }
@@ -397,7 +401,10 @@ public class PipTouchHandler {
                 if (mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+                    event.setImportantForAccessibility(true);
                     event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
+                    event.setWindowId(
+                            AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID);
                     mAccessibilityManager.sendAccessibilityEvent(event);
                     mSendingHoverAccessibilityEvents = false;
                 }
