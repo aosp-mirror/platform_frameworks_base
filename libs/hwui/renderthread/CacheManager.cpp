@@ -44,7 +44,7 @@ namespace renderthread {
 CacheManager::CacheManager(const DisplayInfo& display)
         : mMaxSurfaceArea(display.w * display.h) {
     mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2,
-            skiapipeline::VectorDrawableAtlas::StorageMode::allowSharedSurface);
+            skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
 void CacheManager::reset(GrContext* context) {
@@ -62,7 +62,8 @@ void CacheManager::reset(GrContext* context) {
 void CacheManager::destroy() {
     // cleanup any caches here as the GrContext is about to go away...
     mGrContext.reset(nullptr);
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2);
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2,
+             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
 void CacheManager::updateContextCacheSizes() {
