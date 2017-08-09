@@ -41,10 +41,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"कनेक्ट किया गया, इंटरनेट नहीं"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"एक्सेस पॉइंट फ़िलहाल भरा हुआ है"</string>
-    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
-    <skip />
-    <!-- no translation found for available_via_carrier (1469036129740799053) -->
-    <skip />
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s के ज़रिए कनेक्ट"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s के ज़रिए उपलब्ध"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"अत्‍यधिक धीमी"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"धीमी"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ठीक"</string>
@@ -358,7 +356,8 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज किया जा रहा है"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज नहीं हो रही है"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"चार्ज नहीं हो रही है"</string>
+    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
+    <skip />
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूरी"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"व्यवस्थापक द्वारा नियंत्रित"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"व्यवस्थापक ने सक्षम किया है"</string>
