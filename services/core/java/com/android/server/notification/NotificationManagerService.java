@@ -3043,7 +3043,7 @@ public class NotificationManagerService extends SystemService {
             final NotificationRecord removed = findNotificationByKeyLocked(summaries.remove(pkg));
             if (removed != null) {
                 boolean wasPosted = removeFromNotificationListsLocked(removed);
-                cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED, wasPosted);
+                cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED, wasPosted, null);
             }
         }
     }
@@ -3682,7 +3682,7 @@ public class NotificationManagerService extends SystemService {
                     .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
                             mSnoozeCriterionId == null ? 0 : 1));
             boolean wasPosted = removeFromNotificationListsLocked(r);
-            cancelNotificationLocked(r, false, REASON_SNOOZED, wasPosted);
+            cancelNotificationLocked(r, false, REASON_SNOOZED, wasPosted, null);
             updateLightsLocked();
             if (mSnoozeCriterionId != null) {
                 mAssistants.notifyAssistantSnoozedLocked(r.sbn, mSnoozeCriterionId);
@@ -4513,7 +4513,7 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason,
-            boolean wasPosted) {
+            boolean wasPosted, String listenerName) {
         final String canceledKey = r.getKey();
 
         // Record caller.
@@ -4613,7 +4613,7 @@ public class NotificationManagerService extends SystemService {
                 .setType(MetricsEvent.TYPE_DISMISS)
                 .setSubtype(reason));
         EventLogTags.writeNotificationCanceled(canceledKey, reason,
-                r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
+                r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now), listenerName);
     }
 
     /**
@@ -4656,7 +4656,7 @@ public class NotificationManagerService extends SystemService {
 
                         // Cancel the notification.
                         boolean wasPosted = removeFromNotificationListsLocked(r);
-                        cancelNotificationLocked(r, sendDelete, reason, wasPosted);
+                        cancelNotificationLocked(r, sendDelete, reason, wasPosted, listenerName);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
                                 sendDelete, null);
                         updateLightsLocked();
@@ -4782,7 +4782,7 @@ public class NotificationManagerService extends SystemService {
             notificationList.remove(i);
             mNotificationsByKey.remove(r.getKey());
             canceledNotifications.add(r);
-            cancelNotificationLocked(r, sendDelete, reason, wasPosted);
+            cancelNotificationLocked(r, sendDelete, reason, wasPosted, listenerName);
         }
         if (canceledNotifications != null) {
             final int M = canceledNotifications.size();
@@ -4892,7 +4892,7 @@ public class NotificationManagerService extends SystemService {
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 notificationList.remove(i);
                 mNotificationsByKey.remove(childR.getKey());
-                cancelNotificationLocked(childR, sendDelete, reason, wasPosted);
+                cancelNotificationLocked(childR, sendDelete, reason, wasPosted, listenerName);
             }
         }
     }
