@@ -26,14 +26,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
+import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener;
 import android.media.session.PlaybackState;
 import android.os.UserHandle;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.UserInfoController;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,10 +92,18 @@ public class PipMediaController {
         }
     };
 
-    private MediaController.Callback mPlaybackChangedListener = new MediaController.Callback() {
+    private final MediaController.Callback mPlaybackChangedListener = new MediaController.Callback() {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             notifyActionsChanged();
+        }
+    };
+
+    private final MediaSessionManager.OnActiveSessionsChangedListener mSessionsChangedListener =
+            new OnActiveSessionsChangedListener() {
+        @Override
+        public void onActiveSessionsChanged(List<MediaController> controllers) {
+            resolveActiveMediaController(controllers);
         }
     };
 
@@ -110,9 +122,11 @@ public class PipMediaController {
         createMediaActions();
         mMediaSessionManager =
                 (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
-        mMediaSessionManager.addOnActiveSessionsChangedListener(controllers -> {
-            resolveActiveMediaController(controllers);
-        }, null);
+
+        // The media session listener needs to be re-registered when switching users
+        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
+        userInfoController.addCallback((String name, Drawable picture, String userAccount) ->
+                registerSessionListenerForCurrentUser());
     }
 
     /**
@@ -120,7 +134,8 @@ public class PipMediaController {
      */
     public void onActivityPinned() {
         // Once we enter PiP, try to find the active media controller for the top most activity
-        resolveActiveMediaController(mMediaSessionManager.getActiveSessions(null));
+        resolveActiveMediaController(mMediaSessionManager.getActiveSessionsForUser(null,
+                UserHandle.USER_CURRENT));
     }
 
     /**
@@ -198,6 +213,15 @@ public class PipMediaController {
                 R.drawable.ic_skip_previous_white), prevDescription, prevDescription,
                         PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PREV),
                                 FLAG_UPDATE_CURRENT));
+    }
+
+    /**
+     * Re-registers the session listener for the current user.
+     */
+    private void registerSessionListenerForCurrentUser() {
+        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionsChangedListener);
+        mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionsChangedListener, null,
+                UserHandle.USER_CURRENT, null);
     }
 
     /**
