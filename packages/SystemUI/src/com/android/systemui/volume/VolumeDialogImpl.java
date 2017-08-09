@@ -1059,7 +1059,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         public void onAccessibilityModeChanged(Boolean showA11yStream) {
             boolean show = showA11yStream == null ? false : showA11yStream;
             mShowA11yStream = show;
-            updateRowsH(getActiveRow());
+            VolumeRow activeRow = getActiveRow();
+            if (!mShowA11yStream && AudioManager.STREAM_ACCESSIBILITY == activeRow.stream) {
+                dismissH(Events.DISMISS_STREAM_GONE);
+            } else {
+                updateRowsH(activeRow);
+            }
 
         }
     };
