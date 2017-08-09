@@ -80,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Kwa sasa, huduma hii haipatikani katika mtandao wa simu mahali ulipo"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Haiwezi kufikia mtandao"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ili kupata mtandao thabiti, jaribu kubadilisha aina uliyochagua katika Mipangilio &gt; Mtandao na Intaneti &gt; Mitandao ya simu &gt; Aina ya mtandao unaopendelea."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Umewasha kipengele cha kupiga simu kupitia Wi‑Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Huduma ya kupiga simu za dharura inahitaji mtandao wa simu."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Arifa"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Kupeleka simu kwenye nambari nyingine"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Hali ya kupiga simu za dharura"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Arifa za matumizi ya data ya simu"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Hali ya data ya mtandao wa simu"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Ujumbe wa SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ujumbe wa sauti"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kupiga simu kupitia Wi-Fi"</string>
@@ -117,7 +119,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Ili upige simu na kutuma ujumbe kupitia Wi-Fi, mwambie mtoa huduma wako aweke mipangilio ya huduma hii kwanza. Kisha uwashe tena kipengele cha kupiga simu kupitia Wi-Fi kwenye Mipangilio. (Msimbo wa hitilafu: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Jisajili na mtoa huduma wako (Msimbo wa hitilafu: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
     <!-- String.format failed for translation -->
     <!-- no translation found for wfcSpnFormats:0 (6830082633573257149) -->
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
@@ -357,9 +361,9 @@
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Huruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye runinga yako, pamoja na marudio ya upigaji wako wa simu, utumaji wa barua pepe, au mawasiliano kwa njia nyingine na watu maalum unaowasiliana nao. Idhini hii huruhusu programu kuhifadhi data yako ya mawasiliano, na programu hasidi zinaweza kushiriki data ya mawasiliano bila wewe kujua."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye simu yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"kurekebisha anwani zako"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Inaruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta kibao yako, ikijumuisha ni mara ngapi umepiga simu, kutuma barua pepe, au kuwasiliana kwa njia nyingine na wawasiliani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye runinga yako, pamoja na marudio ya upigaji wako wa simu, utumaji wa barua pepe, au mawasiliano kwa njia nyingine na watu maalum unaowasiliana nao. Ruhusa hii huruhusu programu kufuta data ya anwani."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Inaruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye simu yako, ikijumuisha ni mara ngapi umepiga simu, kutuma barua pepe, au kuwasiliana kwa njia nyingine na wawasiliani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye simu yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"kusoma rekodi ya simu"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Programu hii inaweza kusoma rekodi yako ya simu zilizopigwa."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kuandika rekodi ya simu"</string>
@@ -1181,10 +1185,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB kwa ajili ya MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Imeunganishwa kwa kifuasi cha USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Gonga ili upate chaguo zaidi."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Imetambua kifaa cha sauti ya analogi"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Kifaa ulichoambatisha hakitumiki kwenye simu hii. Gonga ili upate maelezo zaidi."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Utatuaji wa USB umeunganishwa"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Gonga ili uzime utatuaji wa USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Chagua ili kulemaza utatuaji USB."</string>
@@ -1301,6 +1303,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Gonga ili ufunge hali ya garini."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Kushiriki au kusambaza intaneti kumewashwa"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Gonga ili uweke mipangilio."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Umezima kipengele cha kusambaza mtandao"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Wasiliana na msimamizi wako ili upate maelezo zaidi"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Nyuma"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Ifuatayo"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Ruka"</string>

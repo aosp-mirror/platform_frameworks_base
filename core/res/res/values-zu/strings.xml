@@ -80,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Okwesikhashana akunikezwa inethiwekhi yeselula endaweni yakho"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ayikwazi ukufinyelela inethiwekhi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ukuze uthuthukise ukwamukelwa, zama ukushintsha uhlobo olukhethiwe kuzilungiselelo &gt; Inethiwekhi ne-inthanethi &gt; amanethiwekhi eselula &gt; Uhlobo oluncanyelwayo lwenethiwekhi."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Ukushaya kwe-Wi-Fi kuyasebenza"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Amakholi aphuthumayo adinga inethiwekhi yeselula."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Izexwayiso"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Ukudlulisa ikholi"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Imodi yokushayela yesimo esiphuthumayo"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Izexwayiso zedatha yeselula"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Isimo sedatha yeselula"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Imilayezo ye-SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Imilayezo yevoyisimeyili"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Ukushaya kwe-Wi-Fi"</string>
@@ -117,7 +119,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Ukuze wenze amakholi uphinde uthumele imilayezo nge-Wi-Fi, qala ucele inkampani yakho yenethiwekhi ukuthi isethe le sevisi. Bese uvula ukushaya kwe-Wi-Fi futhi kusukela kuzilungiselelo (Ikhodi yephutha: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Bhalisa ngenkampani yakho yenethiwekhi (Ikhodi yephutha: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s ukushaya kwe-Wi-Fi"</item>
@@ -1183,10 +1187,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"I-USB ye-MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Ixhunywe ku-accessory ye-USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Thepha ngezinketho eziningi."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Kutholwe isisetshenziswa se-analog yomsindo"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Idivayisi enamathiselwe kwi-imeyili ayihambisani nale foni. Thepha ukuze ufunde kabanzi."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Thepha ukuze ukhubaze ukususa isiphazamisi se-USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Khetha ukuvimbela ukulungisa iphutha le-USB."</string>
@@ -1303,6 +1305,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Thepha ukuze uphume kumodi yemoto."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Ukusebenzisa njengemodemu noma i-hotspot ephathekayo kuvuliwe"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Thepha ukuze usethe."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Ukusebenzisa ifoni njengemodemu kukhutshaziwe"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Xhumana nomphathi wakho ukuze uthole imininingwane"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Emuva"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Okulandelayo"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Yeqa"</string>

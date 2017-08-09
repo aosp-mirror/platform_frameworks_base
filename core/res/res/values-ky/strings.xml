@@ -80,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Өзгөчө кырдаалдагы кызматтар сиз жайгашкан жердеги мобилдик тармак тарабынан убактылуу бөгөттөлгөн"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Тармакка туташпай жатат"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Кабыл алуу мүмкүнчүлүгүн жакшыртуу үчүн Жөндөөлөр &gt; Тармак жана Интернет &gt; Мобилдик тармактар &gt; Тандалган тармак бөлүмүнөн тармактын түрүн өзгөртүп көрүңүз."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi аркылуу чалуу жүрүп жатат"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Шашылыш чалуу үчүн мобилдик тармак талап кылынат."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Эскертүүлөр"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Чалууну башка номерге багыттоо"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Шашылыш кайра чалуу режими"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Мобилдик Интернеттин эскертүүлөрү"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Мобилдик Интернеттин абалы"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS билдирүүлөрү"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Үн почтасынын билдирүүлөрү"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi аркылуу чалуу"</string>
@@ -117,7 +119,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fi аркылуу чалууларды аткарып жана билдирүүлөрдү жөнөтүү үчүн адегенде байланыш операторуңуздан бул кызматты орнотушун сураныңыз. Андан соң, Жөндөөлөрдөн Wi-Fi чалууну кайра күйгүзүңүз. (Ката коду: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Операторуңузга катталыңыз (Ката коду: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Wi-Fi Чалуу"</item>
@@ -1183,10 +1187,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI үчүн USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB аксессуарга байланышты"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Аналогдук аудио жабдуу табылды"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Мүчүлүштүктөрдү USB аркылуу оңдоо иштетилген"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Мүчүлштктрдү USB аркл оңдну өчр үчн тийп коюңуз."</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
@@ -1304,6 +1306,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Унаа режиминен чыгуу үчүн таптап коюңуз."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Жалгаштыруу же хотспот жандырылган"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Жөндөө үчүн таптап коюңуз."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Жалгаштыруу функциясы өчүрүлгөн"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Кеңири маалымат үчүн администраторуңузга кайрылыңыз"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Артка"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Кийинки"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Өткөрүп жиберүү"</string>
