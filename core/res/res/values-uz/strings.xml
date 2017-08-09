@@ -80,11 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Hududingizda mobil tarmoq tomonidan vaqtinchalik taklif etilmayapti"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tarmoq bilan bog‘lanib bo‘lmadi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Qabul qilish sifatini yaxshilash uchun Sozlamalar &gt; Tarmoq va Internet &gt; Mobil tarmoqlar > Asosiy tarmoq turi orqali o‘zgartirib ko‘ring."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi chaqiruv faol"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Favqulodda chaqiruvlar uchun mobil internet zarur."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ogohlantirishlar"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chaqiruvlarni uzatish"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Favqulodda qaytarib chaqirish rejimi"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Mobil internet holati"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS xabarlar"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ovozli xabarlar"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi chaqiruv"</string>

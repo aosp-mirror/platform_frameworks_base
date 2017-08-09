@@ -82,11 +82,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Тимчасово не пропонується мобільною мережею у вашому місцезнаходженні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не вдається під’єднатися до мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Щоб покращити прийняття сигналу, змініть тип у меню \"Налаштування\" &gt; \"Мережа й Інтернет\" &gt; \"Мобільні мережі\" &gt; \"Тип мережі\"."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Виклики через Wi-Fi активовано"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Щоб здійснювати екстрені виклики, потрібне з’єднання з мобільною мережею."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сповіщення"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Переадресація виклику"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Режим екстреного зворотного виклику"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Статус мобільного передавання даних"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-повідомлення"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Повідомлення голосової пошти"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Дзвінки через Wi-Fi"</string>

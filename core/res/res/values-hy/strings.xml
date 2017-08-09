@@ -80,6 +80,10 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ձեր գտնվելու վայրում ծառայությունը ժամանակավորապես չի տրամադրվում բջջային ցանցի կողմից"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ցանցն անհասանելի է"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ազդանշանի ընդունման որակը բարելավելու համար փոխեք ցանցի տեսակը՝ անցնելով Համակարգ &gt; Ցանց և ինտերնետ &gt; Բջջային ցանցեր &gt; Ցանկալի ցանցի տեսակը։"</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Զանգի վերահասցեավորում"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Շտապ հետկանչի ռեժիմ"</string>
