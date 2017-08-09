@@ -16,17 +16,17 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.backup.RefactoredBackupManagerService;
 
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Records which apps have been backed up on this device, persisting it to disk so that it can be
@@ -41,44 +41,62 @@ import java.util.HashSet;
  * <p>NB: this is always backed by the same files within the state directory supplied at
  * construction.
  */
-final class AppsBackedUpOnThisDeviceJournal {
-    private static final String TAG = "AppsBackedUpOnThisDeviceJournal";
+final class ProcessedPackagesJournal {
+    private static final String TAG = "ProcessedPackagesJournal";
     private static final String JOURNAL_FILE_NAME = "processed";
+    private static final boolean DEBUG = RefactoredBackupManagerService.DEBUG || false;
 
-    @GuardedBy("this")
-    private final HashSet<String> mProcessedPackages = new HashSet<>();
+    // using HashSet instead of ArraySet since we expect 100-500 elements range
+    @GuardedBy("mProcessedPackages")
+    private final Set<String> mProcessedPackages = new HashSet<>();
+    // TODO: at some point consider splitting the bookkeeping to be per-transport
     private final File mStateDirectory;
 
     /**
-     * Constructs a new journal, loading state from disk if it has been previously persisted.
+     * Constructs a new journal.
+     *
+     * After constructing the object one should call {@link #init()} to load state from disk if
+     * it has been previously persisted.
      *
      * @param stateDirectory The directory in which backup state (including journals) is stored.
      */
-    AppsBackedUpOnThisDeviceJournal(File stateDirectory) {
+    ProcessedPackagesJournal(File stateDirectory) {
         mStateDirectory = stateDirectory;
-        loadFromDisk();
+    }
+
+    /**
+     * Loads state from disk if it has been previously persisted.
+     */
+    void init() {
+        synchronized (mProcessedPackages) {
+            loadFromDisk();
+        }
     }
 
     /**
      * Returns {@code true} if {@code packageName} has previously been backed up.
      */
-    synchronized boolean hasBeenProcessed(String packageName) {
-        return mProcessedPackages.contains(packageName);
+    boolean hasBeenProcessed(String packageName) {
+        synchronized (mProcessedPackages) {
+            return mProcessedPackages.contains(packageName);
+        }
     }
 
-    synchronized void addPackage(String packageName) {
-        if (!mProcessedPackages.add(packageName)) {
-            // This package has already been processed - no need to add it to the journal.
-            return;
-        }
+    void addPackage(String packageName) {
+        synchronized (mProcessedPackages) {
+            if (!mProcessedPackages.add(packageName)) {
+                // This package has already been processed - no need to add it to the journal.
+                return;
+            }
 
-        File journalFile = new File(mStateDirectory, JOURNAL_FILE_NAME);
+            File journalFile = new File(mStateDirectory, JOURNAL_FILE_NAME);
 
-        try (RandomAccessFile out = new RandomAccessFile(journalFile, "rws")) {
-            out.seek(out.length());
-            out.writeUTF(packageName);
-        } catch (IOException e) {
-            Slog.e(TAG, "Can't log backup of " + packageName + " to " + journalFile);
+            try (RandomAccessFile out = new RandomAccessFile(journalFile, "rws")) {
+                out.seek(out.length());
+                out.writeUTF(packageName);
+            } catch (IOException e) {
+                Slog.e(TAG, "Can't log backup of " + packageName + " to " + journalFile);
+            }
         }
     }
 
@@ -91,14 +109,18 @@ final class AppsBackedUpOnThisDeviceJournal {
      *
      * @return The current set of packages that have been backed up previously.
      */
-    synchronized HashSet<String> getPackagesCopy() {
-        return new HashSet<>(mProcessedPackages);
+    Set<String> getPackagesCopy() {
+        synchronized (mProcessedPackages) {
+            return new HashSet<>(mProcessedPackages);
+        }
     }
 
-    synchronized void reset() {
-        mProcessedPackages.clear();
-        File journalFile = new File(mStateDirectory, JOURNAL_FILE_NAME);
-        journalFile.delete();
+    void reset() {
+        synchronized (mProcessedPackages) {
+            mProcessedPackages.clear();
+            File journalFile = new File(mStateDirectory, JOURNAL_FILE_NAME);
+            journalFile.delete();
+        }
     }
 
     private void loadFromDisk() {
