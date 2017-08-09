@@ -16,14 +16,15 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
+import com.android.internal.util.Preconditions;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -31,7 +32,8 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 /**
  * Controls showing and hiding of the brightness mirror.
  */
-public class BrightnessMirrorController {
+public class BrightnessMirrorController
+        implements CallbackController<BrightnessMirrorController.BrightnessMirrorListener> {
 
     private final NotificationStackScrollLayout mStackScroller;
     public long TRANSITION_DURATION_OUT = 150;
@@ -40,6 +42,7 @@ public class BrightnessMirrorController {
     private final StatusBarWindowView mStatusBarWindow;
     private final ScrimController mScrimController;
     private final View mNotificationPanel;
+    private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
     private final int[] mInt2Cache = new int[2];
     private View mBrightnessMirror;
 
@@ -130,5 +133,24 @@ public class BrightnessMirrorController {
         mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(
                 R.layout.brightness_mirror, mStatusBarWindow, false);
         mStatusBarWindow.addView(mBrightnessMirror, index);
+
+        for (int i = 0; i < mBrightnessMirrorListeners.size(); i++) {
+            mBrightnessMirrorListeners.valueAt(i).onBrightnessMirrorReinflated(mBrightnessMirror);
+        }
+    }
+
+    @Override
+    public void addCallback(BrightnessMirrorListener listener) {
+        Preconditions.checkNotNull(listener);
+        mBrightnessMirrorListeners.add(listener);
+    }
+
+    @Override
+    public void removeCallback(BrightnessMirrorListener listener) {
+        mBrightnessMirrorListeners.remove(listener);
+    }
+
+    public interface BrightnessMirrorListener {
+        void onBrightnessMirrorReinflated(View brightnessMirror);
     }
 }
