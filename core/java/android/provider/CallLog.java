@@ -862,10 +862,34 @@ public class CallLog {
             }
 
             try {
+                // When cleaning up the call log, try to delete older call long entries on a per
+                // PhoneAccount basis first.  There can be multiple ConnectionServices causing
+                // the addition of entries in the call log.  With the introduction of Self-Managed
+                // ConnectionServices, we want to ensure that a misbehaving self-managed CS cannot
+                // spam the call log with its own entries, causing entries from Telephony to be
+                // removed.
                 final Uri result = resolver.insert(uri, values);
-                resolver.delete(uri, "_id IN " +
-                        "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
-                        + " LIMIT -1 OFFSET 500)", null);
+                if (values.containsKey(PHONE_ACCOUNT_ID)
+                        && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_ID))
+                        && values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)
+                        && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME))) {
+                    // Only purge entries for the same phone account.
+                    resolver.delete(uri, "_id IN " +
+                            "(SELECT _id FROM calls"
+                            + " WHERE " + PHONE_ACCOUNT_COMPONENT_NAME + " = ?"
+                            + " AND " + PHONE_ACCOUNT_ID + " = ?"
+                            + " ORDER BY " + DEFAULT_SORT_ORDER
+                            + " LIMIT -1 OFFSET 500)", new String[] {
+                            values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME),
+                            values.getAsString(PHONE_ACCOUNT_ID)
+                    });
+                } else {
+                    // No valid phone account specified, so default to the old behavior.
+                    resolver.delete(uri, "_id IN " +
+                            "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
+                            + " LIMIT -1 OFFSET 500)", null);
+                }
+
                 return result;
             } catch (IllegalArgumentException e) {
                 Log.w(LOG_TAG, "Failed to insert calllog", e);
