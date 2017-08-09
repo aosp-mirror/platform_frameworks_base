@@ -33,7 +33,6 @@ import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 
-import com.android.internal.view.SurfaceFlingerVsyncChoreographer;
 import com.android.server.AnimationThread;
 
 import java.io.PrintWriter;
@@ -134,26 +133,38 @@ public class WindowAnimator {
      * sure other threads can make progress if this happens.
      */
     private void animate(long frameTimeNs) {
-        boolean transactionOpen = false;
-        try {
-            synchronized (mService.mWindowMap) {
-                if (!mInitialized) {
-                    return;
-                }
 
-                mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
-                mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
-                mAnimating = false;
-                mAppWindowAnimating = false;
-                if (DEBUG_WINDOW_TRACE) {
-                    Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
-                }
+        synchronized (mService.mWindowMap) {
+            if (!mInitialized) {
+                return;
+            }
 
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION animate");
-                mService.openSurfaceTransaction();
-                transactionOpen = true;
-                SurfaceControl.setAnimationTransaction();
+            // Schedule next frame already such that back-pressure happens continuously
+            scheduleAnimation();
+        }
 
+        // Simulate back-pressure by opening and closing an empty animation transaction. This makes
+        // sure that an animation frame is at least presented once on the screen. We do this outside
+        // of the regular transaction such that we can avoid holding the window manager lock in case
+        // we receive back-pressure from SurfaceFlinger. Since closing an animation transaction
+        // without the window manager locks leads to ordering issues (as the transaction will be
+        // processed only at the beginning of the next frame which may result in another transaction
+        // that was executed later in WM side gets executed first on SF side), we don't update any
+        // Surface properties here such that reordering doesn't cause issues.
+        mService.executeEmptyAnimationTransaction();
+
+        synchronized (mService.mWindowMap) {
+            mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
+            mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
+            mAnimating = false;
+            mAppWindowAnimating = false;
+            if (DEBUG_WINDOW_TRACE) {
+                Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
+            }
+
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION animate");
+            mService.openSurfaceTransaction();
+            try {
                 final AccessibilityController accessibilityController =
                         mService.mAccessibilityController;
                 final int numDisplays = mDisplayContentsAnimators.size();
@@ -216,27 +227,20 @@ public class WindowAnimator {
                     mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
                 }
 
-                if (mAnimating) {
-                    mService.scheduleAnimationLocked();
+                if (!mAnimating) {
+                    cancelAnimation();
                 }
 
                 if (mService.mWatermark != null) {
                     mService.mWatermark.drawIfNeeded();
                 }
-            }
-        } catch (RuntimeException e) {
-            Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
-        } finally {
-            if (transactionOpen) {
-
-                // Do not hold window manager lock while closing the transaction, as this might be
-                // blocking until the next frame, which can lead to total lock starvation.
-                mService.closeSurfaceTransaction(false /* withLockHeld */);
+            } catch (RuntimeException e) {
+                Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
+            } finally {
+                mService.closeSurfaceTransaction();
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
-        }
 
-        synchronized (mService.mWindowMap) {
             boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
             boolean doRequest = false;
             if (mBulkUpdateParams != 0) {
@@ -401,6 +405,13 @@ public class WindowAnimator {
         if (!mAnimationFrameCallbackScheduled) {
             mAnimationFrameCallbackScheduled = true;
             mChoreographer.postFrameCallback(mAnimationFrameCallback);
+        }
+    }
+
+    private void cancelAnimation() {
+        if (mAnimationFrameCallbackScheduled) {
+            mAnimationFrameCallbackScheduled = false;
+            mChoreographer.removeFrameCallback(mAnimationFrameCallback);
         }
     }
 
