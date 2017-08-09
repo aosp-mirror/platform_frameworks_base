@@ -1128,10 +1128,14 @@ public final class SmsManager {
     static public final int RESULT_ERROR_NULL_PDU           = 3;
     /** Failed because service is currently unavailable */
     static public final int RESULT_ERROR_NO_SERVICE         = 4;
-    /** Failed because we reached the sending queue limit.  {@hide} */
+    /** Failed because we reached the sending queue limit. */
     static public final int RESULT_ERROR_LIMIT_EXCEEDED     = 5;
     /** Failed because FDN is enabled. {@hide} */
     static public final int RESULT_ERROR_FDN_CHECK_FAILURE  = 6;
+    /** Failed because user denied the sending of this short code. */
+    static public final int RESULT_ERROR_SHORT_CODE_NOT_ALLOWED = 7;
+    /** Failed because the user has denied this app ever send premium short codes. */
+    static public final int RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED = 8;
 
     static private final String PHONE_PACKAGE_NAME = "com.android.phone";
 
