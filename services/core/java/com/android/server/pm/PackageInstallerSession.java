@@ -831,7 +831,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             // Commit was keeping session marked as active until now; release
             // that extra refcount so session appears idle.
-            close();
+            closeInternal(false);
             return;
         }
 
@@ -1388,9 +1388,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void close() {
+        closeInternal(true);
+    }
+
+    private void closeInternal(boolean checkCaller) {
         int activeCount;
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            if (checkCaller) {
+                assertCallerIsOwnerOrRootLocked();
+            }
+
             activeCount = mActiveCount.decrementAndGet();
         }
 
