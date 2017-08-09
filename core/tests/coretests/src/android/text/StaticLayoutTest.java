@@ -21,6 +21,7 @@ import static android.text.Layout.Alignment.ALIGN_NORMAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Canvas;
 import android.graphics.Paint.FontMetricsInt;
 import android.os.LocaleList;
 import android.support.test.filters.SmallTest;
@@ -787,5 +788,15 @@ public class StaticLayoutTest {
             // should not affect the layout.
             assertEquals(numEnglishLines, numPrivateLocaleLines);
         }
+    }
+
+    @Test
+    public void testLayoutDoesntModifyPaint() {
+        final TextPaint paint = new TextPaint();
+        paint.setHyphenEdit(31);
+        final StaticLayout layout = StaticLayout.Builder.obtain("", 0, 0, paint, 100).build();
+        final Canvas canvas = new Canvas();
+        layout.drawText(canvas, 0, 0);
+        assertEquals(31, paint.getHyphenEdit());
     }
 }
