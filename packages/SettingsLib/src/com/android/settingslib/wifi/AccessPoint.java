@@ -454,8 +454,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         // set mSpeed to the connected ScanResult if the AccessPoint is the active network
         if (isActive() && mInfo != null) {
-            NetworkKey key = new NetworkKey(new WifiKey(
-                    AccessPoint.convertToQuotedString(ssid), mInfo.getBSSID()));
+            NetworkKey key = NetworkKey.createFromWifiInfo(mInfo);
             ScoredNetwork score = scoreCache.getScoredNetwork(key);
             if (score != null) {
                 mSpeed = score.calculateBadge(mInfo.getRssi());
@@ -478,8 +477,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mIsScoredNetworkMetered = false;
 
         if (isActive() && mInfo != null) {
-            NetworkKey key = new NetworkKey(new WifiKey(
-                    AccessPoint.convertToQuotedString(ssid), mInfo.getBSSID()));
+            NetworkKey key = NetworkKey.createFromWifiInfo(mInfo);
             ScoredNetwork score = scoreCache.getScoredNetwork(key);
             if (score != null) {
                 mIsScoredNetworkMetered |= score.meteredHint;
