@@ -832,20 +832,23 @@ public class Tethering extends BaseNetworkObserver {
             //       functions are ready to use.
             //
             // For more explanation, see b/62552150 .
-            if (usbConnected && !usbConfigured) {
-                // Nothing for us to do here.
-                // TODO: consider ignoring DISCONNECTED broadcasts as well.
-                return;
-            }
-
             synchronized (Tethering.this.mPublicSync) {
+                // Always record the state of RNDIS.
                 mRndisEnabled = rndisEnabled;
+
+                if (usbConnected && !usbConfigured) {
+                    // Nothing to do here (only CONNECTED, not yet CONFIGURED).
+                    return;
+                }
+
                 // start tethering if we have a request pending
                 if (usbConfigured && mRndisEnabled && mUsbTetherRequested) {
                     tetherMatchingInterfaces(
                             IControlsTethering.STATE_TETHERED,
                             ConnectivityManager.TETHERING_USB);
                 }
+
+                // TODO: Figure out how to remove the need for this variable.
                 mUsbTetherRequested = false;
             }
         }
