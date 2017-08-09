@@ -80,11 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"موقتاً توسط شبکه داده دستگاه همراه در مکان شما ارائه نمی‌شود"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"شبکه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"برای بهبود دریافت، نوع شبکه انتخاب‌شده را در «تنظیمات &gt; شبکه‌ و اینترنت &gt; شبکه‌های تلفن همراه &gt; نوع شبکه ترجیحی» تغییر دهید."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏تماس ازطریق Wi-Fi فعال است"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"برای انجام تماس‌های اضطراری به شبکه تلفن همراه نیاز دارید."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"هشدارها"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"بازارسال تماس"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"حالت پاسخ تماس اضطراری"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"وضعیت داده تلفن همراه"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"پیامک‌ها"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"پیام‌های پست صوتی"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏تماس ازطریق Wi-Fi"</string>
