@@ -332,6 +332,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
         lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
         mLockIcon.setLayoutParams(lp);
+        mLockIcon.setContentDescription(getContext().getText(R.string.accessibility_unlock_button));
         mLockIcon.update(true /* force */);
 
         lp = mLeftAffordanceView.getLayoutParams();
