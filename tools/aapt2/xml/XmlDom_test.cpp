@@ -16,23 +16,20 @@
 
 #include "xml/XmlDom.h"
 
-#include <sstream>
 #include <string>
 
+#include "io/StringInputStream.h"
 #include "test/Test.h"
 
+using ::aapt::io::StringInputStream;
 using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::SizeIs;
 
 namespace aapt {
 
-constexpr const char* kXmlPreamble =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-
 TEST(XmlDomTest, Inflate) {
-  std::stringstream in(kXmlPreamble);
-  in << R"(
+  std::string input = R"(<?xml version="1.0" encoding="utf-8"?>
       <Layout xmlns:android="http://schemas.android.com/apk/res/android"
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
@@ -41,9 +38,9 @@ TEST(XmlDomTest, Inflate) {
             android:layout_height="wrap_content" />
       </Layout>)";
 
-  const Source source("test.xml");
   StdErrDiagnostics diag;
-  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, source);
+  StringInputStream in(input);
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, Source("test.xml"));
   ASSERT_THAT(doc, NotNull());
 
   xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());

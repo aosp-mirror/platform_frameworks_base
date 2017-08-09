@@ -240,6 +240,7 @@ main(int argc, char** argv)
 
         if (!status.isOk()) {
             fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().string());
+            return 1;
         }
 
         // Wait for the result and print out the data they send.

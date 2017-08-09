@@ -160,13 +160,13 @@ static void nSetIndents(JNIEnv* env, jclass, jlong nativePtr, jintArray indents)
 }
 
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
-static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
-        jlong nativePaint, jlong nativeTypeface, jint start, jint end, jboolean isRtl) {
+static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePaint, jint start,
+        jint end, jboolean isRtl) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
-    Typeface* typeface = reinterpret_cast<Typeface*>(nativeTypeface);
+    const Typeface* typeface = paint->getAndroidTypeface();
     minikin::MinikinPaint minikinPaint;
-    Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
+    const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, paint,
             typeface);
     return b->addStyleRun(&minikinPaint, resolvedTypeface->fFontCollection, style, start, end,
@@ -201,7 +201,7 @@ static const JNINativeMethod gMethods[] = {
     {"nSetLocales", "(JLjava/lang/String;[J)V", (void*) nSetLocales},
     {"nSetupParagraph", "(J[CIFIF[IIIIZ)V", (void*) nSetupParagraph},
     {"nSetIndents", "(J[I)V", (void*) nSetIndents},
-    {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
+    {"nAddStyleRun", "(JJIIZ)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
     {"nGetWidths", "(J[F)V", (void*) nGetWidths},

@@ -143,6 +143,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
+import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstantAppInfo;
@@ -448,6 +449,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_FIRST_BOOT_OR_UPGRADE = 1<<16;
     static final int SCAN_AS_INSTANT_APP = 1<<17;
     static final int SCAN_AS_FULL_APP = 1<<18;
+    static final int SCAN_AS_VIRTUAL_PRELOAD = 1<<19;
     /** Should not be with the scan flags */
     static final int FLAGS_REMOVE_CHATTY = 1<<31;
 
@@ -2304,6 +2306,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 factoryTest, onlyCore);
         m.enableSystemUserPackages();
         ServiceManager.addService("package", m);
+        final PackageManagerNative pmn = m.new PackageManagerNative();
+        ServiceManager.addService("package_native", pmn);
         return m;
     }
 
@@ -6409,7 +6413,18 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         synchronized (mPackages) {
-            return getNameForUidLocked(callingUid, uid);
+            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+            if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+                return sus.name + ":" + sus.userId;
+            } else if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+                if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                    return null;
+                }
+                return ps.name;
+            }
+            return null;
         }
     }
 
@@ -6426,25 +6441,23 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             for (int i = uids.length - 1; i >= 0; i--) {
                 final int uid = uids[i];
-                names[i] = getNameForUidLocked(callingUid, uid);
+                Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+                if (obj instanceof SharedUserSetting) {
+                    final SharedUserSetting sus = (SharedUserSetting) obj;
+                    names[i] = "shared:" + sus.name;
+                } else if (obj instanceof PackageSetting) {
+                    final PackageSetting ps = (PackageSetting) obj;
+                    if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                        names[i] = null;
+                    } else {
+                        names[i] = ps.name;
+                    }
+                } else {
+                    names[i] = null;
+                }
             }
         }
         return names;
-    }
-
-    private String getNameForUidLocked(int callingUid, int uid) {
-        Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
-        if (obj instanceof SharedUserSetting) {
-            final SharedUserSetting sus = (SharedUserSetting) obj;
-            return sus.name + ":" + sus.userId;
-        } else if (obj instanceof PackageSetting) {
-            final PackageSetting ps = (PackageSetting) obj;
-            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
-                return null;
-            }
-            return ps.name;
-        }
-        return null;
     }
 
     @Override
@@ -9392,6 +9405,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps != null && ps.getInstantApp(userId)) {
             scanFlags |= SCAN_AS_INSTANT_APP;
         }
+        if (ps != null && ps.getVirtulalPreload(userId)) {
+            scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
+        }
 
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, policyFlags, scanFlags
@@ -9875,17 +9891,19 @@ public class PackageManagerService extends IPackageManager.Stub
         Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
+            DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
+                    options.getCompilerFilter(), options.getSplitName(),
+                    options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
                         getOrCreateCompilerPackageStats(depPackage),
-                        true /* isUsedByOtherApps */,
-                        options);
+                    mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets,
                 getOrCreateCompilerPackageStats(p),
-                mDexManager.isUsedByOtherApps(p.packageName), options);
+                mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
 
     /**
@@ -10011,7 +10029,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void shutdown() {
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
-        mDexManager.savePackageDexUsageNow();
+        mDexManager.writePackageDexUsageNow();
     }
 
     @Override
@@ -10642,15 +10660,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 final String parentPackageName = (pkg.parentPackage != null)
                         ? pkg.parentPackage.packageName : null;
                 final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
+                final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
                 // REMOVE SharedUserSetting from method; update in a separate call
                 pkgSetting = Settings.createNewSetting(pkg.packageName, origPackage,
                         disabledPkgSetting, realName, suid, destCodeFile, destResourceFile,
                         pkg.applicationInfo.nativeLibraryRootDir, pkg.applicationInfo.primaryCpuAbi,
                         pkg.applicationInfo.secondaryCpuAbi, pkg.mVersionCode,
                         pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags, user,
-                        true /*allowInstall*/, instantApp, parentPackageName,
-                        pkg.getChildPackageNames(), UserManagerService.getInstance(),
-                        usesStaticLibraries, pkg.usesStaticLibrariesVersions);
+                        true /*allowInstall*/, instantApp, virtualPreload,
+                        parentPackageName, pkg.getChildPackageNames(),
+                        UserManagerService.getInstance(), usesStaticLibraries,
+                        pkg.usesStaticLibrariesVersions);
                 // SIDE EFFECTS; updates system state; move elsewhere
                 if (origPackage != null) {
                     mSettings.addRenamedPackageLPw(pkg.packageName, origPackage.name);
@@ -18181,6 +18201,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
         final boolean fullApp = ((installFlags & PackageManager.INSTALL_FULL_APP) != 0);
         final boolean forceSdk = ((installFlags & PackageManager.INSTALL_FORCE_SDK) != 0);
+        final boolean virtualPreload =
+                ((installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
         boolean replace = false;
         int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.move != null) {
@@ -18195,6 +18217,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (fullApp) {
             scanFlags |= SCAN_AS_FULL_APP;
+        }
+        if (virtualPreload) {
+            scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
         }
 
         // Result object to be returned
@@ -18575,7 +18600,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                         null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
-                        mDexManager.isUsedByOtherApps(pkg.packageName),
+                        mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
                         dexoptOptions);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
@@ -19986,6 +20011,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /*hidden*/,
                     false /*suspended*/,
                     false /*instantApp*/,
+                    false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
                     null /*enabledComponents*/,
                     null /*disabledComponents*/,
@@ -22873,7 +22899,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         for (PackageParser.Package pkg : packages) {
             ipw.println("[" + pkg.packageName + "]");
             ipw.increaseIndent();
-            mPackageDexOptimizer.dumpDexoptState(ipw, pkg);
+            mPackageDexOptimizer.dumpDexoptState(ipw, pkg,
+                    mDexManager.getPackageUseInfoOrDefault(pkg.packageName));
             ipw.decreaseIndent();
         }
     }
@@ -24804,6 +24831,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    private class PackageManagerNative extends IPackageManagerNative.Stub {
+        @Override
+        public String[] getNamesForUids(int[] uids) throws RemoteException {
+            final String[] results = PackageManagerService.this.getNamesForUids(uids);
+            // massage results so they can be parsed by the native binder
+            for (int i = results.length - 1; i >= 0; --i) {
+                if (results[i] == null) {
+                    results[i] = "";
+                }
+            }
+            return results;
+        }
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public void setLocationPackagesProvider(PackagesProvider provider) {
@@ -25398,8 +25439,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 if (ps == null) {
                     continue;
                 }
-                PackageDexUsage.PackageUseInfo packageUseInfo = getDexManager().getPackageUseInfo(
-                        pkg.packageName);
+                PackageDexUsage.PackageUseInfo packageUseInfo =
+                      getDexManager().getPackageUseInfoOrDefault(pkg.packageName);
                 if (PackageManagerServiceUtils
                         .isUnusedSinceTimeInMillis(ps.firstInstallTime, currentTimeInMillis,
                                 downgradeTimeThresholdMillis, packageUseInfo,

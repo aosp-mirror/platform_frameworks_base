@@ -3001,7 +3001,7 @@ public class PackageParser {
         if (procSeq == null || procSeq.length() <= 0) {
             return defProc;
         }
-        return buildCompoundName(pkg, procSeq, "process", outError);
+        return TextUtils.safeIntern(buildCompoundName(pkg, procSeq, "process", outError));
     }
 
     private static String buildTaskAffinityName(String pkg, String defProc,
@@ -6934,6 +6934,11 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_INSTANT;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_INSTANT;
+        }
+        if (state.virtualPreload) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
+        } else {
+            ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
         }
         if (state.hidden) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;

@@ -70,7 +70,8 @@ TEST(TypefaceTest, resolveDefault_and_setDefaultTest) {
                     RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
     EXPECT_EQ(regular.get(), Typeface::resolveDefault(regular.get()));
 
-    Typeface* old = Typeface::resolveDefault(nullptr);  // Keep the original to restore it later.
+    // Keep the original to restore it later.
+    const Typeface* old = Typeface::resolveDefault(nullptr);
     ASSERT_NE(nullptr, old);
 
     Typeface::setDefault(regular.get());

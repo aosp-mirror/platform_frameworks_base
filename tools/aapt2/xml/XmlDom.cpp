@@ -29,8 +29,9 @@
 #include "XmlPullParser.h"
 #include "util/Util.h"
 
-using android::StringPiece;
-using android::StringPiece16;
+using ::aapt::io::InputStream;
+using ::android::StringPiece;
+using ::android::StringPiece16;
 
 namespace aapt {
 namespace xml {
@@ -189,40 +190,41 @@ static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {
   stack->pending_comment += comment;
 }
 
-std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag, const Source& source) {
+std::unique_ptr<XmlResource> Inflate(InputStream* in, IDiagnostics* diag, const Source& source) {
   Stack stack;
 
-  XML_Parser parser = XML_ParserCreateNS(nullptr, kXmlNamespaceSep);
-  XML_SetUserData(parser, &stack);
-  XML_UseParserAsHandlerArg(parser);
-  XML_SetElementHandler(parser, StartElementHandler, EndElementHandler);
-  XML_SetNamespaceDeclHandler(parser, StartNamespaceHandler, EndNamespaceHandler);
-  XML_SetCharacterDataHandler(parser, CharacterDataHandler);
-  XML_SetCommentHandler(parser, CommentDataHandler);
+  std::unique_ptr<std::remove_pointer<XML_Parser>::type, decltype(XML_ParserFree)*> parser = {
+      XML_ParserCreateNS(nullptr, kXmlNamespaceSep), XML_ParserFree};
+  XML_SetUserData(parser.get(), &stack);
+  XML_UseParserAsHandlerArg(parser.get());
+  XML_SetElementHandler(parser.get(), StartElementHandler, EndElementHandler);
+  XML_SetNamespaceDeclHandler(parser.get(), StartNamespaceHandler, EndNamespaceHandler);
+  XML_SetCharacterDataHandler(parser.get(), CharacterDataHandler);
+  XML_SetCommentHandler(parser.get(), CommentDataHandler);
 
-  char buffer[1024];
-  while (!in->eof()) {
-    in->read(buffer, sizeof(buffer) / sizeof(buffer[0]));
-    if (in->bad() && !in->eof()) {
-      stack.root = {};
-      diag->Error(DiagMessage(source) << strerror(errno));
-      break;
-    }
-
-    if (XML_Parse(parser, buffer, in->gcount(), in->eof()) == XML_STATUS_ERROR) {
-      stack.root = {};
-      diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser)))
-                  << XML_ErrorString(XML_GetErrorCode(parser)));
-      break;
+  const char* buffer = nullptr;
+  size_t buffer_size = 0;
+  while (in->Next(reinterpret_cast<const void**>(&buffer), &buffer_size)) {
+    if (XML_Parse(parser.get(), buffer, buffer_size, false) == XML_STATUS_ERROR) {
+      diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser.get())))
+                  << XML_ErrorString(XML_GetErrorCode(parser.get())));
+      return {};
     }
   }
 
-  XML_ParserFree(parser);
-  if (stack.root) {
-    return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, StringPool{},
-                                          std::move(stack.root));
+  if (in->HadError()) {
+    diag->Error(DiagMessage(source) << in->GetError());
+    return {};
+  } else {
+    // Finish off the parsing.
+    if (XML_Parse(parser.get(), nullptr, 0u, true) == XML_STATUS_ERROR) {
+      diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser.get())))
+                  << XML_ErrorString(XML_GetErrorCode(parser.get())));
+      return {};
+    }
   }
-  return {};
+  return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, StringPool{},
+                                        std::move(stack.root));
 }
 
 static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPool* out_pool) {

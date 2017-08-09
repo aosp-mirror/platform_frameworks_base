@@ -16,21 +16,22 @@
 
 #include "xml/XmlPullParser.h"
 
-#include <sstream>
-
 #include "androidfw/StringPiece.h"
 
+#include "io/StringInputStream.h"
 #include "test/Test.h"
 
-using android::StringPiece;
+using ::aapt::io::StringInputStream;
+using ::android::StringPiece;
 
 namespace aapt {
 
 TEST(XmlPullParserTest, NextChildNodeTraversesCorrectly) {
-  std::stringstream str;
-  str << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-         "<a><b><c xmlns:a=\"http://schema.org\"><d/></c><e/></b></a>";
-  xml::XmlPullParser parser(str);
+  std::string str =
+      R"(<?xml version="1.0" encoding="utf-8"?>
+         <a><b><c xmlns:a="http://schema.org"><d/></c><e/></b></a>)";
+  StringInputStream input(str);
+  xml::XmlPullParser parser(&input);
 
   const size_t depth_outer = parser.depth();
   ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_outer));

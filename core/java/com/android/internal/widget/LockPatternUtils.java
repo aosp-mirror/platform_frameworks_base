@@ -67,8 +67,7 @@ public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
     private static final boolean DEBUG = false;
-    private static final boolean FRP_CREDENTIAL_ENABLED =
-            Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.frpcredential.enable", false);
+    private static final boolean FRP_CREDENTIAL_ENABLED = true;
 
     /**
      * The key to identify when the lock pattern enabled flag is being accessed for legacy reasons.

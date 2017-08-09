@@ -420,11 +420,19 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).instantApp = instantApp;
     }
 
+    boolean getVirtulalPreload(int userId) {
+        return readUserState(userId).virtualPreload;
+    }
+
+    void setVirtualPreload(boolean virtualPreload, int userId) {
+        modifyUserState(userId).virtualPreload = virtualPreload;
+    }
+
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean hidden, boolean suspended, boolean instantApp,
-            String lastDisableAppCaller, ArraySet<String> enabledComponents,
-            ArraySet<String> disabledComponents, int domainVerifState,
-            int linkGeneration, int installReason) {
+            boolean virtualPreload, String lastDisableAppCaller,
+            ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
+            int domainVerifState, int linkGeneration, int installReason) {
         PackageUserState state = modifyUserState(userId);
         state.ceDataInode = ceDataInode;
         state.enabled = enabled;
@@ -440,6 +448,7 @@ abstract class PackageSettingBase extends SettingBase {
         state.appLinkGeneration = linkGeneration;
         state.installReason = installReason;
         state.instantApp = instantApp;
+        state.virtualPreload = virtualPreload;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {

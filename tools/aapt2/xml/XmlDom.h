@@ -17,7 +17,6 @@
 #ifndef AAPT_XML_DOM_H
 #define AAPT_XML_DOM_H
 
-#include <istream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,6 +26,7 @@
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "ResourceValues.h"
+#include "io/Io.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
@@ -37,9 +37,7 @@ class RawVisitor;
 
 class Element;
 
-/**
- * Base class for all XML nodes.
- */
+// Base class for all XML nodes.
 class Node {
  public:
   Node* parent = nullptr;
@@ -60,19 +58,14 @@ class Node {
   virtual std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) = 0;
 };
 
-/**
- * Base class that implements the visitor methods for a
- * subclass of Node.
- */
+// Base class that implements the visitor methods for a subclass of Node.
 template <typename Derived>
 class BaseNode : public Node {
  public:
   virtual void Accept(RawVisitor* visitor) override;
 };
 
-/**
- * A Namespace XML node. Can only have one child.
- */
+// A Namespace XML node. Can only have one child.
 class Namespace : public BaseNode<Namespace> {
  public:
   std::string namespace_prefix;
@@ -90,9 +83,7 @@ struct AaptAttribute {
   Maybe<ResourceId> id;
 };
 
-/**
- * An XML attribute.
- */
+// An XML attribute.
 struct Attribute {
   std::string namespace_uri;
   std::string name;
@@ -102,9 +93,7 @@ struct Attribute {
   std::unique_ptr<Item> compiled_value;
 };
 
-/**
- * An Element XML node.
- */
+// An Element XML node.
 class Element : public BaseNode<Element> {
  public:
   std::string namespace_uri;
@@ -124,9 +113,7 @@ class Element : public BaseNode<Element> {
   std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
-/**
- * A Text (CDATA) XML node. Can not have any children.
- */
+// A Text (CDATA) XML node. Can not have any children.
 class Text : public BaseNode<Text> {
  public:
   std::string text;
@@ -134,9 +121,7 @@ class Text : public BaseNode<Text> {
   std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
-/**
- * An XML resource with a source, name, and XML tree.
- */
+// An XML resource with a source, name, and XML tree.
 class XmlResource {
  public:
   ResourceFile file;
@@ -149,27 +134,20 @@ class XmlResource {
   std::unique_ptr<xml::Node> root;
 };
 
-/**
- * Inflates an XML DOM from a text stream, logging errors to the logger.
- * Returns the root node on success, or nullptr on failure.
- */
-std::unique_ptr<XmlResource> Inflate(std::istream* in, IDiagnostics* diag, const Source& source);
+// Inflates an XML DOM from an InputStream, logging errors to the logger.
+// Returns the root node on success, or nullptr on failure.
+std::unique_ptr<XmlResource> Inflate(io::InputStream* in, IDiagnostics* diag, const Source& source);
 
-/**
- * Inflates an XML DOM from a binary ResXMLTree, logging errors to the logger.
- * Returns the root node on success, or nullptr on failure.
- */
+// Inflates an XML DOM from a binary ResXMLTree, logging errors to the logger.
+// Returns the root node on success, or nullptr on failure.
 std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
                                      const Source& source);
 
 Element* FindRootElement(XmlResource* doc);
 Element* FindRootElement(Node* node);
 
-/**
- * A visitor interface for the different XML Node subtypes. This will not
- * traverse into
- * children. Use Visitor for that.
- */
+// A visitor interface for the different XML Node subtypes. This will not traverse into children.
+// Use Visitor for that.
 class RawVisitor {
  public:
   virtual ~RawVisitor() = default;
@@ -179,18 +157,22 @@ class RawVisitor {
   virtual void Visit(Text* text) {}
 };
 
-/**
- * Visitor whose default implementation visits the children nodes of any node.
- */
+// Visitor whose default implementation visits the children nodes of any node.
 class Visitor : public RawVisitor {
  public:
   using RawVisitor::Visit;
 
-  void Visit(Namespace* node) override { VisitChildren(node); }
+  void Visit(Namespace* node) override {
+    VisitChildren(node);
+  }
 
-  void Visit(Element* node) override { VisitChildren(node); }
+  void Visit(Element* node) override {
+    VisitChildren(node);
+  }
 
-  void Visit(Text* text) override { VisitChildren(text); }
+  void Visit(Text* text) override {
+    VisitChildren(text);
+  }
 
   void VisitChildren(Node* node) {
     for (auto& child : node->children) {
@@ -199,9 +181,7 @@ class Visitor : public RawVisitor {
   }
 };
 
-/**
- * An XML DOM visitor that will record the package name for a namespace prefix.
- */
+// An XML DOM visitor that will record the package name for a namespace prefix.
 class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
   using Visitor::Visit;
@@ -233,7 +213,9 @@ class NodeCastImpl : public RawVisitor {
 
   T* value = nullptr;
 
-  void Visit(T* v) override { value = v; }
+  void Visit(T* v) override {
+    value = v;
+  }
 };
 
 template <typename T>

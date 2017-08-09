@@ -35,16 +35,17 @@ namespace android {
 class MinikinUtils {
 public:
     ANDROID_API static minikin::FontStyle prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-            const Paint* paint, Typeface* typeface);
+            const Paint* paint, const Typeface* typeface);
 
     ANDROID_API static minikin::Layout doLayout(const Paint* paint, int bidiFlags,
-            Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
+            const Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
             size_t bufSize);
 
-    ANDROID_API static float measureText(const Paint* paint, int bidiFlags, Typeface* typeface,
-            const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances);
+    ANDROID_API static float measureText(const Paint* paint, int bidiFlags,
+              const Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
+              size_t bufSize, float *advances);
 
-    ANDROID_API static bool hasVariationSelector(Typeface* typeface, uint32_t codepoint,
+    ANDROID_API static bool hasVariationSelector(const Typeface* typeface, uint32_t codepoint,
             uint32_t vs);
 
     ANDROID_API static float xOffsetForTextAlign(Paint* paint, const minikin::Layout& layout);

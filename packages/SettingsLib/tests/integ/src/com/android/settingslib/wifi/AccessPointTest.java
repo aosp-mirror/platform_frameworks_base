@@ -258,7 +258,7 @@ public class AccessPointTest {
         scanResult.BSSID = "bssid";
         scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
         scanResult.capabilities = "";
-        assertThat(ap.update(scanResult)).isTrue();
+        assertThat(ap.update(scanResult, true /* evict old scan results */)).isTrue();
 
         assertThat(ap.getRssi()).isEqualTo(expectedRssi);
     }
@@ -554,7 +554,7 @@ public class AccessPointTest {
         scanResult.isCarrierAp = true;
         scanResult.carrierApEapType = carrierApEapType;
         scanResult.carrierName = carrierName;
-        assertThat(ap.update(scanResult)).isTrue();
+        assertThat(ap.update(scanResult, true /* evictOldScanresults */)).isTrue();
 
         assertThat(ap.isCarrierAp()).isEqualTo(true);
         assertThat(ap.getCarrierApEapType()).isEqualTo(carrierApEapType);

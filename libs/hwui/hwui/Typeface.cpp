@@ -59,15 +59,15 @@ static minikin::FontStyle computeRelativeStyle(int baseWeight, SkTypeface::Style
     return computeMinikinStyle(weight, italic);
 }
 
-Typeface* gDefaultTypeface = NULL;
+const Typeface* gDefaultTypeface = NULL;
 
-Typeface* Typeface::resolveDefault(Typeface* src) {
+const Typeface* Typeface::resolveDefault(const Typeface* src) {
     LOG_ALWAYS_FATAL_IF(src == nullptr && gDefaultTypeface == nullptr);
     return src == nullptr ? gDefaultTypeface : src;
 }
 
 Typeface* Typeface::createRelative(Typeface* src, SkTypeface::Style style) {
-    Typeface* resolvedFace = Typeface::resolveDefault(src);
+    const Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface;
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
@@ -79,7 +79,7 @@ Typeface* Typeface::createRelative(Typeface* src, SkTypeface::Style style) {
 }
 
 Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
-    Typeface* resolvedFace = Typeface::resolveDefault(base);
+    const Typeface* resolvedFace = Typeface::resolveDefault(base);
     Typeface* result = new Typeface();
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
@@ -92,7 +92,7 @@ Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
 
 Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
         const std::vector<minikin::FontVariation>& variations) {
-    Typeface* resolvedFace = Typeface::resolveDefault(src);
+    const Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface();
     if (result != nullptr) {
         result->fFontCollection =
@@ -112,7 +112,7 @@ Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
 }
 
 Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
-    Typeface* resolvedFace = Typeface::resolveDefault(src);
+    const Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface;
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
@@ -166,7 +166,7 @@ Typeface* Typeface::createFromFamilies(
     return result;
 }
 
-void Typeface::setDefault(Typeface* face) {
+void Typeface::setDefault(const Typeface* face) {
     gDefaultTypeface = face;
 }
 

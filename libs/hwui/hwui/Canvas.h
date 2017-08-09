@@ -255,10 +255,10 @@ public:
      * and delegating the final draw to virtual drawGlyphs method.
      */
     void drawText(const uint16_t* text, int start, int count, int contextCount,
-            float x, float y, int bidiFlags, const Paint& origPaint, Typeface* typeface);
+            float x, float y, int bidiFlags, const Paint& origPaint, const Typeface* typeface);
 
     void drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
-            float hOffset, float vOffset, const Paint& paint, Typeface* typeface);
+            float hOffset, float vOffset, const Paint& paint, const Typeface* typeface);
 
 protected:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);

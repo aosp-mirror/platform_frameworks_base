@@ -70,7 +70,7 @@ static bool parseMcc(const char* name, ResTable_config* out) {
 
 static bool parseMnc(const char* name, ResTable_config* out) {
   if (strcmp(name, kWildcardName) == 0) {
-    if (out) out->mcc = 0;
+    if (out) out->mnc = 0;
     return true;
   }
   const char* c = name;

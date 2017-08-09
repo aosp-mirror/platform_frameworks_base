@@ -49,21 +49,32 @@ status_t ReverseParser::Parse(const int in, const int out) const
 }
 
 // ================================================================================
-// This list must be in order and sync with kernelwake.proto
-const char* kernel_wake_headers[] = {
-    "name",                  // id:  1
-    "active_count",          // id:  2
-    "event_count",           // id:  3
-    "wakeup_count",          // id:  4
-    "expire_count",          // id:  5
-    "active_since",          // id:  6
-    "total_time",            // id:  7
-    "max_time",              // id:  8
-    "last_change",           // id:  9
-    "prevent_suspend_time",  // id: 10
-};
+static const string KERNEL_WAKEUP_LINE_DELIMITER = "\t";
 
-const string KERNEL_WAKEUP_LINE_DELIMITER = "\t";
+static void SetWakeupSourceField(WakeupSourceProto* source, string name, string value) {
+    if (name == "name") {
+        source->set_name(value.c_str());
+    } else if (name == "active_count") {
+        source->set_active_count(atoi(value.c_str()));
+    } else if (name == "event_count") {
+        source->set_event_count(atoi(value.c_str()));
+    } else if (name == "wakeup_count") {
+        source->set_wakeup_count(atoi(value.c_str()));
+    } else if (name == "expire_count") {
+        source->set_expire_count(atoi(value.c_str()));
+    } else if (name == "active_count") {
+        source->set_active_since(atol(value.c_str()));
+    } else if (name == "total_time") {
+        source->set_total_time(atol(value.c_str()));
+    } else if (name == "max_time") {
+        source->set_max_time(atol(value.c_str()));
+    } else if (name == "last_change") {
+        source->set_last_change(atol(value.c_str()));
+    } else if (name == "prevent_suspend_time") {
+        source->set_prevent_suspend_time(atol(value.c_str()));
+    }
+    // add new fields
+}
 
 status_t KernelWakesParser::Parse(const int in, const int out) const {
     Reader reader(in);
@@ -80,10 +91,6 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
         // parse head line
         if (nline++ == 0) {
             split(line, header, KERNEL_WAKEUP_LINE_DELIMITER);
-            if (!assertHeaders(kernel_wake_headers, header)) {
-                fprintf(stderr, "[%s]Bad header:\n%s\n", this->name.string(), line.c_str());
-                return BAD_VALUE;
-            }
             continue;
         }
 
@@ -97,18 +104,9 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
         }
 
         WakeupSourceProto* source = proto.add_wakeup_sources();
-        source->set_name(record.at(0).c_str());
-        // below are int32
-        source->set_active_count(atoi(record.at(1).c_str()));
-        source->set_event_count(atoi(record.at(2).c_str()));
-        source->set_wakeup_count(atoi(record.at(3).c_str()));
-        source->set_expire_count(atoi(record.at(4).c_str()));
-        // below are int64
-        source->set_active_since(atol(record.at(5).c_str()));
-        source->set_total_time(atol(record.at(6).c_str()));
-        source->set_max_time(atol(record.at(7).c_str()));
-        source->set_last_change(atol(record.at(8).c_str()));
-        source->set_prevent_suspend_time(atol(record.at(9).c_str()));
+        for (int i=0; i<(int)record.size(); i++) {
+            SetWakeupSourceField(source, header[i], record[i]);
+        }
     }
 
     if (!reader.ok(line)) {
@@ -125,18 +123,31 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
 }
 
 // ================================================================================
-const char* procrank_headers[] = {
-    "PID",          // id:  1
-    "Vss",          // id:  2
-    "Rss",          // id:  3
-    "Pss",          // id:  4
-    "Uss",          // id:  5
-    "Swap",         // id:  6
-    "PSwap",        // id:  7
-    "USwap",        // id:  8
-    "ZSwap",        // id:  9
-    "cmdline",      // id: 10
-};
+// Remove K for numeric fields
+static void SetProcessField(ProcessProto* process, string name, string value) {
+    ssize_t len = value.size();
+    if (name == "PID") {
+        process->set_pid(atoi(value.c_str()));
+    } else if (name == "Vss") {
+        process->set_vss(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "Rss") {
+        process->set_rss(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "Pss") {
+        process->set_pss(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "Uss") {
+        process->set_uss(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "Swap") {
+        process->set_swap(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "PSwap") {
+        process->set_pswap(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "USwap") {
+        process->set_uswap(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "ZSwap") {
+        process->set_zswap(atol(value.substr(0, len - 1).c_str()));
+    } else if (name == "cmdline") {
+        process->set_cmdline(value);
+    }
+}
 
 status_t ProcrankParser::Parse(const int in, const int out) const {
     Reader reader(in);
@@ -154,10 +165,6 @@ status_t ProcrankParser::Parse(const int in, const int out) const {
         // parse head line
         if (nline++ == 0) {
             split(line, header);
-            if (!assertHeaders(procrank_headers, header)) {
-                fprintf(stderr, "[%s]Bad header:\n%s\n", this->name.string(), line.c_str());
-                return BAD_VALUE;
-            }
             continue;
         }
 
@@ -165,12 +172,9 @@ status_t ProcrankParser::Parse(const int in, const int out) const {
         if (record.size() != header.size()) {
             if (record[record.size() - 1] == "TOTAL") { // TOTAL record
                 ProcessProto* total = proto.mutable_summary()->mutable_total();
-                total->set_pss(atol(record.at(0).substr(0, record.at(0).size() - 1).c_str()));
-                total->set_uss(atol(record.at(1).substr(0, record.at(1).size() - 1).c_str()));
-                total->set_swap(atol(record.at(2).substr(0, record.at(2).size() - 1).c_str()));
-                total->set_pswap(atol(record.at(3).substr(0, record.at(3).size() - 1).c_str()));
-                total->set_uswap(atol(record.at(4).substr(0, record.at(4).size() - 1).c_str()));
-                total->set_zswap(atol(record.at(5).substr(0, record.at(5).size() - 1).c_str()));
+                for (int i=1; i<=(int)record.size(); i++) {
+                    SetProcessField(total, header[header.size() - i], record[record.size() - i]);
+                }
             } else if (record[0] == "ZRAM:") {
                 split(line, record, ":");
                 proto.mutable_summary()->mutable_zram()->set_raw_text(record[1]);
@@ -185,19 +189,9 @@ status_t ProcrankParser::Parse(const int in, const int out) const {
         }
 
         ProcessProto* process = proto.add_processes();
-        // int32
-        process->set_pid(atoi(record.at(0).c_str()));
-        // int64, remove 'K' at the end
-        process->set_vss(atol(record.at(1).substr(0, record.at(1).size() - 1).c_str()));
-        process->set_rss(atol(record.at(2).substr(0, record.at(2).size() - 1).c_str()));
-        process->set_pss(atol(record.at(3).substr(0, record.at(3).size() - 1).c_str()));
-        process->set_uss(atol(record.at(4).substr(0, record.at(4).size() - 1).c_str()));
-        process->set_swap(atol(record.at(5).substr(0, record.at(5).size() - 1).c_str()));
-        process->set_pswap(atol(record.at(6).substr(0, record.at(6).size() - 1).c_str()));
-        process->set_uswap(atol(record.at(7).substr(0, record.at(7).size() - 1).c_str()));
-        process->set_zswap(atol(record.at(8).substr(0, record.at(8).size() - 1).c_str()));
-        // string
-        process->set_cmdline(record.at(9));
+        for (int i=0; i<(int)record.size(); i++) {
+            SetProcessField(process, header[i], record[i]);
+        }
     }
 
     if (!reader.ok(line)) {
