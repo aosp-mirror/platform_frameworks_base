@@ -2012,7 +2012,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     public boolean okToShowLocked() {
         return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
                 || (mStackSupervisor.isCurrentProfileLocked(userId)
-                && !service.mUserController.isUserStoppingOrShuttingDownLocked(userId));
+                && service.mUserController.isUserRunningLocked(userId, 0 /* flags */));
     }
 
     /**
