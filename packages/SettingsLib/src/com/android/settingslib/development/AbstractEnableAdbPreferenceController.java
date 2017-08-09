@@ -29,8 +29,10 @@ import android.support.v7.preference.TwoStatePreference;
 import android.text.TextUtils;
 
 import com.android.settingslib.core.AbstractPreferenceController;
+import com.android.settingslib.core.ConfirmationDialogController;
 
-public abstract class AbstractEnableAdbPreferenceController extends AbstractPreferenceController {
+public abstract class AbstractEnableAdbPreferenceController extends AbstractPreferenceController
+        implements ConfirmationDialogController {
     private static final String KEY_ENABLE_ADB = "enable_adb";
     public static final String ACTION_ENABLE_ADB_STATE_CHANGED =
             "com.android.settingslib.development.AbstractEnableAdbController."
@@ -91,7 +93,7 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
     public boolean handlePreferenceTreeClick(Preference preference) {
         if (TextUtils.equals(KEY_ENABLE_ADB, preference.getKey())) {
             if (!isAdbEnabled()) {
-                showConfirmationDialog((SwitchPreference) preference);
+                showConfirmationDialog(preference);
             } else {
                 writeAdbSetting(false);
             }
@@ -107,10 +109,8 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
         notifyStateChanged();
     }
 
-    protected void notifyStateChanged() {
+    private void notifyStateChanged() {
         LocalBroadcastManager.getInstance(mContext)
                 .sendBroadcast(new Intent(ACTION_ENABLE_ADB_STATE_CHANGED));
     }
-
-    public abstract void showConfirmationDialog(SwitchPreference preference);
 }

@@ -150,9 +150,17 @@ public class EnableAdbPreferenceControllerTest {
         }
 
         @Override
-        public void showConfirmationDialog(SwitchPreference preference) {
+        public void showConfirmationDialog(Preference preference) {
             // Don't show a dialog, just set setting.
             writeAdbSetting(true);
         }
+
+        @Override
+        public boolean isConfirmationDialogShowing() {
+            return false;
+        }
+
+        @Override
+        public void dismissConfirmationDialog() {}
     }
 }
