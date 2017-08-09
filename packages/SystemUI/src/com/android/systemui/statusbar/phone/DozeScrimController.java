@@ -23,14 +23,11 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.view.animation.Interpolator;
 
-import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.doze.DozeTriggers;
 
 /**
  * Controller which handles all the doze animations of the scrims.
@@ -341,18 +338,31 @@ public class DozeScrimController {
             if (!mDozing) return;
             startScrimAnimation(true /* inFront */, 1,
                     mDozeParameters.getPulseOutDuration(),
-                    Interpolators.ALPHA_IN, mPulseOutFinished);
+                    Interpolators.ALPHA_IN, mPulseOutFinishing);
+        }
+    };
+
+    private final Runnable mPulseOutFinishing = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) Log.d(TAG, "Pulse out finished");
+            DozeLog.tracePulseFinish();
+            if (mDozeParameters.getAlwaysOn() && mDozing) {
+                // Setting power states can block rendering. For AOD, delay finishing the pulse and
+                // setting the power state until the fully black scrim had time to hit the
+                // framebuffer.
+                mHandler.postDelayed(mPulseOutFinished, 30);
+            } else {
+                mPulseOutFinished.run();
+            }
         }
     };
 
     private final Runnable mPulseOutFinished = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Pulse out finished");
-            DozeLog.tracePulseFinish();
-
             // Signal that the pulse is all finished so we can turn the screen off now.
-            pulseFinished();
+            DozeScrimController.this.pulseFinished();
             if (mDozeParameters.getAlwaysOn()) {
                 mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
             }
