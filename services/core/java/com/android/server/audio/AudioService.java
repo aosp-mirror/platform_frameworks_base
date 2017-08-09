@@ -5450,6 +5450,9 @@ public class AudioService extends IAudioService.Stub
         } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE ||
                    device == AudioSystem.DEVICE_OUT_LINE) {
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
+            intent.putExtra("microphone", (device & AudioSystem.DEVICE_BIT_IN) != 0 ? 1 : 0);
+        } else if (device == AudioSystem.DEVICE_OUT_USB_HEADSET) {
+            intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 0);
         } else if (device == AudioSystem.DEVICE_OUT_HDMI ||
                 device == AudioSystem.DEVICE_OUT_HDMI_ARC) {
@@ -5489,9 +5492,7 @@ public class AudioService extends IAudioService.Stub
             if ((state == 0) && ((device & DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG) != 0)) {
                 setBluetoothA2dpOnInt(true);
             }
-            boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
-                            (((device & AudioSystem.DEVICE_BIT_IN) != 0) &&
-                             ((device & ~AudioSystem.DEVICE_IN_ALL_USB) == 0));
+
             if (!handleDeviceConnection(state == 1, device, address, deviceName)) {
                 // change of connection state failed, bailout
                 return;
@@ -5531,7 +5532,7 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
-            if (!isUsb && device != AudioSystem.DEVICE_IN_WIRED_HEADSET) {
+            if (device != AudioSystem.DEVICE_IN_WIRED_HEADSET) {
                 sendDeviceConnectionIntent(device, state, address, deviceName);
             }
             updateAudioRoutes(device, state);
