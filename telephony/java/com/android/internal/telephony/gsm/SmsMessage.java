@@ -278,6 +278,10 @@ public class SmsMessage extends SmsMessageBase {
                 scAddress, destinationAddress, mtiByte,
                 statusReportRequested, ret);
 
+        // Skip encoding pdu if error occurs when create pdu head and the error will be handled
+        // properly later on encodedMessage sanity check.
+        if (bo == null) return ret;
+
         // User Data (and length)
         byte[] userData;
         try {
@@ -420,6 +424,9 @@ public class SmsMessage extends SmsMessageBase {
                 scAddress, destinationAddress, (byte) 0x41, // MTI = SMS-SUBMIT,
                                                             // TP-UDHI = true
                 statusReportRequested, ret);
+        // Skip encoding pdu if error occurs when create pdu head and the error will be handled
+        // properly later on encodedMessage sanity check.
+        if (bo == null) return ret;
 
         // TP-Data-Coding-Scheme
         // No class, 8 bit data
@@ -451,7 +458,7 @@ public class SmsMessage extends SmsMessageBase {
      * @param destinationAddress the address of the destination for the message
      * @param mtiByte
      * @param ret <code>SubmitPdu</code> containing the encoded SC
-     *        address, if applicable, and the encoded message
+     *        address, if applicable, and the encoded message. Returns null on encode error.
      */
     private static ByteArrayOutputStream getSubmitPduHead(
             String scAddress, String destinationAddress, byte mtiByte,
@@ -481,6 +488,9 @@ public class SmsMessage extends SmsMessageBase {
         byte[] daBytes;
 
         daBytes = PhoneNumberUtils.networkPortionToCalledPartyBCD(destinationAddress);
+
+        // return empty pduHead for invalid destination address
+        if (daBytes == null) return null;
 
         // destination address length in BCD digits, ignoring TON byte and pad
         // TODO Should be better.
