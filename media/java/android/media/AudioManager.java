@@ -1501,7 +1501,9 @@ public class AudioManager {
         if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_WIRED_HEADSET,"")
                 == AudioSystem.DEVICE_STATE_UNAVAILABLE &&
             AudioSystem.getDeviceConnectionState(DEVICE_OUT_WIRED_HEADPHONE,"")
-                == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
+                == AudioSystem.DEVICE_STATE_UNAVAILABLE &&
+            AudioSystem.getDeviceConnectionState(DEVICE_OUT_USB_HEADSET, "")
+              == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
             return false;
         } else {
             return true;
@@ -3323,6 +3325,9 @@ public class AudioManager {
     /** @hide
      * The audio output device code for a wired headphone without attached microphone */
     public static final int DEVICE_OUT_WIRED_HEADPHONE = AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
+    /** @hide
+     * The audio output device code for a USB headphone with attached microphone */
+    public static final int DEVICE_OUT_USB_HEADSET = AudioSystem.DEVICE_OUT_USB_HEADSET;
     /** @hide
      * The audio output device code for generic Bluetooth SCO, for voice */
     public static final int DEVICE_OUT_BLUETOOTH_SCO = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
