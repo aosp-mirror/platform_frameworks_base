@@ -3646,7 +3646,7 @@ public class UserManagerService extends IUserManager.Stub {
         public UserInfo createUserEvenWhenDisallowed(String name, int flags) {
             UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL, null);
             // Keep this in sync with UserManager.createUser
-            if (user != null && !user.isAdmin()) {
+            if (user != null && !user.isAdmin() && !user.isDemo()) {
                 setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);
                 setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, true, user.id);
             }
