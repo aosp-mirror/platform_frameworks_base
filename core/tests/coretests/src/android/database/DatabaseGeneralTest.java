@@ -1058,7 +1058,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         mDatabase.close();
         SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
                 .setLookasideConfig(0, 0).build();
-        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile.getPath(), params);
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile, params);
         verifyLookasideStats(true);
     }
 
@@ -1193,7 +1193,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         mDatabase.close();
         SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
                 .setIdleConnectionTimeout(1000).build();
-        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile.getPath(), params);
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile, params);
         // Wait a bit and check that connection is still open
         Thread.sleep(100);
         String output = executeShellCommand("dumpsys dbinfo " + getContext().getPackageName());

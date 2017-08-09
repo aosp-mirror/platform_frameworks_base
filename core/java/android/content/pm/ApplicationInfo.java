@@ -572,7 +572,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_STATIC_SHARED_LIBRARY = 1 << 14;
 
     /**
-     * Value for {@linl #privateFlags}: When set, the application will only have its splits loaded
+     * Value for {@link #privateFlags}: When set, the application will only have its splits loaded
      * if they are required to load a component. Splits can be loaded on demand using the
      * {@link Context#createContextForSplit(String)} API.
      * @hide
@@ -580,10 +580,40 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_ISOLATED_SPLIT_LOADING = 1 << 15;
 
     /**
-     * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
-     * {@hide}
+     * Value for {@link #privateFlags}: When set, the application was installed as
+     * a virtual preload.
+     * @hide
      */
-    public int privateFlags;
+    public static final int PRIVATE_FLAG_VIRTUAL_PRELOAD = 1 << 16;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
+            PRIVATE_FLAG_HIDDEN,
+            PRIVATE_FLAG_CANT_SAVE_STATE,
+            PRIVATE_FLAG_FORWARD_LOCK,
+            PRIVATE_FLAG_PRIVILEGED,
+            PRIVATE_FLAG_HAS_DOMAIN_URLS,
+            PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE,
+            PRIVATE_FLAG_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_INSTANT,
+            PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION,
+            PRIVATE_FLAG_BACKUP_IN_FOREGROUND,
+            PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
+            PRIVATE_FLAG_ISOLATED_SPLIT_LOADING,
+            PRIVATE_FLAG_VIRTUAL_PRELOAD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApplicationInfoPrivateFlags {}
+
+    /**
+     * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
+     * @hide
+     */
+    public @ApplicationInfoPrivateFlags int privateFlags;
 
     /**
      * @hide
@@ -1506,6 +1536,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isStaticSharedLibrary() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY) != 0;
+    }
+
+    /**
+     * Returns whether or not this application was installed as a virtual preload.
+     */
+    public boolean isVirtualPreload() {
+        return (privateFlags & PRIVATE_FLAG_VIRTUAL_PRELOAD) != 0;
     }
 
     /**

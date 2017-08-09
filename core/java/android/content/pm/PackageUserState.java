@@ -21,10 +21,10 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.util.ArraySet;
@@ -45,6 +45,7 @@ public class PackageUserState {
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
     public boolean instantApp;
+    public boolean virtualPreload;
     public int enabled;
     public String lastDisableAppCaller;
     public int domainVerificationStatus;
@@ -75,6 +76,7 @@ public class PackageUserState {
         hidden = o.hidden;
         suspended = o.suspended;
         instantApp = o.instantApp;
+        virtualPreload = o.virtualPreload;
         enabled = o.enabled;
         lastDisableAppCaller = o.lastDisableAppCaller;
         domainVerificationStatus = o.domainVerificationStatus;
@@ -192,6 +194,9 @@ public class PackageUserState {
             return false;
         }
         if (instantApp != oldState.instantApp) {
+            return false;
+        }
+        if (virtualPreload != oldState.virtualPreload) {
             return false;
         }
         if (enabled != oldState.enabled) {

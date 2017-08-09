@@ -703,12 +703,19 @@ public final class SQLiteDatabase extends SQLiteClosable {
     /**
      * Open the database according to the specified {@link OpenParams parameters}
      *
-     * @param path to database file to open and/or create
+     * @param path path to database file to open and/or create.
+     * <p><strong>Important:</strong> The file should be constructed either from an absolute path or
+     * by using {@link android.content.Context#getDatabasePath(String)}.
      * @param openParams configuration parameters that are used for opening {@link SQLiteDatabase}
      * @return the newly opened database
      * @throws SQLiteException if the database cannot be opened
      */
-    public static SQLiteDatabase openDatabase(@NonNull String path,
+    public static SQLiteDatabase openDatabase(@NonNull File path,
+            @NonNull OpenParams openParams) {
+        return openDatabase(path.getPath(), openParams);
+    }
+
+    private static SQLiteDatabase openDatabase(@NonNull String path,
             @NonNull OpenParams openParams) {
         Preconditions.checkArgument(openParams != null, "OpenParams cannot be null");
         SQLiteDatabase db = new SQLiteDatabase(path, openParams.mOpenFlags,
@@ -873,7 +880,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *
      * @param factory an optional factory class that is called to instantiate a
      *            cursor when query is called
-     * @return a SQLiteDatabase object, or null if the database can't be created
+     * @return a SQLiteDatabase instance
+     * @throws SQLiteException if the database cannot be created
      */
     @NonNull
     public static SQLiteDatabase create(@Nullable CursorFactory factory) {
@@ -889,7 +897,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * <p>Sets the locale of the database to the  the system's current locale.
      * Call {@link #setLocale} if you would like something else.</p>
      * @param openParams configuration parameters that are used for opening SQLiteDatabase
-     * @return a SQLiteDatabase object, or null if the database can't be created
+     * @return a SQLiteDatabase instance
+     * @throws SQLException if the database cannot be created
      */
     @NonNull
     public static SQLiteDatabase createInMemory(@NonNull OpenParams openParams) {
@@ -2322,7 +2331,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         }
 
         /**
-         * Returns flags to control database access mode
+         * Returns flags to control database access mode. Default value is 0.
          *
          * @see Builder#setOpenFlags(int)
          */

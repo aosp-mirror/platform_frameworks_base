@@ -31,6 +31,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import dalvik.system.DexFile;
 
@@ -112,7 +114,7 @@ public class PackageDexOptimizer {
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
-            boolean isUsedByOtherApps, DexoptOptions options) {
+            PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
@@ -120,7 +122,7 @@ public class PackageDexOptimizer {
             final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets,
-                        packageStats, isUsedByOtherApps, options);
+                        packageStats, packageUseInfo, options);
             } finally {
                 releaseWakeLockLI(acquireTime);
             }
@@ -134,20 +136,12 @@ public class PackageDexOptimizer {
     @GuardedBy("mInstallLock")
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
-            boolean isUsedByOtherApps, DexoptOptions options) {
+            PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         final List<String> paths = pkg.getAllCodePaths();
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-
-        final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
-                options.getCompilerFilter(), isUsedByOtherApps);
-        final boolean profileUpdated = options.isCheckForProfileUpdates() &&
-                isProfileUpdated(pkg, sharedGid, compilerFilter);
-
-        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
-        final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
 
         // Get the class loader context dependencies.
         // For each code path in the package, this array contains the class loader context that
@@ -171,6 +165,17 @@ public class PackageDexOptimizer {
                     continue;
                 }
             }
+
+            final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
+                    || packageUseInfo.isUsedByOtherApps(path);
+            final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
+                options.getCompilerFilter(), isUsedByOtherApps);
+            final boolean profileUpdated = options.isCheckForProfileUpdates() &&
+                isProfileUpdated(pkg, sharedGid, compilerFilter);
+
+            // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
+            // flags.
+            final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
 
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
@@ -376,26 +381,60 @@ public class PackageDexOptimizer {
     /**
      * Dumps the dexopt state of the given package {@code pkg} to the given {@code PrintWriter}.
      */
-    void dumpDexoptState(IndentingPrintWriter pw, PackageParser.Package pkg) {
+    void dumpDexoptState(IndentingPrintWriter pw, PackageParser.Package pkg,
+            PackageDexUsage.PackageUseInfo useInfo) {
         final String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
 
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
 
-        for (String instructionSet : dexCodeInstructionSets) {
-             pw.println("Instruction Set: " + instructionSet);
-             pw.increaseIndent();
-             for (String path : paths) {
-                  String status = null;
-                  try {
-                      status = DexFile.getDexFileStatus(path, instructionSet);
-                  } catch (IOException ioe) {
-                      status = "[Exception]: " + ioe.getMessage();
-                  }
-                  pw.println("path: " + path);
-                  pw.println("status: " + status);
-             }
-             pw.decreaseIndent();
+        for (String path : paths) {
+            pw.println("path: " + path);
+            pw.increaseIndent();
+
+            for (String isa : dexCodeInstructionSets) {
+                String status = null;
+                try {
+                    status = DexFile.getDexFileStatus(path, isa);
+                } catch (IOException ioe) {
+                     status = "[Exception]: " + ioe.getMessage();
+                }
+                pw.println(isa + ": " + status);
+            }
+
+            if (useInfo.isUsedByOtherApps(path)) {
+                pw.println("used be other apps: " + useInfo.getLoadingPackages(path));
+            }
+
+            Map<String, PackageDexUsage.DexUseInfo> dexUseInfoMap = useInfo.getDexUseInfoMap();
+
+            if (!dexUseInfoMap.isEmpty()) {
+                pw.println("known secondary dex files:");
+                pw.increaseIndent();
+                for (Map.Entry<String, PackageDexUsage.DexUseInfo> e : dexUseInfoMap.entrySet()) {
+                    String dex = e.getKey();
+                    PackageDexUsage.DexUseInfo dexUseInfo = e.getValue();
+                    pw.println(dex);
+                    pw.increaseIndent();
+                    for (String isa : dexUseInfo.getLoaderIsas()) {
+                        String status = null;
+                        try {
+                            status = DexFile.getDexFileStatus(path, isa);
+                        } catch (IOException ioe) {
+                             status = "[Exception]: " + ioe.getMessage();
+                        }
+                        pw.println(isa + ": " + status);
+                    }
+
+                    pw.println("class loader context: " + dexUseInfo.getClassLoaderContext());
+                    if (dexUseInfo.isUsedByOtherApps()) {
+                        pw.println("used be other apps: " + dexUseInfo.getLoadingPackages());
+                    }
+                    pw.decreaseIndent();
+                }
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
         }
     }
 

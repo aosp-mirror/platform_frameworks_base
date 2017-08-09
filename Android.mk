@@ -172,6 +172,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageInstallerCallback.aidl \
 	core/java/android/content/pm/IPackageInstallerSession.aidl \
 	core/java/android/content/pm/IPackageManager.aidl \
+	../native/libs/binder/aidl/android/content/pm/IPackageManagerNative.aidl \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/content/pm/IPinItemRequest.aidl \
