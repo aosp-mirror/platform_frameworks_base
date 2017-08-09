@@ -1388,11 +1388,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void close() {
+        int activeCount;
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
+            activeCount = mActiveCount.decrementAndGet();
         }
 
-        if (mActiveCount.decrementAndGet() == 0) {
+        if (activeCount == 0) {
             mCallback.onSessionActiveChanged(this, false);
         }
     }
