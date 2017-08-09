@@ -834,6 +834,16 @@ public class Tethering extends BaseNetworkObserver {
             // For more explanation, see b/62552150 .
             synchronized (Tethering.this.mPublicSync) {
                 // Always record the state of RNDIS.
+                // TODO: consider:
+                //     final boolean disconnected = !usbConnected;
+                //     if (disconnected) {
+                //         mRndisEnabled = false;
+                //         mUsbTetherRequested = false;
+                //         return;
+                //     }
+                //     final boolean configured = usbConnected && usbConfigured;
+                //     mRndisEnabled = configured ? rndisEnabled : false;
+                //     if (!configured) return;
                 mRndisEnabled = rndisEnabled;
 
                 if (usbConnected && !usbConfigured) {
