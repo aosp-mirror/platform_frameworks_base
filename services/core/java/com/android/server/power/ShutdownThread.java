@@ -57,7 +57,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.server.LocalServices;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -288,6 +290,9 @@ public final class ShutdownThread extends Thread {
                 pd.setMessage(context.getText(
                             com.android.internal.R.string.reboot_to_update_prepare));
             } else {
+                if (showSysuiReboot()) {
+                    return null;
+                }
                 pd.setIndeterminate(true);
                 pd.setMessage(context.getText(
                             com.android.internal.R.string.reboot_to_update_reboot));
@@ -296,39 +301,12 @@ public final class ShutdownThread extends Thread {
             // Factory reset path. Set the dialog message accordingly.
             pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
             pd.setMessage(context.getText(
-                        com.android.internal.R.string.reboot_to_reset_message));
+                    com.android.internal.R.string.reboot_to_reset_message));
             pd.setIndeterminate(true);
-        } else if (mReason != null && mReason.equals(PowerManager.SHUTDOWN_USER_REQUESTED)) {
-            Dialog d = new Dialog(context);
-            d.setContentView(com.android.internal.R.layout.shutdown_dialog);
-            d.setCancelable(false);
-
-            int color;
-            try {
-                boolean onKeyguard = context.getSystemService(
-                        KeyguardManager.class).isKeyguardLocked();
-                WallpaperColors currentColors = context.getSystemService(WallpaperManager.class)
-                        .getWallpaperColors(onKeyguard ?
-                                WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
-                color = currentColors != null &&
-                        (currentColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT)
-                                != 0 ?
-                        Color.BLACK : Color.WHITE;
-            } catch (Exception e) {
-                color = Color.WHITE;
-            }
-
-            ProgressBar bar = d.findViewById(com.android.internal.R.id.progress);
-            bar.getIndeterminateDrawable().setTint(color);
-            ((TextView) d.findViewById(com.android.internal.R.id.text1)).setTextColor(color);
-            d.getWindow().getAttributes().width = ViewGroup.LayoutParams.MATCH_PARENT;
-            d.getWindow().getAttributes().height = ViewGroup.LayoutParams.MATCH_PARENT;
-            d.getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-            d.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            d.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            d.show();
-            return null;
         } else {
+            if (showSysuiReboot()) {
+                return null;
+            }
             pd.setTitle(context.getText(com.android.internal.R.string.power_off));
             pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
             pd.setIndeterminate(true);
@@ -338,6 +316,23 @@ public final class ShutdownThread extends Thread {
 
         pd.show();
         return pd;
+    }
+
+    private static boolean showSysuiReboot() {
+        Log.d(TAG, "Attempting to use SysUI shutdown UI");
+        try {
+            StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            if (service.showShutdownUi(mReboot, mReason)) {
+                // Sysui will handle shutdown UI.
+                Log.d(TAG, "SysUI handling shutdown UI");
+                return true;
+            }
+        } catch (Exception e) {
+            // If anything went wrong, ignore it and use fallback ui
+        }
+        Log.d(TAG, "SysUI is unavailable");
+        return false;
     }
 
     private static void beginShutdownSequence(Context context) {
@@ -561,7 +556,7 @@ public final class ShutdownThread extends Thread {
         Thread t = new Thread() {
             public void run() {
                 boolean nfcOff;
-                boolean bluetoothOff;
+                boolean bluetoothReadyForShutdown;
                 boolean radioOff;
 
                 final INfcAdapter nfc =
@@ -585,15 +580,15 @@ public final class ShutdownThread extends Thread {
                 }
 
                 try {
-                    bluetoothOff = bluetooth == null ||
+                    bluetoothReadyForShutdown = bluetooth == null ||
                             bluetooth.getState() == BluetoothAdapter.STATE_OFF;
-                    if (!bluetoothOff) {
+                    if (!bluetoothReadyForShutdown) {
                         Log.w(TAG, "Disabling Bluetooth...");
                         bluetooth.disable(mContext.getPackageName(), false);  // disable but don't persist new state
                     }
                 } catch (RemoteException ex) {
                     Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
-                    bluetoothOff = true;
+                    bluetoothReadyForShutdown = true;
                 }
 
                 try {
@@ -618,14 +613,19 @@ public final class ShutdownThread extends Thread {
                         sInstance.setRebootProgress(status, null);
                     }
 
-                    if (!bluetoothOff) {
+                    if (!bluetoothReadyForShutdown) {
                         try {
-                            bluetoothOff = bluetooth.getState() == BluetoothAdapter.STATE_OFF;
+                          // BLE only mode can happen when BT is turned off
+                          // We will continue shutting down in such case
+                          bluetoothReadyForShutdown =
+                                  bluetooth.getState() == BluetoothAdapter.STATE_OFF ||
+                                  bluetooth.getState() == BluetoothAdapter.STATE_BLE_TURNING_OFF ||
+                                  bluetooth.getState() == BluetoothAdapter.STATE_BLE_ON;
                         } catch (RemoteException ex) {
                             Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
-                            bluetoothOff = true;
+                            bluetoothReadyForShutdown = true;
                         }
-                        if (bluetoothOff) {
+                        if (bluetoothReadyForShutdown) {
                             Log.i(TAG, "Bluetooth turned off.");
                         }
                     }
@@ -652,7 +652,7 @@ public final class ShutdownThread extends Thread {
                         }
                     }
 
-                    if (radioOff && bluetoothOff && nfcOff) {
+                    if (radioOff && bluetoothReadyForShutdown && nfcOff) {
                         Log.i(TAG, "NFC, Radio and Bluetooth shutdown complete.");
                         done[0] = true;
                         break;

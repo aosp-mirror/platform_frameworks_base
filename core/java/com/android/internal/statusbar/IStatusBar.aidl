@@ -115,4 +115,6 @@ oneway interface IStatusBar
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);
     void handleSystemKey(in int key);
+
+    void showShutdownUi(boolean isReboot, String reason);
 }

@@ -137,7 +137,6 @@ public class WifiTrackerTest {
     private Looper mMainLooper;
 
     private int mOriginalScoringUiSettingValue;
-    private boolean mOriginalStaleScanResultsValue;
 
     @Before
     public void setUp() {
@@ -213,7 +212,6 @@ public class WifiTrackerTest {
                 Settings.Global.NETWORK_SCORING_UI_ENABLED,
                 1 /* enabled */);
 
-        mOriginalStaleScanResultsValue = WifiTracker.sStaleScanResults;
     }
 
     @After
@@ -222,8 +220,6 @@ public class WifiTrackerTest {
                 InstrumentationRegistry.getTargetContext().getContentResolver(),
                 Settings.Global.NETWORK_SCORING_UI_ENABLED,
                 mOriginalScoringUiSettingValue);
-
-        WifiTracker.sStaleScanResults = mOriginalStaleScanResultsValue;
     }
 
     private static ScanResult buildScanResult1() {

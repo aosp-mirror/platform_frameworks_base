@@ -46,6 +46,11 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
     }
 
     @Override
+    public void handleShowShutdownUi(boolean isReboot, String reason) {
+        mExtension.get().showShutdownUi(isReboot, reason);
+    }
+
+    @Override
     public void handleShowGlobalActionsMenu() {
         mExtension.get().showGlobalActions(this);
     }

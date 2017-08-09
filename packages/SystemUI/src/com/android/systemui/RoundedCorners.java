@@ -24,6 +24,7 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
@@ -69,12 +70,14 @@ public class RoundedCorners extends SystemUI implements Tunable {
         mOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        mOverlay.setAlpha(0);
         mOverlay.findViewById(R.id.right).setRotation(90);
 
         mContext.getSystemService(WindowManager.class)
                 .addView(mOverlay, getWindowLayoutParams());
         mBottomOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
+        mBottomOverlay.setAlpha(0);
         mBottomOverlay.findViewById(R.id.right).setRotation(180);
         mBottomOverlay.findViewById(R.id.left).setRotation(270);
         WindowManager.LayoutParams layoutParams = getWindowLayoutParams();
@@ -88,6 +91,23 @@ public class RoundedCorners extends SystemUI implements Tunable {
         mDensity = metrics.density;
 
         Dependency.get(TunerService.class).addTunable(this, SIZE);
+
+        mOverlay.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                    int oldLeft,
+                    int oldTop, int oldRight, int oldBottom) {
+                mOverlay.removeOnLayoutChangeListener(this);
+                mOverlay.animate()
+                        .alpha(1)
+                        .setDuration(1000)
+                        .start();
+                mBottomOverlay.animate()
+                        .alpha(1)
+                        .setDuration(1000)
+                        .start();
+            }
+        });
     }
 
     private void setupPadding(int padding) {

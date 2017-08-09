@@ -131,6 +131,7 @@ public class UserInfoControllerImpl implements UserInfoController {
         final int userId = userInfo.id;
         final boolean isGuest = userInfo.isGuest();
         final String userName = userInfo.name;
+        final boolean lightIcon = mContext.getThemeResId() != R.style.Theme_SystemUI_Light;
 
         final Resources res = mContext.getResources();
         final int avatarSize = Math.max(
@@ -154,7 +155,7 @@ public class UserInfoControllerImpl implements UserInfoController {
                             .setIcon(rawAvatar).setBadgeIfManagedUser(mContext, userId).bake();
                 } else {
                     avatar = UserIcons.getDefaultUserIcon(isGuest? UserHandle.USER_NULL : userId,
-                            /* light= */ true);
+                            lightIcon);
                 }
 
                 // If it's a single-user device, get the profile name, since the nickname is not

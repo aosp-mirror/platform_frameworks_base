@@ -19,8 +19,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.telephony.SubscriptionManager;
@@ -49,6 +51,10 @@ public class CarrierActionUtils {
     public static final int CARRIER_ACTION_SHOW_PORTAL_NOTIFICATION          = 4;
     public static final int CARRIER_ACTION_SHOW_NO_DATA_SERVICE_NOTIFICATION = 5;
     public static final int CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS          = 6;
+    public static final int CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER        = 7;
+    public static final int CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER       = 8;
+    public static final int CARRIER_ACTION_REGISTER_DEFAULT_NETWORK_AVAIL    = 9;
+    public static final int CARRIER_ACTION_DEREGISTER_DEFAULT_NETWORK_AVAIL  = 10;
 
     public static void applyCarrierAction(int actionIdx, Intent intent, Context context) {
         switch (actionIdx) {
@@ -73,6 +79,18 @@ public class CarrierActionUtils {
             case CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS:
                 onCancelAllNotifications(context);
                 break;
+            case CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER:
+                onEnableDefaultURLHandler(context);
+                break;
+            case CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER:
+                onDisableDefaultURLHandler(context);
+                break;
+            case CARRIER_ACTION_REGISTER_DEFAULT_NETWORK_AVAIL:
+                onRegisterDefaultNetworkAvail(intent, context);
+                break;
+            case CARRIER_ACTION_DEREGISTER_DEFAULT_NETWORK_AVAIL:
+                onDeregisterDefaultNetworkAvail(intent, context);
+                break;
             default:
                 loge("unsupported carrier action index: " + actionIdx);
         }
@@ -92,6 +110,38 @@ public class CarrierActionUtils {
         logd("onEnableAllMeteredApns subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
         telephonyMgr.carrierActionSetMeteredApnsEnabled(subId, ENABLE);
+    }
+
+    private static void onEnableDefaultURLHandler(Context context) {
+        logd("onEnableDefaultURLHandler");
+        final PackageManager pm = context.getPackageManager();
+        pm.setComponentEnabledSetting(
+                new ComponentName(context, CaptivePortalLoginActivity.getAlias(context)),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+    }
+
+    private static void onDisableDefaultURLHandler(Context context) {
+        logd("onDisableDefaultURLHandler");
+        final PackageManager pm = context.getPackageManager();
+        pm.setComponentEnabledSetting(
+                new ComponentName(context, CaptivePortalLoginActivity.getAlias(context)),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    }
+
+    private static void onRegisterDefaultNetworkAvail(Intent intent, Context context) {
+        int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                SubscriptionManager.getDefaultVoiceSubscriptionId());
+        logd("onRegisterDefaultNetworkAvail subId: " + subId);
+        final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
+        telephonyMgr.carrierActionReportDefaultNetworkStatus(subId, true);
+    }
+
+    private static void onDeregisterDefaultNetworkAvail(Intent intent, Context context) {
+        int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                SubscriptionManager.getDefaultVoiceSubscriptionId());
+        logd("onDeregisterDefaultNetworkAvail subId: " + subId);
+        final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
+        telephonyMgr.carrierActionReportDefaultNetworkStatus(subId, false);
     }
 
     private static void onDisableRadio(Intent intent, Context context) {
