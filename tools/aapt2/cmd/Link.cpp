@@ -482,7 +482,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
 
   if (options_.no_version_vectors || options_.no_version_transitions) {
     // Skip this if it is a vector or animated-vector.
-    xml::Element* el = xml::FindRootElement(doc);
+    xml::Element* el = doc->root.get();
     if (el && el->namespace_uri.empty()) {
       if ((options_.no_version_vectors && IsVectorElement(el->name)) ||
           (options_.no_version_transitions && IsTransitionElement(el->name))) {

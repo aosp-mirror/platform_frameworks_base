@@ -26,35 +26,30 @@
 
 namespace aapt {
 
-/**
- * Extracts Inline XML definitions into their own xml::XmlResource objects.
- *
- * Inline XML looks like:
- *
- * <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
- *                  xmlns:aapt="http://schemas.android.com/aapt" >
- *   <aapt:attr name="android:drawable" >
- *     <vector
- *       android:height="64dp"
- *       android:width="64dp"
- *       android:viewportHeight="600"
- *       android:viewportWidth="600"/>
- *   </aapt:attr>
- * </animated-vector>
- *
- * The <vector> will be extracted into its own XML file and <animated-vector>
- * will
- * gain an attribute 'android:drawable' set to a reference to the extracted
- * <vector> resource.
- */
+// Extracts Inline XML definitions into their own xml::XmlResource objects.
+//
+// Inline XML looks like:
+//
+// <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+//                  xmlns:aapt="http://schemas.android.com/aapt" >
+//   <aapt:attr name="android:drawable" >
+//     <vector
+//       android:height="64dp"
+//       android:width="64dp"
+//       android:viewportHeight="600"
+//       android:viewportWidth="600"/>
+//   </aapt:attr>
+// </animated-vector>
+//
+// The <vector> will be extracted into its own XML file and <animated-vector> will
+// gain an attribute 'android:drawable' set to a reference to the extracted <vector> resource.
 class InlineXmlFormatParser : public IXmlResourceConsumer {
  public:
   explicit InlineXmlFormatParser() = default;
 
   bool Consume(IAaptContext* context, xml::XmlResource* doc) override;
 
-  std::vector<std::unique_ptr<xml::XmlResource>>&
-  GetExtractedInlineXmlDocuments() {
+  std::vector<std::unique_ptr<xml::XmlResource>>& GetExtractedInlineXmlDocuments() {
     return queue_;
   }
 
