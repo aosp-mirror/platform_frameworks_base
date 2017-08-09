@@ -111,7 +111,7 @@ public class AmbientDisplayConfiguration {
         return mContext.getResources().getString(R.string.config_dozeComponent);
     }
 
-    private boolean accessibilityInversionEnabled(int user) {
+    public boolean accessibilityInversionEnabled(int user) {
         return boolSettingDefaultOff(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, user);
     }
 
