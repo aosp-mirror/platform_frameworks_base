@@ -254,7 +254,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏تم تعيين الموقع بواسطة GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"طلبات الموقع نشطة"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"محو جميع الإشعارات."</string>
-    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"و<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="zero"><xliff:g id="NUMBER_1">%s</xliff:g> إشعار آخر بداخل المجموعة.</item>
       <item quantity="two">إشعاران (<xliff:g id="NUMBER_1">%s</xliff:g>) آخران بداخل المجموعة.</item>
