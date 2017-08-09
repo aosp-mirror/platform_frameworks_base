@@ -39,4 +39,7 @@
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">false</bool>
+
+    <!-- Allow SystemUI to show the shutdown dialog -->
+    <bool name="config_showSysuiShutdown">false</bool>
 </resources>
