@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import dalvik.system.DexFile;
 
@@ -380,26 +381,60 @@ public class PackageDexOptimizer {
     /**
      * Dumps the dexopt state of the given package {@code pkg} to the given {@code PrintWriter}.
      */
-    void dumpDexoptState(IndentingPrintWriter pw, PackageParser.Package pkg) {
+    void dumpDexoptState(IndentingPrintWriter pw, PackageParser.Package pkg,
+            PackageDexUsage.PackageUseInfo useInfo) {
         final String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
 
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
 
-        for (String instructionSet : dexCodeInstructionSets) {
-             pw.println("Instruction Set: " + instructionSet);
-             pw.increaseIndent();
-             for (String path : paths) {
-                  String status = null;
-                  try {
-                      status = DexFile.getDexFileStatus(path, instructionSet);
-                  } catch (IOException ioe) {
-                      status = "[Exception]: " + ioe.getMessage();
-                  }
-                  pw.println("path: " + path);
-                  pw.println("status: " + status);
-             }
-             pw.decreaseIndent();
+        for (String path : paths) {
+            pw.println("path: " + path);
+            pw.increaseIndent();
+
+            for (String isa : dexCodeInstructionSets) {
+                String status = null;
+                try {
+                    status = DexFile.getDexFileStatus(path, isa);
+                } catch (IOException ioe) {
+                     status = "[Exception]: " + ioe.getMessage();
+                }
+                pw.println(isa + ": " + status);
+            }
+
+            if (useInfo.isUsedByOtherApps(path)) {
+                pw.println("used be other apps: " + useInfo.getLoadingPackages(path));
+            }
+
+            Map<String, PackageDexUsage.DexUseInfo> dexUseInfoMap = useInfo.getDexUseInfoMap();
+
+            if (!dexUseInfoMap.isEmpty()) {
+                pw.println("known secondary dex files:");
+                pw.increaseIndent();
+                for (Map.Entry<String, PackageDexUsage.DexUseInfo> e : dexUseInfoMap.entrySet()) {
+                    String dex = e.getKey();
+                    PackageDexUsage.DexUseInfo dexUseInfo = e.getValue();
+                    pw.println(dex);
+                    pw.increaseIndent();
+                    for (String isa : dexUseInfo.getLoaderIsas()) {
+                        String status = null;
+                        try {
+                            status = DexFile.getDexFileStatus(path, isa);
+                        } catch (IOException ioe) {
+                             status = "[Exception]: " + ioe.getMessage();
+                        }
+                        pw.println(isa + ": " + status);
+                    }
+
+                    pw.println("class loader context: " + dexUseInfo.getClassLoaderContext());
+                    if (dexUseInfo.isUsedByOtherApps()) {
+                        pw.println("used be other apps: " + dexUseInfo.getLoadingPackages());
+                    }
+                    pw.decreaseIndent();
+                }
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
         }
     }
 
