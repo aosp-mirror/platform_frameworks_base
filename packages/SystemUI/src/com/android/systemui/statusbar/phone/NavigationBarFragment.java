@@ -437,7 +437,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {
-        mStatusBar.checkUserAutohide(v, event);
+        mStatusBar.checkUserAutohide(event);
         return false;
     }
 
