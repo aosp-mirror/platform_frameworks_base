@@ -74,6 +74,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.StringBuilder;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -414,7 +415,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void registerListener(IVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -424,7 +426,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void unregisterListener(IVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -434,7 +437,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void registerPersistentVrStateListener(IPersistentVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -444,7 +448,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void unregisterPersistentVrStateListener(IPersistentVrStateCallbacks cb) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             if (cb == null) {
                 throw new IllegalArgumentException("Callback binder object is null.");
             }
@@ -454,19 +459,28 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public boolean getVrModeState() {
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
             return VrManagerService.this.getVrMode();
         }
 
         @Override
+        public boolean getPersistentVrModeEnabled() {
+            enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER,
+                    Manifest.permission.ACCESS_VR_STATE);
+            return VrManagerService.this.getPersistentVrMode();
+        }
+
+        @Override
         public void setPersistentVrModeEnabled(boolean enabled) {
-            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
             VrManagerService.this.setPersistentVrModeEnabled(enabled);
         }
 
         @Override
         public void setVr2dDisplayProperties(
                 Vr2dDisplayProperties vr2dDisplayProp) {
-            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
             VrManagerService.this.setVr2dDisplayProperties(vr2dDisplayProp);
         }
 
@@ -530,11 +544,21 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     };
 
-    private void enforceCallerPermission(String permission) {
-        if (mContext.checkCallingOrSelfPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold the permission " + permission);
+    /**
+     * Enforces that at lease one of the specified permissions is held by the caller.
+     * Throws SecurityException if none of the specified permissions are held.
+     *
+     * @param permissions One or more permissions to check against.
+     */
+    private void enforceCallerPermissionAnyOf(String... permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkCallingOrSelfPermission(permission)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
+        throw new SecurityException("Caller does not hold at least one of the permissions: "
+                + Arrays.toString(permissions));
     }
 
     /**
@@ -1202,6 +1226,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean getVrMode() {
         synchronized (mLock) {
             return mVrModeEnabled;
+        }
+    }
+
+    private boolean getPersistentVrMode() {
+        synchronized (mLock) {
+            return mPersistentVrModeEnabled;
         }
     }
 }
