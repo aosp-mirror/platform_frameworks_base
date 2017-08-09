@@ -3061,4 +3061,5 @@
   <java-symbol type="bool" name="config_showAreaUpdateInfoSettings" />
   <java-symbol type="layout" name="shutdown_dialog" />
   <java-symbol type="dimen" name="chooser_service_spacing" />
+  <java-symbol type="bool" name="config_showSysuiShutdown" />
 </resources>

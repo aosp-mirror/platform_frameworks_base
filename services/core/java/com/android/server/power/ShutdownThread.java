@@ -58,7 +58,9 @@ import android.widget.TextView;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.server.RescueParty;
+import com.android.server.LocalServices;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -289,6 +291,9 @@ public final class ShutdownThread extends Thread {
                 pd.setMessage(context.getText(
                             com.android.internal.R.string.reboot_to_update_prepare));
             } else {
+                if (showSysuiReboot()) {
+                    return null;
+                }
                 pd.setIndeterminate(true);
                 pd.setMessage(context.getText(
                             com.android.internal.R.string.reboot_to_update_reboot));
@@ -308,37 +313,10 @@ public final class ShutdownThread extends Thread {
                             com.android.internal.R.string.reboot_to_reset_message));
                 pd.setIndeterminate(true);
             }
-        } else if (mReason != null && mReason.equals(PowerManager.SHUTDOWN_USER_REQUESTED)) {
-            Dialog d = new Dialog(context);
-            d.setContentView(com.android.internal.R.layout.shutdown_dialog);
-            d.setCancelable(false);
-
-            int color;
-            try {
-                boolean onKeyguard = context.getSystemService(
-                        KeyguardManager.class).isKeyguardLocked();
-                WallpaperColors currentColors = context.getSystemService(WallpaperManager.class)
-                        .getWallpaperColors(onKeyguard ?
-                                WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
-                color = currentColors != null &&
-                        (currentColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT)
-                                != 0 ?
-                        Color.BLACK : Color.WHITE;
-            } catch (Exception e) {
-                color = Color.WHITE;
-            }
-
-            ProgressBar bar = d.findViewById(com.android.internal.R.id.progress);
-            bar.getIndeterminateDrawable().setTint(color);
-            ((TextView) d.findViewById(com.android.internal.R.id.text1)).setTextColor(color);
-            d.getWindow().getAttributes().width = ViewGroup.LayoutParams.MATCH_PARENT;
-            d.getWindow().getAttributes().height = ViewGroup.LayoutParams.MATCH_PARENT;
-            d.getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-            d.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            d.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            d.show();
-            return null;
         } else {
+            if (showSysuiReboot()) {
+                return null;
+            }
             pd.setTitle(context.getText(com.android.internal.R.string.power_off));
             pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
             pd.setIndeterminate(true);
@@ -348,6 +326,23 @@ public final class ShutdownThread extends Thread {
 
         pd.show();
         return pd;
+    }
+
+    private static boolean showSysuiReboot() {
+        Log.d(TAG, "Attempting to use SysUI shutdown UI");
+        try {
+            StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            if (service.showShutdownUi(mReboot, mReason)) {
+                // Sysui will handle shutdown UI.
+                Log.d(TAG, "SysUI handling shutdown UI");
+                return true;
+            }
+        } catch (Exception e) {
+            // If anything went wrong, ignore it and use fallback ui
+        }
+        Log.d(TAG, "SysUI is unavailable");
+        return false;
     }
 
     private static void beginShutdownSequence(Context context) {
