@@ -134,9 +134,9 @@ public class KernelUidCpuFreqTimeReader {
                         .append(uid).append("\n");
                 sb.append("data=").append("(").append(uidTimeMs[i]).append(",")
                         .append(totalTimeMs).append(")").append("\n");
-                sb.append("times=").append("(")
-                        .append(TimeUtils.formatForLogging(mLastTimeReadMs)).append(",")
-                        .append(TimeUtils.formatForLogging(mNowTimeMs)).append(")");
+                sb.append("times=").append("(");
+                TimeUtils.formatDuration(mLastTimeReadMs, sb); sb.append(",");
+                TimeUtils.formatDuration(mNowTimeMs, sb); sb.append(")");
                 Slog.wtf(TAG, sb.toString());
                 return;
             }
