@@ -4700,6 +4700,7 @@ public abstract class PackageManager {
      * on the system for other users, also install it for the calling user.
      * @hide
      */
+    @SystemApi
     public abstract int installExistingPackage(String packageName) throws NameNotFoundException;
 
     /**
@@ -4707,6 +4708,7 @@ public abstract class PackageManager {
      * on the system for other users, also install it for the calling user.
      * @hide
      */
+    @SystemApi
     public abstract int installExistingPackage(String packageName, @InstallReason int installReason)
             throws NameNotFoundException;
 
