@@ -3471,27 +3471,31 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (!mBootAnimationStopped) {
-                // Do this one time.
                 Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
-                try {
-                    IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
-                    if (surfaceFlinger != null) {
-                        Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
-                        Parcel data = Parcel.obtain();
-                        data.writeInterfaceToken("android.ui.ISurfaceComposer");
-                        surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
-                                data, null, 0);
-                        data.recycle();
-                    }
-                } catch (RemoteException ex) {
-                    Slog.e(TAG_WM, "Boot completed: SurfaceFlinger is dead!");
-                }
+                // stop boot animation
+                // formerly we would just kill the process, but we now ask it to exit so it
+                // can choose where to stop the animation.
+                SystemProperties.set("service.bootanim.exit", "1");
                 mBootAnimationStopped = true;
             }
 
             if (!mForceDisplayEnabled && !checkBootAnimationCompleteLocked()) {
                 if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: Waiting for anim complete");
                 return;
+            }
+
+            try {
+                IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+                if (surfaceFlinger != null) {
+                    Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
+                    Parcel data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
+                            data, null, 0);
+                    data.recycle();
+                }
+            } catch (RemoteException ex) {
+                Slog.e(TAG_WM, "Boot completed: SurfaceFlinger is dead!");
             }
 
             EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
