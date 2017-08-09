@@ -16,6 +16,7 @@
 
 package android.text.format;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -183,8 +184,17 @@ public class DateFormat {
             return value.equals("24");
         }
 
-        final Locale locale = context.getResources().getConfiguration().locale;
+        return is24HourLocale(context.getResources().getConfiguration().locale);
+    }
 
+    /**
+     * Returns true if the specified locale uses a 24-hour time format by default, ignoring user
+     * settings.
+     * @param locale the locale to check
+     * @return true if the locale uses a 24 hour time format by default, false otherwise
+     * @hide
+     */
+    public static boolean is24HourLocale(@NonNull Locale locale) {
         synchronized (sLocaleLock) {
             if (sIs24HourLocale != null && sIs24HourLocale.equals(locale)) {
                 return sIs24Hour;
