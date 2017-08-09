@@ -503,6 +503,14 @@ public class TextUtils {
     }
 
     /**
+     * @return interned string if it's null.
+     * @hide
+     */
+    public static String safeIntern(String s) {
+        return (s != null) ? s.intern() : null;
+    }
+
+    /**
      * Returns the length that the specified CharSequence would have if
      * spaces and ASCII control characters were trimmed from the start and end,
      * as by {@link String#trim}.
