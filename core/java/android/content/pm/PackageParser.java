@@ -429,12 +429,9 @@ public class PackageParser {
         public final boolean extractNativeLibs;
         public final boolean isolatedSplits;
 
-        public final String classLoaderName;
-        public final String[] splitClassLoaderNames;
-
         public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
                 boolean[] isFeatureSplits, String[] usesSplitNames, String[] configForSplit,
-                String[] splitCodePaths, int[] splitRevisionCodes, String[] splitClassLoaderNames) {
+                String[] splitCodePaths, int[] splitRevisionCodes) {
             this.packageName = baseApk.packageName;
             this.versionCode = baseApk.versionCode;
             this.installLocation = baseApk.installLocation;
@@ -454,9 +451,6 @@ public class PackageParser {
             this.use32bitAbi = baseApk.use32bitAbi;
             this.extractNativeLibs = baseApk.extractNativeLibs;
             this.isolatedSplits = baseApk.isolatedSplits;
-
-            this.classLoaderName = baseApk.classLoaderName;
-            this.splitClassLoaderNames = splitClassLoaderNames;
         }
 
         public List<String> getAllCodePaths() {
@@ -491,14 +485,13 @@ public class PackageParser {
         public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
         public final boolean isolatedSplits;
-        public final String classLoaderName;
 
         public ApkLite(String codePath, String packageName, String splitName, boolean isFeatureSplit,
                 String configForSplit, String usesSplitName, int versionCode, int revisionCode,
                 int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
                 Certificate[][] certificates, boolean coreApp, boolean debuggable,
                 boolean multiArch, boolean use32bitAbi, boolean extractNativeLibs,
-                boolean isolatedSplits, String classLoaderName) {
+                boolean isolatedSplits) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -517,7 +510,6 @@ public class PackageParser {
             this.use32bitAbi = use32bitAbi;
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
-            this.classLoaderName = classLoaderName;
         }
     }
 
@@ -886,7 +878,7 @@ public class PackageParser {
         final ApkLite baseApk = parseApkLite(packageFile, flags);
         final String packagePath = packageFile.getAbsolutePath();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        return new PackageLite(packagePath, baseApk, null, null, null, null, null, null, null);
+        return new PackageLite(packagePath, baseApk, null, null, null, null, null, null);
     }
 
     static PackageLite parseClusterPackageLite(File packageDir, int flags)
@@ -957,7 +949,6 @@ public class PackageParser {
             configForSplits = new String[size];
             splitCodePaths = new String[size];
             splitRevisionCodes = new int[size];
-            splitClassLoaderNames = new String[size];
 
             splitNames = apks.keySet().toArray(splitNames);
             Arrays.sort(splitNames, sSplitNameComparator);
@@ -969,13 +960,12 @@ public class PackageParser {
                 configForSplits[i] = apk.configForSplit;
                 splitCodePaths[i] = apk.codePath;
                 splitRevisionCodes[i] = apk.revisionCode;
-                splitClassLoaderNames[i] = apk.classLoaderName;
             }
         }
 
         final String codePath = packageDir.getAbsolutePath();
         return new PackageLite(codePath, baseApk, splitNames, isFeatureSplits, usesSplitNames,
-                configForSplits, splitCodePaths, splitRevisionCodes, splitClassLoaderNames);
+                configForSplits, splitCodePaths, splitRevisionCodes);
     }
 
     /**
@@ -1240,8 +1230,7 @@ public class PackageParser {
                 pkg.splitPrivateFlags = new int[num];
                 pkg.applicationInfo.splitNames = pkg.splitNames;
                 pkg.applicationInfo.splitDependencies = splitDependencies;
-                pkg.applicationInfo.classLoaderName = lite.classLoaderName;
-                pkg.applicationInfo.splitClassLoaderNames = lite.splitClassLoaderNames;
+                pkg.applicationInfo.splitClassLoaderNames = new String[num];
 
                 for (int i = 0; i < num; i++) {
                     final AssetManager splitAssets = assetLoader.getSplitAssetManager(i);
@@ -1855,7 +1844,6 @@ public class PackageParser {
         boolean isFeatureSplit = false;
         String configForSplit = null;
         String usesSplitName = null;
-        String classLoaderName = null;
 
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             final String attr = attrs.getAttributeName(i);
@@ -1912,14 +1900,6 @@ public class PackageParser {
                     if ("extractNativeLibs".equals(attr)) {
                         extractNativeLibs = attrs.getAttributeBooleanValue(i, true);
                     }
-                    if ("classLoader".equals(attr)) {
-                        classLoaderName = attrs.getAttributeValue(i);
-                        if (!ClassLoaderFactory.isValidClassLoaderName(classLoaderName)) {
-                            throw new PackageParserException(
-                                    PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                                    "Invalid class loader name: " + classLoaderName);
-                        }
-                    }
                 }
             } else if (TAG_USES_SPLIT.equals(parser.getName())) {
                 if (usesSplitName != null) {
@@ -1939,7 +1919,7 @@ public class PackageParser {
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
                 configForSplit, usesSplitName, versionCode, revisionCode, installLocation,
                 verifiers, signatures, certificates, coreApp, debuggable, multiArch, use32bitAbi,
-                extractNativeLibs, isolatedSplits, classLoaderName);
+                extractNativeLibs, isolatedSplits);
     }
 
     /**
@@ -3691,6 +3671,13 @@ public class PackageParser {
         ai.uiOptions = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestApplication_uiOptions, 0);
 
+        ai.classLoaderName = sa.getString(
+            com.android.internal.R.styleable.AndroidManifestApplication_classLoader);
+        if (ai.classLoaderName != null
+                && !ClassLoaderFactory.isValidClassLoaderName(ai.classLoaderName)) {
+            outError[0] = "Invalid class loader name: " + ai.classLoaderName;
+        }
+
         sa.recycle();
 
         if (outError[0] != null) {
@@ -3938,6 +3925,16 @@ public class PackageParser {
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hasCode, true)) {
             owner.splitFlags[splitIndex] |= ApplicationInfo.FLAG_HAS_CODE;
+        }
+
+        final String classLoaderName = sa.getString(
+                com.android.internal.R.styleable.AndroidManifestApplication_classLoader);
+        if (classLoaderName == null || ClassLoaderFactory.isValidClassLoaderName(classLoaderName)) {
+            owner.applicationInfo.splitClassLoaderNames[splitIndex] = classLoaderName;
+        } else {
+            outError[0] = "Invalid class loader name: " + classLoaderName;
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            return false;
         }
 
         final int innerDepth = parser.getDepth();
