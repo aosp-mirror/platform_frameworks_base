@@ -754,7 +754,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If the task has temp inset bounds set, we have to make sure all its windows uses
         // the temp inset frame. Otherwise different display frames get applied to the main
         // window and the child window, making them misaligned.
-        if (inFullscreenContainer) {
+        if (inFullscreenContainer || isLetterboxedAppWindow()) {
             mInsetFrame.setEmpty();
         } else if (task != null && isInMultiWindowMode()) {
             task.getTempInsetBounds(mInsetFrame);
