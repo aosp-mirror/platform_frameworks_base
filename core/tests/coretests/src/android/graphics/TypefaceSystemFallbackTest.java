@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -128,7 +129,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_NonExistentFontShouldBeIgnored() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>a3em.ttf</font>"
                 + "    <font weight='400' style='normal'>NoSuchFont.ttf</font>"
@@ -154,7 +155,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_NamedFamily() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>a3em.ttf</font>"
                 + "  </family>"
@@ -200,7 +201,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_defaultFallback() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
                 + "  </family>"
@@ -239,7 +240,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_namedFallbackFamily() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
                 + "  </family>"
@@ -291,7 +292,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_namedFallbackFamily2() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
                 + "  </family>"
@@ -341,7 +342,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_ImplicitSansSerifFallback() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>a3em.ttf</font>"
                 + "  </family>"
@@ -380,7 +381,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_ElegantFallback() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
                 + "  </family>"
@@ -418,7 +419,7 @@ public class TypefaceSystemFallbackTest {
     @Test
     public void testBuildSystemFallback_ElegantFallback_customFallback() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
-                + "<familyset version='22'>"
+                + "<familyset>"
                 + "  <family name='sans-serif'>"
                 + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
                 + "  </family>"
@@ -465,5 +466,43 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
         assertEquals(GLYPH_3EM_WIDTH, paint.measureText("c"), 0.0f);
+    }
+
+    @Test
+    public void testBuildSystemFallback_multiLingualFamilies() {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family lang='de'>"
+                + "    <font weight='400' style='normal'>a3em.ttf</font>"
+                + "  </family>"
+                + "  <family lang='it fr'>"
+                + "    <font weight='400' style='normal'>b3em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(xml, fontMap, fallbackMap);
+
+        final Paint paint = new Paint();
+        paint.setTypeface(fontMap.get("sans-serif"));
+
+        paint.setTextLocale(Locale.GERMANY);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+
+        paint.setTextLocale(Locale.ITALY);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+
+        paint.setTextLocale(Locale.FRANCE);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
     }
 }

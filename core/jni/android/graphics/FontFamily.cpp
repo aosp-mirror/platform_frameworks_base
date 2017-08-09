@@ -51,10 +51,10 @@ struct NativeFamilyBuilder {
     std::vector<minikin::FontVariation> axes;
 };
 
-static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
+static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring langs, jint variant) {
     NativeFamilyBuilder* builder;
-    if (lang != nullptr) {
-        ScopedUtfChars str(env, lang);
+    if (langs != nullptr) {
+        ScopedUtfChars str(env, langs);
         builder = new NativeFamilyBuilder(
                 minikin::FontStyle::registerLanguageList(str.c_str()), variant);
     } else {
