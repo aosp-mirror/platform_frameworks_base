@@ -53,7 +53,6 @@ using ::aapt::io::RegularFile;
 using ::aapt::io::StringInputStream;
 using ::aapt::util::TrimWhitespace;
 using ::aapt::xml::Element;
-using ::aapt::xml::FindRootElement;
 using ::aapt::xml::NodeCast;
 using ::aapt::xml::XmlActionExecutor;
 using ::aapt::xml::XmlActionExecutorPolicy;
@@ -185,13 +184,13 @@ ConfigurationParser::ConfigurationParser(std::string contents)
 
 Maybe<PostProcessingConfiguration> ConfigurationParser::Parse() {
   StringInputStream in(contents_);
-  auto doc = xml::Inflate(&in, diag_, Source("config.xml"));
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, diag_, Source("config.xml"));
   if (!doc) {
     return {};
   }
 
   // Strip any namespaces from the XML as the XmlActionExecutor ignores anything with a namespace.
-  auto* root = FindRootElement(doc.get());
+  Element* root = doc->root.get();
   if (root == nullptr) {
     diag_->Error(DiagMessage() << "Could not find the root element in the XML document");
     return {};

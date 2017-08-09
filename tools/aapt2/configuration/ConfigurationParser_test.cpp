@@ -18,9 +18,6 @@
 
 #include <string>
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
 #include "androidfw/ResourceTypes.h"
 
 #include "test/Test.h"
@@ -29,7 +26,7 @@
 namespace aapt {
 namespace {
 
-using android::ResTable_config;
+using ::android::ResTable_config;
 using configuration::Abi;
 using configuration::AndroidSdk;
 using configuration::Artifact;
@@ -38,7 +35,7 @@ using configuration::DeviceFeature;
 using configuration::GlTexture;
 using configuration::Locale;
 using configuration::AndroidManifest;
-using testing::ElementsAre;
+using ::testing::ElementsAre;
 using xml::Element;
 using xml::NodeCast;
 
@@ -192,7 +189,7 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok = artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = artifact_handler_(&config, NodeCast<Element>(doc->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
   EXPECT_EQ(1ul, config.artifacts.size());

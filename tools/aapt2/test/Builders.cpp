@@ -201,7 +201,7 @@ std::unique_ptr<xml::XmlResource> BuildXmlDom(const StringPiece& str) {
   StringInputStream in(input);
   StdErrDiagnostics diag;
   std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, Source("test.xml"));
-  CHECK(doc != nullptr) << "failed to parse inline XML string";
+  CHECK(doc != nullptr && doc->root != nullptr) << "failed to parse inline XML string";
   return doc;
 }
 
