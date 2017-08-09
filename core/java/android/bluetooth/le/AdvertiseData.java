@@ -141,32 +141,18 @@ public final class AdvertiseData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeList(mServiceUuids);
+        dest.writeTypedArray(mServiceUuids.toArray(new ParcelUuid[mServiceUuids.size()]), flags);
 
         // mManufacturerSpecificData could not be null.
         dest.writeInt(mManufacturerSpecificData.size());
         for (int i = 0; i < mManufacturerSpecificData.size(); ++i) {
             dest.writeInt(mManufacturerSpecificData.keyAt(i));
-            byte[] data = mManufacturerSpecificData.valueAt(i);
-            if (data == null) {
-                dest.writeInt(0);
-            } else {
-                dest.writeInt(1);
-                dest.writeInt(data.length);
-                dest.writeByteArray(data);
-            }
+            dest.writeByteArray(mManufacturerSpecificData.valueAt(i));
         }
         dest.writeInt(mServiceData.size());
         for (ParcelUuid uuid : mServiceData.keySet()) {
-            dest.writeParcelable(uuid, flags);
-            byte[] data = mServiceData.get(uuid);
-            if (data == null) {
-                dest.writeInt(0);
-            } else {
-                dest.writeInt(1);
-                dest.writeInt(data.length);
-                dest.writeByteArray(data);
-            }
+            dest.writeTypedObject(uuid, flags);
+            dest.writeByteArray(mServiceData.get(uuid));
         }
         dest.writeByte((byte) (getIncludeTxPowerLevel() ? 1 : 0));
         dest.writeByte((byte) (getIncludeDeviceName() ? 1 : 0));
@@ -182,33 +168,22 @@ public final class AdvertiseData implements Parcelable {
             @Override
                 public AdvertiseData createFromParcel(Parcel in) {
                     Builder builder = new Builder();
-                    @SuppressWarnings("unchecked")
-                    List<ParcelUuid> uuids = in.readArrayList(ParcelUuid.class.getClassLoader());
-                    if (uuids != null) {
-                        for (ParcelUuid uuid : uuids) {
-                            builder.addServiceUuid(uuid);
-                        }
+                    ArrayList<ParcelUuid> uuids = in.createTypedArrayList(ParcelUuid.CREATOR);
+                    for (ParcelUuid uuid : uuids) {
+                        builder.addServiceUuid(uuid);
                     }
+
                     int manufacturerSize = in.readInt();
                     for (int i = 0; i < manufacturerSize; ++i) {
                         int manufacturerId = in.readInt();
-                        if (in.readInt() == 1) {
-                            int manufacturerDataLength = in.readInt();
-                            byte[] manufacturerData = new byte[manufacturerDataLength];
-                            in.readByteArray(manufacturerData);
-                            builder.addManufacturerData(manufacturerId, manufacturerData);
-                        }
+                        byte[] manufacturerData = in.createByteArray();
+                        builder.addManufacturerData(manufacturerId, manufacturerData);
                     }
                     int serviceDataSize = in.readInt();
                     for (int i = 0; i < serviceDataSize; ++i) {
-                        ParcelUuid serviceDataUuid = in.readParcelable(
-                                ParcelUuid.class.getClassLoader());
-                        if (in.readInt() == 1) {
-                            int serviceDataLength = in.readInt();
-                            byte[] serviceData = new byte[serviceDataLength];
-                            in.readByteArray(serviceData);
-                            builder.addServiceData(serviceDataUuid, serviceData);
-                        }
+                        ParcelUuid serviceDataUuid = in.readTypedObject(ParcelUuid.CREATOR);
+                        byte[] serviceData = in.createByteArray();
+                        builder.addServiceData(serviceDataUuid, serviceData);
                     }
                     builder.setIncludeTxPowerLevel(in.readByte() == 1);
                     builder.setIncludeDeviceName(in.readByte() == 1);
