@@ -356,7 +356,8 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
+    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
+    <skip />
     <string name="battery_info_status_full" msgid="2824614753861462808">"ਪੂਰੀ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕੀਤੀ ਗਈ"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
