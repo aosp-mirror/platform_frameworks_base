@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 
@@ -35,6 +36,8 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
     public final InstantAppResolveInfo resolveInfo;
     /** The resolved package. Copied from {@link #resolveInfo}. */
     public final String packageName;
+    /** The activity to launch if there's an installation failure. */
+    public final ComponentName installFailureActivity;
     /** The resolve split. Copied from the matched filter in {@link #resolveInfo}. */
     public final String splitName;
     /** Whether or not instant resolution needs the second phase */
@@ -61,15 +64,18 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
         this.needsPhaseTwo = needsPhase2;
         this.versionCode = resolveInfo.getVersionCode();
         this.failureIntent = failureIntent;
+        this.installFailureActivity = null;
     }
 
     /** Create a response for installing a split on demand. */
     public AuxiliaryResolveInfo(@NonNull String packageName,
             @Nullable String splitName,
+            @Nullable ComponentName failureActivity,
             int versionCode,
             @Nullable Intent failureIntent) {
         super();
         this.packageName = packageName;
+        this.installFailureActivity = failureActivity;
         this.splitName = splitName;
         this.versionCode = versionCode;
         this.resolveInfo = null;

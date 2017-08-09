@@ -1535,6 +1535,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_INSTALL_PACKAGE = "android.intent.action.INSTALL_PACKAGE";
 
     /**
+     * Activity Action: Activity to handle split installation failures.
+     * <p>Splits may be installed dynamically. This happens when an Activity is launched,
+     * but the split that contains the application isn't installed. When a split is
+     * installed in this manner, the containing package usually doesn't know this is
+     * happening. However, if an error occurs during installation, the containing
+     * package can define a single activity handling this action to deal with such
+     * failures.
+     * <p>The activity handling this action must be in the base package.
+     * <p>
+     * Input: {@link #EXTRA_INTENT} the original intent that started split installation.
+     * {@link #EXTRA_SPLIT_NAME} the name of the split that failed to be installed.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_INSTALL_FAILURE = "android.intent.action.INSTALL_FAILURE";
+
+    /**
      * @hide
      * @deprecated Do not use. This will go away.
      *     Replace with {@link #ACTION_INSTALL_INSTANT_APP_PACKAGE}.
@@ -1823,9 +1839,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Type: String
      * </p>
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_SPLIT_NAME = "android.intent.extra.SPLIT_NAME";
 
     /**
