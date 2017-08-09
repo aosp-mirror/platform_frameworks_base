@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
@@ -29,7 +30,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -38,6 +38,7 @@ import java.util.Map;
  */
 public class NotificationGroupManager implements OnHeadsUpChangedListener {
 
+    private static final String TAG = "NotificationGroupManager";
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private OnGroupChangeListener mListener;
     private int mBarState = -1;
@@ -96,7 +97,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
             return;
         }
         if (isGroupChild(sbn)) {
-            group.children.remove(removed);
+            group.children.remove(removed.key);
         } else {
             group.summary = null;
         }
@@ -109,6 +110,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
     }
 
     public void onEntryAdded(final NotificationData.Entry added) {
+        if (added.row.isRemoved()) {
+            added.setDebugThrowable(new Throwable());
+        }
         final StatusBarNotification sbn = added.notification;
         boolean isGroupChild = isGroupChild(sbn);
         String groupKey = getGroupKey(sbn);
@@ -118,15 +122,25 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
             mGroupMap.put(groupKey, group);
         }
         if (isGroupChild) {
-            group.children.add(added);
+            NotificationData.Entry existing = group.children.get(added.key);
+            if (existing != null && existing != added) {
+                Throwable existingThrowable = existing.getDebugThrowable();
+                Log.wtf(TAG, "Inconsistent entries found with the same key " + added.key
+                        + "existing removed: " + existing.row.isRemoved()
+                        + (existingThrowable != null
+                                ? Log.getStackTraceString(existingThrowable) + "\n": "")
+                        + " added removed" + added.row.isRemoved()
+                        , new Throwable());
+            }
+            group.children.put(added.key, added);
             updateSuppression(group);
         } else {
             group.summary = added;
             group.expanded = added.row.areChildrenExpanded();
             updateSuppression(group);
             if (!group.children.isEmpty()) {
-                HashSet<NotificationData.Entry> childrenCopy =
-                        (HashSet<NotificationData.Entry>) group.children.clone();
+                ArrayList<NotificationData.Entry> childrenCopy
+                        = new ArrayList<>(group.children.values());
                 for (NotificationData.Entry child : childrenCopy) {
                     onEntryBecomingChild(child);
                 }
@@ -410,7 +424,8 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
         // The parent of a suppressed group got huned, lets hun the child!
         NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
         if (notificationGroup != null) {
-            Iterator<NotificationData.Entry> iterator = notificationGroup.children.iterator();
+            Iterator<NotificationData.Entry> iterator
+                    = notificationGroup.children.values().iterator();
             NotificationData.Entry child = iterator.hasNext() ? iterator.next() : null;
             if (child == null) {
                 child = getIsolatedChild(sbn.getGroupKey());
@@ -463,7 +478,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
     }
 
     public static class NotificationGroup {
-        public final HashSet<NotificationData.Entry> children = new HashSet<>();
+        public final HashMap<String, NotificationData.Entry> children = new HashMap<>();
         public NotificationData.Entry summary;
         public boolean expanded;
         /**
@@ -474,10 +489,16 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
         @Override
         public String toString() {
             String result = "    summary:\n      "
-                    + (summary != null ? summary.notification : "null");
+                    + (summary != null ? summary.notification : "null")
+                    + (summary != null && summary.getDebugThrowable() != null
+                            ? Log.getStackTraceString(summary.getDebugThrowable())
+                            : "");
             result += "\n    children size: " + children.size();
-            for (NotificationData.Entry child : children) {
-                result += "\n      " + child.notification;
+            for (NotificationData.Entry child : children.values()) {
+                result += "\n      " + child.notification
+                + (child.getDebugThrowable() != null
+                        ? Log.getStackTraceString(child.getDebugThrowable())
+                        : "");
             }
             return result;
         }
