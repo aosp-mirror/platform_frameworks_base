@@ -3382,6 +3382,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return mStackSupervisor.moveHomeStackTaskToTop(reason);
         }
 
+        if (stack.isAssistantStack() && top != null
+                && top.getTask().getTaskToReturnTo() == HOME_ACTIVITY_TYPE) {
+            // It is possible for the home stack to not be directly underneath the assistant stack.
+            // For example, the assistant may start an activity in the fullscreen stack. Upon
+            // returning to the assistant stack, we must ensure that the home stack is underneath
+            // when appropriate.
+            mStackSupervisor.moveHomeStackTaskToTop("adjustAssistantReturnToHome");
+        }
+
         stack.moveToFront(myReason);
         return true;
     }
