@@ -89,6 +89,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     @NonNull
     private final UserManager mUserManager;
     private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private int mSpellCheckerMapUpdateCount = 0;
 
     public static final class Lifecycle extends SystemService {
         private TextServicesManagerService mService;
@@ -242,11 +244,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private static void buildSpellCheckerMapLocked(Context context,
+    private void buildSpellCheckerMapLocked(Context context,
             ArrayList<SpellCheckerInfo> list, HashMap<String, SpellCheckerInfo> map,
             @UserIdInt int userId) {
         list.clear();
         map.clear();
+        mSpellCheckerMapUpdateCount++;
         final PackageManager pm = context.getPackageManager();
         // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
         // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
@@ -690,6 +693,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         synchronized (mLock) {
             pw.println("Current Text Services Manager state:");
+            pw.println("  Spell Checkers: mSpellCheckerMapUpdateCount="
+                    + mSpellCheckerMapUpdateCount);
             pw.println("  Spell Checkers:");
             int spellCheckerIndex = 0;
             for (final SpellCheckerInfo info : mSpellCheckerMap.values()) {
