@@ -659,7 +659,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     boolean mustNotUnlockCurrentUser() {
-        return (UserManager.isSplitSystemUser() || UserManager.isDeviceInDemoMode(mContext))
+        return UserManager.isSplitSystemUser()
                 && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM;
     }
 
