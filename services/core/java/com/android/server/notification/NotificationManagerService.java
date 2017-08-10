@@ -794,6 +794,15 @@ public class NotificationManagerService extends SystemService {
         updateLightsLocked();
     }
 
+    protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                mZenModeHelper.updateDefaultZenRules();
+            }
+        }
+    };
+
     private final BroadcastReceiver mRestoreReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1055,7 +1064,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private SettingsObserver mSettingsObserver;
-    private ZenModeHelper mZenModeHelper;
+    protected ZenModeHelper mZenModeHelper;
 
     static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
         int[] ar = r.getIntArray(resid);
@@ -1362,6 +1371,9 @@ public class NotificationManagerService extends SystemService {
 
         IntentFilter settingsRestoredFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
         getContext().registerReceiver(mRestoreReceiver, settingsRestoredFilter);
+
+        IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+        getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
