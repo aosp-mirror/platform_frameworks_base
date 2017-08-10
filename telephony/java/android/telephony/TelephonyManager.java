@@ -3241,7 +3241,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIsimImpi();
+            //get the Isim Impi based on subId
+            return info.getIsimImpi(getSubId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3260,7 +3261,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIsimDomain();
+            //get the Isim Domain based on subId
+            return info.getIsimDomain(getSubId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3280,7 +3282,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIsimImpu();
+            //get the Isim Impu based on subId
+            return info.getIsimImpu(getSubId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4393,7 +4396,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIsimIst();
+            //get the Isim Ist based on subId
+            return info.getIsimIst(getSubId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4413,7 +4417,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIsimPcscf();
+            //get the Isim Pcscf based on subId
+            return info.getIsimPcscf(getSubId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
