@@ -1904,7 +1904,7 @@
     <string name="pip_phone_dismiss_hint">Drag down to dismiss</string>
 
     <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
-    <string name="pip_menu_title">Picture in picture menu</string>
+    <string name="pip_menu_title">Menu</string>
 
     <!-- PiP BTW notification title. [CHAR LIMIT=50] -->
     <string name="pip_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is in picture-in-picture</string>
