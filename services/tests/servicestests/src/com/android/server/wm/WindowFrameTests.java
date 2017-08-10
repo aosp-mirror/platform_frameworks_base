@@ -363,6 +363,50 @@ public class WindowFrameTests extends WindowTestsBase {
                 Math.min(pf.height(), displayInfo.logicalHeight));
     }
 
+    @Test
+    public void testLayoutLetterboxedWindow() {
+        // First verify task behavior in multi-window mode.
+        final DisplayInfo displayInfo = sWm.getDefaultDisplayContentLocked().getDisplayInfo();
+        final int logicalWidth = displayInfo.logicalWidth;
+        final int logicalHeight = displayInfo.logicalHeight;
+
+        final int taskLeft = logicalWidth / 5;
+        final int taskTop = logicalHeight / 5;
+        final int taskRight = logicalWidth / 4 * 3;
+        final int taskBottom = logicalHeight / 4 * 3;
+        final Rect taskBounds = new Rect(taskLeft, taskTop, taskRight, taskBottom);
+        TaskWithBounds task = new TaskWithBounds(taskBounds);
+        task.mInsetBounds.set(taskLeft, taskTop, taskRight, taskBottom);
+        task.mFullscreenForTest = false;
+        WindowState w = createWindow(task, FILL_PARENT, FILL_PARENT);
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+
+        final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
+        w.computeFrameLw(pf /* parentFrame */, pf /* displayFrame */, pf /* overscanFrame */,
+                pf /* contentFrame */, pf /* visibleFrame */, pf /* decorFrame */,
+                pf /* stableFrame */, null /* outsetFrame */);
+        // For non fullscreen tasks the containing frame is based off the
+        // task bounds not the parent frame.
+        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.getContentFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.mContentInsets, 0, 0, 0, 0);
+
+        // Now simulate switch to fullscreen for letterboxed app.
+        final int xInset = logicalWidth / 10;
+        final int yInset = logicalWidth / 10;
+        final Rect cf = new Rect(xInset, yInset, logicalWidth - xInset, logicalHeight - yInset);
+        w.mAppToken.onOverrideConfigurationChanged(w.mAppToken.getOverrideConfiguration(), cf);
+        pf.set(0, 0, logicalWidth, logicalHeight);
+        task.mFullscreenForTest = true;
+
+        w.computeFrameLw(pf /* parentFrame */, pf /* displayFrame */, pf /* overscanFrame */,
+                cf /* contentFrame */, cf /* visibleFrame */, pf /* decorFrame */,
+                cf /* stableFrame */, null /* outsetFrame */);
+        assertEquals(cf, w.mFrame);
+        assertEquals(cf, w.getContentFrameLw());
+        assertRect(w.mContentInsets, 0, 0, 0, 0);
+    }
+
     private WindowStateWithTask createWindow(Task task, int width, int height) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.width = width;
