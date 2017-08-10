@@ -505,7 +505,7 @@ const char* gBlendOps[18] = {
 // Constructors/destructors
 ///////////////////////////////////////////////////////////////////////////////
 
-ProgramCache::ProgramCache(Extensions& extensions)
+ProgramCache::ProgramCache(const Extensions& extensions)
         : mHasES3(extensions.getMajorGlVersion() >= 3)
         , mHasLinearBlending(extensions.hasLinearBlending()) {
 }

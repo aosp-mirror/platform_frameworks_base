@@ -16,7 +16,10 @@
 #ifndef DEVICEINFO_H
 #define DEVICEINFO_H
 
+#include <ui/DisplayInfo.h>
+
 #include "utils/Macros.h"
+#include "Extensions.h"
 
 namespace android {
 namespace uirenderer {
@@ -35,14 +38,24 @@ public:
     static void initialize(int maxTextureSize);
 
     int maxTextureSize() const { return mMaxTextureSize; }
+    const DisplayInfo& displayInfo() const { return mDisplayInfo; }
+    const Extensions& extensions() const { return mExtensions; }
+
+    static uint32_t multiplyByResolution(uint32_t in) {
+        auto di = DeviceInfo::get()->displayInfo();
+        return di.w * di.h * in;
+    }
 
 private:
     DeviceInfo() {}
     ~DeviceInfo() {}
 
     void load();
+    void loadDisplayInfo();
 
     int mMaxTextureSize;
+    DisplayInfo mDisplayInfo;
+    Extensions mExtensions;
 };
 
 } /* namespace uirenderer */
