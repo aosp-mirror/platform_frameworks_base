@@ -1295,7 +1295,7 @@ class LinkCommand {
       }
 
       for (uint32_t i = 0; i < num_files; i++) {
-        pb::CompiledFile compiled_file;
+        pb::internal::CompiledFile compiled_file;
         if (!input_stream.ReadCompiledFile(&compiled_file)) {
           context_->GetDiagnostics()->Error(DiagMessage(src)
                                             << "failed to read compiled file header");

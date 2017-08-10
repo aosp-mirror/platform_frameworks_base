@@ -133,7 +133,7 @@ class MapFlattenVisitor : public RawValueVisitor {
   }
 
   void Visit(Array* array) override {
-    for (auto& item : array->items) {
+    for (auto& item : array->elements) {
       ResTable_map* out_entry = buffer_->NextBlock<ResTable_map>();
       FlattenValue(item.get(), out_entry);
       out_entry->value.size = util::HostToDevice16(sizeof(out_entry->value));

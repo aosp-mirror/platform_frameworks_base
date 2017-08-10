@@ -142,7 +142,8 @@ cc_library_host_static {
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",
         "xml/XmlUtil.cpp",
-        "Format.proto",
+        "Resources.proto",
+        "ResourcesInternal.proto",
     ],
     proto: {
         export_proto_headers: true,

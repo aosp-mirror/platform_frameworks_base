@@ -282,7 +282,7 @@ static bool WriteHeaderAndBufferToWriter(const StringPiece& output_path, const R
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
+    std::unique_ptr<pb::internal::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
     output_stream.WriteCompiledFile(compiled_file.get());
     output_stream.WriteData(&buffer);
 
@@ -319,7 +319,7 @@ static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path, const Res
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
+    std::unique_ptr<pb::internal::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
     output_stream.WriteCompiledFile(compiled_file.get());
     output_stream.WriteData(map.getDataPtr(), map.getDataLength());
 
@@ -346,7 +346,8 @@ static bool FlattenXmlToOutStream(IAaptContext* context, const StringPiece& outp
     return false;
   }
 
-  std::unique_ptr<pb::CompiledFile> pb_compiled_file = SerializeCompiledFileToPb(xmlres->file);
+  std::unique_ptr<pb::internal::CompiledFile> pb_compiled_file =
+      SerializeCompiledFileToPb(xmlres->file);
   out->WriteCompiledFile(pb_compiled_file.get());
   out->WriteData(&buffer);
 

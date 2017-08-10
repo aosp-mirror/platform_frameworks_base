@@ -540,11 +540,11 @@ TEST_F(ResourceParserTest, ParseArray) {
 
   Array* array = test::GetValue<Array>(&table_, "array/foo");
   ASSERT_THAT(array, NotNull());
-  ASSERT_THAT(array->items, SizeIs(3));
+  ASSERT_THAT(array->elements, SizeIs(3));
 
-  EXPECT_THAT(ValueCast<Reference>(array->items[0].get()), NotNull());
-  EXPECT_THAT(ValueCast<String>(array->items[1].get()), NotNull());
-  EXPECT_THAT(ValueCast<BinaryPrimitive>(array->items[2].get()), NotNull());
+  EXPECT_THAT(ValueCast<Reference>(array->elements[0].get()), NotNull());
+  EXPECT_THAT(ValueCast<String>(array->elements[1].get()), NotNull());
+  EXPECT_THAT(ValueCast<BinaryPrimitive>(array->elements[2].get()), NotNull());
 }
 
 TEST_F(ResourceParserTest, ParseStringArray) {
@@ -565,9 +565,9 @@ TEST_F(ResourceParserTest, ParseArrayWithFormat) {
 
   Array* array = test::GetValue<Array>(&table_, "array/foo");
   ASSERT_THAT(array, NotNull());
-  ASSERT_THAT(array->items, SizeIs(1));
+  ASSERT_THAT(array->elements, SizeIs(1));
 
-  String* str = ValueCast<String>(array->items[0].get());
+  String* str = ValueCast<String>(array->elements[0].get());
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("100"));
 }

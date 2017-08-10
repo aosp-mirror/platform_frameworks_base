@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
+// Keep proto2 syntax because we require the distinction between fields that
+// are set and unset.
 syntax = "proto2";
 
+option java_package = "com.android.aapt";
 option optimize_for = LITE_RUNTIME;
 
 package aapt.pb;
 
 // A configuration description that wraps the binary form of the C++ class
 // aapt::ConfigDescription, with an added product definition.
+// TODO(adamlesinski): Flesh this out to be represented in proto.
 message ConfigDescription {
   optional bytes data = 1;
   optional string product = 2;
@@ -32,37 +36,17 @@ message StringPool {
   optional bytes data = 1;
 }
 
+// The position of a declared entity within a file.
+message SourcePosition {
+  optional uint32 line_number = 1;
+  optional uint32 column_number = 2;
+}
+
 // Developer friendly source file information for an entity in the resource table.
 message Source {
   // The index of the string path within the source string pool of a ResourceTable.
   optional uint32 path_idx = 1;
-
-  optional uint32 line_no = 2;
-  optional uint32 col_no = 3;
-}
-
-// The top level message representing an external resource file (layout XML, PNG, etc).
-message CompiledFile {
-  message Symbol {
-    // The name of the symbol (in the form package:type/name).
-    optional string resource_name = 1;
-
-    // Line number in the file at which this symbol is defined. For debug use.
-    optional uint32 line_no = 2;
-  }
-
-  // The name of the resource (in the form package:type/name).
-  optional string resource_name = 1;
-
-  // The configuration for which the resource is defined.
-  optional ConfigDescription config = 2;
-
-  // The filesystem path to where the source file originated.
-  // Mainly used to display helpful error messages.
-  optional string source_path = 3;
-
-  // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
-  repeated Symbol exported_symbols = 4;
+  optional SourcePosition position = 2;
 }
 
 // Top level message representing a resource table.
@@ -72,7 +56,7 @@ message ResourceTable {
   optional StringPool source_pool = 1;
 
   // Resource definitions corresponding to an Android package.
-  repeated Package packages = 2;
+  repeated Package package = 2;
 }
 
 // Defines resources for an Android package.
@@ -89,7 +73,7 @@ message Package {
   optional string package_name = 2;
 
   // The series of types defined by the package.
-  repeated Type types = 3;
+  repeated Type type = 3;
 }
 
 // A set of resources grouped under a common type. Such types include string, layout, xml, dimen,
@@ -103,7 +87,7 @@ message Type {
   optional string name = 2;
 
   // The entries defined for this type.
-  repeated Entry entries = 3;
+  repeated Entry entry = 3;
 }
 
 // The status of a symbol/entry. This contains information like visibility (public/private),
@@ -115,17 +99,17 @@ message SymbolStatus {
     // The distinction is important when two separate R.java files are generated: a public and
     // private one. An unknown visibility, in this case, would cause the resource to be omitted
     // from either R.java.
-    Unknown = 0;
+    UNKNOWN = 0;
 
     // A resource was explicitly marked as private. This means the resource can not be accessed
     // outside of its package unless the @*package:type/entry notation is used (the asterisk being
     // the private accessor). If two R.java files are generated (private + public), the resource
     // will only be emitted to the private R.java file.
-    Private = 1;
+    PRIVATE = 1;
 
     // A resource was explicitly marked as public. This means the resource can be accessed
     // from any package, and is emitted into all R.java files, public and private.
-    Public = 2;
+    PUBLIC = 2;
   }
 
   optional Visibility visibility = 1;
@@ -159,7 +143,7 @@ message Entry {
 
   // The set of values defined for this entry, each corresponding to a different
   // configuration/variant.
-  repeated ConfigValue config_values = 4;
+  repeated ConfigValue config_value = 4;
 }
 
 // A Configuration/Value pair.
@@ -214,10 +198,10 @@ message CompoundValue {
 message Reference {
   enum Type {
     // A plain reference (@package:type/entry).
-    Ref = 0;
+    REFERENCE = 0;
 
     // A reference to a theme attribute (?package:type/entry).
-    Attr = 1;
+    ATTRIBUTE = 1;
   }
 
   optional Type type = 1;
@@ -301,21 +285,38 @@ message Attribute {
     optional uint32 value = 4;
   }
 
-  // A bitmask of types that this XML attribute accepts. Corresponds to the flags in the C struct
-  // android::ResTable_map.
+  // Bitmask of formats allowed for an attribute.
+  enum FormatFlags {
+    ANY = 0x0000ffff;    // Allows any type except ENUM and FLAGS.
+    REFERENCE = 0x01;    // Allows Reference values.
+    STRING = 0x02;       // Allows String/StyledString values.
+    INTEGER = 0x04;      // Allows any integer BinaryPrimitive values.
+    BOOLEAN = 0x08;      // Allows any boolean BinaryPrimitive values.
+    COLOR = 0x010;       // Allows any color BinaryPrimitive values.
+    FLOAT = 0x020;       // Allows any float BinaryPrimitive values.
+    DIMENSION = 0x040;   // Allows any dimension BinaryPrimitive values.
+    FRACTION = 0x080;    // Allows any fraction BinaryPrimitive values.
+    ENUM = 0x00010000;   // Allows enums that are defined in the Attribute's symbols.
+                         // ENUM and FLAGS cannot BOTH be set.
+    FLAGS = 0x00020000;  // Allows flags that are defined in the Attribute's symbols.
+                         // ENUM and FLAGS cannot BOTH be set.
+  }
+
+  // A bitmask of types that this XML attribute accepts. Corresponds to the flags in the
+  // enum FormatFlags.
   optional uint32 format_flags = 1;
 
   // The smallest integer allowed for this XML attribute. Only makes sense if the format includes
-  // TYPE_INTEGER.
+  // FormatFlags::INTEGER.
   optional int32 min_int = 2;
 
   // The largest integer allowed for this XML attribute. Only makes sense if the format includes
-  // TYPE_INTEGER.
+  // FormatFlags::INTEGER.
   optional int32 max_int = 3;
 
   // The set of enums/flags defined in this attribute. Only makes sense if the format includes
-  // either TYPE_ENUM or TYPE_FLAGS. Having both is an error.
-  repeated Symbol symbols = 4;
+  // either FormatFlags::ENUM or FormatFlags::FLAGS. Having both is an error.
+  repeated Symbol symbol = 4;
 }
 
 // A value that represents a style.
@@ -342,7 +343,7 @@ message Style {
   optional Source parent_source = 2;
 
   // The set of XML attribute/value pairs for this style.
-  repeated Entry entries = 3;
+  repeated Entry entry = 3;
 }
 
 // A value that represents a <declare-styleable> XML resource. These are not real resources and
@@ -361,13 +362,13 @@ message Styleable {
   }
 
   // The set of attribute declarations.
-  repeated Entry entries = 1;
+  repeated Entry entry = 1;
 }
 
 // A value that represents an array of resource values.
 message Array {
   // A single element of the array.
-  message Entry {
+  message Element {
     // Where the element was defined.
     optional Source source = 1;
 
@@ -379,19 +380,19 @@ message Array {
   }
 
   // The list of array elements.
-  repeated Entry entries = 1;
+  repeated Element element = 1;
 }
 
 // A value that represents a string and its many variations based on plurality.
 message Plural {
   // The arity of the plural.
   enum Arity {
-    Zero = 0;
-    One = 1;
-    Two = 2;
-    Few = 3;
-    Many = 4;
-    Other = 5;
+    ZERO = 0;
+    ONE = 1;
+    TWO = 2;
+    FEW = 3;
+    MANY = 4;
+    OTHER = 5;
   }
 
   // The plural value for a given arity.
@@ -410,5 +411,61 @@ message Plural {
   }
 
   // The set of arity/plural mappings.
-  repeated Entry entries = 1;
+  repeated Entry entry = 1;
+}
+
+// Defines an abstract XmlNode that must be either an XmlElement, or
+// a text node represented by a string.
+message XmlNode {
+  // If set, this node is an element/tag.
+  optional XmlElement element = 1;
+
+  // If set, this node is a chunk of text.
+  optional string text = 2;
+
+  // Source line and column info.
+  optional SourcePosition source = 3;
+}
+
+// An <element> in an XML document.
+message XmlElement {
+  // Namespaces defined on this element.
+  repeated XmlNamespace namespace_declaration = 1;
+
+  // The namespace URI of this element.
+  optional string namespace_uri = 2;
+
+  // The name of this element.
+  optional string name = 3;
+
+  // The attributes of this element.
+  repeated XmlAttribute attribute = 4;
+
+  // The children of this element.
+  repeated XmlNode child = 5;
+}
+
+// A namespace declaration on an XmlElement (xmlns:android="http://...").
+message XmlNamespace {
+  optional string prefix = 1;
+  optional string uri = 2;
+
+  // Source line and column info.
+  optional SourcePosition source = 3;
+}
+
+// An attribute defined on an XmlElement (android:text="...").
+message XmlAttribute {
+  optional string namespace_uri = 1;
+  optional string name = 2;
+  optional string value = 3;
+
+  // Source line and column info.
+  optional SourcePosition source = 4;
+
+  // The resource ID (0xPPTTEEEE) of the attribute.
+  optional uint32 resource_id = 5;
+
+  // The interpreted/compiled version of the `value` string.
+  optional Item compiled_item = 6;
 }

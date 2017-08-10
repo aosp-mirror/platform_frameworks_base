@@ -98,7 +98,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     pb_attr->set_max_int(attr->max_int);
 
     for (auto& symbol : attr->symbols) {
-      pb::Attribute_Symbol* pb_symbol = pb_attr->add_symbols();
+      pb::Attribute_Symbol* pb_symbol = pb_attr->add_symbol();
       SerializeItemCommonToPb(symbol.symbol, pb_symbol);
       SerializeReferenceToPb(symbol.symbol, pb_symbol->mutable_name());
       pb_symbol->set_value(symbol.value);
@@ -114,7 +114,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
 
     for (Style::Entry& entry : style->entries) {
-      pb::Style_Entry* pb_entry = pb_style->add_entries();
+      pb::Style_Entry* pb_entry = pb_style->add_entry();
       SerializeReferenceToPb(entry.key, pb_entry->mutable_key());
 
       pb::Item* pb_item = pb_entry->mutable_item();
@@ -127,7 +127,7 @@ class PbSerializerVisitor : public RawValueVisitor {
   void Visit(Styleable* styleable) override {
     pb::Styleable* pb_styleable = pb_compound_value()->mutable_styleable();
     for (Reference& entry : styleable->entries) {
-      pb::Styleable_Entry* pb_entry = pb_styleable->add_entries();
+      pb::Styleable_Entry* pb_entry = pb_styleable->add_entry();
       SerializeItemCommonToPb(entry, pb_entry);
       SerializeReferenceToPb(entry, pb_entry->mutable_attr());
     }
@@ -135,10 +135,10 @@ class PbSerializerVisitor : public RawValueVisitor {
 
   void Visit(Array* array) override {
     pb::Array* pb_array = pb_compound_value()->mutable_array();
-    for (auto& value : array->items) {
-      pb::Array_Entry* pb_entry = pb_array->add_entries();
-      SerializeItemCommonToPb(*value, pb_entry);
-      PbSerializerVisitor sub_visitor(source_pool_, pb_entry->mutable_item());
+    for (auto& value : array->elements) {
+      pb::Array_Element* pb_element = pb_array->add_element();
+      SerializeItemCommonToPb(*value, pb_element);
+      PbSerializerVisitor sub_visitor(source_pool_, pb_element->mutable_item());
       value->Accept(&sub_visitor);
     }
   }
@@ -152,7 +152,7 @@ class PbSerializerVisitor : public RawValueVisitor {
         continue;
       }
 
-      pb::Plural_Entry* pb_entry = pb_plural->add_entries();
+      pb::Plural_Entry* pb_entry = pb_plural->add_entry();
       pb_entry->set_arity(SerializePluralEnumToPb(i));
       pb::Item* pb_element = pb_entry->mutable_item();
       SerializeItemCommonToPb(*plural->values[i], pb_entry);
@@ -219,21 +219,21 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
   StringPool source_pool;
 
   for (auto& package : table->packages) {
-    pb::Package* pb_package = pb_table->add_packages();
+    pb::Package* pb_package = pb_table->add_package();
     if (package->id) {
       pb_package->set_package_id(package->id.value());
     }
     pb_package->set_package_name(package->name);
 
     for (auto& type : package->types) {
-      pb::Type* pb_type = pb_package->add_types();
+      pb::Type* pb_type = pb_package->add_type();
       if (type->id) {
         pb_type->set_id(type->id.value());
       }
       pb_type->set_name(ToString(type->type).to_string());
 
       for (auto& entry : type->entries) {
-        pb::Entry* pb_entry = pb_type->add_entries();
+        pb::Entry* pb_entry = pb_type->add_entry();
         if (entry->id) {
           pb_entry->set_id(entry->id.value());
         }
@@ -247,7 +247,7 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
         pb_status->set_allow_new(entry->symbol_status.allow_new);
 
         for (auto& config_value : entry->values) {
-          pb::ConfigValue* pb_config_value = pb_entry->add_config_values();
+          pb::ConfigValue* pb_config_value = pb_entry->add_config_value();
           SerializeConfig(config_value->config, pb_config_value->mutable_config());
           if (!config_value->product.empty()) {
             pb_config_value->mutable_config()->set_product(config_value->product);
@@ -275,23 +275,22 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
   return pb_table;
 }
 
-std::unique_ptr<pb::CompiledFile> SerializeCompiledFileToPb(
-    const ResourceFile& file) {
-  auto pb_file = util::make_unique<pb::CompiledFile>();
+std::unique_ptr<pb::internal::CompiledFile> SerializeCompiledFileToPb(const ResourceFile& file) {
+  auto pb_file = util::make_unique<pb::internal::CompiledFile>();
   pb_file->set_resource_name(file.name.ToString());
   pb_file->set_source_path(file.source.path);
   SerializeConfig(file.config, pb_file->mutable_config());
 
   for (const SourcedResourceName& exported : file.exported_symbols) {
-    pb::CompiledFile_Symbol* pb_symbol = pb_file->add_exported_symbols();
+    pb::internal::CompiledFile_Symbol* pb_symbol = pb_file->add_exported_symbol();
     pb_symbol->set_resource_name(exported.name.ToString());
-    pb_symbol->set_line_no(exported.line);
+    pb_symbol->mutable_source()->set_line_number(exported.line);
   }
   return pb_file;
 }
 
-CompiledFileOutputStream::CompiledFileOutputStream(ZeroCopyOutputStream* out)
-    : out_(out) {}
+CompiledFileOutputStream::CompiledFileOutputStream(ZeroCopyOutputStream* out) : out_(out) {
+}
 
 void CompiledFileOutputStream::EnsureAlignedWrite() {
   const int padding = out_.ByteCount() % 4;
@@ -306,8 +305,7 @@ void CompiledFileOutputStream::WriteLittleEndian32(uint32_t val) {
   out_.WriteLittleEndian32(val);
 }
 
-void CompiledFileOutputStream::WriteCompiledFile(
-    const pb::CompiledFile* compiled_file) {
+void CompiledFileOutputStream::WriteCompiledFile(const pb::internal::CompiledFile* compiled_file) {
   EnsureAlignedWrite();
   out_.WriteLittleEndian64(static_cast<uint64_t>(compiled_file->ByteSize()));
   compiled_file->SerializeWithCachedSizes(&out_);
@@ -327,7 +325,9 @@ void CompiledFileOutputStream::WriteData(const void* data, size_t len) {
   out_.WriteRaw(data, len);
 }
 
-bool CompiledFileOutputStream::HadError() { return out_.HadError(); }
+bool CompiledFileOutputStream::HadError() {
+  return out_.HadError();
+}
 
 CompiledFileInputStream::CompiledFileInputStream(const void* data, size_t size)
     : in_(static_cast<const uint8_t*>(data), size) {}
@@ -345,7 +345,7 @@ bool CompiledFileInputStream::ReadLittleEndian32(uint32_t* out_val) {
   return in_.ReadLittleEndian32(out_val);
 }
 
-bool CompiledFileInputStream::ReadCompiledFile(pb::CompiledFile* out_val) {
+bool CompiledFileInputStream::ReadCompiledFile(pb::internal::CompiledFile* out_val) {
   EnsureAlignedRead();
 
   google::protobuf::uint64 pb_size = 0u;
@@ -372,8 +372,7 @@ bool CompiledFileInputStream::ReadCompiledFile(pb::CompiledFile* out_val) {
   return true;
 }
 
-bool CompiledFileInputStream::ReadDataMetaData(uint64_t* out_offset,
-                                               uint64_t* out_len) {
+bool CompiledFileInputStream::ReadDataMetaData(uint64_t* out_offset, uint64_t* out_len) {
   EnsureAlignedRead();
 
   google::protobuf::uint64 pb_size = 0u;
