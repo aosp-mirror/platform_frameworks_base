@@ -4262,6 +4262,9 @@ message MetricsEvent {
     // OS: O MR
     DATA_PLAN_USAGE_SUMMARY = 1088;
 
+    // FIELD: The numeric preference value (of type int) when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE = 1089;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
