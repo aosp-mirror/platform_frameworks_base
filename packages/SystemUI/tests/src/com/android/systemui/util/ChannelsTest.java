@@ -56,7 +56,8 @@ public class ChannelsTest extends SysuiTestCase {
                 NotificationChannels.ALERTS,
                 NotificationChannels.SCREENSHOTS,
                 NotificationChannels.STORAGE,
-                NotificationChannels.GENERAL
+                NotificationChannels.GENERAL,
+                NotificationChannels.BATTERY
         ));
         NotificationChannels.createAll(mContext);
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
