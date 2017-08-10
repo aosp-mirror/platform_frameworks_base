@@ -23,7 +23,8 @@
 #include "ResourceTable.h"
 #include "Source.h"
 #include "StringPool.h"
-#include "Format.pb.h"
+#include "Resources.pb.h"
+#include "ResourcesInternal.pb.h"
 
 namespace aapt {
 

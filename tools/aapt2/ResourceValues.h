@@ -292,7 +292,7 @@ struct Style : public BaseValue<Style> {
 };
 
 struct Array : public BaseValue<Array> {
-  std::vector<std::unique_ptr<Item>> items;
+  std::vector<std::unique_ptr<Item>> elements;
 
   bool Equals(const Value* value) const override;
   Array* Clone(StringPool* new_pool) const override;

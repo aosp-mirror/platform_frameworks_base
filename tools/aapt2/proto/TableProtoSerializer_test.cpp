@@ -151,10 +151,10 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
   std::string output_str;
   {
-    std::unique_ptr<pb::CompiledFile> pb_file1 = SerializeCompiledFileToPb(f);
+    std::unique_ptr<pb::internal::CompiledFile> pb_file1 = SerializeCompiledFileToPb(f);
 
     f.name.entry = "__" + f.name.entry + "$0";
-    std::unique_ptr<pb::CompiledFile> pb_file2 = SerializeCompiledFileToPb(f);
+    std::unique_ptr<pb::internal::CompiledFile> pb_file2 = SerializeCompiledFileToPb(f);
 
     StringOutputStream out_stream(&output_str);
     CompiledFileOutputStream out_file_stream(&out_stream);
@@ -173,7 +173,7 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
   // Read the first compiled file.
 
-  pb::CompiledFile new_pb_file;
+  pb::internal::CompiledFile new_pb_file;
   ASSERT_TRUE(in_file_stream.ReadCompiledFile(&new_pb_file));
 
   std::unique_ptr<ResourceFile> file = DeserializeCompiledFileFromPb(
@@ -210,7 +210,7 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
 TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
   ResourceFile f;
-  std::unique_ptr<pb::CompiledFile> pb_file = SerializeCompiledFileToPb(f);
+  std::unique_ptr<pb::internal::CompiledFile> pb_file = SerializeCompiledFileToPb(f);
 
   const std::string expected_data = "1234";
 
@@ -232,7 +232,7 @@ TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
   EXPECT_TRUE(in_file_stream.ReadLittleEndian32(&num_files));
   EXPECT_EQ(1u, num_files);
 
-  pb::CompiledFile new_pb_file;
+  pb::internal::CompiledFile new_pb_file;
   EXPECT_FALSE(in_file_stream.ReadCompiledFile(&new_pb_file));
 
   uint64_t offset, len;
