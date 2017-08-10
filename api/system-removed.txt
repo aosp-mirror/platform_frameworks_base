@@ -15,6 +15,7 @@ package android.app {
 
   public class Notification implements android.os.Parcelable {
     method public deprecated java.lang.String getChannel();
+    method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
     method public deprecated long getTimeout();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
@@ -29,25 +30,8 @@ package android.app {
   }
 
   public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
-    ctor public deprecated PictureInPictureArgs();
-    ctor public deprecated PictureInPictureArgs(float, java.util.List<android.app.RemoteAction>);
     method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
     method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
-    method public void copyOnlySet(android.app.PictureInPictureArgs);
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method public android.util.Rational getAspectRatioRational();
-    method public android.graphics.Rect getSourceRectHint();
-    method public android.graphics.Rect getSourceRectHintInsets();
-    method public boolean hasSetActions();
-    method public boolean hasSetAspectRatio();
-    method public boolean hasSourceBoundsHint();
-    method public boolean hasSourceBoundsHintInsets();
-    method public deprecated void setActions(java.util.List<android.app.RemoteAction>);
-    method public deprecated void setAspectRatio(float);
-    method public deprecated void setSourceRectHint(android.graphics.Rect);
-    method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
-    method public void truncateActions(int);
     field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
   }
 
@@ -59,10 +43,6 @@ package android.app {
     method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
   }
 
-  public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
-    method public deprecated void showAsNotification(android.content.Context);
-  }
-
 }
 
 package android.app.admin {
@@ -70,6 +50,8 @@ package android.app.admin {
   public class DevicePolicyManager {
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
+    method public deprecated java.lang.String getDeviceInitializerApp();
+    method public deprecated android.content.ComponentName getDeviceInitializerComponent();
   }
 
 }
@@ -264,10 +246,22 @@ package android.net {
 
 }
 
+package android.net.wifi {
+
+  public class WifiManager {
+    method public deprecated boolean setWifiApEnabled(android.net.wifi.WifiConfiguration, boolean);
+  }
+
+}
+
 package android.os {
 
   public class BatteryManager {
     ctor public BatteryManager();
+  }
+
+  public class Build {
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
   }
 
   public final class PowerManager {
@@ -340,11 +334,8 @@ package android.provider {
     field public static final java.lang.String CREATED = "created";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String FAVICON = "favicon";
-    field public static final java.lang.String THUMBNAIL = "thumbnail";
     field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String TOUCH_ICON = "touch_icon";
     field public static final java.lang.String URL = "url";
-    field public static final java.lang.String USER_ENTERED = "user_entered";
     field public static final java.lang.String VISITS = "visits";
   }
 
@@ -431,6 +422,26 @@ package android.provider {
 
   public static final class Telephony.Sms.Intents {
     field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+  }
+
+}
+
+package android.service.notification {
+
+  public abstract class NotificationListenerService extends android.app.Service {
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(int);
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(java.lang.String[], int);
+    method public void registerAsSystemService(android.content.Context, android.content.ComponentName, int) throws android.os.RemoteException;
+    method public final void setOnNotificationPostedTrim(int);
+    method public final void snoozeNotification(java.lang.String, java.lang.String);
+    method public void unregisterAsSystemService() throws android.os.RemoteException;
+    field public static final int TRIM_FULL = 0; // 0x0
+    field public static final int TRIM_LIGHT = 1; // 0x1
+  }
+
+  public static class NotificationListenerService.Ranking {
+    method public java.util.List<java.lang.String> getAdditionalPeople();
+    method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
   }
 
 }

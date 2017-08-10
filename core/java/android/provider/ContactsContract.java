@@ -1878,7 +1878,6 @@ public final class ContactsContract {
          * @deprecated - Do not use. This will not be supported in the future. In the future,
          * cursors returned from related queries will be empty.
          *
-         * @hide
          * @removed
          */
         @Deprecated
@@ -2975,7 +2974,6 @@ public final class ContactsContract {
          * @deprecated - Do not use. This will not be supported in the future. In the future,
          * cursors returned from related queries will be empty.
          *
-         * @hide
          * @removed
          */
         @Deprecated
@@ -3414,7 +3412,6 @@ public final class ContactsContract {
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
      *
-     * @hide
      * @removed
      */
     @Deprecated
@@ -3515,7 +3512,6 @@ public final class ContactsContract {
          * @deprecated - Do not use. This will not be supported in the future. In the future,
          * cursors returned from related queries will be empty.
          *
-         * @hide
          * @removed
          */
         @Deprecated
@@ -3568,7 +3564,6 @@ public final class ContactsContract {
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
      *
-     * @hide
      * @removed
      */
     @Deprecated
@@ -3961,7 +3956,6 @@ public final class ContactsContract {
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
      *
-     * @hide
      * @removed
      */
     @Deprecated
@@ -4002,7 +3996,6 @@ public final class ContactsContract {
      * @deprecated - Do not use. This will not be supported in the future. In the future,
      * cursors returned from related queries will be empty.
      *
-     * @hide
      * @removed
      */
     @Deprecated
