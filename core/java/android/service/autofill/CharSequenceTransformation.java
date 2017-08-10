@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -53,7 +54,8 @@ import java.util.regex.Pattern;
  * fields (month and year) would be:
  *
  * <pre class="prettyprint">
- * new CharSequenceTransformation.Builder(ccExpMonthId, Pattern.compile("^(\\d\\d)$"), "Exp: $1")
+ * new CharSequenceTransformation
+ *   .Builder(ccExpMonthId, Pattern.compile("^(\\d\\d)$"), "Exp: $1")
  *   .addField(ccExpYearId, Pattern.compile("^(\\d\\d\\d\\d)$"), " / $1");
  * </pre>
  */
@@ -83,8 +85,13 @@ public final class CharSequenceTransformation extends InternalTransformation imp
                 return;
             }
             try {
+                final Matcher matcher = field.first.matcher(value);
+                if (!matcher.matches()) {
+                    if (sDebug) Log.d(TAG, "match for " + field.first + " failed on id " + id);
+                    return;
+                }
                 // replaceAll throws an exception if the subst is invalid
-                final String convertedValue = field.first.matcher(value).replaceAll(field.second);
+                final String convertedValue = matcher.replaceAll(field.second);
                 converted.append(convertedValue);
             } catch (Exception e) {
                 // Do not log full exception to avoid PII leaking
