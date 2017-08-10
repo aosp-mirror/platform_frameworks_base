@@ -60,7 +60,8 @@ public final class SharedMemory implements Parcelable, Closeable {
         }
 
         mMemoryRegistration = new MemoryRegistration(mSize);
-        mCleaner = Cleaner.create(this, new Closer(mFileDescriptor, mMemoryRegistration));
+        mCleaner = Cleaner.create(mFileDescriptor,
+                new Closer(mFileDescriptor, mMemoryRegistration));
     }
 
     /**
@@ -138,6 +139,8 @@ public final class SharedMemory implements Parcelable, Closeable {
      * This FileDescriptor is interoperable with the ASharedMemory NDK APIs.
      *
      * @return Returns the FileDescriptor associated with this object.
+     *
+     * @hide Exists only for MemoryFile interop
      */
     public @NonNull FileDescriptor getFileDescriptor() {
         return mFileDescriptor;
@@ -150,6 +153,8 @@ public final class SharedMemory implements Parcelable, Closeable {
      * This fd is interoperable with the ASharedMemory NDK APIs.
      *
      * @return Returns the native fd associated with this object, or -1 if it is already closed.
+     *
+     * @hide Exposed for native ASharedMemory_dupFromJava()
      */
     public int getFd() {
         return mFileDescriptor.getInt$();
