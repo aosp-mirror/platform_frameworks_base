@@ -1987,8 +1987,10 @@
     <!-- SysUI Tuner: App subheading for shortcut selection [CHAR LIMIT=60] -->
     <string name="tuner_app"><xliff:g id="app">%1$s</xliff:g> app</string>
 
-    <!-- Title for the notification channel containing important alerts like low battery. [CHAR LIMIT=NONE] -->
+    <!-- Title for the notification channel containing important alerts. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_alerts">Alerts</string>
+    <!-- Title for the notification channel for battery warnings (i.e. < 15%). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_battery">Battery</string>
     <!-- Title for the notification channel dedicated to screenshot progress. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_screenshot">Screenshots</string>
     <!-- Title for the notification channel for miscellaneous notices. [CHAR LIMIT=NONE] -->
