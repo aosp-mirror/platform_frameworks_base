@@ -74,6 +74,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
@@ -2171,7 +2172,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setRequestedOrientation(int requestedOrientation) {
         if (ActivityInfo.isFixedOrientation(requestedOrientation) && !fullscreen
-                && appInfo.targetSdkVersion > O) {
+                && appInfo.targetSdkVersion >= O_MR1) {
             throw new IllegalStateException("Only fullscreen activities can request orientation");
         }
 

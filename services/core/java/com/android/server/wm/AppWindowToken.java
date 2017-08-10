@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -1293,11 +1294,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
-        // We do not allow non-fullscreen apps to influence orientation beyond O. While we do
-        // throw an exception in {@link Activity#onCreate} and
+        // We do not allow non-fullscreen apps to influence orientation starting in O-MR1. While we
+        // do throw an exception in {@link Activity#onCreate} and
         // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
         // other calculations aren't affected.
-        if (!fillsParent() && mTargetSdk > O) {
+        if (!fillsParent() && mTargetSdk >= O_MR1) {
             // Can't specify orientation if app doesn't fill parent.
             return SCREEN_ORIENTATION_UNSET;
         }
