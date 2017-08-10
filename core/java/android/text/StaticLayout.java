@@ -90,6 +90,7 @@ public class StaticLayout extends Layout {
             b.mSpacingMult = 1.0f;
             b.mSpacingAdd = 0.0f;
             b.mIncludePad = true;
+            b.mFallbackLineSpacing = false;
             b.mEllipsizedWidth = width;
             b.mEllipsize = null;
             b.mMaxLines = Integer.MAX_VALUE;
@@ -224,6 +225,24 @@ public class StaticLayout extends Layout {
          */
         public Builder setIncludePad(boolean includePad) {
             mIncludePad = includePad;
+            return this;
+        }
+
+        /**
+         * Set whether to respect the ascent and descent of the fallback fonts that are used in
+         * displaying the text (which is needed to avoid text from consecutive lines running into
+         * each other). If set, fallback fonts that end up getting used can increase the ascent
+         * and descent of the lines that they are used on.
+         *
+         * <p>For backward compatibility reasons, the default is {@code false}, but setting this to
+         * true is strongly recommended. It is required to be true if text could be in languages
+         * like Burmese or Tibetan where text is typically much taller or deeper than Latin text.
+         *
+         * @param useLineSpacingFromFallbacks whether to expand linespacing based on fallback fonts
+         * @return this builder, useful for chaining
+         */
+        public Builder setUseLineSpacingFromFallbacks(boolean useLineSpacingFromFallbacks) {
+            mFallbackLineSpacing = useLineSpacingFromFallbacks;
             return this;
         }
 
@@ -432,6 +451,7 @@ public class StaticLayout extends Layout {
         float mSpacingMult;
         float mSpacingAdd;
         boolean mIncludePad;
+        boolean mFallbackLineSpacing;
         int mEllipsizedWidth;
         TextUtils.TruncateAt mEllipsize;
         int mMaxLines;
@@ -606,6 +626,7 @@ public class StaticLayout extends Layout {
         TextPaint paint = b.mPaint;
         int outerWidth = b.mWidth;
         TextDirectionHeuristic textDir = b.mTextDir;
+        final boolean fallbackLineSpacing = b.mFallbackLineSpacing;
         float spacingmult = b.mSpacingMult;
         float spacingadd = b.mSpacingAdd;
         float ellipsizedWidth = b.mEllipsizedWidth;
@@ -784,11 +805,14 @@ public class StaticLayout extends Layout {
 
             nGetWidths(b.mNativePtr, widths);
             int breakCount = nComputeLineBreaks(b.mNativePtr, lineBreaks, lineBreaks.breaks,
-                    lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
+                    lineBreaks.widths, lineBreaks.ascents, lineBreaks.descents, lineBreaks.flags,
+                    lineBreaks.breaks.length);
 
-            int[] breaks = lineBreaks.breaks;
-            float[] lineWidths = lineBreaks.widths;
-            int[] flags = lineBreaks.flags;
+            final int[] breaks = lineBreaks.breaks;
+            final float[] lineWidths = lineBreaks.widths;
+            final float[] ascents = lineBreaks.ascents;
+            final float[] descents = lineBreaks.descents;
+            final int[] flags = lineBreaks.flags;
 
             final int remainingLineCount = mMaximumVisibleLineCount - mLineCount;
             final boolean ellipsisMayBeApplied = ellipsize != null
@@ -799,7 +823,7 @@ public class StaticLayout extends Layout {
                     && ellipsisMayBeApplied) {
                 // Calculate width and flag.
                 float width = 0;
-                int flag = 0;
+                int flag = 0; // XXX May need to also have starting hyphen edit
                 for (int i = remainingLineCount - 1; i < breakCount; i++) {
                     if (i == breakCount - 1) {
                         width += lineWidths[i];
@@ -808,7 +832,7 @@ public class StaticLayout extends Layout {
                             width += widths[j];
                         }
                     }
-                    flag |= flags[i] & TAB_MASK; // XXX May need to also have starting hyphen edit
+                    flag |= flags[i] & TAB_MASK;
                 }
                 // Treat the last line and overflowed lines as a single line.
                 breaks[remainingLineCount - 1] = breaks[breakCount - 1];
@@ -859,8 +883,14 @@ public class StaticLayout extends Layout {
 
                     boolean moreChars = (endPos < bufEnd);
 
+                    final int ascent = fallbackLineSpacing
+                            ? Math.min(fmAscent, (int) Math.round(ascents[breakIndex]))
+                            : fmAscent;
+                    final int descent = fallbackLineSpacing
+                            ? Math.max(fmDescent, (int) Math.round(descents[breakIndex]))
+                            : fmDescent;
                     v = out(source, here, endPos,
-                            fmAscent, fmDescent, fmTop, fmBottom,
+                            ascent, descent, fmTop, fmBottom,
                             v, spacingmult, spacingadd, chooseHt, chooseHtv, fm, flags[breakIndex],
                             needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
                             addLastLineSpacing, chs, widths, paraStart, ellipsize,
@@ -891,8 +921,6 @@ public class StaticLayout extends Layout {
 
         if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE) &&
                 mLineCount < mMaximumVisibleLineCount) {
-            // Log.e("text", "output last " + bufEnd);
-
             measured.setPara(source, bufEnd, bufEnd, textDir, b);
 
             paint.getFontMetricsInt(fm);
@@ -1470,7 +1498,8 @@ public class StaticLayout extends Layout {
     // to reduce the number of JNI calls in the common case where the
     // arrays do not have to be resized
     private static native int nComputeLineBreaks(long nativePtr, LineBreaks recycle,
-            int[] recycleBreaks, float[] recycleWidths, int[] recycleFlags, int recycleLength);
+            int[] recycleBreaks, float[] recycleWidths, float[] recycleAscents,
+            float[] recycleDescents, int[] recycleFlags, int recycleLength);
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
@@ -1529,6 +1558,8 @@ public class StaticLayout extends Layout {
         private static final int INITIAL_SIZE = 16;
         public int[] breaks = new int[INITIAL_SIZE];
         public float[] widths = new float[INITIAL_SIZE];
+        public float[] ascents = new float[INITIAL_SIZE];
+        public float[] descents = new float[INITIAL_SIZE];
         public int[] flags = new int[INITIAL_SIZE]; // hasTab
         // breaks, widths, and flags should all have the same length
     }

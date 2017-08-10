@@ -1729,6 +1729,9 @@ public class Paint {
      * Return the distance above (negative) the baseline (ascent) based on the
      * current typeface and text size.
      *
+     * <p>Note that this is the ascent of the main typeface, and actual text rendered may need a
+     * larger ascent because fallback fonts may get used in rendering the text.
+     *
      * @return the distance above (negative) the baseline (ascent) based on the
      *         current typeface and text size.
      */
@@ -1739,6 +1742,9 @@ public class Paint {
     /**
      * Return the distance below (positive) the baseline (descent) based on the
      * current typeface and text size.
+     *
+     * <p>Note that this is the descent of the main typeface, and actual text rendered may need a
+     * larger descent because fallback fonts may get used in rendering the text.
      *
      * @return the distance below (positive) the baseline (descent) based on
      *         the current typeface and text size.
@@ -1782,6 +1788,9 @@ public class Paint {
      * Return the font's recommended interline spacing, given the Paint's
      * settings for typeface, textSize, etc. If metrics is not null, return the
      * fontmetric values in it.
+     *
+     * <p>Note that these are the values for the main typeface, and actual text rendered may need a
+     * larger set of values because fallback fonts may get used in rendering the text.
      *
      * @param metrics If this object is not null, its fields are filled with
      *                the appropriate values given the paint's text attributes.
@@ -1844,6 +1853,9 @@ public class Paint {
      * and clipping. If you want more control over the rounding, call
      * getFontMetrics().
      *
+     * <p>Note that these are the values for the main typeface, and actual text rendered may need a
+     * larger set of values because fallback fonts may get used in rendering the text.
+     *
      * @return the font's interline spacing.
      */
     public int getFontMetricsInt(FontMetricsInt fmi) {
@@ -1859,6 +1871,9 @@ public class Paint {
     /**
      * Return the recommend line spacing based on the current typeface and
      * text size.
+     *
+     * <p>Note that this is the value for the main typeface, and actual text rendered may need a
+     * larger value because fallback fonts may get used in rendering the text.
      *
      * @return  recommend line spacing based on the current typeface and
      *          text size.
