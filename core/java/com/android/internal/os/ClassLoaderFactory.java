@@ -71,7 +71,7 @@ public class ClassLoaderFactory {
             String librarySearchPath, ClassLoader parent, String classloaderName) {
         if (isPathClassLoaderName(classloaderName)) {
             return new PathClassLoader(dexPath, librarySearchPath, parent);
-        } else if (isPathClassLoaderName(classloaderName)) {
+        } else if (isDelegateLastClassLoaderName(classloaderName)) {
             return new DelegateLastClassLoader(dexPath, librarySearchPath, parent);
         }
 
