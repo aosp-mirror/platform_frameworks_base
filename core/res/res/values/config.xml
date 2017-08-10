@@ -2767,9 +2767,6 @@
     <!-- True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
-    <!-- Component that runs demo mode when it is enabled. -->
-    <string name="config_demoModePackage" translatable="false"></string>
-
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
     <integer name="config_keepPreloadsMinDays">7</integer>
