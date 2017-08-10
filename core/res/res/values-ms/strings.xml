@@ -80,10 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tidak ditawarkan oleh rangkaian mudah alih di lokasi anda untuk sementara waktu"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tidak dapat mencapai rangkaian"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Untuk memperbaik penerimaan, cuba tukar jenis rangkaian yang dipilih di Tetapan &gt; Rangkaian &amp; Internet &gt; Rangkaian mudah alih &gt; Jenis rangkaian pilihan."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Panggilan Wi-Fi aktif"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Rangkaian mudah alih diperlukan untuk membuat panggilan kecemasan."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Makluman"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Pemajuan panggilan"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mod paggil balik kecemasan"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Makluman data mudah alih"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status data mudah alih"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mesej SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mesej mel suara"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Panggilan Wi-Fi"</string>
@@ -1303,6 +1305,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Ketik untuk keluar daripada mod kereta."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Penambatan atau titik panas aktif"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Ketik untuk membuat persediaan."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Penambatan dilumpuhkan"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Hubungi pentadbir anda untuk maklumat lanjut"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Kembali"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Seterusnya"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Langkau"</string>

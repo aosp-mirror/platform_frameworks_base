@@ -88,7 +88,7 @@ public abstract class InternalEnumerateClient extends EnumerateClient {
             doFingerprintCleanup();
         }
 
-        return fingerId == 0; // done when id hits 0
+        return remaining == 0;
     }
 
 }

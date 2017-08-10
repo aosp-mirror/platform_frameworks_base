@@ -1761,9 +1761,18 @@ public class WifiManager {
 
     /**
      * Enable or disable Wi-Fi.
+     *
+     * Note: This method will return false if wifi cannot be enabled (e.g., an incompatible mode
+     * where the user has enabled tethering or Airplane Mode).
+     *
+     * Applications need to have the {@link android.Manifest.permission#CHANGE_WIFI_STATE}
+     * permission to toggle wifi. Callers without the permissions will trigger a
+     * {@link java.lang.SecurityException}.
+     *
      * @param enabled {@code true} to enable, {@code false} to disable.
      * @return {@code true} if the operation succeeds (or if the existing state
-     *         is the same as the requested state).
+     *         is the same as the requested state). False if wifi cannot be toggled on/off when the
+     *         request is made.
      */
     public boolean setWifiEnabled(boolean enabled) {
         try {

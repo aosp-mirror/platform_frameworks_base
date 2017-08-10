@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Derzeit nicht im Mobilfunknetz in deiner Region verfügbar"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Netzwerk nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Der Empfang lässt sich möglicherweise verbessern, indem du unter \"Einstellungen\" &gt; \"Netzwerk\" &amp; \"Internet\" &gt; \"Mobilfunknetze\" &gt; \"Bevorzugter Netzwerktyp\" einen anderen Typ auswählst."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Warnmeldungen"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Anrufweiterleitung"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Notfallrückrufmodus"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Warnmeldungen für mobile Daten"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mailboxnachrichten"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Anrufe über WLAN"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann noch einmal über die Einstellungen. (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Registriere dich bei deinem Mobilfunkanbieter (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Anrufe über WLAN"</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB für MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Für weitere Optionen tippen."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analoges Audiozubehör erkannt"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Das angeschlossene Gerät ist nicht mit diesem Smartphone kompatibel. Für weitere Informationen tippen."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging aktiviert"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Zum Deaktivieren von USB-Debugging tippen"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB-Debugging deaktivieren: auswählen"</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Zum Beenden des Automodus tippen."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering oder Hotspot aktiv"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Zum Einrichten tippen."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering ist deaktiviert"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Bitte wende dich für weitere Informationen an den Administrator"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Zurück"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Weiter"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Überspringen"</string>

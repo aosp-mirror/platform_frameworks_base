@@ -3358,7 +3358,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM);
+                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else if (matches.size() == 0) {
@@ -3418,7 +3418,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM);
+                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -6586,7 +6586,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, callingUid, userId, resolveForStart);
+                    flags, callingUid, userId, resolveForStart, true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final ResolveInfo bestChoice =
@@ -7131,12 +7131,13 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         return queryIntentActivitiesInternal(
-                intent, resolvedType, flags, Binder.getCallingUid(), userId, false);
+                intent, resolvedType, flags, Binder.getCallingUid(), userId,
+                false /*resolveForStart*/, true /*allowDynamicSplits*/);
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int filterCallingUid, int userId,
-            boolean resolveForStart) {
+            boolean resolveForStart, boolean allowDynamicSplits) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         final String instantAppPkgName = getInstantAppPackageName(filterCallingUid);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -7193,7 +7194,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     list.add(ri);
                 }
             }
-            return applyPostResolutionFilter(list, instantAppPkgName);
+            return applyPostResolutionFilter(
+                    list, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId);
         }
 
         // reader
@@ -7212,7 +7214,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     List<ResolveInfo> xpResult = new ArrayList<ResolveInfo>(1);
                     xpResult.add(xpResolveInfo);
                     return applyPostResolutionFilter(
-                            filterIfNotSystemUser(xpResult, userId), instantAppPkgName);
+                            filterIfNotSystemUser(xpResult, userId), instantAppPkgName,
+                            allowDynamicSplits, filterCallingUid, userId);
                 }
 
                 // Check for results in the current profile.
@@ -7251,13 +7254,15 @@ public class PackageManagerService extends IPackageManager.Stub
                             // And we are not going to add emphemeral app, so we can return the
                             // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
-                            return applyPostResolutionFilter(result, instantAppPkgName);
+                            return applyPostResolutionFilter(result, instantAppPkgName,
+                                    allowDynamicSplits, filterCallingUid, userId);
                         }
                     } else if (result.size() <= 1 && !addEphemeral) {
                         // No result in parent user and <= 1 result in current profile, and we
                         // are not going to add emphemeral app, so we can return the result without
                         // further processing.
-                        return applyPostResolutionFilter(result, instantAppPkgName);
+                        return applyPostResolutionFilter(result, instantAppPkgName,
+                                allowDynamicSplits, filterCallingUid, userId);
                     }
                     // We have more than one candidate (combining results from current and parent
                     // profile), so we need filtering and sorting.
@@ -7292,7 +7297,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (sortResult) {
             Collections.sort(result, mResolvePrioritySorter);
         }
-        return applyPostResolutionFilter(result, instantAppPkgName);
+        return applyPostResolutionFilter(
+                result, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId);
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
@@ -7358,7 +7364,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the instant application, we'll do the right thing.
                 final ApplicationInfo ai = localInstantApp.activityInfo.applicationInfo;
                 auxiliaryResponse = new AuxiliaryResolveInfo(
-                        ai.packageName, null /*splitName*/, ai.versionCode, null /*failureIntent*/);
+                        ai.packageName, null /*splitName*/, null /*failureActivity*/,
+                        ai.versionCode, null /*failureIntent*/);
             }
         }
         if (auxiliaryResponse != null) {
@@ -7494,13 +7501,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * @return A filtered list of resolved activities.
      */
     private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
-            String ephemeralPkgName) {
+            String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid, int userId) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
-            // TODO: When adding on-demand split support for non-instant apps, remove this check
-            // and always apply post filtering
             // allow activities that are defined in the provided package
-            if (info.activityInfo.splitName != null
+            if (allowDynamicSplits
+                    && info.activityInfo.splitName != null
                     && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
                             info.activityInfo.splitName)) {
                 // requested activity is defined in a split that hasn't been installed yet.
@@ -7509,9 +7515,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.v(TAG, "Adding installer to the ResolveInfo list");
                 }
                 final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
+                final ComponentName installFailureActivity = findInstallFailureActivity(
+                        info.activityInfo.packageName,  filterCallingUid, userId);
                 installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                         info.activityInfo.packageName, info.activityInfo.splitName,
-                        info.activityInfo.applicationInfo.versionCode, null /*failureIntent*/);
+                        installFailureActivity,
+                        info.activityInfo.applicationInfo.versionCode,
+                        null /*failureIntent*/);
                 // make sure this resolver is the default
                 installerInfo.isDefault = true;
                 installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -7539,6 +7549,34 @@ public class PackageManagerService extends IPackageManager.Stub
             resolveInfos.remove(i);
         }
         return resolveInfos;
+    }
+
+    /**
+     * Returns the activity component that can handle install failures.
+     * <p>By default, the instant application installer handles failures. However, an
+     * application may want to handle failures on its own. Applications do this by
+     * creating an activity with an intent filter that handles the action
+     * {@link Intent#ACTION_INSTALL_FAILURE}.
+     */
+    private @Nullable ComponentName findInstallFailureActivity(
+            String packageName, int filterCallingUid, int userId) {
+        final Intent failureActivityIntent = new Intent(Intent.ACTION_INSTALL_FAILURE);
+        failureActivityIntent.setPackage(packageName);
+        // IMPORTANT: disallow dynamic splits to avoid an infinite loop
+        final List<ResolveInfo> result = queryIntentActivitiesInternal(
+                failureActivityIntent, null /*resolvedType*/, 0 /*flags*/, filterCallingUid, userId,
+                false /*resolveForStart*/, false /*allowDynamicSplits*/);
+        final int NR = result.size();
+        if (NR > 0) {
+            for (int i = 0; i < NR; i++) {
+                final ResolveInfo info = result.get(i);
+                if (info.activityInfo.splitName != null) {
+                    continue;
+                }
+                return new ComponentName(packageName, info.activityInfo.name);
+            }
+        }
+        return null;
     }
 
     /**
@@ -8028,11 +8066,12 @@ public class PackageManagerService extends IPackageManager.Stub
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, int flags, int userId) {
         return new ParceledListSlice<>(
-                queryIntentReceiversInternal(intent, resolvedType, flags, userId));
+                queryIntentReceiversInternal(intent, resolvedType, flags, userId,
+                        false /*allowDynamicSplits*/));
     }
 
     private @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
-            String resolvedType, int flags, int userId) {
+            String resolvedType, int flags, int userId, boolean allowDynamicSplits) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId,
@@ -8088,7 +8127,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     list.add(ri);
                 }
             }
-            return applyPostResolutionFilter(list, instantAppPkgName);
+            return applyPostResolutionFilter(
+                    list, instantAppPkgName, allowDynamicSplits, callingUid, userId);
         }
 
         // reader
@@ -8097,13 +8137,15 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkgName == null) {
                 final List<ResolveInfo> result =
                         mReceivers.queryIntent(intent, resolvedType, flags, userId);
-                return applyPostResolutionFilter(result, instantAppPkgName);
+                return applyPostResolutionFilter(
+                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
                 final List<ResolveInfo> result = mReceivers.queryIntentForPackage(
                         intent, resolvedType, flags, pkg.receivers, userId);
-                return applyPostResolutionFilter(result, instantAppPkgName);
+                return applyPostResolutionFilter(
+                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId);
             }
             return Collections.emptyList();
         }
@@ -8212,8 +8254,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private List<ResolveInfo> applyPostServiceResolutionFilter(List<ResolveInfo> resolveInfos,
             String instantAppPkgName) {
-        // TODO: When adding on-demand split support for non-instant apps, remove this check
-        // and always apply post filtering
         if (instantAppPkgName == null) {
             return resolveInfos;
         }
@@ -8233,7 +8273,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             info.serviceInfo.packageName, info.serviceInfo.splitName,
-                            info.serviceInfo.applicationInfo.versionCode, null /*failureIntent*/);
+                            null /*failureActivity*/, info.serviceInfo.applicationInfo.versionCode,
+                            null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -8333,8 +8374,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private List<ResolveInfo> applyPostContentProviderResolutionFilter(
             List<ResolveInfo> resolveInfos, String instantAppPkgName) {
-        // TODO: When adding on-demand split support for non-instant applications, remove
-        // this check and always apply post filtering
         if (instantAppPkgName == null) {
             return resolveInfos;
         }
@@ -8354,7 +8393,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             info.providerInfo.packageName, info.providerInfo.splitName,
-                            info.providerInfo.applicationInfo.versionCode, null /*failureIntent*/);
+                            null /*failureActivity*/, info.providerInfo.applicationInfo.versionCode,
+                            null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -16239,7 +16279,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     // Query all live verifiers based on current user state
                     final List<ResolveInfo> receivers = queryIntentReceiversInternal(verification,
-                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
+                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier(),
+                            false /*allowDynamicSplits*/);
 
                     if (DEBUG_VERIFY) {
                         Slog.d(TAG, "Found " + receivers.size() + " verifiers for intent "
@@ -24993,7 +25034,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
             return PackageManagerService.this
                     .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
-                            userId, false /*resolveForStart*/);
+                            userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
         }
 
         @Override

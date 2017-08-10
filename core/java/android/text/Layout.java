@@ -402,7 +402,8 @@ public abstract class Layout {
         int previousLineEnd = getLineStart(firstLine);
         ParagraphStyle[] spans = NO_PARA_SPANS;
         int spanEnd = 0;
-        final TextPaint paint = mPaint;
+        final TextPaint paint = mWorkPaint;
+        paint.set(mPaint);
         CharSequence buf = mText;
 
         Alignment paraAlign = mAlignment;
@@ -418,6 +419,7 @@ public abstract class Layout {
             previousLineEnd = getLineStart(lineNum + 1);
             final boolean justify = isJustificationRequired(lineNum);
             int end = getLineVisibleEnd(lineNum, start, previousLineEnd);
+            paint.setHyphenEdit(getHyphen(lineNum));
 
             int ltop = previousLineBottom;
             int lbottom = getLineTop(lineNum + 1);
@@ -541,7 +543,6 @@ public abstract class Layout {
                 }
             }
 
-            paint.setHyphenEdit(getHyphen(lineNum));
             Directions directions = getLineDirections(lineNum);
             if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTab && !justify) {
                 // XXX: assumes there's nothing additional to be done
@@ -553,7 +554,6 @@ public abstract class Layout {
                 }
                 tl.draw(canvas, x, ltop, lbaseline, lbottom);
             }
-            paint.setHyphenEdit(0);
         }
 
         TextLine.recycle(tl);
@@ -1208,10 +1208,10 @@ public abstract class Layout {
      * @return the extent of the line
      */
     private float getLineExtent(int line, boolean full) {
-        int start = getLineStart(line);
-        int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
+        final int start = getLineStart(line);
+        final int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
 
-        boolean hasTabs = getLineContainsTab(line);
+        final boolean hasTabs = getLineContainsTab(line);
         TabStops tabStops = null;
         if (hasTabs && mText instanceof Spanned) {
             // Just checking this line should be good enough, tabs should be
@@ -1221,21 +1221,22 @@ public abstract class Layout {
                 tabStops = new TabStops(TAB_INCREMENT, tabs); // XXX should reuse
             }
         }
-        Directions directions = getLineDirections(line);
+        final Directions directions = getLineDirections(line);
         // Returned directions can actually be null
         if (directions == null) {
             return 0f;
         }
-        int dir = getParagraphDirection(line);
+        final int dir = getParagraphDirection(line);
 
-        TextLine tl = TextLine.obtain();
-        mPaint.setHyphenEdit(getHyphen(line));
+        final TextLine tl = TextLine.obtain();
+        final TextPaint paint = mWorkPaint;
+        paint.set(mPaint);
+        paint.setHyphenEdit(getHyphen(line));
         tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
-        float width = tl.metrics(null);
-        mPaint.setHyphenEdit(0);
+        final float width = tl.metrics(null);
         TextLine.recycle(tl);
         return width;
     }
@@ -1249,20 +1250,21 @@ public abstract class Layout {
      * @return the extent of the text on this line
      */
     private float getLineExtent(int line, TabStops tabStops, boolean full) {
-        int start = getLineStart(line);
-        int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
-        boolean hasTabs = getLineContainsTab(line);
-        Directions directions = getLineDirections(line);
-        int dir = getParagraphDirection(line);
+        final int start = getLineStart(line);
+        final int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
+        final boolean hasTabs = getLineContainsTab(line);
+        final Directions directions = getLineDirections(line);
+        final int dir = getParagraphDirection(line);
 
-        TextLine tl = TextLine.obtain();
-        mPaint.setHyphenEdit(getHyphen(line));
+        final TextLine tl = TextLine.obtain();
+        final TextPaint paint = mWorkPaint;
+        paint.set(mPaint);
+        paint.setHyphenEdit(getHyphen(line));
         tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
-        float width = tl.metrics(null);
-        mPaint.setHyphenEdit(0);
+        final float width = tl.metrics(null);
         TextLine.recycle(tl);
         return width;
     }
@@ -2233,6 +2235,7 @@ public abstract class Layout {
 
     private CharSequence mText;
     private TextPaint mPaint;
+    private TextPaint mWorkPaint = new TextPaint();
     private int mWidth;
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;

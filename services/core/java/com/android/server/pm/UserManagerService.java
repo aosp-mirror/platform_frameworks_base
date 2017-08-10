@@ -2439,12 +2439,6 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                if (!UserManager.isSplitSystemUser() && (flags & UserInfo.FLAG_EPHEMERAL) != 0
-                        && (flags & UserInfo.FLAG_DEMO) == 0) {
-                    Log.e(LOG_TAG,
-                            "Ephemeral users are supported on split-system-user systems only.");
-                    return null;
-                }
                 // In split system user mode, we assign the first human user the primary flag.
                 // And if there is no device owner, we also assign the admin flag to primary user.
                 if (UserManager.isSplitSystemUser()
@@ -3652,7 +3646,7 @@ public class UserManagerService extends IUserManager.Stub {
         public UserInfo createUserEvenWhenDisallowed(String name, int flags) {
             UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL, null);
             // Keep this in sync with UserManager.createUser
-            if (user != null && !user.isAdmin()) {
+            if (user != null && !user.isAdmin() && !user.isDemo()) {
                 setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);
                 setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, true, user.id);
             }

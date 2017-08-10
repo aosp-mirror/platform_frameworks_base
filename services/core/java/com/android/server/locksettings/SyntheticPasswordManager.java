@@ -625,8 +625,8 @@ public class SyntheticPasswordManager {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] pwdToken = computePasswordToken(userCredential, pwd);
 
-            GateKeeperResponse response = gatekeeper.verify(fakeUid(persistentData.userId),
-                    pwd.passwordHandle, passwordTokenToGkInput(pwdToken));
+            GateKeeperResponse response = gatekeeper.verifyChallenge(fakeUid(persistentData.userId),
+                    0 /* challenge */, pwd.passwordHandle, passwordTokenToGkInput(pwdToken));
             return VerifyCredentialResponse.fromGateKeeperResponse(response);
         } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);

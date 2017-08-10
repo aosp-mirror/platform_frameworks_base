@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"તમારા સ્થળે મોબાઇલ નેટવર્ક દ્વારા અસ્થાયીરૂપે ઑફર કરવામાં આવતી નથી"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"નેટવર્ક પર પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"રિસેપ્શનને બહેતર બનાવવા માટે, સેટિંગ્સ &gt; નેટવર્ક અને ઇન્ટરનેટ &gt; મોબાઇલ નેટવર્ક &gt; પસંદગીના નેટવર્ક પ્રકાર પર પસંદ કરેલ પ્રકાર બદલવાનો પ્રયાસ કરો."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ચેતવણીઓ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"કટોકટી કૉલબૅક મોડ"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"મોબાઇલ ડેટા ચેતવણીઓ"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS સંદેશા"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"વૉઇસમેઇલ સંદેશા"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi કૉલિંગ"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fi પરથી કૉલ કરવા અને સંદેશા મોકલવા માટે પહેલા તમારા કૅરિઅરને આ સેવા સેટ કરવા માટે કહો. પછી સેટિંગ્સમાંથી Wi-Fi કૉલિંગ ફરીથી ચાલુ કરો. (ભૂલ કોડ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"તમારા કૅરિઅર સાથે નોંધણી કરો (ભૂલ કોડ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Wi-Fi કૉલિંગ"</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI માટે USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"વધુ વિકલ્પો માટે ટૅપ કરો."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"એનાલોગ ઑડિઓ ઍક્સેસરી મળી"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"જોડેલ ઉપકરણ આ ફોન સાથે સુસંગત નથી. વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ડીબગિંગ અક્ષમ કરવા માટે ટૅપ કરો."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ડિબગીંગને અક્ષમ કરવા માટે પસંદ કરો."</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"કાર મોડથી બહાર નીકળવા માટે ટૅપ કરો."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ટિથરિંગ અથવા હોટસ્પોટ સક્રિય"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"સેટ કરવા માટે ટૅપ કરો."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ટિથરિંગ અક્ષમ કરેલ છે"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"વિગતો માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો"</string>
     <string name="back_button_label" msgid="2300470004503343439">"પાછળ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"આગલું"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"છોડો"</string>

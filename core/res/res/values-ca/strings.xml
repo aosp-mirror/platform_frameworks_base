@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"La xarxa mòbil de la teva ubicació temporalment no ofereix aquest servei"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No es pot accedir a la xarxa"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Per millorar la recepció, prova de canviar el tipus de xarxa a Configuració &gt; Xarxa i Internet &gt; Xarxes mòbils &gt; Tipus de xarxa preferit."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desviació de trucades"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mode de devolució de trucada d\'emergència"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertes de dades mòbils"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"Missatges SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Per fer trucades i enviar missatges per Wi-Fi, primer has de demanar a l\'operador de telefonia mòbil que configuri aquest servei. Després, torna a activar les trucades per Wi-Fi a Configuració. (Codi d\'error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Registra\'t amb el teu operador de telefonia mòbil (codi d\'error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Trucada de Wi-Fi de: %s"</item>
@@ -880,8 +887,8 @@
     <string name="years" msgid="6881577717993213522">"anys"</string>
     <string name="now_string_shortest" msgid="8912796667087856402">"ara"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB per a MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Toca per veure més opcions."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"S\'ha detectat un accessori d\'àudio analògic"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Toca per desactivar la depuració USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecciona per desactivar la depuració USB"</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Toca per sortir del mode de cotxe."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Compartició de xarxa o punt d\'accés Wi-Fi activat"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca per configurar."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"La compartició de xarxa està desactivada"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Contacta amb el teu administrador per obtenir més informació"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Omet"</string>

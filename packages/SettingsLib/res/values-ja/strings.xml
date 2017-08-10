@@ -41,10 +41,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s経由で使用可能"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"接続済み、インターネットは利用できません"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"アクセス ポイントが一時的にいっぱいです"</string>
-    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
-    <skip />
-    <!-- no translation found for available_via_carrier (1469036129740799053) -->
-    <skip />
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s 経由で接続済み"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s 経由で使用可能"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"とても遅い"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"遅い"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
@@ -358,7 +356,8 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"充電中"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"充電しています"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"充電していません"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"充電していません"</string>
+    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for battery_info_status_full (2824614753861462808) -->
     <skip />

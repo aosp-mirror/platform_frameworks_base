@@ -584,6 +584,12 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS, 0);
         }
 
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            addFeature(PackageManager.FEATURE_RAM_LOW, 0);
+        } else {
+            addFeature(PackageManager.FEATURE_RAM_NORMAL, 0);
+        }
+
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
         }

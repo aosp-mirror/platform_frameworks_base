@@ -71,10 +71,6 @@ public class PipManager implements BasePipManager {
     TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onActivityPinned(String packageName, int taskId) {
-            if (!checkCurrentUserId(mContext, false /* debug */)) {
-                return;
-            }
-
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
@@ -86,10 +82,6 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onActivityUnpinned() {
-            if (!checkCurrentUserId(mContext, false /* debug */)) {
-                return;
-            }
-
             ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext,
                     mActivityManager);
             mMenuController.onActivityUnpinned(topPipActivity);
@@ -116,10 +108,6 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onPinnedActivityRestartAttempt(boolean clearedTask) {
-            if (!checkCurrentUserId(mContext, false /* debug */)) {
-                return;
-            }
-
             mTouchHandler.getMotionHelper().expandPip(clearedTask /* skipAnimation */);
         }
     };

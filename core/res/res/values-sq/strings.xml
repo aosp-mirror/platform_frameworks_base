@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Përkohësisht nuk ofrohet nga rrjeti celular në vendndodhjen tënde"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Cilësimet &gt; Rrjeti dhe interneti &gt; Lloji i preferuar i rrjetit."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Sinjalizimet"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Transferimi i telefonatave"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modaliteti i \"Kthimit të telefonatës së urgjencës\""</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Sinjalizimet për të dhënat celulare"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mesazhet SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mesazhet e postës zanore"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Telefonata me Wi-Fi"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Për të bërë telefonata dhe për të dërguar mesazhe nëpërmjet Wi-Fi, në fillim kërkoji operatorit celular të konfigurojë këtë shërbim. Më pas aktivizo përsëri telefonatat me Wi-Fi nga \"Cilësimet\". (Kodi i gabimit: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Regjistrohu me operatorin tënd celular (kodi i gabimit: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Telefonatat me Wi-Fi nga %s"</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB për MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"U lidh me një ndihmës USB-je"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Trokit për më shumë opsione."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"U zbulua aksesor i audios analoge"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Pajisja e bashkuar nuk është e pajtueshme me këtë telefon. Trokit për të mësuar më shumë."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Trokit për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Përzgjidhe për të çaktivizuar korrigjimin e gabimeve të USB-së"</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Trokit për të dalë nga modaliteti \"në makinë\"."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Lidhja e çiftimit ose ajo e qasjes në zona publike interneti është aktive"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Trokit për ta konfiguruar."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Lidhja e çiftimit është çaktivizuar"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Kontakto me administratorin për detaje"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Prapa"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Përpara"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Kapërce"</string>

@@ -629,7 +629,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // Keep a log of all the apps we've ever backed up, and what the dataset tokens are for both
     // the current backup dataset and the ancestral dataset.
-    private AppsBackedUpOnThisDeviceJournal mAppsBackedUpOnThisDeviceJournal;
+    private ProcessedPackagesJournal mProcessedPackagesJournal;
 
     private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;
     // increment when the schema changes
@@ -816,7 +816,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             Slog.w(TAG, "Unable to read token file", e);
         }
 
-        mAppsBackedUpOnThisDeviceJournal = new AppsBackedUpOnThisDeviceJournal(mBaseStateDir);
+        mProcessedPackagesJournal = new ProcessedPackagesJournal(mBaseStateDir);
+        mProcessedPackagesJournal.init();
 
         synchronized (mQueueLock) {
             // Resume the full-data backup queue
@@ -1068,7 +1069,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // so we must re-upload all saved settings.
     public void resetBackupState(File stateFileDir) {
         synchronized (mQueueLock) {
-            mAppsBackedUpOnThisDeviceJournal.reset();
+            mProcessedPackagesJournal.reset();
 
             mCurrentToken = 0;
             writeRestoreTokens();
@@ -1363,7 +1364,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public void logBackupComplete(String packageName) {
         if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
 
-        mAppsBackedUpOnThisDeviceJournal.addPackage(packageName);
+        mProcessedPackagesJournal.addPackage(packageName);
     }
 
     // Persistently record the current and ancestral backup tokens as well
@@ -1500,7 +1501,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         long token = mAncestralToken;
         synchronized (mQueueLock) {
-            if (mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(packageName)) {
+            if (mProcessedPackagesJournal.hasBeenProcessed(packageName)) {
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "App in ever-stored, so using current token");
                 }
@@ -3303,9 +3304,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 }
             }
 
-            HashSet<String> processedApps = mAppsBackedUpOnThisDeviceJournal.getPackagesCopy();
-            pw.println("Ever backed up: " + processedApps.size());
-            for (String pkg : processedApps) {
+            Set<String> processedPackages = mProcessedPackagesJournal.getPackagesCopy();
+            pw.println("Ever backed up: " + processedPackages.size());
+            for (String pkg : processedPackages) {
                 pw.println("    " + pkg);
             }
 

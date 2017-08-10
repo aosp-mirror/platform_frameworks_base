@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"നിങ്ങളുടെ ലൊക്കേഷനിൽ മൊബൈൽ നെറ്റ്‌വര്‍ക്ക് താൽക്കാലികമായി ലഭ്യമല്ല"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"സ്വീകരണം മെച്ചപ്പെടുത്തുന്നതിന് സിസ്‌റ്റം &gt; നെറ്റ്‌വർക്കും ഇ‌ന്റെർനെറ്റും &gt; മൊബൈൽ നെറ്റ്‌വർക്കുകൾ &gt; തിരഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് തരം എന്നതിൽ തിരഞ്ഞെടുത്തിരിക്കുന്ന തരം മാറ്റിക്കൊണ്ട് ശ്രമിച്ചുനോക്കുക."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"കോൾ ഫോർവേഡിംഗ്"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"അടിയന്തര കോൾബാക്ക് മോഡ്"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"മൊബൈൽ ഡാറ്റ അലേർട്ടുകൾ"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"വോയ്‌സ്‌മെയിൽ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"വൈഫൈ കോളിംഗ്"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"വൈഫൈ വഴി കോളുകൾ ചെയ്യാനും സന്ദേശങ്ങൾ അയയ്‌ക്കാനും ആദ്യം നിങ്ങളുടെ കാരിയറോട് ഈ സേവനം സജ്ജമാക്കാൻ ആവശ്യപ്പെടുക. ക്രമീകരണത്തിൽ നിന്ന് വീണ്ടും വൈഫൈ കോളിംഗ് ഓണാക്കുക. (പിശക് കോഡ്: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"നിങ്ങളുടെ കാരിയറുമായി രജിസ്‌റ്റർ ചെയ്യുക (പിശക് കോഡ്: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s വൈഫൈ കോളിംഗ്"</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI-യ്‌ക്കായുള്ള USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ഒരു USB ആക്‌സസ്സറി കണക്റ്റുചെയ്‌തു"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"അനലോഗ് ഓഡിയോ ആക്‌സസറി കണ്ടെത്തി"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"അറ്റാച്ചുചെയ്‌ത ഉപകരണം ഈ ഫോണിന് അനുയോജ്യമല്ല. കൂടുതലറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"കാർ മോഡിൽ നിന്ന് പുറത്തുകടക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ടെതറിംഗ് അല്ലെങ്കിൽ ഹോട്ട്സ്‌പോട്ട് സജീവമാണ്"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"സജ്ജമാക്കാൻ ടാപ്പുചെയ്യുക."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ടെതറിംഗ് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"വിശദവിവരങ്ങൾക്ക് നിങ്ങളുടെ അഡ്മിനെ ബന്ധപ്പെടുക"</string>
     <string name="back_button_label" msgid="2300470004503343439">"മടങ്ങുക"</string>
     <string name="next_button_label" msgid="1080555104677992408">"അടുത്തത്"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ഒഴിവാക്കുക"</string>

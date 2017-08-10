@@ -41,10 +41,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s을(를) 통해 사용 가능"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"인터넷을 사용하지 않고 연결됨"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"액세스 포인트가 일시적으로 가득 참"</string>
-    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
-    <skip />
-    <!-- no translation found for available_via_carrier (1469036129740799053) -->
-    <skip />
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s을(를) 통해 연결됨"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s을(를) 통해 사용 가능"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"매우 느림"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"느림"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"확인"</string>
@@ -358,7 +356,8 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"충전 중"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"충전 중"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"충전 안함"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"충전 안함"</string>
+    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
+    <skip />
     <string name="battery_info_status_full" msgid="2824614753861462808">"충전 완료"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"관리자가 제어"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"관리자가 사용 설정함"</string>

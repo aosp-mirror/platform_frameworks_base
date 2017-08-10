@@ -18,20 +18,26 @@ import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 
 import android.app.Fragment;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.provider.Settings.Secure;
 import android.support.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import com.android.systemui.R.id;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -69,12 +75,14 @@ public class RoundedCorners extends SystemUI implements Tunable {
         mOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        mOverlay.setAlpha(0);
         mOverlay.findViewById(R.id.right).setRotation(90);
 
         mContext.getSystemService(WindowManager.class)
                 .addView(mOverlay, getWindowLayoutParams());
         mBottomOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
+        mBottomOverlay.setAlpha(0);
         mBottomOverlay.findViewById(R.id.right).setRotation(180);
         mBottomOverlay.findViewById(R.id.left).setRotation(270);
         WindowManager.LayoutParams layoutParams = getWindowLayoutParams();
@@ -88,6 +96,39 @@ public class RoundedCorners extends SystemUI implements Tunable {
         mDensity = metrics.density;
 
         Dependency.get(TunerService.class).addTunable(this, SIZE);
+
+        // Watch color inversion and invert the overlay as needed.
+        SecureSetting setting = new SecureSetting(mContext, Dependency.get(Dependency.MAIN_HANDLER),
+                Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
+            @Override
+            protected void handleValueChanged(int value, boolean observedChange) {
+                int tint = value != 0 ? Color.WHITE : Color.BLACK;
+                ColorStateList tintList = ColorStateList.valueOf(tint);
+                ((ImageView) mOverlay.findViewById(id.left)).setImageTintList(tintList);
+                ((ImageView) mOverlay.findViewById(id.right)).setImageTintList(tintList);
+                ((ImageView) mBottomOverlay.findViewById(id.left)).setImageTintList(tintList);
+                ((ImageView) mBottomOverlay.findViewById(id.right)).setImageTintList(tintList);
+            }
+        };
+        setting.setListening(true);
+        setting.onChange(false);
+
+        mOverlay.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                    int oldLeft,
+                    int oldTop, int oldRight, int oldBottom) {
+                mOverlay.removeOnLayoutChangeListener(this);
+                mOverlay.animate()
+                        .alpha(1)
+                        .setDuration(1000)
+                        .start();
+                mBottomOverlay.animate()
+                        .alpha(1)
+                        .setDuration(1000)
+                        .start();
+            }
+        });
     }
 
     private void setupPadding(int padding) {

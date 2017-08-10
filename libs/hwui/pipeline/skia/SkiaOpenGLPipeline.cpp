@@ -134,9 +134,24 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
     deferredLayer->updateTexImage();
     deferredLayer->apply();
 
-    SkCanvas canvas(*bitmap);
+    /* This intermediate surface is present to work around a bug in SwiftShader that
+     * prevents us from reading the contents of the layer's texture directly. The
+     * workaround involves first rendering that texture into an intermediate buffer and
+     * then reading from the intermediate buffer into the bitmap.
+     */
+    sk_sp<SkSurface> tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
+            SkBudgeted::kYes, bitmap->info());
+
     Layer* layer = deferredLayer->backingLayer();
-    return LayerDrawable::DrawLayer(mRenderThread.getGrContext(), &canvas, layer);
+    if (LayerDrawable::DrawLayer(mRenderThread.getGrContext(), tmpSurface->getCanvas(), layer)) {
+        sk_sp<SkImage> tmpImage = tmpSurface->makeImageSnapshot();
+        if (tmpImage->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
+            bitmap->notifyPixelsChanged();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,

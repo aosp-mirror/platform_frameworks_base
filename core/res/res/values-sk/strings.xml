@@ -82,10 +82,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Momentálne nie sú v ponuke mobilnej siete na vašom mieste"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nepodarilo sa pripojiť k sieti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ak chcete vylepšiť príjem, skúste zmeniť vybraný typ v časti Nastavenia &gt; Sieť a internet &gt; Mobilné siete &gt; Preferovaný typ siete."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozornenia"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Presmerovanie hovorov"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Režim tiesňového spätného volania"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Upozornenia na mobilné dáta"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"Správy SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Správy hlasovej schránky"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Volanie cez Wi-Fi"</string>
@@ -119,7 +124,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Ak chcete volať a odosielať správy prostredníctvom siete Wi-Fi, kontaktujte najskôr svojho operátora v súvislosti s nastavením tejto služby. Potom opäť zapnite v Nastaveniach volanie cez Wi-Fi. (Kód chyby: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Zaregistrujte sa u operátora (Kód chyby: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Volanie siete Wi-Fi %s"</item>
@@ -1227,10 +1234,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB na pripojenie zariadenia MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Pripojené k periférnemu zariadeniu USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Klepnutím zobrazíte ďalšie možnosti."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Bolo zistené analógové zvukové príslušenstvo"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Klepnutím zakážete ladenie cez USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Vyberte, ak chcete zakázať ladenie cez USB."</string>
@@ -1347,6 +1352,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Klepnutím ukončíte režim V aute."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering alebo prístupový bod je aktívny"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Klepnutím prejdete na nastavenie."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering je deaktivovaný"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"O podrobnosti požiadajte svojho správcu"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Späť"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Ďalej"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Preskočiť"</string>

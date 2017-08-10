@@ -80,10 +80,15 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tilbydes i øjeblikket ikke af mobilnetværket på din placering"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Der er ingen forbindelse til netværket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Hvis du vil forbedre signalet, kan du prøve at ændre den valgte netværkstype i Indstillinger &gt; Netværk og internet &gt; Mobilnetværk &gt; Foretrukken netværkstype."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Underretninger"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Viderestilling af opkald"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Nødtilbagekaldstilstand"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Underretninger om mobildata"</string>
+    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
+    <skip />
     <string name="notification_channel_sms" msgid="3441746047346135073">"Sms-beskeder"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Talebeskeder"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-opkald"</string>
@@ -117,7 +122,9 @@
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Hvis du vil foretage opkald og sende beskeder via Wi-Fi, skal du først anmode dit mobilselskab om at konfigurere denne tjeneste. Derefter skal du aktivere Wi-Fi-opkald igen fra Indstillinger. (Fejlkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7472393097168811593) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7472393097168811593">"Registrer dig hos dit mobilselskab (fejlkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Wi-Fi-opkald"</item>
@@ -1183,10 +1190,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB til MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tilsluttet et USB-ekstraudstyr"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Tryk for at se flere muligheder."</string>
-    <!-- no translation found for usb_unsupported_audio_accessory_title (3529881374464628084) -->
-    <skip />
-    <!-- no translation found for usb_unsupported_audio_accessory_message (6309553946441565215) -->
-    <skip />
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Der blev registreret et analogt lydtilbehør"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Den tilsluttede enhed er ikke kompatibel med denne telefon. Tryk for at få flere oplysninger."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tryk for at deaktivere fejlretning via USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Vælg for at deaktivere USB-fejlretning."</string>
@@ -1303,6 +1308,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Tryk for at afslutte biltilstand."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Netdeling eller hotspot er aktivt"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Tryk for at konfigurere"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Netdeling er deaktiveret"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Kontakt din administrator for at få oplysninger"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Tilbage"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Næste"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Spring over"</string>

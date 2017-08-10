@@ -41,10 +41,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"সংযুক্ত, ইন্টারনেট নেই"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
-    <!-- no translation found for connected_via_carrier (7583780074526041912) -->
-    <skip />
-    <!-- no translation found for available_via_carrier (1469036129740799053) -->
-    <skip />
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"খুব ধীরে"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ধীরে"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ঠিক আছে"</string>
@@ -358,7 +356,8 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"চার্জ হচ্ছে না"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"চার্জ হচ্ছে না"</string>
+    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
+    <skip />
     <string name="battery_info_status_full" msgid="2824614753861462808">"পূর্ণ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"প্রশাসকের দ্বারা নিয়ন্ত্রিত"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"প্রশাসক দ্বারা সক্ষম করা হয়েছে"</string>
