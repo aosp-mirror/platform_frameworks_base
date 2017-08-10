@@ -52,6 +52,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
@@ -760,16 +761,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-
-            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                final DisplayContent displayContent = mChildren.get(displayNdx);
-                final int displayId = displayContent.getDisplayId();
-                if (displayContent.updateRotationUnchecked(false /* inTransaction */)) {
-                    mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
-                } else if (displayId == DEFAULT_DISPLAY) {
-                    // TODO(multi-display): Track rotation updates for different displays separately
-                    mUpdateRotation = false;
-                }
+            // TODO(multi-display): Update rotation for different displays separately.
+            final int displayId = defaultDisplay.getDisplayId();
+            if (defaultDisplay.updateRotationUnchecked(false /* inTransaction */)) {
+                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
+            } else {
+                mUpdateRotation = false;
+            }
+            // Update rotation of VR virtual display separately. Currently this is the only kind of
+            // secondary display that can be rotated because of the single-display limitations in
+            // PhoneWindowManager.
+            final DisplayContent vrDisplay = mService.mVr2dDisplayId != INVALID_DISPLAY
+                    ? getDisplayContent(mService.mVr2dDisplayId) : null;
+            if (vrDisplay != null && vrDisplay.updateRotationUnchecked(false /* inTransaction */)) {
+                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mService.mVr2dDisplayId)
+                        .sendToTarget();
             }
         }
 

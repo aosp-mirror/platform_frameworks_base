@@ -31,6 +31,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
+import android.app.ActivityManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
@@ -1787,6 +1788,24 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LOCATION_NETWORK = "android.hardware.location.network";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's
+     * {@link ActivityManager#isLowRamDevice() ActivityManager.isLowRamDevice()} method returns
+     * true.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_RAM_LOW = "android.hardware.ram.low";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's
+     * {@link ActivityManager#isLowRamDevice() ActivityManager.isLowRamDevice()} method returns
+     * false.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_RAM_NORMAL = "android.hardware.ram.normal";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

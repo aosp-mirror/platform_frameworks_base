@@ -1211,6 +1211,11 @@ public class LockPatternUtils {
      */
     public long setLockoutAttemptDeadline(int userId, int timeoutMs) {
         final long deadline = SystemClock.elapsedRealtime() + timeoutMs;
+        if (userId == USER_FRP) {
+            // For secure password storage (that is required for FRP), the underlying storage also
+            // enforces the deadline. Since we cannot store settings for the FRP user, don't.
+            return deadline;
+        }
         setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline, userId);
         setLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, timeoutMs, userId);
         return deadline;

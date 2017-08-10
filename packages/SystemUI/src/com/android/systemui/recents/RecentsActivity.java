@@ -182,6 +182,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHomeIfVisible(false);
+            } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                // When switching users, dismiss Recents to Home similar to screen off
+                finish();
             } else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
                 // If the time shifts but the currentTime >= lastStackActiveTime, then that boundary
                 // is still valid.  Otherwise, we need to reset the lastStackactiveTime to the
@@ -375,6 +378,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         registerReceiver(mSystemBroadcastReceiver, filter);
 
         getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
@@ -400,6 +404,17 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
+
+        // If Recents was restarted, then it should complete the enter animation with partially
+        // reset launch state with dock, app and home set to false
+        Object isRelaunching = getLastNonConfigurationInstance();
+        if (isRelaunching != null && isRelaunching instanceof Boolean && (boolean) isRelaunching) {
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            launchState.launchedViaDockGesture = false;
+            launchState.launchedFromApp = false;
+            launchState.launchedFromHome = false;
+            onEnterAnimationComplete();
+        }
     }
 
     @Override
@@ -502,6 +517,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+    }
+
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        return true;
     }
 
     @Override

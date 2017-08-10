@@ -305,7 +305,7 @@
     <protected-broadcast android:name="com.android.server.WifiManager.action.DEVICE_IDLE" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED" />
-    <protected-broadcast android:name="com.android.server.action.WIPE_EUICC_DATA" />
+    <protected-broadcast android:name="com.android.internal.action.EUICC_FACTORY_RESET" />
     <protected-broadcast android:name="com.android.server.usb.ACTION_OPEN_IN_APPS" />
     <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />

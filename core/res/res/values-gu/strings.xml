@@ -80,6 +80,10 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"તમારા સ્થળે મોબાઇલ નેટવર્ક દ્વારા અસ્થાયીરૂપે ઑફર કરવામાં આવતી નથી"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"નેટવર્ક પર પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"રિસેપ્શનને બહેતર બનાવવા માટે, સેટિંગ્સ &gt; નેટવર્ક અને ઇન્ટરનેટ &gt; મોબાઇલ નેટવર્ક &gt; પસંદગીના નેટવર્ક પ્રકાર પર પસંદ કરેલ પ્રકાર બદલવાનો પ્રયાસ કરો."</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ચેતવણીઓ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"કટોકટી કૉલબૅક મોડ"</string>

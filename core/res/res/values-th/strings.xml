@@ -80,6 +80,10 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"งดให้บริการชั่วคราวโดยเครือข่ายมือถือในตำแหน่งของคุณ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"เข้าถึงเครือข่ายไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ลองเปลี่ยนประเภทที่เลือกใน \"การตั้งค่า\" &gt; \"เครือข่ายและอินเทอร์เน็ต\" &gt; \"เครือข่ายมือถือ\" &gt; \"ประเภทเครือข่ายที่ต้องการ\" เพื่อให้การรับสัญญาณดีขึ้น"</string>
+    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
+    <skip />
+    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"การโอนสาย"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"โหมดติดต่อกลับฉุกเฉิน"</string>

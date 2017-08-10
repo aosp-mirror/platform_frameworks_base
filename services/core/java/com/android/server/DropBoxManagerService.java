@@ -29,18 +29,23 @@ import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.Time;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import libcore.io.IoUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.ObjectUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -52,7 +57,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
@@ -87,7 +92,7 @@ public final class DropBoxManagerService extends SystemService {
     // Accounting of all currently written log files (set in init()).
 
     private FileList mAllFiles = null;
-    private HashMap<String, FileList> mFilesByTag = null;
+    private ArrayMap<String, FileList> mFilesByTag = null;
 
     // Various bits of disk information
 
@@ -153,7 +158,7 @@ public final class DropBoxManagerService extends SystemService {
      * @param context to use for receiving free space & gservices intents
      */
     public DropBoxManagerService(final Context context) {
-        this(context, new File("/data/system/dropbox"));
+        this(context, new File("/data/system/dropbox"), FgThread.get().getLooper());
     }
 
     /**
@@ -163,11 +168,12 @@ public final class DropBoxManagerService extends SystemService {
      * @param context to use for receiving free space & gservices intents
      * @param path to store drop box entries in
      */
-    public DropBoxManagerService(final Context context, File path) {
+    @VisibleForTesting
+    public DropBoxManagerService(final Context context, File path, Looper looper) {
         super(context);
         mDropBoxDir = path;
         mContentResolver = getContext().getContentResolver();
-        mHandler = new Handler() {
+        mHandler = new Handler(looper) {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MSG_SEND_BROADCAST) {
@@ -338,11 +344,12 @@ public final class DropBoxManagerService extends SystemService {
             if ((entry.flags & DropBoxManager.IS_EMPTY) != 0) {
                 return new DropBoxManager.Entry(entry.tag, entry.timestampMillis);
             }
+            final File file = entry.getFile(mDropBoxDir);
             try {
                 return new DropBoxManager.Entry(
-                        entry.tag, entry.timestampMillis, entry.file, entry.flags);
+                        entry.tag, entry.timestampMillis, file, entry.flags);
             } catch (IOException e) {
-                Slog.e(TAG, "Can't read: " + entry.file, e);
+                Slog.wtf(TAG, "Can't read: " + file, e);
                 // Continue to next file
             }
         }
@@ -410,7 +417,9 @@ public final class DropBoxManagerService extends SystemService {
             numFound++;
             if (doPrint) out.append("========================================\n");
             out.append(date).append(" ").append(entry.tag == null ? "(no tag)" : entry.tag);
-            if (entry.file == null) {
+
+            final File file = entry.getFile(mDropBoxDir);
+            if (file == null) {
                 out.append(" (no file)\n");
                 continue;
             } else if ((entry.flags & DropBoxManager.IS_EMPTY) != 0) {
@@ -420,12 +429,12 @@ public final class DropBoxManagerService extends SystemService {
                 out.append(" (");
                 if ((entry.flags & DropBoxManager.IS_GZIPPED) != 0) out.append("compressed ");
                 out.append((entry.flags & DropBoxManager.IS_TEXT) != 0 ? "text" : "data");
-                out.append(", ").append(entry.file.length()).append(" bytes)\n");
+                out.append(", ").append(file.length()).append(" bytes)\n");
             }
 
             if (doFile || (doPrint && (entry.flags & DropBoxManager.IS_TEXT) == 0)) {
                 if (!doPrint) out.append("    ");
-                out.append(entry.file.getPath()).append("\n");
+                out.append(file.getPath()).append("\n");
             }
 
             if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && (doPrint || !doFile)) {
@@ -433,7 +442,7 @@ public final class DropBoxManagerService extends SystemService {
                 InputStreamReader isr = null;
                 try {
                     dbe = new DropBoxManager.Entry(
-                             entry.tag, entry.timestampMillis, entry.file, entry.flags);
+                             entry.tag, entry.timestampMillis, file, entry.flags);
 
                     if (doPrint) {
                         isr = new InputStreamReader(dbe.getInputStream());
@@ -466,7 +475,7 @@ public final class DropBoxManagerService extends SystemService {
                     }
                 } catch (IOException e) {
                     out.append("*** ").append(e.toString()).append("\n");
-                    Slog.e(TAG, "Can't read: " + entry.file, e);
+                    Slog.e(TAG, "Can't read: " + file, e);
                 } finally {
                     if (dbe != null) dbe.close();
                     if (isr != null) {
@@ -509,29 +518,37 @@ public final class DropBoxManagerService extends SystemService {
         }
     }
 
-    /** Metadata describing an on-disk log file. */
-    private static final class EntryFile implements Comparable<EntryFile> {
+    /**
+     * Metadata describing an on-disk log file.
+     *
+     * Note its instances do no have knowledge on what directory they're stored, just to save
+     * 4/8 bytes per instance.  Instead, {@link #getFile} takes a directory so it can build a
+     * fullpath.
+     */
+    @VisibleForTesting
+    static final class EntryFile implements Comparable<EntryFile> {
         public final String tag;
         public final long timestampMillis;
         public final int flags;
-        public final File file;
         public final int blocks;
 
         /** Sorts earlier EntryFile instances before later ones. */
         public final int compareTo(EntryFile o) {
-            if (timestampMillis < o.timestampMillis) return -1;
-            if (timestampMillis > o.timestampMillis) return 1;
-            if (file != null && o.file != null) return file.compareTo(o.file);
-            if (o.file != null) return -1;
-            if (file != null) return 1;
-            if (this == o) return 0;
-            if (hashCode() < o.hashCode()) return -1;
-            if (hashCode() > o.hashCode()) return 1;
-            return 0;
+            int comp = Long.compare(timestampMillis, o.timestampMillis);
+            if (comp != 0) return comp;
+
+            comp = ObjectUtils.compare(tag, o.tag);
+            if (comp != 0) return comp;
+
+            comp = Integer.compare(flags, o.flags);
+            if (comp != 0) return comp;
+
+            return Integer.compare(hashCode(), o.hashCode());
         }
 
         /**
          * Moves an existing temporary file to a new log filename.
+         *
          * @param temp file to rename
          * @param dir to store file in
          * @param tag to use for new log file name
@@ -544,76 +561,94 @@ public final class DropBoxManagerService extends SystemService {
                          int flags, int blockSize) throws IOException {
             if ((flags & DropBoxManager.IS_EMPTY) != 0) throw new IllegalArgumentException();
 
-            this.tag = tag;
+            this.tag = TextUtils.safeIntern(tag);
             this.timestampMillis = timestampMillis;
             this.flags = flags;
-            this.file = new File(dir, Uri.encode(tag) + "@" + timestampMillis +
-                    ((flags & DropBoxManager.IS_TEXT) != 0 ? ".txt" : ".dat") +
-                    ((flags & DropBoxManager.IS_GZIPPED) != 0 ? ".gz" : ""));
 
-            if (!temp.renameTo(this.file)) {
-                throw new IOException("Can't rename " + temp + " to " + this.file);
+            final File file = this.getFile(dir);
+            if (!temp.renameTo(file)) {
+                throw new IOException("Can't rename " + temp + " to " + file);
             }
-            this.blocks = (int) ((this.file.length() + blockSize - 1) / blockSize);
+            this.blocks = (int) ((file.length() + blockSize - 1) / blockSize);
         }
 
         /**
          * Creates a zero-length tombstone for a file whose contents were lost.
+         *
          * @param dir to store file in
          * @param tag to use for new log file name
          * @param timestampMillis of log entry
          * @throws IOException if the file can't be created.
          */
         public EntryFile(File dir, String tag, long timestampMillis) throws IOException {
-            this.tag = tag;
+            this.tag = TextUtils.safeIntern(tag);
             this.timestampMillis = timestampMillis;
             this.flags = DropBoxManager.IS_EMPTY;
-            this.file = new File(dir, Uri.encode(tag) + "@" + timestampMillis + ".lost");
             this.blocks = 0;
-            new FileOutputStream(this.file).close();
+            new FileOutputStream(getFile(dir)).close();
         }
 
         /**
          * Extracts metadata from an existing on-disk log filename.
+         *
+         * Note when a filename is not recognizable, it will create an instance that
+         * {@link #hasFile()} would return false on, and also remove the file.
+         *
          * @param file name of existing log file
          * @param blockSize to use for space accounting
          */
         public EntryFile(File file, int blockSize) {
-            this.file = file;
-            this.blocks = (int) ((this.file.length() + blockSize - 1) / blockSize);
+
+            boolean parseFailure = false;
 
             String name = file.getName();
-            int at = name.lastIndexOf('@');
-            if (at < 0) {
-                this.tag = null;
-                this.timestampMillis = 0;
-                this.flags = DropBoxManager.IS_EMPTY;
-                return;
-            }
-
             int flags = 0;
-            this.tag = Uri.decode(name.substring(0, at));
-            if (name.endsWith(".gz")) {
-                flags |= DropBoxManager.IS_GZIPPED;
-                name = name.substring(0, name.length() - 3);
-            }
-            if (name.endsWith(".lost")) {
-                flags |= DropBoxManager.IS_EMPTY;
-                name = name.substring(at + 1, name.length() - 5);
-            } else if (name.endsWith(".txt")) {
-                flags |= DropBoxManager.IS_TEXT;
-                name = name.substring(at + 1, name.length() - 4);
-            } else if (name.endsWith(".dat")) {
-                name = name.substring(at + 1, name.length() - 4);
+            String tag = null;
+            long millis = 0;
+
+            final int at = name.lastIndexOf('@');
+            if (at < 0) {
+                parseFailure = true;
             } else {
+                tag = Uri.decode(name.substring(0, at));
+                if (name.endsWith(".gz")) {
+                    flags |= DropBoxManager.IS_GZIPPED;
+                    name = name.substring(0, name.length() - 3);
+                }
+                if (name.endsWith(".lost")) {
+                    flags |= DropBoxManager.IS_EMPTY;
+                    name = name.substring(at + 1, name.length() - 5);
+                } else if (name.endsWith(".txt")) {
+                    flags |= DropBoxManager.IS_TEXT;
+                    name = name.substring(at + 1, name.length() - 4);
+                } else if (name.endsWith(".dat")) {
+                    name = name.substring(at + 1, name.length() - 4);
+                } else {
+                    parseFailure = true;
+                }
+                if (!parseFailure) {
+                    try {
+                        millis = Long.parseLong(name);
+                    } catch (NumberFormatException e) {
+                        parseFailure = true;
+                    }
+                }
+            }
+            if (parseFailure) {
+                Slog.wtf(TAG, "Invalid filename: " + file);
+
+                // Remove the file and return an empty instance.
+                file.delete();
+                this.tag = null;
                 this.flags = DropBoxManager.IS_EMPTY;
                 this.timestampMillis = 0;
+                this.blocks = 0;
                 return;
             }
-            this.flags = flags;
 
-            long millis;
-            try { millis = Long.parseLong(name); } catch (NumberFormatException e) { millis = 0; }
+            this.blocks = (int) ((file.length() + blockSize - 1) / blockSize);
+            this.tag = TextUtils.safeIntern(tag);
+            this.flags = flags;
             this.timestampMillis = millis;
         }
 
@@ -625,8 +660,49 @@ public final class DropBoxManagerService extends SystemService {
             this.tag = null;
             this.timestampMillis = millis;
             this.flags = DropBoxManager.IS_EMPTY;
-            this.file = null;
             this.blocks = 0;
+        }
+
+        /**
+         * @return whether an entry actually has a backing file, or it's an empty "tombstone"
+         * entry.
+         */
+        public boolean hasFile() {
+            return tag != null;
+        }
+
+        /** @return File extension for the flags. */
+        private String getExtension() {
+            if ((flags &  DropBoxManager.IS_EMPTY) != 0) {
+                return ".lost";
+            }
+            return ((flags & DropBoxManager.IS_TEXT) != 0 ? ".txt" : ".dat") +
+                    ((flags & DropBoxManager.IS_GZIPPED) != 0 ? ".gz" : "");
+        }
+
+        /**
+         * @return filename for this entry without the pathname.
+         */
+        public String getFilename() {
+            return hasFile() ? Uri.encode(tag) + "@" + timestampMillis + getExtension() : null;
+        }
+
+        /**
+         * Get a full-path {@link File} representing this entry.
+         * @param dir Parent directly.  The caller needs to pass it because {@link EntryFile}s don't
+         *            know in which directory they're stored.
+         */
+        public File getFile(File dir) {
+            return hasFile() ? new File(dir, getFilename()) : null;
+        }
+
+        /**
+         * If an entry has a backing file, remove it.
+         */
+        public void deleteFile(File dir) {
+            if (hasFile()) {
+                getFile(dir).delete();
+            }
         }
     }
 
@@ -651,7 +727,7 @@ public final class DropBoxManagerService extends SystemService {
             if (files == null) throw new IOException("Can't list files: " + mDropBoxDir);
 
             mAllFiles = new FileList();
-            mFilesByTag = new HashMap<String, FileList>();
+            mFilesByTag = new ArrayMap<>();
 
             // Scan pre-existing files.
             for (File file : files) {
@@ -662,16 +738,12 @@ public final class DropBoxManagerService extends SystemService {
                 }
 
                 EntryFile entry = new EntryFile(file, mBlockSize);
-                if (entry.tag == null) {
-                    Slog.w(TAG, "Unrecognized file: " + file);
-                    continue;
-                } else if (entry.timestampMillis == 0) {
-                    Slog.w(TAG, "Invalid filename: " + file);
-                    file.delete();
-                    continue;
-                }
 
-                enrollEntry(entry);
+                if (entry.hasFile()) {
+                    // Enroll only when the filename is valid.  Otherwise the above constructor
+                    // has removed the file already.
+                    enrollEntry(entry);
+                }
             }
         }
     }
@@ -684,11 +756,11 @@ public final class DropBoxManagerService extends SystemService {
         // mFilesByTag is used for trimming, so don't list empty files.
         // (Zero-length/lost files are trimmed by date from mAllFiles.)
 
-        if (entry.tag != null && entry.file != null && entry.blocks > 0) {
+        if (entry.hasFile() && entry.blocks > 0) {
             FileList tagFiles = mFilesByTag.get(entry.tag);
             if (tagFiles == null) {
                 tagFiles = new FileList();
-                mFilesByTag.put(entry.tag, tagFiles);
+                mFilesByTag.put(TextUtils.safeIntern(entry.tag), tagFiles);
             }
             tagFiles.contents.add(entry);
             tagFiles.blocks += entry.blocks;
@@ -722,8 +794,8 @@ public final class DropBoxManagerService extends SystemService {
                     tagFiles.blocks -= late.blocks;
                 }
                 if ((late.flags & DropBoxManager.IS_EMPTY) == 0) {
-                    enrollEntry(new EntryFile(
-                            late.file, mDropBoxDir, late.tag, t++, late.flags, mBlockSize));
+                    enrollEntry(new EntryFile(late.getFile(mDropBoxDir), mDropBoxDir,
+                            late.tag, t++, late.flags, mBlockSize));
                 } else {
                     enrollEntry(new EntryFile(mDropBoxDir, late.tag, t++));
                 }
@@ -757,7 +829,7 @@ public final class DropBoxManagerService extends SystemService {
             FileList tag = mFilesByTag.get(entry.tag);
             if (tag != null && tag.contents.remove(entry)) tag.blocks -= entry.blocks;
             if (mAllFiles.contents.remove(entry)) mAllFiles.blocks -= entry.blocks;
-            if (entry.file != null) entry.file.delete();
+            entry.deleteFile(mDropBoxDir);
         }
 
         // Compute overall quota (a fraction of available free space) in blocks.
@@ -823,7 +895,7 @@ public final class DropBoxManagerService extends SystemService {
                     if (mAllFiles.contents.remove(entry)) mAllFiles.blocks -= entry.blocks;
 
                     try {
-                        if (entry.file != null) entry.file.delete();
+                        entry.deleteFile(mDropBoxDir);
                         enrollEntry(new EntryFile(mDropBoxDir, entry.tag, entry.timestampMillis));
                     } catch (IOException e) {
                         Slog.e(TAG, "Can't write tombstone file", e);

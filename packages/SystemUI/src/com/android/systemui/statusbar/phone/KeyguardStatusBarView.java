@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
+import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
@@ -346,6 +347,9 @@ public class KeyguardStatusBarView extends RelativeLayout
         applyDarkness(R.id.signal_cluster, tintArea, intensity, iconColor);
         applyDarkness(R.id.battery, tintArea, intensity, iconColor);
         applyDarkness(R.id.clock, tintArea, intensity, iconColor);
+        // Reload user avatar
+        ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
+                .onDensityOrFontScaleChanged();
     }
 
     private void applyDarkness(int id, Rect tintArea, float intensity, int color) {

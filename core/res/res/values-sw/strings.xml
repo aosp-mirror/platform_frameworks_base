@@ -80,11 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Kwa sasa, huduma hii haipatikani katika mtandao wa simu mahali ulipo"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Haiwezi kufikia mtandao"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ili kupata mtandao thabiti, jaribu kubadilisha aina uliyochagua katika Mipangilio &gt; Mtandao na Intaneti &gt; Mitandao ya simu &gt; Aina ya mtandao unaopendelea."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Umewasha kipengele cha kupiga simu kupitia Wi‑Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Huduma ya kupiga simu za dharura inahitaji mtandao wa simu."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Arifa"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Kupeleka simu kwenye nambari nyingine"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Hali ya kupiga simu za dharura"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Hali ya data ya mtandao wa simu"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Ujumbe wa SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ujumbe wa sauti"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kupiga simu kupitia Wi-Fi"</string>
