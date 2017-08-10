@@ -34,6 +34,8 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -241,12 +243,20 @@ public class TaskStackAnimationHelper {
             return;
         }
 
+        final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
         int taskViewEnterFromAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_app_duration);
         int taskViewEnterFromAffiliatedAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_affiliated_app_duration);
         int dockGestureAnimDuration = appRes.getInteger(
                 R.integer.long_press_dock_anim_duration);
+
+        // Since low ram devices have an animation when entering app -> recents, do not allow
+        // toggle until the animation is complete
+        if (launchState.launchedFromApp && !launchState.launchedViaDockGesture && isLowRamDevice) {
+            postAnimationTrigger.addLastDecrementRunnable(() -> EventBus.getDefault()
+                .send(new SetWaitingForTransitionStartEvent(false)));
+        }
 
         // Create enter animations for each of the views from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -296,7 +306,7 @@ public class TaskStackAnimationHelper {
                 AnimationProps taskAnimation = new AnimationProps()
                         .setInterpolator(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
-                if (Recents.getConfiguration().isLowRamDevice) {
+                if (isLowRamDevice) {
                     taskAnimation.setInterpolator(AnimationProps.BOUNDS,
                             Interpolators.FAST_OUT_SLOW_IN)
                             .setDuration(AnimationProps.BOUNDS, 150)
