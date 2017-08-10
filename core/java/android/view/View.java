@@ -6856,8 +6856,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        // Invisible and gone views are never focusable.
-        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
+        // Invisible, gone, or disabled views are never focusable.
+        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE
+                || (mViewFlags & ENABLED_MASK) != ENABLED) {
             return false;
         }
 
@@ -10483,7 +10484,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (views == null) {
             return;
         }
-        if (!isFocusable()) {
+        if (!isFocusable() || !isEnabled()) {
             return;
         }
         if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE
@@ -10806,7 +10807,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean requestFocusNoSearch(int direction, Rect previouslyFocusedRect) {
         // need to be focusable
         if ((mViewFlags & FOCUSABLE) != FOCUSABLE
-                || (mViewFlags & VISIBILITY_MASK) != VISIBLE) {
+                || (mViewFlags & VISIBILITY_MASK) != VISIBLE
+                || (mViewFlags & ENABLED_MASK) != ENABLED) {
             return false;
         }
 
@@ -13284,9 +13286,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // about in case nothing has focus.  even if this specific view
                 // isn't focusable, it may contain something that is, so let
                 // the root view try to give this focus if nothing else does.
-                if ((mParent != null)) {
+                if ((mParent != null) && (mViewFlags & ENABLED_MASK) == ENABLED) {
                     mParent.focusableViewAvailable(this);
                 }
+            }
+        }
+
+        if ((changed & ENABLED_MASK) != 0) {
+            if ((mViewFlags & ENABLED_MASK) == ENABLED) {
+                // a view becoming enabled should notify the parent as long as the view is also
+                // visible and the parent wasn't already notified by becoming visible during this
+                // setFlags invocation.
+                if ((mViewFlags & VISIBILITY_MASK) == VISIBLE
+                        && ((changed & VISIBILITY_MASK) == 0)) {
+                    if ((mParent != null) && (mViewFlags & ENABLED_MASK) == ENABLED) {
+                        mParent.focusableViewAvailable(this);
+                    }
+                }
+            } else {
+                if (hasFocus()) clearFocus();
             }
         }
 
