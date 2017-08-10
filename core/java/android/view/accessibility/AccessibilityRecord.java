@@ -323,6 +323,20 @@ public class AccessibilityRecord {
     }
 
     /**
+     * Sets if the source is important for accessibility.
+     *
+     * @param importantForAccessibility True if the source is important for accessibility,
+     *                                  false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @hide
+     */
+    public void setImportantForAccessibility(boolean importantForAccessibility) {
+        enforceNotSealed();
+        setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, importantForAccessibility);
+    }
+
+    /**
      * Gets the number of items that can be visited.
      *
      * @return The number of items.
