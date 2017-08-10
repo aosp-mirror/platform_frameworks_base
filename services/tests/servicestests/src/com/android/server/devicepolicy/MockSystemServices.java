@@ -46,6 +46,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.provider.Settings;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
@@ -53,6 +54,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.IWindowManager;
 
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
@@ -130,6 +132,7 @@ public class MockSystemServices {
         packageManager = spy(realContext.getPackageManager());
 
         contentResolver = new MockContentResolver();
+        contentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
 
         // Add the system user with a fake profile group already set up (this can happen in the real
         // world if a managed profile is added and then removed).
