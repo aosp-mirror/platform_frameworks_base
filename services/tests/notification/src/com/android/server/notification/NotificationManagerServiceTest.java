@@ -48,6 +48,7 @@ import android.app.NotificationManager;
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -60,7 +61,6 @@ import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.service.notification.ZenModeConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -1550,4 +1550,14 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         verify(mAssistants, times(2)).migrateToXml();
     }
 
+
+    @Test
+    public void testLocaleChangedCallsUpdateDefaultZenModeRules() throws Exception {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mNotificationManagerService.mZenModeHelper = mZenModeHelper;
+        mNotificationManagerService.mLocaleChangeReceiver.onReceive(mContext,
+                new Intent(Intent.ACTION_LOCALE_CHANGED));
+
+        verify(mZenModeHelper, times(1)).updateDefaultZenRules();
+    }
 }
