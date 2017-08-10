@@ -3795,7 +3795,6 @@ public abstract class PackageManager {
 
     /**
      * @removed
-     * @hide
      */
     public abstract boolean setInstantAppCookie(@Nullable byte[] cookie);
 
