@@ -53,6 +53,11 @@ void RenderState::onGLContextCreated() {
     mScissor = new Scissor();
     mStencil = new Stencil();
 
+    // Deferred because creation needs GL context for texture limits
+    if (!mLayerPool) {
+        mLayerPool = new OffscreenBufferPool();
+    }
+
     // This is delayed because the first access of Caches makes GL calls
     if (!mCaches) {
         mCaches = &Caches::createInstance(*this);
@@ -67,7 +72,7 @@ static void layerLostGlContext(Layer* layer) {
 }
 
 void RenderState::onGLContextDestroyed() {
-    mLayerPool.clear();
+    mLayerPool->clear();
 
     // TODO: reset all cached state in state objects
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
@@ -100,7 +105,7 @@ static void layerDestroyedVkContext(Layer* layer) {
 }
 
 void RenderState::onVkContextDestroyed() {
-    mLayerPool.clear();
+    mLayerPool->clear();
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerDestroyedVkContext);
     GpuMemoryTracker::onGpuContextDestroyed();
 }
@@ -116,10 +121,10 @@ void RenderState::flush(Caches::FlushMode mode) {
         case Caches::FlushMode::Moderate:
             // fall through
         case Caches::FlushMode::Layers:
-            mLayerPool.clear();
+            if (mLayerPool) mLayerPool->clear();
             break;
     }
-    mCaches->flush(mode);
+    if (mCaches) mCaches->flush(mode);
 }
 
 void RenderState::onBitmapDestroyed(uint32_t pixelRefId) {

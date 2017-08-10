@@ -74,8 +74,8 @@ RENDERTHREAD_TEST(OffscreenBufferPool, construct) {
     OffscreenBufferPool pool;
     EXPECT_EQ(0u, pool.getCount()) << "pool must be created empty";
     EXPECT_EQ(0u, pool.getSize()) << "pool must be created empty";
-    EXPECT_EQ((uint32_t) Properties::layerPoolSize, pool.getMaxSize())
-            << "pool must read size from Properties";
+    // TODO: Does this really make sense as a test?
+    EXPECT_EQ(DeviceInfo::multiplyByResolution(4 * 4), pool.getMaxSize());
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, getPutClear) {
