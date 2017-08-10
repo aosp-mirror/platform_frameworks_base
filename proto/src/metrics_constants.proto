@@ -4262,88 +4262,77 @@ message MetricsEvent {
     // OS: O MR
     DATA_PLAN_USAGE_SUMMARY = 1088;
 
+    // FIELD: The numeric preference value (of type int) when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE = 1089;
+
+    // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
+
     // OPEN: Settings > Network & Internet > Mobile network
     // CATEGORY: SETTINGS
-    // OS: O MR
-    SETTINGS_MOBILE_NETWORK_CATEGORY = 1089;
+    SETTINGS_MOBILE_NETWORK_CATEGORY = 1139;
 
     // ACTION: Settings > Network & Internet > Mobile network > Roaming
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_DATA_ROAMING_TOGGLE = 1090;
+    ACTION_MOBILE_NETWORK_DATA_ROAMING_TOGGLE = 1140;
 
     // ACTION: Settings > Network & Internet > Mobile network > Advanced
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_EXPAND_ADVANCED_FIELDS = 1091;
+    ACTION_MOBILE_NETWORK_EXPAND_ADVANCED_FIELDS = 1141;
 
     // ACTION: Settings > Network & Internet > Mobile network > Enhanced 4G LTE Mode
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_ENHANCED_4G_LTE_MODE_TOGGLE = 1092;
+    ACTION_MOBILE_ENHANCED_4G_LTE_MODE_TOGGLE = 1142;
 
     // ACTION: Settings > Network & Internet > Mobile network > Preferred network type
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_SELECT_PREFERRED_NETWORK = 1093;
+    ACTION_MOBILE_NETWORK_SELECT_PREFERRED_NETWORK = 1143;
 
     // ACTION: Settings > Network & Internet > Mobile network > Preferred network type (enabled networks)
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_SELECT_ENABLED_NETWORK = 1094;
+    ACTION_MOBILE_NETWORK_SELECT_ENABLED_NETWORK = 1144;
 
     // OPEN: Settings > Network & Internet > Mobile network > Carrier
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_EUICC_SETTING = 1095;
+    ACTION_MOBILE_NETWORK_EUICC_SETTING = 1145;
 
     // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_WIFI_CALLING = 1096;
+    ACTION_MOBILE_NETWORK_WIFI_CALLING = 1146;
 
     // ACTION: Settings > Network & Internet > Mobile network > Carrier video calling
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_VIDEO_CALLING_TOGGLE = 1097;
+    ACTION_MOBILE_NETWORK_VIDEO_CALLING_TOGGLE = 1147;
 
     // ACTION: Settings > Network & Internet > Mobile network > Automatically select network
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_AUTO_SELECT_NETWORK_TOGGLE = 1098;
+    ACTION_MOBILE_NETWORK_AUTO_SELECT_NETWORK_TOGGLE = 1148;
 
     // ACTION: Settings > Network & Internet > Mobile network > Network
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1099;
+    ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1149;
 
     // FIELD - Manually selected mobile network
-    FIELD_MOBILE_NETWORK = 1100;
+    FIELD_MOBILE_NETWORK = 1150;
 
     // OPEN: Settings > Network & Internet > Mobile network > Access Point Names
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_APN_SETTINGS = 1101;
+    ACTION_MOBILE_NETWORK_APN_SETTINGS = 1151;
 
     // OPEN: Settings > Network & Internet > Mobile network > Carrier settings
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_CARRIER_SETTINGS = 1102;
+    ACTION_MOBILE_NETWORK_CARRIER_SETTINGS = 1152;
 
     // OPEN: Settings > Network & Internet > Mobile network > System select
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_CDMA_SYSTEM_SELECT = 1103;
+    ACTION_MOBILE_NETWORK_CDMA_SYSTEM_SELECT = 1153;
 
     // OPEN: Settings > Network & Internet > Mobile network > CDMA subscription
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_CDMA_SUBSCRIPTION_SELECT = 1104;
+    ACTION_MOBILE_NETWORK_CDMA_SUBSCRIPTION_SELECT = 1154;
 
     // ACTION: Settings > Network & Internet > Mobile network > Set up data service
     // CATEGORY: SETTINGS
-    // OS: O MR
-    ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1105;
+    ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1155;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
