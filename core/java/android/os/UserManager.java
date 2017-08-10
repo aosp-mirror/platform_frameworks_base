@@ -792,6 +792,19 @@ public class UserManager {
     public static final String DISALLOW_AUTOFILL = "no_autofill";
 
     /**
+     * Specifies if user switching is blocked on the current user.
+     *
+     * <p> This restriction can only be set by the device owner, it will be applied to all users.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_USER_SWITCH = "no_user_switch";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
@@ -917,7 +930,7 @@ public class UserManager {
     /**
      * Returns whether switching users is currently allowed.
      * <p>For instance switching users is not allowed if the current user is in a phone call,
-     * or system user hasn't been unlocked yet
+     * system user hasn't been unlocked yet, or {@link #DISALLOW_USER_SWITCH} is set.
      * @hide
      */
     public boolean canSwitchUsers() {
@@ -927,7 +940,9 @@ public class UserManager {
         boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
         boolean inCall = TelephonyManager.getDefault().getCallState()
                 != TelephonyManager.CALL_STATE_IDLE;
-        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall;
+        boolean isUserSwitchDisallowed = hasUserRestriction(DISALLOW_USER_SWITCH);
+        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
+                && !isUserSwitchDisallowed;
     }
 
     /**
@@ -2296,6 +2311,9 @@ public class UserManager {
      */
     public boolean isUserSwitcherEnabled() {
         if (!supportsMultipleUsers()) {
+            return false;
+        }
+        if (hasUserRestriction(DISALLOW_USER_SWITCH)) {
             return false;
         }
         // If Demo Mode is on, don't show user switcher
