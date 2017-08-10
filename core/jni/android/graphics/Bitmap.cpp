@@ -752,7 +752,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 
 static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
         SkBitmap::Allocator* alloc) {
-    LOG_ALWAYS_FATAL_IF(kIndex_8_SkColorType == dstCT, "Error, cannot copyTo kIndex8.");
+    LOG_ALWAYS_FATAL_IF(kIndex_8_SkColorType == dstCT &&
+            kIndex_8_SkColorType != src.colorType(), "Error, cannot copyTo kIndex8.");
 
     SkPixmap srcPM;
     if (!src.peekPixels(&srcPM)) {
@@ -787,7 +788,7 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
     if (!dst->setInfo(dstInfo)) {
         return false;
     }
-    if (!dst->tryAllocPixels(alloc, nullptr)) {
+    if (!dst->tryAllocPixels(alloc, srcPM.ctable())) {
         return false;
     }
 

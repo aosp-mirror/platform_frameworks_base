@@ -1460,7 +1460,7 @@ public class UserManager {
             user = mService.createUser(name, flags);
             // TODO: Keep this in sync with
             // UserManagerService.LocalService.createUserEvenWhenDisallowed
-            if (user != null && !user.isAdmin()) {
+            if (user != null && !user.isAdmin() && !user.isDemo()) {
                 mService.setUserRestriction(DISALLOW_SMS, true, user.id);
                 mService.setUserRestriction(DISALLOW_OUTGOING_CALLS, true, user.id);
             }

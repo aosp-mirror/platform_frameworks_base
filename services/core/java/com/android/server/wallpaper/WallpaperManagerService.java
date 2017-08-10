@@ -115,6 +115,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -376,40 +377,39 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     private void notifyColorListeners(@NonNull WallpaperColors wallpaperColors, int which,
             int userId) {
         final IWallpaperManagerCallback keyguardListener;
-        final RemoteCallbackList<IWallpaperManagerCallback> currentUserColorListeners;
-        final RemoteCallbackList<IWallpaperManagerCallback> userAllColorListeners;
+        final ArrayList<IWallpaperManagerCallback> colorListeners = new ArrayList<>();
         synchronized (mLock) {
-            currentUserColorListeners = mColorsChangedListeners.get(userId);
-            userAllColorListeners = mColorsChangedListeners.get(UserHandle.USER_ALL);
+            final RemoteCallbackList<IWallpaperManagerCallback> currentUserColorListeners =
+                    mColorsChangedListeners.get(userId);
+            final RemoteCallbackList<IWallpaperManagerCallback> userAllColorListeners =
+                    mColorsChangedListeners.get(UserHandle.USER_ALL);
             keyguardListener = mKeyguardListener;
+
+            if (currentUserColorListeners != null) {
+                final int count = currentUserColorListeners.beginBroadcast();
+                for (int i = 0; i < count; i++) {
+                    colorListeners.add(currentUserColorListeners.getBroadcastItem(i));
+                }
+                currentUserColorListeners.finishBroadcast();
+            }
+
+            if (userAllColorListeners != null) {
+                final int count = userAllColorListeners.beginBroadcast();
+                for (int i = 0; i < count; i++) {
+                    colorListeners.add(userAllColorListeners.getBroadcastItem(i));
+                }
+                userAllColorListeners.finishBroadcast();
+            }
         }
 
-        if (currentUserColorListeners != null) {
-            int count = currentUserColorListeners.beginBroadcast();
-            for (int i = 0; i < count; i++) {
-                try {
-                    currentUserColorListeners.getBroadcastItem(i)
-                            .onWallpaperColorsChanged(wallpaperColors, which, userId);
-                } catch (RemoteException e) {
-                    // Callback is gone, it's not necessary to unregister it since
-                    // RemoteCallbackList#getBroadcastItem will take care of it.
-                }
+        final int count = colorListeners.size();
+        for (int i = 0; i < count; i++) {
+            try {
+                colorListeners.get(i).onWallpaperColorsChanged(wallpaperColors, which, userId);
+            } catch (RemoteException e) {
+                // Callback is gone, it's not necessary to unregister it since
+                // RemoteCallbackList#getBroadcastItem will take care of it.
             }
-            currentUserColorListeners.finishBroadcast();
-        }
-
-        if (userAllColorListeners != null) {
-            int count = userAllColorListeners.beginBroadcast();
-            for (int i = 0; i < count; i++) {
-                try {
-                    userAllColorListeners.getBroadcastItem(i)
-                            .onWallpaperColorsChanged(wallpaperColors, which, userId);
-                } catch (RemoteException e) {
-                    // Callback is gone, it's not necessary to unregister it since
-                    // RemoteCallbackList#getBroadcastItem will take care of it.
-                }
-            }
-            userAllColorListeners.finishBroadcast();
         }
 
         if (keyguardListener != null) {

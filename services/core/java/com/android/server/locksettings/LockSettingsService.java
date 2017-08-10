@@ -1235,6 +1235,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                                 .setUserAuthenticationRequired(true)
                                 .setUserAuthenticationValidityDurationSeconds(30)
+                                .setCriticalToDeviceEncryption(true)
                                 .build());
                 // Key imported, obtain a reference to it.
                 SecretKey keyStoreEncryptionKey = (SecretKey) keyStore.getKey(
