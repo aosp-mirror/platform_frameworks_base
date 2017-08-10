@@ -26,6 +26,7 @@ import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Tests app ops version upgrades
  */
+@SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AppOpsUpgradeTest {
     private static final String TAG = AppOpsUpgradeTest.class.getSimpleName();
