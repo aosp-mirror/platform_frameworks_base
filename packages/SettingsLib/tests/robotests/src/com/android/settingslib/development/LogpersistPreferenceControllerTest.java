@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 
 import android.os.SystemProperties;
 import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
@@ -59,8 +60,14 @@ public class LogpersistPreferenceControllerTest {
         mController = new AbstractLogpersistPreferenceController(RuntimeEnvironment.application,
                 mLifecycle) {
             @Override
-            public void showConfirmationDialog(ListPreference preference) {
+            public void showConfirmationDialog(Preference preference) {}
 
+            @Override
+            public void dismissConfirmationDialog() {}
+
+            @Override
+            public boolean isConfirmationDialogShowing() {
+                return false;
             }
         };
 
