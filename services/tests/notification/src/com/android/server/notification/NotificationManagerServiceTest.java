@@ -1339,7 +1339,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         runnable.run();
         waitForIdle();
 
-        verify(mGroupHelper, times(1)).onNotificationPosted(any());
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
     }
 
     @Test
@@ -1355,7 +1355,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         runnable.run();
         waitForIdle();
 
-        verify(mGroupHelper, times(1)).onNotificationPosted(any());
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
     }
 
     @Test
@@ -1371,7 +1371,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         runnable.run();
         waitForIdle();
 
-        verify(mGroupHelper, never()).onNotificationPosted(any());
+        verify(mGroupHelper, never()).onNotificationPosted(any(), anyBoolean());
     }
 
     @Test
