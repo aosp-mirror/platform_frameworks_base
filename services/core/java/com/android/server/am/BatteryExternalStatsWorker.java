@@ -248,7 +248,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     reason, 0);
 
             if ((updateFlags & UPDATE_CPU) != 0) {
-                mStats.updateCpuTimeLocked(true /* updateCpuFreqData */);
+                mStats.updateCpuTimeLocked();
                 mStats.updateKernelWakelocksLocked();
                 mStats.updateKernelMemoryBandwidthLocked();
             }
