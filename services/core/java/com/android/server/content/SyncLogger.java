@@ -98,6 +98,13 @@ public class SyncLogger {
     }
 
     /**
+     * @return whether log is enabled or not.
+     */
+    public boolean enabled() {
+        return false;
+    }
+
+    /**
      * Actual implementation which is only used on userdebug/eng builds (by default).
      */
     private static class RotatingFileLogger extends SyncLogger {
@@ -132,6 +139,11 @@ public class SyncLogger {
 
         RotatingFileLogger() {
             mLogPath = new File(Environment.getDataSystemDirectory(), "syncmanager-log");
+        }
+
+        @Override
+        public boolean enabled() {
+            return true;
         }
 
         private void handleException(String message, Exception e) {
