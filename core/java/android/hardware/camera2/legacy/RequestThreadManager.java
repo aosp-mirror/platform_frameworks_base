@@ -713,7 +713,7 @@ public class RequestThreadManager {
                     boolean anyRequestOutputAbandoned = false;
 
                     // Get the next burst from the request queue.
-                    Pair<BurstHolder, Long> nextBurst = mRequestQueue.getNext();
+                    RequestQueue.RequestQueueEntry nextBurst = mRequestQueue.getNext();
 
                     if (nextBurst == null) {
                         // If there are no further requests queued, wait for any currently executing
@@ -748,11 +748,17 @@ public class RequestThreadManager {
                     if (nextBurst != null) {
                         // Queue another capture if we did not get the last burst.
                         handler.sendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST);
+
+                        // Check whether capture queue becomes empty
+                        if (nextBurst.isQueueEmpty()) {
+                            mDeviceState.setRequestQueueEmpty();
+                        }
                     }
 
                     // Complete each request in the burst
+                    BurstHolder burstHolder = nextBurst.getBurstHolder();
                     List<RequestHolder> requests =
-                            nextBurst.first.produceRequestHolders(nextBurst.second);
+                            burstHolder.produceRequestHolders(nextBurst.getFrameNumber());
                     for (RequestHolder holder : requests) {
                         CaptureRequest request = holder.getRequest();
 
@@ -918,8 +924,8 @@ public class RequestThreadManager {
                     }
 
                     // Stop the repeating request if any of its output surfaces is abandoned.
-                    if (anyRequestOutputAbandoned && nextBurst.first.isRepeating()) {
-                        long lastFrameNumber = cancelRepeating(nextBurst.first.getRequestId());
+                    if (anyRequestOutputAbandoned && burstHolder.isRepeating()) {
+                        long lastFrameNumber = cancelRepeating(burstHolder.getRequestId());
                         if (DEBUG) {
                             Log.d(TAG, "Stopped repeating request. Last frame number is " +
                                     lastFrameNumber);
