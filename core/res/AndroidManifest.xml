@@ -1825,10 +1825,6 @@
     <permission android:name="android.permission.MANAGE_USERS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide Allows an application to configure the assist gesture -->
-    <permission android:name="android.permission.CONFIGURE_ASSIST_GESTURE"
-        android:protectionLevel="signature" />
-
     <!-- @hide Allows an application to create, remove users and get the list of
          users on the device. Applications holding this permission can only create restricted,
          guest, managed, demo, and ephemeral users. For creating other kind of users,
