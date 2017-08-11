@@ -103,6 +103,18 @@ import java.util.concurrent.CountDownLatch;
  * {@link android.app.backup.BackupAgentHelper}.  That class is particularly
  * suited to handling of simple file or {@link android.content.SharedPreferences}
  * backup and restore.
+ * <p>
+ * <b>Threading</b>
+ * <p>
+ * The constructor, as well as {@link #onCreate()} and {@link #onDestroy()} lifecycle callbacks run
+ * on the main thread (UI thread) of the application that implements the BackupAgent.
+ * The data-handling callbacks:
+ * {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor) onBackup()},
+ * {@link #onFullBackup(FullBackupDataOutput)},
+ * {@link #onRestore(BackupDataInput, int, ParcelFileDescriptor) onRestore()},
+ * {@link #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long) onRestoreFile()},
+ * {@link #onRestoreFinished()}, and {@link #onQuotaExceeded(long, long) onQuotaExceeded()}
+ * run on binder pool threads.
  *
  * @see android.app.backup.BackupManager
  * @see android.app.backup.BackupAgentHelper
