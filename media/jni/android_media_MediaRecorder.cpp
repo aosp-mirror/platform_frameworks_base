@@ -31,7 +31,7 @@
 #include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
