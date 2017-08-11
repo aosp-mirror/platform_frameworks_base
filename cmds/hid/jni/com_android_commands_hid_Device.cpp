@@ -29,7 +29,7 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android/looper.h>
 #include <android/log.h>
 
