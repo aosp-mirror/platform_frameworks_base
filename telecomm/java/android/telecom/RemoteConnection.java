@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1464,7 +1465,11 @@ public final class RemoteConnection {
         if (mExtras == null) {
             mExtras = new Bundle();
         }
-        mExtras.putAll(extras);
+        try {
+            mExtras.putAll(extras);
+        } catch (BadParcelableException bpe) {
+            Log.w(this, "putExtras: could not unmarshal extras; exception = " + bpe);
+        }
 
         notifyExtrasChanged();
     }
