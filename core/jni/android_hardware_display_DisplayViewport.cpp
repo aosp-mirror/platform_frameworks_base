@@ -24,7 +24,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
 
