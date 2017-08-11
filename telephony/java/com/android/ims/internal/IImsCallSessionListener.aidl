@@ -29,7 +29,7 @@ import com.android.ims.ImsSuppServiceNotification;
  * by having one of the methods called on the {@link IImsCallSessionListener}.
  * {@hide}
  */
-interface IImsCallSessionListener {
+oneway interface IImsCallSessionListener {
     /**
      * Notifies the result of the basic session operation (setup / terminate).
      */
