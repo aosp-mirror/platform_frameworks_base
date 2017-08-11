@@ -16,7 +16,7 @@
 
 package com.android.systemui.doze;
 
-import android.content.Context;
+import android.os.Handler;
 import android.view.Display;
 
 /**
@@ -24,16 +24,46 @@ import android.view.Display;
  */
 public class DozeScreenState implements DozeMachine.Part {
     private final DozeMachine.Service mDozeService;
+    private final Handler mHandler;
+    private int mPendingScreenState = Display.STATE_UNKNOWN;
+    private Runnable mApplyPendingScreenState = this::applyPendingScreenState;
 
-    public DozeScreenState(DozeMachine.Service service) {
+    public DozeScreenState(DozeMachine.Service service, Handler handler) {
         mDozeService = service;
+        mHandler = handler;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         int screenState = newState.screenState();
+        if (screenState == Display.STATE_UNKNOWN) {
+            // We'll keep it in the existing state
+            return;
+        }
+        boolean messagePending = mHandler.hasCallbacks(mApplyPendingScreenState);
+        if (messagePending || oldState == DozeMachine.State.INITIALIZED) {
+            // During initialization, we hide the navigation bar. That is however only applied after
+            // a traversal; setting the screen state here is immediate however, so it can happen
+            // that the screen turns on again before the navigation bar is hidden. To work around
+            // that, wait for a traversal to happen before applying the initial screen state.
+            mPendingScreenState = screenState;
+            if (!messagePending) {
+                mHandler.post(mApplyPendingScreenState);
+            }
+            return;
+        }
+        applyScreenState(screenState);
+    }
+
+    private void applyPendingScreenState() {
+        applyScreenState(mPendingScreenState);
+        mPendingScreenState = Display.STATE_UNKNOWN;
+    }
+
+    private void applyScreenState(int screenState) {
         if (screenState != Display.STATE_UNKNOWN) {
             mDozeService.setDozeScreenState(screenState);
+            mPendingScreenState = Display.STATE_UNKNOWN;
         }
     }
 }
