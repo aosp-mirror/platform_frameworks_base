@@ -47,6 +47,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -2314,7 +2315,9 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint.
+     * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint and all
+     * Passpoint related APIs in {@link WifiManager} are supported. Refer to
+     * {@link WifiManager#addOrUpdatePasspointConfiguration} for more info.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
