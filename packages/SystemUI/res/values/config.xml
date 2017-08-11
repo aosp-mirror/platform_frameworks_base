@@ -328,8 +328,12 @@
     <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
-         If < 0, uses the value from HardwarePropertiesManager#getDeviceTemperatures. -->
+         If < 0, uses the value from
+         HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
     <integer name="config_warningTemperature">-1</integer>
+
+    <!-- Fudge factor for how much below the shutdown temp to show the warning. -->
+    <integer name="config_warningTemperatureTolerance">2</integer>
 
     <!-- Accessibility actions -->
     <item type="id" name="action_split_task_to_left" />
