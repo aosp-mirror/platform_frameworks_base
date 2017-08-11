@@ -1700,6 +1700,16 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Returns a URL pointing to the privacy policy for Safe Browsing reporting.
+     *
+     * @return the url pointing to a privacy policy document which can be displayed to users.
+     */
+    @NonNull
+    public static Uri getSafeBrowsingPrivacyPolicyUrl() {
+        return getFactory().getStatics().getSafeBrowsingPrivacyPolicyUrl();
+    }
+
+    /**
      * Gets the WebBackForwardList for this WebView. This contains the
      * back/forward list for use in querying each item in the history stack.
      * This is a copy of the private WebBackForwardList so it contains only a
