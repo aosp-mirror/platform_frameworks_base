@@ -186,7 +186,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -2050,9 +2049,7 @@ public class NotificationManagerService extends SystemService {
 
         private StatusBarNotification sanitizeSbn(String pkg, int userId,
                 StatusBarNotification sbn) {
-            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId
-                    && (sbn.getNotification().flags
-                    & Notification.FLAG_AUTOGROUP_SUMMARY) == 0) {
+            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
                 // We could pass back a cloneLight() but clients might get confused and
                 // try to send this thing back to notify() again, which would not work
                 // very well.
@@ -3060,6 +3057,12 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mNotificationLock")
+    private boolean hasAutoGroupSummaryLocked(StatusBarNotification sbn) {
+        ArrayMap<String, String> summaries = mAutobundledSummaries.get(sbn.getUserId());
+        return summaries != null && summaries.containsKey(sbn.getPackageName());
+    }
+
     // Posts a 'fake' summary for a package that has exceeded the solo-notification limit.
     private void createAutoGroupSummary(int userId, String pkg, String triggeringKey) {
         NotificationRecord summaryRecord = null;
@@ -3832,7 +3835,8 @@ public class NotificationManagerService extends SystemService {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mGroupHelper.onNotificationPosted(n);
+                                    mGroupHelper.onNotificationPosted(
+                                            n, hasAutoGroupSummaryLocked(n));
                                 }
                             });
                         }
