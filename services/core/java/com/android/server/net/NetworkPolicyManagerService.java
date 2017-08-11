@@ -354,6 +354,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // Used to restore mRestrictBackground when battery saver is turned off.
     private boolean mRestrictBackgroundBeforeBsm;
 
+    // Denotes the status of restrict background read from disk.
+    private boolean mLoadedRestrictBackground;
+
     // See main javadoc for instructions on how to use these locks.
     final Object mUidRulesFirstLock = new Object();
     final Object mNetworkPoliciesSecondLock = new Object();
@@ -653,15 +656,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     readPolicyAL();
 
                     // Update the restrictBackground if battery saver is turned on
-                    mRestrictBackgroundBeforeBsm = mRestrictBackground;
+                    mRestrictBackgroundBeforeBsm = mLoadedRestrictBackground;
                     mRestrictBackgroundPowerState = mPowerManagerInternal
                             .getLowPowerState(ServiceType.DATA_SAVER);
                     final boolean localRestrictBackground =
                             mRestrictBackgroundPowerState.batterySaverEnabled;
-                    if (localRestrictBackground && localRestrictBackground != mRestrictBackground) {
-                        mRestrictBackground = localRestrictBackground;
-                        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED,
-                                mRestrictBackground ? 1 : 0, 0).sendToTarget();
+                    if (localRestrictBackground && !mLoadedRestrictBackground) {
+                        mLoadedRestrictBackground = true;
                     }
                     mPowerManagerInternal.registerLowPowerModeObserver(
                             new PowerManagerInternal.LowPowerModeListener() {
@@ -682,7 +683,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         writePolicyAL();
                     }
 
-                    setRestrictBackgroundUL(mRestrictBackground);
+                    setRestrictBackgroundUL(mLoadedRestrictBackground);
                     updateRulesForGlobalChangeAL(false);
                     updateNotificationsNL();
                 }
@@ -1760,19 +1761,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     if (TAG_POLICY_LIST.equals(tag)) {
                         final boolean oldValue = mRestrictBackground;
                         version = readIntAttribute(in, ATTR_VERSION);
-                        if (version >= VERSION_ADDED_RESTRICT_BACKGROUND) {
-                            mRestrictBackground = readBooleanAttribute(
-                                    in, ATTR_RESTRICT_BACKGROUND);
-                        } else {
-                            mRestrictBackground = false;
-                        }
-                        if (mRestrictBackground != oldValue) {
-                            // Some early services may have read the default value,
-                            // so notify them that it's changed
-                            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED,
-                                    mRestrictBackground ? 1 : 0, 0).sendToTarget();
-                        }
-
+                        mLoadedRestrictBackground = (version >= VERSION_ADDED_RESTRICT_BACKGROUND)
+                                && readBooleanAttribute(in, ATTR_RESTRICT_BACKGROUND);
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
                         final int networkTemplate = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
                         final String subscriberId = in.getAttributeValue(null, ATTR_SUBSCRIBER_ID);
@@ -1959,7 +1949,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // usually happens on first boot of a new device and not one that has received an OTA.
 
         // Seed from the default value configured for this device.
-        mRestrictBackground = Settings.Global.getInt(
+        mLoadedRestrictBackground = Settings.Global.getInt(
                 mContext.getContentResolver(), Global.DEFAULT_RESTRICT_BACKGROUND_DATA, 0) == 1;
 
         // NOTE: We used to read the legacy setting here :
@@ -2432,52 +2422,62 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 maybeRefreshTrustedTime();
                 synchronized (mUidRulesFirstLock) {
-                    if (restrictBackground == mRestrictBackground) {
-                        // Ideally, UI should never allow this scenario...
-                        Slog.w(TAG, "setRestrictBackground: already " + restrictBackground);
-                        return;
-                    }
                     setRestrictBackgroundUL(restrictBackground);
                 }
-
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-
-            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED, restrictBackground ? 1 : 0, 0)
-                    .sendToTarget();
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
     private void setRestrictBackgroundUL(boolean restrictBackground) {
-        Slog.d(TAG, "setRestrictBackgroundUL(): " + restrictBackground);
-        final boolean oldRestrictBackground = mRestrictBackground;
-        mRestrictBackground = restrictBackground;
-        // Must whitelist foreground apps before turning data saver mode on.
-        // TODO: there is no need to iterate through all apps here, just those in the foreground,
-        // so it could call AM to get the UIDs of such apps, and iterate through them instead.
-        updateRulesForRestrictBackgroundUL();
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setRestrictBackgroundUL");
         try {
-            if (!mNetworkManager.setDataSaverModeEnabled(mRestrictBackground)) {
-                Slog.e(TAG, "Could not change Data Saver Mode on NMS to " + mRestrictBackground);
-                mRestrictBackground = oldRestrictBackground;
-                // TODO: if it knew the foreground apps (see TODO above), it could call
-                // updateRulesForRestrictBackgroundUL() again to restore state.
+            if (restrictBackground == mRestrictBackground) {
+                // Ideally, UI should never allow this scenario...
+                Slog.w(TAG, "setRestrictBackgroundUL: already " + restrictBackground);
                 return;
             }
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
-        }
+            Slog.d(TAG, "setRestrictBackgroundUL(): " + restrictBackground);
+            final boolean oldRestrictBackground = mRestrictBackground;
+            mRestrictBackground = restrictBackground;
+            // Must whitelist foreground apps before turning data saver mode on.
+            // TODO: there is no need to iterate through all apps here, just those in the foreground,
+            // so it could call AM to get the UIDs of such apps, and iterate through them instead.
+            updateRulesForRestrictBackgroundUL();
+            try {
+                if (!mNetworkManager.setDataSaverModeEnabled(mRestrictBackground)) {
+                    Slog.e(TAG,
+                            "Could not change Data Saver Mode on NMS to " + mRestrictBackground);
+                    mRestrictBackground = oldRestrictBackground;
+                    // TODO: if it knew the foreground apps (see TODO above), it could call
+                    // updateRulesForRestrictBackgroundUL() again to restore state.
+                    return;
+                }
+            } catch (RemoteException e) {
+                // ignored; service lives in system_server
+            }
 
-        if (mRestrictBackgroundPowerState.globalBatterySaverEnabled) {
-            mRestrictBackgroundChangedInBsm = true;
+            sendRestrictBackgroundChangedMsg();
+
+            if (mRestrictBackgroundPowerState.globalBatterySaverEnabled) {
+                mRestrictBackgroundChangedInBsm = true;
+            }
+            synchronized (mNetworkPoliciesSecondLock) {
+                updateNotificationsNL();
+                writePolicyAL();
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
-        synchronized (mNetworkPoliciesSecondLock) {
-            updateNotificationsNL();
-            writePolicyAL();
-        }
+    }
+
+    private void sendRestrictBackgroundChangedMsg() {
+        mHandler.removeMessages(MSG_RESTRICT_BACKGROUND_CHANGED);
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED, mRestrictBackground ? 1 : 0, 0)
+                .sendToTarget();
     }
 
     @Override
@@ -4222,7 +4222,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         if (shouldInvokeRestrictBackground) {
-            setRestrictBackground(restrictBackground);
+            setRestrictBackgroundUL(restrictBackground);
         }
 
         // Change it at last so setRestrictBackground() won't affect this variable
