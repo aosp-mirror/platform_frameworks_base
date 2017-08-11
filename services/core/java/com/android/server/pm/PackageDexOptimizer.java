@@ -39,6 +39,7 @@ import com.android.server.pm.dex.PackageDexUsage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -148,6 +149,17 @@ public class PackageDexOptimizer {
         // needs to be passed to dexopt in order to ensure correct optimizations.
         String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
                 pkg.applicationInfo, sharedLibraries);
+
+        // Sanity check that we do not call dexopt with inconsistent data.
+        if (paths.size() != classLoaderContexts.length) {
+            String[] splitCodePaths = pkg.applicationInfo.getSplitCodePaths();
+            throw new IllegalStateException("Inconsistent information "
+                + "between PackageParser.Package and its ApplicationInfo. "
+                + "pkg.getAllCodePaths=" + paths
+                + " pkg.applicationInfo.getBaseCodePath=" + pkg.applicationInfo.getBaseCodePath()
+                + " pkg.applicationInfo.getSplitCodePaths="
+                + (splitCodePaths == null ? "null" : Arrays.toString(splitCodePaths)));
+        }
 
         int result = DEX_OPT_SKIPPED;
         for (int i = 0; i < paths.size(); i++) {
