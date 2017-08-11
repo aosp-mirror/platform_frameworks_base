@@ -93,10 +93,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -192,6 +192,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -302,12 +303,12 @@ public class NotificationManagerService extends SystemService {
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
-    private boolean mInCall = false;
+    protected boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
 
-    // for generating notification tones in-call
-    private ToneGenerator mInCallToneGenerator;
-    private final Object mInCallToneGeneratorLock = new Object();
+    private Uri mInCallNotificationUri;
+    private AudioAttributes mInCallNotificationAudioAttributes;
+    private float mInCallNotificationVolume;
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -945,30 +946,6 @@ public class NotificationManagerService extends SystemService {
                 mInCall = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
                 updateNotificationPulse();
-                synchronized (mInCallToneGeneratorLock) {
-                    if (mInCall) {
-                        if (mInCallToneGenerator == null) {
-                            int relativeToneVolume = getContext().getResources().getInteger(
-                                    R.integer.config_inCallNotificationVolumeRelative);
-                            if (relativeToneVolume < ToneGenerator.MIN_VOLUME
-                                    || relativeToneVolume > ToneGenerator.MAX_VOLUME) {
-                                relativeToneVolume = ToneGenerator.MAX_VOLUME;
-                            }
-                            try {
-                                mInCallToneGenerator = new ToneGenerator(
-                                        AudioManager.STREAM_VOICE_CALL, relativeToneVolume);
-                            } catch (RuntimeException e) {
-                                Log.e(TAG, "Error creating local tone generator: " + e);
-                                mInCallToneGenerator = null;
-                            }
-                        }
-                    } else {
-                        if (mInCallToneGenerator != null) {
-                            mInCallToneGenerator.release();
-                            mInCallToneGenerator = null;
-                        }
-                     }
-                }
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0) {
@@ -1274,6 +1251,15 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_notificationFallbackVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
+
+        mInCallNotificationUri = Uri.parse("file://" +
+                resources.getString(R.string.config_inCallNotificationSound));
+        mInCallNotificationAudioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                .build();
+        mInCallNotificationVolume = resources.getFloat(R.dimen.config_inCallNotificationVolume);
 
         mUseAttentionLight = resources.getBoolean(R.bool.config_useAttentionLight);
 
@@ -4152,21 +4138,21 @@ public class NotificationManagerService extends SystemService {
                 mUserProfiles.isCurrentProfile(record.getUserId()));
     }
 
-    private void playInCallNotification() {
+    protected void playInCallNotification() {
         new Thread() {
             @Override
             public void run() {
-                // If toneGenerator creation fails, just continue the call
-                // without playing the notification sound.
+                final long identity = Binder.clearCallingIdentity();
                 try {
-                    synchronized (mInCallToneGeneratorLock) {
-                        if (mInCallToneGenerator != null) {
-                            // limit this tone to 1 second; BEEP2 should in fact be much shorter
-                            mInCallToneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2, 1000);
-                        }
+                    final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
+                    if (player != null) {
+                        player.play(new Binder(), mInCallNotificationUri,
+                                mInCallNotificationAudioAttributes,
+                                mInCallNotificationVolume, false);
                     }
-                } catch (RuntimeException e) {
-                    Log.w(TAG, "Exception from ToneGenerator: " + e);
+                } catch (RemoteException e) {
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
             }
         }.start();
