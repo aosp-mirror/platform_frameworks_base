@@ -76,6 +76,7 @@ public class CameraDeviceState {
         void onBusy();
         void onCaptureStarted(RequestHolder holder, long timestamp);
         void onCaptureResult(CameraMetadataNative result, RequestHolder holder);
+        void onRequestQueueEmpty();
         void onRepeatingRequestError(long lastFrameNumber);
     }
 
@@ -213,6 +214,20 @@ public class CameraDeviceState {
             @Override
             public void run() {
                 mCurrentListener.onRepeatingRequestError(lastFrameNumber);
+            }
+        });
+    }
+
+    /**
+     * Indicate that request queue (non-repeating) becomes empty.
+     *
+     * <p> Send notification that all non-repeating requests have been sent to camera device. </p>
+     */
+    public synchronized void setRequestQueueEmpty() {
+        mCurrentHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mCurrentListener.onRequestQueueEmpty();
             }
         });
     }
