@@ -1164,7 +1164,8 @@ public class Notification implements Parcelable
      * Constant for {@link Builder#setGroupAlertBehavior(int)}, meaning that all children
      * notification in a group should be silenced (no sound or vibration) even if they are posted
      * to a {@link NotificationChannel} that has sound and/or vibration. Use this constant to
-     * mute this notification if this notification is a group child.
+     * mute this notification if this notification is a group child. This must be applied to all
+     * children notifications you want to mute.
      *
      * <p> For example, you might want to use this constant if you post a number of children
      * notifications at once (say, after a periodic sync), and only need to notify the user
@@ -1179,7 +1180,8 @@ public class Notification implements Parcelable
      * to mute this notification if this notification is a group summary.
      *
      * <p>For example, you might want to use this constant if only the children notifications
-     * in your group have content and the summary is only used to visually group notifications.
+     * in your group have content and the summary is only used to visually group notifications
+     * rather than to alert the user that new information is available.
      */
     public static final int GROUP_ALERT_CHILDREN = 2;
 
@@ -2914,7 +2916,9 @@ public class Notification implements Parcelable
          * Sets the group alert behavior for this notification. Use this method to mute this
          * notification if alerts for this notification's group should be handled by a different
          * notification. This is only applicable for notifications that belong to a
-         * {@link #setGroup(String) group}.
+         * {@link #setGroup(String) group}. This must be called on all notifications you want to
+         * mute. For example, if you want only the summary of your group to make noise, all
+         * children in the group should have the group alert behavior {@link #GROUP_ALERT_SUMMARY}.
          *
          * <p> The default value is {@link #GROUP_ALERT_ALL}.</p>
          */

@@ -15,24 +15,18 @@
  */
 package android.app;
 
-import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
-import android.util.Slog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -115,10 +109,8 @@ public final class NotificationChannelGroup implements Parcelable {
         return mName;
     }
 
-    /*
+    /**
      * Returns the list of channels that belong to this group
-     *
-     * @hide
      */
     public List<NotificationChannel> getChannels() {
         return mChannels;
