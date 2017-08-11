@@ -320,7 +320,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     }
 
     private String getPositiveButton() {
-        return mContext.getString(R.string.quick_settings_done);
+        return mContext.getString(R.string.ok);
     }
 
     protected CharSequence getManagementMessage(boolean isDeviceManaged,
