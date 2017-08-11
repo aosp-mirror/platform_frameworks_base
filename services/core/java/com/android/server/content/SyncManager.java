@@ -58,6 +58,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -461,6 +462,7 @@ public class SyncManager {
                             continue;
                         }
                         if (opx.key.equals(opy.key)) {
+                            mLogger.log("Removing duplicate sync: ", opy);
                             mJobScheduler.cancel(opy.jobId);
                         }
                     }
@@ -473,25 +475,57 @@ public class SyncManager {
         if (mJobScheduler != null) {
             return;
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.d(TAG, "initializing JobScheduler object.");
-        }
-        mJobScheduler = (JobScheduler) mContext.getSystemService(
-                Context.JOB_SCHEDULER_SERVICE);
-        mJobSchedulerInternal = LocalServices.getService(JobSchedulerInternal.class);
-        // Get all persisted syncs from JobScheduler
-        List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
-        for (JobInfo job : pendingJobs) {
-            SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
-            if (op != null) {
-                if (!op.isPeriodic) {
-                    // Set the pending status of this EndPoint to true. Pending icon is
-                    // shown on the settings activity.
-                    mSyncStorageEngine.markPending(op.target, true);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.d(TAG, "initializing JobScheduler object.");
+            }
+            mJobScheduler = (JobScheduler) mContext.getSystemService(
+                    Context.JOB_SCHEDULER_SERVICE);
+            mJobSchedulerInternal = LocalServices.getService(JobSchedulerInternal.class);
+            // Get all persisted syncs from JobScheduler
+            List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
+
+            int numPersistedPeriodicSyncs = 0;
+            int numPersistedOneshotSyncs = 0;
+            for (JobInfo job : pendingJobs) {
+                SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
+                if (op != null) {
+                    if (op.isPeriodic) {
+                        numPersistedPeriodicSyncs++;
+                    } else {
+                        numPersistedOneshotSyncs++;
+                        // Set the pending status of this EndPoint to true. Pending icon is
+                        // shown on the settings activity.
+                        mSyncStorageEngine.markPending(op.target, true);
+                    }
                 }
             }
+            if (mLogger.enabled()) {
+                mLogger.log("Connected to JobScheduler: "
+                        + numPersistedPeriodicSyncs + " periodic syncs "
+                        + numPersistedOneshotSyncs + " oneshot syncs.");
+            }
+            cleanupJobs();
+
+            if ((numPersistedPeriodicSyncs == 0) && likelyHasPeriodicSyncs()) {
+                Slog.wtf(TAG, "Device booted with no persisted periodic syncs.");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        cleanupJobs();
+    }
+
+    /**
+     * @return whether the device most likely has some periodic syncs.
+     */
+    private boolean likelyHasPeriodicSyncs() {
+        try {
+            return AccountManager.get(mContext).getAccountsByType("com.google").length > 0;
+        } catch (Throwable th) {
+            // Just in case.
+        }
+        return false;
     }
 
     private JobScheduler getJobScheduler() {
@@ -1085,11 +1119,13 @@ public class SyncManager {
     }
 
     private void removeSyncsForAuthority(EndPoint info) {
+        mLogger.log("removeSyncsForAuthority: ", info);
         verifyJobScheduler();
         List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (op.target.matchesSpec(info)) {
-                 getJobScheduler().cancel(op.jobId);
+                mLogger.log("canceling: ", op);
+                getJobScheduler().cancel(op.jobId);
             }
         }
     }
@@ -1634,6 +1670,7 @@ public class SyncManager {
     }
 
     private void onUserRemoved(int userId) {
+        mLogger.log("onUserRemoved: u", userId);
         updateRunningAccounts(null /* Don't sync any target */);
 
         // Clean up the storage engine database
@@ -2926,6 +2963,9 @@ public class SyncManager {
                     Slog.v(TAG, acc.toString());
                 }
             }
+            if (mLogger.enabled()) {
+                mLogger.log("updateRunningAccountsH: ", Arrays.toString(mRunningAccounts));
+            }
             if (mBootCompleted) {
                 doDatabaseCleanup();
             }
@@ -2957,6 +2997,7 @@ public class SyncManager {
             List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (!containsAccountAndUser(allAccounts, op.target.account, op.target.userId)) {
+                    mLogger.log("canceling: ", op);
                     getJobScheduler().cancel(op.jobId);
                 }
             }
@@ -3075,6 +3116,7 @@ public class SyncManager {
                                 "removePeriodicSyncInternalH");
                         runSyncFinishedOrCanceledH(null, asc);
                     }
+                    mLogger.log("removePeriodicSyncInternalH-canceling: ", op);
                     getJobScheduler().cancel(op.jobId);
                 }
             }
