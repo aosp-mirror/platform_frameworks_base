@@ -64,15 +64,11 @@ public class DozeFactory {
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager),
-                createDozeScreenState(wrappedService),
+                new DozeScreenState(wrappedService, handler),
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, handler),
         });
 
         return machine;
-    }
-
-    private DozeMachine.Part createDozeScreenState(DozeMachine.Service service) {
-        return new DozeScreenState(service);
     }
 
     private DozeMachine.Part createDozeScreenBrightness(Context context,
