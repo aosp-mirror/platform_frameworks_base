@@ -1063,6 +1063,10 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        public int getSize() {
+            return mCounts == null ? 0 : mCounts.length;
+        }
+
         /**
          * Clear state of this counter.
          */
@@ -10526,11 +10530,13 @@ public class BatteryStatsImpl extends BatteryStats {
                             return;
                         }
                         final Uid u = getUidStatsLocked(uid);
-                        if (u.mCpuFreqTimeMs == null) {
+                        if (u.mCpuFreqTimeMs == null
+                                || u.mCpuFreqTimeMs.getSize() != cpuFreqTimeMs.length) {
                             u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
                         }
                         u.mCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
-                        if (u.mScreenOffCpuFreqTimeMs == null) {
+                        if (u.mScreenOffCpuFreqTimeMs == null
+                                || u.mScreenOffCpuFreqTimeMs.getSize() != cpuFreqTimeMs.length) {
                             u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
                                     mOnBatteryScreenOffTimeBase);
                         }
