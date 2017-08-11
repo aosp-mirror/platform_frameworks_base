@@ -33,7 +33,7 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>
