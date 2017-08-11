@@ -19,7 +19,7 @@ package android.net;
 import android.net.NetworkStats;
 
 /**
- * Interface that allows NetworkManagementService to query for tethering statistics.
+ * Interface for NetworkManagementService to query tethering statistics and set data limits.
  *
  * TODO: this does not really need to be an interface since Tethering runs in the same process
  * as NetworkManagementService. Consider refactoring Tethering to use direct access to
@@ -29,5 +29,14 @@ import android.net.NetworkStats;
  * @hide
  */
 interface ITetheringStatsProvider {
+    // Returns cumulative statistics for all tethering sessions since boot, on all upstreams.
     NetworkStats getTetherStats();
+
+    // Sets the interface quota for the specified upstream interface. This is defined as the number
+    // of bytes, starting from zero and counting from now, after which data should stop being
+    // forwarded to/from the specified upstream. A value of QUOTA_UNLIMITED means there is no limit.
+    void setInterfaceQuota(String iface, long quotaBytes);
+
+    // Indicates that no data usage limit is set.
+    const int QUOTA_UNLIMITED = -1;
 }

@@ -1569,6 +1569,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
+
+            synchronized (mTetheringStatsProviders) {
+                for (ITetheringStatsProvider provider : mTetheringStatsProviders.keySet()) {
+                    try {
+                        provider.setInterfaceQuota(iface, quotaBytes);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Problem setting tethering data limit on provider " +
+                                mTetheringStatsProviders.get(provider) + ": " + e);
+                    }
+                }
+            }
         }
     }
 
@@ -1594,6 +1605,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.execute("bandwidth", "removeiquota", iface);
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
+            }
+
+            synchronized (mTetheringStatsProviders) {
+                for (ITetheringStatsProvider provider : mTetheringStatsProviders.keySet()) {
+                    try {
+                        provider.setInterfaceQuota(iface, ITetheringStatsProvider.QUOTA_UNLIMITED);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Problem removing tethering data limit on provider " +
+                                mTetheringStatsProviders.get(provider) + ": " + e);
+                    }
+                }
             }
         }
     }
@@ -1852,6 +1874,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             }
             return stats;
+        }
+
+        @Override
+        public void setInterfaceQuota(String iface, long quotaBytes) {
+            // Do nothing. netd is already informed of quota changes in setInterfaceQuota.
         }
     }
 
