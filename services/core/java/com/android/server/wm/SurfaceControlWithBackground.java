@@ -170,6 +170,11 @@ class SurfaceControlWithBackground extends SurfaceControl {
         // Track overall progress of animation by computing cropped portion of status bar.
         final Rect contentInsets = mWindowSurfaceController.mAnimator.mWin.mContentInsets;
         float d = contentInsets.top == 0 ? 0 : (float) crop.top / contentInsets.top;
+        if (d > 1.f) {
+            // We're running expand animation from launcher, won't compute custom bg crop here.
+            mTmpContainerRect.set(crop);
+            return;
+        }
 
         // Compute additional offset for the background when app window is positioned not at (0,0).
         // E.g. landscape with navigation bar on the left.
