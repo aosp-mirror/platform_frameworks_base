@@ -26,7 +26,7 @@ import com.android.ims.ImsReasonInfo;
 /**
  * {@hide}
  */
-interface IImsUtListener {
+oneway interface IImsUtListener {
     /**
      * Notifies the result of the supplementary service configuration udpate.
      */
