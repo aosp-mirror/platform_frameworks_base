@@ -2840,7 +2840,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
                 boolean granted) throws RemoteException {
             Preconditions.checkNotNull(listener);
-            enforceSystemOrSystemUI("grant notification listener access");
+            checkCallerIsSystemOrShell();
             if (!mActivityManager.isLowRamDevice()) {
                 mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
                         userId, false, granted);
@@ -2861,7 +2861,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
                 int userId, boolean granted) throws RemoteException {
             Preconditions.checkNotNull(assistant);
-            enforceSystemOrSystemUI("grant notification assistant access");
+            checkCallerIsSystemOrShell();
             if (!mActivityManager.isLowRamDevice()) {
                 mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                         userId, false, granted);
