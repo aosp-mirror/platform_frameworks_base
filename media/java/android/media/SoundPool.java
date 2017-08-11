@@ -57,10 +57,10 @@ import android.util.Log;
  * SoundPool will automatically stop a previously playing stream based first
  * on priority and then by age within that priority. Limiting the maximum
  * number of streams helps to cap CPU loading and reducing the likelihood that
- * audio mixing will impact visuals or UI performance.</p> 
+ * audio mixing will impact visuals or UI performance.</p>
  *
  * <p>Sounds can be looped by setting a non-zero loop value. A value of -1
- * causes the sound to loop forever. In this case, the application must 
+ * causes the sound to loop forever. In this case, the application must
  * explicitly call the stop() function to stop the sound. Any other non-zero
  * value will cause the sound to repeat the specified number of times, e.g.
  * a value of 3 causes the sound to play a total of 4 times.</p>
@@ -101,7 +101,7 @@ import android.util.Log;
  * <p>Note that since streams can be stopped due to resource constraints, the
  * streamID is a reference to a particular instance of a stream. If the stream
  * is stopped to allow a higher priority stream to play, the stream is no
- * longer be valid. However, the application is allowed to call methods on
+ * longer valid. However, the application is allowed to call methods on
  * the streamID without error. This may help simplify program logic since
  * the application need not concern itself with the stream lifecycle.</p>
  *
@@ -137,7 +137,7 @@ public class SoundPool extends PlayerBase {
      *
      * @param maxStreams the maximum number of simultaneous streams for this
      *                   SoundPool object
-     * @param streamType the audio stream type as described in AudioManager 
+     * @param streamType the audio stream type as described in AudioManager
      *                   For example, game applications will normally use
      *                   {@link AudioManager#STREAM_MUSIC}.
      * @param srcQuality the sample-rate converter quality. Currently has no
@@ -213,7 +213,7 @@ public class SoundPool extends PlayerBase {
      * "R.raw.explosion" as the resource ID. Note that this means you cannot
      * have both an "explosion.wav" and an "explosion.mp3" in the res/raw
      * directory.
-     * 
+     *
      * @param context the application context
      * @param resId the resource ID
      * @param priority the priority of the sound. Currently has no effect. Use
@@ -287,7 +287,7 @@ public class SoundPool extends PlayerBase {
     /**
      * Play a sound from a sound ID.
      *
-     * Play the sound specified by the soundID. This is the value 
+     * Play the sound specified by the soundID. This is the value
      * returned by the load() function. Returns a non-zero streamID
      * if successful, zero if it fails. The streamID can be used to
      * further control playback. Note that calling play() may cause
@@ -509,7 +509,7 @@ public class SoundPool extends PlayerBase {
         }
     }
 
-    private native final int _load(FileDescriptor fd, long offset, long length, int priority); 
+    private native final int _load(FileDescriptor fd, long offset, long length, int priority);
 
     private native final int native_setup(Object weakRef, int maxStreams,
             Object/*AudioAttributes*/ attributes);
