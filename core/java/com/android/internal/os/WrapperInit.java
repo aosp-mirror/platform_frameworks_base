@@ -23,7 +23,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.Slog;
 import dalvik.system.VMRuntime;
 import java.io.DataOutputStream;
@@ -80,7 +80,7 @@ public class WrapperInit {
         }
 
         // Mimic system Zygote preloading.
-        ZygoteInit.preload(new BootTimingsTraceLog("WrapperInitTiming",
+        ZygoteInit.preload(new TimingsTraceLog("WrapperInitTiming",
                 Trace.TRACE_TAG_DALVIK));
 
         // Launch the application.
