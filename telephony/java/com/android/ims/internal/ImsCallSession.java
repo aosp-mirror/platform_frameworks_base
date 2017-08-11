@@ -345,6 +345,24 @@ public class ImsCallSession {
         }
 
         /**
+         * Called when an {@link ImsCallSession} may handover from one radio technology to another.
+         * For example, the session may handover from WIFI to LTE if conditions are right.
+         * <p>
+         * If handover is attempted,
+         * {@link #callSessionHandover(ImsCallSession, int, int, ImsReasonInfo)} or
+         * {@link #callSessionHandoverFailed(ImsCallSession, int, int, ImsReasonInfo)} will be
+         * called to indicate the success or failure of the handover.
+         *
+         * @param session IMS session object
+         * @param srcAccessTech original access technology
+         * @param targetAccessTech new access technology
+         */
+        public void callSessionMayHandover(ImsCallSession session, int srcAccessTech,
+                int targetAccessTech) {
+            // no-op
+        }
+
+        /**
          * Called when session access technology changes
          *
          * @param session IMS session object
@@ -1277,6 +1295,28 @@ public class ImsCallSession {
                 int mode, String ussdMessage) {
             if (mListener != null) {
                 mListener.callSessionUssdMessageReceived(ImsCallSession.this, mode, ussdMessage);
+            }
+        }
+
+        /**
+         * Notifies of a case where a {@link com.android.ims.internal.ImsCallSession} may
+         * potentially handover from one radio technology to another.
+         * @param session
+         * @param srcAccessTech The source radio access technology; one of the access technology
+         *                      constants defined in {@link android.telephony.ServiceState}.  For
+         *                      example
+         *                      {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+         * @param targetAccessTech The target radio access technology; one of the access technology
+         *                      constants defined in {@link android.telephony.ServiceState}.  For
+         *                      example
+         *                      {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+         */
+        @Override
+        public void callSessionMayHandover(IImsCallSession session,
+                int srcAccessTech, int targetAccessTech) {
+            if (mListener != null) {
+                mListener.callSessionMayHandover(ImsCallSession.this, srcAccessTech,
+                        targetAccessTech);
             }
         }
 
