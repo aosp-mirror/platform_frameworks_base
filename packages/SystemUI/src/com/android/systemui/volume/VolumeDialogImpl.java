@@ -134,6 +134,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private boolean mShowA11yStream;
 
     private int mActiveStream;
+    private int mPrevActiveStream;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
@@ -626,10 +627,19 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         }
     }
 
-    private boolean shouldBeVisibleH(VolumeRow row, boolean isActive) {
+    private boolean shouldBeVisibleH(VolumeRow row, VolumeRow activeRow) {
+        boolean isActive = row == activeRow;
         if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
             return mShowA11yStream;
         }
+
+        // if the active row is accessibility, then continue to display previous
+        // active row since accessibility is dispalyed under it
+        if (activeRow.stream == AudioSystem.STREAM_ACCESSIBILITY &&
+                row.stream == mPrevActiveStream) {
+            return true;
+        }
+
         return mExpanded && row.view.getVisibility() == View.VISIBLE
                 || (mExpanded && (row.important || isActive))
                 || !mExpanded && isActive;
@@ -643,7 +653,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         // apply changes to all rows
         for (final VolumeRow row : mRows) {
             final boolean isActive = row == activeRow;
-            final boolean shouldBeVisible = shouldBeVisibleH(row, isActive);
+            final boolean shouldBeVisible = shouldBeVisibleH(row, activeRow);
             Util.setVisOrGone(row.view, shouldBeVisible);
             Util.setVisOrGone(row.header, shouldBeVisible);
             if (row.view.isShown()) {
@@ -686,6 +696,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         }
 
         if (mActiveStream != state.activeStream) {
+            mPrevActiveStream = mActiveStream;
             mActiveStream = state.activeStream;
             updateRowsH(getActiveRow());
             rescheduleTimeoutH();
