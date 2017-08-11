@@ -646,13 +646,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mStrongAuthTracker;
     }
 
-    public void reportSuccessfulStrongAuthUnlockAttempt() {
-        if (mFpm != null) {
-            byte[] token = null; /* TODO: pass real auth token once fp HAL supports it */
-            mFpm.resetTimeout(token);
-        }
-    }
-
     private void notifyStrongAuthStateChanged(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();

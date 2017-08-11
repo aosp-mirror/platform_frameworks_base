@@ -561,6 +561,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mDeviceProvisionedObserver.onSystemReady();
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
+        mStrongAuth.systemReady();
     }
 
     private void migrateOldData() {
