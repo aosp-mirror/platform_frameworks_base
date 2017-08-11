@@ -1152,7 +1152,7 @@
     <string name="monitoring_description_vpn_settings_separator">" "</string>
 
     <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=60] -->
-    <string name="monitoring_description_vpn_settings">Open VPN Settings</string>
+    <string name="monitoring_description_vpn_settings">Open VPN settings</string>
 
     <!-- Monitoring dialog: Space that separates the CA certs body text and the "Open trusted credentials" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_ca_cert_settings_separator">" "</string>
