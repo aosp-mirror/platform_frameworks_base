@@ -1842,7 +1842,7 @@ public final class SystemServer {
                 // TODO: Switch from checkService to getService once it's always
                 // in the build and should reliably be there.
                 final IIncidentManager incident = IIncidentManager.Stub.asInterface(
-                        ServiceManager.checkService("incident"));
+                        ServiceManager.getService(Context.INCIDENT_SERVICE));
                 if (incident != null) incident.systemRunning();
             } catch (Throwable e) {
                 reportWtf("Notifying incident daemon running", e);

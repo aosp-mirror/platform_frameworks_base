@@ -21,8 +21,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.os.IIncidentManager;
-import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -37,7 +35,7 @@ import android.util.Slog;
 public class IncidentManager {
     private static final String TAG = "incident";
 
-    private Context mContext;
+    private final Context mContext;
 
     /**
      * @hide
@@ -54,18 +52,7 @@ public class IncidentManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS
     })
     public void reportIncident(IncidentReportArgs args) {
-        final IIncidentManager service = IIncidentManager.Stub.asInterface(
-                ServiceManager.getService("incident"));
-        if (service == null) {
-            Slog.e(TAG, "reportIncident can't find incident binder service");
-            return;
-        }
-
-        try {
-            service.reportIncident(args);
-        } catch (RemoteException ex) {
-            Slog.e(TAG, "reportIncident failed", ex);
-        }
+        reportIncidentInternal(args);
     }
 
     /**
@@ -89,7 +76,7 @@ public class IncidentManager {
     })
     public void reportIncident(String settingName, byte[] headerProto) {
         // Sections
-        String setting = Settings.System.getString(mContext.getContentResolver(), settingName);
+        String setting = Settings.Global.getString(mContext.getContentResolver(), settingName);
         IncidentReportArgs args;
         try {
             args = IncidentReportArgs.parseSetting(setting);
@@ -98,23 +85,25 @@ public class IncidentManager {
             return;
         }
         if (args == null) {
-            Slog.i(TAG, "Incident report requested but disabled: " + settingName);
+            Slog.i(TAG, String.format("Incident report requested but disabled with "
+                    + "settings [name: %s, value: %s]", settingName, setting));
             return;
         }
 
-        // Header
         args.addHeader(headerProto);
 
-        // Look up the service
+        Slog.i(TAG, "Taking incident report: " + settingName);
+        reportIncidentInternal(args);
+    }
+
+    private void reportIncidentInternal(IncidentReportArgs args) {
         final IIncidentManager service = IIncidentManager.Stub.asInterface(
-                ServiceManager.getService("incident"));
+                ServiceManager.getService(Context.INCIDENT_SERVICE));
         if (service == null) {
             Slog.e(TAG, "reportIncident can't find incident binder service");
             return;
         }
 
-        // Call the service
-        Slog.i(TAG, "Taking incident report: " + settingName);
         try {
             service.reportIncident(args);
         } catch (RemoteException ex) {
