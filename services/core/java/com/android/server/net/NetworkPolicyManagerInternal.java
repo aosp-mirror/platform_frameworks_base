@@ -38,4 +38,13 @@ public abstract class NetworkPolicyManagerInternal {
      * to current networking policies.
      */
     public abstract boolean isUidNetworkingBlocked(int uid, String ifname);
+
+    /**
+     * Informs that an appId has been added or removed from the temp-powersave-whitelist so that
+     * that network rules for that appId can be updated.
+     *
+     * @param appId The appId which has been updated in the whitelist.
+     * @param added Denotes whether the {@param appId} has been added or removed from the whitelist.
+     */
+    public abstract void onTempPowerSaveWhitelistChange(int appId, boolean added);
 }

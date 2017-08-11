@@ -183,7 +183,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -607,36 +606,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return changed;
     }
 
-    void updatePowerSaveTempWhitelistUL() {
-        try {
-            // Clear the states of the current whitelist
-            final int N = mPowerSaveTempWhitelistAppIds.size();
-            for (int i = 0; i < N; i++) {
-                mPowerSaveTempWhitelistAppIds.setValueAt(i, false);
-            }
-            // Update the states with the new whitelist
-            final int[] whitelist = mDeviceIdleController.getAppIdTempWhitelist();
-            if (whitelist != null) {
-                for (int uid : whitelist) {
-                    mPowerSaveTempWhitelistAppIds.put(uid, true);
-                }
-            }
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Remove unnecessary entries in the temp whitelist
-     */
-    void purgePowerSaveTempWhitelistUL() {
-        final int N = mPowerSaveTempWhitelistAppIds.size();
-        for (int i = N - 1; i >= 0; i--) {
-            if (mPowerSaveTempWhitelistAppIds.valueAt(i) == false) {
-                mPowerSaveTempWhitelistAppIds.removeAt(i);
-            }
-        }
-    }
-
     private void initService(CountDownLatch initCompleteSignal) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "systemReady");
         final int oldPriority = Process.getThreadPriority(Process.myTid());
@@ -733,10 +702,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final IntentFilter whitelistFilter = new IntentFilter(
                     PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
             mContext.registerReceiver(mPowerSaveWhitelistReceiver, whitelistFilter, null, mHandler);
-
-            DeviceIdleController.LocalService deviceIdleService
-                    = LocalServices.getService(DeviceIdleController.LocalService.class);
-            deviceIdleService.setNetworkPolicyTempWhitelistCallback(mTempPowerSaveChangedCallback);
 
             // watch for network interfaces to be claimed
             final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
@@ -838,17 +803,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updatePowerSaveWhitelistUL();
                 updateRulesForRestrictPowerUL();
                 updateRulesForAppIdleUL();
-            }
-        }
-    };
-
-    final private Runnable mTempPowerSaveChangedCallback = new Runnable() {
-        @Override
-        public void run() {
-            synchronized (mUidRulesFirstLock) {
-                updatePowerSaveTempWhitelistUL();
-                updateRulesForTempWhitelistChangeUL();
-                purgePowerSaveTempWhitelistUL();
             }
         }
     };
@@ -3395,20 +3349,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void updateRulesForTempWhitelistChangeUL() {
+    private void updateRulesForTempWhitelistChangeUL(int appId) {
         final List<UserInfo> users = mUserManager.getUsers();
-        for (int i = 0; i < users.size(); i++) {
+        final int numUsers = users.size();
+        for (int i = 0; i < numUsers; i++) {
             final UserInfo user = users.get(i);
-            for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; j--) {
-                int appId = mPowerSaveTempWhitelistAppIds.keyAt(j);
-                int uid = UserHandle.getUid(user.id, appId);
-                // Update external firewall rules.
-                updateRuleForAppIdleUL(uid);
-                updateRuleForDeviceIdleUL(uid);
-                updateRuleForRestrictPowerUL(uid);
-                // Update internal rules.
-                updateRulesForPowerRestrictionsUL(uid);
-            }
+            int uid = UserHandle.getUid(user.id, appId);
+            // Update external firewall rules.
+            updateRuleForAppIdleUL(uid);
+            updateRuleForDeviceIdleUL(uid);
+            updateRuleForRestrictPowerUL(uid);
+            // Update internal rules.
+            updateRulesForPowerRestrictionsUL(uid);
         }
     }
 
@@ -4388,6 +4340,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             if (LOGV) logUidStatus(uid, "allowed by default");
             return false;
+        }
+
+        @Override
+        public void onTempPowerSaveWhitelistChange(int appId, boolean added) {
+            synchronized (mUidRulesFirstLock) {
+                if (added) {
+                    mPowerSaveTempWhitelistAppIds.put(appId, true);
+                } else {
+                    mPowerSaveTempWhitelistAppIds.delete(appId);
+                }
+                updateRulesForTempWhitelistChangeUL(appId);
+            }
         }
     }
 

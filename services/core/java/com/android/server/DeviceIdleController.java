@@ -85,6 +85,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -303,10 +304,7 @@ public class DeviceIdleController extends SystemService
     private final SparseArray<Pair<MutableLong, String>> mTempWhitelistAppIdEndTimes
             = new SparseArray<>();
 
-    /**
-     * Callback to the NetworkPolicyManagerService to tell it that the temp whitelist has changed.
-     */
-    Runnable mNetworkPolicyTempWhitelistCallback;
+    private NetworkPolicyManagerInternal mNetworkPolicyManagerInternal;
 
     /**
      * Current app IDs of temporarily whitelist apps for high-priority messages.
@@ -1018,6 +1016,7 @@ public class DeviceIdleController extends SystemService
     private static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
     private static final int MSG_REPORT_MAINTENANCE_ACTIVITY = 7;
     private static final int MSG_FINISH_IDLE_OP = 8;
+    private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 9;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -1132,6 +1131,11 @@ public class DeviceIdleController extends SystemService
                 case MSG_FINISH_IDLE_OP: {
                     // mActiveIdleWakeLock is held at this point
                     decActiveIdleOps();
+                } break;
+                case MSG_REPORT_TEMP_APP_WHITELIST_CHANGED: {
+                    final int appId = msg.arg1;
+                    final boolean added = (msg.arg2 == 1);
+                    mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, added);
                 } break;
             }
         }
@@ -1283,10 +1287,6 @@ public class DeviceIdleController extends SystemService
             return mConstants.NOTIFICATION_WHITELIST_DURATION;
         }
 
-        public void setNetworkPolicyTempWhitelistCallback(Runnable callback) {
-            setNetworkPolicyTempWhitelistCallbackInternal(callback);
-        }
-
         public void setJobsActive(boolean active) {
             DeviceIdleController.this.setJobsActive(active);
         }
@@ -1411,6 +1411,7 @@ public class DeviceIdleController extends SystemService
                 mLocalAlarmManager = getLocalService(AlarmManagerService.LocalService.class);
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+                mNetworkPolicyManagerInternal = getLocalService(NetworkPolicyManagerInternal.class);
                 mDisplayManager = (DisplayManager) getContext().getSystemService(
                         Context.DISPLAY_SERVICE);
                 mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
@@ -1699,7 +1700,7 @@ public class DeviceIdleController extends SystemService
     void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int appId,
             long duration, boolean sync, String reason) {
         final long timeNow = SystemClock.elapsedRealtime();
-        Runnable networkPolicyTempWhitelistCallback = null;
+        boolean informWhitelistChanged = false;
         synchronized (this) {
             int callingAppId = UserHandle.getAppId(callingUid);
             if (callingAppId >= Process.FIRST_APPLICATION_UID) {
@@ -1729,24 +1730,17 @@ public class DeviceIdleController extends SystemService
                 }
                 postTempActiveTimeoutMessage(appId, duration);
                 updateTempWhitelistAppIdsLocked(appId, true);
-                if (mNetworkPolicyTempWhitelistCallback != null) {
-                    if (!sync) {
-                        mHandler.post(mNetworkPolicyTempWhitelistCallback);
-                    } else {
-                        networkPolicyTempWhitelistCallback = mNetworkPolicyTempWhitelistCallback;
-                    }
+                if (sync) {
+                    informWhitelistChanged = true;
+                } else {
+                    mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, appId, 1)
+                            .sendToTarget();
                 }
                 reportTempWhitelistChangedLocked();
             }
         }
-        if (networkPolicyTempWhitelistCallback != null) {
-            networkPolicyTempWhitelistCallback.run();
-        }
-    }
-
-    public void setNetworkPolicyTempWhitelistCallbackInternal(Runnable callback) {
-        synchronized (this) {
-            mNetworkPolicyTempWhitelistCallback = callback;
+        if (informWhitelistChanged) {
+            mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, true);
         }
     }
 
@@ -1775,9 +1769,8 @@ public class DeviceIdleController extends SystemService
                     Slog.d(TAG, "Removing UID " + uid + " from temp whitelist");
                 }
                 updateTempWhitelistAppIdsLocked(uid, false);
-                if (mNetworkPolicyTempWhitelistCallback != null) {
-                    mHandler.post(mNetworkPolicyTempWhitelistCallback);
-                }
+                mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, uid, 0)
+                        .sendToTarget();
                 reportTempWhitelistChangedLocked();
                 try {
                     mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_TEMP_WHITELIST_FINISH,
