@@ -106,10 +106,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private SystemUIDialog mHighTempDialog;
     private SystemUIDialog mThermalShutdownDialog;
 
-    public PowerNotificationWarnings(Context context, NotificationManager notificationManager,
-            StatusBar statusBar) {
+    public PowerNotificationWarnings(Context context) {
         mContext = context;
-        mNoMan = notificationManager;
+        mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mReceiver.init();
     }
