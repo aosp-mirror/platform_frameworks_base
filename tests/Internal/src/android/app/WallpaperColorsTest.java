@@ -36,12 +36,12 @@ public class WallpaperColorsTest {
         final Color color = Color.valueOf(Color.WHITE);
         // Default should not support dark text!
         WallpaperColors colors = new WallpaperColors(color, null, null, 0);
-        Assert.assertTrue("Default behavior is not to support dark text",
+        Assert.assertTrue("Default behavior is not to support dark text.",
                 (colors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) == 0);
 
         // Override it
         colors = new WallpaperColors(color, null, null, WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
-        Assert.assertFalse("Forcing dark text support doesn't work",
+        Assert.assertFalse("Forcing dark text support doesn't work.",
                 (colors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) == 0);
     }
 
@@ -57,15 +57,18 @@ public class WallpaperColorsTest {
         int hints = WallpaperColors.fromBitmap(image).getColorHints();
         boolean supportsDarkText = (hints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) != 0;
         boolean supportsDarkTheme = (hints & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
-        Assert.assertTrue("White surface should support dark text", supportsDarkText);
-        Assert.assertFalse("White surface shouldn't support dark theme", supportsDarkTheme);
+        boolean fromBitmap = (hints & WallpaperColors.HINT_FROM_BITMAP) != 0;
+        Assert.assertTrue("White surface should support dark text.", supportsDarkText);
+        Assert.assertFalse("White surface shouldn't support dark theme.", supportsDarkTheme);
+        Assert.assertTrue("From bitmap should be true if object was created "
+                + "using WallpaperColors#fromBitmap.", fromBitmap);
 
         canvas.drawColor(Color.BLACK);
         hints = WallpaperColors.fromBitmap(image).getColorHints();
         supportsDarkText = (hints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) != 0;
         supportsDarkTheme = (hints & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
-        Assert.assertFalse("Black surface shouldn't support dark text", supportsDarkText);
-        Assert.assertTrue("Black surface should support dark theme", supportsDarkTheme);
+        Assert.assertFalse("Black surface shouldn't support dark text.", supportsDarkText);
+        Assert.assertTrue("Black surface should support dark theme.", supportsDarkTheme);
 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
@@ -75,7 +78,12 @@ public class WallpaperColorsTest {
         supportsDarkText = (WallpaperColors.fromBitmap(image)
                 .getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) != 0;
         Assert.assertFalse("Light surface shouldn't support dark text "
-                + "when it contains dark pixels", supportsDarkText);
+                + "when it contains dark pixels.", supportsDarkText);
+
+        WallpaperColors colors = new WallpaperColors(Color.valueOf(Color.GREEN), null, null);
+        fromBitmap = (colors.getColorHints() & WallpaperColors.HINT_FROM_BITMAP) != 0;
+        Assert.assertFalse("Object created from public constructor should not contain "
+                + "HINT_FROM_BITMAP.", fromBitmap);
     }
 
     /**
