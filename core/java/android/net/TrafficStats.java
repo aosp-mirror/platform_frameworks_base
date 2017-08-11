@@ -110,12 +110,12 @@ public class TrafficStats {
     public static final int TAG_SYSTEM_RESTORE = 0xFFFFFF04;
 
     /**
-     * Default tag value for code or resources downloaded by an app store on
-     * behalf of the app, such as app updates.
+     * Default tag value for code (typically APKs) downloaded by an app store on
+     * behalf of the app, such as updates.
      *
      * @hide
      */
-    public static final int TAG_SYSTEM_CODE = 0xFFFFFF05;
+    public static final int TAG_SYSTEM_APP = 0xFFFFFF05;
 
     /** @hide */
     public static final int TAG_SYSTEM_DHCP = 0xFFFFFF40;
@@ -213,14 +213,14 @@ public class TrafficStats {
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating
      * from the current thread. The tag used internally is well-defined to
-     * distinguish all code-related traffic, such as updates performed by an app
-     * store.
+     * distinguish all code (typically APKs) downloaded by an app store on
+     * behalf of the app, such as updates.
      *
      * @hide
      */
     @SystemApi
-    public static void setThreadStatsTagCode() {
-        setThreadStatsTag(TAG_SYSTEM_CODE);
+    public static void setThreadStatsTagApp() {
+        setThreadStatsTag(TAG_SYSTEM_APP);
     }
 
     /**
