@@ -929,9 +929,9 @@ public class Typeface {
     }
 
     private static @Nullable FontFamily createFontFamily(
-            String familyName, List<FontConfig.Font> fonts, String languageTag, int variant,
+            String familyName, List<FontConfig.Font> fonts, String[] languageTags, int variant,
             Map<String, ByteBuffer> cache, String fontDir) {
-        final FontFamily family = new FontFamily(languageTag, variant);
+        final FontFamily family = new FontFamily(languageTags, variant);
         for (int i = 0; i < fonts.size(); i++) {
             final FontConfig.Font font = fonts.get(i);
             final String fullPath = fontDir + font.getFontName();
@@ -952,7 +952,8 @@ public class Typeface {
             }
         }
         if (!family.freeze()) {
-            Log.e(TAG, "Unable to load Family: " + familyName + " : " + languageTag);
+            Log.e(TAG, "Unable to load Family: " + familyName + " : "
+                    + Arrays.toString(languageTags));
             return null;
         }
         return family;
@@ -963,7 +964,7 @@ public class Typeface {
             Map<String, ByteBuffer> cache,
             String fontDir) {
 
-        final String languageTag = xmlFamily.getLanguage();
+        final String[] languageTags = xmlFamily.getLanguages();
         final int variant = xmlFamily.getVariant();
 
         final ArrayList<FontConfig.Font> defaultFonts = new ArrayList<>();
@@ -985,7 +986,7 @@ public class Typeface {
         }
 
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                xmlFamily.getName(), defaultFonts, languageTag, variant, cache, fontDir);
+                xmlFamily.getName(), defaultFonts, languageTags, variant, cache, fontDir);
 
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
@@ -997,7 +998,7 @@ public class Typeface {
                 }
             } else {
                 final FontFamily family = createFontFamily(
-                        xmlFamily.getName(), fallback, languageTag, variant, cache, fontDir);
+                        xmlFamily.getName(), fallback, languageTags, variant, cache, fontDir);
                 if (family != null) {
                     fallbackMap.valueAt(i).add(family);
                 }
@@ -1034,7 +1035,7 @@ public class Typeface {
                 }
                 final FontFamily family = createFontFamily(
                         xmlFamily.getName(), Arrays.asList(xmlFamily.getFonts()),
-                        xmlFamily.getLanguage(), xmlFamily.getVariant(), bufferCache, fontDir);
+                        xmlFamily.getLanguages(), xmlFamily.getVariant(), bufferCache, fontDir);
                 if (family == null) {
                     continue;
                 }

@@ -16,9 +16,11 @@
 
 package android.graphics;
 
+import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
 import android.text.FontConfig;
+import android.text.TextUtils;
 import android.util.Log;
 import dalvik.annotation.optimization.CriticalNative;
 
@@ -48,8 +50,16 @@ public class FontFamily {
         mBuilderPtr = nInitBuilder(null, 0);
     }
 
-    public FontFamily(String lang, int variant) {
-        mBuilderPtr = nInitBuilder(lang, variant);
+    public FontFamily(@Nullable String[] langs, int variant) {
+        final String langsString;
+        if (langs == null || langs.length == 0) {
+            langsString = null;
+        } else if (langs.length == 1) {
+            langsString = langs[0];
+        } else {
+            langsString = TextUtils.join(",", langs);
+        }
+        mBuilderPtr = nInitBuilder(langsString, variant);
     }
 
     /**
@@ -174,7 +184,7 @@ public class FontFamily {
         return nAddFont(builderPtr, font, ttcIndex, -1, -1);
     }
 
-    private static native long nInitBuilder(String lang, int variant);
+    private static native long nInitBuilder(String langs, int variant);
 
     @CriticalNative
     private static native long nCreateFamily(long mBuilderPtr);

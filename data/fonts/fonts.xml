@@ -19,7 +19,7 @@
     effectively add 300 to the weight, this ensures that 900 is the bold
     paired with the 500 weight, ensuring adequate contrast.
 -->
-<familyset version="22">
+<familyset version="23">
     <!-- first font is default -->
     <family name="sans-serif">
         <font weight="100" style="normal">Roboto-Thin.ttf</font>
@@ -128,8 +128,7 @@
         <font weight="400" style="normal">NotoSansArmenian-Regular.ttf</font>
         <font weight="700" style="normal">NotoSansArmenian-Bold.ttf</font>
     </family>
-    <!-- TODO: add Geok -->
-    <family lang="und-Geor">
+    <family lang="und-Geor und-Geok">
         <font weight="400" style="normal">NotoSansGeorgian-Regular.ttf</font>
         <font weight="700" style="normal">NotoSansGeorgian-Bold.ttf</font>
     </family>
@@ -474,8 +473,7 @@
     <family lang="zh-Hans">
         <font weight="400" style="normal" index="2">NotoSansCJK-Regular.ttc</font>
     </family>
-    <!-- TODO: Add Bopo -->
-    <family lang="zh-Hant">
+    <family lang="zh-Hant zh-Bopo">
         <font weight="400" style="normal" index="3">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="ja">

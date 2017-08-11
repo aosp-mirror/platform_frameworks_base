@@ -74,13 +74,14 @@ public class FontListParser {
 
     private static FontConfig.Family readFamily(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        String name = parser.getAttributeValue(null, "name");
-        String lang = parser.getAttributeValue(null, "lang");
-        String variant = parser.getAttributeValue(null, "variant");
-        List<FontConfig.Font> fonts = new ArrayList<FontConfig.Font>();
+        final String name = parser.getAttributeValue(null, "name");
+        final String lang = parser.getAttributeValue(null, "lang");
+        final String[] langs = lang == null ? null : lang.split("\\s+");
+        final String variant = parser.getAttributeValue(null, "variant");
+        final List<FontConfig.Font> fonts = new ArrayList<FontConfig.Font>();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
-            String tag = parser.getName();
+            final String tag = parser.getName();
             if (tag.equals("font")) {
                 fonts.add(readFont(parser));
             } else {
@@ -95,7 +96,7 @@ public class FontListParser {
                 intVariant = FontConfig.Family.VARIANT_ELEGANT;
             }
         }
-        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), lang,
+        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), langs,
                 intVariant);
     }
 
