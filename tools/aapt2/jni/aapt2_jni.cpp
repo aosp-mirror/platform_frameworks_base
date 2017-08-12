@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "android-base/logging.h"
-#include "ScopedUtfChars.h"
+#include "nativehelper/ScopedUtfChars.h"
 
 #include "Diagnostics.h"
 #include "util/Util.h"
