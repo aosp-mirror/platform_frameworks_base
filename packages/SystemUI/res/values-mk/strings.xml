@@ -756,7 +756,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Предупредувања"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Слики од екранот"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Општи пораки"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"Меморија"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Капацитет"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Инстант апликации"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Инстант апликациите нема потреба да се инсталираат."</string>
     <string name="app_info" msgid="6856026610594615344">"Информации за апликација"</string>

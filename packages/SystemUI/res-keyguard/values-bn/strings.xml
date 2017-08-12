@@ -72,9 +72,9 @@
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"একটি ৪ থেকে ৮ সংখ্যার পিন লিখুন।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK কোডটি ৮ বা তার বেশি সংখ্যার হতে হবে।"</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"সঠিক PUK কোডটি পুনরায় লিখুন। বার বার চেষ্টা করা হলে সিমটি স্থায়ীভাবে অক্ষম হয়ে যাবে।"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"পিন কোডগুলি মেল হচ্ছে না"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"পিন কোডগুলি মিলছে না"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"বিভিন্ন প্যাটার্নের সাহায্যে খুব বেশি বার প্রচেষ্টা করা হয়ে গেছে"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুলভাবে আপনার পিন লিখেছেন।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"আপনি আপনার পিন টাইপ করতে <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করেছেন৷ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুলভাবে আপনার পাসওয়ার্ড লিখেছেন।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুলভাবে আপনার আনলকের প্যাটার্ন এঁকেছেন।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুলভাবে ট্যাবলেটটি আনলক করার চেষ্টা করেছেন। আরো <xliff:g id="NUMBER_1">%2$d</xliff:g> বার অসফল প্রচেষ্টার পর এই ট্যাবলেটটিকে রিসেট করা হবে, যার ফলে এর সমস্ত ডেটা মুছে যাবে।"</string>
@@ -114,7 +114,7 @@
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"অতিরিক্ত সুরক্ষার জন্য পিন দেওয়া প্রয়োজন"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"অতিরিক্ত সুরক্ষার জন্য পাসওয়ার্ড দেওয়া প্রয়োজন"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"আপনি প্রোফাইলগুলি স্যুইচ করার সময় প্যাটার্নের প্রয়োজন হবে"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"আপনি প্রোফাইলগুলি স্যুইচ করার সময় পিন এর প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"প্রোফাইলগুলি স্যুইচ করার সময় পিন প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"আপনি প্রোফাইলগুলি স্যুইচ করার সময় পাসওয়ার্ডের প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"প্রশাসক ডিভাইসটি লক করেছেন"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ডিভাইসটিকে ম্যানুয়ালি লক করা হয়েছে"</string>
@@ -123,8 +123,8 @@
       <item quantity="other">ডিভাইসটি <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টা ধরে আনলক করা হয় নি। প্যাটার্নটি নিশ্চিত করুন।</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
-      <item quantity="one">ডিভাইসটি <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টা ধরে আনলক করা হয় নি। পিন নিশ্চিত করুন।</item>
-      <item quantity="other">ডিভাইসটি <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টা ধরে আনলক করা হয় নি। পিন নিশ্চিত করুন।</item>
+      <item quantity="one">ডিভাইসটি <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধরে আনলক করা হয়নি। পিন নিশ্চিত করুন৷</item>
+      <item quantity="other">ডিভাইসটি <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধরে আনলক করা হয়নি। পিন নিশ্চিত করুন৷</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
       <item quantity="one">ডিভাইসটি <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টা ধরে আনলক করা হয় নি। পাসওয়ার্ড নিশ্চিত করুন।</item>
