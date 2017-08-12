@@ -504,6 +504,15 @@ public class RequestThreadManager {
             previews.add(new Pair<>(p, previewSizeIter.next()));
         }
         mGLThreadManager.setConfigurationAndWait(previews, mCaptureCollector);
+
+        for (Surface p : mPreviewOutputs) {
+            try {
+                LegacyCameraDevice.setSurfaceOrientation(p, facing, orientation);
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.e(TAG, "Surface abandoned, skipping setSurfaceOrientation()", e);
+            }
+        }
+
         mGLThreadManager.allowNewFrames();
         mPreviewTexture = mGLThreadManager.getCurrentSurfaceTexture();
         if (mPreviewTexture != null) {
