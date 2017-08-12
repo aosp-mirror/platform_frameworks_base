@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Таны байршилд таны мобайл сүлжээнээс түр хугацаанд блоклосон"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Хүлээн авалтыг сайжруулахын тулд Тохиргоо &gt; Сүлжээ &amp; Интернэт &gt; Мобайл сүлжээ &gt; Сонгосон сүлжээний төрөл хэсгийг сонгон төрлөө өөрчилнө үү."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi дуудлага идэвхтэй байна"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Яаралтай дуудлага хийхэд мобайл сүлжээнд холбогдсон байх шаардлагатай."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сануулга"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Дуудлага шилжүүлэх"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Яаралтай дуудлага хийх горим"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Мобайл датаны төлөв"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS мессеж"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Дуут шуудангийн мессеж"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi дуудлага"</string>
@@ -1630,7 +1627,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Таны админ суулгасан"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Таны админ устгасан"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг юм. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтрах юм."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтарна."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч цөөн үйлдэл хийнэ. Жишээлбэл зураг харахын тулд та товших шаардлагатай болно."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Өгөгдөл хамгаалагчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>

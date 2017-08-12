@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ඔබේ ස්ථානයේ ජංගම ජාලය මගින් තාවකාලිකව පිරිනොනමයි"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ජාලය වෙත ළඟා විය නොහැකිය"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ප්‍රතිග්‍රහණය වැඩි දියුණු කිරීමට, සැකසීම් &gt; ජාලය සහ අන්තර්ජාලය &gt; ජංගම ජාල &gt; වඩා කැමති ජාල වර්ගය තුළ තෝරන ලද වර්ගය වෙනස් කිරීම උත්සාහ කරන්න."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi ඇමතීම සක්‍රියයි"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"හදිසි ඇමතුම්වලට ජංගම ජාලයක් අවශ්‍යයි"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ඇඟවීම්"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ඇමතුම ප්‍රතියොමු කිරීම"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"හදිසි අවස්ථා පසු ඇමතුම් ප්‍රකාරය"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ජංගම දත්ත තත්ත්වය"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS පණිවිඩ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"හඬ තැපැල් පණිවිඩ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi ඇමතීම"</string>

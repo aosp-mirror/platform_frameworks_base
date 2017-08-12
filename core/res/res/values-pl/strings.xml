@@ -82,15 +82,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Usługa tymczasowo nieoferowana przez sieć komórkową w Twojej lokalizacji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Brak zasięgu sieci"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Aby poprawić odbiór, zmień typ sieci: wybierz Ustawienia &gt; Sieć i internet &gt; Sieci komórkowe &gt; Preferowany typ sieci."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Funkcja Połączenia przez Wi‑Fi jest aktywna"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Połączenia alarmowe wymagają sieci komórkowej."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Tryb alarmowego połączenia zwrotnego"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Stan mobilnej transmisji danych"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-y"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Wiadomości poczty głosowej"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Połączenia przez Wi-Fi"</string>

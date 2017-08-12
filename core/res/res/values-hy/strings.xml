@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ձեր գտնվելու վայրում ծառայությունը ժամանակավորապես չի տրամադրվում բջջային ցանցի կողմից"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ցանցն անհասանելի է"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ազդանշանի ընդունման որակը բարելավելու համար փոխեք ցանցի տեսակը՝ անցնելով Համակարգ &gt; Ցանց և ինտերնետ &gt; Բջջային ցանցեր &gt; Ցանկալի ցանցի տեսակը։"</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi կանչերն ակտիվ են"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Շտապ կանչերի համար բջջային ցանց է անհրաժեշտ"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Զանգի վերահասցեավորում"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Շտապ հետկանչի ռեժիմ"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Բջջային ինտերնետի կարգավիճակը"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS հաղորդագրություններ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ձայնային փոստի հաղորդագրություններ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Զանգեր Wi-Fi-ի միջոցով"</string>
@@ -1081,7 +1078,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Սահմանվել է անձայն զանգերանգ"</string>
     <string name="volume_call" msgid="3941680041282788711">"Մուտքային զանգի ձայնի ուժգնությունը"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth-ի ներզանգի բարձրություն"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Զարթուցիչի ձայնի ուժգնությունը"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Զարթուցիչի ձայնը"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Ծանուցումների ձայնի ուժգնությունը"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Ձայն"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-ի ձայնի ուժգնությունը"</string>
