@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.servicestests.aidl.INetworkStateObserver;
 
 public class ConnTestActivity extends Activity {
@@ -39,17 +40,26 @@ public class ConnTestActivity extends Activity {
     private static final String ACTION_FINISH_ACTIVITY = TEST_PKG + ".FINISH";
     private static final String EXTRA_NETWORK_STATE_OBSERVER = TEST_PKG + ".observer";
 
+    private static final Object INSTANCE_LOCK = new Object();
+    @GuardedBy("instanceLock")
+    private static Activity sInstance;
+
     private BroadcastReceiver finishCommandReceiver = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        synchronized (INSTANCE_LOCK) {
+            sInstance = this;
+        }
+        Log.i(TAG, "onCreate called");
 
         notifyNetworkStateObserver();
 
         finishCommandReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Log.i(TAG, "finish command received");
                 ConnTestActivity.this.finish();
             }
         };
@@ -57,11 +67,35 @@ public class ConnTestActivity extends Activity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume called");
+    }
+
+    @Override
     public void onStop() {
+        Log.i(TAG, "onStop called");
         if (finishCommandReceiver != null) {
             unregisterReceiver(finishCommandReceiver);
         }
         super.onStop();
+    }
+
+    @Override
+    public void finish() {
+        synchronized (INSTANCE_LOCK) {
+            sInstance = null;
+        }
+        Log.i(TAG, "finish called");
+        super.finish();
+    }
+
+    public static void finishSelf() {
+        synchronized (INSTANCE_LOCK) {
+            if (sInstance != null) {
+                sInstance.finish();
+            }
+        }
     }
 
     private void notifyNetworkStateObserver() {
