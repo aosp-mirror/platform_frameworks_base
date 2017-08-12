@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Bug reports"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Bug report <xliff:g id="ID">#%d</xliff:g> is being generated"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Bug report <xliff:g id="ID">#%d</xliff:g> captured"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Adding details to the bug report"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Please wait…"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"The bug report will appear on the phone shortly"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Select to share your bug report"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tap to share your bug report"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Select to share your bug report without a screenshot or wait for the screenshot to finish"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tap to share your bug report without a screenshot or wait for the screenshot to finish"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tap to share your bug report without a screenshot or wait for the screenshot to finish"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Bug reports contain data from the system\'s various log files, which may include data that you consider sensitive (such as app-usage and location data). Only share bug reports with people and apps that you trust."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Don\'t show again"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Bug reports"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Bug report file could not be read"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Couldn\'t add bug report details to zip file"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"unnamed"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Details"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Screenshot"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Screenshot taken successfully."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Screenshot could not be taken."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Bug report <xliff:g id="ID">#%d</xliff:g> details"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Filename"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Bug title"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Bug summary"</string>
+    <string name="save" msgid="4781509040564835759">"Save"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Share Bug report"</string>
+</resources>
