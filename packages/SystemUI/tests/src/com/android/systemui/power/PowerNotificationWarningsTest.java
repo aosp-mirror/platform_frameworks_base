@@ -52,8 +52,8 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         // Test Instance.
-        mPowerNotificationWarnings = new PowerNotificationWarnings(
-                mContext, mMockNotificationManager, null);
+        mContext.addMockSystemService(NotificationManager.class, mMockNotificationManager);
+        mPowerNotificationWarnings = new PowerNotificationWarnings(mContext);
     }
 
     @Test
