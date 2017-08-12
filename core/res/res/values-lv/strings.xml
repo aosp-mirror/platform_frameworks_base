@@ -81,15 +81,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Pagaidām netiek piedāvāts mobilajā tīklā jūsu atrašanās vietā"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nevar sasniegt tīklu"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Lai uzlabotu uztveršanu, mainiet atlasīto veidu sadaļā Iestatījumi &gt; Tīkls un internets &gt; Mobilie tīkli &gt; Ieteicamais tīkla veids."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi zvani ir aktīvi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Lai veiktu ārkārtas zvanus, ir nepieciešams mobilais tīkls."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Brīdinājumi"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Zvanu pāradresācija"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Ārkārtas atzvana režīms"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Mobilo datu statuss"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Īsziņas"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Balss pasta ziņojumi"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi zvani"</string>

@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"​មិន​បាន​ផ្តល់​ជូន​ដោយ​បណ្តាញចល័តនៅ​ទីកន្លែងរបស់អ្នកជា​បណ្តោះ​អាសន្ន"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ដើម្បី​ធ្វើ​ឲ្យ​ការ​ទទួល​​រលក​សញ្ញា​​ប្រសើរ​ជាងមុន សូមសាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ការកំណត់ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ការហៅតាម Wi-Fi បានបើក"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ការហៅ​បន្ទាន់​តម្រូវឲ្យ​មានបណ្ដាញ​ទូរសព្ទ​ចល័ត។"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ស្ថានភាព​ទិន្នន័យ​ទូរសព្ទ​ចល័ត"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"សារ SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"សារ​ជា​សំឡេង"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ការហៅ​ទូរសព្ទ​តាម Wi-Fi"</string>

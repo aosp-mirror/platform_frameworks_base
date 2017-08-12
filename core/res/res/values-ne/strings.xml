@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"तपाईंको स्थानमा सञ्चालन भइरहेको मोबाइल नेटवर्कले अस्थायी रूपमा यो सुविधा प्रदान गर्दैन"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कमाथि पहुँच राख्न सकिँदैन"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"रिसेप्सनमा सुधार गर्न प्रणालीहरू &gt; नेटवर्क तथा इन्टरनेट &gt; मोबाइल नेटवर्कहरू &gt; रुचाइएको नेटवर्कको प्रकारमा गई चयन गरिएको प्रकार परिवर्तन गरी हेर्नुहोस्।"</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi कलिङ सक्रिय छ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"आपतकालीन कलहरू गर्न मोबाइल नेटवर्क अनिवार्य छ।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्टहरू"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"कल फर्वार्ड गर्ने सेवा"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"आपतकालीन कलब्याक मोड"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"मोबाइल डेटाको स्थिति"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS सन्देशहरू"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"भ्वाइस मेल सन्देशहरू"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi कल"</string>

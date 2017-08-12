@@ -1590,7 +1590,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Jaribu tena baadaye"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Unatazama skrini nzima"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Ili kuondoka, telezesha kidole chini kutoka sehemu ya juu."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Ili kuondoka, telezesha kidole kutoka juu hadi chini."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Nimeelewa"</string>
     <string name="done_label" msgid="2093726099505892398">"Imekamilika"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kitelezi cha mviringo wa saa"</string>
@@ -1613,7 +1613,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Imesakinishwa na msimamizi wako"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Imefutwa na msimamizi wako"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Ili kuboresha muda wa matumizi ya betri, kiokoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotegemea usawazishaji huenda zisisasishwe usipozifungua.\n\nKiokoa betri hujizima kiotomatiki wakati kifaa chako kinachaji."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Ili kuboresha muda wa matumizi ya betri, kiokoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali na data nyingi ya chini chini. Programu za barua pepe, za kutuma ujumbe na zinginezo, zinazotegemea usawazishaji huenda zisisasishwe usipozifungua.\n\nKiokoa betri hujizima kiotomatiki wakati kifaa chako kinachaji."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chini chini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Washa"</string>
