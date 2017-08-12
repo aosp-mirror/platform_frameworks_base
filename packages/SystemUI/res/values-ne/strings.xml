@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"कम्प्युटरको RSA कुञ्जी औंलाछाप:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"यो कम्प्युटरबाट सधैँ अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डिबग गर्न अनुमति छैन"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"हालैमा यस यन्त्रमा साइन इन भएको प्रयोगकर्ताले USB डिबगिङ सक्रिय गर्न सक्दैन। यो सुविधा प्रयोग गर्न, कृपया अर्को प्रबन्ध प्रयोगकर्तामा स्विच गर्नुहोस्।"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रिनसट बचत गर्दै…"</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"थप जान्नुहोस्"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"खुला विश्वसनीय प्रमाणहरू"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"तपाईँको प्रशासकले तपाईँको यन्त्रमा ट्राफिकको अनुगमन गर्ने नेटवर्कको लगिङलाई सक्रिय पार्नुभएको छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"मेनु"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> अनुप्रयोग"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"अलर्टहरू"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रिनशटहरू"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य सन्देशहरू"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"भण्डारण"</string>

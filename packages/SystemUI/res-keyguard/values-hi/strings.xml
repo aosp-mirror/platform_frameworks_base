@@ -25,7 +25,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"SIM PUK और नया पिन कोड लिखें"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM PUK कोड"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"नया SIM पिन कोड"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"पासवर्ड लिखने हेतु स्पर्श करें"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"पासवर्ड लिखने के लिए छुएं"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलॉक करने के लिए पासवर्ड लिखें"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"अनलॉक करने के लिए पिन लिखें"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"गलत पिन कोड."</string>
@@ -64,8 +64,8 @@
     <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"मोबाइल सेवा के बिना डिवाइस का उपयोग करने के लिए eSIM अक्षम करें."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन डालें"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"पासवर्ड डालें"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM अब अक्षम हो गया है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" का SIM अब अक्षम हो गया है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM अब काम नहीं करेगा. जारी रखने के लिए PUK कोड डालें. ज़्यादा जानकारी के लिए अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" का SIM अब काम नहीं करेगा. जारी रखने के लिए PUK कोड डालें. ज़्यादा जानकारी के लिए अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"मनचाहा पिन कोड डालें"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"मनचाहे पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM कार्ड अनलॉक हो रहा है…"</string>
@@ -76,7 +76,7 @@
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"पैटर्न के लिए बहुत ज़्यादा बार कोशिश की गई है"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"आप अपना पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"आपने अपना अनलॉक पैटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, इस टैबलेट को रीसेट कर दिया जाएगा, जिससे इसका सारा डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, इस फ़ोन को रीसेट कर दिया जाएगा, जिससे इसका सारा डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस टैबलेट को रीसेट कर दिया जाएगा, जिससे इसका सारा डेटा हट जाएगा."</string>
@@ -89,14 +89,14 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"आपने अपना अनलॉक पैटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, आपसे किसी ईमेल खाते का उपयोग करके अपना टैबलेट अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"आपने अपना अनलॉक पैटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, आपसे किसी ईमेल खाते का उपयोग करके अपना फ़ोन अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"गलत SIM पिन कोड, अपने डिवाइस को अनलॉक करने के लिए अब आपको अपने वाहक से संपर्क करना होगा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. अगर आपने <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत ड्रॉ किया, तो आपसे अपने टैबलेट को किसी ईमेल खाते का इस्तेमाल करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड बाद फिर से कोशिश करें."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. अगर आपने <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत ड्रॉ किया, तो आपसे अपने फ़ोन को किसी ईमेल खाते का इस्तेमाल करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड बाद फिर से कोशिश करें."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"गलत SIM पिन कोड, अपने डिवाइस को अनलॉक करने के लिए अब आपको अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
-      <item quantity="one">SIM पिन कोड गलत है, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
-      <item quantity="other">SIM पिन कोड गलत है, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
+      <item quantity="one">गलत सिम पिन कोड, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
+      <item quantity="other">गलत सिम पिन कोड, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM बेकार हो गया है. अपने वाहक से संपर्क करें."</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM बेकार हो गया है. अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
       <item quantity="one">SIM PUK कोड गलत है, SIM के हमेशा के लिए बेकार हो जाने से पहले आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
       <item quantity="other">SIM PUK कोड गलत है, SIM के हमेशा के लिए बेकार हो जाने से पहले आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
@@ -110,9 +110,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"डिवाइस फिर से चालू होने के बाद पैटर्न ज़रूरी है"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"डिवाइस फिर से चालू होने के बाद पिन ज़रूरी है"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"डिवाइस फिर से चालू होने के बाद पासवर्ड ज़रूरी है"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"अतिरिक्‍त सुरक्षा के लिए पैटर्न ज़रूरी है"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"अतिरिक्‍त सुरक्षा के लिए पिन ज़रूरी है"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"अतिरिक्‍त सुरक्षा के लिए पासवर्ड ज़रूरी है"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"अतिरिक्त सुरक्षा के लिए पैटर्न ज़रूरी है"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"अतिरिक्त सुरक्षा के लिए पिन ज़रूरी है"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"अतिरिक्त सुरक्षा के लिए पासवर्ड ज़रूरी है"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"प्रोफ़ाइल स्विच करते समय पैटर्न ज़रूरी है"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"प्रोफ़ाइल स्विच करते समय पिन ज़रूरी है"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"प्रोफ़ाइल स्विच करते समय पासवर्ड ज़रूरी है"</string>
