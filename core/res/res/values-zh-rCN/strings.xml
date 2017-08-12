@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"您所在位置的移动网络暂时不提供这项服务"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"无法连接网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"要改善信号情况，请尝试更改在“设置”&gt;“网络和互联网”&gt;“移动网络”&gt;“首选网络类型”中选择的类型。"</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"正在进行 WLAN 通话"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"紧急呼救需要使用移动网络。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"提醒"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"来电转接"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"紧急回拨模式"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"移动数据状态"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"短信"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"语音邮件"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"WLAN 通话"</string>
@@ -1606,7 +1603,7 @@
       <item quantity="one">1 秒后重试</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"正在全屏模式下查看"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"目前处于全屏模式"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"要退出，请从顶部向下滑动。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>

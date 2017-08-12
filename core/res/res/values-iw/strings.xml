@@ -82,15 +82,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"הרשת הסלולרית במיקום הזה חסמה את השירות באופן זמני"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"לא ניתן להתחבר לרשת"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"כדי לשפר את הקליטה, כדאי לנסות לשנות את סוג הרשת ב\'הגדרות\' &gt; \'רשת ואינטרנט\' &gt; \'רשתות סלולריות\' &gt; \'סוג רשת מועדף\'."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏שיחות ה-Wi-Fi מופעלות"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"כדי לבצע שיחות חירום, יש להתחבר לרשת סלולרית."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"התראות"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"העברת שיחות"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"מצב \'התקשרות חזרה בחירום\'"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"סטטוס חבילת הגלישה"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"‏הודעות SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"הודעות קוליות"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏שיחות Wi-Fi"</string>

@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Az Ön tartózkodási helyén ideiglenesen nem áll rendelkezésre a mobilhálózaton"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"A hálózat nem érhető el"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"A vétel javítása érdekében próbálja módosítani a kiválasztott hálózattípust a Beállítások &gt; Hálózat és internet &gt; Mobilhálózatok &gt; Preferált hálózattípus menüpontban."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"A Wi‑Fi-hívás aktív"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"A segélyhíváshoz mobilhálózatra van szükség."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Értesítések"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Hívásátirányítás"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Sürgősségi visszahívás mód"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Mobiladat-állapot"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-ek"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Hangpostaüzenetek"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-hívás"</string>

@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"你所在位置的行動網路暫時不提供這項服務"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連上網路"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"如要改善收訊狀況，請依序開啟 [設定] &gt; [網路與網際網路] &gt; [行動網路] &gt; [偏好的網路類型]，然後選取其他網路類型。"</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi 通話正在進行中"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"撥打緊急電話需要使用行動網路"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"快訊"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"來電轉接"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"緊急回撥模式"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"行動數據狀態"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"簡訊"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"語音留言"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
@@ -284,7 +281,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"撥打電話及管理通話"</string>
     <string name="permgrouprequest_phone" msgid="7084161459732093690">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」撥打電話及管理通話"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"身體感應器"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"人體感應器"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"存取與你生命徵象相關的感應器資料"</string>
     <string name="permgrouprequest_sensors" msgid="8631146669524259656">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」與你生命徵象相關的感應器資料"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
@@ -375,7 +372,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話紀錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話紀錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此清除或修改你的通話紀錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話紀錄。"</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取身體感應器 (例如心跳速率監測器)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取人體感應器 (例如心跳速率監測器)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感測器所收集的資料 (這類感測器可監測你的體能狀態，例如你的心跳速率)。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>

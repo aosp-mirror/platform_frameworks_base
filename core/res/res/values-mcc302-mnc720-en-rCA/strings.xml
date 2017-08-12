@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-/* //device/apps/common/assets/res/any/strings.xml
-**
-** Copyright 2015, The Android Open Source Project
+/*
+** Copyright 2017, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -20,6 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="android_upgrading_apk" msgid="1090732262010398759">"<xliff:g id="NUMBER_1">%2$d</xliff:g>లో<xliff:g id="NUMBER_0">%1$d</xliff:g>వ యాప్."</string>
-    <string name="permgrouplab_sensors" msgid="202675452368612754">"సెన్సార్‌లు"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="2776657861851140021">"%s"</item>
+    <item msgid="5094669985484060934">"%s Wi-Fi"</item>
+  </string-array>
 </resources>
