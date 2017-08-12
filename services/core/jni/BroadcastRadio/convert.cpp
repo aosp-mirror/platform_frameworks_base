@@ -19,6 +19,8 @@
 
 #include "convert.h"
 
+#include "regions.h"
+
 #include <broadcastradio-utils/Utils.h>
 #include <core_jni_helpers.h>
 #include <nativehelper/JNIHelp.h>
@@ -29,8 +31,11 @@ namespace server {
 namespace BroadcastRadio {
 namespace convert {
 
+namespace utils = V1_1::utils;
+
 using hardware::Return;
 using hardware::hidl_vec;
+using regions::RegionalBandConfig;
 
 using V1_0::Band;
 using V1_0::Deemphasis;
@@ -43,6 +48,7 @@ using V1_1::ProgramListResult;
 using V1_1::ProgramSelector;
 using V1_1::VendorKeyValue;
 
+static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const RegionalBandConfig &config);
 static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
 
 static struct {
@@ -334,9 +340,10 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
     auto jSerial = make_javastr(env, prop10.serial);
     bool isBgScanSupported = prop11 ? prop11->supportsBackgroundScanning : false;
     auto jVendorInfo = prop11 ? VendorInfoFromHal(env, prop11->vendorInfo) : nullptr;
-    // ITU_1 is the default region just because its index is 0.
-    auto jBands = ArrayFromHal<V1_0::BandConfig>(env, prop10.bands, gjni.BandDescriptor.clazz,
-        std::bind(BandDescriptorFromHal, _1, _2, Region::ITU_1));
+
+    auto regionalBands = regions::mapRegions(prop10.bands);
+    auto jBands = ArrayFromHal<RegionalBandConfig>(env, regionalBands,
+            gjni.BandDescriptor.clazz, BandDescriptorFromHal);
     auto jSupportedProgramTypes =
             prop11 ? ArrayFromHal(env, prop11->supportedProgramTypes) : nullptr;
     auto jSupportedIdentifierTypes =
@@ -359,32 +366,31 @@ JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_1::Properties &pr
     return ModulePropertiesFromHal(env, properties.base, &properties, moduleId, serviceName);
 }
 
+static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const RegionalBandConfig &config) {
+    return BandDescriptorFromHal(env, config.bandConfig, config.region);
+}
+
 static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
     ALOGV("%s", __func__);
 
     jint spacing = config.spacings.size() > 0 ? config.spacings[0] : 0;
+    ALOGW_IF(config.spacings.size() > 1, "Multiple spacings - not a regional config");
     ALOGW_IF(config.spacings.size() == 0, "No channel spacing specified");
 
-    switch (config.type) {
-        case Band::FM:
-        case Band::FM_HD: {
-            auto& fm = config.ext.fm;
-            return make_javaref(env, env->NewObject(
-                    gjni.FmBandDescriptor.clazz, gjni.FmBandDescriptor.cstor,
-                    region, config.type, config.lowerLimit, config.upperLimit, spacing,
-                    fm.stereo, fm.rds != Rds::NONE, fm.ta, fm.af, fm.ea));
-        }
-        case Band::AM:
-        case Band::AM_HD: {
-            auto& am = config.ext.am;
-            return make_javaref(env, env->NewObject(
-                    gjni.AmBandDescriptor.clazz, gjni.AmBandDescriptor.cstor,
-                    region, config.type, config.lowerLimit, config.upperLimit, spacing,
-                    am.stereo));
-        }
-        default:
-            ALOGE("Unsupported band type: %d", config.type);
-            return nullptr;
+    if (utils::isFm(config.type)) {
+        auto& fm = config.ext.fm;
+        return make_javaref(env, env->NewObject(
+                gjni.FmBandDescriptor.clazz, gjni.FmBandDescriptor.cstor,
+                region, config.type, config.lowerLimit, config.upperLimit, spacing,
+                fm.stereo, fm.rds != Rds::NONE, fm.ta, fm.af, fm.ea));
+    } else if (utils::isAm(config.type)) {
+        auto& am = config.ext.am;
+        return make_javaref(env, env->NewObject(
+                gjni.AmBandDescriptor.clazz, gjni.AmBandDescriptor.cstor,
+                region, config.type, config.lowerLimit, config.upperLimit, spacing, am.stereo));
+    } else {
+        ALOGE("Unsupported band type: %d", config.type);
+        return nullptr;
     }
 }
 
@@ -394,20 +400,15 @@ JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, 
     auto descriptor = BandDescriptorFromHal(env, config, region);
     if (descriptor == nullptr) return nullptr;
 
-    switch (config.type) {
-        case Band::FM:
-        case Band::FM_HD: {
-            return make_javaref(env, env->NewObject(
-                    gjni.FmBandConfig.clazz, gjni.FmBandConfig.cstor, descriptor.get()));
-        }
-        case Band::AM:
-        case Band::AM_HD: {
-            return make_javaref(env, env->NewObject(
-                    gjni.AmBandConfig.clazz, gjni.AmBandConfig.cstor, descriptor.get()));
-        }
-        default:
-            ALOGE("Unsupported band type: %d", config.type);
-            return nullptr;
+    if (utils::isFm(config.type)) {
+        return make_javaref(env, env->NewObject(
+                gjni.FmBandConfig.clazz, gjni.FmBandConfig.cstor, descriptor.get()));
+    } else if (utils::isAm(config.type)) {
+        return make_javaref(env, env->NewObject(
+                gjni.AmBandConfig.clazz, gjni.AmBandConfig.cstor, descriptor.get()));
+    } else {
+        ALOGE("Unsupported band type: %d", config.type);
+        return nullptr;
     }
 }
 
@@ -583,7 +584,7 @@ static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo 
 }
 
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info, V1_0::Band band) {
-    auto selector = V1_1::utils::make_selector(band, info.channel, info.subChannel);
+    auto selector = utils::make_selector(band, info.channel, info.subChannel);
     return ProgramInfoFromHal(env, info, nullptr, selector);
 }
 
