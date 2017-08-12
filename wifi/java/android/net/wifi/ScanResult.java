@@ -262,6 +262,7 @@ public class ScanResult implements Parcelable {
     /**
      * Status indicating the scan result does not correspond to a user's saved configuration
      * @hide
+     * @removed
      */
     @SystemApi
     public boolean untrusted;

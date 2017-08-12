@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * Information about an ephemeral application intent filter.
  * @hide
+ * @removed
  */
 @Deprecated
 @SystemApi
