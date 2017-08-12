@@ -3169,7 +3169,7 @@
 
     <!-- Allows notifications to be colorized
          <p>Not for use by third-party applications. @hide -->
-    <permission android:name="android.permission.USE_COLORIZED_NOTIFICATIONS"
+    <permission android:name="com.android.permission.USE_COLORIZED_NOTIFICATIONS"
                 android:protectionLevel="signature|setup" />
 
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.

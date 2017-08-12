@@ -3203,9 +3203,9 @@ public class NotificationManagerService extends SystemService {
                     (userId == UserHandle.USER_ALL) ? UserHandle.USER_SYSTEM : userId);
             Notification.addFieldsFromContext(ai, notification);
 
-            int canColorize = mPackageManagerClient.checkPermission(
-                    android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
-            if (canColorize == PERMISSION_GRANTED) {
+            boolean canColorize = PERMISSION_GRANTED == mPackageManagerClient.checkPermission(
+                    "com.android.permission.USE_COLORIZED_NOTIFICATIONS", pkg);
+            if (canColorize) {
                 notification.flags |= Notification.FLAG_CAN_COLORIZE;
             } else {
                 notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
