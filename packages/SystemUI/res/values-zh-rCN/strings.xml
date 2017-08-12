@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"不允许使用 USB 调试功能"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"当前登录了此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为管理员用户。"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在保存屏幕截图..."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"了解详情"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"您已连接到<xliff:g id="VPN_APP">%1$s</xliff:g>，该应用可以监控您的网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"打开 VPN 设置"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"打开可信凭据列表"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"您的管理员已开启网络日志功能，该功能会监控您设备上的流量。\n\n如需更多信息，请与您的管理员联系。"</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"菜单"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>应用"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"屏幕截图"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"常规消息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"存储空间"</string>

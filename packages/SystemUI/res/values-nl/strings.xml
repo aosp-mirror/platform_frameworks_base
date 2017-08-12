@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Altijd toestaan vanaf deze computer"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als u deze functie wilt gebruiken, schakelt u naar een beheerdersgebruiker."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot opslaan..."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Meer informatie"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Je bent verbonden met <xliff:g id="VPN_APP">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden gecontroleerd."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-instellingen openen"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Vertrouwde gegevens openen"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Je beheerder heeft netwerkregistratie ingeschakeld, waarmee verkeer op je apparaat wordt bijgehouden.\n\nNeem contact op met je beheerder voor meer informatie."</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Apps <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Meldingen"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshots"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Algemene berichten"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Opslag"</string>

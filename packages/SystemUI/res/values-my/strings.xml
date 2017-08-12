@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ဒီကွန်ပျူတာရဲ့ RSA key fingerprint ကတော့:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g> ဖြစ်ပါသည်"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ဒီကွန်ပျူတာမှ အမြဲခွင့်ပြုရန်"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB အမှားပြင်ဆင်ခြင်း ခွင့်မပြုပါ"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ဤစက်ပစ္စည်းသို့ လက်ရှိဝင်ရောက်ထားသည့် အသုံးပြုသူသည် USB အမှားပြင်ဆင်ခြင်း ဖွင့်၍မရပါ။ ဤအင်္ဂါရပ်ကို အသုံးပြုရန်၊ ကျေးဇူးပြု၍ ကြီးကြပ်သူသို့ပြောင်းပါ။"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"ဇူးမ်အပြည့်ဆွဲခြင်း"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ဖန်သားပြင်အပြည့်ဆန့်ခြင်း"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ဖန်သားပြင်ဓါတ်ပုံသိမ်းစဉ်.."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"ပိုမိုလေ့လာရန်"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ သင်သည် ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Open VPN ဆက်တင်များ"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"ယုံကြည်စိတ်ချရသော အထောက်အထားများကို ဖွင့်ရန်"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"သင့်စီမံခန့်ခွဲသူသည် စက်ပစ္စည်းပေါ်ရှိ ဒေတာအသွားအလာကို စောင့်ကြည့်နိုင်သည့် ကွန်ရက်အတွက် မှတ်တမ်းတင်ခြင်းကို ဖွင့်ထားပါသည်။\n\nနောက်ထပ် အချက်အလက်များအတွက် သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"မီနူး"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> အက်ပ်"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"သတိပေးချက်များ"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"မျက်နှာပြင်ဓာတ်ပုံများ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"အထွေထွေ မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"သိုလှောင်မှုများ"</string>
