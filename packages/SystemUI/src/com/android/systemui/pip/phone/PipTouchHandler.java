@@ -31,7 +31,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -47,10 +46,8 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.PipSnapAlgorithm;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
@@ -90,6 +87,8 @@ public class PipTouchHandler {
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
 
+    // The reference inset bounds, used to determine the dismiss fraction
+    private Rect mInsetBounds = new Rect();
     // The reference bounds used to calculate the normal/expanded target bounds
     private Rect mNormalBounds = new Rect();
     private Rect mNormalMovementBounds = new Rect();
@@ -311,6 +310,7 @@ public class PipTouchHandler {
         mNormalMovementBounds = normalMovementBounds;
         mExpandedMovementBounds = expandedMovementBounds;
         mDisplayRotation = displayRotation;
+        mInsetBounds.set(insetBounds);
         updateMovementBounds(mMenuState);
 
         // If we have a deferred resize, apply it now
@@ -418,9 +418,12 @@ public class PipTouchHandler {
      * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
      */
     private void updateDismissFraction() {
-        if (mMenuController != null) {
+        // Skip updating the dismiss fraction when the IME is showing. This is to work around an
+        // issue where starting the menu activity for the dismiss overlay will steal the window
+        // focus, which closes the IME.
+        if (mMenuController != null && !mIsImeShowing) {
             Rect bounds = mMotionHelper.getBounds();
-            final float target = mMovementBounds.bottom + bounds.height();
+            final float target = mInsetBounds.bottom;
             float fraction = 0f;
             if (bounds.bottom > target) {
                 final float distance = bounds.bottom - target;
