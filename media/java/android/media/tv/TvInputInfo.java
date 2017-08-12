@@ -161,6 +161,7 @@ public final class TvInputInfo implements Parcelable {
      *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
      *            the application icon of {@code service} will be loaded.
      * @hide
+     * @removed
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
@@ -189,6 +190,7 @@ public final class TvInputInfo implements Parcelable {
      * @param icon The {@link android.graphics.drawable.Icon} to load the icon image. If it is
      *            {@code null}, the application icon of {@code service} will be loaded.
      * @hide
+     * @removed
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
@@ -216,6 +218,7 @@ public final class TvInputInfo implements Parcelable {
      *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
      *            the application icon of {@code service} will be loaded.
      * @hide
+     * @removed
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
@@ -242,6 +245,7 @@ public final class TvInputInfo implements Parcelable {
      * @param icon The {@link android.graphics.drawable.Icon} to load the icon image. If it is
      *            {@code null}, the application icon of {@code service} will be loaded.
      * @hide
+     * @removed
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
