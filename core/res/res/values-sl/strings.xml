@@ -281,7 +281,7 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostop do stikov"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostop do lokacije te naprave"</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Google Koledar"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Koledar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostop do koledarja"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"pošiljanje in ogled sporočil SMS"</string>
@@ -1653,8 +1653,8 @@
       <item quantity="other">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Celozaslonski način"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete tako, da z vrha s prstom povlečete navzdol."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Vklopljen je celozaslonski način"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete ga tako, da z vrha s prstom povlečete navzdol."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumem"</string>
     <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Okrogli drsnik za ure"</string>

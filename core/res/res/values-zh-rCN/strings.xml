@@ -1605,7 +1605,7 @@
       <item quantity="one">1 秒后重试</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"正在全屏模式下查看"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"目前处于全屏模式"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"要退出，请从顶部向下滑动。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
