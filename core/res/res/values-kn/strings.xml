@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ತಾತ್ಕಾಲಿಕವಾಗಿ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ನಿಂದ ನಿಮ್ಮ ಸ್ಥಳದಲ್ಲಿ ಒದಗಿಸುತ್ತಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕ ಪಡೆಯುವುದನ್ನು ಸುಧಾರಿಸಲು, ಆಯ್ಕೆ ಮಾಡಿರುವ ವಿಧವನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ನೆಟ್‌ವರ್ಕ್ ಮತ್ತು ಇಂಟರ್ನೆಟ್ &gt; ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳು &gt; ಆದ್ಯತೆಯ ನೆಟ್‌ವರ್ಕ್ ವಿಧದಲ್ಲಿ ಬದಲಿಸಿ ನೋಡಿ."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ವೈ‑ಫೈ ಕರೆಮಾಡುವಿಕೆ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ತುರ್ತು ಕರೆಗಳನ್ನು ಮಾಡಲು ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್ ಅಗತ್ಯವಿದೆ."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ತುರ್ತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ ಮೋಡ್‌"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ಮೊಬೈಲ್ ಡೇಟಾ ಸ್ಥಿತಿ"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"ಎಸ್‌ಎಂಎಸ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ಧ್ವನಿಮೇಲ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>

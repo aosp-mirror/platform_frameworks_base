@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"عارضی طور پر آپ کے مقام پر موبائل نیٹ ورک کی طرف سے پیش نہیں ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"نیٹ ورک تک نہیں پہنچا جا سکتا"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"‏ریسپشن کو بہتر بنانے کیلئے، ترتیبات ‎&gt; نیٹ ورک اور انٹرنیٹ ‎&gt; موبائل نیٹ ورکس ‎&gt; ترجیحی نیٹ ورک کی قسم تبدیل کرنے کی کوشش کریں۔"</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏Wi-Fi کالنگ فعال ہے"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ہنگامی کالز کو موبائل نیٹ ورک کی ضرورت ہے۔"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"کال آگے منتقل کرنا"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ہنگامی کال بیک وضع"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"موبائل ڈیٹا کی صورت حال"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"‏SMS پیغامات"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"صوتی میل پیغامات"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏Wi-Fi کالنگ"</string>

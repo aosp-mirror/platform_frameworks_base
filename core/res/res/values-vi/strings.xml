@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tạm thời không được cung cấp bởi mạng di động tại vị trí của bạn"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Không thể kết nối mạng"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại mạng được chọn trong Cài đặt &gt; Mạng và Internet &gt; Mạng di động &gt; Loại mạng ưa thích."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Gọi qua Wi‑Fi đang hoạt động"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Cuộc gọi khẩn cấp yêu cầu có mạng di động."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Thông báo"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chuyển tiếp cuộc gọi"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Chế độ gọi lại khẩn cấp"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Trạng thái dữ liệu di động"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Tin nhắn SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Thư thoại"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Gọi qua Wi-Fi"</string>
