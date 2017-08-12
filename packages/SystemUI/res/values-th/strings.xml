@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ลายนิ้วมือหลัก RSA ของคอมพิวเตอร์คือ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"อนุญาตจากคอมพิวเตอร์เครื่องนี้เสมอ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"ไม่อนุญาตให้แก้ไขข้อบกพร่องผ่าน USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ผู้ใช้ที่ลงชื่อเข้าใช้อุปกรณ์นี้อยู่ในขณะนี้ไม่สามารถเปิดการแก้ปัญหาผ่าน USB ได้ หากต้องการใช้ฟีเจอร์นี้ โปรดเปลี่ยนไปเป็นผู้ใช้ที่เป็นผู้ดูแลระบบ"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"กำลังบันทึกภาพหน้าจอ..."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"เรียนรู้เพิ่มเติม"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"คุณเชื่อมต่อกับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"เปิดการตั้งค่า VPN"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"เปิดข้อมูลรับรองที่เชื่อถือได้"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"ผู้ดูแลระบบได้เปิดการทำบันทึกเครือข่าย ซึ่งจะติดตามดูการรับส่งข้อมูลบนอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบสำหรับข้อมูลเพิ่มเติม"</string>
@@ -726,8 +728,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ย่อเล็กสุด"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ปิด"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ลากลงเพื่อปิด"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"เมนูการแสดงผลหลายแหล่งพร้อมกัน"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงผลหลายแหล่งพร้อมกัน"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"เมนูการแสดงภาพซ้อนภาพ"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
     <string name="pip_play" msgid="1417176722760265888">"เล่น"</string>
     <string name="pip_pause" msgid="8881063404466476571">"หยุดชั่วคราว"</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"เมนู"</string>
     <string name="tuner_app" msgid="3507057938640108777">"แอป <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"การแจ้งเตือน"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ภาพหน้าจอ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ข้อความทั่วไป"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"พื้นที่เก็บข้อมูล"</string>
