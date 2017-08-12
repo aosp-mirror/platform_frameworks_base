@@ -2777,7 +2777,7 @@
          Could be used to prevent unwanted touch events
          on a touchscreen, for example during swimming or rain.
          @hide -->
-    <permission android:name="android.permission.DISABLE_INPUT_DEVICE"
+    <permission android:name="com.android.permission.DISABLE_INPUT_DEVICE"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to configure and connect to Wifi displays
