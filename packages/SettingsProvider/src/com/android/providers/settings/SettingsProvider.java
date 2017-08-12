@@ -2878,7 +2878,11 @@ public class SettingsProvider extends ContentProvider {
                     case MSG_NOTIFY_URI_CHANGED: {
                         final int userId = msg.arg1;
                         Uri uri = (Uri) msg.obj;
-                        getContext().getContentResolver().notifyChange(uri, null, true, userId);
+                        try {
+                            getContext().getContentResolver().notifyChange(uri, null, true, userId);
+                        } catch (SecurityException e) {
+                            Slog.w(LOG_TAG, "Failed to notify for " + userId + ": " + uri, e);
+                        }
                         if (DEBUG) {
                             Slog.v(LOG_TAG, "Notifying for " + userId + ": " + uri);
                         }
