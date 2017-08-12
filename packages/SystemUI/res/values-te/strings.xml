@@ -52,7 +52,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ఇన్‌పుట్ పద్ధతులను సెటప్ చేయండి"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"భౌతిక కీబోర్డ్"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB పరికరాన్ని ప్రాప్యత చేయడానికి అనువర్తనాన్ని <xliff:g id="APPLICATION">%1$s</xliff:g> అనుమతించాలా?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"USB ఉపకరణాన్ని ప్రాప్యత చేయడానికి అనువర్తనం <xliff:g id="APPLICATION">%1$s</xliff:g>ను అనుమతించాలా?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"USB ఉపకరణాన్ని యాక్సెస్ చేయడానికి యాప్ <xliff:g id="APPLICATION">%1$s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"ఈ USB పరికరం కనెక్ట్ చేయబడినప్పుడు <xliff:g id="ACTIVITY">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"ఈ USB ఉపకరణం కనెక్ట్ చేయబడినప్పుడు <xliff:g id="ACTIVITY">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ఈ USB ఉపకరణంతో ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలు ఏవీ పని చేయవు. ఈ ఉపకరణం గురించి <xliff:g id="URL">%1$s</xliff:g>లో మరింత తెలుసుకోండి"</string>
@@ -75,11 +75,11 @@
     <string name="screenshot_failed_title" msgid="705781116746922771">"స్క్రీన్‌షాట్‌ను క్యాప్చర్ చేయడం సాధ్యపడలేదు."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"స్క్రీన్‌షాట్‌ని సేవ్ చేస్తున్నప్పుడు సమస్య సంభవించింది."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"పరిమిత నిల్వ స్థలం కారణంగా స్క్రీన్‌షాట్‌ను సేవ్ చేయడం సాధ్యపడదు."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"స్క్రీన్‌షాట్‌లు తీయడానికి అనువర్తనం లేదా మీ సంస్థ అనుమతించలేదు"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"స్క్రీన్‌షాట్‌లు తీయడానికి యాప్ లేదా మీ సంస్థ అనుమతించలేదు"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ఫైల్ బదిలీ ఎంపికలు"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"మీడియా ప్లేయర్‌గా (MTP) మౌంట్ చేయి"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"కెమెరాగా (PTP) మౌంట్ చేయి"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Macకు Android ఫైల్ బదిలీ అను. ఇన్‌స్టాల్ చేయండి"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Macకు Android ఫైల్ బదిలీ యాప్ ఇన్‌స్టాల్ చేయండి"</string>
     <string name="accessibility_back" msgid="567011538994429120">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"హోమ్"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"మెను"</string>
@@ -88,13 +88,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"శోధించు"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ఫోన్"</string>
-    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"వాయిస్ సహాయకం"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"వాయిస్ అసిస్టెంట్"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"వేలిముద్ర కోసం వేచి ఉంది"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"మీ వేలిముద్రను ఉపయోగించకుండా అన్‌లాక్ చేయండి"</string>
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
-    <string name="voice_assist_label" msgid="3956854378310019854">"వాయిస్ సహాయకం తెరువు"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
     <string name="camera_label" msgid="7261107956054836961">"కెమెరాను తెరువు"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"కొత్త విధి లేఅవుట్‌ను ఎంచుకోండి"</string>
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయండి"</string>
@@ -365,7 +365,7 @@
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ఈ పరికరాన్ని మీ సంస్థ నిర్వహిస్తోంది"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> నిర్వహణలో ఉంది"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"వాయిస్ సహాయకం చిహ్నం నుండి స్వైప్"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"వాయిస్ అసిస్టెంట్ చిహ్నం నుండి స్వైప్"</string>
     <string name="camera_hint" msgid="7939688436797157483">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"మొత్తం నిశ్శబ్దం. దీని వలన స్క్రీన్ రీడర్‌లు కూడా నిశ్శబ్దమవుతాయి."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"మొత్తం నిశ్శబ్దం"</string>
@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"విశ్వసనీయ ఆధారాలను తెరువు"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేసారు.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"మీరు VPN కనెక్షన్ సెటప్ చేయడానికి ఒక అనువర్తనానికి అనుమతి ఇచ్చారు.\n\nఈ అనువర్తనం ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ పరికరం మరియు నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"మీరు VPN కనెక్షన్ సెటప్ చేయడానికి ఒక యాప్‌నకు అనుమతి ఇచ్చారు.\n\nఈ యాప్ ఇమెయిల్‌లు,యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ డివైజ్ మరియు నెట్‌వర్క్ కార్యకలాపాన్ని పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ద్వారా మీ కార్యాలయ ప్రొఫైల్ నిర్వహించబడుతోంది.\n\nఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల సామర్థ్యం మీ నిర్వాహకులకు ఉంది.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ అయ్యారు, ఇది మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"మీరు ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
@@ -533,7 +533,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"అభినందనలు! సెట్టింగ్‌లకు సిస్టమ్ UI ట్యూనర్ జోడించబడింది"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"సెట్టింగ్‌ల నుండి తీసివేయి"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"సిస్టమ్ UI ట్యూనర్‌ను సెట్టింగ్‌ల నుండి తీసివేసి, దాని అన్ని లక్షణాలను ఉపయోగించడం ఆపివేయాలా?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"అనువర్తనం మీ పరికరంలో ఇన్‌స్టాల్ చేయలేదు"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"యాప్ మీ డివైజ్‌లో ఇన్‌స్టాల్ చేయలేదు"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"గడియారం సెకన్లు చూపు"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"స్థితి పట్టీలో గడియారం సెకన్లు చూపుతుంది. బ్యాటరీ శక్తి ప్రభావితం చేయవచ్చు."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"శీఘ్ర సెట్టింగ్‌ల ఏర్పాటు క్రమం మార్చు"</string>
@@ -549,15 +549,15 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ఆన్‌లో ఉన్నాయి"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ఆఫ్‌లో ఉన్నాయి"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు అనువర్తన నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ జాబితా పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ జాబితా దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- అనువర్తనం నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు యాప్ నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ జాబితా పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ జాబితా దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_channel_disabled" msgid="2139193533791840539">"మీరు ఇకపై ఈ నోటిఫికేషన్‌లను పొందరు"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> నోటిఫికేషన్ వర్గాలు"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ఈ అనువర్తనానికి నోటిఫికేషన్ వర్గాలు లేవు"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"ఈ యాప్ నుండి వచ్చే నోటిఫికేషన్‌లను ఆఫ్ చేయలేరు"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">ఈ అనువర్తనం నుంచి <xliff:g id="NUMBER_1">%d</xliff:g> నోటిఫికేషన్ వర్గాలలో 1</item>
-      <item quantity="one">ఈ అనువర్తనం నుంచి <xliff:g id="NUMBER_0">%d</xliff:g> నోటిఫికేషన్ వర్గంలో 1</item>
+      <item quantity="other">ఈ యాప్ నుంచి <xliff:g id="NUMBER_1">%d</xliff:g> నోటిఫికేషన్ వర్గాలలో 1</item>
+      <item quantity="one">ఈ యాప్ నుంచి <xliff:g id="NUMBER_0">%d</xliff:g> నోటిఫికేషన్ వర్గంలో 1</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -707,7 +707,7 @@
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g>వ స్థానానికి తరలించబడింది"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"శీఘ్ర సెట్టింగ్‌ల ఎడిటర్."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> నోటిఫికేషన్: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"స్క్రీన్ విభజనతో అనువర్తనం పని చేయకపోవచ్చు."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"స్క్రీన్ విభజనతో యాప్‌ పని చేయకపోవచ్చు."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ప్రత్యామ్నాయ డిస్‌ప్లేలో యాప్ పని చేయకపోవచ్చు."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ప్రత్యామ్నాయ డిస్‌ప్లేల్లో ప్రారంభానికి యాప్ మద్దతు లేదు."</string>
@@ -766,8 +766,8 @@
     <string name="bt_is_off" msgid="2640685272289706392">"బ్లూటూత్ ఆఫ్‌లో ఉంది"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"స్వయంచాలక నియమం (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"అనువర్తనం (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"స్వయంచాలక నియమం లేదా అనువర్తనం ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"యాప్ (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"స్వయంచాలక నియమం లేదా యాప్ ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> వరకు"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"ఉంచు"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"భర్తీ చేయి"</string>

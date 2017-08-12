@@ -269,7 +269,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Čuvar ekrana"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne ometaj"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetni prekidi"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetno"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Samo alarmi"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Potpuna tišina"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -371,7 +371,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Prevucite od ikone da otvorite kameru"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Potpuna tišina. Ovo će utišati i čitače ekrana."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Potpuna tišina"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetni prekidi"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetno"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Samo alarmi"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Potpuna\ntišina"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Samo\nprioritetni prekidi"</string>
