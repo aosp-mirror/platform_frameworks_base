@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Izigxivizo zeminwe zokhiye we-RSA wekhompyutha ngu:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Hlala uvumela njalo kusuka kule khompyutha"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ukususa iphutha kwe-USB akuvunyelwe"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Umsebenzisi manje ongene ngemvume kule divayisi akakwazi ukuvula ukususa iphutha kwe-USB. Ukuze usebenzise lesi sici, sicela ushintshele kumsebenzisi ongumlawuli."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Sondeza ukugcwalisa isikrini"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Nweba ukugcwalisa isikrini"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ilondoloz umfanekiso weskrini..."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Funda kabanzi"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Uxhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>, engaqapha umsebenzi wenethiwekhi yakho, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Vula izilungiselelo ze-VPN"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Vula ukuqinisekisa okuthenjiwe"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Umlawuli wakho uvule ukungena kwenethiwekhi, okuhlola ithrafikhi kudivayisi yakho.\n\nNgolwazi olubanzi xhumana nomlawuli wakho."</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"Imenyu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> uhlelo lokusebenza"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Izexwayiso"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Izithombe-skrini"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Imilayezo ejwayelekile"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Isitoreji"</string>

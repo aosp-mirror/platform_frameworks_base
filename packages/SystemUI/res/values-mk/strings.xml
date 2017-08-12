@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Клучниот отпечаток на RSA на компјутерот е:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Секогаш дозволувај од овој компјутер"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Отстранувањето грешки на USB не е дозволено"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Корисникот што моментално е најавен на уредов не може да вклучи отстранување грешки на USB. За да ја користите функцијата, префрлете се на корисникот Администратор."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Зумирај да се исполни екранот"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растегни да се исполни екранот"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сликата на екранот се зачувува..."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Дознајте повеќе"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Поврзани сте на <xliff:g id="VPN_APP">%1$s</xliff:g>, којашто може да ја следи вашата активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-сајтовите."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Отворете „Поставки за VPN“"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Отворете ги доверливите акредитиви"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Вашиот администратор вклучил евиденција на мрежата, што подразбира следење на сообраќајот на вашиот уред.\n\nЗа повеќе информации, контактирајте со администраторот."</string>
@@ -754,9 +756,11 @@
     <string name="tuner_menu" msgid="191640047241552081">"Мени"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Апликација <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Предупредувања"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Слики од екранот"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Општи пораки"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"Меморија"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Капацитет"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Инстант апликации"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Инстант апликациите нема потреба да се инсталираат."</string>
     <string name="app_info" msgid="6856026610594615344">"Информации за апликација"</string>

@@ -221,11 +221,11 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Close panel."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"More time."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Less time."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Torch off."</string>
-    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Torch unavailable."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Torch on."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Torch turned off."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Torch turned on."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Flashlight off."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Flashlight unavailable."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Flashlight on."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Flashlight turned off."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Flashlight turned on."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Colour inversion turned off."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Colour inversion turned on."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobile hotspot turned off."</string>
@@ -316,7 +316,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifications"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Torch"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Flashlight"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobile data"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Data usage"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Remaining data"</string>

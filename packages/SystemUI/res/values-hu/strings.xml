@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"A számítógép RSA kulcs ujjlenyomata:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Mindig engedélyezze erről a számítógépről"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Az USB hibakeresése nem engedélyezett"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Az eszközre jelenleg bejelentkezett felhasználó nem kapcsolhatja be az USB hibakeresését. A funkció használatához váltson rendszergazda felhasználóra."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Nagyítás a kitöltéshez"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Nyújtás kitöltéshez"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Képernyőkép mentése..."</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"További információ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ön kapcsolódik ehhez: <xliff:g id="VPN_APP">%1$s</xliff:g>, amely figyelheti hálózati tevékenységét, köztük a levelezést, az alkalmazás- és webhelyhasználatot."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-beállítások megnyitása"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Megbízható hitelesítési adatok megnyitása"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"A rendszergazda bekapcsolta az eszköz forgalmát figyelő hálózati naplózást.\n\nHa további információra van szüksége, forduljon a rendszergazdához."</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menü"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> alkalmazás"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Értesítések"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Képernyőképek"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Általános üzenetek"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Tárhely"</string>
