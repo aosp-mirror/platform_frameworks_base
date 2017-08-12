@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"Use this network as is"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"Do not use this network"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Sign in to network"</string>
+    <string name="action_bar_title" msgid="5645564790486983117">"Sign in to %1$s"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"The network that you’re trying to join has security issues."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"For example, the login page might not belong to the organisation shown."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Continue anyway via browser"</string>
+</resources>
