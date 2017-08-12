@@ -22,7 +22,6 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
-import android.app.timezone.RulesManager;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
@@ -872,13 +871,6 @@ final class SystemServiceRegistry {
                 return new VrManager(IVrManager.Stub.asInterface(b));
             }
         });
-
-        registerService(Context.TIME_ZONE_RULES_MANAGER_SERVICE, RulesManager.class,
-                new CachedServiceFetcher<RulesManager>() {
-            @Override
-            public RulesManager createService(ContextImpl ctx) {
-                return new RulesManager(ctx.getOuterContext());
-            }});
     }
 
     /**
