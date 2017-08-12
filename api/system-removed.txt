@@ -271,13 +271,6 @@ package android.media {
 
 package android.media.tv {
 
-  public final class TvInputInfo implements android.os.Parcelable {
-    method public static deprecated android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.hardware.hdmi.HdmiDeviceInfo, java.lang.String, java.lang.String, android.net.Uri) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public static deprecated android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.hardware.hdmi.HdmiDeviceInfo, java.lang.String, int, android.graphics.drawable.Icon) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public static deprecated android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.media.tv.TvInputHardwareInfo, java.lang.String, android.net.Uri) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public static deprecated android.media.tv.TvInputInfo createTvInputInfo(android.content.Context, android.content.pm.ResolveInfo, android.media.tv.TvInputHardwareInfo, int, android.graphics.drawable.Icon) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-  }
-
   public final class TvInputManager {
     method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
   }
