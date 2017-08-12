@@ -7007,22 +7007,44 @@ public class PackageManagerService extends IPackageManager.Stub
 
                             // Okay we found a previously set preferred or last chosen app.
                             // If the result set is different from when this
-                            // was created, we need to clear it and re-ask the
-                            // user their preference, if we're looking for an "always" type entry.
+                            // was created, and is not a subset of the preferred set, we need to
+                            // clear it and re-ask the user their preference, if we're looking for
+                            // an "always" type entry.
                             if (always && !pa.mPref.sameSet(query)) {
-                                Slog.i(TAG, "Result set changed, dropping preferred activity for "
-                                        + intent + " type " + resolvedType);
-                                if (DEBUG_PREFERRED) {
-                                    Slog.v(TAG, "Removing preferred activity since set changed "
-                                            + pa.mPref.mComponent);
+                                if (pa.mPref.isSuperset(query)) {
+                                    // some components of the set are no longer present in
+                                    // the query, but the preferred activity can still be reused
+                                    if (DEBUG_PREFERRED) {
+                                        Slog.i(TAG, "Result set changed, but PreferredActivity is"
+                                                + " still valid as only non-preferred components"
+                                                + " were removed for " + intent + " type "
+                                                + resolvedType);
+                                    }
+                                    // remove obsolete components and re-add the up-to-date filter
+                                    PreferredActivity freshPa = new PreferredActivity(pa,
+                                            pa.mPref.mMatch,
+                                            pa.mPref.discardObsoleteComponents(query),
+                                            pa.mPref.mComponent,
+                                            pa.mPref.mAlways);
+                                    pir.removeFilter(pa);
+                                    pir.addFilter(freshPa);
+                                    changed = true;
+                                } else {
+                                    Slog.i(TAG,
+                                            "Result set changed, dropping preferred activity for "
+                                                    + intent + " type " + resolvedType);
+                                    if (DEBUG_PREFERRED) {
+                                        Slog.v(TAG, "Removing preferred activity since set changed "
+                                                + pa.mPref.mComponent);
+                                    }
+                                    pir.removeFilter(pa);
+                                    // Re-add the filter as a "last chosen" entry (!always)
+                                    PreferredActivity lastChosen = new PreferredActivity(
+                                            pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
+                                    pir.addFilter(lastChosen);
+                                    changed = true;
+                                    return null;
                                 }
-                                pir.removeFilter(pa);
-                                // Re-add the filter as a "last chosen" entry (!always)
-                                PreferredActivity lastChosen = new PreferredActivity(
-                                        pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
-                                pir.addFilter(lastChosen);
-                                changed = true;
-                                return null;
                             }
 
                             // Yay! Either the set matched or we're looking for the last chosen
