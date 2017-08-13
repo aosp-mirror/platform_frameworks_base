@@ -203,7 +203,7 @@ public class SwipeHelper implements Gefingerpoken {
             return Math.max(1 - progress, 0);
         }
 
-        return Math.min(0, Math.max(1, progress / SWIPE_PROGRESS_FADE_END));
+        return 1f - Math.max(0, Math.min(1, progress / SWIPE_PROGRESS_FADE_END));
     }
 
     private void updateSwipeProgressFromOffset(View animView, boolean dismissable) {

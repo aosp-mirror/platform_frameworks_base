@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datamaskinens nøkkelfingeravtrykk for RSA er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillat alltid fra denne datamaskinen"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-feilsøking er ikke tillatt"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til en administratorbruker."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom for å fylle skjermen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strekk for å fylle skjerm"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Lagrer skjermdumpen …"</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Finn ut mer"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Enheten er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Åpne VPN-innstillingene"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Åpne pålitelig legitimasjon"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken på enheten din.\n\nKontakt administratoren for mer informasjon."</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"Meny"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>-appen"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Varsler"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skjermdumper"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Generelle meldinger"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Lagring"</string>

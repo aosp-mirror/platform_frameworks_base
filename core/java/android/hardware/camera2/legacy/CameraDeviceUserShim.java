@@ -504,12 +504,18 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (mLegacyDevice.isClosed()) {
             String err = "Cannot end configure, device has been closed.";
             Log.e(TAG, err);
+            synchronized(mConfigureLock) {
+                mConfiguring = false;
+            }
             throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
         }
 
         if (operatingMode != ICameraDeviceUser.NORMAL_MODE) {
             String err = "LEGACY devices do not support this operating mode";
             Log.e(TAG, err);
+            synchronized(mConfigureLock) {
+                mConfiguring = false;
+            }
             throw new ServiceSpecificException(ICameraService.ERROR_ILLEGAL_ARGUMENT, err);
         }
 

@@ -131,7 +131,9 @@ public class RadioTunerTest {
 
         // find FM band and build its config
         mModule = mModules.get(0);
+
         for (RadioManager.BandDescriptor band : mModule.getBands()) {
+            Log.d(TAG, "Band: " + band);
             int bandType = band.getType();
             if (bandType == RadioManager.BAND_AM || bandType == RadioManager.BAND_AM_HD) {
                 mAmBandDescriptor = (RadioManager.AmBandDescriptor)band;

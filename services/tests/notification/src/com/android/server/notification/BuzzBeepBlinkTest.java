@@ -537,6 +537,21 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     }
 
     @Test
+    public void testInCallNotification() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+
+        // set up internal state
+        mService.buzzBeepBlinkLocked(r);
+        Mockito.reset(mRingtonePlayer);
+
+        mService.mInCall = true;
+        mService.buzzBeepBlinkLocked(r);
+
+        //verify(mService, times(1)).playInCallNotification();
+        verifyNeverBeep(); // doesn't play normal beep
+    }
+
+    @Test
     public void testNoDemoteSoundToVibrateIfVibrateGiven() throws Exception {
         NotificationRecord r = getBuzzyBeepyNotification();
         assertTrue(r.getSound() != null);

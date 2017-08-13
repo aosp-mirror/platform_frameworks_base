@@ -57,7 +57,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k periférnemu zariadeniu USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Chcete pri pripojení tohto zariadenia USB otvoriť aplikáciu <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Chcete pri pripojení tohto periférneho zariadenia USB otvoriť aplikáciu <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"S týmto zariad. USB nefunguje žiadna nainštal. aplikácia. Viac informácií na <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"S týmto zariad. USB nefunguje žiadna nainštal. aplikácia. Ďalšie informácie na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Periférne zariadenie USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Zobraziť"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Pre toto zariadenie USB použiť ako predvolené"</string>
@@ -66,7 +66,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povoliť z tohto počítača"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladenie cez USB nie je povolené"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Používateľ, ktorý je práve prihlásený na tomto zariadení, nemôže zapnúť ladenie cez USB. Ak chcete použiť túto funkciu, prepnite na používateľa s oprávneniami správcu."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Prebieha ukladanie snímky obrazovky..."</string>
@@ -462,7 +463,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Ďalšie informácie"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ste pripojený/-á k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti vrátane e-mailových správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Otvoriť Nastavenia pripojenia VPN"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Otvoriť dôveryhodné poverenia"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení.\n\nĎalšie informácie vám poskytne správca."</string>
@@ -768,6 +770,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"Ponuka"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplikácia <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornenia"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovky"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Všeobecné správy"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Úložisko"</string>

@@ -13284,7 +13284,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // about in case nothing has focus.  even if this specific view
                 // isn't focusable, it may contain something that is, so let
                 // the root view try to give this focus if nothing else does.
-                if ((mParent != null)) {
+                if ((mParent != null) && (mBottom > mTop) && (mRight > mLeft)) {
                     mParent.focusableViewAvailable(this);
                 }
             }

@@ -2810,9 +2810,6 @@
     <!-- True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
-    <!-- Component that runs demo mode when it is enabled. -->
-    <string name="config_demoModePackage" translatable="false"></string>
-
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
     <integer name="config_keepPreloadsMinDays">7</integer>
@@ -2997,9 +2994,11 @@
     <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
 
-    <!-- Volume level of in-call notification tone playback,
-         relative to the overall voice call stream volume [0..100] -->
-    <integer name="config_inCallNotificationVolumeRelative">67</integer>
+    <!-- Volume level of in-call notification tone playback [0..1] -->
+    <item name="config_inCallNotificationVolume" format="float" type="dimen">.25</item>
+
+    <!-- URI for in call notification sound -->
+    <string translatable="false" name="config_inCallNotificationSound">/system/media/audio/ui/InCallNotification.ogg</string>
 
     <!-- The OEM specified sensor type for the lift trigger to launch the camera app. -->
     <integer name="config_cameraLiftTriggerSensorType">-1</integer>

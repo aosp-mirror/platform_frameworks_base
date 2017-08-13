@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"La xarxa mòbil de la teva ubicació temporalment no ofereix aquest servei"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No es pot accedir a la xarxa"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Per millorar la recepció, prova de canviar el tipus de xarxa a Configuració &gt; Xarxa i Internet &gt; Xarxes mòbils &gt; Tipus de xarxa preferit."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"La funció Trucades per Wi Fi està activada"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Per poder fer trucades d\'emergència, cal tenir connexió a una xarxa mòbil."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desviació de trucades"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mode de devolució de trucada d\'emergència"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Estat de les dades mòbils"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Missatges SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
@@ -1594,7 +1591,7 @@
       <item quantity="one">Torna-ho a provar d\'aquí a 1 segon</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Visualització en pantalla completa"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Mode de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Per sortir, llisca cap avall des de la part superior."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"D\'acord"</string>
     <string name="done_label" msgid="2093726099505892398">"Fet"</string>

@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Servizio temporaneamente non offerto dalla rete mobile nella tua località"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossibile raggiungere la rete"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Per migliorare la ricezione, prova a modificare il tipo selezionato in Impostazioni &gt; Rete e Internet &gt; Reti mobili &gt; Tipo di rete preferito."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Chiamate Wi‑Fi attive"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Per le chiamate di emergenza è necessaria una rete mobile."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Avvisi"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Deviazione chiamate"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modalità di richiamata di emergenza"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Stato dati mobili"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Messaggi vocali"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Chiamate Wi-Fi"</string>

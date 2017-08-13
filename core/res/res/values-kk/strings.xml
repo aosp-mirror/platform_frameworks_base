@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Орналасқан аймағыңызда мобильдік желі уақытша ұсынбады"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Желіге қосылу мүмкін емес"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Қабылдауды жақсарту үшін \"Параметрлер &gt; Желі және интернет &gt; Мобильді желілер және қалаулы желі түрі\" тармағынан түрді өзгертіп көріңіз."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi қоңыраулары қосулы"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Жедел қызметке қоңырау шалу үшін мобильдік желі қажет."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Дабылдар"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Қоңырауды басқа нөмірге бағыттау"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Шұғыл кері қоңырау шалу режимі"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Мобильдік деректер күйі"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS хабарлары"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Дауыстық пошта хабарлары"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi қоңыраулары"</string>
@@ -1595,7 +1592,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Кейінірек қайта әрекеттеніңіз."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Толық экранда көру"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Шығу үшін жоғарыдан төмен қарай жанап өтіңіз."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Шығу үшін жоғарыдан төмен қарай сипап өтіңіз."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Түсіндім"</string>
     <string name="done_label" msgid="2093726099505892398">"Дайын"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Сағаттар айналымының қозғалтқышы"</string>

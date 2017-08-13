@@ -82,15 +82,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ta storitev trenutno ni na voljo v mobilnem omrežju na vaši lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Povezave z omrežjem ni mogoče vzpostaviti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Če želite izboljšati sprejem, poskusite zamenjati vrsto omrežja v »Nastavitve« &gt; »Omrežje in internet« &gt; »Mobilna omrežja« &gt; »Prednostna vrsta omrežja«."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Klicanje prek Wi-Fi-ja je aktivno"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Za klice v sili potrebujete mobilno omrežje."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Opozorila"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmerjanje klicev"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način za povratni klic v sili"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Stanje prenosa podatkov v mobilnem omrežju"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Sporočila SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Sporočila v odzivniku"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Klicanje prek Wi-Fi-ja"</string>
@@ -270,7 +267,7 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostop do stikov"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostop do lokacije te naprave"</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Google Koledar"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Koledar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostop do koledarja"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"pošiljanje in ogled sporočil SMS"</string>
@@ -1642,8 +1639,8 @@
       <item quantity="other">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Celozaslonski način"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete tako, da z vrha s prstom povlečete navzdol."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Vklopljen je celozaslonski način"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete ga tako, da z vrha s prstom povlečete navzdol."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumem"</string>
     <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Okrogli drsnik za ure"</string>

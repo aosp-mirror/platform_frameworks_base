@@ -163,7 +163,7 @@
     <string name="usb_debugging_secondary_user_title">USB debugging not allowed</string>
 
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
-    <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, please switch to an Admin user.</string>
+    <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
 
     <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
          on a phone).  [CHAR LIMIT=25] -->
@@ -1152,7 +1152,7 @@
     <string name="monitoring_description_vpn_settings_separator">" "</string>
 
     <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=60] -->
-    <string name="monitoring_description_vpn_settings">Open VPN Settings</string>
+    <string name="monitoring_description_vpn_settings">Open VPN settings</string>
 
     <!-- Monitoring dialog: Space that separates the CA certs body text and the "Open trusted credentials" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_ca_cert_settings_separator">" "</string>
@@ -1904,7 +1904,7 @@
     <string name="pip_phone_dismiss_hint">Drag down to dismiss</string>
 
     <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
-    <string name="pip_menu_title">Picture in picture menu</string>
+    <string name="pip_menu_title">Menu</string>
 
     <!-- PiP BTW notification title. [CHAR LIMIT=50] -->
     <string name="pip_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is in picture-in-picture</string>
@@ -1987,8 +1987,10 @@
     <!-- SysUI Tuner: App subheading for shortcut selection [CHAR LIMIT=60] -->
     <string name="tuner_app"><xliff:g id="app">%1$s</xliff:g> app</string>
 
-    <!-- Title for the notification channel containing important alerts like low battery. [CHAR LIMIT=NONE] -->
+    <!-- Title for the notification channel containing important alerts. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_alerts">Alerts</string>
+    <!-- Title for the notification channel for battery warnings (i.e. < 15%). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_battery">Battery</string>
     <!-- Title for the notification channel dedicated to screenshot progress. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_screenshot">Screenshots</string>
     <!-- Title for the notification channel for miscellaneous notices. [CHAR LIMIT=NONE] -->

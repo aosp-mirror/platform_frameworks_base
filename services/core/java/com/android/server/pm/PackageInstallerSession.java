@@ -274,9 +274,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             synchronized (mLock) {
-                if (msg.obj != null) {
-                    mRemoteObserver = (IPackageInstallObserver2) msg.obj;
-                }
                 try {
                     commitLocked();
                 } catch (PackageManagerException e) {
@@ -666,7 +663,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void commit(IntentSender statusReceiver, boolean forTransfer) {
+    public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
         Preconditions.checkNotNull(statusReceiver);
 
         // Cache package manager data without the lock held
@@ -678,6 +675,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotDestroyedLocked("commit");
+
+            final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(
+                    mContext, statusReceiver, sessionId, isInstallerDeviceOwnerLocked(), userId);
+            mRemoteObserver = adapter.getBinder();
 
             if (forTransfer) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, null);
@@ -712,9 +713,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mActiveCount.incrementAndGet();
 
             mCommitted = true;
-            final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(
-                    mContext, statusReceiver, sessionId, isInstallerDeviceOwnerLocked(), userId);
-            mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
+            mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
         }
 
         if (!wasSealed) {
@@ -1153,7 +1152,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // This is kind of hacky; we're creating a half-parsed package that is
         // straddled between the inherited and staged APKs.
         final PackageLite pkg = new PackageLite(null, baseApk, null, null, null, null,
-                splitPaths.toArray(new String[splitPaths.size()]), null, null);
+                splitPaths.toArray(new String[splitPaths.size()]), null);
         final boolean isForwardLocked =
                 (params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
 
@@ -1422,8 +1421,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
-        IPackageInstallObserver2 observer;
-        String packageName;
+        final IPackageInstallObserver2 observer;
+        final String packageName;
         synchronized (mLock) {
             mFinalStatus = returnCode;
             mFinalMessage = msg;

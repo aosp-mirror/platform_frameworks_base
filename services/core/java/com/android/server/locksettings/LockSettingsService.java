@@ -25,6 +25,7 @@ import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_EN
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
+import static com.android.internal.widget.LockPatternUtils.userOwnsFrpCredential;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -560,6 +561,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mDeviceProvisionedObserver.onSystemReady();
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
+        mStrongAuth.systemReady();
     }
 
     private void migrateOldData() {
@@ -2360,6 +2362,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (isProvisioned()) {
                     Slog.i(TAG, "Reporting device setup complete to IGateKeeperService");
                     reportDeviceSetupComplete();
+                    clearFrpCredentialIfOwnerNotSecure();
                 }
             }
         }
@@ -2384,6 +2387,23 @@ public class LockSettingsService extends ILockSettings.Stub {
                 getGateKeeperService().reportDeviceSetupComplete();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failure reporting to IGateKeeperService", e);
+            }
+        }
+
+        /**
+         * Clears the FRP credential if the user that controls it does not have a secure
+         * lockscreen.
+         */
+        private void clearFrpCredentialIfOwnerNotSecure() {
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo user : users) {
+                if (userOwnsFrpCredential(user)) {
+                    if (!isUserSecure(user.id)) {
+                        mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, user.id,
+                                0, null);
+                    }
+                    return;
+                }
             }
         }
 
