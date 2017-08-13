@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Përkohësisht nuk ofrohet nga rrjeti celular në vendndodhjen tënde"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Cilësimet &gt; Rrjeti dhe interneti &gt; Lloji i preferuar i rrjetit."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Telefonata me Wi‑Fi është aktive"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Telefonatat e urgjencës kërkojnë një rrjet celular."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Sinjalizimet"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Transferimi i telefonatave"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modaliteti i \"Kthimit të telefonatës së urgjencës\""</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Statusi i të dhënave celulare"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mesazhet SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mesazhet e postës zanore"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Telefonata me Wi-Fi"</string>

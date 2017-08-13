@@ -223,6 +223,25 @@ public class LegacyCameraDevice implements AutoCloseable {
         }
 
         @Override
+        public void onRequestQueueEmpty() {
+            mResultHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "doing onRequestQueueEmpty callback");
+                    }
+                    try {
+                        mDeviceCallbacks.onRequestQueueEmpty();
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Received remote exception during onRequestQueueEmpty callback: ",
+                                e);
+                    }
+                }
+            });
+        }
+
+        @Override
         public void onCaptureResult(final CameraMetadataNative result, final RequestHolder holder) {
             final CaptureResultExtras extras = getExtrasFromRequest(holder);
 

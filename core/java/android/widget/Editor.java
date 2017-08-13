@@ -4734,7 +4734,9 @@ public class Editor {
     public static final int HANDLE_TYPE_SELECTION_START = 0;
     public static final int HANDLE_TYPE_SELECTION_END = 1;
 
-    private class SelectionHandleView extends HandleView {
+    /** For selection handles */
+    @VisibleForTesting
+    public final class SelectionHandleView extends HandleView {
         // Indicates the handle type, selection start (HANDLE_TYPE_SELECTION_START) or selection
         // end (HANDLE_TYPE_SELECTION_END).
         @HandleType

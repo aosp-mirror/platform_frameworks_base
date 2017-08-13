@@ -96,7 +96,7 @@
     <string name="serviceClassVoice" msgid="1258393812335258019">"အသံ"</string>
     <string name="serviceClassData" msgid="872456782077937893">"ဒေတာ"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"ဖက်စ်"</string>
-    <string name="serviceClassSMS" msgid="2015460373701527489">"စာတိုစနစ်"</string>
+    <string name="serviceClassSMS" msgid="2015460373701527489">"SMS စာတိုစနစ်"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Async"</string>
     <string name="serviceClassDataSync" msgid="7530000519646054776">"ထပ်တူ ကိုက်ညီခြင်း"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"Packet"</string>
@@ -266,7 +266,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ပြက္ခဒိန်"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouprequest_calendar" msgid="6704529828699071445">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား သင်၏ပြက္ခဒိန်ကို သုံးခွင့်ပေးရန်"</string>
-    <string name="permgrouplab_sms" msgid="228308803364967808">"စာတိုစနစ်"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"<xliff:g id="APP_NAME">%1$s</xliff:g> အား SMS မက်ဆေ့ဂျ်များကို ကြည့်ရှုခွင့်နှင့် ပို့ခွင့်ပေးရန်"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"သိုလှောင်မှုများ"</string>
@@ -1604,7 +1604,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေစဉ်"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန်၊ ထိပ်ဘက်မှ အောက်ဘက်သို့ ဆွဲချပါ။"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ရပါပြီ"</string>
     <string name="done_label" msgid="2093726099505892398">"ပြီးပါပြီ"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"နာရီရွေးချက်စရာ"</string>
@@ -1672,7 +1672,7 @@
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"မနှောင့်ယှက်ရ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊တနင်္ဂနွေ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>

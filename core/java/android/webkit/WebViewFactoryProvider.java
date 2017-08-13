@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
@@ -95,6 +96,13 @@ public interface WebViewFactoryProvider {
         * ValueCallback<Boolean>)}
         */
         void setSafeBrowsingWhitelist(List<String> urls, ValueCallback<Boolean> callback);
+
+        /**
+         * Implement the API method
+         * {@link android.webkit.WebView#getSafeBrowsingPrivacyPolicyUrl()}
+         */
+        @NonNull
+        Uri getSafeBrowsingPrivacyPolicyUrl();
     }
 
     Statics getStatics();

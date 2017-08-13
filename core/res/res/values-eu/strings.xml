@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Zauden tokiko sare mugikorrak ez du eskaintzen aukera hori une honetan"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ezin da konektatu sarera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Seinalea hobea izan dadin, aldatu sare mota Ezarpenak &gt; Sareak eta Internet &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi bidezko deiak aktibo daude"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Sare mugikorrera konektatuta egon behar da larrialdi-deiak egin ahal izateko."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Abisuak"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Dei-desbideratzea"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Larrialdi-deiak soilik jasotzeko modua"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Datu mugikorren egoera"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Erantzungailuko mezuak"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi bidezko deiak"</string>

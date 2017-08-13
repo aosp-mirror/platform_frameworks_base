@@ -16,7 +16,6 @@
 
 package com.android.systemui.power;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,14 +32,17 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.StatusBar;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -84,10 +86,7 @@ public class PowerUI extends SystemUI {
         mHardwarePropertiesManager = (HardwarePropertiesManager)
                 mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
-        mWarnings = new PowerNotificationWarnings(
-                mContext,
-                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE),
-                getComponent(StatusBar.class));
+        mWarnings = Dependency.get(WarningsUI.class);
         mLastConfiguration.setTo(mContext.getResources().getConfiguration());
 
         ContentObserver obs = new ContentObserver(mHandler) {
@@ -231,6 +230,7 @@ public class PowerUI extends SystemUI {
                         && (bucket < oldBucket || oldPlugged)
                         && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                         && bucket < 0) {
+
                     // only play SFX when the dialog comes up or the bucket changes
                     final boolean playSound = bucket != oldBucket || oldPlugged;
                     mWarnings.showLowBatteryWarning(playSound);
@@ -266,13 +266,14 @@ public class PowerUI extends SystemUI {
             // Get the throttling temperature. No need to check if we're not throttling.
             float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
                     HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
-                    HardwarePropertiesManager.TEMPERATURE_THROTTLING);
+                    HardwarePropertiesManager.TEMPERATURE_SHUTDOWN);
             if (throttlingTemps == null
                     || throttlingTemps.length == 0
                     || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
                 return;
             }
-            mThresholdTemp = throttlingTemps[0];
+            mThresholdTemp = throttlingTemps[0] -
+                    resources.getInteger(R.integer.config_warningTemperatureTolerance);
         }
 
         setNextLogTime();
@@ -293,7 +294,8 @@ public class PowerUI extends SystemUI {
         }
     }
 
-    private void updateTemperatureWarning() {
+    @VisibleForTesting
+    protected void updateTemperatureWarning() {
         float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
                 HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
                 HardwarePropertiesManager.TEMPERATURE_CURRENT);

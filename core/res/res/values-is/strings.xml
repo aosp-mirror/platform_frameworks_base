@@ -80,15 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ekki í boði á farsímakerfinu á þínum stað eins og er"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ekki næst samband við símkerfi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Reyndu að breyta valinni gerð í Stillingar &gt; Netkerfi og internet > Farsímakerfi &gt; Valin símkerfistegund til að bæta móttökuskilyrðin."</string>
-    <!-- no translation found for EmergencyCallWarningTitle (4790413876281901612) -->
-    <skip />
-    <!-- no translation found for EmergencyCallWarningSummary (8973232888021643293) -->
-    <skip />
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi símtöl eru virk"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Neyðarsímtöl krefjast farsímanets."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Tilkynningar"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Símtalsflutningur"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Stilling fyrir svarhringingu neyðarsímtala"</string>
-    <!-- no translation found for notification_channel_mobile_data_status (4575131690860945836) -->
-    <skip />
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Staða farsímagagna"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-skilaboð"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Talhólfsskilaboð"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi símtöl"</string>

@@ -11,6 +11,7 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/BroadcastRadio/Tuner.cpp \
     $(LOCAL_REL_DIR)/BroadcastRadio/TunerCallback.cpp \
     $(LOCAL_REL_DIR)/BroadcastRadio/convert.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/regions.cpp \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_am_BatteryStatsService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_connectivity_Vpn.cpp \

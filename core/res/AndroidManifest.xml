@@ -1709,7 +1709,8 @@
     <permission android:name="android.permission.RECEIVE_STK_COMMANDS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to send EMBMS download intents to apps-->
+      <!-- Allows an application to send EMBMS download intents to apps
+           @hide -->
     <permission android:name="android.permission.SEND_EMBMS_INTENTS"
         android:protectionLevel="signature|privileged" />
 
@@ -1832,10 +1833,6 @@
          third party applications. -->
     <permission android:name="android.permission.MANAGE_USERS"
         android:protectionLevel="signature|privileged" />
-
-    <!-- @hide Allows an application to configure the assist gesture -->
-    <permission android:name="android.permission.CONFIGURE_ASSIST_GESTURE"
-        android:protectionLevel="signature" />
 
     <!-- @hide Allows an application to create, remove users and get the list of
          users on the device. Applications holding this permission can only create restricted,
@@ -2273,7 +2270,7 @@
          <p>An application requesting this permission is responsible for
          verifying the source and integrity of the update before passing
          it off to the installer components.
-         @hide -->
+         @SystemApi @hide -->
     <permission android:name="android.permission.UPDATE_TIME_ZONE_RULES"
         android:protectionLevel="signature|privileged" />
 

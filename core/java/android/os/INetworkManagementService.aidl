@@ -435,4 +435,6 @@ interface INetworkManagementService
     int removeRoutesFromLocalNetwork(in List<RouteInfo> routes);
 
     void setAllowOnlyVpnForUids(boolean enable, in UidRange[] uidRanges);
+
+    boolean isNetworkRestricted(int uid);
 }

@@ -1221,7 +1221,7 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Enheten har inte stöd för <xliff:g id="NAME">%s</xliff:g>. Tryck här om du vill konfigurera i ett format som stöds."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Enheten stöder inte detta <xliff:g id="NAME">%s</xliff:g>. Välj för att konfigurera i ett format som stöds."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> togs bort oväntat"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Montera bort <xliff:g id="NAME">%s</xliff:g> före borttagningen för att undvika dataförlust"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Avmontera <xliff:g id="NAME">%s</xliff:g> före borttagningen för att undvika dataförlust"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Ditt <xliff:g id="NAME">%s</xliff:g> har tagits bort"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> togs bort. Mata in ett nytt"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Ditt <xliff:g id="NAME">%s</xliff:g> matas fortfarande ut …"</string>

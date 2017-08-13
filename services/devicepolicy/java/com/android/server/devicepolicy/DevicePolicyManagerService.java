@@ -2378,6 +2378,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             BroadcastReceiver result) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
+        if (UserManager.isDeviceInDemoMode(mContext)) {
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        }
         if (action.equals(DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING)) {
             intent.putExtra("expiration", admin.passwordExpirationDate);
         }
@@ -8173,23 +8176,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return null;
             }
 
-            final UserInfo userInfo = getUserInfo(userHandle);
-            if (userInfo != null && userInfo.isDemo()) {
-                try {
-                    final ApplicationInfo ai = mIPackageManager.getApplicationInfo(adminPkg,
-                            PackageManager.MATCH_DISABLED_COMPONENTS, userHandle);
-                    final boolean isSystemApp =
-                            ai != null && (ai.flags & (ApplicationInfo.FLAG_SYSTEM
-                                    | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
-                    if (isSystemApp) {
-                        mIPackageManager.setApplicationEnabledSetting(adminPkg,
-                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                                PackageManager.DONT_KILL_APP, userHandle, "DevicePolicyManager");
-                    }
-                } catch (RemoteException e) {
-                }
-            }
-
             setActiveAdmin(profileOwner, true, userHandle);
             // User is not started yet, the broadcast by setActiveAdmin will not be received.
             // So we store adminExtras for broadcasting when the user starts for first time.
@@ -8483,6 +8469,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_ENABLE_SYSTEM_APP);
 
+            final boolean isDemo = isCurrentUserDemo();
+
             int userId = UserHandle.getCallingUserId();
             long id = mInjector.binderClearCallingIdentity();
 
@@ -8493,14 +8481,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
 
                 int parentUserId = getProfileParentId(userId);
-                if (!isSystemApp(mIPackageManager, packageName, parentUserId)) {
+                if (!isDemo && !isSystemApp(mIPackageManager, packageName, parentUserId)) {
                     throw new IllegalArgumentException("Only system apps can be enabled this way.");
                 }
 
                 // Install the app.
                 mIPackageManager.installExistingPackageAsUser(packageName, userId,
                         0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
-
+                if (isDemo) {
+                    // Ensure the app is also ENABLED for demo users.
+                    mIPackageManager.setApplicationEnabledSetting(packageName,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                            PackageManager.DONT_KILL_APP, userId, "DevicePolicyManager");
+                }
             } catch (RemoteException re) {
                 // shouldn't happen
                 Slog.wtf(LOG_TAG, "Failed to install " + packageName, re);
@@ -8945,7 +8938,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
 
-            if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)) {
+            if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)
+                    && !UserManager.isDeviceInDemoMode(mContext)) {
                 throw new SecurityException(String.format(
                         "Permission denial: device owners cannot update %1$s", setting));
             }
@@ -8977,11 +8971,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             if (isDeviceOwner(who, callingUserId)) {
-                if (!SECURE_SETTINGS_DEVICEOWNER_WHITELIST.contains(setting)) {
+                if (!SECURE_SETTINGS_DEVICEOWNER_WHITELIST.contains(setting)
+                        && !isCurrentUserDemo()) {
                     throw new SecurityException(String.format(
                             "Permission denial: Device owners cannot update %1$s", setting));
                 }
-            } else if (!SECURE_SETTINGS_WHITELIST.contains(setting)) {
+            } else if (!SECURE_SETTINGS_WHITELIST.contains(setting) && !isCurrentUserDemo()) {
                 throw new SecurityException(String.format(
                         "Permission denial: Profile owners cannot update %1$s", setting));
             }
@@ -9432,12 +9427,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public SystemUpdatePolicy getSystemUpdatePolicy() {
-        if (UserManager.isDeviceInDemoMode(mContext)) {
-            // Pretending to have an automatic update policy when the device is in retail demo
-            // mode. This will allow the device to download and install an ota without
-            // any user interaction.
-            return SystemUpdatePolicy.createAutomaticInstallPolicy();
-        }
         synchronized (this) {
             SystemUpdatePolicy policy =  mOwners.getSystemUpdatePolicy();
             if (policy != null && !policy.isValid()) {
@@ -10442,6 +10431,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             return getUserDataUnchecked(UserHandle.USER_SYSTEM).mUserSetupComplete;
         }
+    }
+
+    private boolean isCurrentUserDemo() {
+        if (UserManager.isDeviceInDemoMode(mContext)) {
+            final int userId = mInjector.userHandleGetCallingUserId();
+            final long callingIdentity = mInjector.binderClearCallingIdentity();
+            try {
+                return mUserManager.getUserInfo(userId).isDemo();
+            } finally {
+                mInjector.binderRestoreCallingIdentity(callingIdentity);
+            }
+        }
+        return false;
     }
 
     private void removePackageIfRequired(final String packageName, final int userId) {

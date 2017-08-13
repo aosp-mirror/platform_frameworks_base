@@ -39,8 +39,8 @@
 #include <utils/misc.h>
 #include <utils/String8.h>
 
-#include "JNIHelp.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>

@@ -857,6 +857,7 @@ public final class PowerManager {
      *
      * @deprecated This call is rarely used and will be phased out soon.
      * @hide
+     * @removed
      */
     @SystemApi @Deprecated
     public boolean isScreenBrightnessBoosted() {
@@ -1222,6 +1223,7 @@ public final class PowerManager {
      *
      * @deprecated This intent is rarely used and will be phased out soon.
      * @hide
+     * @removed
      **/
     @SystemApi @Deprecated
     public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED

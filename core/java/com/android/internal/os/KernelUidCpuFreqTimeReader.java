@@ -16,8 +16,12 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.SystemClock;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -46,7 +50,6 @@ public class KernelUidCpuFreqTimeReader {
     private static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
 
     public interface Callback {
-        void onCpuFreqs(long[] cpuFreqs);
         void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs);
     }
 
@@ -62,18 +65,51 @@ public class KernelUidCpuFreqTimeReader {
     private static final int TOTAL_READ_ERROR_COUNT = 5;
     private int mReadErrorCounter;
     private boolean mProcFileAvailable;
+    private boolean mPerClusterTimesAvailable;
+
+    public boolean perClusterTimesAvailable() {
+        return mPerClusterTimesAvailable;
+    }
+
+    public long[] readFreqs(@NonNull PowerProfile powerProfile) {
+        checkNotNull(powerProfile);
+
+        if (mCpuFreqs != null) {
+            // No need to read cpu freqs more than once.
+            return mCpuFreqs;
+        }
+        if (!mProcFileAvailable && mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
+            return null;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
+            mProcFileAvailable = true;
+            return readFreqs(reader, powerProfile);
+        } catch (IOException e) {
+            mReadErrorCounter++;
+            Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
+            return null;
+        }
+    }
+
+    @VisibleForTesting
+    public long[] readFreqs(BufferedReader reader, PowerProfile powerProfile)
+            throws IOException {
+        final String line = reader.readLine();
+        if (line == null) {
+            return null;
+        }
+        return readCpuFreqs(line, powerProfile);
+    }
 
     public void readDelta(@Nullable Callback callback) {
-        if (!mProcFileAvailable && mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
+        if (!mProcFileAvailable) {
             return;
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
             mNowTimeMs = SystemClock.elapsedRealtime();
             readDelta(reader, callback);
             mLastTimeReadMs = mNowTimeMs;
-            mProcFileAvailable = true;
         } catch (IOException e) {
-            mReadErrorCounter++;
             Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
         }
     }
@@ -99,7 +135,6 @@ public class KernelUidCpuFreqTimeReader {
         if (line == null) {
             return;
         }
-        readCpuFreqs(line, callback);
         while ((line = reader.readLine()) != null) {
             final int index = line.indexOf(' ');
             final int uid = Integer.parseInt(line.substring(0, index - 1), 10);
@@ -151,18 +186,54 @@ public class KernelUidCpuFreqTimeReader {
         }
     }
 
-    private void readCpuFreqs(String line, Callback callback) {
-        if (mCpuFreqs == null) {
-            final String[] freqStr = line.split(" ");
-            // First item would be "uid:" which needs to be ignored
-            mCpuFreqsCount = freqStr.length - 1;
-            mCpuFreqs = new long[mCpuFreqsCount];
-            for (int i = 0; i < mCpuFreqsCount; ++i) {
-                mCpuFreqs[i] = Long.parseLong(freqStr[i + 1], 10);
+    private long[] readCpuFreqs(String line, PowerProfile powerProfile) {
+        final String[] freqStr = line.split(" ");
+        // First item would be "uid: " which needs to be ignored.
+        mCpuFreqsCount = freqStr.length - 1;
+        mCpuFreqs = new long[mCpuFreqsCount];
+        for (int i = 0; i < mCpuFreqsCount; ++i) {
+            mCpuFreqs[i] = Long.parseLong(freqStr[i + 1], 10);
+        }
+
+        // Check if the freqs in the proc file correspond to per-cluster freqs.
+        final IntArray numClusterFreqs = extractClusterInfoFromProcFileFreqs();
+        final int numClusters = powerProfile.getNumCpuClusters();
+        if (numClusterFreqs.size() == numClusters) {
+            mPerClusterTimesAvailable = true;
+            for (int i = 0; i < numClusters; ++i) {
+                if (numClusterFreqs.get(i) != powerProfile.getNumSpeedStepsInCpuCluster(i)) {
+                    mPerClusterTimesAvailable = false;
+                    break;
+                }
+            }
+        } else {
+            mPerClusterTimesAvailable = false;
+        }
+        Slog.i(TAG, "mPerClusterTimesAvailable=" + mPerClusterTimesAvailable);
+
+        return mCpuFreqs;
+    }
+
+    /**
+     * Extracts no. of cpu clusters and no. of freqs in each of these clusters from the freqs
+     * read from the proc file.
+     *
+     * We need to assume that freqs in each cluster are strictly increasing.
+     * For e.g. if the freqs read from proc file are: 12, 34, 15, 45, 12, 15, 52. Then it means
+     * there are 3 clusters: (12, 34), (15, 45), (12, 15, 52)
+     *
+     * @return an IntArray filled with no. of freqs in each cluster.
+     */
+    private IntArray extractClusterInfoFromProcFileFreqs() {
+        final IntArray numClusterFreqs = new IntArray();
+        int freqsFound = 0;
+        for (int i = 0; i < mCpuFreqsCount; ++i) {
+            freqsFound++;
+            if (i + 1 == mCpuFreqsCount || mCpuFreqs[i + 1] <= mCpuFreqs[i]) {
+                numClusterFreqs.add(freqsFound);
+                freqsFound = 0;
             }
         }
-        if (callback != null) {
-            callback.onCpuFreqs(mCpuFreqs);
-        }
+        return numClusterFreqs;
     }
 }

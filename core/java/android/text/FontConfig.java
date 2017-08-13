@@ -175,7 +175,7 @@ public final class FontConfig {
     public static final class Family {
         private final @NonNull String mName;
         private final @NonNull Font[] mFonts;
-        private final @NonNull String mLanguage;
+        private final @NonNull String[] mLanguages;
 
         /** @hide */
         @Retention(SOURCE)
@@ -209,11 +209,11 @@ public final class FontConfig {
         // See frameworks/minikin/include/minikin/FontFamily.h
         private final @Variant int mVariant;
 
-        public Family(@NonNull String name, @NonNull Font[] fonts, @NonNull String language,
+        public Family(@NonNull String name, @NonNull Font[] fonts, @NonNull String[] languages,
                 @Variant int variant) {
             mName = name;
             mFonts = fonts;
-            mLanguage = language;
+            mLanguages = languages;
             mVariant = variant;
         }
 
@@ -232,10 +232,10 @@ public final class FontConfig {
         }
 
         /**
-         * Returns the language for this family. May be null.
+         * Returns the languages for this family. May be null.
          */
-        public @Nullable String getLanguage() {
-            return mLanguage;
+        public @Nullable String[] getLanguages() {
+            return mLanguages;
         }
 
         /**

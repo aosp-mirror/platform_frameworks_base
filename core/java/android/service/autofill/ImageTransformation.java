@@ -78,8 +78,7 @@ public final class ImageTransformation extends InternalTransformation implements
         }
         final int size = mOptions.size();
         if (sDebug) {
-            Log.d(TAG, size + " multiple options on id " + childViewId + " to compare against "
-                    + value);
+            Log.d(TAG, size + " multiple options on id " + childViewId + " to compare against");
         }
 
         for (int i = 0; i < size; i++) {

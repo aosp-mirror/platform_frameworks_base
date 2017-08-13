@@ -1445,15 +1445,6 @@ class UserController {
         return mStartedUserArray;
     }
 
-    boolean isUserStoppingOrShuttingDownLocked(int userId) {
-        UserState state = getStartedUserStateLocked(userId);
-        if (state == null) {
-            return false;
-        }
-        return state.state == UserState.STATE_STOPPING
-                || state.state == UserState.STATE_SHUTDOWN;
-    }
-
     boolean isUserRunningLocked(int userId, int flags) {
         UserState state = getStartedUserStateLocked(userId);
         if (state == null) {

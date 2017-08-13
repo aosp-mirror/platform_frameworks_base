@@ -1694,20 +1694,22 @@ public abstract class Layout {
     }
 
     private void addSelection(int line, int start, int end,
-                              int top, int bottom, Path dest) {
+            int top, int bottom, RectangleConsumer consumer) {
         int linestart = getLineStart(line);
         int lineend = getLineEnd(line);
         Directions dirs = getLineDirections(line);
 
-        if (lineend > linestart && mText.charAt(lineend - 1) == '\n')
+        if (lineend > linestart && mText.charAt(lineend - 1) == '\n') {
             lineend--;
+        }
 
         for (int i = 0; i < dirs.mDirections.length; i += 2) {
             int here = linestart + dirs.mDirections[i];
-            int there = here + (dirs.mDirections[i+1] & RUN_LENGTH_MASK);
+            int there = here + (dirs.mDirections[i + 1] & RUN_LENGTH_MASK);
 
-            if (there > lineend)
+            if (there > lineend) {
                 there = lineend;
+            }
 
             if (start <= there && end >= here) {
                 int st = Math.max(start, here);
@@ -1720,7 +1722,7 @@ public abstract class Layout {
                     float left = Math.min(h1, h2);
                     float right = Math.max(h1, h2);
 
-                    dest.addRect(left, top, right, bottom, Path.Direction.CW);
+                    consumer.accept(left, top, right, bottom);
                 }
             }
         }
@@ -1734,9 +1736,25 @@ public abstract class Layout {
      */
     public void getSelectionPath(int start, int end, Path dest) {
         dest.reset();
+        getSelection(start, end, (left, top, right, bottom) ->
+                dest.addRect(left, top, right, bottom, Path.Direction.CW));
+    }
 
-        if (start == end)
+    /**
+     * Calculates the rectangles which should be highlighted to indicate a selection between start
+     * and end and feeds them into the given {@link RectangleConsumer}.
+     *
+     * @param start    the starting index of the selection
+     * @param end      the ending index of the selection
+     * @param consumer the {@link RectangleConsumer} which will receive the generated rectangles. It
+     *                 will be called every time a rectangle is generated.
+     * @hide
+     * @see #getSelectionPath(int, int, Path)
+     */
+    public final void getSelection(int start, int end, final RectangleConsumer consumer) {
+        if (start == end) {
             return;
+        }
 
         if (end < start) {
             int temp = end;
@@ -1751,35 +1769,35 @@ public abstract class Layout {
         int bottom = getLineBottomWithoutSpacing(endline);
 
         if (startline == endline) {
-            addSelection(startline, start, end, top, bottom, dest);
+            addSelection(startline, start, end, top, bottom, consumer);
         } else {
             final float width = mWidth;
 
             addSelection(startline, start, getLineEnd(startline),
-                         top, getLineBottom(startline), dest);
+                    top, getLineBottom(startline), consumer);
 
-            if (getParagraphDirection(startline) == DIR_RIGHT_TO_LEFT)
-                dest.addRect(getLineLeft(startline), top,
-                              0, getLineBottom(startline), Path.Direction.CW);
-            else
-                dest.addRect(getLineRight(startline), top,
-                              width, getLineBottom(startline), Path.Direction.CW);
+            if (getParagraphDirection(startline) == DIR_RIGHT_TO_LEFT) {
+                consumer.accept(getLineLeft(startline), top, 0, getLineBottom(startline));
+            } else {
+                consumer.accept(getLineRight(startline), top, width, getLineBottom(startline));
+            }
 
             for (int i = startline + 1; i < endline; i++) {
                 top = getLineTop(i);
                 bottom = getLineBottom(i);
-                dest.addRect(0, top, width, bottom, Path.Direction.CW);
+                consumer.accept(0, top, width, bottom);
             }
 
             top = getLineTop(endline);
             bottom = getLineBottomWithoutSpacing(endline);
 
-            addSelection(endline, getLineStart(endline), end, top, bottom, dest);
+            addSelection(endline, getLineStart(endline), end, top, bottom, consumer);
 
-            if (getParagraphDirection(endline) == DIR_RIGHT_TO_LEFT)
-                dest.addRect(width, top, getLineRight(endline), bottom, Path.Direction.CW);
-            else
-                dest.addRect(0, top, getLineLeft(endline), bottom, Path.Direction.CW);
+            if (getParagraphDirection(endline) == DIR_RIGHT_TO_LEFT) {
+                consumer.accept(width, top, getLineRight(endline), bottom);
+            } else {
+                consumer.accept(0, top, getLineLeft(endline), bottom);
+            }
         }
     }
 
@@ -2280,5 +2298,19 @@ public abstract class Layout {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
+
+    /** @hide */
+    @FunctionalInterface
+    public interface RectangleConsumer {
+        /**
+         * Performs this operation on the given rectangle.
+         *
+         * @param left   the left edge of the rectangle
+         * @param top    the top edge of the rectangle
+         * @param right  the right edge of the rectangle
+         * @param bottom the bottom edge of the rectangle
+         */
+        void accept(float left, float top, float right, float bottom);
+    }
 
 }

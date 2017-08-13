@@ -1604,7 +1604,7 @@
       <item quantity="one">1 секунддан кийин кайталаңыз</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Кийинчерээк кайталаңыз"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Толук экранды көрүүдө"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Толук экран режими"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Чыгуу үчүн, жогурдан төмөн сүрүңүз."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Түшүндүм"</string>
     <string name="done_label" msgid="2093726099505892398">"Даяр"</string>

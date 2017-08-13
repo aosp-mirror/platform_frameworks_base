@@ -7007,22 +7007,44 @@ public class PackageManagerService extends IPackageManager.Stub
 
                             // Okay we found a previously set preferred or last chosen app.
                             // If the result set is different from when this
-                            // was created, we need to clear it and re-ask the
-                            // user their preference, if we're looking for an "always" type entry.
+                            // was created, and is not a subset of the preferred set, we need to
+                            // clear it and re-ask the user their preference, if we're looking for
+                            // an "always" type entry.
                             if (always && !pa.mPref.sameSet(query)) {
-                                Slog.i(TAG, "Result set changed, dropping preferred activity for "
-                                        + intent + " type " + resolvedType);
-                                if (DEBUG_PREFERRED) {
-                                    Slog.v(TAG, "Removing preferred activity since set changed "
-                                            + pa.mPref.mComponent);
+                                if (pa.mPref.isSuperset(query)) {
+                                    // some components of the set are no longer present in
+                                    // the query, but the preferred activity can still be reused
+                                    if (DEBUG_PREFERRED) {
+                                        Slog.i(TAG, "Result set changed, but PreferredActivity is"
+                                                + " still valid as only non-preferred components"
+                                                + " were removed for " + intent + " type "
+                                                + resolvedType);
+                                    }
+                                    // remove obsolete components and re-add the up-to-date filter
+                                    PreferredActivity freshPa = new PreferredActivity(pa,
+                                            pa.mPref.mMatch,
+                                            pa.mPref.discardObsoleteComponents(query),
+                                            pa.mPref.mComponent,
+                                            pa.mPref.mAlways);
+                                    pir.removeFilter(pa);
+                                    pir.addFilter(freshPa);
+                                    changed = true;
+                                } else {
+                                    Slog.i(TAG,
+                                            "Result set changed, dropping preferred activity for "
+                                                    + intent + " type " + resolvedType);
+                                    if (DEBUG_PREFERRED) {
+                                        Slog.v(TAG, "Removing preferred activity since set changed "
+                                                + pa.mPref.mComponent);
+                                    }
+                                    pir.removeFilter(pa);
+                                    // Re-add the filter as a "last chosen" entry (!always)
+                                    PreferredActivity lastChosen = new PreferredActivity(
+                                            pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
+                                    pir.addFilter(lastChosen);
+                                    changed = true;
+                                    return null;
                                 }
-                                pir.removeFilter(pa);
-                                // Re-add the filter as a "last chosen" entry (!always)
-                                PreferredActivity lastChosen = new PreferredActivity(
-                                        pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
-                                pir.addFilter(lastChosen);
-                                changed = true;
-                                return null;
                             }
 
                             // Yay! Either the set matched or we're looking for the last chosen
@@ -18621,42 +18643,56 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
                 }
             }
-
-            // dexopt can take some time to complete, so, for instant apps, we skip this
-            // step during installation. Instead, we'll take extra time the first time the
-            // instant app starts. It's preferred to do it this way to provide continuous
-            // progress to the user instead of mysteriously blocking somewhere in the
-            // middle of running an instant app. The default behaviour can be overridden
-            // via gservices.
-            if (!instantApp || Global.getInt(
-                        mContext.getContentResolver(), Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-                // Do not run PackageDexOptimizer through the local performDexOpt
-                // method because `pkg` may not be in `mPackages` yet.
-                //
-                // Also, don't fail application installs if the dexopt step fails.
-                DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
-                        REASON_INSTALL,
-                        DexoptOptions.DEXOPT_BOOT_COMPLETE);
-                mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
-                        null /* instructionSets */,
-                        getOrCreateCompilerPackageStats(pkg),
-                        mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
-                        dexoptOptions);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-
-            // Notify BackgroundDexOptService that the package has been changed.
-            // If this is an update of a package which used to fail to compile,
-            // BDOS will remove it from its blacklist.
-            // TODO: Layering violation
-            BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
             res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
             return;
         }
+
+        // Verify if we need to dexopt the app.
+        //
+        // NOTE: it is *important* to call dexopt after doRename which will sync the
+        // package data from PackageParser.Package and its corresponding ApplicationInfo.
+        //
+        // We only need to dexopt if the package meets ALL of the following conditions:
+        //   1) it is not forward locked.
+        //   2) it is not on on an external ASEC container.
+        //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //
+        // Note that we do not dexopt instant apps by default. dexopt can take some time to
+        // complete, so we skip this step during installation. Instead, we'll take extra time
+        // the first time the instant app starts. It's preferred to do it this way to provide
+        // continuous progress to the useur instead of mysteriously blocking somewhere in the
+        // middle of running an instant app. The default behaviour can be overridden
+        // via gservices.
+        final boolean performDexopt = !forwardLocked
+            && !pkg.applicationInfo.isExternalAsec()
+            && (!instantApp || Global.getInt(mContext.getContentResolver(),
+                    Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0);
+
+        if (performDexopt) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+            // Do not run PackageDexOptimizer through the local performDexOpt
+            // method because `pkg` may not be in `mPackages` yet.
+            //
+            // Also, don't fail application installs if the dexopt step fails.
+            DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
+                REASON_INSTALL,
+                DexoptOptions.DEXOPT_BOOT_COMPLETE);
+            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+                null /* instructionSets */,
+                getOrCreateCompilerPackageStats(pkg),
+                mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
+                dexoptOptions);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+
+        // Notify BackgroundDexOptService that the package has been changed.
+        // If this is an update of a package which used to fail to compile,
+        // BackgroundDexOptService will remove it from its blacklist.
+        // TODO: Layering violation
+        BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
 
         startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
 

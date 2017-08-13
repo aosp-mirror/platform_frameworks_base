@@ -93,10 +93,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -186,13 +186,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -303,12 +303,12 @@ public class NotificationManagerService extends SystemService {
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
-    private boolean mInCall = false;
+    protected boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
 
-    // for generating notification tones in-call
-    private ToneGenerator mInCallToneGenerator;
-    private final Object mInCallToneGeneratorLock = new Object();
+    private Uri mInCallNotificationUri;
+    private AudioAttributes mInCallNotificationAudioAttributes;
+    private float mInCallNotificationVolume;
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -553,7 +553,7 @@ public class NotificationManagerService extends SystemService {
     {
         final int pid;
         final String pkg;
-        final ITransientNotification callback;
+        ITransientNotification callback;
         int duration;
         Binder token;
 
@@ -568,6 +568,10 @@ public class NotificationManagerService extends SystemService {
 
         void update(int duration) {
             this.duration = duration;
+        }
+
+        void update(ITransientNotification callback) {
+            this.callback = callback;
         }
 
         void dump(PrintWriter pw, String prefix, DumpFilter filter) {
@@ -794,6 +798,15 @@ public class NotificationManagerService extends SystemService {
         updateLightsLocked();
     }
 
+    protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                mZenModeHelper.updateDefaultZenRules();
+            }
+        }
+    };
+
     private final BroadcastReceiver mRestoreReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -937,30 +950,6 @@ public class NotificationManagerService extends SystemService {
                 mInCall = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
                 updateNotificationPulse();
-                synchronized (mInCallToneGeneratorLock) {
-                    if (mInCall) {
-                        if (mInCallToneGenerator == null) {
-                            int relativeToneVolume = getContext().getResources().getInteger(
-                                    R.integer.config_inCallNotificationVolumeRelative);
-                            if (relativeToneVolume < ToneGenerator.MIN_VOLUME
-                                    || relativeToneVolume > ToneGenerator.MAX_VOLUME) {
-                                relativeToneVolume = ToneGenerator.MAX_VOLUME;
-                            }
-                            try {
-                                mInCallToneGenerator = new ToneGenerator(
-                                        AudioManager.STREAM_VOICE_CALL, relativeToneVolume);
-                            } catch (RuntimeException e) {
-                                Log.e(TAG, "Error creating local tone generator: " + e);
-                                mInCallToneGenerator = null;
-                            }
-                        }
-                    } else {
-                        if (mInCallToneGenerator != null) {
-                            mInCallToneGenerator.release();
-                            mInCallToneGenerator = null;
-                        }
-                     }
-                }
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0) {
@@ -1055,7 +1044,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private SettingsObserver mSettingsObserver;
-    private ZenModeHelper mZenModeHelper;
+    protected ZenModeHelper mZenModeHelper;
 
     static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
         int[] ar = r.getIntArray(resid);
@@ -1267,6 +1256,15 @@ public class NotificationManagerService extends SystemService {
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
 
+        mInCallNotificationUri = Uri.parse("file://" +
+                resources.getString(R.string.config_inCallNotificationSound));
+        mInCallNotificationAudioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                .build();
+        mInCallNotificationVolume = resources.getFloat(R.dimen.config_inCallNotificationVolume);
+
         mUseAttentionLight = resources.getBoolean(R.bool.config_useAttentionLight);
 
         // Don't start allowing notifications until the setup wizard has run once.
@@ -1362,6 +1360,9 @@ public class NotificationManagerService extends SystemService {
 
         IntentFilter settingsRestoredFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
         getContext().registerReceiver(mRestoreReceiver, settingsRestoredFilter);
+
+        IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+        getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
@@ -1606,38 +1607,28 @@ public class NotificationManagerService extends SystemService {
                 long callingId = Binder.clearCallingIdentity();
                 try {
                     ToastRecord record;
-                    int index = indexOfToastLocked(pkg, callback);
-                    // If it's already in the queue, we update it in place, we don't
-                    // move it to the end of the queue.
+                    int index;
+                    // All packages aside from the android package can enqueue one toast at a time
+                    if (!isSystemToast) {
+                        index = indexOfToastPackageLocked(pkg);
+                    } else {
+                        index = indexOfToastLocked(pkg, callback);
+                    }
+
+                    // If the package already has a toast, we update its toast
+                    // in the queue, we don't move it to the end of the queue.
                     if (index >= 0) {
                         record = mToastQueue.get(index);
                         record.update(duration);
+                        record.update(callback);
                     } else {
-                        // Limit the number of toasts that any given package except the android
-                        // package can enqueue.  Prevents DOS attacks and deals with leaks.
-                        if (!isSystemToast) {
-                            int count = 0;
-                            final int N = mToastQueue.size();
-                            for (int i=0; i<N; i++) {
-                                 final ToastRecord r = mToastQueue.get(i);
-                                 if (r.pkg.equals(pkg)) {
-                                     count++;
-                                     if (count >= MAX_PACKAGE_NOTIFICATIONS) {
-                                         Slog.e(TAG, "Package has already posted " + count
-                                                + " toasts. Not showing more. Package=" + pkg);
-                                         return;
-                                     }
-                                 }
-                            }
-                        }
-
                         Binder token = new Binder();
                         mWindowManagerInternal.addWindowToken(token, TYPE_TOAST, DEFAULT_DISPLAY);
                         record = new ToastRecord(callingPid, pkg, callback, duration, token);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
-                        keepProcessAliveIfNeededLocked(callingPid);
                     }
+                    keepProcessAliveIfNeededLocked(callingPid);
                     // If it's at index 0, it's the current toast.  It doesn't matter if it's
                     // new or just been updated.  Call back and tell it to show itself.
                     // If the callback fails, this will remove it from the list, so don't
@@ -2038,9 +2029,7 @@ public class NotificationManagerService extends SystemService {
 
         private StatusBarNotification sanitizeSbn(String pkg, int userId,
                 StatusBarNotification sbn) {
-            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId
-                    && (sbn.getNotification().flags
-                    & Notification.FLAG_AUTOGROUP_SUMMARY) == 0) {
+            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
                 // We could pass back a cloneLight() but clients might get confused and
                 // try to send this thing back to notify() again, which would not work
                 // very well.
@@ -2827,7 +2816,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
                 boolean granted) throws RemoteException {
             Preconditions.checkNotNull(listener);
-            enforceSystemOrSystemUI("grant notification listener access");
+            checkCallerIsSystemOrShell();
             if (!mActivityManager.isLowRamDevice()) {
                 mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
                         userId, false, granted);
@@ -2848,7 +2837,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
                 int userId, boolean granted) throws RemoteException {
             Preconditions.checkNotNull(assistant);
-            enforceSystemOrSystemUI("grant notification assistant access");
+            checkCallerIsSystemOrShell();
             if (!mActivityManager.isLowRamDevice()) {
                 mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                         userId, false, granted);
@@ -3046,6 +3035,12 @@ public class NotificationManagerService extends SystemService {
                 cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED, wasPosted, null);
             }
         }
+    }
+
+    @GuardedBy("mNotificationLock")
+    private boolean hasAutoGroupSummaryLocked(StatusBarNotification sbn) {
+        ArrayMap<String, String> summaries = mAutobundledSummaries.get(sbn.getUserId());
+        return summaries != null && summaries.containsKey(sbn.getPackageName());
     }
 
     // Posts a 'fake' summary for a package that has exceeded the solo-notification limit.
@@ -3820,7 +3815,8 @@ public class NotificationManagerService extends SystemService {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mGroupHelper.onNotificationPosted(n);
+                                    mGroupHelper.onNotificationPosted(
+                                            n, hasAutoGroupSummaryLocked(n));
                                 }
                             });
                         }
@@ -4136,21 +4132,21 @@ public class NotificationManagerService extends SystemService {
                 mUserProfiles.isCurrentProfile(record.getUserId()));
     }
 
-    private void playInCallNotification() {
+    protected void playInCallNotification() {
         new Thread() {
             @Override
             public void run() {
-                // If toneGenerator creation fails, just continue the call
-                // without playing the notification sound.
+                final long identity = Binder.clearCallingIdentity();
                 try {
-                    synchronized (mInCallToneGeneratorLock) {
-                        if (mInCallToneGenerator != null) {
-                            // limit this tone to 1 second; BEEP2 should in fact be much shorter
-                            mInCallToneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2, 1000);
-                        }
+                    final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
+                    if (player != null) {
+                        player.play(new Binder(), mInCallNotificationUri,
+                                mInCallNotificationAudioAttributes,
+                                mInCallNotificationVolume, false);
                     }
-                } catch (RuntimeException e) {
-                    Log.w(TAG, "Exception from ToneGenerator: " + e);
+                } catch (RemoteException e) {
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
             }
         }.start();
@@ -4235,7 +4231,21 @@ public class NotificationManagerService extends SystemService {
         int len = list.size();
         for (int i=0; i<len; i++) {
             ToastRecord r = list.get(i);
-            if (r.pkg.equals(pkg) && r.callback.asBinder() == cbak) {
+            if (r.pkg.equals(pkg) && r.callback.asBinder().equals(cbak)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @GuardedBy("mToastQueue")
+    int indexOfToastPackageLocked(String pkg)
+    {
+        ArrayList<ToastRecord> list = mToastQueue;
+        int len = list.size();
+        for (int i=0; i<len; i++) {
+            ToastRecord r = list.get(i);
+            if (r.pkg.equals(pkg)) {
                 return i;
             }
         }

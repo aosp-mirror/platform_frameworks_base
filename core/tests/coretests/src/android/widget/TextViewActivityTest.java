@@ -310,9 +310,9 @@ public class TextViewActivityTest {
     @Test
     public void testToolbarAndInsertionHandle() {
         final String text = "text";
+        assertFloatingToolbarIsNotDisplayed();
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
-        assertFloatingToolbarIsNotDisplayed();
 
         onHandleView(com.android.internal.R.id.insertion_handle).perform(click());
         sleepForFloatingToolbarPopup();

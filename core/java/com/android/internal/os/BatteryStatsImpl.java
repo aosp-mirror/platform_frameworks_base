@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 164 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 165 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -232,7 +232,7 @@ public class BatteryStatsImpl extends BatteryStats {
             switch (msg.what) {
                 case MSG_UPDATE_WAKELOCKS:
                     synchronized (BatteryStatsImpl.this) {
-                        updateCpuTimeLocked(false /* updateCpuFreqData */);
+                        updateCpuTimeLocked();
                     }
                     if (cb != null) {
                         cb.batteryNeedsCpuUpdate();
@@ -1080,6 +1080,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     mCounts[i] += counts[i];
                 }
             }
+        }
+
+        public int getSize() {
+            return mCounts == null ? 0 : mCounts.length;
         }
 
         /**
@@ -3530,7 +3534,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 Slog.d(TAG, "Updating cpu time because screen is now " + (screenOff ? "off" : "on")
                         + " and battery is " + (unplugged ? "on" : "off"));
             }
-            updateCpuTimeLocked(true /* updateCpuFreqData */);
+            updateCpuTimeLocked();
 
             mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
             mOnBatteryScreenOffTimeBase.setRunning(unplugged && screenOff, uptime, realtime);
@@ -10246,6 +10250,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // Used in updateCpuTimeLocked().
     long mTempTotalCpuUserTimeUs;
     long mTempTotalCpuSystemTimeUs;
+    long[][] mWakeLockAllocationsUs;
 
     /**
      * Reads the newest memory stats from the kernel.
@@ -10279,13 +10284,17 @@ public class BatteryStatsImpl extends BatteryStats {
      * and we are on battery with screen off, we give more of the cpu time to those apps holding
      * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
      */
-    public void updateCpuTimeLocked(boolean updateCpuFreqData) {
+    public void updateCpuTimeLocked() {
         if (mPowerProfile == null) {
             return;
         }
 
         if (DEBUG_ENERGY_CPU) {
             Slog.d(TAG, "!Cpu updating!");
+        }
+
+        if (mCpuFreqs == null) {
+            mCpuFreqs = mKernelUidCpuFreqTimeReader.readFreqs(mPowerProfile);
         }
 
         // Calculate the wakelocks we have to distribute amongst. The system is excluded as it is
@@ -10320,12 +10329,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mUserInfoProvider.refreshUserIds();
-        final SparseLongArray updatedUids = new SparseLongArray();
+        final SparseLongArray updatedUids = mKernelUidCpuFreqTimeReader.perClusterTimesAvailable()
+                ? null : new SparseLongArray();
         readKernelUidCpuTimesLocked(partialTimersToConsider, updatedUids);
-        updateClusterSpeedTimes(updatedUids);
-        if (updateCpuFreqData) {
-            readKernelUidCpuFreqTimesLocked();
+        // updatedUids=null means /proc/uid_time_in_state provides snapshots of per-cluster cpu
+        // freqs, so no need to approximate these values.
+        if (updatedUids != null) {
+            updateClusterSpeedTimes(updatedUids);
         }
+        readKernelUidCpuFreqTimesLocked(partialTimersToConsider);
     }
 
     /**
@@ -10526,40 +10538,109 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Take a snapshot of the cpu times spent by each uid in each freq and update the
      * corresponding counters.
+     *
+     * @param partialTimers The wakelock holders among which the cpu freq times will be distributed.
      */
     @VisibleForTesting
-    public void readKernelUidCpuFreqTimesLocked() {
-        mKernelUidCpuFreqTimeReader.readDelta(new KernelUidCpuFreqTimeReader.Callback() {
-            @Override
-            public void onCpuFreqs(long[] cpuFreqs) {
-                mCpuFreqs = cpuFreqs;
+    public void readKernelUidCpuFreqTimesLocked(@Nullable ArrayList<StopwatchTimer> partialTimers) {
+        final boolean perClusterTimesAvailable =
+                mKernelUidCpuFreqTimeReader.perClusterTimesAvailable();
+        final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
+        final int numClusters = mPowerProfile.getNumCpuClusters();
+        mWakeLockAllocationsUs = null;
+        mKernelUidCpuFreqTimeReader.readDelta((uid, cpuFreqTimeMs) -> {
+            uid = mapUid(uid);
+            if (Process.isIsolated(uid)) {
+                mKernelUidCpuFreqTimeReader.removeUid(uid);
+                Slog.d(TAG, "Got freq readings for an isolated uid with no mapping: " + uid);
+                return;
             }
+            if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
+                Slog.d(TAG, "Got freq readings for an invalid user's uid " + uid);
+                mKernelUidCpuFreqTimeReader.removeUid(uid);
+                return;
+            }
+            final Uid u = getUidStatsLocked(uid);
+            if (u.mCpuFreqTimeMs == null || u.mCpuFreqTimeMs.getSize() != cpuFreqTimeMs.length) {
+                u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
+            }
+            u.mCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
+            if (u.mScreenOffCpuFreqTimeMs == null ||
+                    u.mScreenOffCpuFreqTimeMs.getSize() != cpuFreqTimeMs.length) {
+                u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
+                        mOnBatteryScreenOffTimeBase);
+            }
+            u.mScreenOffCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
 
-            @Override
-            public void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs) {
-                uid = mapUid(uid);
-                if (Process.isIsolated(uid)) {
-                    mKernelUidCpuFreqTimeReader.removeUid(uid);
-                    Slog.d(TAG, "Got freq readings for an isolated uid with no mapping: " + uid);
-                    return;
+            if (perClusterTimesAvailable) {
+                if (u.mCpuClusterSpeedTimesUs == null ||
+                        u.mCpuClusterSpeedTimesUs.length != numClusters) {
+                    u.mCpuClusterSpeedTimesUs = new LongSamplingCounter[numClusters][];
                 }
-                if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
-                    Slog.d(TAG, "Got freq readings for an invalid user's uid " + uid);
-                    mKernelUidCpuFreqTimeReader.removeUid(uid);
-                    return;
+                if (numWakelocks > 0 && mWakeLockAllocationsUs == null) {
+                    mWakeLockAllocationsUs = new long[numClusters][];
                 }
-                final Uid u = getUidStatsLocked(uid);
-                if (u.mCpuFreqTimeMs == null) {
-                    u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
+
+                int freqIndex = 0;
+                for (int cluster = 0; cluster < numClusters; ++cluster) {
+                    final int speedsInCluster = mPowerProfile.getNumSpeedStepsInCpuCluster(cluster);
+                    if (u.mCpuClusterSpeedTimesUs[cluster] == null ||
+                            u.mCpuClusterSpeedTimesUs[cluster].length != speedsInCluster) {
+                        u.mCpuClusterSpeedTimesUs[cluster]
+                                = new LongSamplingCounter[speedsInCluster];
+                    }
+                    if (numWakelocks > 0 && mWakeLockAllocationsUs[cluster] == null) {
+                        mWakeLockAllocationsUs[cluster] = new long[speedsInCluster];
+                    }
+                    final LongSamplingCounter[] cpuTimesUs = u.mCpuClusterSpeedTimesUs[cluster];
+                    for (int speed = 0; speed < speedsInCluster; ++speed) {
+                        if (cpuTimesUs[speed] == null) {
+                            cpuTimesUs[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
+                        }
+                        final long appAllocationUs;
+                        if (mWakeLockAllocationsUs != null) {
+                            appAllocationUs =
+                                    (cpuFreqTimeMs[freqIndex] * 1000 * WAKE_LOCK_WEIGHT) / 100;
+                            mWakeLockAllocationsUs[cluster][speed] +=
+                                    (cpuFreqTimeMs[freqIndex] * 1000 - appAllocationUs);
+                        } else {
+                            appAllocationUs = cpuFreqTimeMs[freqIndex] * 1000;
+                        }
+                        cpuTimesUs[speed].addCountLocked(appAllocationUs);
+                        freqIndex++;
+                    }
                 }
-                u.mCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
-                if (u.mScreenOffCpuFreqTimeMs == null) {
-                    u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
-                            mOnBatteryScreenOffTimeBase);
-                }
-                u.mScreenOffCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
             }
         });
+
+        if (mWakeLockAllocationsUs != null) {
+            for (int i = 0; i < numWakelocks; ++i) {
+                final Uid u = partialTimers.get(i).mUid;
+                if (u.mCpuClusterSpeedTimesUs == null ||
+                        u.mCpuClusterSpeedTimesUs.length != numClusters) {
+                    u.mCpuClusterSpeedTimesUs = new LongSamplingCounter[numClusters][];
+                }
+
+                for (int cluster = 0; cluster < numClusters; ++cluster) {
+                    final int speedsInCluster = mPowerProfile.getNumSpeedStepsInCpuCluster(cluster);
+                    if (u.mCpuClusterSpeedTimesUs[cluster] == null ||
+                            u.mCpuClusterSpeedTimesUs[cluster].length != speedsInCluster) {
+                        u.mCpuClusterSpeedTimesUs[cluster]
+                                = new LongSamplingCounter[speedsInCluster];
+                    }
+                    final LongSamplingCounter[] cpuTimeUs = u.mCpuClusterSpeedTimesUs[cluster];
+                    for (int speed = 0; speed < speedsInCluster; ++speed) {
+                        if (cpuTimeUs[speed] == null) {
+                            cpuTimeUs[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
+                        }
+                        final long allocationUs =
+                                mWakeLockAllocationsUs[cluster][speed] / (numWakelocks - i);
+                        cpuTimeUs[speed].addCountLocked(allocationUs);
+                        mWakeLockAllocationsUs[cluster][speed] -= allocationUs;
+                    }
+                }
+            }
+        }
     }
 
     boolean setChargingLocked(boolean charging) {
@@ -11668,8 +11749,6 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        mCpuFreqs = in.createLongArray();
-
         final int NU = in.readInt();
         if (NU > 10000) {
             throw new ParcelFormatException("File corrupt: too many uids " + NU);
@@ -12061,8 +12140,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
         }
-
-        out.writeLongArray(mCpuFreqs);
 
         final int NU = mUidStats.size();
         out.writeInt(NU);
@@ -12528,8 +12605,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mFlashlightTurnedOnTimers.clear();
         mCameraTurnedOnTimers.clear();
 
-        mCpuFreqs = in.createLongArray();
-
         int numUids = in.readInt();
         mUidStats.clear();
         for (int i = 0; i < numUids; i++) {
@@ -12688,8 +12763,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
         }
-
-        out.writeLongArray(mCpuFreqs);
 
         if (inclUids) {
             int size = mUidStats.size();

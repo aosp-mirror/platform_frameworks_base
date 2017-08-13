@@ -38,14 +38,14 @@ public class GroupHelper {
     private final Callback mCallback;
 
     // Map of user : <Map of package : notification keys>. Only contains notifications that are not
-    // groupd by the app (aka no group or sort key).
+    // grouped by the app (aka no group or sort key).
     Map<Integer, Map<String, LinkedHashSet<String>>> mUngroupedNotifications = new HashMap<>();
 
     public GroupHelper(Callback callback) {;
         mCallback = callback;
     }
 
-    public void onNotificationPosted(StatusBarNotification sbn) {
+    public void onNotificationPosted(StatusBarNotification sbn, boolean autogroupSummaryExists) {
         if (DEBUG) Log.i(TAG, "POSTED " + sbn.getKey());
         try {
             List<String> notificationsToGroup = new ArrayList<>();
@@ -68,7 +68,8 @@ public class GroupHelper {
                     notificationsForPackage.add(sbn.getKey());
                     ungroupedNotificationsByUser.put(sbn.getPackageName(), notificationsForPackage);
 
-                    if (notificationsForPackage.size() >= AUTOGROUP_AT_COUNT) {
+                    if (notificationsForPackage.size() >= AUTOGROUP_AT_COUNT
+                            || autogroupSummaryExists) {
                         notificationsToGroup.addAll(notificationsForPackage);
                     }
                 }
@@ -120,6 +121,7 @@ public class GroupHelper {
             // If the status change of this notification has brought the number of loose
             // notifications to zero, remove the summary and un-autogroup.
             if (notificationsForPackage.size() == 0) {
+                ungroupedNotificationsByUser.remove(sbn.getPackageName());
                 removeSummary = true;
             }
         }

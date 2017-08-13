@@ -64,7 +64,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ಈ ಸಾಧನಕ್ಕೆ ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, ದಯವಿಟ್ಟು ನಿರ್ವಾಹಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -456,7 +457,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"ನೀವು ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದಾದ, <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ನೀವು ಸಂಪರ್ಕಗೊಂಡಿರುವಿರಿ."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"ವಿಶ್ವಾಸಾರ್ಹ ರುಜುವಾತುಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ನೆಟ್‌ವರ್ಕ್ ಲಾಗಿಂಗ್ ಆನ್ ಮಾಡಿದ್ದಾರೆ. ಇದು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ನಿಗಾ ಇರಿಸುತ್ತದೆ.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗೆ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
@@ -754,6 +756,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"ಮೆನು"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ಎಚ್ಚರಿಕೆಗಳು"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳು"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ಸಂಗ್ರಹಣೆ"</string>

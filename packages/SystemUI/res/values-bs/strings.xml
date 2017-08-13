@@ -65,7 +65,8 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Otklanjanje grešaka putem uređaja spojenog na USB nije dozvoljeno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Korisnik koji je trenutno prijavljen na uređaju ne može uključiti opciju za otklanjanje grešaka putem uređaja spojenog na USB. Da biste koristili ovu funkciju prebacite se na korisnika administratora."</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Uvećaj prikaz na ekran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Razvuci prikaz na ekran"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Spašavanje snimka ekrana..."</string>
@@ -269,7 +270,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Čuvar ekrana"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne ometaj"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetni prekidi"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetno"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Samo alarmi"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Potpuna tišina"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -371,7 +372,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Prevucite od ikone da otvorite kameru"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Potpuna tišina. Ovo će utišati i čitače ekrana."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Potpuna tišina"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetni prekidi"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetno"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Samo alarmi"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Potpuna\ntišina"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Samo\nprioritetni prekidi"</string>
@@ -458,7 +459,8 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Saznajte više"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Povezani ste s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može pratiti vašu aktivnost na mreži, uključujući e-poruke i web lokacije."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Postavke otvorene VPN mreže"</string>
+    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
+    <skip />
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Otvorite pouzdane akreditive"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Vaš administrator je uključio zapisivanje na mreži, čime se prati saobraćaj na vašem uređaju.\n\nZa više informacija, obratite se administratoru."</string>
@@ -762,6 +764,8 @@
     <string name="tuner_menu" msgid="191640047241552081">"Meni"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
+    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
+    <skip />
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snimci ekrana"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Opće poruke"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Pohrana"</string>
