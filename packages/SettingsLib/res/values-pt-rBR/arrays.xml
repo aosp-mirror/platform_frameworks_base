@@ -190,9 +190,9 @@
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"Animação desativada"</item>
-    <item msgid="1138649021950863198">"Escala de animação 5x"</item>
+    <item msgid="1138649021950863198">"Escala de animação 0,5x"</item>
     <item msgid="4394388961370833040">"Escala de animação 1x"</item>
-    <item msgid="8125427921655194973">"Escala de animação 1.5 x"</item>
+    <item msgid="8125427921655194973">"Escala de animação 1,5x"</item>
     <item msgid="3334024790739189573">"Escala de animação 2x"</item>
     <item msgid="3170120558236848008">"Escala de animação 5x"</item>
     <item msgid="1069584980746680398">"Escala de animação 10x"</item>

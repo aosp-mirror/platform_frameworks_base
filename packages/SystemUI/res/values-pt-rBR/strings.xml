@@ -214,10 +214,10 @@
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth conectado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"O Bluetooth foi desativado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"O Bluetooth foi ativado."</string>
-    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Relatório de Localização desativado."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Relatório de Localização ativado."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"O Relatório de Localização foi desativado."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"O Relatório de Localização foi ativado."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Relatório de localização desativado."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Relatório de localização ativado."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"O Relatório de localização foi desativado."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"O Relatório de localização foi ativado."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarme definido para <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Fechar painel."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Mais tempo."</string>
