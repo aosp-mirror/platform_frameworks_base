@@ -270,7 +270,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Mitte segada"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Ainult prioriteetsed"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ainult alarmid"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ainult äratused"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Täielik vaikus"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> seadet)"</string>
@@ -332,7 +332,7 @@
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC on lubatud"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Hiljutisi üksusi pole"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Olete kõik ära kustutanud"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduste teave"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduse teave"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ekraanikuva kinnitamine"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"otsing"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Rakendust <xliff:g id="APP">%s</xliff:g> ei saanud käivitada."</string>
@@ -372,7 +372,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Täielik vaikus. See vaigistab ka ekraanilugejad."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Täielik vaikus"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Ainult prioriteetsed"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult alarmid"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult äratused"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Täielik\nvaikus"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Ainult\nprioriteetsed"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ainult\nalarmid"</string>

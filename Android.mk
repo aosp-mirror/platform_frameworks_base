@@ -114,8 +114,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/backup/IRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreSession.aidl \
 	core/java/android/app/backup/ISelectBackupTransportCallback.aidl \
-	core/java/android/app/timezone/ICallback.aidl \
-	core/java/android/app/timezone/IRulesManager.aidl \
 	core/java/android/app/usage/ICacheQuotaService.aidl \
 	core/java/android/app/usage/IStorageStatsManager.aidl \
 	core/java/android/app/usage/IUsageStatsManager.aidl \

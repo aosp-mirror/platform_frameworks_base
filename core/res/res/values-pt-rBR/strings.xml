@@ -1012,7 +1012,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"Enviar usando"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Enviar usando %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Enviar"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Selecione um app de Página inicial"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Selecione um app de início"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como Página inicial"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Capturar imagem"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Capturar imagem com"</string>

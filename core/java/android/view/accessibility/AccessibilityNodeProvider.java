@@ -76,7 +76,7 @@ public abstract class AccessibilityNodeProvider {
 
     /**
      * Returns an {@link AccessibilityNodeInfo} representing a virtual view,
-     * i.e. a descendant of the host View, with the given <code>virtualViewId</code>
+     * such as a descendant of the host View, with the given <code>virtualViewId</code>
      * or the host View itself if <code>virtualViewId</code> equals to {@link #HOST_VIEW_ID}.
      * <p>
      * A virtual descendant is an imaginary View that is reported as a part of the view
@@ -123,7 +123,7 @@ public abstract class AccessibilityNodeProvider {
     }
 
     /**
-     * Performs an accessibility action on a virtual view, i.e. a descendant of the
+     * Performs an accessibility action on a virtual view, such as a descendant of the
      * host View, with the given <code>virtualViewId</code> or the host View itself
      * if <code>virtualViewId</code> equals to {@link #HOST_VIEW_ID}.
      *
@@ -160,7 +160,7 @@ public abstract class AccessibilityNodeProvider {
     }
 
     /**
-     * Find the virtual view, i.e. a descendant of the host View, that has the
+     * Find the virtual view, such as a descendant of the host View, that has the
      * specified focus type.
      *
      * @param focus The focus to find. One of
