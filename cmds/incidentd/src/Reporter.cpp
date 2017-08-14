@@ -225,9 +225,8 @@ Reporter::runReport()
     // and report to those that care that we're doing it.
     for (const Section** section=SECTION_LIST; *section; section++) {
         const int id = (*section)->id;
-        ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
-
         if (this->batch.containsSection(id)) {
+            ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
             // Notify listener of starting
             for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
@@ -251,6 +250,7 @@ Reporter::runReport()
                             IIncidentReportStatusListener::STATUS_FINISHED);
                 }
             }
+            ALOGD("Finish incident report section %d '%s'", id, (*section)->name.string());
         }
     }
 
@@ -324,6 +324,7 @@ Reporter::upload_backlog()
     struct stat st;
     status_t err;
 
+    ALOGD("Start uploading backlogs in %s", INCIDENT_DIRECTORY);
     if ((err = create_directory(INCIDENT_DIRECTORY)) != NO_ERROR) {
         ALOGE("directory doesn't exist: %s", strerror(-err));
         return REPORT_FINISHED;
@@ -337,6 +338,7 @@ Reporter::upload_backlog()
     sp<DropBoxManager> dropbox = new DropBoxManager();
 
     // Enumerate, count and add up size
+    int count = 0;
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_name[0] == '.') {
             continue;
@@ -360,8 +362,9 @@ Reporter::upload_backlog()
         // boot or the next checkin. If the directory gets too big older files will
         // be rotated out.
         unlink(filename.string());
+        count++;
     }
-
+    ALOGD("Successfully uploaded %d files to Dropbox.", count);
     closedir(dir);
 
     return REPORT_FINISHED;

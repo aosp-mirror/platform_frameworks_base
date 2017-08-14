@@ -97,6 +97,8 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt64(fieldId, value64);
                     break;
                 } else {
+                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d\n", tag, tag,
+                                                    in->CurrentPosition());
                     return false;
                 }
             case WireFormatLite::WIRETYPE_FIXED64:
@@ -104,10 +106,14 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt64(fieldId, value64);
                     break;
                 } else {
+                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d\n", tag, tag,
+                            in->CurrentPosition());
                     return false;
                 }
             case WireFormatLite::WIRETYPE_LENGTH_DELIMITED:
                 if (!read_length_delimited(in, fieldId, descriptor, message)) {
+                    fprintf(stderr, "bad LENGTH_DELIMITED: 0x%x (%d) at index %d\n",
+                            tag, tag, in->CurrentPosition());
                     return false;
                 }
                 break;
@@ -116,6 +122,8 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt32(fieldId, value32);
                     break;
                 } else {
+                    fprintf(stderr, "bad FIXED32: 0x%x (%d) at index %d\n", tag, tag,
+                            in->CurrentPosition());
                     return false;
                 }
             default:
@@ -146,7 +154,7 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     out->printf("%f", *(float*)&node.value32);
                     break;
                 default:
-                    out->printf("(unexpected value %d (0x%x)", node.value32, node.value32);
+                    out->printf("(unexpected value32 %d (0x%x)", node.value32, node.value32);
                     break;
             }
             break;
@@ -177,8 +185,11 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     }
                     break;
                 case FieldDescriptor::TYPE_ENUM:
+                    out->printf("%s", field->enum_type()->FindValueByNumber((int)node.value64)
+                            ->name().c_str());
+                    break;
                 default:
-                    out->printf("(unexpected value %ld (0x%x))", node.value64, node.value64);
+                    out->printf("(unexpected value64 %ld (0x%x))", node.value64, node.value64);
                     break;
             }
             break;

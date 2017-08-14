@@ -54,9 +54,7 @@ LOCAL_SHARED_LIBRARIES := \
         libservices \
         libutils
 
-ifeq (BUILD_WITH_INCIDENTD_RC,true)
 LOCAL_INIT_RC := incidentd.rc
-endif
 
 include $(BUILD_EXECUTABLE)
 
