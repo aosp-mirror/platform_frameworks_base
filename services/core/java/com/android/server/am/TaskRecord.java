@@ -53,6 +53,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
 import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.TaskWindowContainerListener;
@@ -971,7 +972,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     @Override
-    void onParentChanged() {
+    protected void onParentChanged() {
         super.onParentChanged();
         mService.mStackSupervisor.updateUIDsPresentOnDisplay();
     }

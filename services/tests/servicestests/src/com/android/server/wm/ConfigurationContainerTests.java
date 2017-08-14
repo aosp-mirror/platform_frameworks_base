@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.am;
+package com.android.server.wm;
 
 
 import org.junit.Test;
@@ -35,12 +35,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAI
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test class for {@link ConfigurationContainer}. Mostly duplicates configuration tests from
- * {@link com.android.server.wm.WindowContainerTests}.
+ * Test class for {@link ConfigurationContainer}.
  *
- * Build: mmma -j32 frameworks/base/services/tests/servicestests
- * Install: adb install -r out/target/product/$TARGET_PRODUCT/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
- * Run: adb shell am instrument -w -e class com.android.server.am.ConfigurationContainerTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ * Build/Install/Run:
+ *  bit FrameworksServicesTests:com.android.server.wm.ConfigurationContainerTests
  */
 @SmallTest
 @Presubmit

@@ -350,14 +350,14 @@ public class DisplayContentTests extends WindowTestsBase {
         createStackControllerOnStackOnDisplay(PINNED_STACK_ID, mDisplayContent);
         final int initialStackCount = mDisplayContent.getStackCount();
         // Ensure that the pinned stack was placed at the end
-        assertEquals(initialStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        assertEquals(initialStackCount - 1, mDisplayContent.getStackPosById(PINNED_STACK_ID));
         // By default, this should try to create a new stack on top
         createTaskStackOnDisplay(mDisplayContent);
         final int afterStackCount = mDisplayContent.getStackCount();
         // Make sure the stack count has increased
         assertEquals(initialStackCount + 1, afterStackCount);
         // Ensure that the pinned stack is still on top
-        assertEquals(afterStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
+        assertEquals(afterStackCount - 1, mDisplayContent.getStackPosById(PINNED_STACK_ID));
     }
 
     /**
