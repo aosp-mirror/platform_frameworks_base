@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1922181315419294640"></item>
+    <item msgid="8934131797783724664">"검색 중..."</item>
+    <item msgid="8513729475867537913">"연결 중…"</item>
+    <item msgid="515055375277271756">"인증하는 중..."</item>
+    <item msgid="1943354004029184381">"IP 주소를 가져오는 중..."</item>
+    <item msgid="4221763391123233270">"연결됨"</item>
+    <item msgid="624838831631122137">"일시 정지됨"</item>
+    <item msgid="7979680559596111948">"연결을 끊는 중…"</item>
+    <item msgid="1634960474403853625">"연결 끊김"</item>
+    <item msgid="746097431216080650">"실패"</item>
+    <item msgid="6367044185730295334">"차단됨"</item>
+    <item msgid="503942654197908005">"연결 불량 일시적으로 방지"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="7714855332363650812"></item>
+    <item msgid="8878186979715711006">"검색 중..."</item>
+    <item msgid="355508996603873860">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>에 연결 중..."</item>
+    <item msgid="554971459996405634">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>에서 인증하는 중..."</item>
+    <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>에서 IP 주소를 가져오는 중..."</item>
+    <item msgid="8937994881315223448">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>에 연결됨"</item>
+    <item msgid="1330262655415760617">"일시 정지됨"</item>
+    <item msgid="7698638434317271902">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>에서 연결을 끊는 중..."</item>
+    <item msgid="197508606402264311">"연결 끊김"</item>
+    <item msgid="8578370891960825148">"실패"</item>
+    <item msgid="5660739516542454527">"차단됨"</item>
+    <item msgid="1805837518286731242">"연결 상태 불량 일시적으로 방지"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"확인 안함"</item>
+    <item msgid="6042769699089883931">"DRM 콘텐츠만 확인"</item>
+    <item msgid="9174900380056846820">"항상 확인"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"HDCP 확인 사용 안함"</item>
+    <item msgid="3878793616631049349">"DRM 콘텐츠에 대해서만 HDCP 확인 사용"</item>
+    <item msgid="45075631231212732">"항상 HDCP 확인 사용"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4(기본)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"시스템 설정 사용(기본)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"선택사항 코덱 사용 설정"</item>
+    <item msgid="3304843301758635896">"선택사항 코덱 사용 중지"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"시스템 설정 사용(기본)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"선택사항 코덱 사용 설정"</item>
+    <item msgid="741805482892725657">"선택사항 코덱 사용 중지"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"시스템 설정 사용(기본)"</item>
+    <item msgid="8895532488906185219">"44.1kHz"</item>
+    <item msgid="2909915718994807056">"48.0kHz"</item>
+    <item msgid="3347287377354164611">"88.2kHz"</item>
+    <item msgid="1234212100239985373">"96.0kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"시스템 설정 사용(기본)"</item>
+    <item msgid="4482862757811638365">"44.1kHz"</item>
+    <item msgid="354495328188724404">"48.0kHz"</item>
+    <item msgid="7329816882213695083">"88.2kHz"</item>
+    <item msgid="6967397666254430476">"96.0kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"시스템 설정 사용(기본)"</item>
+    <item msgid="5618929009984956469">"16비트/샘플"</item>
+    <item msgid="3412640499234627248">"24비트/샘플"</item>
+    <item msgid="121583001492929387">"32비트/샘플"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"시스템 설정 사용(기본)"</item>
+    <item msgid="4726688794884191540">"16비트/샘플"</item>
+    <item msgid="305344756485516870">"24비트/샘플"</item>
+    <item msgid="244568657919675099">"32비트/샘플"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"시스템 설정 사용(기본)"</item>
+    <item msgid="4106832974775067314">"모노"</item>
+    <item msgid="5571632958424639155">"스테레오"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"시스템 설정 사용(기본)"</item>
+    <item msgid="8900559293912978337">"모노"</item>
+    <item msgid="8883739882299884241">"스테레오"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"오디오 품질(990kbps/909kbps)에 최적화됨"</item>
+    <item msgid="2921767058740704969">"오디오 및 연결 품질의 균형 유지(660Kbps/606Kbps)"</item>
+    <item msgid="8860982705384396512">"연결 품질(330kbps/303kbps)에 최적화됨"</item>
+    <item msgid="4414060457677684127">"최선의 결과(비트 전송률 자동 조절)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"오디오 품질에 최적화됨"</item>
+    <item msgid="4327143584633311908">"오디오 및 연결 품질의 균형 유지"</item>
+    <item msgid="4681409244565426925">"연결 품질에 최적화됨"</item>
+    <item msgid="364670732877872677">"최선의 결과(비트 전송률 자동 조절)"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"사용 안함"</item>
+    <item msgid="1593289376502312923">"64K"</item>
+    <item msgid="487545340236145324">"256K"</item>
+    <item msgid="2423528675294333831">"1M"</item>
+    <item msgid="180883774509476541">"4M"</item>
+    <item msgid="2803199102589126938">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"사용 안함"</item>
+    <item msgid="4622460333038586791">"64K"</item>
+    <item msgid="2212125625169582330">"256K"</item>
+    <item msgid="1704946766699242653">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"사용 안함"</item>
+    <item msgid="2969458029344750262">"로그 버퍼당 64K"</item>
+    <item msgid="1342285115665698168">"로그 버퍼당 256K"</item>
+    <item msgid="1314234299552254621">"로그 버퍼당 1M"</item>
+    <item msgid="3606047780792894151">"로그 버퍼당 4M"</item>
+    <item msgid="5431354956856655120">"로그 버퍼당 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"사용 안함"</item>
+    <item msgid="3054662377365844197">"전체"</item>
+    <item msgid="688870735111627832">"라디오 외 모두"</item>
+    <item msgid="2850427388488887328">"커널만"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"사용 안함"</item>
+    <item msgid="172978079776521897">"모든 로그 버퍼"</item>
+    <item msgid="3873873912383879240">"라디오 로그 버퍼를 제외한 모든 버퍼"</item>
+    <item msgid="8489661142527693381">"커널 로그 버퍼만"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"애니메이션 사용 안함"</item>
+    <item msgid="6624864048416710414">"애니메이션 배율 .5x"</item>
+    <item msgid="2219332261255416635">"애니메이션 배율 1x"</item>
+    <item msgid="3544428804137048509">"애니메이션 배율 1.5x"</item>
+    <item msgid="3110710404225974514">"애니메이션 배율 2x"</item>
+    <item msgid="4402738611528318731">"애니메이션 배율 5x"</item>
+    <item msgid="6189539267968330656">"애니메이션 배율 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"애니메이션 사용 안함"</item>
+    <item msgid="3375781541913316411">"애니메이션 배율 .5x"</item>
+    <item msgid="1991041427801869945">"애니메이션 배율 1x"</item>
+    <item msgid="4012689927622382874">"애니메이션 배율 1.5x"</item>
+    <item msgid="3289156759925947169">"애니메이션 배율 2x"</item>
+    <item msgid="7705857441213621835">"애니메이션 배율 5x"</item>
+    <item msgid="6660750935954853365">"애니메이션 배율 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"애니메이션 사용 안함"</item>
+    <item msgid="1138649021950863198">"애니메이션 배율 .5x"</item>
+    <item msgid="4394388961370833040">"애니메이션 배율 1x"</item>
+    <item msgid="8125427921655194973">"애니메이션 배율 1.5x"</item>
+    <item msgid="3334024790739189573">"애니메이션 배율 2x"</item>
+    <item msgid="3170120558236848008">"애니메이션 배율 5x"</item>
+    <item msgid="1069584980746680398">"애니메이션 배율 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"없음"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p(보안)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p(보안)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p(보안)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K(보안)"</item>
+    <item msgid="3547211260846843098">"4K(업스케일됨)"</item>
+    <item msgid="5411365648951414254">"4K(업스케일됨, 보안)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p(듀얼 화면)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"없음"</item>
+    <item msgid="9089630089455370183">"로그캣"</item>
+    <item msgid="5397807424362304288">"Systrace(그래픽)"</item>
+    <item msgid="1340692776955662664">"glGetError의 스택 호출"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"사용 안함"</item>
+    <item msgid="675719912558941285">"사각형이 아닌 클립 영역을 파란색으로 그립니다."</item>
+    <item msgid="1064373276095698656">"테스트한 그림 그리기 명령을 초록색으로 강조표시합니다."</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"사용 안함"</item>
+    <item msgid="2751513398307949636">"화면에 막대로 표시"</item>
+    <item msgid="2355151170975410323">"설정: <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"사용 안함"</item>
+    <item msgid="7688197031296835369">"오버드로 영역 표시"</item>
+    <item msgid="2290859360633824369">"녹색약 영역 표시"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL(기본)"</item>
+    <item msgid="2839130076198120436">"OpenGL(Skia)"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"표준 제한"</item>
+    <item msgid="4071574792028999443">"백그라운드 프로세스 없음"</item>
+    <item msgid="4810006996171705398">"최대 1개 프로세스"</item>
+    <item msgid="8586370216857360863">"최대 2개 프로세스"</item>
+    <item msgid="836593137872605381">"최대 3개 프로세스"</item>
+    <item msgid="7899496259191969307">"최대 4개 프로세스"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"충전"</item>
+    <item msgid="5220695614993094977">"MTP(Media Transfer Protocol)"</item>
+    <item msgid="2086000968159047375">"PTP(Picture Transfer Protocol)"</item>
+    <item msgid="7398830860950841822">"RNDIS(USB 이더넷)"</item>
+    <item msgid="1718924214939774352">"오디오 소스"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
+</resources>

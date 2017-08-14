@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1922181315419294640"></item>
+    <item msgid="8934131797783724664">"Սկանավորում…"</item>
+    <item msgid="8513729475867537913">"Միանում է..."</item>
+    <item msgid="515055375277271756">"Նույնականացում…"</item>
+    <item msgid="1943354004029184381">"IP հասցեի ստացում…"</item>
+    <item msgid="4221763391123233270">"Միացված է"</item>
+    <item msgid="624838831631122137">"Կասեցված է"</item>
+    <item msgid="7979680559596111948">"Անջատվում է…"</item>
+    <item msgid="1634960474403853625">"Անջատված է"</item>
+    <item msgid="746097431216080650">"Անհաջող"</item>
+    <item msgid="6367044185730295334">"Արգելափակված"</item>
+    <item msgid="503942654197908005">"Ժամանակավորապես խուսափելով թույլ կապից"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="7714855332363650812"></item>
+    <item msgid="8878186979715711006">"Սկանավորում...."</item>
+    <item msgid="355508996603873860">"Միանում է <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-ին…"</item>
+    <item msgid="554971459996405634">"Նույնականացում <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-ի հետ…"</item>
+    <item msgid="7928343808033020343">"IP հասցեի ստացում <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-ից…"</item>
+    <item msgid="8937994881315223448">"Միացված է <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-ին"</item>
+    <item msgid="1330262655415760617">"Անջատված"</item>
+    <item msgid="7698638434317271902">"Անջատվում է <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-ից…"</item>
+    <item msgid="197508606402264311">"Անջատած է"</item>
+    <item msgid="8578370891960825148">"Անհաջող"</item>
+    <item msgid="5660739516542454527">"Արգելափակված"</item>
+    <item msgid="1805837518286731242">"Վատ ցանցից ժամանակավոր խուսափում"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Երբեք չստուգել"</item>
+    <item msgid="6042769699089883931">"Ստուգել միայն DRM բովանդակությունը"</item>
+    <item msgid="9174900380056846820">"Միշտ ստուգել"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Երբեք չօգտագործել HDCP ստուգումը"</item>
+    <item msgid="3878793616631049349">"Օգտագործել HDCP-ը` միայն DRM-ի բովանդակությունը ստուգելու համար"</item>
+    <item msgid="45075631231212732">"Միշտ օգտագործել HDCP ստուգումը"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (կանխադրված)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Միացնել լրացուցիչ կոդեկները"</item>
+    <item msgid="3304843301758635896">"Անջատել լրացուցիչ կոդեկները"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Միացնել լրացուցիչ կոդեկները"</item>
+    <item msgid="741805482892725657">"Անջատել լրացուցիչ կոդեկները"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="8895532488906185219">"44,1 կՀց"</item>
+    <item msgid="2909915718994807056">"48,0 կՀց"</item>
+    <item msgid="3347287377354164611">"88,2 կՀց"</item>
+    <item msgid="1234212100239985373">"96,0 կՀց"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="4482862757811638365">"44,1 կՀց"</item>
+    <item msgid="354495328188724404">"48,0 կՀց"</item>
+    <item msgid="7329816882213695083">"88,2 կՀց"</item>
+    <item msgid="6967397666254430476">"96,0 կՀց"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="5618929009984956469">"16 բիթ/նմուշ"</item>
+    <item msgid="3412640499234627248">"24 բիթ/նմուշ"</item>
+    <item msgid="121583001492929387">"32 բիթ/նմուշ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="4726688794884191540">"16 բիթ/նմուշ"</item>
+    <item msgid="305344756485516870">"24 բիթ/նմուշ"</item>
+    <item msgid="244568657919675099">"32 բիթ/նմուշ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="4106832974775067314">"Մոնո"</item>
+    <item msgid="5571632958424639155">"Ստերեո"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Օգտագործել համակարգի կարգավորումը (կանխադրված)"</item>
+    <item msgid="8900559293912978337">"Մոնո"</item>
+    <item msgid="8883739882299884241">"Ստերեո"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Օպտիմալացված ձայնի որակի համար (990 կբ/վ / 909 կբ/վ)"</item>
+    <item msgid="2921767058740704969">"Ձայնի և կապի հավասարակշռված որակ (660 կբ/վ / 606 կբ/վ)"</item>
+    <item msgid="8860982705384396512">"Օպտիմալացված կապի որակի համար (330 կբ/վ / 303 կբ/վ)"</item>
+    <item msgid="4414060457677684127">"Հնարավորներից լավագույնը (բիթերի փոխանցման հարմարեցվող արագություն)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Օպտիմալացված ձայնի որակի համար"</item>
+    <item msgid="4327143584633311908">"Ձայնի և կապի հավասարակշռված որակ"</item>
+    <item msgid="4681409244565426925">"Օպտիմալացված կապի որակի համար"</item>
+    <item msgid="364670732877872677">"Հնարավորներից լավագույնը (բիթերի փոխանցման հարմարեցվող արագություն)"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"Անջատված է"</item>
+    <item msgid="1593289376502312923">"64ԿԲ"</item>
+    <item msgid="487545340236145324">"256ԿԲ"</item>
+    <item msgid="2423528675294333831">"1ՄԲ"</item>
+    <item msgid="180883774509476541">"4ՄԲ"</item>
+    <item msgid="2803199102589126938">"16ՄԲ"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"Անջատված է"</item>
+    <item msgid="4622460333038586791">"64ԿԲ"</item>
+    <item msgid="2212125625169582330">"256ԿԲ"</item>
+    <item msgid="1704946766699242653">"1ՄԲ"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"Անջատված է"</item>
+    <item msgid="2969458029344750262">"Պահնակ՝ առավ. 64ԿԲ"</item>
+    <item msgid="1342285115665698168">"Պահնակ՝ առավ. 256ԿԲ"</item>
+    <item msgid="1314234299552254621">"Պահնակ՝ առավ. 1ՄԲ"</item>
+    <item msgid="3606047780792894151">"Պահնակ՝ առավ. 4ՄԲ"</item>
+    <item msgid="5431354956856655120">"Պահնակ՝ առավ. 16ՄԲ"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Անջատված է"</item>
+    <item msgid="3054662377365844197">"Բոլորը"</item>
+    <item msgid="688870735111627832">"Բոլորը, ռադիոյից բացի"</item>
+    <item msgid="2850427388488887328">"միայն միջուկը"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Անջատված է"</item>
+    <item msgid="172978079776521897">"Մատյանի բոլոր բուֆերները"</item>
+    <item msgid="3873873912383879240">"Մատյանի բոլոր բուֆերները, ռադիո բուֆերներից բացի"</item>
+    <item msgid="8489661142527693381">"միայն միջուկի մատյանի պահնակը"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Անջատել շարժապատկերը"</item>
+    <item msgid="6624864048416710414">"Շարժապատկերի սանդղակը` .5x"</item>
+    <item msgid="2219332261255416635">"Շարժապատկերի սանդղակը` 1x"</item>
+    <item msgid="3544428804137048509">"Շարժապատկերի սանդղակը` 1.5x"</item>
+    <item msgid="3110710404225974514">"Շարժապատկերի սանդղակը` 2x"</item>
+    <item msgid="4402738611528318731">"Շարժապատկերի սանդղակը` 5x"</item>
+    <item msgid="6189539267968330656">"Շարժապատկերի սանդղակը` 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Անջատել շարժապատկերը"</item>
+    <item msgid="3375781541913316411">"Շարժապատկերի սանդղակը` .5x"</item>
+    <item msgid="1991041427801869945">"Շարժապատկերի սանդղակը` 1x"</item>
+    <item msgid="4012689927622382874">"Շարժապատկերի սանդղակը` 1.5x"</item>
+    <item msgid="3289156759925947169">"Շարժապատկերի սանդղակը` 2x"</item>
+    <item msgid="7705857441213621835">"Շարժապատկերի սանդղակը` 5x"</item>
+    <item msgid="6660750935954853365">"Շարժապատկերի սանդղակը` 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Անջատել շարժապատկերը"</item>
+    <item msgid="1138649021950863198">"Շարժապատկերի սանդղակը .5x"</item>
+    <item msgid="4394388961370833040">"Շարժապատկերի սանդղակը` 1x"</item>
+    <item msgid="8125427921655194973">"Շարժապատկերի սանդղակը 1.5x"</item>
+    <item msgid="3334024790739189573">"Շարժապատկերի սանդղակը` 2x"</item>
+    <item msgid="3170120558236848008">"Շարժանկարի սանդղակը` 5x"</item>
+    <item msgid="1069584980746680398">"Շարժապատկերի սանդղակը` 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Ոչ մեկը"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (ապահով)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (ապահով)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (ապահով)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (ապահով)"</item>
+    <item msgid="3547211260846843098">"4K (մասշտաբավորված)"</item>
+    <item msgid="5411365648951414254">"4K (մասշտաբավորված, ապահով)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (երկէկրան)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Ոչ մեկը"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Համակարգային հետագիծ (գծապատկերներ)"</item>
+    <item msgid="1340692776955662664">"glGetError կանչերի ցուցակ"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Անջատված"</item>
+    <item msgid="675719912558941285">"Ներկել ոչ ուղղանկյունային կտրվածքի տարածքը կապույտով"</item>
+    <item msgid="1064373276095698656">"Փորձարկված թեստի գունանշումը կանաչով"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Անջատել"</item>
+    <item msgid="2751513398307949636">"Էկրանի վրա որպես գոտիներ"</item>
+    <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>-ից"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Անջատված է"</item>
+    <item msgid="7688197031296835369">"Ցույց տալ գերազանցված հատվածները"</item>
+    <item msgid="2290859360633824369">"Ցույց տալ դալտոնիզմի ոլորտները"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (կանխադրված)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Սովորական սահման"</item>
+    <item msgid="4071574792028999443">"Հետնաշերտում գործողություններ չկան"</item>
+    <item msgid="4810006996171705398">"Առավելագույնը 1 գործընթաց"</item>
+    <item msgid="8586370216857360863">"Առավելագույնը 2 գործընթաց"</item>
+    <item msgid="836593137872605381">"Առավելագույնը 3  գործընթաց"</item>
+    <item msgid="7899496259191969307">"Ամենաշատը 4 գործընթաց"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Լիցքավորում"</item>
+    <item msgid="5220695614993094977">"MTP (Մեդիա ֆայլերի փոխանցման հաղորդակարգ)"</item>
+    <item msgid="2086000968159047375">"PTP (Նկարների փոխանցման հաղորդակարգ)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB Ethernet)"</item>
+    <item msgid="1718924214939774352">"Ձայնի աղբյուրը"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
+</resources>
