@@ -17,8 +17,13 @@
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.UserHandle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -138,13 +143,41 @@ public class UserGridView extends ViewPager {
             return pods;
         }
 
-        private Drawable getUserIcon(Context context, UserSwitcherController.UserRecord record) {
-            if (record.isAddUser) {
-                Drawable icon = context.getDrawable(R.drawable.ic_add_circle_qs);
-                icon.setTint(Color.WHITE);
-                return icon;
-            }
-            return UserIcons.getDefaultUserIcon(record.resolveId(), /* light= */ true);
+        /**
+         * Returns the default user icon.  This icon is a circle with a letter in it.  The letter is
+         * the first character in the username.
+         *
+         * @param userName the username of the user for which the icon is to be created
+         */
+        private Bitmap getDefaultUserIcon(CharSequence userName) {
+            CharSequence displayText = userName.subSequence(0, 1);
+            Bitmap out = Bitmap.createBitmap(mPodWidth, mPodWidth, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(out);
+
+            // Draw the circle background.
+            GradientDrawable shape = new GradientDrawable();
+            shape.setShape(GradientDrawable.RADIAL_GRADIENT);
+            shape.setGradientRadius(1.0f);
+            shape.setColor(getContext().getColor(R.color.car_user_switcher_no_user_image_bgcolor));
+            shape.setBounds(0, 0, mPodWidth, mPodWidth);
+            shape.draw(canvas);
+
+            // Draw the letter in the center.
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setColor(getContext().getColor(R.color.car_user_switcher_no_user_image_fgcolor));
+            paint.setTextAlign(Align.CENTER);
+            paint.setTextSize(getResources().getDimensionPixelSize(
+                    R.dimen.car_fullscreen_user_pod_icon_text_size));
+            Paint.FontMetricsInt metrics = paint.getFontMetricsInt();
+            // The Y coordinate is measured by taking half the height of the pod, but that would
+            // draw the character putting the bottom of the font in the middle of the pod.  To
+            // correct this, half the difference between the top and bottom distance metrics of the
+            // font gives the offset of the font.  Bottom is a positive value, top is negative, so
+            // the different is actually a sum.  The "half" operation is then factored out.
+            canvas.drawText(displayText.toString(),
+                    mPodWidth / 2, (mPodWidth - (metrics.bottom + metrics.top)) / 2, paint);
+
+            return out;
         }
 
         private View makeUserPod(LayoutInflater inflater, Context context,
@@ -161,8 +194,12 @@ public class UserGridView extends ViewPager {
             }
 
             ImageView iconView = (ImageView) view.findViewById(R.id.user_avatar);
-            if (record == null || record.picture == null) {
-                iconView.setImageDrawable(getUserIcon(context, record));
+            if (record == null || (record.picture == null && !record.isAddUser)) {
+                iconView.setImageBitmap(getDefaultUserIcon(nameView.getText()));
+            } else if (record.isAddUser) {
+                Drawable icon = context.getDrawable(R.drawable.ic_add_circle_qs);
+                icon.setTint(context.getColor(R.color.car_user_switcher_no_user_image_bgcolor));
+                iconView.setImageDrawable(icon);
             } else {
                 iconView.setImageBitmap(record.picture);
             }
