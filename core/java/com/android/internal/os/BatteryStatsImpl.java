@@ -1846,6 +1846,7 @@ public class BatteryStatsImpl extends BatteryStats {
             super(clocks, uid, type, timerPool, timeBase, in);
             mMaxDurationMs = in.readLong();
             mTotalDurationMs = in.readLong();
+            mCurrentDurationMs = in.readLong();
         }
 
         public DurationTimer(Clocks clocks, Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
@@ -1857,7 +1858,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
             super.writeToParcel(out, elapsedRealtimeUs);
             out.writeLong(getMaxDurationMsLocked(elapsedRealtimeUs / 1000));
-            out.writeLong(getTotalDurationMsLocked(elapsedRealtimeUs / 1000));
+            out.writeLong(mTotalDurationMs);
+            out.writeLong(getCurrentDurationMsLocked(elapsedRealtimeUs / 1000));
         }
 
         /**
@@ -1988,6 +1990,10 @@ public class BatteryStatsImpl extends BatteryStats {
          *
          * Note that this time is NOT split between the timers in the timer group that
          * this timer is attached to.  It is the TOTAL time.
+         *
+         * Note that if running timer is parceled and unparceled, this method will return
+         * current duration value at the time of parceling even though timer may not be
+         * currently running.
          */
         @Override
         public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
