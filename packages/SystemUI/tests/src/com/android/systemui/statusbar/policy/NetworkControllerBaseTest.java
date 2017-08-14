@@ -21,6 +21,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -105,6 +107,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
