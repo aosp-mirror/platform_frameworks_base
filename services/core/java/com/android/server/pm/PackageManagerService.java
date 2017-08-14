@@ -227,7 +227,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -2940,7 +2940,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
             mPrepareAppDataFuture = SystemServerInitThreadPool.get().submit(() -> {
-                BootTimingsTraceLog traceLog = new BootTimingsTraceLog("SystemServerTimingAsync",
+                TimingsTraceLog traceLog = new TimingsTraceLog("SystemServerTimingAsync",
                         Trace.TRACE_TAG_PACKAGE_MANAGER);
                 traceLog.traceBegin("AppDataFixup");
                 try {

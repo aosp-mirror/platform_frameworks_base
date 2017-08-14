@@ -338,7 +338,7 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -14054,7 +14054,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void systemReady(final Runnable goingCallback, BootTimingsTraceLog traceLog) {
+    public void systemReady(final Runnable goingCallback, TimingsTraceLog traceLog) {
         traceLog.traceBegin("PhaseActivityManagerReady");
         synchronized(this) {
             if (mSystemReady) {
