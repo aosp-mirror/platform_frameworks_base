@@ -486,6 +486,12 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         loadingContent.layout(0, 0, loadingContent.getMeasuredWidth(),
                 loadingContent.getMeasuredHeight());
 
+        // To create a bitmap, height & width should be larger than 0
+        if (mPageContentHeight <= 0 || mPageContentWidth <= 0) {
+            Log.w(LOG_TAG, "Unable to create bitmap, height or width smaller than 0!");
+            return;
+        }
+
         Bitmap loadingBitmap = Bitmap.createBitmap(mPageContentWidth, mPageContentHeight,
                 Bitmap.Config.ARGB_8888);
         loadingContent.draw(new Canvas(loadingBitmap));
