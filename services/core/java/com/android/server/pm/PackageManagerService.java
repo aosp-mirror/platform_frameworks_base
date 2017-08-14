@@ -20228,10 +20228,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
 
         final PackageSetting ps = mSettings.getPackageLPr(packageName);
-        if (ps != null && filterAppAccessLPr(ps, callingUid, userId)) {
-            return;
-        }
-        if (mProtectedPackages.isPackageDataProtected(userId, packageName)) {
+        final boolean filterApp = (ps != null && filterAppAccessLPr(ps, callingUid, userId));
+        if (!filterApp && mProtectedPackages.isPackageDataProtected(userId, packageName)) {
             throw new SecurityException("Cannot clear data for a protected package: "
                     + packageName);
         }
@@ -20240,26 +20238,30 @@ public class PackageManagerService extends IPackageManager.Stub
             public void run() {
                 mHandler.removeCallbacks(this);
                 final boolean succeeded;
-                try (PackageFreezer freezer = freezePackage(packageName,
-                        "clearApplicationUserData")) {
-                    synchronized (mInstallLock) {
-                        succeeded = clearApplicationUserDataLIF(packageName, userId);
+                if (!filterApp) {
+                    try (PackageFreezer freezer = freezePackage(packageName,
+                            "clearApplicationUserData")) {
+                        synchronized (mInstallLock) {
+                            succeeded = clearApplicationUserDataLIF(packageName, userId);
+                        }
+                        clearExternalStorageDataSync(packageName, userId, true);
+                        synchronized (mPackages) {
+                            mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
+                                    packageName, userId);
+                        }
                     }
-                    clearExternalStorageDataSync(packageName, userId, true);
-                    synchronized (mPackages) {
-                        mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
-                                packageName, userId);
+                    if (succeeded) {
+                        // invoke DeviceStorageMonitor's update method to clear any notifications
+                        DeviceStorageMonitorInternal dsm = LocalServices
+                                .getService(DeviceStorageMonitorInternal.class);
+                        if (dsm != null) {
+                            dsm.checkMemory();
+                        }
                     }
+                } else {
+                    succeeded = false;
                 }
-                if (succeeded) {
-                    // invoke DeviceStorageMonitor's update method to clear any notifications
-                    DeviceStorageMonitorInternal dsm = LocalServices
-                            .getService(DeviceStorageMonitorInternal.class);
-                    if (dsm != null) {
-                        dsm.checkMemory();
-                    }
-                }
-                if(observer != null) {
+                if (observer != null) {
                     try {
                         observer.onRemoveCompleted(packageName, succeeded);
                     } catch (RemoteException e) {
