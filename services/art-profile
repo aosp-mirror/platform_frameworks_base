@@ -5445,7 +5445,7 @@ PLcom/android/server/am/ActivityManagerService;->stopAppSwitches()V
 PLcom/android/server/am/ActivityManagerService;->stopAssociationLocked(ILjava/lang/String;ILandroid/content/ComponentName;)V
 PLcom/android/server/am/ActivityManagerService;->stopService(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;I)I
 PLcom/android/server/am/ActivityManagerService;->stopServiceToken(Landroid/content/ComponentName;Landroid/os/IBinder;I)Z
-PLcom/android/server/am/ActivityManagerService;->systemReady(Ljava/lang/Runnable;Landroid/util/BootTimingsTraceLog;)V
+PLcom/android/server/am/ActivityManagerService;->systemReady(Ljava/lang/Runnable;Landroid/util/TimingsTraceLog;)V
 PLcom/android/server/am/ActivityManagerService;->trimApplications()V
 PLcom/android/server/am/ActivityManagerService;->uidOnBackgroundWhitelist(I)Z
 PLcom/android/server/am/ActivityManagerService;->unbindFinished(Landroid/os/IBinder;Landroid/content/Intent;Z)V

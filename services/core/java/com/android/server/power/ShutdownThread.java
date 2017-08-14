@@ -45,16 +45,15 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.SystemVibrator;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.storage.IStorageManager;
 import android.os.storage.IStorageShutdownObserver;
 import android.util.Log;
-import android.view.ViewGroup;
+import android.util.TimingsTraceLog;
 import android.view.WindowManager;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.server.RescueParty;
@@ -107,6 +106,9 @@ public final class ShutdownThread extends Thread {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build();
+
+    private static final TimingsTraceLog SHUTDOWN_TIMINGS_LOG = new TimingsTraceLog(
+            "ShutdownTiming", Trace.TRACE_TAG_SYSTEM_SERVER);
 
     private final Object mActionDoneSync = new Object();
     private boolean mActionDone;
@@ -346,6 +348,7 @@ public final class ShutdownThread extends Thread {
     }
 
     private static void beginShutdownSequence(Context context) {
+        SHUTDOWN_TIMINGS_LOG.traceBegin("SystemServerShutdown");
         synchronized (sIsStartedGuard) {
             if (sIsStarted) {
                 Log.d(TAG, "Shutdown sequence already running, returning.");
@@ -427,6 +430,7 @@ public final class ShutdownThread extends Thread {
             SystemProperties.set(REBOOT_SAFEMODE_PROPERTY, "1");
         }
 
+        SHUTDOWN_TIMINGS_LOG.traceBegin("SendShutdownBroadcast");
         Log.i(TAG, "Sending shutdown broadcast...");
 
         // First send the high-level shut down broadcast.
@@ -458,8 +462,10 @@ public final class ShutdownThread extends Thread {
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(BROADCAST_STOP_PERCENT, null);
         }
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // SendShutdownBroadcast
 
         Log.i(TAG, "Shutting down activity manager...");
+        SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownActivityManager");
 
         final IActivityManager am =
                 IActivityManager.Stub.asInterface(ServiceManager.checkService("activity"));
@@ -472,8 +478,10 @@ public final class ShutdownThread extends Thread {
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(ACTIVITY_MANAGER_STOP_PERCENT, null);
         }
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownActivityManager
 
         Log.i(TAG, "Shutting down package manager...");
+        SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownPackageManager");
 
         final PackageManagerService pm = (PackageManagerService)
             ServiceManager.getService("package");
@@ -483,12 +491,15 @@ public final class ShutdownThread extends Thread {
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(PACKAGE_MANAGER_STOP_PERCENT, null);
         }
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownPackageManager
 
         // Shutdown radios.
+        SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownRadios");
         shutdownRadios(MAX_RADIO_WAIT_TIME);
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(RADIO_STOP_PERCENT, null);
         }
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownRadios
 
         // Shutdown StorageManagerService to ensure media is in a safe state
         IStorageShutdownObserver observer = new IStorageShutdownObserver.Stub() {
@@ -499,6 +510,7 @@ public final class ShutdownThread extends Thread {
         };
 
         Log.i(TAG, "Shutting down StorageManagerService");
+        SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownStorageManager");
 
         // Set initial variables and time out time.
         mActionDone = false;
@@ -518,7 +530,7 @@ public final class ShutdownThread extends Thread {
             while (!mActionDone) {
                 long delay = endShutTime - SystemClock.elapsedRealtime();
                 if (delay <= 0) {
-                    Log.w(TAG, "Shutdown wait timed out");
+                    Log.w(TAG, "StorageManager shutdown wait timed out");
                     break;
                 } else if (mRebootHasProgressBar) {
                     int status = (int)((MAX_SHUTDOWN_WAIT_TIME - delay) * 1.0 *
@@ -533,6 +545,8 @@ public final class ShutdownThread extends Thread {
                 }
             }
         }
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownStorageManager
+
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(MOUNT_SERVICE_STOP_PERCENT, null);
 
@@ -576,7 +590,7 @@ public final class ShutdownThread extends Thread {
                 final IBluetoothManager bluetooth =
                         IBluetoothManager.Stub.asInterface(ServiceManager.checkService(
                                 BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE));
-
+                final long nfcShutdownStarted = SystemClock.elapsedRealtime();
                 try {
                     nfcOff = nfc == null ||
                              nfc.getState() == NfcAdapter.STATE_OFF;
@@ -589,6 +603,7 @@ public final class ShutdownThread extends Thread {
                     nfcOff = true;
                 }
 
+                final long btShutdownStarted = SystemClock.elapsedRealtime();
                 try {
                     bluetoothReadyForShutdown = bluetooth == null ||
                             bluetooth.getState() == BluetoothAdapter.STATE_OFF;
@@ -601,6 +616,7 @@ public final class ShutdownThread extends Thread {
                     bluetoothReadyForShutdown = true;
                 }
 
+                final long radioShutdownStarted = SystemClock.elapsedRealtime();
                 try {
                     radioOff = phone == null || !phone.needMobileRadioShutdown();
                     if (!radioOff) {
@@ -637,6 +653,8 @@ public final class ShutdownThread extends Thread {
                         }
                         if (bluetoothReadyForShutdown) {
                             Log.i(TAG, "Bluetooth turned off.");
+                            SHUTDOWN_TIMINGS_LOG.logDuration("ShutdownBt",
+                                    SystemClock.elapsedRealtime() - btShutdownStarted);
                         }
                     }
                     if (!radioOff) {
@@ -648,6 +666,8 @@ public final class ShutdownThread extends Thread {
                         }
                         if (radioOff) {
                             Log.i(TAG, "Radio turned off.");
+                            SHUTDOWN_TIMINGS_LOG.logDuration("ShutdownRadio",
+                                    SystemClock.elapsedRealtime() - radioShutdownStarted);
                         }
                     }
                     if (!nfcOff) {
@@ -659,6 +679,8 @@ public final class ShutdownThread extends Thread {
                         }
                         if (nfcOff) {
                             Log.i(TAG, "NFC turned off.");
+                            SHUTDOWN_TIMINGS_LOG.logDuration("ShutdownNfc",
+                                    SystemClock.elapsedRealtime() - nfcShutdownStarted);
                         }
                     }
 
@@ -714,7 +736,7 @@ public final class ShutdownThread extends Thread {
             } catch (InterruptedException unused) {
             }
         }
-
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // SystemServerShutdown
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
         PowerManagerService.lowLevelShutdown(reason);
