@@ -201,6 +201,17 @@ final class SelectionActionModeHelper {
                 convertSelectionToRectangles(layout, result.mStart, result.mEnd);
 
         /*
+         * Do not run the Smart Select animation when there are multiple lines involved, as this
+         * behavior is currently broken.
+         *
+         * TODO fix Smart Select Animation when the selection spans multiple lines
+         */
+        if (selectionRectangles.size() != 1) {
+            onAnimationEndCallback.run();
+            return;
+        }
+
+        /*
          * TODO Figure out a more robust approach for this
          * We have to translate all the generated rectangles by the top-left padding of the
          * TextView because the padding influences the rendering of the ViewOverlay, but is not
