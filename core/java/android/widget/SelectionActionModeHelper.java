@@ -55,7 +55,7 @@ final class SelectionActionModeHelper {
     // TODO: Consider making this a ViewConfiguration.
     private static final int TIMEOUT_DURATION = 200;
 
-    private static final boolean SMART_SELECT_ANIMATION_ENABLED = false;
+    private static final boolean SMART_SELECT_ANIMATION_ENABLED = true;
 
     private final Editor mEditor;
     private final TextClassificationHelper mTextClassificationHelper;
