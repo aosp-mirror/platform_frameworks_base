@@ -703,37 +703,37 @@ public final class TvContract {
     }
 
     /**
-     * Returns {@code true}, if {@code uri} is a channel URI.
+     * @return {@code true} if {@code uri} is a channel URI.
      */
-    public static boolean isChannelUri(Uri uri) {
+    public static boolean isChannelUri(@NonNull Uri uri) {
         return isChannelUriForTunerInput(uri) || isChannelUriForPassthroughInput(uri);
     }
 
     /**
-     * Returns {@code true}, if {@code uri} is a channel URI for a tuner input.
+     * @return {@code true} if {@code uri} is a channel URI for a tuner input.
      */
-    public static boolean isChannelUriForTunerInput(Uri uri) {
+    public static boolean isChannelUriForTunerInput(@NonNull Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_CHANNEL);
     }
 
     /**
-     * Returns {@code true}, if {@code uri} is a channel URI for a pass-through input.
+     * @return {@code true} if {@code uri} is a channel URI for a pass-through input.
      */
-    public static boolean isChannelUriForPassthroughInput(Uri uri) {
+    public static boolean isChannelUriForPassthroughInput(@NonNull Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PASSTHROUGH);
     }
 
     /**
-     * Returns {@code true}, if {@code uri} is a program URI.
+     * @return {@code true} if {@code uri} is a program URI.
      */
-    public static boolean isProgramUri(Uri uri) {
+    public static boolean isProgramUri(@NonNull Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PROGRAM);
     }
 
     /**
-     * Returns {@code true}, if {@code uri} is a recorded program URI.
+     * @return {@code true} if {@code uri} is a recorded program URI.
      */
-    public static boolean isRecordedProgramUri(Uri uri) {
+    public static boolean isRecordedProgramUri(@NonNull Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_RECORDED_PROGRAM);
     }
 
