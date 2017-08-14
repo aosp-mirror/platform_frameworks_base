@@ -5413,10 +5413,21 @@ public class AudioService extends IAudioService.Stub
         } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE ||
                    device == AudioSystem.DEVICE_OUT_LINE) {
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
-            intent.putExtra("microphone", (device & AudioSystem.DEVICE_BIT_IN) != 0 ? 1 : 0);
+            intent.putExtra("microphone",  0);
         } else if (device == AudioSystem.DEVICE_OUT_USB_HEADSET) {
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
-            intent.putExtra("microphone", 0);
+            intent.putExtra("microphone",
+                    AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_IN_USB_HEADSET, "")
+                        == AudioSystem.DEVICE_STATE_AVAILABLE ? 1 : 0);
+        } else if (device == AudioSystem.DEVICE_IN_USB_HEADSET) {
+            if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_USB_HEADSET, "")
+                    == AudioSystem.DEVICE_STATE_AVAILABLE) {
+                intent.setAction(Intent.ACTION_HEADSET_PLUG);
+                intent.putExtra("microphone", 1);
+            } else {
+                // do not send ACTION_HEADSET_PLUG when only the input side is seen as changing
+                return;
+            }
         } else if (device == AudioSystem.DEVICE_OUT_HDMI ||
                 device == AudioSystem.DEVICE_OUT_HDMI_ARC) {
             configureHdmiPlugIntent(intent, state);
