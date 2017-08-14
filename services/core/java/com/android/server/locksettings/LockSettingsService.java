@@ -193,6 +193,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
+        public void onBootPhase(int phase) {
+            super.onBootPhase(phase);
+            if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+                mLockSettingsService.migrateOldDataAfterSystemReady();
+            }
+        }
+
+        @Override
         public void onStartUser(int userHandle) {
             mLockSettingsService.onStartUser(userHandle);
         }
@@ -722,6 +730,73 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    private void migrateOldDataAfterSystemReady() {
+        try {
+            // Migrate the FRP credential to the persistent data block
+            if (LockPatternUtils.frpCredentialEnabled() && !getBoolean("migrated_frp", false, 0)) {
+                migrateFrpCredential();
+                setBoolean("migrated_frp", true, 0);
+                Slog.i(TAG, "Migrated migrated_frp.");
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to migrateOldDataAfterSystemReady", e);
+        }
+    }
+
+    /**
+     * Migrate the credential for the FRP credential owner user if the following are satisfied:
+     * - the user has a secure credential
+     * - the FRP credential is not set up
+     * - the credential is based on a synthetic password.
+     */
+    private void migrateFrpCredential() throws RemoteException {
+        if (mStorage.readPersistentDataBlock() != PersistentData.NONE) {
+            return;
+        }
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            if (userOwnsFrpCredential(userInfo) && isUserSecure(userInfo.id)) {
+                synchronized (mSpManager) {
+                    if (isSyntheticPasswordBasedCredentialLocked(userInfo.id)) {
+                        int actualQuality = (int) getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userInfo.id);
+
+                        mSpManager.migrateFrpPasswordLocked(
+                                getSyntheticPasswordHandleLocked(userInfo.id),
+                                userInfo,
+                                redactActualQualityToMostLenientEquivalentQuality(actualQuality));
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    /**
+     * Returns the lowest password quality that still presents the same UI for entering it.
+     *
+     * For the FRP credential, we do not want to leak the actual quality of the password, only what
+     * kind of UI it requires. However, when migrating, we only know the actual quality, not the
+     * originally requested quality; since this is only used to determine what input variant to
+     * present to the user, we just assume the lowest possible quality was requested.
+     */
+    private int redactActualQualityToMostLenientEquivalentQuality(int quality) {
+        switch (quality) {
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+                return DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                return DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
+            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+            case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
+            default:
+                return quality;
+        }
+    }
+
     private final void checkWritePermission(int userId) {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsWrite");
     }
@@ -805,7 +880,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public boolean getBoolean(String key, boolean defaultValue, int userId) throws RemoteException {
+    public boolean getBoolean(String key, boolean defaultValue, int userId) {
         checkReadPermission(key, userId);
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ?
@@ -813,14 +888,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public long getLong(String key, long defaultValue, int userId) throws RemoteException {
+    public long getLong(String key, long defaultValue, int userId) {
         checkReadPermission(key, userId);
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
     }
 
     @Override
-    public String getString(String key, String defaultValue, int userId) throws RemoteException {
+    public String getString(String key, String defaultValue, int userId) {
         checkReadPermission(key, userId);
         return getStringUnchecked(key, defaultValue, userId);
     }
@@ -1926,11 +2001,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private long getSyntheticPasswordHandleLocked(int userId) {
-        try {
-            return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId);
-        } catch (RemoteException e) {
-            return SyntheticPasswordManager.DEFAULT_HANDLE;
-        }
+        return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY,
+                SyntheticPasswordManager.DEFAULT_HANDLE, userId);
     }
 
     private boolean isSyntheticPasswordBasedCredentialLocked(int userId) throws RemoteException {
