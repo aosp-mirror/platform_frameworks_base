@@ -26,6 +26,10 @@ import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+
 /**
  * SurfaceControl extension that has background sized to match its container.
  */
@@ -33,8 +37,7 @@ class SurfaceControlWithBackground extends SurfaceControl {
     // SurfaceControl that holds the background behind opaque letterboxed app windows.
     private SurfaceControl mBackgroundControl;
 
-    // Flags that define whether the background should be shown.
-    private boolean mOpaque;
+    // Flag that defines whether the background should be shown.
     private boolean mVisible;
 
     // Way to communicate with corresponding window.
@@ -48,10 +51,12 @@ class SurfaceControlWithBackground extends SurfaceControl {
     private float mLastDsDx = 1, mLastDsDy = 1;
     private float mLastX, mLastY;
 
+    // Will skip alpha animation for background of starting window.
+    private boolean mIsStartingWindow;
+
     public SurfaceControlWithBackground(SurfaceControlWithBackground other) {
         super(other);
         mBackgroundControl = other.mBackgroundControl;
-        mOpaque = other.mOpaque;
         mVisible = other.mVisible;
         mWindowSurfaceController = other.mWindowSurfaceController;
     }
@@ -61,15 +66,17 @@ class SurfaceControlWithBackground extends SurfaceControl {
             WindowSurfaceController windowSurfaceController) throws OutOfResourcesException {
         super(s, name, w, h, format, flags, windowType, ownerUid);
 
-        // We should only show background when the window is letterboxed in a task.
-        if (!windowSurfaceController.mAnimator.mWin.isLetterboxedAppWindow()) {
+        // We should only show background behind app windows that are letterboxed in a task.
+        if (!windowSurfaceController.mAnimator.mWin.isLetterboxedAppWindow()
+                || windowType < FIRST_APPLICATION_WINDOW
+                || windowType > LAST_APPLICATION_WINDOW) {
             return;
         }
         mWindowSurfaceController = windowSurfaceController;
         mLastWidth = w;
         mLastHeight = h;
-        mOpaque = (flags & SurfaceControl.OPAQUE) != 0;
         mWindowSurfaceController.getContainerRect(mTmpContainerRect);
+        mIsStartingWindow = windowType == TYPE_APPLICATION_STARTING;
         mBackgroundControl = new SurfaceControl(s, "Background for - " + name,
                 mTmpContainerRect.width(), mTmpContainerRect.height(), PixelFormat.OPAQUE,
                 flags | SurfaceControl.FX_SURFACE_DIM);
@@ -82,7 +89,10 @@ class SurfaceControlWithBackground extends SurfaceControl {
         if (mBackgroundControl == null) {
             return;
         }
-        mBackgroundControl.setAlpha(alpha);
+        // We won't animate alpha for starting window because it will be visible as a flash for user
+        // when fading out to reveal real app window.
+        final float backgroundAlpha = mIsStartingWindow && alpha < 1.f ? 0 : alpha;
+        mBackgroundControl.setAlpha(backgroundAlpha);
     }
 
     @Override
@@ -217,7 +227,6 @@ class SurfaceControlWithBackground extends SurfaceControl {
     @Override
     public void setOpaque(boolean isOpaque) {
         super.setOpaque(isOpaque);
-        mOpaque = isOpaque;
         updateBackgroundVisibility();
     }
 
@@ -307,7 +316,8 @@ class SurfaceControlWithBackground extends SurfaceControl {
         if (mBackgroundControl == null) {
             return;
         }
-        if (mOpaque && mVisible) {
+        final AppWindowToken appWindowToken = mWindowSurfaceController.mAnimator.mWin.mAppToken;
+        if (appWindowToken != null && appWindowToken.fillsParent() && mVisible) {
             mBackgroundControl.show();
         } else {
             mBackgroundControl.hide();
