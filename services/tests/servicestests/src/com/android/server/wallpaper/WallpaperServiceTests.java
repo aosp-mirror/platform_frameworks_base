@@ -17,10 +17,14 @@
 package com.android.server.wallpaper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.WallpaperColors;
+import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.service.wallpaper.WallpaperService;
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -28,18 +32,31 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WallpaperServiceTests {
 
+    @UiThreadTest
     @Test
     public void testNotifyColorsChanged_rateLimit() throws Exception {
+        long[] clockOffset = {0};
+        boolean[] postDelayed = {false};
+        Supplier<Long> clockFunction = () -> SystemClock.elapsedRealtime() + clockOffset[0];
+        Handler handler = new Handler() {
+            @Override
+            public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+                postDelayed[0] = true;
+                return super.sendMessageAtTime(msg, uptimeMillis);
+            }
+        };
+
         CountDownLatch eventCountdown = new CountDownLatch(2);
         WallpaperService service = new WallpaperService() {
             @Override
             public Engine onCreateEngine() {
-                return new WallpaperService.Engine() {
+                return new WallpaperService.Engine(clockFunction, handler) {
                     @Override
                     public WallpaperColors onComputeColors() {
                         eventCountdown.countDown();
@@ -59,8 +76,11 @@ public class WallpaperServiceTests {
         engine.notifyColorsChanged();
         assertEquals("OnComputeColors should have been throttled.",
                 1, eventCountdown.getCount());
-        // Called after being deferred.
-        engine.setClockFunction(() ->  SystemClock.elapsedRealtime() + 1500);
+        // Should have been posted to the handler.
+        assertTrue("Event should have been delayed", postDelayed[0]);
+
+        // Called again after being deferred.
+        clockOffset[0] = 1500;
         engine.notifyColorsChanged();
         assertEquals("OnComputeColors should have been deferred.",
                 0, eventCountdown.getCount());
