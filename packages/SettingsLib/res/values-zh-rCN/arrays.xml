@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1922181315419294640"></item>
+    <item msgid="8934131797783724664">"正在扫描..."</item>
+    <item msgid="8513729475867537913">"正在连接..."</item>
+    <item msgid="515055375277271756">"正在进行身份验证..."</item>
+    <item msgid="1943354004029184381">"正在获取IP地址..."</item>
+    <item msgid="4221763391123233270">"已连接"</item>
+    <item msgid="624838831631122137">"已暂停"</item>
+    <item msgid="7979680559596111948">"正在断开连接..."</item>
+    <item msgid="1634960474403853625">"已断开连接"</item>
+    <item msgid="746097431216080650">"失败"</item>
+    <item msgid="6367044185730295334">"已停用"</item>
+    <item msgid="503942654197908005">"暂时关闭（网络状况不佳）"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="7714855332363650812"></item>
+    <item msgid="8878186979715711006">"正在扫描..."</item>
+    <item msgid="355508996603873860">"正在连接到 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="554971459996405634">"正在通过 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 进行身份验证..."</item>
+    <item msgid="7928343808033020343">"正在从<xliff:g id="NETWORK_NAME">%1$s</xliff:g>获取IP地址..."</item>
+    <item msgid="8937994881315223448">"已连接到 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1330262655415760617">"已暂停"</item>
+    <item msgid="7698638434317271902">"正在断开与 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 的连接..."</item>
+    <item msgid="197508606402264311">"已断开连接"</item>
+    <item msgid="8578370891960825148">"失败"</item>
+    <item msgid="5660739516542454527">"已停用"</item>
+    <item msgid="1805837518286731242">"暂时关闭（网络状况不佳）"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"永不检查"</item>
+    <item msgid="6042769699089883931">"仅检查 DRM 内容"</item>
+    <item msgid="9174900380056846820">"总是检查"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"一律不使用 HDCP 检查"</item>
+    <item msgid="3878793616631049349">"仅使用 HDCP 检查 DRM 内容"</item>
+    <item msgid="45075631231212732">"始终使用 HDCP 检查"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4（默认）"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"使用系统选择（默认）"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"启用可选编解码器"</item>
+    <item msgid="3304843301758635896">"停用可选编解码器"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"使用系统选择（默认）"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"启用可选编解码器"</item>
+    <item msgid="741805482892725657">"停用可选编解码器"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"使用系统选择（默认）"</item>
+    <item msgid="8895532488906185219">"44.1 kHz"</item>
+    <item msgid="2909915718994807056">"48.0 kHz"</item>
+    <item msgid="3347287377354164611">"88.2 kHz"</item>
+    <item msgid="1234212100239985373">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"使用系统选择（默认）"</item>
+    <item msgid="4482862757811638365">"44.1 kHz"</item>
+    <item msgid="354495328188724404">"48.0 kHz"</item>
+    <item msgid="7329816882213695083">"88.2 kHz"</item>
+    <item msgid="6967397666254430476">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"使用系统选择（默认）"</item>
+    <item msgid="5618929009984956469">"16 位/样本"</item>
+    <item msgid="3412640499234627248">"24 位/样本"</item>
+    <item msgid="121583001492929387">"32 位/样本"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"使用系统选择（默认）"</item>
+    <item msgid="4726688794884191540">"16 位/样本"</item>
+    <item msgid="305344756485516870">"24 位/样本"</item>
+    <item msgid="244568657919675099">"32 位/样本"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"使用系统选择（默认）"</item>
+    <item msgid="4106832974775067314">"单声道"</item>
+    <item msgid="5571632958424639155">"立体声"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"使用系统选择（默认）"</item>
+    <item msgid="8900559293912978337">"单声道"</item>
+    <item msgid="8883739882299884241">"立体声"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"偏重音频质量 (990kbps/909kbps)"</item>
+    <item msgid="2921767058740704969">"兼顾音频和连接质量 (660kbps/606kbps)"</item>
+    <item msgid="8860982705384396512">"偏重连接质量 (330kbps/303kbps)"</item>
+    <item msgid="4414060457677684127">"尽可能提供更佳音质（自适应比特率）"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"偏重音频质量"</item>
+    <item msgid="4327143584633311908">"兼顾音频和连接质量"</item>
+    <item msgid="4681409244565426925">"偏重连接质量"</item>
+    <item msgid="364670732877872677">"尽可能提供更佳音质（自适应比特率）"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"关闭"</item>
+    <item msgid="1593289376502312923">"64K"</item>
+    <item msgid="487545340236145324">"256K"</item>
+    <item msgid="2423528675294333831">"1M"</item>
+    <item msgid="180883774509476541">"4M"</item>
+    <item msgid="2803199102589126938">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"关闭"</item>
+    <item msgid="4622460333038586791">"64K"</item>
+    <item msgid="2212125625169582330">"256K"</item>
+    <item msgid="1704946766699242653">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"关闭"</item>
+    <item msgid="2969458029344750262">"每个日志缓冲区 64K"</item>
+    <item msgid="1342285115665698168">"每个日志缓冲区 256K"</item>
+    <item msgid="1314234299552254621">"每个日志缓冲区 1M"</item>
+    <item msgid="3606047780792894151">"每个日志缓冲区 4M"</item>
+    <item msgid="5431354956856655120">"每个日志缓冲区 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"关闭"</item>
+    <item msgid="3054662377365844197">"全部"</item>
+    <item msgid="688870735111627832">"所有非无线电"</item>
+    <item msgid="2850427388488887328">"仅限内核"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"关闭"</item>
+    <item msgid="172978079776521897">"所有日志缓冲区"</item>
+    <item msgid="3873873912383879240">"所有非无线电日志缓冲区"</item>
+    <item msgid="8489661142527693381">"仅限内核日志缓冲区"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"关闭动画"</item>
+    <item msgid="6624864048416710414">"动画缩放 0.5x"</item>
+    <item msgid="2219332261255416635">"动画缩放 1x"</item>
+    <item msgid="3544428804137048509">"动画缩放 1.5x"</item>
+    <item msgid="3110710404225974514">"动画缩放 2x"</item>
+    <item msgid="4402738611528318731">"动画缩放 5x"</item>
+    <item msgid="6189539267968330656">"动画缩放 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"关闭动画"</item>
+    <item msgid="3375781541913316411">"动画缩放 0.5x"</item>
+    <item msgid="1991041427801869945">"动画缩放 1x"</item>
+    <item msgid="4012689927622382874">"动画缩放 1.5x"</item>
+    <item msgid="3289156759925947169">"动画缩放 2x"</item>
+    <item msgid="7705857441213621835">"动画缩放 5x"</item>
+    <item msgid="6660750935954853365">"动画缩放 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"关闭动画"</item>
+    <item msgid="1138649021950863198">"动画缩放 0.5x"</item>
+    <item msgid="4394388961370833040">"动画缩放 1x"</item>
+    <item msgid="8125427921655194973">"动画缩放 1.5x"</item>
+    <item msgid="3334024790739189573">"动画缩放 2x"</item>
+    <item msgid="3170120558236848008">"动画缩放 5x"</item>
+    <item msgid="1069584980746680398">"动画缩放 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"无"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p（安全）"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p（安全）"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p（安全）"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K（安全）"</item>
+    <item msgid="3547211260846843098">"4K（画质提升）"</item>
+    <item msgid="5411365648951414254">"4K（画质提升、安全）"</item>
+    <item msgid="1311305077526792901">"720p，1080p（双屏）"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"无"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace（图形）"</item>
+    <item msgid="1340692776955662664">"glGetError 上的调用堆栈"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"关闭"</item>
+    <item msgid="675719912558941285">"以蓝色填充非矩形剪裁区域"</item>
+    <item msgid="1064373276095698656">"以绿色突出显示测试绘制命令"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"关闭"</item>
+    <item msgid="2751513398307949636">"在屏幕上显示为条形图"</item>
+    <item msgid="2355151170975410323">"在 <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> 中"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"关闭"</item>
+    <item msgid="7688197031296835369">"显示过度绘制区域"</item>
+    <item msgid="2290859360633824369">"显示适合绿色弱视患者查看的区域"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL（默认）"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"标准限制"</item>
+    <item msgid="4071574792028999443">"不允许后台进程"</item>
+    <item msgid="4810006996171705398">"不得超过1个进程"</item>
+    <item msgid="8586370216857360863">"不得超过2个进程"</item>
+    <item msgid="836593137872605381">"不得超过3个进程"</item>
+    <item msgid="7899496259191969307">"不得超过4个进程"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"充电"</item>
+    <item msgid="5220695614993094977">"MTP（媒体传输协议）"</item>
+    <item msgid="2086000968159047375">"PTP（图片传输协议）"</item>
+    <item msgid="7398830860950841822">"RNDIS（USB 以太网）"</item>
+    <item msgid="1718924214939774352">"音频来源"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
+</resources>
