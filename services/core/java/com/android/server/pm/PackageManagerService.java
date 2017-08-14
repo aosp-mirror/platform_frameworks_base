@@ -18529,12 +18529,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 BasePermission bp = mSettings.mPermissions.get(perm.info.name);
 
                 // Don't allow anyone but the system to define ephemeral permissions.
-                if ((perm.info.protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0
+                if ((perm.info.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTANT) != 0
                         && !systemApp) {
                     Slog.w(TAG, "Non-System package " + pkg.packageName
                             + " attempting to delcare ephemeral permission "
                             + perm.info.name + "; Removing ephemeral.");
-                    perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_EPHEMERAL;
+                    perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_INSTANT;
                 }
                 // Check whether the newly-scanned package wants to define an already-defined perm
                 if (bp != null) {
