@@ -23,16 +23,24 @@
 
 const ssize_t BUFFER_SIZE = 16 * 1024; // 4KB
 
-std::string trim(const std::string& s, const std::string& whitespace) {
-    const auto head = s.find_first_not_of(whitespace);
+
+static std::string trim(const std::string& s) {
+    const auto head = s.find_first_not_of(DEFAULT_WHITESPACE);
     if (head == std::string::npos) return "";
 
-    const auto tail = s.find_last_not_of(whitespace);
+    const auto tail = s.find_last_not_of(DEFAULT_WHITESPACE);
     return s.substr(head, tail - head + 1);
 }
 
+static std::string trimHeader(const std::string& s) {
+    std::string res = trim(s);
+    std::transform(res.begin(), res.end(), res.begin(), ::tolower);
+    return res;
+}
+
 // This is similiar to Split in android-base/file.h, but it won't add empty string
-void split(const std::string& line, std::vector<std::string>& words, const std::string& delimiters) {
+static void split(const std::string& line, std::vector<std::string>& words,
+        const trans_func& func, const std::string& delimiters) {
     words.clear();  // clear the buffer before split
 
     size_t base = 0;
@@ -40,7 +48,7 @@ void split(const std::string& line, std::vector<std::string>& words, const std::
     while (true) {
         found = line.find_first_of(delimiters, base);
         if (found != base) {
-            std::string word = trim(line.substr(base, found - base));
+            std::string word = (*func) (line.substr(base, found - base));
             if (!word.empty()) {
                 words.push_back(word);
             }
@@ -50,13 +58,18 @@ void split(const std::string& line, std::vector<std::string>& words, const std::
     }
 }
 
-bool assertHeaders(const char* expected[], const std::vector<std::string>& actual) {
-    for (size_t i = 0; i < actual.size(); i++) {
-        if (expected[i] == NULL || std::string(expected[i]) != actual[i]) {
-            return false;
-        }
-    }
-    return true;
+header_t parseHeader(const std::string& line, const std::string& delimiters) {
+    header_t header;
+    trans_func f = &trimHeader;
+    split(line, header, f, delimiters);
+    return header;
+}
+
+record_t parseRecord(const std::string& line, const std::string& delimiters) {
+    record_t record;
+    trans_func f = &trim;
+    split(line, record, f, delimiters);
+    return record;
 }
 
 Reader::Reader(const int fd) : Reader(fd, BUFFER_SIZE) {};
