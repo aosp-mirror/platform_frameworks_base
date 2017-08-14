@@ -46,7 +46,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,8 +56,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class OffloadController {
     private static final String TAG = OffloadController.class.getSimpleName();
-
-    private static final int STATS_FETCH_TIMEOUT_MS = 1000;
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
@@ -177,33 +174,24 @@ public class OffloadController {
         @Override
         public NetworkStats getTetherStats() {
             NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-            CountDownLatch latch = new CountDownLatch(1);
 
-            mHandler.post(() -> {
-                try {
-                    NetworkStats.Entry entry = new NetworkStats.Entry();
-                    entry.set = SET_DEFAULT;
-                    entry.tag = TAG_NONE;
-                    entry.uid = UID_TETHERING;
+            // We can't just post to mHandler because we are mostly (but not always) called by
+            // NetworkStatsService#performPollLocked, which is (currently) on the same thread as us.
+            mHandler.runWithScissors(() -> {
+                NetworkStats.Entry entry = new NetworkStats.Entry();
+                entry.set = SET_DEFAULT;
+                entry.tag = TAG_NONE;
+                entry.uid = UID_TETHERING;
 
-                    updateStatsForCurrentUpstream();
+                updateStatsForCurrentUpstream();
 
-                    for (String iface : mForwardedStats.keySet()) {
-                        entry.iface = iface;
-                        entry.rxBytes = mForwardedStats.get(iface).rxBytes;
-                        entry.txBytes = mForwardedStats.get(iface).txBytes;
-                        stats.addValues(entry);
-                    }
-                } finally {
-                    latch.countDown();
+                for (String iface : mForwardedStats.keySet()) {
+                    entry.iface = iface;
+                    entry.rxBytes = mForwardedStats.get(iface).rxBytes;
+                    entry.txBytes = mForwardedStats.get(iface).txBytes;
+                    stats.addValues(entry);
                 }
-            });
-
-            try {
-                latch.await(STATS_FETCH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                mLog.e("Tethering stats fetch timed out after " + STATS_FETCH_TIMEOUT_MS + "ms");
-            }
+            }, 0);
 
             return stats;
         }
