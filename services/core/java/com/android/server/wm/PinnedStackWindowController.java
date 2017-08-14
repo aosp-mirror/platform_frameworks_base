@@ -202,10 +202,12 @@ public class PinnedStackWindowController extends StackWindowController {
      */
 
     /** Calls directly into activity manager so window manager lock shouldn't held. */
-    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds,
+            boolean forceUpdate) {
         if (mListener != null) {
             PinnedStackWindowListener listener = (PinnedStackWindowListener) mListener;
-            listener.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds);
+            listener.updatePictureInPictureModeForPinnedStackAnimation(targetStackBounds,
+                    forceUpdate);
         }
     }
 }
