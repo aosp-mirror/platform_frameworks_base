@@ -22,10 +22,12 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import android.util.SparseArray;
+import android.util.Pair;
 import android.widget.RemoteViews;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
 
 /**
  * Defines a custom description for the Save UI affordance.
@@ -65,14 +67,17 @@ import com.android.internal.util.Preconditions;
  *   new ImageTransformation.Builder(ccNumberId)
  *     .addOption(Pattern.compile(""^4815.*$"), R.drawable.ic_credit_card_logo1)
  *     .addOption(Pattern.compile(""^1623.*$"), R.drawable.ic_credit_card_logo2)
- *     .addOption(Pattern.compile(""^42.*$"), R.drawable.ic_credit_card_logo3);
+ *     .addOption(Pattern.compile(""^42.*$"), R.drawable.ic_credit_card_logo3)
+ *     .build();
  * // Masked credit card number (as .....LAST_4_DIGITS)
- * builder.addChild(R.id.templateCcNumber, new CharSequenceTransformation.Builder()
- *     .addField(ccNumberId, Pattern.compile(""^.*(\\d\\d\\d\\d)$"), "...$1")
+ * builder.addChild(R.id.templateCcNumber, new CharSequenceTransformation
+ *     .Builder(ccNumberId, Pattern.compile(""^.*(\\d\\d\\d\\d)$"), "...$1")
+ *     .build();
  * // Expiration date as MM / YYYY:
- * builder.addChild(R.id.templateExpDate, new CharSequenceTransformation.Builder()
- *     .addField(ccExpMonthId, Pattern.compile(""^(\\d\\d)$"), "Exp: $1")
- *     .addField(ccExpYearId, Pattern.compile(""^(\\d\\d)$"), "/$1");
+ * builder.addChild(R.id.templateExpDate, new CharSequenceTransformation
+ *     .Builder(ccExpMonthId, Pattern.compile(""^(\\d\\d)$"), "Exp: $1")
+ *     .addField(ccExpYearId, Pattern.compile(""^(\\d\\d)$"), "/$1")
+ *     .build();
  * </pre>
  *
  * <p>See {@link ImageTransformation}, {@link CharSequenceTransformation} for more info about these
@@ -83,7 +88,7 @@ public final class CustomDescription implements Parcelable {
     private static final String TAG = "CustomDescription";
 
     private final RemoteViews mPresentation;
-    private final SparseArray<InternalTransformation> mTransformations;
+    private final ArrayList<Pair<Integer, InternalTransformation>> mTransformations;
 
     private CustomDescription(Builder builder) {
         mPresentation = builder.mPresentation;
@@ -96,8 +101,9 @@ public final class CustomDescription implements Parcelable {
             final int size = mTransformations.size();
             if (sDebug) Log.d(TAG, "getPresentation(): applying " + size + " transformations");
             for (int i = 0; i < size; i++) {
-                final int id = mTransformations.keyAt(i);
-                final InternalTransformation transformation = mTransformations.valueAt(i);
+                final Pair<Integer, InternalTransformation> pair = mTransformations.get(i);
+                final int id = pair.first;
+                final InternalTransformation transformation = pair.second;
                 if (sDebug) Log.d(TAG, "#" + i + ": " + transformation);
 
                 try {
@@ -119,7 +125,7 @@ public final class CustomDescription implements Parcelable {
     public static class Builder {
         private final RemoteViews mPresentation;
 
-        private SparseArray<InternalTransformation> mTransformations;
+        private ArrayList<Pair<Integer, InternalTransformation>> mTransformations;
 
         /**
          * Default constructor.
@@ -134,6 +140,9 @@ public final class CustomDescription implements Parcelable {
          * Adds a transformation to replace the value of a child view with the fields in the
          * screen.
          *
+         * <p>When multiple transformations are added for the same child view, they will be applied
+         * in the same order as added.
+         *
          * @param id view id of the children view.
          * @param transformation an implementation provided by the Android System.
          * @return this builder.
@@ -144,9 +153,9 @@ public final class CustomDescription implements Parcelable {
             Preconditions.checkArgument((transformation instanceof InternalTransformation),
                     "not provided by Android System: " + transformation);
             if (mTransformations == null) {
-                mTransformations = new SparseArray<>();
+                mTransformations = new ArrayList<>();
             }
-            mTransformations.put(id, (InternalTransformation) transformation);
+            mTransformations.add(new Pair<>(id, (InternalTransformation) transformation));
             return this;
         }
 
@@ -189,8 +198,9 @@ public final class CustomDescription implements Parcelable {
             final int[] ids = new int[size];
             final InternalTransformation[] values = new InternalTransformation[size];
             for (int i = 0; i < size; i++) {
-                ids[i] = mTransformations.keyAt(i);
-                values[i] = mTransformations.valueAt(i);
+                final Pair<Integer, InternalTransformation> pair = mTransformations.get(i);
+                ids[i] = pair.first;
+                values[i] = pair.second;
             }
             dest.writeIntArray(ids);
             dest.writeParcelableArray(values, flags);
