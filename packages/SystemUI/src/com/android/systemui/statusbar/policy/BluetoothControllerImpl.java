@@ -296,10 +296,13 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
         @Override
         public void run() {
-            mBondState = mDevice.get().getBondState();
-            mMaxConnectionState = mDevice.get().getMaxConnectionState();
-            mUiHandler.removeMessages(H.MSG_PAIRED_DEVICES_CHANGED);
-            mUiHandler.sendEmptyMessage(H.MSG_PAIRED_DEVICES_CHANGED);
+            CachedBluetoothDevice device = mDevice.get();
+            if (device != null) {
+                mBondState = device.getBondState();
+                mMaxConnectionState = device.getMaxConnectionState();
+                mUiHandler.removeMessages(H.MSG_PAIRED_DEVICES_CHANGED);
+                mUiHandler.sendEmptyMessage(H.MSG_PAIRED_DEVICES_CHANGED);
+            }
         }
     }
 
