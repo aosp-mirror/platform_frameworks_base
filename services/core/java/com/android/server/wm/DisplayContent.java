@@ -3240,6 +3240,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.requestTraversal();
     }
 
+    boolean okToDisplay() {
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            return !mService.mDisplayFrozen
+                    && mService.mDisplayEnabled && mService.mPolicy.isScreenOn();
+        }
+        return mDisplayInfo.state == Display.STATE_ON;
+    }
+
+    boolean okToAnimate() {
+        return okToDisplay() &&
+                (mDisplayId != DEFAULT_DISPLAY || mService.mPolicy.okToAnimate());
+    }
+
     static final class TaskForResizePointSearchResult {
         boolean searchDone;
         Task taskForResize;

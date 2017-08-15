@@ -1348,7 +1348,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        final boolean isTopActivityWhileSleeping = service.isSleepingLocked() && isTopRunningActivity();
+        final ActivityStack stack = getStack();
+        final boolean isTopActivityWhileSleeping = isTopRunningActivity()
+                && (stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked());
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -1738,7 +1740,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // If the screen is going to turn on because the caller explicitly requested it and
             // the keyguard is not showing don't attempt to sleep. Otherwise the Activity will
             // pause and then resume again later, which will result in a double life-cycle event.
-            mStackSupervisor.checkReadyForSleepLocked();
+            stack.checkReadyForSleep();
         }
     }
 
