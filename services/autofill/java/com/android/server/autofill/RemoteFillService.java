@@ -290,10 +290,20 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private void dispatchOnFillRequestFailure(PendingRequest pendingRequest,
-            CharSequence message) {
+            @Nullable CharSequence message) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
                 mCallbacks.onFillRequestFailure(message, mComponentName.getPackageName());
+            }
+        });
+    }
+
+    private void dispatchOnFillTimeout(@NonNull ICancellationSignal cancellationSignal) {
+        mHandler.getHandler().post(() -> {
+            try {
+                cancellationSignal.cancel();
+            } catch (RemoteException e) {
+                Slog.w(LOG_TAG, "Error calling cancellation signal: " + e);
             }
         });
     }
@@ -307,7 +317,7 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     private void dispatchOnSaveRequestFailure(PendingRequest pendingRequest,
-            CharSequence message) {
+            @Nullable CharSequence message) {
         mHandler.getHandler().post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
                 mCallbacks.onSaveRequestFailure(message, mComponentName.getPackageName());
@@ -432,7 +442,7 @@ final class RemoteFillService implements DeathRecipient {
                 if (remoteService != null) {
                     Slog.w(LOG_TAG, getClass().getSimpleName() + " timed out after "
                             + TIMEOUT_REMOTE_REQUEST_MILLIS + " ms");
-                    fail(remoteService);
+                    onTimeout(remoteService);
                 }
             };
             mServiceHandler.postAtTime(mTimeoutTrigger,
@@ -485,7 +495,7 @@ final class RemoteFillService implements DeathRecipient {
          * Called by the self-destructure timeout when the AutofilllService didn't reply to the
          * request on time.
          */
-        abstract void fail(RemoteFillService remoteService);
+        abstract void onTimeout(RemoteFillService remoteService);
 
         /**
          * @return whether this request leads to a final state where no
@@ -549,7 +559,10 @@ final class RemoteFillService implements DeathRecipient {
         }
 
         @Override
-        void fail(RemoteFillService remoteService) {
+        void onTimeout(RemoteFillService remoteService) {
+            // NOTE: Must make these 2 calls asynchronously, because the cancellation signal is
+            // handled by the service, which could block.
+            remoteService.dispatchOnFillTimeout(mCancellation);
             remoteService.dispatchOnFillRequestFailure(PendingFillRequest.this, null);
         }
 
@@ -617,7 +630,7 @@ final class RemoteFillService implements DeathRecipient {
         }
 
         @Override
-        void fail(RemoteFillService remoteService) {
+        void onTimeout(RemoteFillService remoteService) {
             remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this, null);
         }
 
@@ -630,7 +643,7 @@ final class RemoteFillService implements DeathRecipient {
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Error calling on save request", e);
 
-                    remoteService.dispatchOnFillRequestFailure(PendingSaveRequest.this, null);
+                    remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this, null);
                 }
             }
         }
