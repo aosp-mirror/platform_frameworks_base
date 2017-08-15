@@ -54,17 +54,6 @@
                     android:layout_weight="1">
                 </TextView>
 
-                <ImageView
-                    android:id="@+id/autofill_save_close"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:src="@android:drawable/ic_close"
-                    android:alpha="0.54"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@android:string/close_button_text">
-                </ImageView>
-
             </LinearLayout>
 
             <com.android.server.autofill.ui.CustomScrollView
@@ -106,7 +95,6 @@
                 android:layout_height="wrap_content"
                 style="@style/Widget.Material.Button.Colored"
                 android:text="@string/autofill_save_yes">
-                <requestFocus />
             </Button>
 
         </com.android.internal.widget.ButtonBarLayout>
