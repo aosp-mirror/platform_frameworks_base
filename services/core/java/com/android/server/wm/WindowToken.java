@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
+import android.util.proto.ProtoOutputStream;
 import java.util.Comparator;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
@@ -26,6 +26,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.server.wm.proto.WindowTokenProto.HASH_CODE;
+import static com.android.server.wm.proto.WindowTokenProto.WINDOWS;
 
 import android.os.Debug;
 import android.os.IBinder;
@@ -259,6 +261,16 @@ class WindowToken extends WindowContainer<WindowState> {
         SurfaceControl.closeTransaction();
 
         super.onDisplayChanged(dc);
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowState w = mChildren.get(i);
+            w.writeToProto(proto, WINDOWS);
+        }
+        proto.end(token);
     }
 
     void dump(PrintWriter pw, String prefix) {

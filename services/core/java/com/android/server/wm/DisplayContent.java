@@ -97,6 +97,15 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
+import static com.android.server.wm.proto.DisplayProto.ABOVE_APP_WINDOWS;
+import static com.android.server.wm.proto.DisplayProto.BELOW_APP_WINDOWS;
+import static com.android.server.wm.proto.DisplayProto.DISPLAY_INFO;
+import static com.android.server.wm.proto.DisplayProto.DOCKED_STACK_DIVIDER_CONTROLLER;
+import static com.android.server.wm.proto.DisplayProto.DPI;
+import static com.android.server.wm.proto.DisplayProto.ID;
+import static com.android.server.wm.proto.DisplayProto.IME_WINDOWS;
+import static com.android.server.wm.proto.DisplayProto.PINNED_STACK_CONTROLLER;
+import static com.android.server.wm.proto.DisplayProto.STACKS;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
@@ -118,6 +127,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.MutableBoolean;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputDevice;
@@ -2097,6 +2107,32 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 outMatrix.postTranslate(-rectTop, rectLeft);
                 break;
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(ID, mDisplayId);
+        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mTaskStackContainers.get(stackNdx);
+            stack.writeToProto(proto, STACKS);
+        }
+        mDividerControllerLocked.writeToProto(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
+        mPinnedStackControllerLocked.writeToProto(proto, PINNED_STACK_CONTROLLER);
+        for (int i = mAboveAppWindowsContainers.size() - 1; i >= 0; --i) {
+            final WindowToken windowToken = mAboveAppWindowsContainers.get(i);
+            windowToken.writeToProto(proto, ABOVE_APP_WINDOWS);
+        }
+        for (int i = mBelowAppWindowsContainers.size() - 1; i >= 0; --i) {
+            final WindowToken windowToken = mBelowAppWindowsContainers.get(i);
+            windowToken.writeToProto(proto, BELOW_APP_WINDOWS);
+        }
+        for (int i = mImeWindowsContainers.size() - 1; i >= 0; --i) {
+            final WindowToken windowToken = mImeWindowsContainers.get(i);
+            windowToken.writeToProto(proto, IME_WINDOWS);
+        }
+        proto.write(DPI, mBaseDisplayDensity);
+        mDisplayInfo.writeToProto(proto, DISPLAY_INFO);
+        proto.end(token);
     }
 
     public void dump(String prefix, PrintWriter pw) {

@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -24,7 +26,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
+import static com.android.server.wm.proto.WindowSurfaceControllerProto.LAYER;
+import static com.android.server.wm.proto.WindowSurfaceControllerProto.SHOWN;
 
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -33,6 +36,7 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Debug;
 import android.os.Trace;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -534,6 +538,12 @@ class WindowSurfaceController {
         return mSurfaceH;
     }
 
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(SHOWN, mSurfaceShown);
+        proto.write(LAYER, mSurfaceLayer);
+        proto.end(token);
+    }
 
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (dumpAll) {

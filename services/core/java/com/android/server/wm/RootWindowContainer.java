@@ -35,11 +35,11 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 
-import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
 
@@ -89,6 +89,8 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
+import static com.android.server.wm.proto.WindowManagerServiceProto.DISPLAYS;
+import static com.android.server.wm.proto.WindowManagerServiceProto.WINDOWS;
 
 /** Root {@link WindowContainer} for the device. */
 class RootWindowContainer extends WindowContainer<DisplayContent> {
@@ -1053,6 +1055,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             mChildren.get(i).dumpTokens(pw, dumpAll);
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto) {
+        if (mService.mDisplayReady) {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; ++i) {
+                final DisplayContent displayContent = mChildren.get(i);
+                displayContent.writeToProto(proto, DISPLAYS);
+            }
+        }
+        forAllWindows((w) -> {
+            w.writeIdentifierToProto(proto, WINDOWS);
+        }, true);
     }
 
     @Override
