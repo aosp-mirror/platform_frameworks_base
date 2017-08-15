@@ -840,8 +840,8 @@ public class ConnectivityManager {
      * In order to support the always-on feature, an app has to
      * <ul>
      *     <li>target {@link VERSION_CODES#N API 24} or above, and
-     *     <li>not opt out through the {@link VpnService#METADATA_SUPPORTS_ALWAYS_ON} meta-data
-     *         field.
+     *     <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
+     *         meta-data field.
      * </ul>
      *
      * @param userId The identifier of the user for whom the VPN app is installed.
