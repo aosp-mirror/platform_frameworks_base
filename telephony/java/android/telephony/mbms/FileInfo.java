@@ -25,7 +25,7 @@ import android.os.Parcelable;
  * Describes a single file that is available over MBMS.
  * @hide
  */
-public class FileInfo implements Parcelable {
+public final class FileInfo implements Parcelable {
 
     private final Uri uri;
 

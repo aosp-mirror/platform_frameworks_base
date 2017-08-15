@@ -31,11 +31,11 @@ import java.util.Map;
  * cell-broadcast.
  * @hide
  */
-public class FileServiceInfo extends ServiceInfo implements Parcelable {
+public final class FileServiceInfo extends ServiceInfo implements Parcelable {
     private final List<FileInfo> files;
 
     /** @hide */
-    @SystemApi
+    //@SystemApi
     public FileServiceInfo(Map<Locale, String> newNames, String newClassName,
             List<Locale> newLocales, String newServiceId, Date start, Date end,
             List<FileInfo> newFiles) {
