@@ -136,7 +136,8 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
             SkPaint paint;
             paint.setBlendMode(SkBlendMode::kSrc);
             scaledSurface->getCanvas()->concat(textureMatrix);
-            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint);
+            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint,
+                    SkCanvas::kFast_SrcRectConstraint);
 
             image = scaledSurface->makeImageSnapshot();
 

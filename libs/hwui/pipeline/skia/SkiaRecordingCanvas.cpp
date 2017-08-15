@@ -203,7 +203,8 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
     SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImageRect(image, srcRect, dstRect, bitmapPaint(paint, &tmpPaint, colorFilter));
+    mRecorder.drawImageRect(image, srcRect, dstRect, bitmapPaint(paint, &tmpPaint, colorFilter),
+            SkCanvas::kFast_SrcRectConstraint);
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
             && !dstRect.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
