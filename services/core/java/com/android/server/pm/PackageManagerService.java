@@ -4246,10 +4246,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 return null;
             }
             // If the caller is an app that targets pre 26 SDK drop protection flags.
-            final PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
+            PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
             if (permissionInfo != null) {
-                permissionInfo.protectionLevel = adjustPermissionProtectionFlagsLPr(
+                final int protectionLevel = adjustPermissionProtectionFlagsLPr(
                         permissionInfo.protectionLevel, packageName, callingUid);
+                if (permissionInfo.protectionLevel != protectionLevel) {
+                    // If we return different protection level, don't use the cached info
+                    if (p.perm != null && p.perm.info == permissionInfo) {
+                        permissionInfo = new PermissionInfo(permissionInfo);
+                    }
+                    permissionInfo.protectionLevel = protectionLevel;
+                }
             }
             return permissionInfo;
         }
