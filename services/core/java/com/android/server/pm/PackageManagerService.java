@@ -13126,18 +13126,28 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean platformPackage = PLATFORM_PACKAGE_NAME.equals(pkg.packageName);
         if (!privappPermissionsDisable && privilegedPermission && pkg.isPrivilegedApp()
                 && !platformPackage && platformPermission) {
-            ArraySet<String> wlPermissions = SystemConfig.getInstance()
+            final ArraySet<String> allowedPermissions = SystemConfig.getInstance()
                     .getPrivAppPermissions(pkg.packageName);
-            boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
+            final boolean whitelisted =
+                    allowedPermissions != null && allowedPermissions.contains(perm);
             if (!whitelisted) {
                 Slog.w(TAG, "Privileged permission " + perm + " for package "
                         + pkg.packageName + " - not in privapp-permissions whitelist");
                 // Only report violations for apps on system image
                 if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
-                    if (mPrivappPermissionsViolations == null) {
-                        mPrivappPermissionsViolations = new ArraySet<>();
+                    // it's only a reportable violation if the permission isn't explicitly denied
+                    final ArraySet<String> deniedPermissions = SystemConfig.getInstance()
+                            .getPrivAppDenyPermissions(pkg.packageName);
+                    final boolean permissionViolation =
+                            deniedPermissions == null || !deniedPermissions.contains(perm);
+                    if (permissionViolation) {
+                        if (mPrivappPermissionsViolations == null) {
+                            mPrivappPermissionsViolations = new ArraySet<>();
+                        }
+                        mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
+                    } else {
+                        return false;
                     }
-                    mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
                 }
                 if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                     return false;
