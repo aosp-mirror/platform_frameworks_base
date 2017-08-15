@@ -29,7 +29,36 @@
 
 using namespace android::base;
 using namespace android::os;
+using namespace google::protobuf;
 using namespace std;
+
+static bool
+SetTableField(::google::protobuf::Message* message, string field_name, string field_value) {
+    const Descriptor* descriptor = message->GetDescriptor();
+    const Reflection* reflection = message->GetReflection();
+
+    const FieldDescriptor* field = descriptor->FindFieldByName(field_name);
+    switch (field->type()) {
+        case FieldDescriptor::TYPE_STRING:
+            reflection->SetString(message, field, field_value);
+            return true;
+        case FieldDescriptor::TYPE_INT64:
+            reflection->SetInt64(message, field, atol(field_value.c_str()));
+            return true;
+        case FieldDescriptor::TYPE_UINT64:
+            reflection->SetUInt64(message, field, atol(field_value.c_str()));
+            return true;
+        case FieldDescriptor::TYPE_INT32:
+            reflection->SetInt32(message, field, atoi(field_value.c_str()));
+            return true;
+        case FieldDescriptor::TYPE_UINT32:
+            reflection->SetUInt32(message, field, atoi(field_value.c_str()));
+            return true;
+        default:
+            // Add new scalar types
+            return false;
+    }
+}
 
 // ================================================================================
 status_t ReverseParser::Parse(const int in, const int out) const
@@ -51,31 +80,6 @@ status_t ReverseParser::Parse(const int in, const int out) const
 // ================================================================================
 static const string KERNEL_WAKEUP_LINE_DELIMITER = "\t";
 
-static void SetWakeupSourceField(WakeupSourceProto* source, string name, string value) {
-    if (name == "name") {
-        source->set_name(value.c_str());
-    } else if (name == "active_count") {
-        source->set_active_count(atoi(value.c_str()));
-    } else if (name == "event_count") {
-        source->set_event_count(atoi(value.c_str()));
-    } else if (name == "wakeup_count") {
-        source->set_wakeup_count(atoi(value.c_str()));
-    } else if (name == "expire_count") {
-        source->set_expire_count(atoi(value.c_str()));
-    } else if (name == "active_count") {
-        source->set_active_since(atol(value.c_str()));
-    } else if (name == "total_time") {
-        source->set_total_time(atol(value.c_str()));
-    } else if (name == "max_time") {
-        source->set_max_time(atol(value.c_str()));
-    } else if (name == "last_change") {
-        source->set_last_change(atol(value.c_str()));
-    } else if (name == "prevent_suspend_time") {
-        source->set_prevent_suspend_time(atol(value.c_str()));
-    }
-    // add new fields
-}
-
 status_t KernelWakesParser::Parse(const int in, const int out) const {
     Reader reader(in);
     string line;
@@ -90,12 +94,12 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
         if (line.empty()) continue;
         // parse head line
         if (nline++ == 0) {
-            split(line, header, KERNEL_WAKEUP_LINE_DELIMITER);
+            header = parseHeader(line, KERNEL_WAKEUP_LINE_DELIMITER);
             continue;
         }
 
         // parse for each record, the line delimiter is \t only!
-        split(line, record, KERNEL_WAKEUP_LINE_DELIMITER);
+        record = parseRecord(line, KERNEL_WAKEUP_LINE_DELIMITER);
 
         if (record.size() != header.size()) {
             // TODO: log this to incident report!
@@ -105,7 +109,10 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
 
         WakeupSourceProto* source = proto.add_wakeup_sources();
         for (int i=0; i<(int)record.size(); i++) {
-            SetWakeupSourceField(source, header[i], record[i]);
+            if (!SetTableField(source, header[i], record[i])) {
+                fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
+                        this->name.string(), nline, header[i].c_str(), record[i].c_str());
+            }
         }
     }
 
@@ -123,32 +130,6 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
 }
 
 // ================================================================================
-// Remove K for numeric fields
-static void SetProcessField(ProcessProto* process, string name, string value) {
-    ssize_t len = value.size();
-    if (name == "PID") {
-        process->set_pid(atoi(value.c_str()));
-    } else if (name == "Vss") {
-        process->set_vss(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "Rss") {
-        process->set_rss(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "Pss") {
-        process->set_pss(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "Uss") {
-        process->set_uss(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "Swap") {
-        process->set_swap(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "PSwap") {
-        process->set_pswap(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "USwap") {
-        process->set_uswap(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "ZSwap") {
-        process->set_zswap(atol(value.substr(0, len - 1).c_str()));
-    } else if (name == "cmdline") {
-        process->set_cmdline(value);
-    }
-}
-
 status_t ProcrankParser::Parse(const int in, const int out) const {
     Reader reader(in);
     string line, content;
@@ -164,22 +145,22 @@ status_t ProcrankParser::Parse(const int in, const int out) const {
 
         // parse head line
         if (nline++ == 0) {
-            split(line, header);
+            header = parseHeader(line);
             continue;
         }
 
-        split(line, record);
+        record = parseRecord(line);
         if (record.size() != header.size()) {
             if (record[record.size() - 1] == "TOTAL") { // TOTAL record
                 ProcessProto* total = proto.mutable_summary()->mutable_total();
                 for (int i=1; i<=(int)record.size(); i++) {
-                    SetProcessField(total, header[header.size() - i], record[record.size() - i]);
+                    SetTableField(total, header[header.size() - i], record[record.size() - i]);
                 }
             } else if (record[0] == "ZRAM:") {
-                split(line, record, ":");
+                record = parseRecord(line, ":");
                 proto.mutable_summary()->mutable_zram()->set_raw_text(record[1]);
             } else if (record[0] == "RAM:") {
-                split(line, record, ":");
+                record = parseRecord(line, ":");
                 proto.mutable_summary()->mutable_ram()->set_raw_text(record[1]);
             } else {
                 fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline,
@@ -190,7 +171,10 @@ status_t ProcrankParser::Parse(const int in, const int out) const {
 
         ProcessProto* process = proto.add_processes();
         for (int i=0; i<(int)record.size(); i++) {
-            SetProcessField(process, header[i], record[i]);
+            if (!SetTableField(process, header[i], record[i])) {
+                fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
+                        this->name.string(), nline, header[i].c_str(), record[i].c_str());
+            }
         }
     }
 

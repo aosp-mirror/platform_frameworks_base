@@ -26,25 +26,38 @@ using namespace android::base;
 using namespace std;
 using ::testing::StrEq;
 
-TEST(IhUtilTest, Trim) {
-    EXPECT_THAT(trim(" \t 100 00\toooh \t wqrw  "), StrEq("100 00\toooh \t wqrw"));
-    EXPECT_THAT(trim(" \t 100 00\toooh \t wqrw  ", " "), StrEq("\t 100 00\toooh \t wqrw"));
-}
-
-TEST(IhUtilTest, Split) {
-    vector<string> result, expected;
-    split(" \t \t\t ", result);
+TEST(IhUtilTest, ParseHeader) {
+    header_t result, expected;
+    result = parseHeader(" \t \t\t ");
     EXPECT_EQ(expected, result);
 
-    split(" \t 100 00\toooh \t wqrw", result);
+    result = parseHeader(" \t 100 00\tOpQ \t wqrw");
+    expected = { "100", "00", "opq", "wqrw" };
+    EXPECT_EQ(expected, result);
+
+    result = parseHeader(" \t 100 00\toooh \t wTF", "\t");
+    expected = { "100 00", "oooh", "wtf" };
+    EXPECT_EQ(expected, result);
+
+    result = parseHeader("123,456,78_9", ",");
+    expected = { "123", "456", "78_9" };
+    EXPECT_EQ(expected, result);
+}
+
+TEST(IhUtilTest, ParseRecord) {
+    record_t result, expected;
+    result = parseRecord(" \t \t\t ");
+    EXPECT_EQ(expected, result);
+
+    result = parseRecord(" \t 100 00\toooh \t wqrw");
     expected = { "100", "00", "oooh", "wqrw" };
     EXPECT_EQ(expected, result);
 
-    split(" \t 100 00\toooh \t wqrw", result, "\t");
+    result = parseRecord(" \t 100 00\toooh \t wqrw", "\t");
     expected = { "100 00", "oooh", "wqrw" };
     EXPECT_EQ(expected, result);
 
-    split("123,456,78_9", result, ",");
+    result = parseRecord("123,456,78_9", ",");
     expected = { "123", "456", "78_9" };
     EXPECT_EQ(expected, result);
 }

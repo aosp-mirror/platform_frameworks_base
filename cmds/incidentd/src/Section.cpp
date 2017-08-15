@@ -330,11 +330,13 @@ WorkerThreadSection::Execute(ReportRequestSet* requests) const
 void CommandSection::init(const char* command, va_list args)
 {
     va_list copied_args;
-    va_copy(copied_args, args);
     int numOfArgs = 0;
-    while(va_arg(args, const char*) != NULL) {
+
+    va_copy(copied_args, args);
+    while(va_arg(copied_args, const char*) != NULL) {
         numOfArgs++;
     }
+    va_end(copied_args);
 
     // allocate extra 1 for command and 1 for NULL terminator
     mCommand = (const char**)malloc(sizeof(const char*) * (numOfArgs + 2));
@@ -342,13 +344,12 @@ void CommandSection::init(const char* command, va_list args)
     mCommand[0] = command;
     name = command;
     for (int i=0; i<numOfArgs; i++) {
-        const char* arg = va_arg(copied_args, const char*);
+        const char* arg = va_arg(args, const char*);
         mCommand[i+1] = arg;
         name += " ";
         name += arg;
     }
     mCommand[numOfArgs+1] = NULL;
-    va_end(copied_args);
 }
 
 CommandSection::CommandSection(int id, const int64_t timeoutMs, const char* command, ...)
