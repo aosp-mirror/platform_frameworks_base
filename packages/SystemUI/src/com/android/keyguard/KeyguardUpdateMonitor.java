@@ -1157,10 +1157,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    private boolean shouldListenForFingerprintAssistant() {
+        return mAssistantVisible && mKeyguardOccluded
+                && !mUserFingerprintAuthenticated.get(getCurrentUser(), false)
+                && !mUserHasTrust.get(getCurrentUser(), false);
+    }
+
     private boolean shouldListenForFingerprint() {
         return (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
-                (mAssistantVisible && mKeyguardOccluded))
+                shouldListenForFingerprintAssistant())
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
                 && !mKeyguardGoingAway;
     }
