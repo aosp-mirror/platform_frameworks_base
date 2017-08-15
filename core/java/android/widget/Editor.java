@@ -260,6 +260,7 @@ public class Editor {
     private PositionListener mPositionListener;
 
     private float mLastDownPositionX, mLastDownPositionY;
+    private float mLastUpPositionX, mLastUpPositionY;
     private float mContextMenuAnchorX, mContextMenuAnchorY;
     Callback mCustomSelectionActionModeCallback;
     Callback mCustomInsertionActionModeCallback;
@@ -1130,6 +1131,14 @@ public class Editor {
         return handled;
     }
 
+    float getLastUpPositionX() {
+        return mLastUpPositionX;
+    }
+
+    float getLastUpPositionY() {
+        return mLastUpPositionY;
+    }
+
     private long getLastTouchOffsets() {
         SelectionModifierCursorController selectionController = getSelectionController();
         final int minOffset = selectionController.getMinTouchOffset();
@@ -1369,6 +1378,11 @@ public class Editor {
         if (mShowSuggestionRunnable != null) {
             mTextView.removeCallbacks(mShowSuggestionRunnable);
             mShowSuggestionRunnable = null;
+        }
+
+        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            mLastUpPositionX = event.getX();
+            mLastUpPositionY = event.getY();
         }
 
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
