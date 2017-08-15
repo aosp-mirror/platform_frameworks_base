@@ -46,7 +46,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,8 +56,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class OffloadController {
     private static final String TAG = OffloadController.class.getSimpleName();
-
-    private static final int STATS_FETCH_TIMEOUT_MS = 1000;
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
@@ -76,8 +73,16 @@ public class OffloadController {
     private Set<String> mLastLocalPrefixStrs;
 
     // Maps upstream interface names to offloaded traffic statistics.
+    // Always contains the latest value received from the hardware for each interface, regardless of
+    // whether offload is currently running on that interface.
     private HashMap<String, OffloadHardwareInterface.ForwardedStats>
             mForwardedStats = new HashMap<>();
+
+    // Maps upstream interface names to interface quotas.
+    // Always contains the latest value received from the framework for each interface, regardless
+    // of whether offload is currently running (or is even supported) on that interface. Only
+    // includes upstream interfaces that have a quota set.
+    private HashMap<String, Long> mInterfaceQuotas = new HashMap<>();
 
     public OffloadController(Handler h, OffloadHardwareInterface hwi,
             ContentResolver contentResolver, INetworkManagementService nms, SharedLog log) {
@@ -177,35 +182,37 @@ public class OffloadController {
         @Override
         public NetworkStats getTetherStats() {
             NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-            CountDownLatch latch = new CountDownLatch(1);
 
-            mHandler.post(() -> {
-                try {
-                    NetworkStats.Entry entry = new NetworkStats.Entry();
-                    entry.set = SET_DEFAULT;
-                    entry.tag = TAG_NONE;
-                    entry.uid = UID_TETHERING;
+            // We can't just post to mHandler because we are mostly (but not always) called by
+            // NetworkStatsService#performPollLocked, which is (currently) on the same thread as us.
+            mHandler.runWithScissors(() -> {
+                NetworkStats.Entry entry = new NetworkStats.Entry();
+                entry.set = SET_DEFAULT;
+                entry.tag = TAG_NONE;
+                entry.uid = UID_TETHERING;
 
-                    updateStatsForCurrentUpstream();
+                updateStatsForCurrentUpstream();
 
-                    for (String iface : mForwardedStats.keySet()) {
-                        entry.iface = iface;
-                        entry.rxBytes = mForwardedStats.get(iface).rxBytes;
-                        entry.txBytes = mForwardedStats.get(iface).txBytes;
-                        stats.addValues(entry);
-                    }
-                } finally {
-                    latch.countDown();
+                for (String iface : mForwardedStats.keySet()) {
+                    entry.iface = iface;
+                    entry.rxBytes = mForwardedStats.get(iface).rxBytes;
+                    entry.txBytes = mForwardedStats.get(iface).txBytes;
+                    stats.addValues(entry);
                 }
-            });
-
-            try {
-                latch.await(STATS_FETCH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                mLog.e("Tethering stats fetch timed out after " + STATS_FETCH_TIMEOUT_MS + "ms");
-            }
+            }, 0);
 
             return stats;
+        }
+
+        public void setInterfaceQuota(String iface, long quotaBytes) {
+            mHandler.post(() -> {
+                if (quotaBytes == ITetheringStatsProvider.QUOTA_UNLIMITED) {
+                    mInterfaceQuotas.remove(iface);
+                } else {
+                    mInterfaceQuotas.put(iface, quotaBytes);
+                }
+                maybeUpdateDataLimit(iface);
+            });
         }
     }
 
@@ -218,6 +225,22 @@ public class OffloadController {
             mForwardedStats.put(iface, new OffloadHardwareInterface.ForwardedStats());
         }
         mForwardedStats.get(iface).add(mHwInterface.getForwardedStats(iface));
+    }
+
+    private boolean maybeUpdateDataLimit(String iface) {
+        // setDataLimit may only be called while offload is occuring on this upstream.
+        if (!started() ||
+                mUpstreamLinkProperties == null ||
+                !TextUtils.equals(iface, mUpstreamLinkProperties.getInterfaceName())) {
+            return true;
+        }
+
+        Long limit = mInterfaceQuotas.get(iface);
+        if (limit == null) {
+            limit = Long.MAX_VALUE;
+        }
+
+        return mHwInterface.setDataLimit(iface, limit);
     }
 
     private void updateStatsForCurrentUpstream() {
@@ -309,8 +332,21 @@ public class OffloadController {
             }
         }
 
-        return mHwInterface.setUpstreamParameters(
+        boolean success = mHwInterface.setUpstreamParameters(
                 iface, v4addr, v4gateway, (v6gateways.isEmpty() ? null : v6gateways));
+
+        if (!success) {
+           return success;
+        }
+
+        // Data limits can only be set once offload is running on the upstream.
+        success = maybeUpdateDataLimit(iface);
+        if (!success) {
+            mLog.log("Setting data limit for " + iface + " failed, disabling offload.");
+            stop();
+        }
+
+        return success;
     }
 
     private boolean computeAndPushLocalPrefixes() {

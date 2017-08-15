@@ -188,6 +188,27 @@ public class OffloadHardwareInterface {
         return results.success;
     }
 
+    public boolean setDataLimit(String iface, long limit) {
+
+        final String logmsg = String.format("setDataLimit(%s, %d)", iface, limit);
+
+        final CbResults results = new CbResults();
+        try {
+            mOffloadControl.setDataLimit(
+                    iface, limit,
+                    (boolean success, String errMsg) -> {
+                        results.success = success;
+                        results.errMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return false;
+        }
+
+        record(logmsg, results);
+        return results.success;
+    }
+
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
         iface = (iface != null) ? iface : NO_INTERFACE_NAME;

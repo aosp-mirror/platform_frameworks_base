@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -45,6 +46,7 @@ import android.net.LinkProperties;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.INetworkManagementService;
@@ -110,6 +112,12 @@ public class OffloadControllerTest {
 
     private void enableOffload() {
         Settings.Global.putInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0);
+    }
+
+    private void waitForIdle() {
+        ConditionVariable cv = new ConditionVariable();
+        new Handler(Looper.getMainLooper()).post(() -> { cv.open(); });
+        cv.block();
     }
 
     private OffloadController makeOffloadController() throws Exception {
@@ -420,5 +428,69 @@ public class OffloadControllerTest {
         ethernetStats.txBytes = 54321 + 100000;
         entry = stats.getValues(ethernetPosition, entry);
         assertNetworkStats(ethernetIface, ethernetStats, entry);
+    }
+
+    @Test
+    public void testSetInterfaceQuota() throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        final String ethernetIface = "eth1";
+        final String mobileIface = "rmnet_data0";
+        final long ethernetLimit = 12345;
+        final long mobileLimit = 12345678;
+
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(ethernetIface);
+        offload.setUpstreamLinkProperties(lp);
+
+        ITetheringStatsProvider provider = mTetherStatsProviderCaptor.getValue();
+        final InOrder inOrder = inOrder(mHardware);
+        when(mHardware.setUpstreamParameters(any(), any(), any(), any())).thenReturn(true);
+        when(mHardware.setDataLimit(anyString(), anyLong())).thenReturn(true);
+
+        // Applying an interface quota to the current upstream immediately sends it to the hardware.
+        provider.setInterfaceQuota(ethernetIface, ethernetLimit);
+        waitForIdle();
+        inOrder.verify(mHardware).setDataLimit(ethernetIface, ethernetLimit);
+        inOrder.verifyNoMoreInteractions();
+
+        // Applying an interface quota to another upstream does not take any immediate action.
+        provider.setInterfaceQuota(mobileIface, mobileLimit);
+        waitForIdle();
+        inOrder.verify(mHardware, never()).setDataLimit(anyString(), anyLong());
+
+        // Switching to that upstream causes the quota to be applied if the parameters were applied
+        // correctly.
+        lp.setInterfaceName(mobileIface);
+        offload.setUpstreamLinkProperties(lp);
+        waitForIdle();
+        inOrder.verify(mHardware).setDataLimit(mobileIface, mobileLimit);
+
+        // Setting a limit of ITetheringStatsProvider.QUOTA_UNLIMITED causes the limit to be set
+        // to Long.MAX_VALUE.
+        provider.setInterfaceQuota(mobileIface, ITetheringStatsProvider.QUOTA_UNLIMITED);
+        waitForIdle();
+        inOrder.verify(mHardware).setDataLimit(mobileIface, Long.MAX_VALUE);
+
+        // If setting upstream parameters fails, then the data limit is not set.
+        when(mHardware.setUpstreamParameters(any(), any(), any(), any())).thenReturn(false);
+        lp.setInterfaceName(ethernetIface);
+        offload.setUpstreamLinkProperties(lp);
+        provider.setInterfaceQuota(mobileIface, mobileLimit);
+        waitForIdle();
+        inOrder.verify(mHardware, never()).setDataLimit(anyString(), anyLong());
+
+        // If setting the data limit fails while changing upstreams, offload is stopped.
+        when(mHardware.setUpstreamParameters(any(), any(), any(), any())).thenReturn(true);
+        when(mHardware.setDataLimit(anyString(), anyLong())).thenReturn(false);
+        lp.setInterfaceName(mobileIface);
+        offload.setUpstreamLinkProperties(lp);
+        provider.setInterfaceQuota(mobileIface, mobileLimit);
+        waitForIdle();
+        inOrder.verify(mHardware).stopOffloadControl();
     }
 }
