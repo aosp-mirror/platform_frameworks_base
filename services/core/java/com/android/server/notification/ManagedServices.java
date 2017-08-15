@@ -139,6 +139,19 @@ abstract public class ManagedServices {
                         || Objects.equals(element, mConfig.secondarySettingName)) {
                     String prevValue = intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE);
                     String newValue = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
+                    int restoredFromSdkInt = intent.getIntExtra(
+                            Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, 0);
+                    if (restoredFromSdkInt < Build.VERSION_CODES.O) {
+                        // automatic system grants were added in O, so append the approved apps
+                        // rather than wiping out the setting
+                        if (!TextUtils.isEmpty(prevValue)) {
+                            if (!TextUtils.isEmpty(newValue)) {
+                                newValue = newValue + ENABLED_SERVICES_SEPARATOR + prevValue;
+                            } else {
+                                newValue = prevValue;
+                            }
+                        }
+                    }
                     settingRestored(element, prevValue, newValue, getSendingUserId());
                 }
             }
