@@ -18,7 +18,6 @@ package android.os;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.IntArray;
@@ -50,10 +49,12 @@ public final class IncidentReportArgs implements Parcelable {
         readFromParcel(in);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mAll ? 1 : 0);
 
@@ -100,6 +101,7 @@ public final class IncidentReportArgs implements Parcelable {
     /**
      * Print this report as a string.
      */
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Incident(");
         if (mAll) {
@@ -131,10 +133,11 @@ public final class IncidentReportArgs implements Parcelable {
     }
 
     /**
-     * Add this section to the incident report.
+     * Add this section to the incident report. Skip if the input is smaller than 2 since section
+     * id are only valid for positive integer as Protobuf field id. Here 1 is reserved for Header.
      */
     public void addSection(int section) {
-        if (!mAll) {
+        if (!mAll && section > 1) {
             mSections.add(section);
         }
     }

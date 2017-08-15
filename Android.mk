@@ -1099,6 +1099,31 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate SupportLib https://developer.android.com \
 		-federationapi SupportLib prebuilts/sdk/current/support-api.txt
 
+# ====  the api diff ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES := $(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES := $(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS := $(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_ADDITIONAL_JAVA_DIR := $(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES := \
+	$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES) \
+	$(INTERNAL_PLATFORM_API_FILE)
+
+LOCAL_MODULE := offline-sdk-referenceonly
+
+last_released_sdk_version := $(lastword $(call numerically_sort, \
+			$(filter-out current, \
+				$(patsubst $(SRC_API_DIR)/%.txt,%, $(wildcard $(SRC_API_DIR)/*.txt)) \
+			 )\
+		))
+
+LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_API_DIR)/$(last_released_sdk_version)
+LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_FILE))
+
+include $(BUILD_APIDIFF)
+
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
 

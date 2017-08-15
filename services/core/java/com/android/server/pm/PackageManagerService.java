@@ -227,7 +227,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -2940,7 +2940,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
             mPrepareAppDataFuture = SystemServerInitThreadPool.get().submit(() -> {
-                BootTimingsTraceLog traceLog = new BootTimingsTraceLog("SystemServerTimingAsync",
+                TimingsTraceLog traceLog = new TimingsTraceLog("SystemServerTimingAsync",
                         Trace.TRACE_TAG_PACKAGE_MANAGER);
                 traceLog.traceBegin("AppDataFixup");
                 try {
@@ -4246,10 +4246,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 return null;
             }
             // If the caller is an app that targets pre 26 SDK drop protection flags.
-            final PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
+            PermissionInfo permissionInfo = generatePermissionInfo(p, flags);
             if (permissionInfo != null) {
-                permissionInfo.protectionLevel = adjustPermissionProtectionFlagsLPr(
+                final int protectionLevel = adjustPermissionProtectionFlagsLPr(
                         permissionInfo.protectionLevel, packageName, callingUid);
+                if (permissionInfo.protectionLevel != protectionLevel) {
+                    // If we return different protection level, don't use the cached info
+                    if (p.perm != null && p.perm.info == permissionInfo) {
+                        permissionInfo = new PermissionInfo(permissionInfo);
+                    }
+                    permissionInfo.protectionLevel = protectionLevel;
+                }
             }
             return permissionInfo;
         }
@@ -14368,7 +14375,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 if (savedInfo.second == info) {
                     // circled back to the highest ordered item; remove from order list
-                    mOrderResult.remove(savedInfo);
+                    mOrderResult.remove(packageName);
                     if (mOrderResult.size() == 0) {
                         // no more ordered items
                         break;
@@ -18529,12 +18536,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 BasePermission bp = mSettings.mPermissions.get(perm.info.name);
 
                 // Don't allow anyone but the system to define ephemeral permissions.
-                if ((perm.info.protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0
+                if ((perm.info.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTANT) != 0
                         && !systemApp) {
                     Slog.w(TAG, "Non-System package " + pkg.packageName
                             + " attempting to delcare ephemeral permission "
                             + perm.info.name + "; Removing ephemeral.");
-                    perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_EPHEMERAL;
+                    perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_INSTANT;
                 }
                 // Check whether the newly-scanned package wants to define an already-defined perm
                 if (bp != null) {
@@ -20243,10 +20250,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
 
         final PackageSetting ps = mSettings.getPackageLPr(packageName);
-        if (ps != null && filterAppAccessLPr(ps, callingUid, userId)) {
-            return;
-        }
-        if (mProtectedPackages.isPackageDataProtected(userId, packageName)) {
+        final boolean filterApp = (ps != null && filterAppAccessLPr(ps, callingUid, userId));
+        if (!filterApp && mProtectedPackages.isPackageDataProtected(userId, packageName)) {
             throw new SecurityException("Cannot clear data for a protected package: "
                     + packageName);
         }
@@ -20255,26 +20260,30 @@ public class PackageManagerService extends IPackageManager.Stub
             public void run() {
                 mHandler.removeCallbacks(this);
                 final boolean succeeded;
-                try (PackageFreezer freezer = freezePackage(packageName,
-                        "clearApplicationUserData")) {
-                    synchronized (mInstallLock) {
-                        succeeded = clearApplicationUserDataLIF(packageName, userId);
+                if (!filterApp) {
+                    try (PackageFreezer freezer = freezePackage(packageName,
+                            "clearApplicationUserData")) {
+                        synchronized (mInstallLock) {
+                            succeeded = clearApplicationUserDataLIF(packageName, userId);
+                        }
+                        clearExternalStorageDataSync(packageName, userId, true);
+                        synchronized (mPackages) {
+                            mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
+                                    packageName, userId);
+                        }
                     }
-                    clearExternalStorageDataSync(packageName, userId, true);
-                    synchronized (mPackages) {
-                        mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
-                                packageName, userId);
+                    if (succeeded) {
+                        // invoke DeviceStorageMonitor's update method to clear any notifications
+                        DeviceStorageMonitorInternal dsm = LocalServices
+                                .getService(DeviceStorageMonitorInternal.class);
+                        if (dsm != null) {
+                            dsm.checkMemory();
+                        }
                     }
+                } else {
+                    succeeded = false;
                 }
-                if (succeeded) {
-                    // invoke DeviceStorageMonitor's update method to clear any notifications
-                    DeviceStorageMonitorInternal dsm = LocalServices
-                            .getService(DeviceStorageMonitorInternal.class);
-                    if (dsm != null) {
-                        dsm.checkMemory();
-                    }
-                }
-                if(observer != null) {
+                if (observer != null) {
                     try {
                         observer.onRemoveCompleted(packageName, succeeded);
                     } catch (RemoteException e) {

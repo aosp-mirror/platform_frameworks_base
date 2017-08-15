@@ -125,6 +125,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
+import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
 import com.android.server.wm.WindowManagerService;
@@ -209,7 +210,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     @Override
-    void onParentChanged() {
+    protected void onParentChanged() {
         super.onParentChanged();
         mStackSupervisor.updateUIDsPresentOnDisplay();
     }

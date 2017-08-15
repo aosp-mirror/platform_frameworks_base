@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1922181315419294640"></item>
+    <item msgid="8934131797783724664">"Nuskaitoma..."</item>
+    <item msgid="8513729475867537913">"Prisijungiama..."</item>
+    <item msgid="515055375277271756">"Nustatoma tapatybė..."</item>
+    <item msgid="1943354004029184381">"Gaunamas IP adresas..."</item>
+    <item msgid="4221763391123233270">"Prisijungta"</item>
+    <item msgid="624838831631122137">"Pristabdyta"</item>
+    <item msgid="7979680559596111948">"Atjungiama..."</item>
+    <item msgid="1634960474403853625">"Atsijungęs (-usi)"</item>
+    <item msgid="746097431216080650">"Nesėkminga"</item>
+    <item msgid="6367044185730295334">"Užblokuota"</item>
+    <item msgid="503942654197908005">"Laikinai vengiama prasto ryšio"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="7714855332363650812"></item>
+    <item msgid="8878186979715711006">"Nuskaitoma..."</item>
+    <item msgid="355508996603873860">"Prijungiama prie <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="554971459996405634">"Nustatoma tapatybė su <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="7928343808033020343">"Gaunamas IP adresas iš <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="8937994881315223448">"Prijungta prie <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1330262655415760617">"Pristabdyta"</item>
+    <item msgid="7698638434317271902">"Atjungiama nuo <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="197508606402264311">"Atsijungęs (-usi)"</item>
+    <item msgid="8578370891960825148">"Nesėkminga"</item>
+    <item msgid="5660739516542454527">"Užblokuota"</item>
+    <item msgid="1805837518286731242">"Laikinai vengiama prasto ryšio"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Niekada netikrinti"</item>
+    <item msgid="6042769699089883931">"Tikrinti tik DRM turinį"</item>
+    <item msgid="9174900380056846820">"Visada tikrinti"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Niekada nenaudoti HDCP tikrinimo"</item>
+    <item msgid="3878793616631049349">"Taikyti HDCP tikrinimą tik DRM turiniui"</item>
+    <item msgid="45075631231212732">"Visada naudoti HDCP tikrinimą"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (numatytoji)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Įgalinti nebūtinus kodekus"</item>
+    <item msgid="3304843301758635896">"Išjungti nebūtinus kodekus"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Įgalinti nebūtinus kodekus"</item>
+    <item msgid="741805482892725657">"Išjungti nebūtinus kodekus"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="8895532488906185219">"44,1 kHz"</item>
+    <item msgid="2909915718994807056">"48,0 kHz"</item>
+    <item msgid="3347287377354164611">"88,2 kHz"</item>
+    <item msgid="1234212100239985373">"96,0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="4482862757811638365">"44,1 kHz"</item>
+    <item msgid="354495328188724404">"48,0 kHz"</item>
+    <item msgid="7329816882213695083">"88,2 kHz"</item>
+    <item msgid="6967397666254430476">"96,0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="5618929009984956469">"16 bitų pavyzdyje"</item>
+    <item msgid="3412640499234627248">"24 bitai pavyzdyje"</item>
+    <item msgid="121583001492929387">"32 bitai pavyzdyje"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="4726688794884191540">"16 bitų pavyzdyje"</item>
+    <item msgid="305344756485516870">"24 bitai pavyzdyje"</item>
+    <item msgid="244568657919675099">"32 bitai pavyzdyje"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="4106832974775067314">"Monofoninis garsas"</item>
+    <item msgid="5571632958424639155">"Stereofoninis garsas"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Naudoti sistemos pasirink. (numatytasis)"</item>
+    <item msgid="8900559293912978337">"Monofoninis garsas"</item>
+    <item msgid="8883739882299884241">"Stereofoninis garsas"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Optimizuota garso kokybė (990 Kb/s; 909 Kb/s)"</item>
+    <item msgid="2921767058740704969">"Subalansuotą garso ir ryšio kokybė (660 kbps / 606 kbps)"</item>
+    <item msgid="8860982705384396512">"Optimizuota ryšio kokybė (330 Kb/s; 303 Kb/s)"</item>
+    <item msgid="4414060457677684127">"Geriausias rezultatas (adaptyvusis pralaidumas)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Optimizuota garso kokybė"</item>
+    <item msgid="4327143584633311908">"Subalansuota garso ir ryšio kokybė"</item>
+    <item msgid="4681409244565426925">"Optimizuota ryšio kokybė"</item>
+    <item msgid="364670732877872677">"Geriausias rezultatas (adaptyvusis pralaidumas)"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"Išjungta"</item>
+    <item msgid="1593289376502312923">"64 KB"</item>
+    <item msgid="487545340236145324">"256 KB"</item>
+    <item msgid="2423528675294333831">"1 MB"</item>
+    <item msgid="180883774509476541">"4 MB"</item>
+    <item msgid="2803199102589126938">"16 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"Išjungta"</item>
+    <item msgid="4622460333038586791">"64 KB"</item>
+    <item msgid="2212125625169582330">"256 KB"</item>
+    <item msgid="1704946766699242653">"1 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"Išjungta"</item>
+    <item msgid="2969458029344750262">"64 KB žurnalo buferis"</item>
+    <item msgid="1342285115665698168">"256 KB žurnalo buferis"</item>
+    <item msgid="1314234299552254621">"1 MB žurnalo buferis"</item>
+    <item msgid="3606047780792894151">"4 MB žurnalo buferis"</item>
+    <item msgid="5431354956856655120">"16 MB žurnalo buferis"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Išjungta"</item>
+    <item msgid="3054662377365844197">"Viskas"</item>
+    <item msgid="688870735111627832">"Viskas, išsk. rad. r."</item>
+    <item msgid="2850427388488887328">"tik branduolys"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Išjungta"</item>
+    <item msgid="172978079776521897">"Visi žurnalų buferiai"</item>
+    <item msgid="3873873912383879240">"Visi, išskyrus radijo ryšio žurnalų buferius"</item>
+    <item msgid="8489661142527693381">"tik branduolio žurnalo buferis"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Animacija išjungta"</item>
+    <item msgid="6624864048416710414">"Animacijos mastelis 0,5x"</item>
+    <item msgid="2219332261255416635">"Animacijos mastelis 1x"</item>
+    <item msgid="3544428804137048509">"Animacijos mastelis 1,5x"</item>
+    <item msgid="3110710404225974514">"Animacijos mastelis 2x"</item>
+    <item msgid="4402738611528318731">"Animacijos mastelis 5x"</item>
+    <item msgid="6189539267968330656">"Animacijos mastelis 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Animacija išjungta"</item>
+    <item msgid="3375781541913316411">"Animacijos mastelis 0,5x"</item>
+    <item msgid="1991041427801869945">"Animacijos mastelis 1x"</item>
+    <item msgid="4012689927622382874">"Animacijos mastelis 1,5x"</item>
+    <item msgid="3289156759925947169">"Animacijos mastelis 2x"</item>
+    <item msgid="7705857441213621835">"Animacijos mastelis 5x"</item>
+    <item msgid="6660750935954853365">"Animacijos mastelis 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Animacija išjungta"</item>
+    <item msgid="1138649021950863198">"Animacijos mastelis 0,5 x"</item>
+    <item msgid="4394388961370833040">"Animacijos mastelis 1 x"</item>
+    <item msgid="8125427921655194973">"Animacijos mastelis 1,5 x"</item>
+    <item msgid="3334024790739189573">"Animacijos mastelis 2 x"</item>
+    <item msgid="3170120558236848008">"Animacijos mastelis 5 x"</item>
+    <item msgid="1069584980746680398">"Animacijos mastelis 10 x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Nėra"</item>
+    <item msgid="9033194758688161545">"480 piks."</item>
+    <item msgid="1025306206556583600">"480 piks. (saugus)"</item>
+    <item msgid="1853913333042744661">"720 piks."</item>
+    <item msgid="3414540279805870511">"720 piks. (saugus)"</item>
+    <item msgid="9039818062847141551">"1 080 piks."</item>
+    <item msgid="4939496949750174834">"1 080 piks. (saugus)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (saugus)"</item>
+    <item msgid="3547211260846843098">"4K (didesnio mastelio)"</item>
+    <item msgid="5411365648951414254">"4K (didesnio mastelio, saugus)"</item>
+    <item msgid="1311305077526792901">"720 piks., 1 080 piks. (dvig. ekr.)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Nėra"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"„Systrace“ (grafika)"</item>
+    <item msgid="1340692776955662664">"Kreipinių dėklas „glGetError“"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Išjungta"</item>
+    <item msgid="675719912558941285">"Piešti ne stačiak. reg. mėlyna sp."</item>
+    <item msgid="1064373276095698656">"Paryš. išban. pieš. kom. žalia sp."</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Išjungta"</item>
+    <item msgid="2751513398307949636">"Ekrane (stulpeliai)"</item>
+    <item msgid="2355151170975410323">"Po <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Išjungta"</item>
+    <item msgid="7688197031296835369">"Rodyti perdangos sritis"</item>
+    <item msgid="2290859360633824369">"Rodyti deuteranomalijos sritis"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"„OpenGL“ (numatyt.)"</item>
+    <item msgid="2839130076198120436">"„OpenGL“ („Skia“)"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Standartinis apribojimas"</item>
+    <item msgid="4071574792028999443">"Nėra fono procesų"</item>
+    <item msgid="4810006996171705398">"Daugiausia 1 procesas"</item>
+    <item msgid="8586370216857360863">"Daugiausia 2 procesai"</item>
+    <item msgid="836593137872605381">"Daugiausia 3 procesai"</item>
+    <item msgid="7899496259191969307">"Daugiausia 4 procesai"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Kraunama"</item>
+    <item msgid="5220695614993094977">"MTP (medijos perdavimo protokolas)"</item>
+    <item msgid="2086000968159047375">"PTP (nuotraukų perdavimo protokolas)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB eternetas)"</item>
+    <item msgid="1718924214939774352">"Garso šaltinis"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
+</resources>

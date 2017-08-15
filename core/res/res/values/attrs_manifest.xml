@@ -242,9 +242,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the setup wizard app -->
         <flag name="setup" value="0x800" />
-        <!-- Additional flag from base permission type: this permission can be granted to ephemeral
+        <!-- Additional flag from base permission type: this permission can be granted to instant
              apps -->
-        <flag name="ephemeral" value="0x1000" />
+        <flag name="instant" value="0x1000" />
         <!-- Additional flag from base permission type: this permission can only be granted to apps
              that target runtime permissions ({@link android.os.Build.VERSION_CODES#M} and above)
              -->

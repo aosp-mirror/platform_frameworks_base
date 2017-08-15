@@ -3463,11 +3463,13 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.FORCE_FACTORY_RESET";
 
     /**
-     * Broadcast action: report that a settings element is being restored from backup.  The intent
-     * contains three extras: EXTRA_SETTING_NAME is a string naming the restored setting,
-     * EXTRA_SETTING_NEW_VALUE is the value being restored, and EXTRA_SETTING_PREVIOUS_VALUE
-     * is the value of that settings entry prior to the restore operation.  All of these values are
-     * represented as strings.
+     * Broadcast action: report that a settings element is being restored from backup. The intent
+     * contains four extras: EXTRA_SETTING_NAME is a string naming the restored setting,
+     * EXTRA_SETTING_NEW_VALUE is the value being restored, EXTRA_SETTING_PREVIOUS_VALUE
+     * is the value of that settings entry prior to the restore operation, and
+     * EXTRA_SETTING_RESTORED_FROM_SDK_INT is the version of the SDK that the setting has been
+     * restored from (corresponds to {@link android.os.Build.VERSION#SDK_INT}). The first three
+     * values are represented as strings, the fourth one as int.
      *
      * <p>This broadcast is sent only for settings provider entries known to require special handling
      * around restore time.  These entries are found in the BROADCAST_ON_RESTORE table within
@@ -3476,6 +3478,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #EXTRA_SETTING_NAME
      * @see #EXTRA_SETTING_PREVIOUS_VALUE
      * @see #EXTRA_SETTING_NEW_VALUE
+     * @see #EXTRA_SETTING_RESTORED_FROM_SDK_INT
      * {@hide}
      */
     public static final String ACTION_SETTING_RESTORED = "android.os.action.SETTING_RESTORED";
@@ -3486,6 +3489,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SETTING_PREVIOUS_VALUE = "previous_value";
     /** {@hide} */
     public static final String EXTRA_SETTING_NEW_VALUE = "new_value";
+    /** {@hide} */
+    public static final String EXTRA_SETTING_RESTORED_FROM_SDK_INT = "restored_from_sdk_int";
 
     /**
      * Activity Action: Process a piece of text.

@@ -814,6 +814,8 @@ public class NotificationManagerService extends SystemService {
                 try {
                     String element = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
                     String newValue = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
+                    int restoredFromSdkInt = intent.getIntExtra(
+                            Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, 0);
                     mListeners.onSettingRestored(element, newValue, getSendingUserId());
                     mConditionProviders.onSettingRestored(element, newValue, getSendingUserId());
                 } catch (Exception e) {

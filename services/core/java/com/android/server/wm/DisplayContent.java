@@ -1445,7 +1445,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @VisibleForTesting
-    int getStaskPosById(int stackId) {
+    int getStackPosById(int stackId) {
         for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
             final TaskStack stack = mTaskStackContainers.get(i);
             if (stack.mStackId == stackId) {
@@ -1456,7 +1456,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    void onConfigurationChanged(Configuration newParentConfig) {
+    public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
 
         // The display size information is heavily dependent on the resources in the current

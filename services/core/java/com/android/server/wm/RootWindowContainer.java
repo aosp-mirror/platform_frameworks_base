@@ -373,7 +373,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     @Override
-    void onConfigurationChanged(Configuration newParentConfig) {
+    public void onConfigurationChanged(Configuration newParentConfig) {
         prepareFreezingTaskBounds();
         super.onConfigurationChanged(newParentConfig);
 

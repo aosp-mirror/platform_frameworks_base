@@ -3240,11 +3240,11 @@ public class PackageParser {
         perm.info.protectionLevel = PermissionInfo.fixProtectionLevel(perm.info.protectionLevel);
 
         if ((perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_FLAGS) != 0) {
-            if ( (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_EPHEMERAL) == 0
+            if ( (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_INSTANT) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE) !=
                     PermissionInfo.PROTECTION_SIGNATURE) {
-                outError[0] = "<permission>  protectionLevel specifies a non-ephemeral flag but is "
+                outError[0] = "<permission>  protectionLevel specifies a non-instnat flag but is "
                         + "not based on signature type";
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return false;
