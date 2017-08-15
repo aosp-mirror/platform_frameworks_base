@@ -19,6 +19,7 @@ package android.telephony.mbms.vendor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.DownloadRequest;
@@ -36,7 +37,7 @@ import java.util.List;
  * its {@link android.app.Service#onBind(Intent)} method.
  * @hide
  */
-//@SystemApi
+@SystemApi
 public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     /**
      * Initialize the download service for this app and subId, registering the listener.
@@ -62,22 +63,42 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @hide
      */
     @Override
-    public final int initialize(int subscriptionId,
+    public final int initialize(final int subscriptionId,
             final IMbmsDownloadManagerCallback callback) throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        callback.asBinder().linkToDeath(new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                onAppCallbackDied(uid, subscriptionId);
+            }
+        }, 0);
+
         return initialize(subscriptionId, new MbmsDownloadManagerCallback() {
             @Override
-            public void error(int errorCode, String message) throws RemoteException {
-                callback.error(errorCode, message);
+            public void onError(int errorCode, String message) {
+                try {
+                    callback.error(errorCode, message);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void fileServicesUpdated(List<FileServiceInfo> services) throws RemoteException {
-                callback.fileServicesUpdated(services);
+            public void onFileServicesUpdated(List<FileServiceInfo> services) {
+                try {
+                    callback.fileServicesUpdated(services);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
 
             @Override
-            public void middlewareReady() throws RemoteException {
-                callback.middlewareReady();
+            public void onMiddlewareReady() {
+                try {
+                    callback.middlewareReady();
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
             }
         });
     }
@@ -150,13 +171,25 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     @Override
     public final int download(DownloadRequest downloadRequest, IDownloadStateCallback callback)
             throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        callback.asBinder().linkToDeath(new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
+            }
+        }, 0);
+
         return download(downloadRequest, new DownloadStateCallback() {
             @Override
-            public void progress(DownloadRequest request, FileInfo fileInfo, int
+            public void onProgressUpdated(DownloadRequest request, FileInfo fileInfo, int
                     currentDownloadSize, int fullDownloadSize, int currentDecodedSize, int
-                    fullDecodedSize) throws RemoteException {
-                callback.progress(request, fileInfo, currentDownloadSize, fullDownloadSize,
-                        currentDecodedSize, fullDecodedSize);
+                    fullDecodedSize) {
+                try {
+                    callback.progress(request, fileInfo, currentDownloadSize, fullDownloadSize,
+                            currentDecodedSize, fullDecodedSize);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
+                }
             }
         });
     }
@@ -245,5 +278,13 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      */
     @Override
     public void dispose(int subscriptionId) throws RemoteException {
+    }
+
+    /**
+     * Indicates that the app identified by the given UID and subscription ID has died.
+     * @param uid the UID of the app, as returned by {@link Binder#getCallingUid()}.
+     * @param subscriptionId The subscription ID the app is using.
+     */
+    public void onAppCallbackDied(int uid, int subscriptionId) {
     }
 }

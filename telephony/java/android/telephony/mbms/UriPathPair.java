@@ -28,8 +28,8 @@ import android.telephony.mbms.vendor.VendorUtils;
  * download files via cell-broadcast.
  * @hide
  */
-//@SystemApi
-public class UriPathPair implements Parcelable {
+@SystemApi
+public final class UriPathPair implements Parcelable {
     private final Uri mFilePathUri;
     private final Uri mContentUri;
 

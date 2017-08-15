@@ -29,9 +29,8 @@ import java.util.Map;
 /**
  * Describes a file service available from the carrier from which files can be downloaded via
  * cell-broadcast.
- * @hide
  */
-public class FileServiceInfo extends ServiceInfo implements Parcelable {
+public final class FileServiceInfo extends ServiceInfo implements Parcelable {
     private final List<FileInfo> files;
 
     /** @hide */
