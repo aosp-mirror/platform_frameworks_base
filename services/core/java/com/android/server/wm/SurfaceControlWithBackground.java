@@ -29,12 +29,16 @@ import android.view.SurfaceSession;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
 
 /**
- * SurfaceControl extension that has background sized to match its container.
+ * SurfaceControl extension that has black background behind navigation bar area for fullscreen
+ * letterboxed apps.
  */
 class SurfaceControlWithBackground extends SurfaceControl {
-    // SurfaceControl that holds the background behind opaque letterboxed app windows.
+    // SurfaceControl that holds the background.
     private SurfaceControl mBackgroundControl;
 
     // Flag that defines whether the background should be shown.
@@ -51,8 +55,10 @@ class SurfaceControlWithBackground extends SurfaceControl {
     private float mLastDsDx = 1, mLastDsDy = 1;
     private float mLastX, mLastY;
 
-    // Will skip alpha animation for background of starting window.
-    private boolean mIsStartingWindow;
+    // SurfaceFlinger doesn't support crop rectangles where width or height is non-positive.
+    // If we just set an empty crop it will behave as if there is no crop at all.
+    // To fix this we explicitly hide the surface and won't let it to be shown.
+    private boolean mHiddenForCrop = false;
 
     public SurfaceControlWithBackground(SurfaceControlWithBackground other) {
         super(other);
@@ -76,7 +82,6 @@ class SurfaceControlWithBackground extends SurfaceControl {
         mLastWidth = w;
         mLastHeight = h;
         mWindowSurfaceController.getContainerRect(mTmpContainerRect);
-        mIsStartingWindow = windowType == TYPE_APPLICATION_STARTING;
         mBackgroundControl = new SurfaceControl(s, "Background for - " + name,
                 mTmpContainerRect.width(), mTmpContainerRect.height(), PixelFormat.OPAQUE,
                 flags | SurfaceControl.FX_SURFACE_DIM);
@@ -89,10 +94,7 @@ class SurfaceControlWithBackground extends SurfaceControl {
         if (mBackgroundControl == null) {
             return;
         }
-        // We won't animate alpha for starting window because it will be visible as a flash for user
-        // when fading out to reveal real app window.
-        final float backgroundAlpha = mIsStartingWindow && alpha < 1.f ? 0 : alpha;
-        mBackgroundControl.setAlpha(backgroundAlpha);
+        mBackgroundControl.setAlpha(alpha);
     }
 
     @Override
@@ -146,15 +148,10 @@ class SurfaceControlWithBackground extends SurfaceControl {
         if (mBackgroundControl == null) {
             return;
         }
-        if (crop.width() < mLastWidth || crop.height() < mLastHeight) {
-            // We're animating and cropping window, compute the appropriate crop for background.
-            calculateBgCrop(crop);
-            mBackgroundControl.setWindowCrop(mTmpContainerRect);
-        } else {
-            // When not animating just set crop to container rect.
-            mWindowSurfaceController.getContainerRect(mTmpContainerRect);
-            mBackgroundControl.setWindowCrop(mTmpContainerRect);
-        }
+        calculateBgCrop(crop);
+        mBackgroundControl.setWindowCrop(mTmpContainerRect);
+        mHiddenForCrop = mTmpContainerRect.isEmpty();
+        updateBackgroundVisibility();
     }
 
     @Override
@@ -164,33 +161,23 @@ class SurfaceControlWithBackground extends SurfaceControl {
         if (mBackgroundControl == null) {
             return;
         }
-        if (crop.width() < mLastWidth || crop.height() < mLastHeight) {
-            // We're animating and cropping window, compute the appropriate crop for background.
-            calculateBgCrop(crop);
-            mBackgroundControl.setFinalCrop(mTmpContainerRect);
-        } else {
-            // When not animating just set crop to container rect.
-            mWindowSurfaceController.getContainerRect(mTmpContainerRect);
-            mBackgroundControl.setFinalCrop(mTmpContainerRect);
-        }
+        mWindowSurfaceController.getContainerRect(mTmpContainerRect);
+        mBackgroundControl.setFinalCrop(mTmpContainerRect);
     }
 
-    /** Compute background crop based on current animation progress for main surface control. */
+    /**
+     * Compute background crop based on current animation progress for main surface control and
+     * update {@link #mTmpContainerRect} with new values.
+     */
     private void calculateBgCrop(Rect crop) {
         // Track overall progress of animation by computing cropped portion of status bar.
         final Rect contentInsets = mWindowSurfaceController.mAnimator.mWin.mContentInsets;
         float d = contentInsets.top == 0 ? 0 : (float) crop.top / contentInsets.top;
         if (d > 1.f) {
             // We're running expand animation from launcher, won't compute custom bg crop here.
-            mTmpContainerRect.set(crop);
+            mTmpContainerRect.setEmpty();
             return;
         }
-
-        // Compute additional offset for the background when app window is positioned not at (0,0).
-        // E.g. landscape with navigation bar on the left.
-        final Rect winFrame = mWindowSurfaceController.mAnimator.mWin.mFrame;
-        final int offsetX = (int) (winFrame.left * mLastDsDx * d + 0.5);
-        final int offsetY = (int) (winFrame.top * mLastDsDy * d + 0.5);
 
         // Compute new scaled width and height for background that will depend on current animation
         // progress. Those consist of current crop rect for the main surface + scaled areas outside
@@ -201,17 +188,39 @@ class SurfaceControlWithBackground extends SurfaceControl {
         // computing correct frames for letterboxed windows in WindowState.
         d = d < 0.025f ? 0 : d;
         mWindowSurfaceController.getContainerRect(mTmpContainerRect);
-        final int backgroundWidth =
-                (int) (crop.width() + (mTmpContainerRect.width() - mLastWidth) * (1 - d) + 0.5);
-        final int backgroundHeight =
-                (int) (crop.height() + (mTmpContainerRect.height() - mLastHeight) * (1 - d) + 0.5);
+        int backgroundWidth = 0, backgroundHeight = 0;
+        // Compute additional offset for the background when app window is positioned not at (0,0).
+        // E.g. landscape with navigation bar on the left.
+        final Rect winFrame = mWindowSurfaceController.mAnimator.mWin.mFrame;
+        int offsetX = (int)((winFrame.left - mTmpContainerRect.left) * mLastDsDx),
+                offsetY = (int) ((winFrame.top - mTmpContainerRect.top) * mLastDsDy);
 
-        mTmpContainerRect.set(crop);
-        // Make sure that part of background to left/top is visible and scaled.
-        mTmpContainerRect.offset(offsetX, offsetY);
-        // Set correct width/height, so that area to right/bottom is cropped properly.
-        mTmpContainerRect.right = mTmpContainerRect.left + backgroundWidth;
-        mTmpContainerRect.bottom = mTmpContainerRect.top + backgroundHeight;
+        // Position and size background.
+        final int bgPosition = mWindowSurfaceController.mAnimator.mService.getNavBarPosition();
+
+        switch (bgPosition) {
+            case NAV_BAR_LEFT:
+                backgroundWidth = (int) ((mTmpContainerRect.width() - mLastWidth) * (1 - d) + 0.5);
+                backgroundHeight = crop.height();
+                offsetX += crop.left - backgroundWidth;
+                offsetY += crop.top;
+                break;
+            case NAV_BAR_RIGHT:
+                backgroundWidth = (int) ((mTmpContainerRect.width() - mLastWidth) * (1 - d) + 0.5);
+                backgroundHeight = crop.height();
+                offsetX += crop.right;
+                offsetY += crop.top;
+                break;
+            case NAV_BAR_BOTTOM:
+                backgroundWidth = crop.width();
+                backgroundHeight = (int) ((mTmpContainerRect.height() - mLastHeight) * (1 - d)
+                        + 0.5);
+                offsetX += crop.left;
+                offsetY += crop.bottom;
+                break;
+        }
+        mTmpContainerRect.set(offsetX, offsetY, offsetX + backgroundWidth,
+                offsetY + backgroundHeight);
     }
 
     @Override
@@ -317,7 +326,7 @@ class SurfaceControlWithBackground extends SurfaceControl {
             return;
         }
         final AppWindowToken appWindowToken = mWindowSurfaceController.mAnimator.mWin.mAppToken;
-        if (appWindowToken != null && appWindowToken.fillsParent() && mVisible) {
+        if (!mHiddenForCrop && mVisible && appWindowToken != null && appWindowToken.fillsParent()) {
             mBackgroundControl.show();
         } else {
             mBackgroundControl.hide();
