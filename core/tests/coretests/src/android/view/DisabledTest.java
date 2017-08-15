@@ -78,7 +78,7 @@ public class DisabledTest extends ActivityInstrumentationTestCase<Disabled> {
         assertNotNull(mDisabledParent);
         assertFalse(mDisabled.isEnabled());
         assertTrue(mDisabledParent.isEnabled());
-        assertTrue(mDisabled.hasFocus());
+        assertFalse(mDisabled.hasFocus());
     }
 
     @MediumTest
