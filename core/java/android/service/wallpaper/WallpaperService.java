@@ -195,7 +195,8 @@ public abstract class WallpaperService extends Service {
         // Needed for throttling onComputeColors.
         private long mLastColorInvalidation;
         private final Runnable mNotifyColorsChanged = this::notifyColorsChanged;
-        private Supplier<Long> mClockFunction = SystemClock::elapsedRealtime;
+        private final Supplier<Long> mClockFunction;
+        private final Handler mHandler;
 
         DisplayManager mDisplayManager;
         Display mDisplay;
@@ -362,6 +363,26 @@ public abstract class WallpaperService extends Service {
                 }
             }
         };
+
+        /**
+         * Default constructor
+         */
+        public Engine() {
+            this(SystemClock::elapsedRealtime, Handler.getMain());
+        }
+
+        /**
+         * Constructor used for test purposes.
+         *
+         * @param clockFunction Supplies current times in millis.
+         * @param handler Used for posting/deferring asynchronous calls.
+         * @hide
+         */
+        @VisibleForTesting
+        public Engine(Supplier<Long> clockFunction, Handler handler) {
+           mClockFunction = clockFunction;
+           mHandler = handler;
+        }
         
         /**
          * Provides access to the surface in which this wallpaper is drawn.
@@ -563,18 +584,17 @@ public abstract class WallpaperService extends Service {
          */
         public void notifyColorsChanged() {
             final long now = mClockFunction.get();
-            final Handler mainHandler = Handler.getMain();
             if (now - mLastColorInvalidation < NOTIFY_COLORS_RATE_LIMIT_MS) {
                 Log.w(TAG, "This call has been deferred. You should only call "
                         + "notifyColorsChanged() once every "
                         + (NOTIFY_COLORS_RATE_LIMIT_MS / 1000f) + " seconds.");
-                if (!mainHandler.hasCallbacks(mNotifyColorsChanged)) {
-                    mainHandler.postDelayed(mNotifyColorsChanged, NOTIFY_COLORS_RATE_LIMIT_MS);
+                if (!mHandler.hasCallbacks(mNotifyColorsChanged)) {
+                    mHandler.postDelayed(mNotifyColorsChanged, NOTIFY_COLORS_RATE_LIMIT_MS);
                 }
                 return;
             }
             mLastColorInvalidation = now;
-            mainHandler.removeCallbacks(mNotifyColorsChanged);
+            mHandler.removeCallbacks(mNotifyColorsChanged);
 
             try {
                 final WallpaperColors newColors = onComputeColors();
@@ -660,14 +680,6 @@ public abstract class WallpaperService extends Service {
                 mCaller.sendMessage(msg);
             } else {event.recycle();
             }
-        }
-
-        /**
-         * @hide
-         */
-        @VisibleForTesting
-        public void setClockFunction(Supplier<Long> clockFunction) {
-            mClockFunction = clockFunction;
         }
 
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
