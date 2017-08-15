@@ -368,6 +368,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.BinderInternal;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
@@ -14083,6 +14084,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+
+            BinderInternal.nSetBinderProxyCountEnabled(true);
+            BinderInternal.setBinderProxyCountCallback(
+                    new BinderInternal.BinderProxyLimitListener() {
+                        @Override
+                        public void onLimitReached(int uid) {
+                            Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
+                                    + Process.myUid());
+                            if (uid == Process.SYSTEM_UID) {
+                                Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
+                            } else {
+                                killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                                        "Too many Binders sent to SYSTEM");
+                            }
+                        }
+                    }, mHandler);
+
             traceLog.traceEnd(); // ActivityManagerStartApps
             traceLog.traceEnd(); // PhaseActivityManagerReady
         }
@@ -14900,6 +14918,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mRecentTasks.dump(pw, true /* dumpAll */, dumpPackage);
                     }
                 }
+            } else if ("binder-proxies".equals(cmd)) {
+                if (opti >= args.length) {
+                    dumpBinderProxiesCounts(pw, BinderInternal.nGetBinderProxyPerUidCounts(),
+                            "Counts of Binder Proxies held by SYSTEM");
+                } else {
+                    String uid = args[opti];
+                    opti++;
+                    // Ensure Binder Proxy Count is as up to date as possible
+                    System.gc();
+                    System.runFinalization();
+                    System.gc();
+                    pw.println(BinderInternal.nGetBinderProxyCount(Integer.parseInt(uid)));
+                }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -15416,6 +15447,34 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.print(": "); pw.println(uidRec);
         }
         return printed;
+    }
+
+    boolean dumpBinderProxiesCounts(PrintWriter pw, SparseIntArray counts, String header) {
+        if(counts != null) {
+            pw.println(header);
+            for (int i = 0; i < counts.size(); i++) {
+                final int uid = counts.keyAt(i);
+                final int binderCount = counts.valueAt(i);
+                pw.print("    UID ");
+                pw.print(uid);
+                pw.print(", binder count = ");
+                pw.print(binderCount);
+                pw.print(", package(s)= ");
+                final String[] pkgNames = mContext.getPackageManager().getPackagesForUid(uid);
+                if (pkgNames != null) {
+                    for (int j = 0; j < pkgNames.length; j++) {
+                        pw.print(pkgNames[j]);
+                        pw.print("; ");
+                    }
+                } else {
+                    pw.print("NO PACKAGE NAME FOUND");
+                }
+                pw.println();
+            }
+            pw.println();
+            return true;
+        }
+        return false;
     }
 
     void dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
