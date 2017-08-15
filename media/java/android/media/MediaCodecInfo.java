@@ -2095,6 +2095,7 @@ public final class MediaCodecInfo {
                             errors |= ERROR_UNRECOGNIZED;
                     }
                     switch (profileLevel.profile) {
+                        case CodecProfileLevel.AVCProfileConstrainedHigh:
                         case CodecProfileLevel.AVCProfileHigh:
                             BR *= 1250; break;
                         case CodecProfileLevel.AVCProfileHigh10:
@@ -2107,6 +2108,7 @@ public final class MediaCodecInfo {
                             errors |= ERROR_UNSUPPORTED;
                             supported = false;
                             // fall through - treat as base profile
+                        case CodecProfileLevel.AVCProfileConstrainedBaseline:
                         case CodecProfileLevel.AVCProfileBaseline:
                         case CodecProfileLevel.AVCProfileMain:
                             BR *= 1000; break;
