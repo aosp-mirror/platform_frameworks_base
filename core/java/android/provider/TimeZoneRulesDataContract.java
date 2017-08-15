@@ -41,12 +41,6 @@ public final class TimeZoneRulesDataContract {
     private static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
-     * The permission that the reader of the ContentProvider must possess.
-     */
-    public static final String READER_PERMISSION =
-            android.Manifest.permission.UPDATE_TIME_ZONE_RULES;
-
-    /**
      * Defines fields exposed through the {@link Operation#CONTENT_URI} for describing a time zone
      * distro operation.
      */
