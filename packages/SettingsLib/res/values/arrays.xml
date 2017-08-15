@@ -121,8 +121,8 @@
         <item>Use System Selection (Default)</item>
         <item>SBC</item>
         <item>AAC</item>
-        <item>aptX</item>
-        <item>aptX HD</item>
+        <item><xliff:g id="aptx">Qualcomm(R) aptX(TM) audio</xliff:g></item>
+        <item><xliff:g id="aptx_hd">Qualcomm(R) aptX(TM) HD audio</xliff:g></item>
         <item>LDAC</item>
         <item>Enable Optional Codecs</item>
         <item>Disable Optional Codecs</item>
@@ -145,8 +145,8 @@
         <item>Use System Selection (Default)</item>
         <item>SBC</item>
         <item>AAC</item>
-        <item>aptX</item>
-        <item>aptX HD</item>
+        <item><xliff:g id="aptx">Qualcomm(R) aptX(TM) audio</xliff:g></item>
+        <item><xliff:g id="aptx_hd">Qualcomm(R) aptX(TM) HD audio</xliff:g></item>
         <item>LDAC</item>
         <item>Enable Optional Codecs</item>
         <item>Disable Optional Codecs</item>
