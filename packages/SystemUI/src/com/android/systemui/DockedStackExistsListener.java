@@ -33,6 +33,7 @@ public class DockedStackExistsListener {
     private static final String TAG = "DockedStackExistsListener";
 
     private static ArrayList<WeakReference<Consumer<Boolean>>> sCallbacks = new ArrayList<>();
+    private static boolean mLastExists;
 
     static {
         try {
@@ -73,6 +74,7 @@ public class DockedStackExistsListener {
 
 
     private static void onDockedStackExistsChanged(boolean exists) {
+        mLastExists = exists;
         synchronized (sCallbacks) {
             sCallbacks.removeIf(wf -> {
                 Consumer<Boolean> l = wf.get();
@@ -83,6 +85,7 @@ public class DockedStackExistsListener {
     }
 
     public static void register(Consumer<Boolean> callback) {
+        callback.accept(mLastExists);
         synchronized (sCallbacks) {
             sCallbacks.add(new WeakReference<>(callback));
         }
