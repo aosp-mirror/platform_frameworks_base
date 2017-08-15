@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.UserHandle;
@@ -146,15 +147,82 @@ public class ManagedServicesTest extends NotificationTestCase {
                 service.onSettingRestored(
                         service.getConfig().secureSettingName,
                         mExpectedPrimary.get(approvalLevel).get(userId),
-                        userId);
+                        Build.VERSION_CODES.O, userId);
             }
             verifyExpectedApprovedEntries(service, true);
 
             for (int userId : mExpectedSecondary.get(approvalLevel).keySet()) {
                 service.onSettingRestored(service.getConfig().secondarySettingName,
-                        mExpectedSecondary.get(approvalLevel).get(userId), userId);
+                        mExpectedSecondary.get(approvalLevel).get(userId), Build.VERSION_CODES.O,
+                        userId);
             }
             verifyExpectedApprovedEntries(service);
+        }
+    }
+
+    @Test
+    public void testBackupAndRestore_migration_preO() throws Exception {
+        ArrayMap backupPrimaryPackages = new ArrayMap<>();
+        backupPrimaryPackages.put(0, "backup.0:backup:0a");
+        backupPrimaryPackages.put(10, "10.backup");
+        backupPrimaryPackages.put(11, "eleven");
+        backupPrimaryPackages.put(12, "");
+        ArrayMap backupPrimaryComponentNames = new ArrayMap<>();
+        backupPrimaryComponentNames.put(0, "backup.first/whatever:a/b");
+        backupPrimaryComponentNames.put(10, "again/M1");
+        backupPrimaryComponentNames.put(11, "orange/youglad:itisnot/banana");
+        backupPrimaryComponentNames.put(12, "");
+        ArrayMap<Integer, ArrayMap<Integer, String>> backupPrimary = new ArrayMap<>();
+        backupPrimary.put(APPROVAL_BY_PACKAGE, backupPrimaryPackages);
+        backupPrimary.put(APPROVAL_BY_COMPONENT, backupPrimaryComponentNames);
+
+        ArrayMap backupSecondaryComponentNames = new ArrayMap<>();
+        backupSecondaryComponentNames.put(0, "secondary.1/component.Name");
+        backupSecondaryComponentNames.put(10,
+                "this.is.another.package.backup/with.Component:component.backup/2");
+        ArrayMap backupSecondaryPackages = new ArrayMap<>();
+        backupSecondaryPackages.put(0, "");
+        backupSecondaryPackages.put(10,
+                "this.is.another.package.backup:package.backup");
+        ArrayMap<Integer, ArrayMap<Integer, String>> backupSecondary = new ArrayMap<>();
+        backupSecondary.put(APPROVAL_BY_PACKAGE, backupSecondaryPackages);
+        backupSecondary.put(APPROVAL_BY_COMPONENT, backupSecondaryComponentNames);
+
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+
+            // not an expected flow but a way to get data into the settings
+            for (int userId : mExpectedPrimary.get(approvalLevel).keySet()) {
+                service.onSettingRestored(
+                        service.getConfig().secureSettingName,
+                        mExpectedPrimary.get(approvalLevel).get(userId),
+                        Build.VERSION_CODES.O, userId);
+            }
+
+            for (int userId : mExpectedSecondary.get(approvalLevel).keySet()) {
+                service.onSettingRestored(service.getConfig().secondarySettingName,
+                        mExpectedSecondary.get(approvalLevel).get(userId), Build.VERSION_CODES.O,
+                        userId);
+            }
+
+            // actual test
+            for (int userId : backupPrimary.get(approvalLevel).keySet()) {
+                service.onSettingRestored(
+                        service.getConfig().secureSettingName,
+                        backupPrimary.get(approvalLevel).get(userId),
+                        Build.VERSION_CODES.N_MR1, userId);
+            }
+            verifyExpectedApprovedEntries(service, true);
+
+            for (int userId : backupSecondary.get(approvalLevel).keySet()) {
+                service.onSettingRestored(service.getConfig().secondarySettingName,
+                        backupSecondary.get(approvalLevel).get(userId),
+                        Build.VERSION_CODES.N_MR1, userId);
+            }
+            verifyExpectedApprovedEntries(service);
+            verifyExpectedApprovedEntries(service, backupPrimary.get(approvalLevel));
+            verifyExpectedApprovedEntries(service, backupSecondary.get(approvalLevel));
         }
     }
 
@@ -619,23 +687,20 @@ public class ManagedServicesTest extends NotificationTestCase {
         ArrayMap<Integer, String> verifyMap = primary
                 ? mExpectedPrimary.get(service.mApprovalLevel)
                 : mExpectedSecondary.get(service.mApprovalLevel);
+        verifyExpectedApprovedEntries(service, verifyMap);
+    }
+
+    private void verifyExpectedApprovedEntries(ManagedServices service,
+            ArrayMap<Integer, String> verifyMap) {
         for (int userId : verifyMap.keySet()) {
             for (String verifyValue : verifyMap.get(userId).split(":")) {
                 if (!TextUtils.isEmpty(verifyValue)) {
                     assertTrue("service type " + service.mApprovalLevel + ":"
-                            + verifyValue + " is not allowed for user " + userId,
+                                    + verifyValue + " is not allowed for user " + userId,
                             service.isPackageOrComponentAllowed(verifyValue, userId));
                 }
             }
         }
-    }
-
-    private boolean isPackage(String packageOrComponent) {
-        final ComponentName component = ComponentName.unflattenFromString(packageOrComponent);
-        if (component != null) {
-            return false;
-        }
-        return true;
     }
 
     private void writeExpectedValuesToSettings(int approvalLevel) {
