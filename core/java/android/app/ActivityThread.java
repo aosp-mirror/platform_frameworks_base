@@ -2666,14 +2666,8 @@ public final class ActivityThread {
         Activity activity = null;
         try {
             java.lang.ClassLoader cl = appContext.getClassLoader();
-            if (appContext.getApplicationContext() instanceof Application) {
-                activity = ((Application) appContext.getApplicationContext())
-                        .instantiateActivity(cl, component.getClassName(), r.intent);
-            }
-            if (activity == null) {
-                activity = mInstrumentation.newActivity(
-                        cl, component.getClassName(), r.intent);
-            }
+            activity = mInstrumentation.newActivity(
+                    cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
             r.intent.prepareToEnterProcess();
@@ -3169,8 +3163,7 @@ public final class ActivityThread {
             data.intent.setExtrasClassLoader(cl);
             data.intent.prepareToEnterProcess();
             data.setExtrasClassLoader(cl);
-            receiver = instantiate(cl, component, data.intent, app,
-                    Application::instantiateReceiver);
+            receiver = (BroadcastReceiver)cl.loadClass(component).newInstance();
         } catch (Exception e) {
             if (DEBUG_BROADCAST) Slog.i(TAG,
                     "Finishing failed broadcast to " + data.intent.getComponent());
@@ -3258,13 +3251,12 @@ public final class ActivityThread {
             } else {
                 try {
                     if (DEBUG_BACKUP) Slog.v(TAG, "Initializing agent class " + classname);
-                    ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
 
                     java.lang.ClassLoader cl = packageInfo.getClassLoader();
-                    agent = instantiate(cl, classname, context,
-                            Application::instantiateBackupAgent);
+                    agent = (BackupAgent) cl.loadClass(classname).newInstance();
 
                     // set up the agent's context
+                    ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
                     context.setOuterContext(agent);
                     agent.attach(context);
 
@@ -3324,12 +3316,9 @@ public final class ActivityThread {
         LoadedApk packageInfo = getPackageInfoNoCheck(
                 data.info.applicationInfo, data.compatInfo);
         Service service = null;
-        Application app = null;
         try {
-            app = packageInfo.makeApplication(false, mInstrumentation);
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
-            service = instantiate(cl, data.info.name, data.intent, app,
-                    Application::instantiateService);
+            service = (Service) cl.loadClass(data.info.name).newInstance();
         } catch (Exception e) {
             if (!mInstrumentation.onException(service, e)) {
                 throw new RuntimeException(
@@ -3344,6 +3333,7 @@ public final class ActivityThread {
             ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
             context.setOuterContext(service);
 
+            Application app = packageInfo.makeApplication(false, mInstrumentation);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
             service.onCreate();
@@ -5682,8 +5672,8 @@ public final class ActivityThread {
 
             try {
                 final ClassLoader cl = instrContext.getClassLoader();
-                mInstrumentation = instantiate(cl, data.instrumentationName.getClassName(),
-                        instrContext, Application::instantiateInstrumentation);
+                mInstrumentation = (Instrumentation)
+                    cl.loadClass(data.instrumentationName.getClassName()).newInstance();
             } catch (Exception e) {
                 throw new RuntimeException(
                     "Unable to instantiate instrumentation "
@@ -6234,8 +6224,8 @@ public final class ActivityThread {
 
             try {
                 final java.lang.ClassLoader cl = c.getClassLoader();
-                localProvider = instantiate(cl, info.name, context,
-                        Application::instantiateProvider);
+                localProvider = (ContentProvider)cl.
+                    loadClass(info.name).newInstance();
                 provider = localProvider.getIContentProvider();
                 if (provider == null) {
                     Slog.e(TAG, "Failed to instantiate class " +
@@ -6432,49 +6422,6 @@ public final class ActivityThread {
             }
             return defaultValue;
         }
-    }
-
-    private <T> T instantiate(ClassLoader cl, String className, Context c,
-            Instantiator<T> instantiator)
-            throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        Application app = getApp(c);
-        if (app != null) {
-            T a = instantiator.instantiate(app, cl, className);
-            if (a != null) return a;
-        }
-        return (T) cl.loadClass(className).newInstance();
-    }
-
-    private <T> T instantiate(ClassLoader cl, String className, Intent intent, Context c,
-            IntentInstantiator<T> instantiator)
-            throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        Application app = getApp(c);
-        if (app != null) {
-            T a = instantiator.instantiate(app, cl, className, intent);
-            if (a != null) return a;
-        }
-        return (T) cl.loadClass(className).newInstance();
-    }
-
-    private Application getApp(Context c) {
-        // We need this shortcut to avoid actually calling getApplicationContext() on an Application
-        // because the Application may not return itself for getApplicationContext() because the
-        // API doesn't enforce it.
-        if (c instanceof Application) return (Application) c;
-        if (c.getApplicationContext() instanceof Application) {
-            return (Application) c.getApplicationContext();
-        }
-        return null;
-    }
-
-    private interface Instantiator<T> {
-        T instantiate(Application app, ClassLoader cl, String className)
-                throws ClassNotFoundException, IllegalAccessException, InstantiationException;
-    }
-
-    private interface IntentInstantiator<T> {
-        T instantiate(Application app, ClassLoader cl, String className, Intent intent)
-                throws ClassNotFoundException, IllegalAccessException, InstantiationException;
     }
 
     private static class EventLoggingReporter implements EventLogger.Reporter {
