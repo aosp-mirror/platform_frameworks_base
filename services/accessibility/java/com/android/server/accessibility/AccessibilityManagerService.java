@@ -2394,6 +2394,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS = 12;
         public static final int MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER = 13;
         public static final int MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER = 14;
+        public static final int MSG_INIT_SERVICE = 15;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2491,6 +2492,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
                 case MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER: {
                     showAccessibilityButtonTargetSelection();
+                } break;
+
+                case MSG_INIT_SERVICE: {
+                    final Service service = (Service) msg.obj;
+                    service.initializeService();
                 } break;
             }
         }
@@ -2947,17 +2953,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (userState.mBindingServices.contains(mComponentName) || mWasConnectedAndDied) {
                     userState.mBindingServices.remove(mComponentName);
                     mWasConnectedAndDied = false;
-                    try {
-                       mServiceInterface.init(this, mId, mOverlayWindowToken);
-                       onUserStateChangedLocked(userState);
-                    } catch (RemoteException re) {
-                        Slog.w(LOG_TAG, "Error while setting connection for service: "
-                                + service, re);
-                        binderDied();
-                    }
+                    onUserStateChangedLocked(userState);
+                    // Initialize the service on the main handler after we're done setting up for
+                    // the new configuration (for example, initializing the input filter).
+                    mMainHandler.obtainMessage(MainHandler.MSG_INIT_SERVICE, this).sendToTarget();
                 } else {
                     binderDied();
                 }
+            }
+        }
+
+        private void initializeService() {
+            final IAccessibilityServiceClient serviceInterface;
+            synchronized (mLock) {
+                serviceInterface = mServiceInterface;
+            }
+            if (serviceInterface == null) return;
+            try {
+                serviceInterface.init(this, mId, mOverlayWindowToken);
+            } catch (RemoteException re) {
+                Slog.w(LOG_TAG, "Error while setting connection for service: "
+                        + serviceInterface, re);
+                binderDied();
             }
         }
 
@@ -3310,8 +3327,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     if (mMotionEventInjector != null) {
                         List<GestureDescription.GestureStep> steps = gestureSteps.getList();
-                         mMotionEventInjector.injectEvents(steps, mServiceInterface, sequence);
-                         return;
+                        mMotionEventInjector.injectEvents(steps, mServiceInterface, sequence);
+                        return;
                     } else {
                         Slog.e(LOG_TAG, "MotionEventInjector installation timed out");
                     }
@@ -3450,18 +3467,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return region;
                 }
                 MagnificationController magnificationController = getMagnificationController();
-                boolean forceRegistration = mSecurityPolicy.canControlMagnification(this);
-                boolean initiallyRegistered = magnificationController.isRegisteredLocked();
-                if (!initiallyRegistered && forceRegistration) {
-                    magnificationController.register();
-                }
+                boolean registeredJustForThisCall =
+                        registerMagnificationIfNeeded(magnificationController);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     magnificationController.getMagnificationRegion(region);
                     return region;
                 } finally {
                     Binder.restoreCallingIdentity(identity);
-                    if (!initiallyRegistered && forceRegistration) {
+                    if (registeredJustForThisCall) {
                         magnificationController.unregister();
                     }
                 }
@@ -3475,11 +3489,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return 0.0f;
                 }
             }
+            MagnificationController magnificationController = getMagnificationController();
+            boolean registeredJustForThisCall =
+                    registerMagnificationIfNeeded(magnificationController);
             final long identity = Binder.clearCallingIdentity();
             try {
-                return getMagnificationController().getCenterX();
+                return magnificationController.getCenterX();
             } finally {
                 Binder.restoreCallingIdentity(identity);
+                if (registeredJustForThisCall) {
+                    magnificationController.unregister();
+                }
             }
         }
 
@@ -3490,12 +3510,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return 0.0f;
                 }
             }
+            MagnificationController magnificationController = getMagnificationController();
+            boolean registeredJustForThisCall =
+                    registerMagnificationIfNeeded(magnificationController);
             final long identity = Binder.clearCallingIdentity();
             try {
-                return getMagnificationController().getCenterY();
+                return magnificationController.getCenterY();
             } finally {
                 Binder.restoreCallingIdentity(identity);
+                if (registeredJustForThisCall) {
+                    magnificationController.unregister();
+                }
             }
+        }
+
+        private boolean registerMagnificationIfNeeded(
+                MagnificationController magnificationController) {
+            if (!magnificationController.isRegisteredLocked()
+                    && mSecurityPolicy.canControlMagnification(this)) {
+                magnificationController.register();
+                return true;
+            }
+            return false;
         }
 
         @Override
