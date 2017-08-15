@@ -95,6 +95,9 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+    <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_LOWPAN_STATE"/>
+    <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL"/>
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN" />
