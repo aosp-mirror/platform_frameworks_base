@@ -655,6 +655,19 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public void dismissUi() {
+            final UserHandle user = getCallingUserHandle();
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(
+                        user.getIdentifier());
+                if (service != null) {
+                    service.dismissUi();
+                }
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
