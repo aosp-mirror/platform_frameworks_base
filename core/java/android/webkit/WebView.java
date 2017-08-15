@@ -2648,6 +2648,18 @@ public class WebView extends AbsoluteLayout
      * understood by the {@link android.service.autofill.AutofillService} implementations:
      *
      * <ol>
+     *   <li>Only the HTML nodes inside a {@code FORM} are generated.
+     *   <li>The source of the HTML is set using {@link ViewStructure#setWebDomain(String)} in the
+     *   node representing the WebView.
+     *   <li>If a web page has multiple {@code FORM}s, only the data for the current form is
+     *   represented&mdash;if the user taps a field from another form, then the current autofill
+     *   context is canceled (by calling {@link android.view.autofill.AutofillManager#cancel()} and
+     *   a new context is created for that {@code FORM}.
+     *   <li>Similarly, if the page has {@code IFRAME} nodes, they are not initially represented in
+     *   the view structure until the user taps a field from a {@code FORM} inside the
+     *   {@code IFRAME}, in which case it would be treated the same way as multiple forms described
+     *   above, except that the {@link ViewStructure#setWebDomain(String) web domain} of the
+     *   {@code FORM} contains the {@code src} attribute from the {@code IFRAME} node.
      *   <li>If the Android SDK provides a similar View, then should be set with the
      *   fully-qualified class name of such view.
      *   <li>The W3C autofill field ({@code autocomplete} tag attribute) maps to
