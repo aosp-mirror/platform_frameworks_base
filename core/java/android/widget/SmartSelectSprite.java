@@ -26,6 +26,7 @@ import android.annotation.ColorInt;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -59,12 +60,19 @@ final class SmartSelectSprite {
     private static final int CORNER_DURATION = 150;
     private static final float STROKE_WIDTH_DP = 1.5F;
     private static final int POINTS_PER_LINE = 4;
+
+    // GBLUE700
+    @ColorInt
+    private static final int DEFAULT_STROKE_COLOR = 0xFF3367D6;
+
     private final Interpolator mExpandInterpolator;
     private final Interpolator mCornerInterpolator;
     private final float mStrokeWidth;
 
     private final View mView;
     private Animator mActiveAnimator = null;
+    @ColorInt
+    private final int mStrokeColor;
     private Set<Drawable> mExistingAnimationDrawables = new HashSet<>();
 
     /**
@@ -322,6 +330,7 @@ final class SmartSelectSprite {
                 context,
                 android.R.interpolator.fast_out_linear_in);
         mStrokeWidth = dpToPixel(context, STROKE_WIDTH_DP);
+        mStrokeColor = getStrokeColor(context);
         mView = view;
     }
 
@@ -406,7 +415,6 @@ final class SmartSelectSprite {
     /**
      * Performs the Smart Select animation on the view bound to this SmartSelectSprite.
      *
-     * @param color                 The color of the stroke used.
      * @param start                 The point from which the animation will start. Must be inside
      *                              destinationRectangles.
      * @param destinationRectangles The rectangles which the animation will fill out by its
@@ -418,7 +426,6 @@ final class SmartSelectSprite {
      * @see #cancelAnimation()
      */
     public void startAnimation(
-            final @ColorInt int color,
             final Pair<Float, Float> start,
             final List<RectF> destinationRectangles,
             final Runnable onAnimationEnd) throws IllegalArgumentException {
@@ -474,13 +481,13 @@ final class SmartSelectSprite {
         final ShapeDrawable shapeDrawable = new ShapeDrawable(rectangleList);
 
         final Paint paint = shapeDrawable.getPaint();
-        paint.setColor(color);
+        paint.setColor(mStrokeColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(mStrokeWidth);
 
         addToOverlay(shapeDrawable);
 
-        mActiveAnimator = createAnimator(color, destinationRectangles, rectangleList,
+        mActiveAnimator = createAnimator(mStrokeColor, destinationRectangles, rectangleList,
                 startingOffsetLeft, startingOffsetRight, cornerAnimators, updateListener,
                 onAnimationEnd);
         mActiveAnimator.start();
@@ -613,6 +620,16 @@ final class SmartSelectSprite {
                 TypedValue.COMPLEX_UNIT_DIP,
                 dp,
                 context.getResources().getDisplayMetrics());
+    }
+
+    @ColorInt
+    private static int getStrokeColor(final Context context) {
+        final TypedValue typedValue = new TypedValue();
+        final TypedArray array = context.obtainStyledAttributes(typedValue.data, new int[]{
+                android.R.attr.colorControlActivated});
+        final int result = array.getColor(0, DEFAULT_STROKE_COLOR);
+        array.recycle();
+        return result;
     }
 
     private void addToOverlay(final Drawable drawable) {
