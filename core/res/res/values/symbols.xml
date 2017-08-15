@@ -2932,6 +2932,14 @@
   <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
 
+  <java-symbol type="dimen" name="notification_big_picture_max_height_low_ram"/>
+  <java-symbol type="dimen" name="notification_big_picture_max_width_low_ram"/>
+  <java-symbol type="dimen" name="notification_media_image_max_width_low_ram"/>
+  <java-symbol type="dimen" name="notification_media_image_max_height_low_ram"/>
+  <java-symbol type="dimen" name="notification_right_icon_size_low_ram"/>
+  <java-symbol type="dimen" name="notification_custom_view_max_image_height_low_ram"/>
+  <java-symbol type="dimen" name="notification_custom_view_max_image_width_low_ram"/>
+
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />
   <java-symbol type="string" name="capability_desc_canCaptureFingerprintGestures" />
