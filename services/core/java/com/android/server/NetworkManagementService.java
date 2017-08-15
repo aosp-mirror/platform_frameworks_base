@@ -529,6 +529,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
+    public void tetherLimitReached(ITetheringStatsProvider provider) {
+        mContext.enforceCallingOrSelfPermission(NETWORK_STACK, TAG);
+        synchronized(mTetheringStatsProviders) {
+            if (!mTetheringStatsProviders.containsKey(provider)) {
+                return;
+            }
+            // No current code examines the interface parameter in a global alert. Just pass null.
+            notifyLimitReached(LIMIT_GLOBAL_ALERT, null);
+        }
+    }
+
     // Sync the state of the given chain with the native daemon.
     private void syncFirewallChainLocked(int chain, SparseIntArray uidFirewallRules, String name) {
         int size = uidFirewallRules.size();

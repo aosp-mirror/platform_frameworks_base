@@ -85,6 +85,8 @@ public class OffloadControllerTest {
             ArgumentCaptor.forClass(ArrayList.class);
     private final ArgumentCaptor<ITetheringStatsProvider.Stub> mTetherStatsProviderCaptor =
             ArgumentCaptor.forClass(ITetheringStatsProvider.Stub.class);
+    private final ArgumentCaptor<OffloadHardwareInterface.ControlCallback> mControlCallbackCaptor =
+            ArgumentCaptor.forClass(OffloadHardwareInterface.ControlCallback.class);
     private MockContentResolver mContentResolver;
 
     @Before public void setUp() {
@@ -105,7 +107,7 @@ public class OffloadControllerTest {
 
     private void setupFunctioningHardwareInterface() {
         when(mHardware.initOffloadConfig()).thenReturn(true);
-        when(mHardware.initOffloadControl(any(OffloadHardwareInterface.ControlCallback.class)))
+        when(mHardware.initOffloadControl(mControlCallbackCaptor.capture()))
                 .thenReturn(true);
         when(mHardware.getForwardedStats(any())).thenReturn(new ForwardedStats());
     }
@@ -492,5 +494,18 @@ public class OffloadControllerTest {
         provider.setInterfaceQuota(mobileIface, mobileLimit);
         waitForIdle();
         inOrder.verify(mHardware).stopOffloadControl();
+    }
+
+    @Test
+    public void testDataLimitCallback() throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        OffloadHardwareInterface.ControlCallback callback = mControlCallbackCaptor.getValue();
+        callback.onStoppedLimitReached();
+        verify(mNMService, times(1)).tetherLimitReached(mTetherStatsProviderCaptor.getValue());
     }
 }

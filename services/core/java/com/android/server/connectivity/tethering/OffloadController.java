@@ -60,6 +60,8 @@ public class OffloadController {
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
     private final ContentResolver mContentResolver;
+    private final INetworkManagementService mNms;
+    private final ITetheringStatsProvider mStatsProvider;
     private final SharedLog mLog;
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
@@ -89,13 +91,14 @@ public class OffloadController {
         mHandler = h;
         mHwInterface = hwi;
         mContentResolver = contentResolver;
+        mNms = nms;
+        mStatsProvider = new OffloadTetheringStatsProvider();
         mLog = log.forSubComponent(TAG);
         mExemptPrefixes = new HashSet<>();
         mLastLocalPrefixStrs = new HashSet<>();
 
         try {
-            nms.registerTetheringStatsProvider(
-                    new OffloadTetheringStatsProvider(), getClass().getSimpleName());
+            mNms.registerTetheringStatsProvider(mStatsProvider, getClass().getSimpleName());
         } catch (RemoteException e) {
             mLog.e("Cannot register offload stats provider: " + e);
         }
@@ -150,7 +153,26 @@ public class OffloadController {
                     @Override
                     public void onStoppedLimitReached() {
                         mLog.log("onStoppedLimitReached");
-                        // Poll for statistics and notify NetworkStats
+
+                        // We cannot reliably determine on which interface the limit was reached,
+                        // because the HAL interface does not specify it. We cannot just use the
+                        // current upstream, because that might have changed since the time that
+                        // the HAL queued the callback.
+                        // TODO: rev the HAL so that it provides an interface name.
+
+                        // Fetch current stats, so that when our notification reaches
+                        // NetworkStatsService and triggers a poll, we will respond with
+                        // current data (which will be above the limit that was reached).
+                        // Note that if we just changed upstream, this is unnecessary but harmless.
+                        // The stats for the previous upstream were already updated on this thread
+                        // just after the upstream was changed, so they are also up-to-date.
+                        updateStatsForCurrentUpstream();
+
+                        try {
+                            mNms.tetherLimitReached(mStatsProvider);
+                        } catch (RemoteException e) {
+                            mLog.e("Cannot report data limit reached: " + e);
+                        }
                     }
 
                     @Override

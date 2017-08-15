@@ -220,6 +220,21 @@ interface INetworkManagementService
     void unregisterTetheringStatsProvider(ITetheringStatsProvider provider);
 
     /**
+     * Reports that a tethering provider has reached a data limit.
+     *
+     * Currently triggers a global alert, which causes NetworkStatsService to poll counters and
+     * re-evaluate data usage.
+     *
+     * This does not take an interface name because:
+     * 1. The tethering offload stats provider cannot reliably determine the interface on which the
+     *    limit was reached, because the HAL does not provide it.
+     * 2. Firing an interface-specific alert instead of a global alert isn't really useful since in
+     *    all cases of interest, the system responds to both in the same way - it polls stats, and
+     *    then notifies NetworkPolicyManagerService of the fact.
+     */
+    void tetherLimitReached(ITetheringStatsProvider provider);
+
+    /**
      ** PPPD
      **/
 
