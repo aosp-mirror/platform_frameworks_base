@@ -43,7 +43,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.text.Hyphenator;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -54,7 +54,6 @@ import com.android.internal.logging.MetricsLogger;
 
 import com.android.internal.util.Preconditions;
 import dalvik.system.DexFile;
-import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 import dalvik.system.ZygoteHooks;
 
@@ -120,7 +119,7 @@ public class ZygoteInit {
 
     private static boolean sPreloadComplete;
 
-    static void preload(BootTimingsTraceLog bootTimingsTraceLog) {
+    static void preload(TimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
         bootTimingsTraceLog.traceBegin("BeginIcuCachePinning");
         beginIcuCachePinning();
@@ -153,7 +152,7 @@ public class ZygoteInit {
         Preconditions.checkState(!sPreloadComplete);
         Log.i(TAG, "Lazily preloading resources.");
 
-        preload(new BootTimingsTraceLog("ZygoteInitTiming_lazy", Trace.TRACE_TAG_DALVIK));
+        preload(new TimingsTraceLog("ZygoteInitTiming_lazy", Trace.TRACE_TAG_DALVIK));
     }
 
     private static void beginIcuCachePinning() {
@@ -719,7 +718,7 @@ public class ZygoteInit {
             }
 
             String bootTimeTag = Process.is64Bit() ? "Zygote64Timing" : "Zygote32Timing";
-            BootTimingsTraceLog bootTimingsTraceLog = new BootTimingsTraceLog(bootTimeTag,
+            TimingsTraceLog bootTimingsTraceLog = new TimingsTraceLog(bootTimeTag,
                     Trace.TRACE_TAG_DALVIK);
             bootTimingsTraceLog.traceBegin("ZygoteInit");
             RuntimeInit.enableDdms();

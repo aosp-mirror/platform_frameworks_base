@@ -26,7 +26,7 @@
 # to your device.mk, e.g.,
 #
 #   PRODUCT_COPY_FILES += \
-#     frameworks/base/compiled-classes-phone:system/etc/compiled-classes
+#     frameworks/base/config/compiled-classes-phone:system/etc/compiled-classes
 #
 android.R$styleable
 android.accessibilityservice.AccessibilityServiceInfo
@@ -4183,7 +4183,7 @@ android.util.Base64
 android.util.Base64$Coder
 android.util.Base64$Decoder
 android.util.Base64$Encoder
-android.util.BootTimingsTraceLog
+android.util.TimingsTraceLog
 android.util.ByteStringUtils
 android.util.ContainerHelpers
 android.util.DebugUtils

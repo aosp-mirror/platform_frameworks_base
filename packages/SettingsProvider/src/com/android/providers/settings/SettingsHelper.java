@@ -122,7 +122,7 @@ public class SettingsHelper {
      * and in some cases the property value needs to be modified before setting.
      */
     public void restoreValue(Context context, ContentResolver cr, ContentValues contentValues,
-            Uri destination, String name, String value) {
+            Uri destination, String name, String value, int restoredFromSdkInt) {
         // Will we need a post-restore broadcast for this element?
         String oldValue = null;
         boolean sendBroadcast = false;
@@ -179,7 +179,8 @@ public class SettingsHelper {
                         .setPackage("android").addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
                         .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, value)
-                        .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue);
+                        .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue)
+                        .putExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, restoredFromSdkInt);
                 context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
             }
         }

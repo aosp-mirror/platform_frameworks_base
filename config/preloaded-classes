@@ -2276,7 +2276,7 @@ android.util.Base64
 android.util.Base64$Coder
 android.util.Base64$Decoder
 android.util.Base64$Encoder
-android.util.BootTimingsTraceLog
+android.util.TimingsTraceLog
 android.util.ContainerHelpers
 android.util.DisplayMetrics
 android.util.EventLog

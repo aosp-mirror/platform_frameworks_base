@@ -770,7 +770,7 @@
         android:permissionGroup="android.permission-group.LOCATION"
         android:label="@string/permlab_accessFineLocation"
         android:description="@string/permdesc_accessFineLocation"
-        android:protectionLevel="dangerous|ephemeral" />
+        android:protectionLevel="dangerous|instant" />
 
     <!-- Allows an app to access approximate location.
          Alternatively, you might want {@link #ACCESS_FINE_LOCATION}.
@@ -780,7 +780,7 @@
         android:permissionGroup="android.permission-group.LOCATION"
         android:label="@string/permlab_accessCoarseLocation"
         android:description="@string/permdesc_accessCoarseLocation"
-        android:protectionLevel="dangerous|ephemeral" />
+        android:protectionLevel="dangerous|instant" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device telephony                         -->
@@ -814,13 +814,13 @@
         android:protectionLevel="dangerous" />
 
     <!-- Allows read access to the device's phone number(s). This is a subset of the capabilities
-         granted by {@link #READ_PHONE_STATE} but is exposed to ephemeral applications.
+         granted by {@link #READ_PHONE_STATE} but is exposed to instant applications.
          <p>Protection level: dangerous-->
     <permission android:name="android.permission.READ_PHONE_NUMBERS"
         android:permissionGroup="android.permission-group.PHONE"
         android:label="@string/permlab_readPhoneNumbers"
         android:description="@string/permdesc_readPhoneNumbers"
-        android:protectionLevel="dangerous|ephemeral" />
+        android:protectionLevel="dangerous|instant" />
 
     <!-- Allows an application to initiate a phone call without going through
         the Dialer user interface for the user to confirm the call.
@@ -1000,7 +1000,7 @@
         android:permissionGroup="android.permission-group.CAMERA"
         android:label="@string/permlab_camera"
         android:description="@string/permdesc_camera"
-        android:protectionLevel="dangerous|ephemeral" />
+        android:protectionLevel="dangerous|instant" />
 
 
     <!-- ====================================================================== -->
@@ -1242,7 +1242,7 @@
     <permission android:name="android.permission.INTERNET"
         android:description="@string/permdesc_createNetworkSockets"
         android:label="@string/permlab_createNetworkSockets"
-        android:protectionLevel="normal|ephemeral" />
+        android:protectionLevel="normal|instant" />
 
     <!-- Allows applications to access information about networks.
          <p>Protection level: normal
@@ -1250,7 +1250,7 @@
     <permission android:name="android.permission.ACCESS_NETWORK_STATE"
         android:description="@string/permdesc_accessNetworkState"
         android:label="@string/permlab_accessNetworkState"
-        android:protectionLevel="normal|ephemeral" />
+        android:protectionLevel="normal|instant" />
 
     <!-- Allows applications to access information about Wi-Fi networks.
          <p>Protection level: normal
@@ -1473,7 +1473,7 @@
     <permission android:name="android.permission.VIBRATE"
         android:label="@string/permlab_vibrate"
         android:description="@string/permdesc_vibrate"
-        android:protectionLevel="normal|ephemeral" />
+        android:protectionLevel="normal|instant" />
 
     <!-- Allows using PowerManager WakeLocks to keep processor from sleeping or screen
          from dimming.
@@ -1482,7 +1482,7 @@
     <permission android:name="android.permission.WAKE_LOCK"
         android:label="@string/permlab_wakeLock"
         android:description="@string/permdesc_wakeLock"
-        android:protectionLevel="normal|ephemeral" />
+        android:protectionLevel="normal|instant" />
 
     <!-- Allows using the device's IR transmitter, if available.
          <p>Protection level: normal
@@ -3532,7 +3532,7 @@
 
     <!-- Allows an instant app to create foreground services. -->
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
-        android:protectionLevel="signature|development|ephemeral|appop" />
+        android:protectionLevel="signature|development|instant|appop" />
 
     <application android:process="system"
                  android:persistent="true"

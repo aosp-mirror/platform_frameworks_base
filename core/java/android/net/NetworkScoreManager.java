@@ -227,6 +227,8 @@ public class NetworkScoreManager {
      * @return the full package name of the current active scorer, or null if there is no active
      *         scorer.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.SCORE_NETWORKS,
+                                 android.Manifest.permission.REQUEST_NETWORK_SCORES})
     public String getActiveScorerPackage() {
         try {
             return mService.getActiveScorerPackage();

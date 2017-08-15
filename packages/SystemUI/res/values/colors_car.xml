@@ -19,6 +19,8 @@
 <resources>
     <color name="car_user_switcher_progress_bgcolor">#00000000</color> <!-- Transparent -->
     <color name="car_user_switcher_progress_fgcolor">#80CBC4</color> <!-- Teal 200 -->
+    <color name="car_user_switcher_no_user_image_bgcolor">#FAFAFA</color> <!-- Grey 50 -->
+    <color name="car_user_switcher_no_user_image_fgcolor">#212121</color> <!-- Grey 900 -->
     <color name="car_start_driving_background">#FAFAFA</color> <!-- Grey 50 -->
     <color name="car_start_driving_text">#212121</color> <!-- Grey 900 -->
 </resources>

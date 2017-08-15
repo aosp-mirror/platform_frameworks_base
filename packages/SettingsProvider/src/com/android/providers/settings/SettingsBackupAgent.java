@@ -151,6 +151,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private WifiManager mWifiManager;
 
+    // Version of the SDK that com.android.providers.settings package has been restored from.
+    // Populated in onRestore().
+    private int mRestoredFromSdkInt;
+
     @Override
     public void onCreate() {
         if (DEBUG_BACKUP) Log.d(TAG, "onCreate() invoked");
@@ -204,6 +208,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState) throws IOException {
+
+        // versionCode of com.android.providers.settings corresponds to SDK_INT
+        mRestoredFromSdkInt = appVersionCode;
 
         HashSet<String> movedToGlobal = new HashSet<String>();
         Settings.System.getMovedToGlobalSettings(movedToGlobal);
@@ -656,7 +663,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             final Uri destination = (movedToGlobal != null && movedToGlobal.contains(key))
                     ? Settings.Global.CONTENT_URI
                     : contentUri;
-            settingsHelper.restoreValue(this, cr, contentValues, destination, key, value);
+            settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
+                    mRestoredFromSdkInt);
 
             if (DEBUG) {
                 Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
