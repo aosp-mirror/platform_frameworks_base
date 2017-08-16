@@ -55,6 +55,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -119,6 +120,7 @@ public class PipMenuActivity extends Activity {
                 }
             };
 
+    private PipTouchState mTouchState;
     private PointF mDownPosition = new PointF();
     private PointF mDownDelta = new PointF();
     private ViewConfiguration mViewConfig;
@@ -175,6 +177,13 @@ public class PipMenuActivity extends Activity {
         // Set the flags to allow us to watch for outside touches and also hide the menu and start
         // manipulating the PIP in the same touch gesture
         mViewConfig = ViewConfiguration.get(this);
+        mTouchState = new PipTouchState(mViewConfig, mHandler, () -> {
+            if (mMenuState == MENU_STATE_CLOSE) {
+                showPipMenu();
+            } else {
+                expandPip();
+            }
+        });
         getWindow().addFlags(LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | LayoutParams.FLAG_SLIPPERY);
 
         super.onCreate(savedInstanceState);
@@ -186,12 +195,28 @@ public class PipMenuActivity extends Activity {
         mViewRoot.setBackground(mBackgroundDrawable);
         mMenuContainer = findViewById(R.id.menu_container);
         mMenuContainer.setAlpha(0);
-        mMenuContainer.setOnClickListener((v) -> {
-            if (mMenuState == MENU_STATE_CLOSE) {
-                showPipMenu();
-            } else {
-                expandPip();
+        mMenuContainer.setOnTouchListener((v, event) -> {
+            mTouchState.onTouchEvent(event);
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:
+                    if (mTouchState.isDoubleTap() || mMenuState == MENU_STATE_FULL) {
+                        // Expand to fullscreen if this is a double tap or we are already expanded
+                        expandPip();
+                    } else if (!mTouchState.isWaitingForDoubleTap()) {
+                        // User has stalled long enough for this not to be a drag or a double tap,
+                        // just expand the menu if necessary
+                        if (mMenuState == MENU_STATE_CLOSE) {
+                            showPipMenu();
+                        }
+                    } else {
+                        // Next touch event _may_ be the second tap for the double-tap, schedule a
+                        // fallback runnable to trigger the menu if no touch event occurs before the
+                        // next tap
+                        mTouchState.scheduleDoubleTapTimeoutCallback();
+                    }
+                    break;
             }
+            return true;
         });
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setAlpha(0);
