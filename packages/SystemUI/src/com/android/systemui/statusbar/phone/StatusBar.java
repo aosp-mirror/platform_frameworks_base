@@ -5153,6 +5153,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         recomputeDisableFlags(true /* animate */);
     }
 
+    public void cancelCurrentTouch() {
+        if (mNotificationPanel.isTracking()) {
+            mStatusBarWindow.cancelCurrentTouch();
+            if (mState == StatusBarState.SHADE) {
+                animateCollapsePanels();
+            }
+        }
+    }
 
     WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
