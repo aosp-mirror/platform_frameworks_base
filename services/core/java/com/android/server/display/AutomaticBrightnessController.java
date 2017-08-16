@@ -59,6 +59,13 @@ class AutomaticBrightnessController {
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
 
+    // Length of the ambient light horizon used to calculate the long term estimate of ambient
+    // light.
+    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
+
+    // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
+    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
+
     // Callbacks for requesting updates to the display's power state
     private final Callbacks mCallbacks;
 
@@ -345,22 +352,51 @@ class AutomaticBrightnessController {
     }
 
     private void setAmbientLux(float lux) {
+        if (DEBUG) {
+            Slog.d(TAG, "setAmbientLux(" + lux + ")");
+        }
         mAmbientLux = lux;
         mBrighteningLuxThreshold = mDynamicHysteresis.getBrighteningThreshold(lux);
         mDarkeningLuxThreshold = mDynamicHysteresis.getDarkeningThreshold(lux);
     }
 
-    private float calculateAmbientLux(long now) {
+    private float calculateAmbientLux(long now, long horizon) {
+        if (DEBUG) {
+            Slog.d(TAG, "calculateAmbientLux(" + now + ", " + horizon + ")");
+        }
         final int N = mAmbientLightRingBuffer.size();
         if (N == 0) {
             Slog.e(TAG, "calculateAmbientLux: No ambient light readings available");
             return -1;
         }
+
+        // Find the first measurement that is just outside of the horizon.
+        int endIndex = 0;
+        final long horizonStartTime = now - horizon;
+        for (int i = 0; i < N-1; i++) {
+            if (mAmbientLightRingBuffer.getTime(i + 1) <= horizonStartTime) {
+                endIndex++;
+            } else {
+                break;
+            }
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "calculateAmbientLux: selected endIndex=" + endIndex + ", point=("
+                    + mAmbientLightRingBuffer.getTime(endIndex) + ", "
+                    + mAmbientLightRingBuffer.getLux(endIndex)
+                    + ")");
+        }
         float sum = 0;
         float totalWeight = 0;
         long endTime = AMBIENT_LIGHT_PREDICTION_TIME_MILLIS;
-        for (int i = N - 1; i >= 0; i--) {
-            long startTime = (mAmbientLightRingBuffer.getTime(i) - now);
+        for (int i = N - 1; i >= endIndex; i--) {
+            long eventTime = mAmbientLightRingBuffer.getTime(i);
+            if (i == endIndex && eventTime < horizonStartTime) {
+                // If we're at the final value, make sure we only consider the part of the sample
+                // within our desired horizon.
+                eventTime = horizonStartTime;
+            }
+            final long startTime = eventTime - now;
             float weight = calculateWeight(startTime, endTime);
             float lux = mAmbientLightRingBuffer.getLux(i);
             if (DEBUG) {
@@ -435,7 +471,7 @@ class AutomaticBrightnessController {
                         timeWhenSensorWarmedUp);
                 return;
             }
-            setAmbientLux(calculateAmbientLux(time));
+            setAmbientLux(calculateAmbientLux(time, AMBIENT_LIGHT_SHORT_HORIZON_MILLIS));
             mAmbientLuxValid = true;
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: Initializing: "
@@ -447,14 +483,25 @@ class AutomaticBrightnessController {
 
         long nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
         long nextDarkenTransition = nextAmbientLightDarkeningTransition(time);
-        float ambientLux = calculateAmbientLux(time);
+        // Essentially, we calculate both a slow ambient lux, to ensure there's a true long-term
+        // change in lighting conditions, and a fast ambient lux to determine what the new
+        // brightness situation is since the slow lux can be quite slow to converge.
+        //
+        // Note that both values need to be checked for sufficient change before updating the
+        // proposed ambient light value since the slow value might be sufficiently far enough away
+        // from the fast value to cause a recalculation while its actually just converging on
+        // the fast value still.
+        float slowAmbientLux = calculateAmbientLux(time, AMBIENT_LIGHT_LONG_HORIZON_MILLIS);
+        float fastAmbientLux = calculateAmbientLux(time, AMBIENT_LIGHT_SHORT_HORIZON_MILLIS);
 
-        if (ambientLux >= mBrighteningLuxThreshold && nextBrightenTransition <= time
-                || ambientLux <= mDarkeningLuxThreshold && nextDarkenTransition <= time) {
-            setAmbientLux(ambientLux);
+        if (slowAmbientLux >= mBrighteningLuxThreshold &&
+                fastAmbientLux >= mBrighteningLuxThreshold && nextBrightenTransition <= time
+                || slowAmbientLux <= mDarkeningLuxThreshold
+                && fastAmbientLux <= mDarkeningLuxThreshold && nextDarkenTransition <= time) {
+            setAmbientLux(fastAmbientLux);
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: "
-                        + ((ambientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
+                        + ((fastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
                         + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
                         + ", mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
                         + ", mAmbientLux=" + mAmbientLux);
@@ -616,6 +663,12 @@ class AutomaticBrightnessController {
         void updateBrightness();
     }
 
+    /**
+     * A ring buffer of ambient light measurements sorted by time.
+     *
+     * Each entry consists of a timestamp and a lux measurement, and the overall buffer is sorted
+     * from oldest to newest.
+     */
     private static final class AmbientLightRingBuffer {
         // Proportional extra capacity of the buffer beyond the expected number of light samples
         // in the horizon
