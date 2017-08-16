@@ -659,6 +659,8 @@ public class Surface implements Parcelable {
      *
      * @see #isSharedBufferModeEnabled()
      * @see #setAutoRefreshEnabled(boolean)
+     *
+     * @hide
      */
     public void setSharedBufferModeEnabled(boolean enabled) {
         if (mIsSharedBufferModeEnabled != enabled) {
@@ -676,6 +678,8 @@ public class Surface implements Parcelable {
      * @return True if shared buffer mode is enabled on this surface, false otherwise
      *
      * @see #setSharedBufferModeEnabled(boolean)
+     *
+     * @hide
      */
     public boolean isSharedBufferModeEnabled() {
         return mIsSharedBufferModeEnabled;
@@ -699,6 +703,8 @@ public class Surface implements Parcelable {
      *
      * @see #isAutoRefreshEnabled()
      * @see #setSharedBufferModeEnabled(boolean)
+     *
+     * @hide
      */
     public void setAutoRefreshEnabled(boolean enabled) {
         if (mIsAutoRefreshEnabled != enabled) {
@@ -713,6 +719,8 @@ public class Surface implements Parcelable {
 
     /**
      * @return True if auto-refresh is enabled on this surface, false otherwise
+     *
+     * @hide
      */
     public boolean isAutoRefreshEnabled() {
         return mIsAutoRefreshEnabled;
