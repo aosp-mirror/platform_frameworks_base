@@ -17,6 +17,10 @@ if [ "$#" -lt 2 ]; then
   echo "Usage $0 <input classes file> <blacklist file> [extra classes files]"
   exit 1
 fi
+
+# Write file headers first
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cat "$DIR/copyright-header"
 echo "# Preloaded-classes filter file for phones.
 #
 # Classes in this file will be allocated into the boot image, and forcibly initialized in
@@ -25,9 +29,11 @@ echo "# Preloaded-classes filter file for phones.
 #
 # This file has been derived for mainline phone (and tablet) usage.
 #"
+
 input=$1
 blacklist=$2
 shift 2
 extra_classes_files=("$@")
-sort "$input" "${extra_classes_files[@]}" | uniq | grep -f "$blacklist" -v -F -x
 
+# Disable locale to enable lexicographical sorting
+LC_ALL=C sort "$input" "${extra_classes_files[@]}" | uniq | grep -f "$blacklist" -v -F -x
