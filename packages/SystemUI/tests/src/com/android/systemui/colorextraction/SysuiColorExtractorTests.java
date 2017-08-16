@@ -17,6 +17,7 @@
 package com.android.systemui.colorextraction;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
@@ -25,7 +26,6 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
@@ -48,18 +48,21 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
 
     @Test
     public void getColors_usesGreyIfWallpaperNotVisible() {
-        SysuiColorExtractor extractor = new SysuiColorExtractor(getContext(),
-                new Tonal(getContext()), false);
+        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
+        colors.setMainColor(Color.RED);
+        colors.setSecondaryColor(Color.RED);
+
+        SysuiColorExtractor extractor = getTestableExtractor(colors);
         simulateEvent(extractor);
         extractor.setWallpaperVisible(false);
 
         ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
 
-        for (int which : sWhich) {
-            for (int type : sTypes) {
-                assertEquals("Not using fallback!", extractor.getColors(which, type),
-                        fallbackColors);
-            }
+        for (int type : sTypes) {
+            assertEquals("Not using fallback!",
+                    extractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
+            assertNotEquals("Wallpaper visibility event should not affect lock wallpaper.",
+                    extractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
         }
     }
 
@@ -69,13 +72,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         colors.setMainColor(Color.RED);
         colors.setSecondaryColor(Color.RED);
 
-        SysuiColorExtractor extractor = new SysuiColorExtractor(getContext(),
-                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
-                        outGradientColorsExtraDark) -> {
-                    outGradientColorsNormal.set(colors);
-                    outGradientColorsDark.set(colors);
-                    outGradientColorsExtraDark.set(colors);
-                }, false);
+        SysuiColorExtractor extractor = getTestableExtractor(colors);
         simulateEvent(extractor);
         extractor.setWallpaperVisible(true);
 
@@ -85,6 +82,16 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                         extractor.getColors(which, type), colors);
             }
         }
+    }
+
+    private SysuiColorExtractor getTestableExtractor(ColorExtractor.GradientColors colors) {
+        return new SysuiColorExtractor(getContext(),
+                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
+                        outGradientColorsExtraDark) -> {
+                    outGradientColorsNormal.set(colors);
+                    outGradientColorsDark.set(colors);
+                    outGradientColorsExtraDark.set(colors);
+                }, false);
     }
 
     private void simulateEvent(SysuiColorExtractor extractor) {

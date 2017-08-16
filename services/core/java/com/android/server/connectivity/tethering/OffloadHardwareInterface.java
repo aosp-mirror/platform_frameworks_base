@@ -40,7 +40,7 @@ public class OffloadHardwareInterface {
     // Change this value to control whether tether offload is enabled or
     // disabled by default in the absence of an explicit Settings value.
     // See accompanying unittest to distinguish 0 from non-0 values.
-    private static final int DEFAULT_TETHER_OFFLOAD_DISABLED = 1;
+    private static final int DEFAULT_TETHER_OFFLOAD_DISABLED = 0;
     private static final String NO_INTERFACE_NAME = "";
     private static final String NO_IPV4_ADDRESS = "";
     private static final String NO_IPV4_GATEWAY = "";
@@ -175,6 +175,27 @@ public class OffloadHardwareInterface {
         final CbResults results = new CbResults();
         try {
             mOffloadControl.setLocalPrefixes(localPrefixes,
+                    (boolean success, String errMsg) -> {
+                        results.success = success;
+                        results.errMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return false;
+        }
+
+        record(logmsg, results);
+        return results.success;
+    }
+
+    public boolean setDataLimit(String iface, long limit) {
+
+        final String logmsg = String.format("setDataLimit(%s, %d)", iface, limit);
+
+        final CbResults results = new CbResults();
+        try {
+            mOffloadControl.setDataLimit(
+                    iface, limit,
                     (boolean success, String errMsg) -> {
                         results.success = success;
                         results.errMsg = errMsg;

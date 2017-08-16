@@ -683,8 +683,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
             if (isCarMode != mInCarMode) {
                 mInCarMode = isCarMode;
-                getHomeButton().setCarMode(isCarMode);
-
                 if (ALTERNATE_CAR_MODE_UI) {
                     mUseCarModeUi = isCarMode;
                     uiCarModeChanged = true;

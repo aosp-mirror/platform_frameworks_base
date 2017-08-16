@@ -24,6 +24,7 @@ import static android.view.View.MeasureSpec;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
+import android.app.ActivityOptions.OnAnimationFinishedListener;
 import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -663,7 +664,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         mWaitingForTransitionStart = waitingForTransitionStart;
         if (!waitingForTransitionStart && mToggleFollowingTransitionStart) {
-            toggleRecents(DividerView.INVALID_RECENTS_GROW_TARGET);
+            mHandler.post(() -> toggleRecents(DividerView.INVALID_RECENTS_GROW_TARGET));
         }
         mToggleFollowingTransitionStart = false;
     }
@@ -866,6 +867,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     private Pair<ActivityOptions, AppTransitionAnimationSpecsFuture>
             getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo runningTask,
                     Rect windowOverrideRect) {
+        final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
         if (runningTask != null && runningTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
             ArrayList<Task> tasks;
@@ -896,8 +898,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
             specs.toArray(specsArray);
 
+            // For low end ram devices, wait for transition flag is reset when Recents entrance
+            // animation is complete instead of when the transition animation starts
             return new Pair<>(ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    specsArray, mHandler, mResetToggleFlagListener, this), null);
+                    specsArray, mHandler, isLowRamDevice ? null : mResetToggleFlagListener, this),
+                    null);
         } else {
             // Update the destination rect
             Task toTask = new Task();
@@ -916,9 +921,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                                 toTask.key.id, thumbnail, rect));
                     });
 
+            // For low end ram devices, wait for transition flag is reset when Recents entrance
+            // animation is complete instead of when the transition animation starts
             return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
-                    mHandler, future.getFuture(), mResetToggleFlagListener, false /* scaleUp */),
-                    future);
+                    mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
+                    false /* scaleUp */), future);
         }
     }
 

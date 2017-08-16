@@ -429,7 +429,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowManager mStatusBarWindowManager;
     protected UnlockMethodCache mUnlockMethodCache;
-    private DozeServiceHost mDozeServiceHost;
+    private DozeServiceHost mDozeServiceHost = new DozeServiceHost();
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
 
@@ -733,7 +733,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
-    private KeyguardMonitorImpl mKeyguardMonitor;
+    private KeyguardMonitorImpl mKeyguardMonitor
+            = (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
     private BatteryController mBatteryController;
     protected boolean mPanelExpanded;
     private IOverlayManager mOverlayManager;
@@ -741,7 +742,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
-    private NotificationIconAreaController mNotificationIconAreaController;
+    protected NotificationIconAreaController mNotificationIconAreaController;
     private boolean mReinflateNotificationsOnUserSwitched;
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
@@ -788,14 +789,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void start() {
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
-        mKeyguardMonitor = (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         mBatteryController = Dependency.get(BatteryController.class);
         mAssistManager = Dependency.get(AssistManager.class);
-        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
@@ -981,7 +980,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         startKeyguard();
 
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
-        mDozeServiceHost = new DozeServiceHost();
         putComponent(DozeHost.class, mDozeServiceHost);
 
         notifyUserAboutHiddenNotifications();
@@ -1328,7 +1326,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Clock and bottom icons
         mNotificationPanel.onOverlayChanged();
         // The status bar on the keyguard is a special layout.
-        mKeyguardStatusBar.onOverlayChanged();
+        if (mKeyguardStatusBar != null) mKeyguardStatusBar.onOverlayChanged();
         // Recreate Indication controller because internal references changed
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
@@ -1373,7 +1371,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void inflateSignalClusters() {
-        reinflateSignalCluster(mKeyguardStatusBar);
+        if (mKeyguardStatusBar != null) reinflateSignalCluster(mKeyguardStatusBar);
     }
 
     public static SignalClusterView reinflateSignalCluster(View view) {
@@ -4565,7 +4563,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
             }
-            mStatusBarView.removePendingHideExpandedRunnables();
+            if (mStatusBarView != null) mStatusBarView.removePendingHideExpandedRunnables();
             if (mAmbientIndicationContainer != null) {
                 mAmbientIndicationContainer.setVisibility(View.VISIBLE);
             }
@@ -4603,7 +4601,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * Switches theme from light to dark and vice-versa.
      */
-    private void updateTheme() {
+    protected void updateTheme() {
         final boolean inflated = mStackScroller != null;
 
         // The system wallpaper defines if QS should be light or dark.
@@ -5673,7 +5671,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
-    private DeviceProvisionedController mDeviceProvisionedController;
+    private DeviceProvisionedController mDeviceProvisionedController
+            = Dependency.get(DeviceProvisionedController.class);
     protected SystemServicesProxy mSystemServicesProxy;
 
     // UI-specific methods

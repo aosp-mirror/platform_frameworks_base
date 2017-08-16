@@ -304,11 +304,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     public void setVertical(boolean vertical) {
         //no op
     }
-
-    @Override
-    public void setCarMode(boolean carMode) {
-        // no op
-    }
 }
 
 

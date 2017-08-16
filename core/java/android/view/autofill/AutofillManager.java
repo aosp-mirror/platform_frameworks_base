@@ -1339,6 +1339,25 @@ public final class AutofillManager {
     }
 
     /**
+     * Dismiss the Autofill UI, even if associated with other sessions.
+     *
+     * <p>Typically called when a new activity starts so it can hide the existing Save UI (if any).
+     *
+     * @hide
+     */
+    public void dismissUi() {
+        if (sVerbose) Log.v(TAG, "dismissUi()");
+
+        if (mService == null) return;
+
+        try {
+            mService.dismissUi();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * View tracking information. Once all tracked views become invisible the session is finished.
      */
     private class TrackedViews {

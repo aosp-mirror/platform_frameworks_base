@@ -69,6 +69,7 @@ import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.ActivityUnpinnedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.HideIncompatibleAppOverlayEvent;
@@ -517,6 +518,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+
+        // Workaround for b/64694148: The animation started callback is not made (see
+        // RecentsImpl.getThumbnailTransitionActivityOptions) so reset the transition-waiting state
+        // once the enter animation has completed.
+        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
     }
 
     @Override

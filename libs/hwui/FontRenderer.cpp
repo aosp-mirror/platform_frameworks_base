@@ -99,13 +99,22 @@ FontRenderer::FontRenderer(const uint8_t* gammaTable)
     }
 
     auto deviceInfo = DeviceInfo::get();
+    auto displayInfo = deviceInfo->displayInfo();
     int maxTextureSize = deviceInfo->maxTextureSize();
 
+    // Adjust cache size based on Pixel's desnsity.
+    constexpr float PIXEL_DENSITY = 2.6;
+    const float densityRatio = displayInfo.density / PIXEL_DENSITY;
+
     // TODO: Most devices are hardcoded with this configuration, does it need to be dynamic?
-    mSmallCacheWidth = std::min(1024, maxTextureSize);
-    mSmallCacheHeight = std::min(1024, maxTextureSize);
-    mLargeCacheWidth = std::min(2048, maxTextureSize);
-    mLargeCacheHeight = std::min(1024, maxTextureSize);
+    mSmallCacheWidth =
+            OffscreenBuffer::computeIdealDimension(std::min(1024, maxTextureSize) * densityRatio);
+    mSmallCacheHeight =
+            OffscreenBuffer::computeIdealDimension(std::min(1024, maxTextureSize) * densityRatio);
+    mLargeCacheWidth =
+            OffscreenBuffer::computeIdealDimension(std::min(2048, maxTextureSize) * densityRatio);
+    mLargeCacheHeight =
+            OffscreenBuffer::computeIdealDimension(std::min(1024, maxTextureSize) * densityRatio);
 
     if (sLogFontRendererCreate) {
         INIT_LOGD("  Text cache sizes, in pixels: %i x %i, %i x %i, %i x %i, %i x %i",
