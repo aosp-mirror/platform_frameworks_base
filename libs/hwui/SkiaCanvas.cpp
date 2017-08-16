@@ -533,6 +533,9 @@ void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
 
 void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
+    if (CC_UNLIKELY(path.isEmpty() && (!path.isInverseFillType()))) {
+        return;
+    }
     mCanvas->drawPath(path, paint);
 }
 
