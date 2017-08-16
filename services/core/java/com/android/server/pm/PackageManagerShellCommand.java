@@ -148,6 +148,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHomeActivity();
                 case "get-privapp-permissions":
                     return runGetPrivappPermissions();
+                case "get-privapp-deny-permissions":
+                    return runGetPrivappDenyPermissions();
                 case "get-instantapp-resolver":
                     return runGetInstantAppResolver();
                 case "has-feature":
@@ -1290,6 +1292,19 @@ class PackageManagerShellCommand extends ShellCommand {
         ArraySet<String> privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
         getOutPrintWriter().println(privAppPermissions == null
                 ? "{}" : privAppPermissions.toString());
+        return 0;
+    }
+
+    private int runGetPrivappDenyPermissions() {
+        final String pkg = getNextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            return 1;
+        }
+        ArraySet<String> privAppDenyPermissions =
+                SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
+        getOutPrintWriter().println(privAppDenyPermissions == null
+                ? "{}" : privAppDenyPermissions.toString());
         return 0;
     }
 
