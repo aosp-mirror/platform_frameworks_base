@@ -15,14 +15,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
-import android.net.NetworkBadging;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
-import android.view.View;
 
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
@@ -35,12 +32,12 @@ public class Utils {
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
 
-    static final int[] WIFI_PIE_FOR_BADGING = {
-          com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars
+    static final int[] WIFI_PIE = {
+        com.android.internal.R.drawable.ic_wifi_signal_0,
+        com.android.internal.R.drawable.ic_wifi_signal_1,
+        com.android.internal.R.drawable.ic_wifi_signal_2,
+        com.android.internal.R.drawable.ic_wifi_signal_3,
+        com.android.internal.R.drawable.ic_wifi_signal_4
     };
 
     /**
@@ -272,42 +269,17 @@ public class Utils {
     }
 
     /**
-     * Returns a badged Wifi icon drawable.
+     * Returns the Wifi icon resource for a given RSSI level.
      *
-     * <p>The first layer contains the Wifi pie and the second layer contains the badge. Callers
-     * should set the drawable to the appropriate size and tint color.
-     *
-     * @param context The caller's context (must have access to internal resources)
      * @param level The number of bars to show (0-4)
-     * @param badge The badge enum {@see android.net.ScoredNetwork}
      *
-     * @throws IllegalArgumentException if an invalid badge enum is given
-     *
-     * @deprecated TODO(sghuman): Finalize the form of this method and then move it to a new
-     *         location.
+     * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
-    public static LayerDrawable getBadgedWifiIcon(Context context, int level, int badge) {
-        return new LayerDrawable(
-                new Drawable[] {
-                        context.getDrawable(WIFI_PIE_FOR_BADGING[level]),
-                        context.getDrawable(getWifiBadgeResource(badge))
-                });
-    }
-
-    private static int getWifiBadgeResource(int badge) {
-        switch (badge) {
-            case NetworkBadging.BADGING_NONE:
-                return View.NO_ID;
-            case NetworkBadging.BADGING_SD:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
-            case NetworkBadging.BADGING_HD:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
-            case NetworkBadging.BADGING_4K:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
-            default:
-                throw new IllegalArgumentException(
-                    "No badge resource found for badge value: " + badge);
+    public static int getWifiIconResource(int level) {
+        if (level < 0 || level >= WIFI_PIE.length) {
+            throw new IllegalArgumentException("No Wifi icon found for level: " + level);
         }
+        return WIFI_PIE[level];
     }
 
     public static int getDefaultStorageManagerDaysToRetain(Resources resources) {

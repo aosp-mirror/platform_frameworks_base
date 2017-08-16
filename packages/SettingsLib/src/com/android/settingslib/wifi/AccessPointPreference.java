@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
-import android.net.NetworkBadging;
 import android.net.wifi.WifiConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -37,6 +36,7 @@ import android.widget.TextView;
 import com.android.settingslib.R;
 import com.android.settingslib.TronUtils;
 import com.android.settingslib.Utils;
+import com.android.settingslib.wifi.AccessPoint.Speed;
 
 public class AccessPointPreference extends Preference {
 
@@ -71,7 +71,7 @@ public class AccessPointPreference extends Preference {
     private int mLevel;
     private CharSequence mContentDescription;
     private int mDefaultIconResId;
-    private int mWifiSpeed = NetworkBadging.BADGING_NONE;
+    private int mWifiSpeed = Speed.NONE;
 
     public static String generatePreferenceKey(AccessPoint accessPoint) {
         StringBuilder builder = new StringBuilder();
@@ -179,9 +179,7 @@ public class AccessPointPreference extends Preference {
         }
         TronUtils.logWifiSettingsSpeed(context, mWifiSpeed);
 
-        // TODO(b/62355275): Revert this to N code after deleting NetworkBadging API
-        Drawable drawable = NetworkBadging.getWifiIcon(
-                level, NetworkBadging.BADGING_NONE, getContext().getTheme());
+        Drawable drawable = context.getDrawable(Utils.getWifiIconResource(level));
         if (!mForSavedNetworks && drawable != null) {
             drawable.setTint(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
             setIcon(drawable);
