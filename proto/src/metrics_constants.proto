@@ -4043,6 +4043,7 @@ message MetricsEvent {
     ASSIST_GESTURE_PRIMED = 998;
 
     // ACTION: Assist gesture triggered
+    //  SUBTYPE: 1 is for SCREEN_ON, 2 is for SCREEN_OFF
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: O DR
     ASSIST_GESTURE_TRIGGERED = 999;
