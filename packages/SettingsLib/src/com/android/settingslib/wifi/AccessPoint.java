@@ -188,7 +188,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private WifiConfiguration mConfig;
 
     private int mRssi = UNREACHABLE_RSSI;
-    private long mSeen = 0;
 
     private WifiInfo mInfo;
     private NetworkInfo mNetworkInfo;
@@ -272,7 +271,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         // Do not evict old scan results on initial creation
         updateRssi();
-        updateSeen();
         mId = sLastId.incrementAndGet();
     }
 
@@ -318,7 +316,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.pskType = that.pskType;
         this.mConfig = that.mConfig; //TODO: Watch out, this object is mutated.
         this.mRssi = that.mRssi;
-        this.mSeen = that.mSeen;
         this.mInfo = that.mInfo;
         this.mNetworkInfo = that.mNetworkInfo;
         this.mScanResultCache.clear();
@@ -632,21 +629,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mRssi = (mRssi + rssi) / 2; // half-life previous value
         } else {
             mRssi = rssi;
-        }
-    }
-
-    /** Updates {@link #mSeen} based on the scan result cache. */
-    private void updateSeen() {
-        long seen = 0;
-        for (ScanResult result : mScanResultCache.values()) {
-            if (result.timestamp > seen) {
-                seen = result.timestamp;
-            }
-        }
-
-        // Only replace the previous value if we have a recent scan result to use
-        if (seen != 0) {
-            mSeen = seen;
         }
     }
 
@@ -1110,7 +1092,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         mScanResultCache.put(result.BSSID, result);
         updateRssi();
-        mSeen = result.timestamp; // even if the timestamp is old it is still valid
         mIsCarrierAp = result.isCarrierAp;
         mCarrierApEapType = result.carrierApEapType;
         mCarrierName = result.carrierName;
@@ -1162,7 +1143,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
             /* Add or update the scan result for the BSSID */
             mScanResultCache.put(result.BSSID, result);
             if (evictOldScanResults) evictOldScanResults();
-            updateSeen();
             updateRssi();
             int newLevel = getLevel();
 
