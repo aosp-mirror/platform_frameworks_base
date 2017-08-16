@@ -43,6 +43,8 @@ import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.system.StructCapUserData;
+import android.system.StructCapUserHeader;
 import android.text.Hyphenator;
 import android.util.BootTimingsTraceLog;
 import android.util.EventLog;
@@ -88,7 +90,6 @@ public class ZygoteInit {
 
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
-    private static final String PROPERTY_RUNNING_IN_CONTAINER = "ro.boot.container";
 
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
@@ -609,12 +610,20 @@ public class ZygoteInit {
             OsConstants.CAP_SYS_PTRACE,
             OsConstants.CAP_SYS_TIME,
             OsConstants.CAP_SYS_TTY_CONFIG,
-            OsConstants.CAP_WAKE_ALARM
+            OsConstants.CAP_WAKE_ALARM,
+            OsConstants.CAP_BLOCK_SUSPEND
         );
-        /* Containers run without this capability, so avoid setting it in that case */
-        if (!SystemProperties.getBoolean(PROPERTY_RUNNING_IN_CONTAINER, false)) {
-            capabilities |= posixCapabilitiesAsBits(OsConstants.CAP_BLOCK_SUSPEND);
+        /* Containers run without some capabilities, so drop any caps that are not available. */
+        StructCapUserHeader header = new StructCapUserHeader(
+                OsConstants._LINUX_CAPABILITY_VERSION_3, 0);
+        StructCapUserData[] data;
+        try {
+            data = Os.capget(header);
+        } catch (ErrnoException ex) {
+            throw new RuntimeException("Failed to capget()", ex);
         }
+        capabilities &= ((long) data[0].effective) | (((long) data[1].effective) << 32);
+
         /* Hardcoded command line to start the system server */
         String args[] = {
             "--setuid=1000",
