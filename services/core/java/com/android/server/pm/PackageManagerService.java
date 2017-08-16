@@ -456,6 +456,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String STATIC_SHARED_LIB_DELIMITER = "_";
     /** Extension of the compressed packages */
     private final static String COMPRESSED_EXTENSION = ".gz";
+    /** Suffix of stub packages on the system partition */
+    private final static String STUB_SUFFIX = "-Stub";
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
@@ -3191,12 +3193,46 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private File[] getCompressedFiles(String codePath) {
-        return new File(codePath).listFiles(new FilenameFilter() {
+        final File stubCodePath = new File(codePath);
+        final String stubName = stubCodePath.getName();
+
+        // The layout of a compressed package on a given partition is as follows :
+        //
+        // Compressed artifacts:
+        //
+        // /partition/ModuleName/foo.gz
+        // /partation/ModuleName/bar.gz
+        //
+        // Stub artifact:
+        //
+        // /partition/ModuleName-Stub/ModuleName-Stub.apk
+        //
+        // In other words, stub is on the same partition as the compressed artifacts
+        // and in a directory that's suffixed with "-Stub".
+        int idx = stubName.lastIndexOf(STUB_SUFFIX);
+        if (idx < 0 || (stubName.length() != (idx + STUB_SUFFIX.length()))) {
+            return null;
+        }
+
+        final File stubParentDir = stubCodePath.getParentFile();
+        if (stubParentDir == null) {
+            Slog.e(TAG, "Unable to determine stub parent dir for codePath: " + codePath);
+            return null;
+        }
+
+        final File compressedPath = new File(stubParentDir, stubName.substring(0, idx));
+        final File[] files = compressedPath.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith(COMPRESSED_EXTENSION);
             }
         });
+
+        if (DEBUG_COMPRESSION && files != null && files.length > 0) {
+            Slog.i(TAG, "getCompressedFiles[" + codePath + "]: " + Arrays.toString(files));
+        }
+
+        return files;
     }
 
     private boolean compressedFileExists(String codePath) {
@@ -3213,7 +3249,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final File[] compressedFiles = getCompressedFiles(pkg.codePath);
         if (compressedFiles == null || compressedFiles.length == 0) {
             if (DEBUG_COMPRESSION) {
-                Slog.i(TAG, "No files to decompress");
+                Slog.i(TAG, "No files to decompress: " + pkg.baseCodePath);
             }
             return null;
         }
@@ -11079,7 +11115,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     r.info.encryptionAware = r.info.directBootAware = true;
                 }
             }
-            if (compressedFileExists(pkg.baseCodePath)) {
+            if (compressedFileExists(pkg.codePath)) {
                 pkg.isStub = true;
             }
         } else {
