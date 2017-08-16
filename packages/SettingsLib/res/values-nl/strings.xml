@@ -163,7 +163,7 @@
     <string name="choose_profile" msgid="6921016979430278661">"Profiel kiezen"</string>
     <string name="category_personal" msgid="1299663247844969448">"Persoonlijk"</string>
     <string name="category_work" msgid="8699184680584175622">"Werk"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opties voor ontwikkelaars"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Ontwikkelaarsopties"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Opties voor ontwikkelaars inschakelen"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Opties instellen voor appontwikkeling"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Ontwikkelaarsopties zijn niet beschikbaar voor deze gebruiker"</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Opladen"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"opladen"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Wordt niet opgeladen"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Aangesloten, kan nu niet opladen"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Volledig"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ingesteld door beheerder"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Ingeschakeld door beheerder"</string>

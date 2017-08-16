@@ -124,7 +124,7 @@
     <string name="tts_settings" msgid="8186971894801348327">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ട്"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"വായന നിരക്ക്"</string>
-    <string name="tts_default_rate_summary" msgid="4061815292287182801">"വാചകം പറയുന്ന വേഗത"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"ടെക്സ്റ്റ് ചെയ്യൽ പറയുമ്പോഴുടെക്കുന്ന വേഗത"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"പിച്ച്"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"സിന്തസൈസ് ചെയ്ത സംസാരത്തിന്റെ സ്വരഭേദത്തെ ബാധിക്കുന്നു"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ഭാഷ"</string>
@@ -261,7 +261,7 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"ടാപ്പുകൾക്ക് ദൃശ്യ ഫീഡ്ബാക്ക് കാണിക്കുക"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"സർഫേസ് അപ്‌ഡേറ്റ് കാണിക്കൂ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"മുഴുവൻ വിൻഡോ സർഫേസുകളും അപ്‌ഡേറ്റുചെയ്‌തുകഴിയുമ്പോൾ അവ ഫ്ലാഷുചെയ്യുക"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU കാഴ്ച അപ്‌ഡേറ്റ് കാണിക്കൂ"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU കാഴ്‌ചയുടെ അപ്‌ഡേറ്റുകൾ കാണിക്കൂ"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU ഉപയോഗിച്ച് വലിക്കുമ്പോൾ വിൻഡോകൾക്കുള്ളിൽ കാഴ്‌ചകൾ ഫ്ലാഷുചെയ്യുക"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ഹാർഡ്‌വെയർ ലേയർ അപ്‌ഡേറ്റ് കാണിക്കൂ"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ഹാർഡ്‌വെയർ ലേയറുകളുടെ അപ്‌ഡേറ്റുകൾ പൂർത്തിയാകുമ്പോൾ അവ പച്ച നിറത്തിൽ പ്രകാശിപ്പിക്കുക"</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ചാർജ്ജുചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"പ്ലഗ് ഇൻ ചെയ്‌തു, ഇപ്പോൾ ചാർജ് ചെയ്യാനാവില്ല"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"നിറഞ്ഞു"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"അഡ്‌മിൻ നിയന്ത്രിക്കുന്നത്"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"അഡ്‌മിൻ പ്രവർത്തനക്ഷമമാക്കി"</string>
