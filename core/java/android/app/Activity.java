@@ -16,7 +16,7 @@
 
 package android.app;
 
-import static android.os.Build.VERSION_CODES.O;
+import static android.os.Build.VERSION_CODES.O_MR1;
 
 import static java.lang.Character.MIN_VALUE;
 
@@ -973,7 +973,7 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
 
-        if (getApplicationInfo().targetSdkVersion > O && mActivityInfo.isFixedOrientation()) {
+        if (getApplicationInfo().targetSdkVersion >= O_MR1 && mActivityInfo.isFixedOrientation()) {
             final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
             final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
             ta.recycle();
