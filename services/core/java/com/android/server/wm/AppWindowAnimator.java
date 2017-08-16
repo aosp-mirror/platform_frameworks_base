@@ -148,7 +148,7 @@ public class AppWindowAnimator {
         }
         // Start out animation gone if window is gone, or visible if window is visible.
         transformation.clear();
-        transformation.setAlpha(mAppToken.hasContentToDisplay() ? 1 : 0);
+        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
         mStackClip = stackClip;
 
@@ -172,7 +172,7 @@ public class AppWindowAnimator {
         animation = sDummyAnimation;
         hasTransformation = true;
         transformation.clear();
-        transformation.setAlpha(mAppToken.hasContentToDisplay() ? 1 : 0);
+        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
     }
 
     void setNullAnimation() {
