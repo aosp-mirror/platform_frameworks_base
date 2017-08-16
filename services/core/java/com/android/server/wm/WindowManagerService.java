@@ -102,6 +102,14 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSA
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.proto.WindowManagerServiceProto.APP_TRANSITION;
+import static com.android.server.wm.proto.WindowManagerServiceProto.DISPLAY_FROZEN;
+import static com.android.server.wm.proto.WindowManagerServiceProto.FOCUSED_APP;
+import static com.android.server.wm.proto.WindowManagerServiceProto.FOCUSED_WINDOW;
+import static com.android.server.wm.proto.WindowManagerServiceProto.INPUT_METHOD_WINDOW;
+import static com.android.server.wm.proto.WindowManagerServiceProto.LAST_ORIENTATION;
+import static com.android.server.wm.proto.WindowManagerServiceProto.POLICY;
+import static com.android.server.wm.proto.WindowManagerServiceProto.ROTATION;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -175,6 +183,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
+import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -2347,7 +2356,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // artifacts when we unfreeze the display if some different animation
         // is running.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
-        if (okToAnimate()) {
+        if (atoken.okToAnimate()) {
             final DisplayContent displayContent = atoken.getTask().getDisplayContent();
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             final int width = displayInfo.appWidth;
@@ -2423,14 +2432,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", uid=" + Binder.getCallingUid() + " requires " + permission;
         Slog.w(TAG_WM, msg);
         return false;
-    }
-
-    boolean okToDisplay() {
-        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOn();
-    }
-
-    boolean okToAnimate() {
-        return okToDisplay() && mPolicy.okToAnimate();
     }
 
     @Override
@@ -2699,7 +2700,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             boolean prepared = mAppTransition.prepareAppTransitionLocked(transit, alwaysKeepCurrent,
                     flags, forceOverride);
-            if (prepared && okToAnimate()) {
+            // TODO (multidisplay): associate app transitions with displays
+            final DisplayContent dc = mRoot.getDisplayContent(DEFAULT_DISPLAY);
+            if (prepared && dc != null && dc.okToAnimate()) {
                 mSkipAppTransitionAnimation = false;
             }
         }
@@ -5817,7 +5820,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // If the screen is currently frozen or off, then keep
         // it frozen/off until this window draws at its new
         // orientation.
-        if (!okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
+        // TODO (multidisplay): Support screen freezing on secondary displays.
+        final DisplayContent dc = mRoot.getDisplayContent(DEFAULT_DISPLAY);
+        if ((dc == null || !dc.okToDisplay())
+                && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Changing surface while display frozen: " + w);
             w.setOrientationChanging(true);
             w.mLastFreezeDuration = 0;
@@ -6033,7 +6039,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (!displayContent.isReady() || !mPolicy.isScreenOn() || !okToAnimate()) {
+        if (!displayContent.isReady() || !mPolicy.isScreenOn() || !displayContent.okToAnimate()) {
             // No need to freeze the screen before the display is ready,  if the screen is off,
             // or we can't currently animate.
             return;
@@ -6524,6 +6530,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void writeToProtoLocked(ProtoOutputStream proto) {
+        mPolicy.writeToProto(proto, POLICY);
+        mRoot.writeToProto(proto);
+        if (mCurrentFocus != null) {
+            mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
+        }
+        if (mFocusedApp != null) {
+            mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
+        }
+        if (mInputMethodWindow != null) {
+            mInputMethodWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
+        }
+        proto.write(DISPLAY_FROZEN, mDisplayFrozen);
+        final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
+        proto.write(ROTATION, defaultDisplayContent.getRotation());
+        proto.write(LAST_ORIENTATION, defaultDisplayContent.getLastOrientation());
+        mAppTransition.writeToProto(proto, APP_TRANSITION);
+    }
+
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
@@ -6798,6 +6823,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         boolean dumpAll = false;
+        boolean useProto = false;
 
         int opti = 0;
         while (opti < args.length) {
@@ -6808,6 +6834,8 @@ public class WindowManagerService extends IWindowManager.Stub
             opti++;
             if ("-a".equals(opt)) {
                 dumpAll = true;
+            } else if ("--proto".equals(opt)) {
+                useProto = true;
             } else if ("-h".equals(opt)) {
                 pw.println("Window manager dump options:");
                 pw.println("  [-a] [-h] [cmd] ...");
@@ -6827,12 +6855,21 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    \"visible\" for the visible windows.");
                 pw.println("    \"visible-apps\" for the visible app windows.");
                 pw.println("  -a: include all available server state.");
+                pw.println("  --proto: output dump in protocol buffer format.");
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
         }
 
+        if (useProto) {
+            final ProtoOutputStream proto = new ProtoOutputStream(fd);
+            synchronized (mWindowMap) {
+                writeToProtoLocked(proto);
+            }
+            proto.flush();
+            return;
+        }
         // Is the caller requesting to dump a particular piece of data?
         if (opti < args.length) {
             String cmd = args[opti];

@@ -180,6 +180,7 @@ public class ApfFilter {
     private static final int ETH_DEST_ADDR_OFFSET = 0;
     private static final int ETH_ETHERTYPE_OFFSET = 12;
     private static final int ETH_TYPE_MIN = 0x0600;
+    private static final int ETH_TYPE_MAX = 0xFFFF;
     private static final byte[] ETH_BROADCAST_MAC_ADDRESS =
             {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
     // TODO: Make these offsets relative to end of link-layer header; don't include ETH_HEADER_LEN.
@@ -232,6 +233,9 @@ public class ApfFilter {
     private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
     // Do not log ApfProgramEvents whose actual lifetimes was less than this.
     private static final int APF_PROGRAM_EVENT_LIFETIME_THRESHOLD = 2;
+    // Limit on the Black List size to cap on program usage for this
+    // TODO: Select a proper max length
+    private static final int APF_MAX_ETH_TYPE_BLACK_LIST_LEN = 20;
 
     private final ApfCapabilities mApfCapabilities;
     private final IpManager.Callback mIpManagerCallback;
@@ -247,6 +251,8 @@ public class ApfFilter {
     @GuardedBy("this")
     private boolean mMulticastFilter;
     private final boolean mDrop802_3Frames;
+    private final int[] mEthTypeBlackList;
+
     // Our IPv4 address, if we have just one, otherwise null.
     @GuardedBy("this")
     private byte[] mIPv4Address;
@@ -257,12 +263,16 @@ public class ApfFilter {
     @VisibleForTesting
     ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
             IpManager.Callback ipManagerCallback, boolean multicastFilter,
-            boolean ieee802_3Filter, IpConnectivityLog log) {
+            boolean ieee802_3Filter, int[] ethTypeBlackList, IpConnectivityLog log) {
         mApfCapabilities = apfCapabilities;
         mIpManagerCallback = ipManagerCallback;
         mNetworkInterface = networkInterface;
         mMulticastFilter = multicastFilter;
         mDrop802_3Frames = ieee802_3Filter;
+
+        // Now fill the black list from the passed array
+        mEthTypeBlackList = filterEthTypeBlackList(ethTypeBlackList);
+
         mMetricsLog = log;
 
         // TODO: ApfFilter should not generate programs until IpManager sends provisioning success.
@@ -276,6 +286,35 @@ public class ApfFilter {
     @GuardedBy("this")
     private long getUniqueNumberLocked() {
         return mUniqueCounter++;
+    }
+
+    @GuardedBy("this")
+    private static int[] filterEthTypeBlackList(int[] ethTypeBlackList) {
+        ArrayList<Integer> bl = new ArrayList<Integer>();
+
+        for (int p : ethTypeBlackList) {
+            // Check if the protocol is a valid ether type
+            if ((p < ETH_TYPE_MIN) || (p > ETH_TYPE_MAX)) {
+                continue;
+            }
+
+            // Check if the protocol is not repeated in the passed array
+            if (bl.contains(p)) {
+                continue;
+            }
+
+            // Check if list reach its max size
+            if (bl.size() == APF_MAX_ETH_TYPE_BLACK_LIST_LEN) {
+                Log.w(TAG, "Passed EthType Black List size too large (" + bl.size() +
+                        ") using top " + APF_MAX_ETH_TYPE_BLACK_LIST_LEN + " protocols");
+                break;
+            }
+
+            // Now add the protocol to the list
+            bl.add(p);
+        }
+
+        return bl.stream().mapToInt(Integer::intValue).toArray();
     }
 
     /**
@@ -891,6 +930,7 @@ public class ApfFilter {
      * Begin generating an APF program to:
      * <ul>
      * <li>Drop/Pass 802.3 frames (based on policy)
+     * <li>Drop packets with EtherType within the Black List
      * <li>Drop ARP requests not for us, if mIPv4Address is set,
      * <li>Drop IPv4 broadcast packets, except DHCP destined to our MAC,
      * <li>Drop IPv4 multicast packets, if mMulticastFilter,
@@ -914,6 +954,8 @@ public class ApfFilter {
         //
         // if it's a 802.3 Frame (ethtype < 0x0600):
         //    drop or pass based on configurations
+        // if it has a ether-type that belongs to the black list
+        //    drop
         // if it's ARP:
         //   insert ARP filter to drop or pass these appropriately
         // if it's IPv4:
@@ -929,6 +971,11 @@ public class ApfFilter {
         if (mDrop802_3Frames) {
             // drop 802.3 frames (ethtype < 0x0600)
             gen.addJumpIfR0LessThan(ETH_TYPE_MIN, gen.DROP_LABEL);
+        }
+
+        // Handle ether-type black list
+        for (int p : mEthTypeBlackList) {
+            gen.addJumpIfR0Equals(p, gen.DROP_LABEL);
         }
 
         // Add ARP filters:
@@ -1115,7 +1162,7 @@ public class ApfFilter {
      */
     public static ApfFilter maybeCreate(ApfCapabilities apfCapabilities,
             NetworkInterface networkInterface, IpManager.Callback ipManagerCallback,
-            boolean multicastFilter, boolean ieee802_3Filter) {
+            boolean multicastFilter, boolean ieee802_3Filter, int[] ethTypeBlackList) {
         if (apfCapabilities == null || networkInterface == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
         if (apfCapabilities.maximumApfProgramSize < 512) {
@@ -1132,7 +1179,7 @@ public class ApfFilter {
             return null;
         }
         return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback,
-                multicastFilter, ieee802_3Filter, new IpConnectivityLog());
+                multicastFilter, ieee802_3Filter, ethTypeBlackList, new IpConnectivityLog());
     }
 
     public synchronized void shutdown() {

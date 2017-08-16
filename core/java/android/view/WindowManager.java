@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2542,6 +2543,15 @@ public interface WindowManager extends ViewManager {
             sb.append(" colorMode=").append(mColorMode);
             sb.append('}');
             return sb.toString();
+        }
+
+        /**
+         * @hide
+         */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            proto.write(WindowLayoutParamsProto.TYPE, type);
+            proto.end(token);
         }
 
         /**

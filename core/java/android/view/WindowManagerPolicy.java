@@ -77,6 +77,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -1644,6 +1645,14 @@ public interface WindowManagerPolicy {
      * @param args additional arguments to the dump request.
      */
     public void dump(String prefix, PrintWriter writer, String[] args);
+
+    /**
+     * Write the WindowManagerPolicy's state into the protocol buffer.
+     * The message is described in {@link com.android.server.wm.proto.WindowManagerPolicyProto}
+     *
+     * @param proto The protocol buffer output stream to write to.
+     */
+    void writeToProto(ProtoOutputStream proto, long fieldId);
 
     /**
      * Returns whether a given window type can be magnified.

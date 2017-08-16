@@ -749,9 +749,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     static class Token extends IApplicationToken.Stub {
         private final WeakReference<ActivityRecord> weakActivity;
+        private final String name;
 
-        Token(ActivityRecord activity) {
+        Token(ActivityRecord activity, Intent intent) {
             weakActivity = new WeakReference<>(activity);
+            name = intent.getComponent().flattenToShortString();
         }
 
         private static ActivityRecord tokenToActivityRecordLocked(Token token) {
@@ -774,6 +776,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             sb.append(weakActivity.get());
             sb.append('}');
             return sb.toString();
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
     }
 
@@ -798,7 +805,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             ActivityStackSupervisor supervisor, ActivityOptions options,
             ActivityRecord sourceRecord) {
         service = _service;
-        appToken = new Token(this);
+        appToken = new Token(this, _intent);
         info = aInfo;
         launchedFromPid = _launchedFromPid;
         launchedFromUid = _launchedFromUid;
@@ -1341,7 +1348,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        final boolean isTopActivityWhileSleeping = service.isSleepingLocked() && isTopRunningActivity();
+        final ActivityStack stack = getStack();
+        final boolean isTopActivityWhileSleeping = isTopRunningActivity()
+                && (stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked());
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -1731,7 +1740,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // If the screen is going to turn on because the caller explicitly requested it and
             // the keyguard is not showing don't attempt to sleep. Otherwise the Activity will
             // pause and then resume again later, which will result in a double life-cycle event.
-            mStackSupervisor.checkReadyForSleepLocked();
+            stack.checkReadyForSleep();
         }
     }
 

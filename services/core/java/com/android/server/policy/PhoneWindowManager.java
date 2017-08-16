@@ -115,6 +115,8 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
+import static com.android.server.wm.proto.WindowManagerPolicyProto.STABLE_BOUNDS;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
@@ -194,6 +196,7 @@ import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -7466,10 +7469,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
     private void updateDreamingSleepToken(boolean acquire) {
         if (acquire) {
             if (mDreamingSleepToken == null) {
-                mDreamingSleepToken = mActivityManagerInternal.acquireSleepToken("Dream");
+                mDreamingSleepToken = mActivityManagerInternal.acquireSleepToken(
+                        "Dream", Display.DEFAULT_DISPLAY);
             }
         } else {
             if (mDreamingSleepToken != null) {
@@ -7479,10 +7484,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
     private void updateScreenOffSleepToken(boolean acquire) {
         if (acquire) {
             if (mScreenOffSleepToken == null) {
-                mScreenOffSleepToken = mActivityManagerInternal.acquireSleepToken("ScreenOff");
+                mScreenOffSleepToken = mActivityManagerInternal.acquireSleepToken(
+                        "ScreenOff", Display.DEFAULT_DISPLAY);
             }
         } else {
             if (mScreenOffSleepToken != null) {
@@ -8215,6 +8222,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        new Rect(mStableLeft, mStableTop, mStableRight, mStableBottom).writeToProto(proto,
+                STABLE_BOUNDS);
+        proto.end(token);
     }
 
     @Override

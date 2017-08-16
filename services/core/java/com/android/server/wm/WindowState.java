@@ -102,6 +102,23 @@ import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.proto.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.proto.IdentifierProto.TITLE;
+import static com.android.server.wm.proto.IdentifierProto.USER_ID;
+import static com.android.server.wm.proto.WindowStateProto.ANIMATING_EXIT;
+import static com.android.server.wm.proto.WindowStateProto.ANIMATOR;
+import static com.android.server.wm.proto.WindowStateProto.ATTRIBUTES;
+import static com.android.server.wm.proto.WindowStateProto.CHILD_WINDOWS;
+import static com.android.server.wm.proto.WindowStateProto.CONTAINING_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.CONTENT_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.CONTENT_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.DISPLAY_ID;
+import static com.android.server.wm.proto.WindowStateProto.FRAME;
+import static com.android.server.wm.proto.WindowStateProto.GIVEN_CONTENT_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.IDENTIFIER;
+import static com.android.server.wm.proto.WindowStateProto.PARENT_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
+import static com.android.server.wm.proto.WindowStateProto.SURFACE_INSETS;
 
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -125,6 +142,7 @@ import android.util.MergedConfiguration;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -1711,7 +1729,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean adjustedForMinimizedDockOrIme = task != null
                 && (task.mStack.isAdjustedForMinimizedDockedStack()
                 || task.mStack.isAdjustedForIme());
-        if (mService.okToAnimate()
+        if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
                 && (task == null || getTask().mStack.hasMovementAnimations())
@@ -1880,7 +1898,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // First, see if we need to run an animation. If we do, we have to hold off on removing the
         // window until the animation is done. If the display is frozen, just remove immediately,
         // since the animation wouldn't be seen.
-        if (mHasSurface && mService.okToAnimate()) {
+        if (mHasSurface && mToken.okToAnimate()) {
             if (mWillReplaceWindow) {
                 // This window is going to be replaced. We need to keep it around until the new one
                 // gets added, then we will get rid of this one.
@@ -2315,7 +2333,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mLayoutNeeded = true;
         }
 
-        if (isDrawnLw() && mService.okToAnimate()) {
+        if (isDrawnLw() && mToken.okToAnimate()) {
             mWinAnimator.applyEnterAnimationLocked();
         }
     }
@@ -2471,7 +2489,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mWinAnimator.mAnimation);
-            if (!mService.okToAnimate()) {
+            if (!mToken.okToAnimate()) {
                 doAnimation = false;
             } else if (mPolicyVisibility && mWinAnimator.mAnimation == null) {
                 // Check for the case where we are currently visible and
@@ -2501,7 +2519,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean hideLw(boolean doAnimation, boolean requestAnim) {
         if (doAnimation) {
-            if (!mService.okToAnimate()) {
+            if (!mToken.okToAnimate()) {
                 doAnimation = false;
             }
         }
@@ -3388,6 +3406,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isDockedResizing() {
         return (mDragResizing && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER)
                 || (isChildWindow() && getParentWindow().isDockedResizing());
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        writeIdentifierToProto(proto, IDENTIFIER);
+        proto.write(DISPLAY_ID, getDisplayId());
+        proto.write(STACK_ID, getStackId());
+        mAttrs.writeToProto(proto, ATTRIBUTES);
+        mGivenContentInsets.writeToProto(proto, GIVEN_CONTENT_INSETS);
+        mFrame.writeToProto(proto, FRAME);
+        mContainingFrame.writeToProto(proto, CONTAINING_FRAME);
+        mParentFrame.writeToProto(proto, PARENT_FRAME);
+        mContentFrame.writeToProto(proto, CONTENT_FRAME);
+        mContentInsets.writeToProto(proto, CONTENT_INSETS);
+        mAttrs.surfaceInsets.writeToProto(proto, SURFACE_INSETS);
+        mWinAnimator.writeToProto(proto, ANIMATOR);
+        proto.write(ANIMATING_EXIT, mAnimatingExit);
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).writeToProto(proto, CHILD_WINDOWS);
+        }
+        proto.end(token);
+    }
+
+    void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        proto.write(USER_ID, UserHandle.getUserId(mOwnerUid));
+        final CharSequence title = getWindowTag();
+        if (title != null) {
+            proto.write(TITLE, title.toString());
+        }
+        proto.end(token);
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {

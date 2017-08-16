@@ -97,7 +97,7 @@ TEST_F(IncidentHelperTest, KernelWakesParser) {
     record2->set_last_change(2067286206l);
     record2->set_prevent_suspend_time(0l);
 
-    int fd = open(testFile.c_str(), O_RDONLY, 0444);
+    int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_TRUE(fd != -1);
 
     CaptureStdout();
@@ -149,7 +149,7 @@ TEST_F(IncidentHelperTest, ProcrankParser) {
     expected.mutable_summary()->mutable_ram()
         ->set_raw_text("3843972K total, 281424K free, 116764K buffers, 1777452K cached, 1136K shmem, 217916K slab");
 
-    int fd = open(testFile.c_str(), O_RDONLY, 0444);
+    int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_TRUE(fd != -1);
 
     CaptureStdout();
@@ -187,7 +187,7 @@ TEST_F(IncidentHelperTest, ProcrankParserShortHeader) {
     expected.mutable_summary()->mutable_ram()
         ->set_raw_text("3843972K total, 281424K free, 116764K buffers, 1777452K cached, 1136K shmem, 217916K slab");
 
-    int fd = open(testFile.c_str(), O_RDONLY, 0444);
+    int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_TRUE(fd != -1);
 
     CaptureStdout();

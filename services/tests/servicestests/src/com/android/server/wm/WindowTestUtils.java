@@ -92,7 +92,9 @@ public class WindowTestUtils {
         boolean mOnTop = false;
 
         TestAppWindowToken(DisplayContent dc) {
-            super(dc.mService, new IApplicationToken.Stub() {}, false, dc, true /* fillsParent */,
+            super(dc.mService, new IApplicationToken.Stub() {
+                public String getName() {return null;}
+                }, false, dc, true /* fillsParent */,
                     null /* overrideConfig */, null /* bounds */);
         }
 
@@ -286,6 +288,10 @@ public class WindowTestUtils {
         @Override
         public IBinder asBinder() {
             return mBinder;
+        }
+        @Override
+        public String getName() {
+            return null;
         }
     }
 

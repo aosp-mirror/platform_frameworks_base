@@ -49,6 +49,8 @@ import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
+import static com.android.server.wm.proto.AppWindowTokenProto.NAME;
+import static com.android.server.wm.proto.AppWindowTokenProto.WINDOW_TOKEN;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -57,8 +59,10 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.IApplicationToken;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -1742,6 +1746,26 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (mRemovingFromDisplay) {
             pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
+        }
+    }
+
+    @Override
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        writeNameToProto(proto, NAME);
+        super.writeToProto(proto, WINDOW_TOKEN);
+        proto.end(token);
+    }
+
+    void writeNameToProto(ProtoOutputStream proto, long fieldId) {
+        if (appToken == null) {
+            return;
+        }
+        try {
+            proto.write(fieldId, appToken.getName());
+        } catch (RemoteException e) {
+            // This shouldn't happen, but in this case fall back to outputting nothing
+            Slog.e(TAG, e.toString());
         }
     }
 

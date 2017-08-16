@@ -212,12 +212,25 @@ abstract public class ManagedServices {
         }
     }
 
-    protected void onSettingRestored(String element, String value, int userId) {
+    protected void onSettingRestored(String element, String value, int backupSdkInt, int userId) {
         if (!mUseXml) {
             Slog.d(TAG, "Restored managed service setting: " + element);
             if (mConfig.secureSettingName.equals(element) ||
                     (mConfig.secondarySettingName != null
                             && mConfig.secondarySettingName.equals(element))) {
+                if (backupSdkInt < Build.VERSION_CODES.O) {
+                    // automatic system grants were added in O, so append the approved apps
+                    // rather than wiping out the setting
+                    String currentSetting =
+                            getApproved(userId, mConfig.secureSettingName.equals(element));
+                    if (!TextUtils.isEmpty(currentSetting)) {
+                        if (!TextUtils.isEmpty(value)) {
+                            value = value + ENABLED_SERVICES_SEPARATOR + currentSetting;
+                        } else {
+                            value = currentSetting;
+                        }
+                    }
+                }
                 Settings.Secure.putStringForUser(
                         mContext.getContentResolver(), element, value, userId);
                 loadAllowedComponentsFromSettings();
@@ -368,6 +381,13 @@ abstract public class ManagedServices {
         } else {
             return getPackageName(pkgOrComponent);
         }
+    }
+
+    protected String getApproved(int userId, boolean primary) {
+        final ArrayMap<Boolean, ArraySet<String>> allowedByType =
+                mApproved.getOrDefault(userId, new ArrayMap<>());
+        ArraySet<String> approved = allowedByType.getOrDefault(primary, new ArraySet<>());
+        return String.join(ENABLED_SERVICES_SEPARATOR, approved);
     }
 
     protected List<ComponentName> getAllowedComponents(int userId) {

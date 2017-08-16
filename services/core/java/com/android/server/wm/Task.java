@@ -29,6 +29,11 @@ import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.proto.TaskProto.APP_WINDOW_TOKENS;
+import static com.android.server.wm.proto.TaskProto.BOUNDS;
+import static com.android.server.wm.proto.TaskProto.FILLS_PARENT;
+import static com.android.server.wm.proto.TaskProto.ID;
+import static com.android.server.wm.proto.TaskProto.TEMP_INSET_BOUNDS;
 
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
@@ -37,11 +42,11 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.wm.DimLayer.DimLayerUser;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -733,6 +738,19 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     @Override
     public String toShortString() {
         return "Task=" + mTaskId;
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(ID, mTaskId);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final AppWindowToken appWindowToken = mChildren.get(i);
+            appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS);
+        }
+        proto.write(FILLS_PARENT, mFillsParent);
+        mBounds.writeToProto(proto, BOUNDS);
+        mTempInsetBounds.writeToProto(proto, TEMP_INSET_BOUNDS);
+        proto.end(token);
     }
 
     public void dump(String prefix, PrintWriter pw) {

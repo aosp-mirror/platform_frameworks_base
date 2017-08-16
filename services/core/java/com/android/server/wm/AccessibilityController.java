@@ -429,6 +429,8 @@ final class AccessibilityController {
         }
 
         public void getMagnificationRegionLocked(Region outMagnificationRegion) {
+            // Make sure we're working with the most current bounds
+            mMagnifedViewport.recomputeBoundsLocked();
             mMagnifedViewport.getMagnificationRegionLocked(outMagnificationRegion);
         }
 

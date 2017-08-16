@@ -23,16 +23,13 @@
 
 typedef std::vector<std::string> header_t;
 typedef std::vector<std::string> record_t;
+typedef std::string (*trans_func) (const std::string&);
 
 const char DEFAULT_NEWLINE = '\n';
 const std::string DEFAULT_WHITESPACE = " \t";
 
-std::string trim(const std::string& s, const std::string& whitespace = DEFAULT_WHITESPACE);
-
-void split(const std::string& line, std::vector<std::string>& words,
-    const std::string& delimiters = DEFAULT_WHITESPACE);
-
-bool assertHeaders(const char* expected[], const std::vector<std::string>& actual);
+header_t parseHeader(const std::string& line, const std::string& delimiters = DEFAULT_WHITESPACE);
+record_t parseRecord(const std::string& line, const std::string& delimiters = DEFAULT_WHITESPACE);
 
 /**
  * Reader class reads data from given fd in streaming fashion.

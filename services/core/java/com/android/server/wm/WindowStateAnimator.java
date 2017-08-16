@@ -46,6 +46,8 @@ import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
+import static com.android.server.wm.proto.WindowStateAnimatorProto.LAST_CLIP_RECT;
+import static com.android.server.wm.proto.WindowStateAnimatorProto.SURFACE;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -57,6 +59,7 @@ import android.graphics.Region;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.Surface.OutOfResourcesException;
@@ -369,7 +372,7 @@ class WindowStateAnimator {
         // we just started or just stopped animating by comparing mWasAnimating with isAnimationSet().
         mWasAnimating = mAnimating;
         final DisplayContent displayContent = mWin.getDisplayContent();
-        if (displayContent != null && mService.okToAnimate()) {
+        if (mWin.mToken.okToAnimate()) {
             // We will run animations as long as the display isn't frozen.
 
             if (mWin.isDrawnLw() && mAnimation != null) {
@@ -1812,7 +1815,7 @@ class WindowStateAnimator {
         // artifacts when we unfreeze the display if some different animation
         // is running.
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#applyAnimationLocked");
-        if (mService.okToAnimate()) {
+        if (mWin.mToken.okToAnimate()) {
             int anim = mPolicy.selectAnimationLw(mWin, transit);
             int attr = -1;
             Animation a = null;
@@ -1883,6 +1886,15 @@ class WindowStateAnimator {
         newAnimation.addAnimation(fadeOut);
         newAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(), mAnimDx, mAnimDy);
         mAnimation = newAnimation;
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        mLastClipRect.writeToProto(proto, LAST_CLIP_RECT);
+        if (mSurfaceController != null) {
+            mSurfaceController.writeToProto(proto, SURFACE);
+        }
+        proto.end(token);
     }
 
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {

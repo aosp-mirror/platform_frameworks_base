@@ -21,6 +21,8 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.proto.PinnedStackControllerProto.DEFAULT_BOUNDS;
+import static com.android.server.wm.proto.PinnedStackControllerProto.MOVEMENT_BOUNDS;
 
 import android.app.RemoteAction;
 import android.content.pm.ParceledListSlice;
@@ -35,6 +37,7 @@ import android.util.Log;
 import android.util.Size;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
@@ -504,5 +507,13 @@ class PinnedStackController {
             }
             pw.println(prefix + "  ]");
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        getDefaultBounds().writeToProto(proto, DEFAULT_BOUNDS);
+        mService.getStackBounds(PINNED_STACK_ID, mTmpRect);
+        getMovementBounds(mTmpRect).writeToProto(proto, MOVEMENT_BOUNDS);
+        proto.end(token);
     }
 }

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
@@ -401,7 +402,7 @@ public class AppWindowContainerController
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (mService.okToAnimate() && mService.mAppTransition.isTransitionSet()) {
+            if (wtoken.okToAnimate() && mService.mAppTransition.isTransitionSet()) {
                 // A dummy animation is a placeholder animation which informs others that an
                 // animation is going on (in this case an application transition). If the animation
                 // was transferred from another application/animator, no dummy animator should be
@@ -478,7 +479,7 @@ public class AppWindowContainerController
 
             // If the display is frozen, we won't do anything until the actual window is
             // displayed so there is no reason to put in the starting window.
-            if (!mService.okToDisplay()) {
+            if (!mContainer.okToDisplay()) {
                 return false;
             }
 
@@ -699,16 +700,17 @@ public class AppWindowContainerController
 
     public void startFreezingScreen(int configChanges) {
         synchronized(mWindowMap) {
-            if (configChanges == 0 && mService.okToDisplay()) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Skipping set freeze of " + mToken);
-                return;
-            }
-
             if (mContainer == null) {
                 Slog.w(TAG_WM,
                         "Attempted to freeze screen with non-existing app token: " + mContainer);
                 return;
             }
+
+            if (configChanges == 0 && mContainer.okToDisplay()) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Skipping set freeze of " + mToken);
+                return;
+            }
+
             mContainer.startFreezingScreen();
         }
     }

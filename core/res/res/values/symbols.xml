@@ -1828,6 +1828,7 @@
   <java-symbol type="integer" name="config_networkWakeupPacketMark" />
   <java-symbol type="integer" name="config_networkWakeupPacketMask" />
   <java-symbol type="bool" name="config_apfDrop802_3Frames" />
+  <java-symbol type="array" name="config_apfEthTypeBlackList" />
   <java-symbol type="integer" name="config_networkMeteredMultipathPreference" />
   <java-symbol type="integer" name="config_notificationsBatteryFullARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOff" />
@@ -2002,6 +2003,7 @@
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationComponent" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationSecondaryUserComponent" />
   <java-symbol type="string" name="config_customVpnConfirmDialogComponent" />
+  <java-symbol type="string" name="config_customVpnAlwaysOnDisconnectedDialogComponent" />
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
 
