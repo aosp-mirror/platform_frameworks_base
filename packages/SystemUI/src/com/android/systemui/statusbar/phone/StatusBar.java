@@ -3535,6 +3535,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         DozeLog.dump(pw);
 
+        if (mFingerprintUnlockController != null) {
+            mFingerprintUnlockController.dump(pw);
+        }
+
+        if (mScrimController != null) {
+            mScrimController.dump(pw);
+        }
+
         if (DUMPTRUCK) {
             synchronized (mNotificationData) {
                 mNotificationData.dump(pw, "  ");
