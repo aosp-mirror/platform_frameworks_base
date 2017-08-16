@@ -179,7 +179,7 @@ void SkiaCanvasProxy::onDrawImageLattice(const SkImage* image, const Lattice& la
     SkLatticeIter iter(lattice, dst);
     SkRect srcR, dstR;
     while (iter.next(&srcR, &dstR)) {
-        onDrawImageRect(image, &srcR, dstR, paint, SkCanvas::kStrict_SrcRectConstraint);
+        onDrawImageRect(image, &srcR, dstR, paint, SkCanvas::kFast_SrcRectConstraint);
     }
 }
 

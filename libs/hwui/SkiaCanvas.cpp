@@ -597,7 +597,8 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
     SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mCanvas->drawImageRect(image, srcRect, dstRect, addFilter(paint, &tmpPaint, colorFilter));
+    mCanvas->drawImageRect(image, srcRect, dstRect, addFilter(paint, &tmpPaint, colorFilter),
+            SkCanvas::kFast_SrcRectConstraint);
 }
 
 void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
