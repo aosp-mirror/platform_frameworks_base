@@ -263,4 +263,10 @@ public abstract class ActivityManagerInternal {
      * Clears the previously saved activity manager ANR state.
      */
     public abstract void clearSavedANRState();
+
+    /**
+     * Set focus on an activity.
+     * @param token The IApplicationToken for the activity
+     */
+    public abstract void setFocusedActivity(IBinder token);
 }
