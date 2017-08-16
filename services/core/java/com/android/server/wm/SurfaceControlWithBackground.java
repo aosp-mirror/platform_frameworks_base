@@ -26,9 +26,8 @@ import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
@@ -73,9 +72,8 @@ class SurfaceControlWithBackground extends SurfaceControl {
         super(s, name, w, h, format, flags, windowType, ownerUid);
 
         // We should only show background behind app windows that are letterboxed in a task.
-        if (!windowSurfaceController.mAnimator.mWin.isLetterboxedAppWindow()
-                || windowType < FIRST_APPLICATION_WINDOW
-                || windowType > LAST_APPLICATION_WINDOW) {
+        if ((windowType != TYPE_BASE_APPLICATION && windowType != TYPE_APPLICATION_STARTING)
+                || !windowSurfaceController.mAnimator.mWin.isLetterboxedAppWindow()) {
             return;
         }
         mWindowSurfaceController = windowSurfaceController;
