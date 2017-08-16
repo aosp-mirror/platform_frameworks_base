@@ -770,7 +770,6 @@ public final class NetworkCapabilities implements Parcelable {
 
         StringJoiner joiner = new StringJoiner(", ");
 
-        // TODO: consider only enforcing that capabilities are not removed, allowing addition.
         // Ignore NOT_METERED being added or removed as it is effectively dynamic. http://b/63326103
         // TODO: properly support NOT_METERED as a mutable and requestable capability.
         final long mask = ~MUTABLE_CAPABILITIES & ~(1 << NET_CAPABILITY_NOT_METERED);
