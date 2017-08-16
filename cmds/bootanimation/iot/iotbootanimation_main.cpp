@@ -39,17 +39,21 @@ namespace {
 
 class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {public:
     void init(const Vector<Animation::Part>&) override {
-        // Create and initialize BootActions if we have a boot_action.conf.
-        std::string bootActionConf;
-        if (ReadFileToString("/oem/app/etc/boot_action.conf", &bootActionConf)) {
-            mBootAction = new BootAction();
-            if (!mBootAction->init("/oem/app/lib", bootActionConf)) {
-                mBootAction = NULL;
-            }
-        } else {
-            ALOGI("No boot actions specified");
-        }
+        std::string library_path("/oem/lib/");
 
+        // This value is optionally provided by the user and will be written to
+        // /oem/oem.prop.
+        char property[PROP_VALUE_MAX] = {0};
+        if (property_get("ro.oem.bootactions.lib", property, "") < 1) {
+            ALOGI("No bootaction specified");
+            return;
+        }
+        library_path += property;
+
+        mBootAction = new BootAction();
+        if (!mBootAction->init(library_path)) {
+            mBootAction = NULL;
+        }
     };
 
     void playPart(int partNumber, const Animation::Part&, int playNumber) override {

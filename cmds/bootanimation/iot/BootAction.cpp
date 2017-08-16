@@ -37,7 +37,7 @@ BootAction::~BootAction() {
     }
 }
 
-bool BootAction::init(const std::string& libraryPath, const std::string& config) {
+bool BootAction::init(const std::string& libraryPath) {
     APeripheralManagerClient* client = nullptr;
     ALOGD("Connecting to peripheralmanager");
     // Wait for peripheral manager to come up.
@@ -51,16 +51,11 @@ bool BootAction::init(const std::string& libraryPath, const std::string& config)
     ALOGD("Peripheralmanager is up.");
     APeripheralManagerClient_delete(client);
 
-    std::string path_to_lib = libraryPath;
-    if (!parseConfig(config, &path_to_lib)) {
-        return false;
-    }
-
-    ALOGI("Loading boot action %s", path_to_lib.c_str());
-    mLibHandle = dlopen(path_to_lib.c_str(), RTLD_NOW);
+    ALOGI("Loading boot action %s", libraryPath.c_str());
+    mLibHandle = dlopen(libraryPath.c_str(), RTLD_NOW);
     if (mLibHandle == nullptr) {
         ALOGE("Unable to load library at %s :: %s",
-              path_to_lib.c_str(), dlerror());
+              libraryPath.c_str(), dlerror());
         return false;
     }
 
@@ -113,63 +108,6 @@ bool BootAction::loadSymbol(const char* symbol, void** loaded) {
         return false;
     }
     return true;
-}
-
-
-bool BootAction::parseConfig(const std::string& config, std::string* path) {
-    auto lines = Split(config, "\n");
-
-    if (lines.size() < 1) {
-        ALOGE("Config format invalid, expected one line, found %d",
-              lines.size());
-        return false;
-    }
-
-    size_t lineNumber = 0;
-    auto& line1 = lines.at(lineNumber);
-    while (StartsWith(line1, "#")) {
-      if (lines.size() < ++lineNumber) {
-        ALOGE("Config file contains no non-comment lines.");
-        return false;
-      }
-      line1 = lines.at(lineNumber);
-    }
-
-    const std::string libraryNameToken("LIBRARY_NAME=");
-    if (!StartsWith(line1, libraryNameToken.c_str())) {
-        ALOGE("Invalid config format, expected second line to start  with %s "
-              "Instead found: %s", libraryNameToken.c_str(), line1.c_str());
-        return false;
-    }
-
-    std::string libraryName = line1.substr(libraryNameToken.length());
-
-    *path += "/";
-    *path += architectureDirectory();
-    *path += "/";
-    *path += libraryName;
-
-    return true;
-}
-
-const char* BootAction::architectureDirectory() {
-  switch(android_getCpuFamily()) {
-      case ANDROID_CPU_FAMILY_ARM:
-          return "arm";
-      case ANDROID_CPU_FAMILY_X86:
-          return "x86";
-      case ANDROID_CPU_FAMILY_MIPS:
-          return "mips";
-      case ANDROID_CPU_FAMILY_ARM64:
-          return "arm64";
-      case ANDROID_CPU_FAMILY_X86_64:
-          return "x86_64";
-      case ANDROID_CPU_FAMILY_MIPS64:
-          return "mips64";
-      default:
-          ALOGE("Unsupported cpu family: %d", android_getCpuFamily());
-          return "";
-  }
 }
 
 }  // namespace android

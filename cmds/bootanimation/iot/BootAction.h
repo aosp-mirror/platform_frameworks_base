@@ -26,11 +26,9 @@ namespace android {
 class BootAction : public RefBase {
 public:
     ~BootAction();
-    // Parse the contents of the config file. We expect one line:
-    // LIBRARY_NAME=
-    //
-    // LIBRARY_NAME is the name of the shared library that contains the boot action.
-    bool init(const std::string& libraryPath, const std::string& config);
+
+    // libraryPath is a fully qualified path to the target .so library.
+    bool init(const std::string& libraryPath);
 
     // The animation is going to start playing partNumber for the playCount'th
     // time, update the action as needed.
@@ -47,9 +45,7 @@ private:
     typedef void (*libStartPart)(int partNumber, int playNumber);
     typedef void (*libShutdown)();
 
-    bool parseConfig(const std::string& config, std::string* path);
     bool loadSymbol(const char* symbol, void** loaded);
-    const char* architectureDirectory();
 
     void* mLibHandle = nullptr;
     libInit mLibInit = nullptr;
