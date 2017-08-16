@@ -16,6 +16,23 @@
 
 package android.net;
 
+import static android.system.OsConstants.IFA_F_DADFAILED;
+import static android.system.OsConstants.IFA_F_DEPRECATED;
+import static android.system.OsConstants.IFA_F_OPTIMISTIC;
+import static android.system.OsConstants.IFA_F_PERMANENT;
+import static android.system.OsConstants.IFA_F_TEMPORARY;
+import static android.system.OsConstants.IFA_F_TENTATIVE;
+import static android.system.OsConstants.RT_SCOPE_HOST;
+import static android.system.OsConstants.RT_SCOPE_LINK;
+import static android.system.OsConstants.RT_SCOPE_SITE;
+import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -27,44 +44,35 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.net.LinkAddress;
 import android.os.Parcel;
-import android.test.AndroidTestCase;
-import static android.test.MoreAsserts.assertNotEqual;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
-import static android.system.OsConstants.IFA_F_DADFAILED;
-import static android.system.OsConstants.IFA_F_DEPRECATED;
-import static android.system.OsConstants.IFA_F_OPTIMISTIC;
-import static android.system.OsConstants.IFA_F_PERMANENT;
-import static android.system.OsConstants.IFA_F_TEMPORARY;
-import static android.system.OsConstants.IFA_F_TENTATIVE;
-import static android.system.OsConstants.RT_SCOPE_HOST;
-import static android.system.OsConstants.RT_SCOPE_LINK;
-import static android.system.OsConstants.RT_SCOPE_SITE;
-import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
+import org.junit.runner.RunWith;
+import org.junit.Test;
 
-/**
- * Tests for {@link LinkAddress}.
- */
-public class LinkAddressTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class LinkAddressTest {
 
     private static final String V4 = "192.0.2.1";
     private static final String V6 = "2001:db8::1";
     private static final InetAddress V4_ADDRESS = NetworkUtils.numericToInetAddress(V4);
     private static final InetAddress V6_ADDRESS = NetworkUtils.numericToInetAddress(V6);
 
+    @Test
     public void testConstants() {
         // RT_SCOPE_UNIVERSE = 0, but all the other constants should be nonzero.
-        assertNotEqual(0, RT_SCOPE_HOST);
-        assertNotEqual(0, RT_SCOPE_LINK);
-        assertNotEqual(0, RT_SCOPE_SITE);
+        assertNotEquals(0, RT_SCOPE_HOST);
+        assertNotEquals(0, RT_SCOPE_LINK);
+        assertNotEquals(0, RT_SCOPE_SITE);
 
-        assertNotEqual(0, IFA_F_DEPRECATED);
-        assertNotEqual(0, IFA_F_PERMANENT);
-        assertNotEqual(0, IFA_F_TENTATIVE);
+        assertNotEquals(0, IFA_F_DEPRECATED);
+        assertNotEquals(0, IFA_F_PERMANENT);
+        assertNotEquals(0, IFA_F_TENTATIVE);
     }
 
+    @Test
     public void testConstructors() throws SocketException {
         LinkAddress address;
 
@@ -74,12 +82,14 @@ public class LinkAddressTest extends AndroidTestCase {
         assertEquals(25, address.getPrefixLength());
         assertEquals(0, address.getFlags());
         assertEquals(RT_SCOPE_UNIVERSE, address.getScope());
+        assertTrue(address.isIPv4());
 
         address = new LinkAddress(V6_ADDRESS, 127);
         assertEquals(V6_ADDRESS, address.getAddress());
         assertEquals(127, address.getPrefixLength());
         assertEquals(0, address.getFlags());
         assertEquals(RT_SCOPE_UNIVERSE, address.getScope());
+        assertTrue(address.isIPv6());
 
         // Nonsensical flags/scopes or combinations thereof are acceptable.
         address = new LinkAddress(V6 + "/64", IFA_F_DEPRECATED | IFA_F_PERMANENT, RT_SCOPE_LINK);
@@ -87,12 +97,14 @@ public class LinkAddressTest extends AndroidTestCase {
         assertEquals(64, address.getPrefixLength());
         assertEquals(IFA_F_DEPRECATED | IFA_F_PERMANENT, address.getFlags());
         assertEquals(RT_SCOPE_LINK, address.getScope());
+        assertTrue(address.isIPv6());
 
         address = new LinkAddress(V4 + "/23", 123, 456);
         assertEquals(V4_ADDRESS, address.getAddress());
         assertEquals(23, address.getPrefixLength());
         assertEquals(123, address.getFlags());
         assertEquals(456, address.getScope());
+        assertTrue(address.isIPv4());
 
         // InterfaceAddress doesn't have a constructor. Fetch some from an interface.
         List<InterfaceAddress> addrs = NetworkInterface.getByName("lo").getInterfaceAddresses();
@@ -174,6 +186,7 @@ public class LinkAddressTest extends AndroidTestCase {
         } catch(IllegalArgumentException expected) {}
     }
 
+    @Test
     public void testAddressScopes() {
         assertEquals(RT_SCOPE_HOST, new LinkAddress("::/128").getScope());
         assertEquals(RT_SCOPE_HOST, new LinkAddress("0.0.0.0/32").getScope());
@@ -216,6 +229,7 @@ public class LinkAddressTest extends AndroidTestCase {
         assertFalse(l2 + " unexpectedly equal to " + l1, l2.equals(l1));
     }
 
+    @Test
     public void testEqualsAndSameAddressAs() {
         LinkAddress l1, l2, l3;
 
@@ -293,26 +307,17 @@ public class LinkAddressTest extends AndroidTestCase {
         assertIsSameAddressAs(l1, l2);
     }
 
+    @Test
     public void testHashCode() {
-        LinkAddress l;
+        LinkAddress l1, l2;
 
-        l = new LinkAddress(V4_ADDRESS, 23);
-        assertEquals(-982787, l.hashCode());
+        l1 = new LinkAddress(V4_ADDRESS, 23);
+        l2 = new LinkAddress(V4_ADDRESS, 23, 0, RT_SCOPE_HOST);
+        assertNotEquals(l1.hashCode(), l2.hashCode());
 
-        l = new LinkAddress(V4_ADDRESS, 23, 0, RT_SCOPE_HOST);
-        assertEquals(-971865, l.hashCode());
-
-        l = new LinkAddress(V4_ADDRESS, 27);
-        assertEquals(-982743, l.hashCode());
-
-        l = new LinkAddress(V6_ADDRESS, 64);
-        assertEquals(1076522926, l.hashCode());
-
-        l = new LinkAddress(V6_ADDRESS, 128);
-        assertEquals(1076523630, l.hashCode());
-
-        l = new LinkAddress(V6_ADDRESS, 128, IFA_F_TENTATIVE, RT_SCOPE_UNIVERSE);
-        assertEquals(1076524846, l.hashCode());
+        l1 = new LinkAddress(V6_ADDRESS, 128);
+        l2 = new LinkAddress(V6_ADDRESS, 128, IFA_F_TENTATIVE, RT_SCOPE_UNIVERSE);
+        assertNotEquals(l1.hashCode(), l2.hashCode());
     }
 
     private LinkAddress passThroughParcel(LinkAddress l) {
@@ -334,6 +339,7 @@ public class LinkAddressTest extends AndroidTestCase {
       assertEquals(l, l2);
     }
 
+    @Test
     public void testParceling() {
         LinkAddress l;
 
@@ -352,6 +358,7 @@ public class LinkAddressTest extends AndroidTestCase {
         assertFalse(msg, l.isGlobalPreferred());
     }
 
+    @Test
     public void testIsGlobalPreferred() {
         LinkAddress l;
 
