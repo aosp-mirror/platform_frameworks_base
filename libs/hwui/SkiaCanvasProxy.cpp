@@ -452,7 +452,7 @@ void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScala
              break;
          }
          default:
-             SkFAIL("unhandled positioning mode");
+             SK_ABORT("unhandled positioning mode");
          }
      }
 }
