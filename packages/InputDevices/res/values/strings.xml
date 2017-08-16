@@ -119,4 +119,7 @@
 
     <!-- Latvian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_latvian">Latvian</string>
+
+    <!-- Persian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_persian">Persian</string>
 </resources>
