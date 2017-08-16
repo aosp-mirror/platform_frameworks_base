@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"جارٍ الشحن"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"لا يتم الشحن"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"تم التوصيل، ولكن يتعذّر الشحن الآن"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ممتلئة"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"إعدادات يتحكم فيها المشرف"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"تم تمكين الإعداد بواسطة المشرف"</string>
@@ -375,7 +374,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"قبل <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"يتبقى <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"صغير"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"افتراضي"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"تلقائي"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"كبير"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"أكبر"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"أكبر مستوى"</string>

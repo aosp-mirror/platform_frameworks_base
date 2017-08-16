@@ -356,15 +356,14 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Polnjenje"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"polnjenje"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Se ne polni"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Priključeno, trenutno ni mogoče polniti"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Poln"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Nadzira skrbnik"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Omogočil skrbnik"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Onemogočil skrbnik"</string>
     <string name="disabled" msgid="9206776641295849915">"Onemogočeno"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Dovoljene"</string>
-    <string name="external_source_untrusted" msgid="2677442511837596726">"Nedovoljene"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Ni dovoljeno"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"Nameščanje neznanih aplikacij"</string>
     <string name="home" msgid="3256884684164448244">"Začetna stran nastavitev"</string>
   <string-array name="battery_labels">

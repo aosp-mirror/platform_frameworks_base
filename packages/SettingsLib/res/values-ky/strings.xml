@@ -119,7 +119,7 @@
     <string name="user_guest" msgid="8475274842845401871">"Конок"</string>
     <string name="unknown" msgid="1592123443519355854">"Белгисиз"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Колдонуучу: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"Айрым демейкилер коюлду"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"Айрым демейки параметрлер туураланды"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Демейкилер коюлган жок"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Кеп синтезаторунун жөндөөлөрү"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Текстти-оозекилөө"</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Кубатталууда"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"кубатталууда"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Кубат алган жок"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Сайылып турат, учурда кубаттоо мүмкүн эмес"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Толук"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Администратор тарабынан көзөмөлдөнөт"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Администратор иштетип койгон"</string>

@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Punjenje"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"punjenje"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ne puni se"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Priključen, trenutno se ne može puniti"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Pod kontrolom administratora"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Omogućio administrator"</string>
