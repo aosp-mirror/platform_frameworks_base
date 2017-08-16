@@ -68,26 +68,10 @@
     <item msgid="1913619118958233129">"avrcp15"</item>
     <item msgid="7142710449249088270">"avrcp16"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="686685526567131661">"AAC"</item>
-    <item msgid="8910200421843557332">"aptX"</item>
-    <item msgid="8434403964359457768">"aptX HD"</item>
-    <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"वैकल्पिक कोडेक सक्षम करें"</item>
-    <item msgid="3304843301758635896">"वैकल्पिक कोडेक अक्षम करें"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="6839647709301342559">"AAC"</item>
-    <item msgid="2279916056363477395">"aptX"</item>
-    <item msgid="6641171061200063516">"aptX HD"</item>
-    <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"वैकल्पिक कोडेक सक्षम करें"</item>
-    <item msgid="741805482892725657">"वैकल्पिक कोडेक अक्षम करें"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -215,7 +199,7 @@
     <item msgid="3191973083884253830">"कोई नहीं"</item>
     <item msgid="9089630089455370183">"Logcat"</item>
     <item msgid="5397807424362304288">"Systrace (ग्राफ़िक)"</item>
-    <item msgid="1340692776955662664">"glGetError पर स्टैक कॉल करें"</item>
+    <item msgid="1340692776955662664">"glGetError पर कॉल स्टैक"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
     <item msgid="993742912147090253">"बंद"</item>
