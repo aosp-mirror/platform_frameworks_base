@@ -3354,6 +3354,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} but not
      * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION
      *         FLAG_TRANSLUCENT_NAVIGATION}.
+     *
+     * @see android.R.attr#windowLightNavigationBar
      */
     public static final int SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR = 0x00000010;
 
