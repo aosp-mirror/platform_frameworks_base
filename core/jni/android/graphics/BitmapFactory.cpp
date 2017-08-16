@@ -75,6 +75,9 @@ jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format) {
         case SkEncodedImageFormat::kWEBP:
             mimeType = "image/webp";
             break;
+        case SkEncodedImageFormat::kHEIF:
+            mimeType = "image/heif";
+            break;
         case SkEncodedImageFormat::kWBMP:
             mimeType = "image/vnd.wap.wbmp";
             break;
