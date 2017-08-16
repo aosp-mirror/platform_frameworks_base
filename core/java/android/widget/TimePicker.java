@@ -366,8 +366,11 @@ public class TimePicker extends FrameLayout {
         void setMinute(@IntRange(from = 0, to = 59) int minute);
         int getMinute();
 
-        void setDate(long date);
-        long getDate();
+        void setDate(@IntRange(from = 0, to = 23) int hour,
+                @IntRange(from = 0, to = 59) int minute);
+
+        void autofill(AutofillValue value);
+        AutofillValue getAutofillValue();
 
         void setIs24Hour(boolean is24Hour);
         boolean is24Hour();
@@ -422,6 +425,11 @@ public class TimePicker extends FrameLayout {
         protected OnTimeChangedListener mOnTimeChangedListener;
         protected OnTimeChangedListener mAutoFillChangeListener;
 
+        // The value that was passed to autofill() - it must be stored because it getAutofillValue()
+        // must return the exact same value that was autofilled, otherwise the widget will not be
+        // properly highlighted after autofill().
+        private long mAutofilledValue;
+
         public AbstractTimePickerDelegate(@NonNull TimePicker delegator, @NonNull Context context) {
             mDelegator = delegator;
             mContext = context;
@@ -439,19 +447,41 @@ public class TimePicker extends FrameLayout {
         }
 
         @Override
-        public void setDate(long date) {
-            Calendar cal = Calendar.getInstance(mLocale);
-            cal.setTimeInMillis(date);
-            setHour(cal.get(Calendar.HOUR_OF_DAY));
-            setMinute(cal.get(Calendar.MINUTE));
+        public final void autofill(AutofillValue value) {
+            if (value == null || !value.isDate()) {
+                Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+                return;
+            }
+
+            final long time = value.getDateValue();
+
+            final Calendar cal = Calendar.getInstance(mLocale);
+            cal.setTimeInMillis(time);
+            setDate(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));
+
+            // Must set mAutofilledValue *after* calling subclass method to make sure the value
+            // returned by getAutofillValue() matches it.
+            mAutofilledValue = time;
         }
 
         @Override
-        public long getDate() {
-            Calendar cal = Calendar.getInstance(mLocale);
+        public final AutofillValue getAutofillValue() {
+            if (mAutofilledValue != 0) {
+                return AutofillValue.forDate(mAutofilledValue);
+            }
+
+            final Calendar cal = Calendar.getInstance(mLocale);
             cal.set(Calendar.HOUR_OF_DAY, getHour());
             cal.set(Calendar.MINUTE, getMinute());
-            return cal.getTimeInMillis();
+            return AutofillValue.forDate(cal.getTimeInMillis());
+        }
+
+        /**
+         * This method must be called every time the value of the hour and/or minute is changed by
+         * a subclass method.
+         */
+        protected void resetAutofilledValue() {
+            mAutofilledValue = 0;
         }
 
         protected static class SavedState extends View.BaseSavedState {
@@ -532,12 +562,7 @@ public class TimePicker extends FrameLayout {
     public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
-        if (!value.isDate()) {
-            Log.w(LOG_TAG, value + " could not be autofilled into " + this);
-            return;
-        }
-
-        mDelegate.setDate(value.getDateValue());
+        mDelegate.autofill(value);
     }
 
     @Override
@@ -547,6 +572,6 @@ public class TimePicker extends FrameLayout {
 
     @Override
     public AutofillValue getAutofillValue() {
-        return isEnabled() ? AutofillValue.forDate(mDelegate.getDate()) : null;
+        return isEnabled() ? mDelegate.getAutofillValue() : null;
     }
 }

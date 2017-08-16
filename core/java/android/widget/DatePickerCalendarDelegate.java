@@ -368,12 +368,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     }
 
     @Override
-    public void init(int year, int monthOfYear, int dayOfMonth,
+    public void init(int year, int month, int dayOfMonth,
             DatePicker.OnDateChangedListener callBack) {
-        mCurrentDate.set(Calendar.YEAR, year);
-        mCurrentDate.set(Calendar.MONTH, monthOfYear);
-        mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
+        setDate(year, month, dayOfMonth);
         onDateChanged(false, false);
 
         mOnDateChangedListener = callBack;
@@ -381,11 +378,15 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     @Override
     public void updateDate(int year, int month, int dayOfMonth) {
+        setDate(year, month, dayOfMonth);
+        onDateChanged(false, true);
+    }
+
+    private void setDate(int year, int month, int dayOfMonth) {
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, month);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-        onDateChanged(false, true);
+        resetAutofilledValue();
     }
 
     private void onDateChanged(boolean fromUser, boolean callbackToClient) {
