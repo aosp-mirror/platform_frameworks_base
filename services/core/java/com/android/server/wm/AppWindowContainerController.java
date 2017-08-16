@@ -631,9 +631,12 @@ public class AppWindowContainerController
                 mContainer.startingSurface = null;
                 mContainer.startingWindow = null;
                 mContainer.startingDisplayed = false;
-                if (surface == null && DEBUG_STARTING_WINDOW) {
-                    Slog.v(TAG_WM, "startingWindow was set but startingSurface==null, couldn't "
-                            + "remove");
+                if (surface == null) {
+                    if (DEBUG_STARTING_WINDOW) {
+                        Slog.v(TAG_WM, "startingWindow was set but startingSurface==null, couldn't "
+                                + "remove");
+                    }
+                    return;
                 }
             } else {
                 if (DEBUG_STARTING_WINDOW) {
