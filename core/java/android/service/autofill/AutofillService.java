@@ -18,16 +18,15 @@ package android.service.autofill;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteException;
-import android.provider.Settings;
-
-import com.android.internal.os.HandlerCaller;
 import android.annotation.SdkConstant;
-import android.app.Service;import android.content.Intent;
+import android.app.Service;
+import android.content.Intent;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewStructure;
@@ -35,6 +34,7 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
+import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
 /**
