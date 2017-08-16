@@ -142,6 +142,17 @@ public class IpSecService extends IIpSecService.Stub {
             }
             mCurrent--;
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("{mCurrent=")
+                    .append(mCurrent)
+                    .append(", mMax=")
+                    .append(mMax)
+                    .append("}")
+                    .toString();
+        }
     }
 
     private static final class UserQuotaTracker {
@@ -159,6 +170,19 @@ public class IpSecService extends IIpSecService.Stub {
             public final ResourceTracker socket = new ResourceTracker(MAX_NUM_ENCAP_SOCKETS);
             public final ResourceTracker transform = new ResourceTracker(MAX_NUM_TRANSFORMS);
             public final ResourceTracker spi = new ResourceTracker(MAX_NUM_SPIS);
+
+            @Override
+            public String toString() {
+                return new StringBuilder()
+                        .append("{socket=")
+                        .append(socket)
+                        .append(", transform=")
+                        .append(transform)
+                        .append(", spi=")
+                        .append(spi)
+                        .append("}")
+                        .toString();
+            }
         }
 
         private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
@@ -171,6 +195,11 @@ public class IpSecService extends IIpSecService.Stub {
                 mUserRecords.put(uid, r);
             }
             return r;
+        }
+
+        @Override
+        public String toString() {
+            return mUserRecords.toString();
         }
     }
 
@@ -909,6 +938,8 @@ public class IpSecService extends IIpSecService.Stub {
         pw.println("NetdNativeService Connection: " + (isNetdAlive() ? "alive" : "dead"));
         pw.println();
 
+        pw.println("mUserQuotaTracker:");
+        pw.println(mUserQuotaTracker);
         pw.println("mTransformRecords:");
         pw.println(mTransformRecords);
         pw.println("mUdpSocketRecords:");
