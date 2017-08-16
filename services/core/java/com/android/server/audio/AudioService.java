@@ -5470,6 +5470,10 @@ public class AudioService extends IAudioService.Stub
             configureHdmiPlugIntent(intent, state);
         }
 
+        if (intent.getAction() == null) {
+            return;
+        }
+
         intent.putExtra(CONNECT_INTENT_KEY_STATE, state);
         intent.putExtra(CONNECT_INTENT_KEY_ADDRESS, address);
         intent.putExtra(CONNECT_INTENT_KEY_PORT_NAME, deviceName);
@@ -5543,9 +5547,7 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
-            if (device != AudioSystem.DEVICE_IN_WIRED_HEADSET) {
-                sendDeviceConnectionIntent(device, state, address, deviceName);
-            }
+            sendDeviceConnectionIntent(device, state, address, deviceName);
             updateAudioRoutes(device, state);
         }
     }
