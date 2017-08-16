@@ -102,6 +102,11 @@ class TaskSnapshotController {
      */
     private final boolean mIsRunningOnIoT;
 
+    /**
+     * Flag indicating whether we are running on an Android Wear device.
+     */
+    private final boolean mIsRunningOnWear;
+
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
         mCache = new TaskSnapshotCache(mService, mLoader);
@@ -109,6 +114,8 @@ class TaskSnapshotController {
                 PackageManager.FEATURE_LEANBACK);
         mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EMBEDDED);
+        mIsRunningOnWear = mService.mContext.getPackageManager().hasSystemFeature(
+            PackageManager.FEATURE_WATCH);
     }
 
     void systemReady() {
@@ -213,8 +220,7 @@ class TaskSnapshotController {
     }
 
     private boolean shouldDisableSnapshots() {
-        return !ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic()
-                || mIsRunningOnTv || mIsRunningOnIoT;
+        return !ENABLE_TASK_SNAPSHOTS || mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
     private Rect minRect(Rect rect1, Rect rect2) {
