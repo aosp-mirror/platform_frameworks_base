@@ -251,6 +251,8 @@ class ResourceTable {
 
   ResourceTablePackage* CreatePackage(const android::StringPiece& name, Maybe<uint8_t> id = {});
 
+  std::unique_ptr<ResourceTable> Clone() const;
+
   /**
    * The string pool used by this resource table. Values that reference strings
    * must use

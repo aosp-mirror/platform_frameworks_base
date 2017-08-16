@@ -24,7 +24,9 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "configuration/ConfigurationParser.h"
 #include "process/IResourceTableConsumer.h"
+#include "test/Common.h"
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
@@ -148,6 +150,37 @@ class StyleableBuilder {
 std::unique_ptr<xml::XmlResource> BuildXmlDom(const android::StringPiece& str);
 std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* context,
                                                             const android::StringPiece& str);
+
+class PostProcessingConfigurationBuilder {
+ public:
+  PostProcessingConfigurationBuilder() = default;
+
+  PostProcessingConfigurationBuilder& SetAbiGroup(const std::string& name,
+                                                  const std::vector<configuration::Abi>& abis);
+  PostProcessingConfigurationBuilder& SetLocaleGroup(const std::string& name,
+                                                     const std::vector<std::string>& locales);
+  PostProcessingConfigurationBuilder& SetDensityGroup(const std::string& name,
+                                                      const std::vector<std::string>& densities);
+  PostProcessingConfigurationBuilder& AddArtifact(const configuration::Artifact& artifact);
+  configuration::PostProcessingConfiguration Build();
+
+ private:
+  configuration::PostProcessingConfiguration config_;
+};
+
+class ArtifactBuilder {
+ public:
+  ArtifactBuilder() = default;
+
+  ArtifactBuilder& SetName(const std::string& name);
+  ArtifactBuilder& SetAbiGroup(const std::string& name);
+  ArtifactBuilder& SetDensityGroup(const std::string& name);
+  ArtifactBuilder& SetLocaleGroup(const std::string& name);
+  configuration::Artifact Build();
+
+ private:
+  configuration::Artifact artifact_;
+};
 
 }  // namespace test
 }  // namespace aapt

@@ -67,18 +67,15 @@ constexpr const char* kValidConfig = R"(<?xml version="1.0" encoding="utf-8" ?>
       <screen-density>xxxhdpi</screen-density>
     </screen-density-group>
     <locale-group label="europe">
-      <locale lang="en"/>
-      <locale lang="es"/>
-      <locale lang="fr"/>
-      <locale lang="de"/>
+      <locale>en</locale>
+      <locale>es</locale>
+      <locale>fr</locale>
+      <locale>de</locale>
     </locale-group>
     <locale-group label="north-america">
-      <locale lang="en"/>
-      <locale lang="es" region="MX"/>
-      <locale lang="fr" region="CA"/>
-    </locale-group>
-    <locale-group label="all">
-      <locale/>
+      <locale>en</locale>
+      <locale>es-rMX</locale>
+      <locale>fr-rCA</locale>
     </locale-group>
     <android-sdk-group label="19">
       <android-sdk
@@ -156,10 +153,9 @@ TEST_F(ConfigurationParserTest, ValidateFile) {
   EXPECT_EQ(3ul, value.screen_density_groups["large"].size());
   EXPECT_EQ(6ul, value.screen_density_groups["alldpi"].size());
 
-  EXPECT_EQ(3ul, value.locale_groups.size());
+  EXPECT_EQ(2ul, value.locale_groups.size());
   EXPECT_EQ(4ul, value.locale_groups["europe"].size());
   EXPECT_EQ(3ul, value.locale_groups["north-america"].size());
-  EXPECT_EQ(1ul, value.locale_groups["all"].size());
 
   EXPECT_EQ(1ul, value.android_sdk_groups.size());
   EXPECT_EQ(1ul, value.android_sdk_groups["19"].size());
@@ -198,7 +194,7 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
   EXPECT_EQ(1ul, config.artifacts.size());
 
   auto& artifact = config.artifacts.front();
-  EXPECT_EQ("", artifact.name); // TODO: make this fail.
+  EXPECT_FALSE(artifact.name);  // TODO: make this fail.
   EXPECT_EQ("arm", artifact.abi_group.value());
   EXPECT_EQ("large", artifact.screen_density_group.value());
   EXPECT_EQ("europe", artifact.locale_group.value());
@@ -298,10 +294,10 @@ TEST_F(ConfigurationParserTest, ScreenDensityGroupAction) {
 TEST_F(ConfigurationParserTest, LocaleGroupAction) {
   static constexpr const char* xml = R"xml(
     <locale-group label="europe">
-      <locale lang="en"/>
-      <locale lang="es"/>
-      <locale lang="fr"/>
-      <locale lang="de"/>
+      <locale>en</locale>
+      <locale>es</locale>
+      <locale>fr</locale>
+      <locale>de</locale>
     </locale-group>)xml";
 
   auto doc = test::BuildXmlDom(xml);
@@ -313,16 +309,12 @@ TEST_F(ConfigurationParserTest, LocaleGroupAction) {
   ASSERT_EQ(1ul, config.locale_groups.size());
   ASSERT_EQ(1u, config.locale_groups.count("europe"));
 
-  auto& out = config.locale_groups["europe"];
+  const auto& out = config.locale_groups["europe"];
 
-  Locale en;
-  en.lang = std::string("en");
-  Locale es;
-  es.lang = std::string("es");
-  Locale fr;
-  fr.lang = std::string("fr");
-  Locale de;
-  de.lang = std::string("de");
+  ConfigDescription en = test::ParseConfigOrDie("en");
+  ConfigDescription es = test::ParseConfigOrDie("es");
+  ConfigDescription fr = test::ParseConfigOrDie("fr");
+  ConfigDescription de = test::ParseConfigOrDie("de");
 
   ASSERT_THAT(out, ElementsAre(en, es, fr, de));
 }
@@ -425,14 +417,14 @@ TEST(ArtifactTest, Simple) {
   Artifact x86;
   x86.abi_group = {"x86"};
 
-  auto x86_result = x86.ToArtifactName("something.{abi}.apk", &diag);
+  auto x86_result = x86.ToArtifactName("something.${abi}.apk", &diag);
   ASSERT_TRUE(x86_result);
   EXPECT_EQ(x86_result.value(), "something.x86.apk");
 
   Artifact arm;
   arm.abi_group = {"armeabi-v7a"};
 
-  auto arm_result = arm.ToArtifactName("app.{abi}.apk", &diag);
+  auto arm_result = arm.ToArtifactName("app.${abi}.apk", &diag);
   ASSERT_TRUE(arm_result);
   EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
 }
@@ -447,8 +439,8 @@ TEST(ArtifactTest, Complex) {
   artifact.locale_group = {"en-AU"};
   artifact.android_sdk_group = {"26"};
 
-  auto result =
-      artifact.ToArtifactName("app.{density}_{locale}_{feature}_{gl}.sdk{sdk}.{abi}.apk", &diag);
+  auto result = artifact.ToArtifactName(
+      "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", &diag);
   ASSERT_TRUE(result);
   EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
 }
@@ -458,7 +450,7 @@ TEST(ArtifactTest, Missing) {
   Artifact x86;
   x86.abi_group = {"x86"};
 
-  EXPECT_FALSE(x86.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.${density}.apk", &diag));
   EXPECT_FALSE(x86.ToArtifactName("something.apk", &diag));
 }
 
@@ -466,7 +458,7 @@ TEST(ArtifactTest, Empty) {
   StdErrDiagnostics diag;
   Artifact artifact;
 
-  EXPECT_FALSE(artifact.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.apk", &diag));
   EXPECT_TRUE(artifact.ToArtifactName("something.apk", &diag));
 }
 
@@ -475,8 +467,8 @@ TEST(ArtifactTest, Repeated) {
   Artifact artifact;
   artifact.screen_density_group = {"mdpi"};
 
-  EXPECT_TRUE(artifact.ToArtifactName("something.{density}.apk", &diag));
-  EXPECT_FALSE(artifact.ToArtifactName("something.{density}.{density}.apk", &diag));
+  ASSERT_TRUE(artifact.ToArtifactName("something.${density}.apk", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.${density}.apk", &diag));
 }
 
 TEST(ArtifactTest, Nesting) {
@@ -484,36 +476,36 @@ TEST(ArtifactTest, Nesting) {
   Artifact x86;
   x86.abi_group = {"x86"};
 
-  EXPECT_FALSE(x86.ToArtifactName("something.{abi{density}}.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.${abi${density}}.apk", &diag));
 
-  const Maybe<std::string>& name = x86.ToArtifactName("something.{abi{abi}}.apk", &diag);
-  EXPECT_TRUE(name);
-  EXPECT_EQ(name.value(), "something.{abix86}.apk");
+  const Maybe<std::string>& name = x86.ToArtifactName("something.${abi${abi}}.apk", &diag);
+  ASSERT_TRUE(name);
+  EXPECT_EQ(name.value(), "something.${abix86}.apk");
 }
 
 TEST(ArtifactTest, Recursive) {
   StdErrDiagnostics diag;
   Artifact artifact;
-  artifact.device_feature_group = {"{gl}"};
+  artifact.device_feature_group = {"${gl}"};
   artifact.gl_texture_group = {"glx1"};
 
-  EXPECT_FALSE(artifact.ToArtifactName("app.{feature}.{gl}.apk", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("app.${feature}.${gl}.apk", &diag));
 
   artifact.device_feature_group = {"df1"};
-  artifact.gl_texture_group = {"{feature}"};
+  artifact.gl_texture_group = {"${feature}"};
   {
-    const auto& result = artifact.ToArtifactName("app.{feature}.{gl}.apk", &diag);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(result.value(), "app.df1.{feature}.apk");
+    const auto& result = artifact.ToArtifactName("app.${feature}.${gl}.apk", &diag);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.df1.${feature}.apk");
   }
 
   // This is an invalid case, but should be the only possible case due to the ordering of
   // replacement.
-  artifact.device_feature_group = {"{gl}"};
+  artifact.device_feature_group = {"${gl}"};
   artifact.gl_texture_group = {"glx1"};
   {
-    const auto& result = artifact.ToArtifactName("app.{feature}.apk", &diag);
-    EXPECT_TRUE(result);
+    const auto& result = artifact.ToArtifactName("app.${feature}.apk", &diag);
+    ASSERT_TRUE(result);
     EXPECT_EQ(result.value(), "app.glx1.apk");
   }
 }

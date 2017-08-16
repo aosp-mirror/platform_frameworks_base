@@ -36,7 +36,7 @@ using Group = std::unordered_map<std::string, std::vector<T>>;
 /** Output artifact configuration options. */
 struct Artifact {
   /** Name to use for output of processing foo.apk -> foo.<name>.apk. */
-  std::string name;
+  Maybe<std::string> name;
   /** If present, uses the ABI group with this name. */
   Maybe<std::string> abi_group;
   /** If present, uses the screen density group with this name. */
@@ -51,7 +51,13 @@ struct Artifact {
   Maybe<std::string> gl_texture_group;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> ToArtifactName(const std::string& format, IDiagnostics* diag) const;
+  Maybe<std::string> ToArtifactName(const android::StringPiece& format, IDiagnostics* diag,
+                                    const android::StringPiece& base_name = "",
+                                    const android::StringPiece& ext = "apk") const;
+
+  /** Convert an artifact name template into a name string based on configuration contents. */
+  Maybe<std::string> Name(const android::StringPiece& base_name, const android::StringPiece& ext,
+                          IDiagnostics* diag) const;
 };
 
 /** Enumeration of currently supported ABIs. */
@@ -129,7 +135,7 @@ struct PostProcessingConfiguration {
 
   Group<Abi> abi_groups;
   Group<ConfigDescription> screen_density_groups;
-  Group<Locale> locale_groups;
+  Group<ConfigDescription> locale_groups;
   Group<AndroidSdk> android_sdk_groups;
   Group<DeviceFeature> device_feature_groups;
   Group<GlTexture> gl_texture_groups;

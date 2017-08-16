@@ -59,6 +59,7 @@ using ::aapt::xml::XmlActionExecutor;
 using ::aapt::xml::XmlActionExecutorPolicy;
 using ::aapt::xml::XmlNodeAction;
 using ::android::base::ReadFileToString;
+using ::android::StringPiece;
 
 const std::unordered_map<std::string, Abi> kStringToAbiMap = {
     {"armeabi", Abi::kArmeV6}, {"armeabi-v7a", Abi::kArmV7a},  {"arm64-v8a", Abi::kArm64V8a},
@@ -117,9 +118,9 @@ const std::string& AbiToString(Abi abi) {
  * success, or false if the either the placeholder is not found in the name, or the value is not
  * present and the placeholder was.
  */
-static bool ReplacePlaceholder(const std::string& placeholder, const Maybe<std::string>& value,
+static bool ReplacePlaceholder(const StringPiece& placeholder, const Maybe<StringPiece>& value,
                                std::string* name, IDiagnostics* diag) {
-  size_t offset = name->find(placeholder);
+  size_t offset = name->find(placeholder.data());
   bool found = (offset != std::string::npos);
 
   // Make sure the placeholder was present if the desired value is present.
@@ -139,41 +140,81 @@ static bool ReplacePlaceholder(const std::string& placeholder, const Maybe<std::
     return false;
   }
 
-  name->replace(offset, placeholder.length(), value.value());
+  name->replace(offset, placeholder.length(), value.value().data());
 
   // Make sure there was only one instance of the placeholder.
-  if (name->find(placeholder) != std::string::npos) {
+  if (name->find(placeholder.data()) != std::string::npos) {
     diag->Error(DiagMessage() << "Placeholder present multiple times: " << placeholder);
     return false;
   }
   return true;
 }
 
-Maybe<std::string> Artifact::ToArtifactName(const std::string& format, IDiagnostics* diag) const {
-  std::string result = format;
+Maybe<std::string> Artifact::ToArtifactName(const StringPiece& format, IDiagnostics* diag,
+                                            const StringPiece& base_name,
+                                            const StringPiece& ext) const {
+  std::string result = format.to_string();
 
-  if (!ReplacePlaceholder("{abi}", abi_group, &result, diag)) {
+  Maybe<StringPiece> maybe_base_name =
+      base_name.empty() ? Maybe<StringPiece>{} : Maybe<StringPiece>{base_name};
+  if (!ReplacePlaceholder("${basename}", maybe_base_name, &result, diag)) {
     return {};
   }
 
-  if (!ReplacePlaceholder("{density}", screen_density_group, &result, diag)) {
+  // Extension is optional.
+  if (result.find("${ext}") != std::string::npos) {
+    if (!ReplacePlaceholder("${ext}", {ext}, &result, diag)) {
+      return {};
+    }
+  }
+
+  if (!ReplacePlaceholder("${abi}", abi_group, &result, diag)) {
     return {};
   }
 
-  if (!ReplacePlaceholder("{locale}", locale_group, &result, diag)) {
+  if (!ReplacePlaceholder("${density}", screen_density_group, &result, diag)) {
     return {};
   }
 
-  if (!ReplacePlaceholder("{sdk}", android_sdk_group, &result, diag)) {
+  if (!ReplacePlaceholder("${locale}", locale_group, &result, diag)) {
     return {};
   }
 
-  if (!ReplacePlaceholder("{feature}", device_feature_group, &result, diag)) {
+  if (!ReplacePlaceholder("${sdk}", android_sdk_group, &result, diag)) {
     return {};
   }
 
-  if (!ReplacePlaceholder("{gl}", gl_texture_group, &result, diag)) {
+  if (!ReplacePlaceholder("${feature}", device_feature_group, &result, diag)) {
     return {};
+  }
+
+  if (!ReplacePlaceholder("${gl}", gl_texture_group, &result, diag)) {
+    return {};
+  }
+
+  return result;
+}
+
+Maybe<std::string> Artifact::Name(const StringPiece& base_name, const StringPiece& ext,
+                                  IDiagnostics* diag) const {
+  if (!name) {
+    return {};
+  }
+
+  std::string result = name.value();
+
+  // Base name is optional.
+  if (result.find("${basename}") != std::string::npos) {
+    if (!ReplacePlaceholder("${basename}", {base_name}, &result, diag)) {
+      return {};
+    }
+  }
+
+  // Extension is optional.
+  if (result.find("${ext}") != std::string::npos) {
+    if (!ReplacePlaceholder("${ext}", {ext}, &result, diag)) {
+      return {};
+    }
   }
 
   return result;
@@ -346,7 +387,10 @@ ConfigurationParser::ActionHandler ConfigurationParser::screen_density_group_han
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
           ConfigDescription config_descriptor;
           const android::StringPiece& text = TrimWhitespace(t->text);
-          if (ConfigDescription::Parse(text, &config_descriptor)) {
+          bool parsed = ConfigDescription::Parse(text, &config_descriptor);
+          if (parsed &&
+              (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
+               android::ResTable_config::CONFIG_DENSITY)) {
             // Copy the density with the minimum SDK version stripped out.
             group.push_back(config_descriptor.CopyWithoutSdkVersion());
           } else {
@@ -379,17 +423,25 @@ ConfigurationParser::ActionHandler ConfigurationParser::locale_group_handler_ =
                                 << child->name);
       valid = false;
     } else {
-      Locale entry;
-      for (const auto& attr : child->attributes) {
-        if (attr.name == "lang") {
-          entry.lang = {attr.value};
-        } else if (attr.name == "region") {
-          entry.region = {attr.value};
-        } else {
-          diag->Warn(DiagMessage() << "Unknown attribute: " << attr.name << " = " << attr.value);
+      for (auto& node : child->children) {
+        xml::Text* t;
+        if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
+          ConfigDescription config_descriptor;
+          const android::StringPiece& text = TrimWhitespace(t->text);
+          bool parsed = ConfigDescription::Parse(text, &config_descriptor);
+          if (parsed &&
+              (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
+               android::ResTable_config::CONFIG_LOCALE)) {
+            // Copy the locale with the minimum SDK version stripped out.
+            group.push_back(config_descriptor.CopyWithoutSdkVersion());
+          } else {
+            diag->Error(DiagMessage()
+                        << "Could not parse config descriptor for screen-density: " << text);
+            valid = false;
+          }
+          break;
         }
       }
-      group.push_back(entry);
     }
   }
 

@@ -546,4 +546,34 @@ Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNam
   return SearchResult{package, type, entry};
 }
 
+std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
+  std::unique_ptr<ResourceTable> new_table = util::make_unique<ResourceTable>();
+  for (const auto& pkg : packages) {
+    ResourceTablePackage* new_pkg = new_table->CreatePackage(pkg->name, pkg->id);
+    for (const auto& type : pkg->types) {
+      ResourceTableType* new_type = new_pkg->FindOrCreateType(type->type);
+      if (!new_type->id) {
+        new_type->id = type->id;
+        new_type->symbol_status = type->symbol_status;
+      }
+
+      for (const auto& entry : type->entries) {
+        ResourceEntry* new_entry = new_type->FindOrCreateEntry(entry->name);
+        if (!new_entry->id) {
+          new_entry->id = entry->id;
+          new_entry->symbol_status = entry->symbol_status;
+        }
+
+        for (const auto& config_value : entry->values) {
+          ResourceConfigValue* new_value =
+              new_entry->FindOrCreateValue(config_value->config, config_value->product);
+          Value* value = config_value->value->Clone(&new_table->string_pool);
+          new_value->value = std::unique_ptr<Value>(value);
+        }
+      }
+    }
+  }
+  return new_table;
+}
+
 }  // namespace aapt
