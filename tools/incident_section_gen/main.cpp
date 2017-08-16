@@ -17,26 +17,30 @@
 
 #include <frameworks/base/core/proto/android/os/incident.pb.h>
 
-
 #include <map>
+#include <string>
 
+using namespace android;
 using namespace android::os;
 using namespace google::protobuf;
 using namespace google::protobuf::io;
 using namespace google::protobuf::internal;
 using namespace std;
 
-int
-main(int, const char**)
-{
-    map<string,FieldDescriptor const*> sections;
-    int N;
-
+static void generateHead(const char* header) {
     printf("// Auto generated file. Do not modify\n");
     printf("\n");
-    printf("#include \"incident_sections.h\"\n");
+    printf("#include \"%s.h\"\n", header);
     printf("\n");
+}
 
+// ================================================================================
+static bool generateIncidentSectionsCpp()
+{
+    generateHead("incident_sections");
+
+    map<string,FieldDescriptor const*> sections;
+    int N;
     Descriptor const* descriptor = IncidentProto::descriptor();
     N = descriptor->field_count();
     for (int i=0; i<N; i++) {
@@ -63,5 +67,72 @@ main(int, const char**)
 
     printf("const int INCIDENT_SECTION_COUNT = %d;\n", N);
 
-    return 0;
+    return true;
+}
+
+// ================================================================================
+static void splitAndPrint(const string& args) {
+    size_t base = 0;
+    size_t found;
+    while (true) {
+        found = args.find_first_of(" ", base);
+        if (found != base) {
+            string arg = args.substr(base, found - base);
+            printf(" \"%s\",", arg.c_str());
+        }
+        if (found == args.npos) break;
+        base = found + 1;
+    }
+}
+
+static bool generateSectionListCpp() {
+    generateHead("section_list");
+
+    printf("const Section* SECTION_LIST[] = {\n");
+    Descriptor const* descriptor = IncidentProto::descriptor();
+    for (int i=0; i<descriptor->field_count(); i++) {
+        const FieldDescriptor* field = descriptor->field(i);
+
+        if (field->type() != FieldDescriptor::TYPE_MESSAGE) {
+            continue;
+        }
+        const SectionFlags s = field->options().GetExtension(section);
+        switch (s.type()) {
+            case SECTION_NONE:
+                continue;
+            case SECTION_FILE:
+                printf("    new FileSection(%d, \"%s\"),\n", field->number(), s.args().c_str());
+                break;
+            case SECTION_COMMAND:
+                printf("    new CommandSection(%d,", field->number());
+                splitAndPrint(s.args());
+                printf(" NULL),\n");
+                break;
+            case SECTION_DUMPSYS:
+                printf("    new DumpsysSection(%d,", field->number());
+                splitAndPrint(s.args());
+                printf(" NULL),\n");
+                break;
+        }
+    }
+    printf("    NULL\n");
+    printf("};\n");
+    return true;
+}
+
+// ================================================================================
+int main(int argc, char const *argv[])
+{
+    if (argc != 2) return 1;
+    const char* module = argv[1];
+
+    if (strcmp(module, "incident") == 0) {
+        return !generateIncidentSectionsCpp();
+    }
+    if (strcmp(module, "incidentd") == 0 ) {
+        return !generateSectionListCpp();
+    }
+
+    // return failure if not called by the whitelisted modules
+    return 1;
 }

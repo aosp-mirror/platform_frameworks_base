@@ -20,6 +20,7 @@ option java_multiple_files = true;
 option java_outer_classname = "IncidentProtoMetadata";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/libs/incident/proto/android/section.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
 import "frameworks/base/core/proto/android/service/fingerprint.proto";
@@ -54,12 +55,21 @@ message IncidentProto {
     //SystemProperties system_properties = 1000;
 
     // Linux services
-    Procrank procrank = 2000;
+    Procrank procrank = 2000 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "/system/xbin/procrank"
+    ];
     //PageTypeInfo page_type_info = 2001;
-    KernelWakeSources kernel_wake_sources = 2002;
+    KernelWakeSources kernel_wake_sources = 2002 [
+        (section).type = SECTION_FILE,
+        (section).args = "/d/wakeup_sources"
+    ];
 
     // System Services
-    android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000;
+    android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "fingerprint --proto --incident"
+    ];
     android.service.NetworkStatsServiceDumpProto netstats = 3001;
     android.providers.settings.SettingsServiceDumpProto settings = 3002;
     android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;

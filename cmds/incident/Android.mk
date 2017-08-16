@@ -37,7 +37,7 @@ gen_src_dir := $(local-generated-sources-dir)
 gen := $(gen_src_dir)/incident_sections.cpp
 $(gen): $(HOST_OUT_EXECUTABLES)/incident-section-gen
 $(gen): PRIVATE_CUSTOM_TOOL = \
-    $(HOST_OUT_EXECUTABLES)/incident-section-gen > $@
+    $(HOST_OUT_EXECUTABLES)/incident-section-gen incident > $@
 $(gen): $(HOST_OUT_EXECUTABLES)/incident-section-gen
 	$(transform-generated-source)
 LOCAL_GENERATED_SOURCES += $(gen)
