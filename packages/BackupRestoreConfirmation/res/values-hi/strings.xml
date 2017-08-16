@@ -35,5 +35,5 @@
     <string name="toast_backup_ended" msgid="3818080769548726424">"सुरक्षित करना पूर्ण"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"पुनर्स्‍थापना प्रारंभ हो रही है..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"पुनर्स्‍थापना समाप्त"</string>
-    <string name="toast_timeout" msgid="5276598587087626877">"कार्यवाही समयबाह्य हो गई"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"काम नहीं हो सका. टाइम आउट हो गया"</string>
 </resources>
