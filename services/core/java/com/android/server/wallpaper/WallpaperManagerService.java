@@ -1606,8 +1606,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     @Override
     public ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb,
             final int which, Bundle outParams, int wallpaperUserId) {
-        enforceCallingOrSelfPermissionAndAppOp(android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                callingPkg, Binder.getCallingUid(), "read wallpaper");
+        final int hasPrivilege = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.READ_WALLPAPER_INTERNAL);
+        if (hasPrivilege != PackageManager.PERMISSION_GRANTED) {
+            enforceCallingOrSelfPermissionAndAppOp(android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    callingPkg, Binder.getCallingUid(), "read wallpaper");
+        }
 
         wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), wallpaperUserId, false, true, "getWallpaper", null);
