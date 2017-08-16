@@ -3354,18 +3354,22 @@ public class SyncManager {
             int downstreamActivity;
             int upstreamActivity;
 
-            if (!syncOperation.isPeriodic) {
-                // mSyncJobService.jobFinidhed is async, we need to ensure that this job is
-                // removed from JobScheduler's pending jobs list before moving forward and
-                // potentially rescheduling all pending jobs to respect new backoff values.
-                getJobScheduler().cancel(syncOperation.jobId);
-            }
             mLogger.log("runSyncFinishedOrCanceledH() op=", syncOperation, " result=", syncResult);
 
             if (syncResult != null) {
                 if (isLoggable) {
                     Slog.v(TAG, "runSyncFinishedOrCanceled [finished]: "
                             + syncOperation + ", result " + syncResult);
+                }
+
+                // In the non-canceled case, close the active sync context before doing the rest
+                // of the stuff.
+                closeActiveSyncContext(activeSyncContext);
+
+                // Note this part is probably okay to do before closeActiveSyncContext()...
+                // But moved here to restore OC-dev's behavior.  See b/64597061.
+                if (!syncOperation.isPeriodic) {
+                    getJobScheduler().cancel(syncOperation.jobId);
                 }
 
                 if (!syncResult.hasError()) {
@@ -3404,6 +3408,11 @@ public class SyncManager {
                 if (isLoggable) {
                     Slog.v(TAG, "runSyncFinishedOrCanceled [canceled]: " + syncOperation);
                 }
+
+                if (!syncOperation.isPeriodic) {
+                    getJobScheduler().cancel(syncOperation.jobId);
+                }
+
                 if (activeSyncContext.mSyncAdapter != null) {
                     try {
                         mLogger.log("Calling cancelSync for runSyncFinishedOrCanceled ",
@@ -3418,10 +3427,10 @@ public class SyncManager {
                 historyMessage = SyncStorageEngine.MESG_CANCELED;
                 downstreamActivity = 0;
                 upstreamActivity = 0;
-            }
 
-            // Close and unbind the service.  Don't use activeSyncContext.mSyncAdapter after this.
-            closeActiveSyncContext(activeSyncContext);
+                // In the cancel sync case, close it after calling cancelSync().
+                closeActiveSyncContext(activeSyncContext);
+            }
 
             stopSyncEvent(activeSyncContext.mHistoryRowId, syncOperation, historyMessage,
                     upstreamActivity, downstreamActivity, elapsedTime);
@@ -3457,6 +3466,8 @@ public class SyncManager {
                         + activeSyncContext.toString());
             }
             mSyncHandler.removeMessages(SyncHandler.MESSAGE_MONITOR_SYNC, activeSyncContext);
+
+            mLogger.log("closeActiveSyncContext: ", activeSyncContext);
         }
 
         /**
