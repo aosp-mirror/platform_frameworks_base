@@ -480,7 +480,7 @@ Maybe<std::string> JavaClassGenerator::UnmangleResource(const StringPiece& packa
   if (NameMangler::Unmangle(&unmangled_name, &unmangled_package)) {
     // The entry name was mangled, and we successfully unmangled it.
     // Check that we want to emit this symbol.
-    if (package_name != unmangled_package) {
+    if (package_name_to_generate != unmangled_package) {
       // Skip the entry if it doesn't belong to the package we're writing.
       return {};
     }
@@ -579,8 +579,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
         continue;
       }
 
-      // Stay consistent with AAPT and generate an empty type class if the R class
-      // is public.
+      // Stay consistent with AAPT and generate an empty type class if the R class is public.
       const bool force_creation_if_empty =
           (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic);
 

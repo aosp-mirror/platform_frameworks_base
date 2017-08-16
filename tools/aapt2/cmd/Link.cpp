@@ -457,7 +457,8 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   const Source& src = doc->file.source;
 
   if (context_->IsVerbose()) {
-    context_->GetDiagnostics()->Note(DiagMessage() << "linking " << src.path);
+    context_->GetDiagnostics()->Note(DiagMessage()
+                                     << "linking " << src.path << " (" << doc->file.name << ")");
   }
 
   XmlReferenceLinker xml_linker;
@@ -505,6 +506,8 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
   std::map<std::pair<ConfigDescription, StringPiece>, FileOperation> config_sorted_files;
 
   for (auto& pkg : table->packages) {
+    CHECK(!pkg->name.empty()) << "Packages must have names when being linked";
+
     for (auto& type : pkg->types) {
       // Sort by config and name, so that we get better locality in the zip file.
       config_sorted_files.clear();
@@ -701,7 +704,7 @@ class LinkCommand {
         util::make_unique<AssetManagerSymbolSource>();
     for (const std::string& path : options_.include_paths) {
       if (context_->IsVerbose()) {
-        context_->GetDiagnostics()->Note(DiagMessage(path) << "loading include path");
+        context_->GetDiagnostics()->Note(DiagMessage() << "including " << path);
       }
 
       // First try to load the file as a static lib.
@@ -819,11 +822,9 @@ class LinkCommand {
     return app_info;
   }
 
-  /**
-   * Precondition: ResourceTable doesn't have any IDs assigned yet, nor is it linked.
-   * Postcondition: ResourceTable has only one package left. All others are
-   * stripped, or there is an error and false is returned.
-   */
+  // Precondition: ResourceTable doesn't have any IDs assigned yet, nor is it linked.
+  // Postcondition: ResourceTable has only one package left. All others are
+  // stripped, or there is an error and false is returned.
   bool VerifyNoExternalPackages() {
     auto is_ext_package_func = [&](const std::unique_ptr<ResourceTablePackage>& pkg) -> bool {
       return context_->GetCompilationPackage() != pkg->name || !pkg->id ||
@@ -965,7 +966,91 @@ class LinkCommand {
       context_->GetDiagnostics()->Error(DiagMessage()
                                         << "failed writing to '" << out_path
                                         << "': " << android::base::SystemErrorCodeToString(errno));
+      return false;
     }
+    return true;
+  }
+
+  bool GenerateJavaClasses() {
+    // The set of packages whose R class to call in the main classes onResourcesLoaded callback.
+    std::vector<std::string> packages_to_callback;
+
+    JavaClassGeneratorOptions template_options;
+    template_options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+    template_options.javadoc_annotations = options_.javadoc_annotations;
+
+    if (context_->GetPackageType() == PackageType::kStaticLib || options_.generate_non_final_ids) {
+      template_options.use_final = false;
+    }
+
+    if (context_->GetPackageType() == PackageType::kSharedLib) {
+      template_options.use_final = false;
+      template_options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{};
+    }
+
+    const StringPiece actual_package = context_->GetCompilationPackage();
+    StringPiece output_package = context_->GetCompilationPackage();
+    if (options_.custom_java_package) {
+      // Override the output java package to the custom one.
+      output_package = options_.custom_java_package.value();
+    }
+
+    // Generate the private symbols if required.
+    if (options_.private_symbols) {
+      packages_to_callback.push_back(options_.private_symbols.value());
+
+      // If we defined a private symbols package, we only emit Public symbols
+      // to the original package, and private and public symbols to the private package.
+      JavaClassGeneratorOptions options = template_options;
+      options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
+      if (!WriteJavaFile(&final_table_, actual_package, options_.private_symbols.value(),
+                         options)) {
+        return false;
+      }
+    }
+
+    // Generate copies of the original package R class but with different package names.
+    // This is to support non-namespaced builds.
+    for (const std::string& extra_package : options_.extra_java_packages) {
+      packages_to_callback.push_back(extra_package);
+
+      JavaClassGeneratorOptions options = template_options;
+      options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+      if (!WriteJavaFile(&final_table_, actual_package, extra_package, options)) {
+        return false;
+      }
+    }
+
+    // Generate R classes for each package that was merged (static library).
+    // Use the actual package's resources only.
+    for (const std::string& package : table_merger_->merged_packages()) {
+      packages_to_callback.push_back(package);
+
+      JavaClassGeneratorOptions options = template_options;
+      options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+      if (!WriteJavaFile(&final_table_, package, package, options)) {
+        return false;
+      }
+    }
+
+    // Generate the main public R class.
+    JavaClassGeneratorOptions options = template_options;
+
+    // Only generate public symbols if we have a private package.
+    if (options_.private_symbols) {
+      options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
+    }
+
+    if (options.rewrite_callback_options) {
+      options.rewrite_callback_options.value().packages_to_callback =
+          std::move(packages_to_callback);
+    }
+
+    if (!WriteJavaFile(&final_table_, actual_package, output_package, options,
+                       options_.generate_text_symbols_path)) {
+      return false;
+    }
+
     return true;
   }
 
@@ -1097,15 +1182,17 @@ class LinkCommand {
 
     bool result;
     if (options_.no_static_lib_packages) {
-      // Merge all resources as if they were in the compilation package. This is
-      // the old behavior of aapt.
+      // Merge all resources as if they were in the compilation package. This is the old behavior
+      // of aapt.
 
-      // Add the package to the set of --extra-packages so we emit an R.java for
-      // each library package.
+      // Add the package to the set of --extra-packages so we emit an R.java for each library
+      // package.
       if (!pkg->name.empty()) {
         options_.extra_java_packages.insert(pkg->name);
       }
 
+      // Clear the package name, so as to make the resources look like they are coming from the
+      // local package.
       pkg->name = "";
       if (override) {
         result = table_merger_->MergeOverlay(Source(input), table.get(), collection.get());
@@ -1673,8 +1760,7 @@ class LinkCommand {
 
     bool error = false;
     {
-      // AndroidManifest.xml has no resource name, but the CallSite is built
-      // from the name
+      // AndroidManifest.xml has no resource name, but the CallSite is built from the name
       // (aka, which package the AndroidManifest.xml is coming from).
       // So we give it a package name so it can see local resources.
       manifest_xml->file.name.package = context_->GetCompilationPackage();
@@ -1727,72 +1813,7 @@ class LinkCommand {
     }
 
     if (options_.generate_java_class_path) {
-      // The set of packages whose R class to call in the main classes
-      // onResourcesLoaded callback.
-      std::vector<std::string> packages_to_callback;
-
-      JavaClassGeneratorOptions template_options;
-      template_options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
-      template_options.javadoc_annotations = options_.javadoc_annotations;
-
-      if (context_->GetPackageType() == PackageType::kStaticLib ||
-          options_.generate_non_final_ids) {
-        template_options.use_final = false;
-      }
-
-      if (context_->GetPackageType() == PackageType::kSharedLib) {
-        template_options.use_final = false;
-        template_options.rewrite_callback_options = OnResourcesLoadedCallbackOptions{};
-      }
-
-      const StringPiece actual_package = context_->GetCompilationPackage();
-      StringPiece output_package = context_->GetCompilationPackage();
-      if (options_.custom_java_package) {
-        // Override the output java package to the custom one.
-        output_package = options_.custom_java_package.value();
-      }
-
-      // Generate the private symbols if required.
-      if (options_.private_symbols) {
-        packages_to_callback.push_back(options_.private_symbols.value());
-
-        // If we defined a private symbols package, we only emit Public symbols
-        // to the original package, and private and public symbols to the
-        // private package.
-        JavaClassGeneratorOptions options = template_options;
-        options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
-        if (!WriteJavaFile(&final_table_, actual_package, options_.private_symbols.value(),
-                           options)) {
-          return 1;
-        }
-      }
-
-      // Generate all the symbols for all extra packages.
-      for (const std::string& extra_package : options_.extra_java_packages) {
-        packages_to_callback.push_back(extra_package);
-
-        JavaClassGeneratorOptions options = template_options;
-        options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
-        if (!WriteJavaFile(&final_table_, actual_package, extra_package, options)) {
-          return 1;
-        }
-      }
-
-      // Generate the main public R class.
-      JavaClassGeneratorOptions options = template_options;
-
-      // Only generate public symbols if we have a private package.
-      if (options_.private_symbols) {
-        options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
-      }
-
-      if (options.rewrite_callback_options) {
-        options.rewrite_callback_options.value().packages_to_callback =
-            std::move(packages_to_callback);
-      }
-
-      if (!WriteJavaFile(&final_table_, actual_package, output_package, options,
-                         options_.generate_text_symbols_path)) {
+      if (!GenerateJavaClasses()) {
         return 1;
       }
     }
