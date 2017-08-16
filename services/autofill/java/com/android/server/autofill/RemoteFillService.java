@@ -562,7 +562,10 @@ final class RemoteFillService implements DeathRecipient {
         void onTimeout(RemoteFillService remoteService) {
             // NOTE: Must make these 2 calls asynchronously, because the cancellation signal is
             // handled by the service, which could block.
-            remoteService.dispatchOnFillTimeout(mCancellation);
+            final ICancellationSignal cancellation = mCancellation;
+            if (cancellation != null) {
+                remoteService.dispatchOnFillTimeout(cancellation);
+            }
             remoteService.dispatchOnFillRequestFailure(PendingFillRequest.this, null);
         }
 
