@@ -72,8 +72,8 @@
     <item msgid="7065842274271279580">"Sebenzisa ukukhetha kwesistimu (Okuzenzakalelayo)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
     <item msgid="686685526567131661">"I-AAC"</item>
-    <item msgid="8910200421843557332">"aptX"</item>
-    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="8910200421843557332">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
+    <item msgid="8434403964359457768">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
     <item msgid="6751080638867012696">"I-LDAC"</item>
     <item msgid="723675059572222462">"Nika amandla amakhodekhi akhethekayo"</item>
     <item msgid="3304843301758635896">"Khubaza amakhodekhi akhethekayo"</item>
@@ -82,8 +82,8 @@
     <item msgid="5062108632402595000">"Sebenzisa ukukhetha kwesistimu (Okuzenzakalelayo)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"I-AAC"</item>
-    <item msgid="2279916056363477395">"aptX"</item>
-    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="2279916056363477395">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
+    <item msgid="6641171061200063516">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
     <item msgid="7950781694447359344">"I-LDAC"</item>
     <item msgid="2209680154067241740">"Nika amandla amakhodekhi akhethekayo"</item>
     <item msgid="741805482892725657">"Khubaza amakhodekhi akhethekayo"</item>
