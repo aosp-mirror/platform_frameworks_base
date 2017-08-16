@@ -13161,17 +13161,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Remove the pending callback for sending a
-     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
-     */
-    private void removeSendViewScrolledAccessibilityEventCallback() {
-        if (mSendViewScrolledAccessibilityEvent != null) {
-            removeCallbacks(mSendViewScrolledAccessibilityEvent);
-            mSendViewScrolledAccessibilityEvent.mIsPending = false;
-        }
-    }
-
-    /**
      * Sets the TouchDelegate for this View.
      */
     public void setTouchDelegate(TouchDelegate delegate) {
@@ -13468,7 +13457,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         notifySubtreeAccessibilityStateChangedIfNeeded();
 
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            postSendViewScrolledAccessibilityEventCallback();
+            postSendViewScrolledAccessibilityEventCallback(l - oldl, t - oldt);
         }
 
         mBackgroundSizeChanged = true;
@@ -15998,15 +15987,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This event is sent at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
      */
-    private void postSendViewScrolledAccessibilityEventCallback() {
+    private void postSendViewScrolledAccessibilityEventCallback(int dx, int dy) {
         if (mSendViewScrolledAccessibilityEvent == null) {
             mSendViewScrolledAccessibilityEvent = new SendViewScrolledAccessibilityEvent();
         }
-        if (!mSendViewScrolledAccessibilityEvent.mIsPending) {
-            mSendViewScrolledAccessibilityEvent.mIsPending = true;
-            postDelayed(mSendViewScrolledAccessibilityEvent,
-                    ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
-        }
+        mSendViewScrolledAccessibilityEvent.post(dx, dy);
     }
 
     /**
@@ -17264,7 +17249,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeUnsetPressCallback();
         removeLongPressCallback();
         removePerformClickCallback();
-        removeSendViewScrolledAccessibilityEventCallback();
+        cancel(mSendViewScrolledAccessibilityEvent);
         stopNestedScroll();
 
         // Anything that started animating right before detach should already
@@ -25705,11 +25690,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private class SendViewScrolledAccessibilityEvent implements Runnable {
         public volatile boolean mIsPending;
+        public int mDeltaX;
+        public int mDeltaY;
 
-        public void run() {
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
-            mIsPending = false;
+        public void post(int dx, int dy) {
+            mDeltaX += dx;
+            mDeltaY += dy;
+            if (!mIsPending) {
+                mIsPending = true;
+                postDelayed(this, ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
+            }
         }
+
+        @Override
+        public void run() {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                event.setScrollDeltaX(mDeltaX);
+                event.setScrollDeltaY(mDeltaY);
+                sendAccessibilityEventUnchecked(event);
+            }
+            reset();
+        }
+
+        private void reset() {
+            mIsPending = false;
+            mDeltaX = 0;
+            mDeltaY = 0;
+        }
+    }
+
+    /**
+     * Remove the pending callback for sending a
+     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
+     */
+    private void cancel(@Nullable SendViewScrolledAccessibilityEvent callback) {
+        if (callback == null || !callback.mIsPending) return;
+        removeCallbacks(callback);
+        callback.reset();
     }
 
     /**

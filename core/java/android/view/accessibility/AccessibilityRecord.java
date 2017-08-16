@@ -86,6 +86,9 @@ public class AccessibilityRecord {
     int mToIndex = UNDEFINED;
     int mScrollX = UNDEFINED;
     int mScrollY = UNDEFINED;
+
+    int mScrollDeltaX = UNDEFINED;
+    int mScrollDeltaY = UNDEFINED;
     int mMaxScrollX = UNDEFINED;
     int mMaxScrollY = UNDEFINED;
 
@@ -462,6 +465,48 @@ public class AccessibilityRecord {
     public void setScrollY(int scrollY) {
         enforceNotSealed();
         mScrollY = scrollY;
+    }
+
+    /**
+     * Gets the difference in pixels between the horizontal position before the scroll and the
+     * current horizontal position
+     *
+     * @return the scroll delta x
+     */
+    public int getScrollDeltaX() {
+        return mScrollDeltaX;
+    }
+
+    /**
+     * Sets the difference in pixels between the horizontal position before the scroll and the
+     * current horizontal position
+     *
+     * @param scrollDeltaX the scroll delta x
+     */
+    public void setScrollDeltaX(int scrollDeltaX) {
+        enforceNotSealed();
+        mScrollDeltaX = scrollDeltaX;
+    }
+
+    /**
+     * Gets the difference in pixels between the vertical position before the scroll and the
+     * current vertical position
+     *
+     * @return the scroll delta y
+     */
+    public int getScrollDeltaY() {
+        return mScrollDeltaY;
+    }
+
+    /**
+     * Sets the difference in pixels between the vertical position before the scroll and the
+     * current vertical position
+     *
+     * @param scrollDeltaY the scroll delta y
+     */
+    public void setScrollDeltaY(int scrollDeltaY) {
+        enforceNotSealed();
+        mScrollDeltaY = scrollDeltaY;
     }
 
     /**

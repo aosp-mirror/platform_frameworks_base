@@ -1480,11 +1480,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /** @hide */
     @Override
-    public void sendAccessibilityEventInternal(int eventType) {
+    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
         // Since this class calls onScrollChanged even if the mFirstPosition and the
         // child count have not changed we will avoid sending duplicate accessibility
         // events.
-        if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
             final int firstVisiblePosition = getFirstVisiblePosition();
             final int lastVisiblePosition = getLastVisiblePosition();
             if (mLastAccessibilityScrollEventFromIndex == firstVisiblePosition
@@ -1495,7 +1495,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
             }
         }
-        super.sendAccessibilityEventInternal(eventType);
+        super.sendAccessibilityEventUnchecked(event);
     }
 
     @Override
