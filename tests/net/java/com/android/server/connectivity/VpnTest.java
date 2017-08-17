@@ -351,7 +351,7 @@ public class VpnTest extends AndroidTestCase {
         // Apps that opt out explicitly are not supported
         appInfo.targetSdkVersion = VERSION_CODES.CUR_DEVELOPMENT;
         Bundle metaData = new Bundle();
-        metaData.putBoolean(VpnService.METADATA_SUPPORTS_ALWAYS_ON, false);
+        metaData.putBoolean(VpnService.SERVICE_META_DATA_SUPPORTS_ALWAYS_ON, false);
         svcInfo.metaData = metaData;
         assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0]));
     }

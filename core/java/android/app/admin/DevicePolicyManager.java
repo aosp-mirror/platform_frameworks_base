@@ -3939,7 +3939,7 @@ public class DevicePolicyManager {
      *         {@link android.Manifest.permission#BIND_VPN_SERVICE};</li>
      *     <li>target {@link android.os.Build.VERSION_CODES#N API 24} or above; and</li>
      *     <li><i>not</i> explicitly opt out of the feature through
-     *         {@link android.net.VpnService#METADATA_SUPPORTS_ALWAYS_ON}.</li>
+     *         {@link android.net.VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}.</li>
      * </ul>
      * The call will fail if called with the package name of an unsupported VPN app.
      *
