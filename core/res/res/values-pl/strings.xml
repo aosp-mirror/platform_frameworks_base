@@ -1338,9 +1338,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Nawiązano połączenie: <xliff:g id="SESSION">%s</xliff:g>. Dotknij, aby zarządzać siecią."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Łączę ze stałą siecią VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Połączono ze stałą siecią VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Rozłączono ze stałą siecią VPN"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Błąd stałej sieci VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Kliknij, by skonfigurować"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Wybierz plik"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie wybrano pliku"</string>
     <string name="reset" msgid="2448168080964209908">"Resetuj"</string>
@@ -1651,7 +1653,7 @@
       <item quantity="one">Spróbuj ponownie za sekundę</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Spróbuj ponownie później"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Widok na pełnym ekranie"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Włączony pełny ekran"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Aby wyjść, przesuń palcem z góry na dół."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Gotowe"</string>

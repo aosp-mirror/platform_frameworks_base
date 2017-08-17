@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> তে সংযুক্ত হয়েছে৷ নেটওয়ার্ক পরিচালনা করতে আলতো চাপুন৷"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"সর্বদা-চালু VPN সংযুক্ত হচ্ছে..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"সর্বদা-চালু VPN সংযুক্ত হয়েছে"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"সর্বদা-চালু VPN এর সংযোগ বিচ্ছিন্ন হয়েছে"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"সর্বদা-চালু VPN ত্রুটি"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"সেট আপ করতে আলতো চাপুন"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ফাইল বেছে নিন"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"কোনো ফাইল নির্বাচন করা হয়নি"</string>
     <string name="reset" msgid="2448168080964209908">"আবার সেট করুন"</string>

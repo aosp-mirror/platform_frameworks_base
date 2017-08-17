@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ। ਨੈੱਟਵਰਕ ਦੇ ਪ੍ਰਬੰਧਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ਹਮੇਸ਼ਾ-ਚਾਲੂ VPN ਡਿਸਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਅਸ਼ੁੱਧੀ"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ਫਾਈਲ ਚੁਣੋ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ਕੋਈ ਫਾਈਲ ਨਹੀਂ ਚੁਣੀ ਗਈ"</string>
     <string name="reset" msgid="2448168080964209908">"ਰੀਸੈੱਟ ਕਰੋ"</string>

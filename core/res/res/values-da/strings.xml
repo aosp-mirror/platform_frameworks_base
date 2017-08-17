@@ -261,7 +261,7 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"have adgang til dine kontaktpersoner"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Giv &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til dine kontaktpersoner"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"at få adgang til enhedens placering"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"få adgang til enhedens placering"</string>
     <string name="permgrouprequest_location" msgid="8903573681261610809">"Giv &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til enhedens placering"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"have adgang til din kalender"</string>
@@ -296,7 +296,7 @@
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, stryge, knibe sammen og udføre andre bevægelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingeraftryksbevægelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan registrere bevægelser, der foretages på enhedernes fingeraftrykslæser."</string>
-    <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller redigere statuslinje"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vær statusbjælken"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tillader, at appen er statusbjælken."</string>
@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Forbundet til <xliff:g id="SESSION">%s</xliff:g>. Tryk for at administrere netværket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til konstant VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Konstant VPN er forbundet"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Forbindelsen til konstant VPN er afbrudt"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i konstant VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tryk for at konfigurere"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Nulstil"</string>

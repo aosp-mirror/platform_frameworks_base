@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> သို့ ချိတ်ဆက်ထားသည်။ ကွန်ရက်ကို စီမံခန့်ခွဲရန် တို့ပါ။"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်နေစဉ်…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်မှုရှိ"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"အမြဲတမ်းဖွင့်ထားရသော VPN ပြတ်တောက်နေသည်"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"အမြဲတမ်းဖွင့်ထား VPN အမှား"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ပြင်ဆင်သတ်မှတ်ရန် တို့ပါ"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ဖိုင်ရွေးချယ်ရန်"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"မည်သည့်ဖိုင်ကိုမှမရွေးပါ"</string>
     <string name="reset" msgid="2448168080964209908">"ပြန်လည်သတ်မှတ်ရန်"</string>
