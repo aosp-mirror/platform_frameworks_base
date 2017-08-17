@@ -567,18 +567,25 @@ public class CarrierConfigManager {
             "carrier_data_call_retry_config_strings";
 
     /**
-     * Delay between trying APN from the pool
+     * Delay in milliseconds between trying APN from the pool
      * @hide
      */
     public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG =
             "carrier_data_call_apn_delay_default_long";
 
     /**
-     * Faster delay between trying APN from the pool
+     * Faster delay in milliseconds between trying APN from the pool
      * @hide
      */
     public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
             "carrier_data_call_apn_delay_faster_long";
+
+    /**
+     * Delay in milliseconds for retrying APN after disconnect
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG =
+            "carrier_data_call_apn_retry_after_disconnect_long";
 
     /**
      * Data call setup permanent failure causes by the carrier
@@ -1645,6 +1652,7 @@ public class CarrierConfigManager {
                 "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 10000);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
