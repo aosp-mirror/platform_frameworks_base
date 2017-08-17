@@ -19,9 +19,11 @@ package com.android.systemui;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -34,13 +36,27 @@ public class ChargingView extends ImageView implements
         BatteryController.BatteryStateChangeCallback,
         ConfigurationController.ConfigurationListener {
 
+    private static final long CHARGING_INDICATION_DELAY_MS = 1000;
+
+    private final AmbientDisplayConfiguration mConfig;
+    private final Runnable mClearSuppressCharging = this::clearSuppressCharging;
     private BatteryController mBatteryController;
     private int mImageResource;
     private boolean mCharging;
     private boolean mDark;
+    private boolean mSuppressCharging;
+
+
+    private void clearSuppressCharging() {
+        mSuppressCharging = false;
+        removeCallbacks(mClearSuppressCharging);
+        updateVisibility();
+    }
 
     public ChargingView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+
+        mConfig = new AmbientDisplayConfiguration(context);
 
         TypedArray a = context.obtainStyledAttributes(attrs, new int[]{android.R.attr.src});
         int srcResId = a.getResourceId(0, 0);
@@ -67,12 +83,28 @@ public class ChargingView extends ImageView implements
         super.onDetachedFromWindow();
         mBatteryController.removeCallback(this);
         Dependency.get(ConfigurationController.class).removeCallback(this);
+        removeCallbacks(mClearSuppressCharging);
     }
 
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        boolean startCharging = charging && !mCharging;
+        if (startCharging && deviceWillWakeUpWhenPluggedIn() && mDark) {
+            // We're about to wake up, and thus don't want to show the indicator just for it to be
+            // hidden again.
+            clearSuppressCharging();
+            mSuppressCharging = true;
+            postDelayed(mClearSuppressCharging, CHARGING_INDICATION_DELAY_MS);
+        }
         mCharging = charging;
         updateVisibility();
+    }
+
+    private boolean deviceWillWakeUpWhenPluggedIn() {
+        boolean plugTurnsOnScreen = getResources().getBoolean(
+                com.android.internal.R.bool.config_unplugTurnsOnScreen);
+        boolean aod = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        return !aod && plugTurnsOnScreen;
     }
 
     @Override
@@ -82,10 +114,13 @@ public class ChargingView extends ImageView implements
 
     public void setDark(boolean dark) {
         mDark = dark;
+        if (!dark) {
+            clearSuppressCharging();
+        }
         updateVisibility();
     }
 
     private void updateVisibility() {
-        setVisibility(mCharging && mDark ? VISIBLE : INVISIBLE);
+        setVisibility(mCharging && !mSuppressCharging && mDark ? VISIBLE : INVISIBLE);
     }
 }
