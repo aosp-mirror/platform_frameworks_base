@@ -33,45 +33,33 @@
 namespace aapt {
 namespace xml {
 
-class RawVisitor;
-
 class Element;
+class Visitor;
 
 // Base class for all XML nodes.
 class Node {
  public:
-  Node* parent = nullptr;
-  size_t line_number = 0;
-  size_t column_number = 0;
-  std::string comment;
-  std::vector<std::unique_ptr<Node>> children;
-
   virtual ~Node() = default;
 
-  void AppendChild(std::unique_ptr<Node> child);
-  void InsertChild(size_t index, std::unique_ptr<Node> child);
-  virtual void Accept(RawVisitor* visitor) = 0;
+  Element* parent = nullptr;
+  size_t line_number = 0u;
+  size_t column_number = 0u;
+  std::string comment;
+
+  virtual void Accept(Visitor* visitor) = 0;
 
   using ElementCloneFunc = std::function<void(const Element&, Element*)>;
 
   // Clones the Node subtree, using the given function to decide how to clone an Element.
-  virtual std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) = 0;
+  virtual std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) const = 0;
 };
 
-// Base class that implements the visitor methods for a subclass of Node.
-template <typename Derived>
-class BaseNode : public Node {
- public:
-  virtual void Accept(RawVisitor* visitor) override;
-};
-
-// A Namespace XML node. Can only have one child.
-class Namespace : public BaseNode<Namespace> {
- public:
-  std::string namespace_prefix;
-  std::string namespace_uri;
-
-  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
+// A namespace declaration (xmlns:prefix="uri").
+struct NamespaceDecl {
+  std::string prefix;
+  std::string uri;
+  size_t line_number = 0u;
+  size_t column_number = 0u;
 };
 
 struct AaptAttribute {
@@ -94,31 +82,46 @@ struct Attribute {
 };
 
 // An Element XML node.
-class Element : public BaseNode<Element> {
+class Element : public Node {
  public:
+  // Ordered namespace prefix declarations.
+  std::vector<NamespaceDecl> namespace_decls;
+
   std::string namespace_uri;
   std::string name;
   std::vector<Attribute> attributes;
+  std::vector<std::unique_ptr<Node>> children;
+
+  void AppendChild(std::unique_ptr<Node> child);
+  void InsertChild(size_t index, std::unique_ptr<Node> child);
 
   Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
   const Attribute* FindAttribute(const android::StringPiece& ns,
                                  const android::StringPiece& name) const;
-  xml::Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
-  xml::Element* FindChildWithAttribute(const android::StringPiece& ns,
-                                       const android::StringPiece& name,
-                                       const android::StringPiece& attr_ns,
-                                       const android::StringPiece& attr_name,
-                                       const android::StringPiece& attr_value);
-  std::vector<xml::Element*> GetChildElements();
-  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
+  Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
+  Element* FindChildWithAttribute(const android::StringPiece& ns, const android::StringPiece& name,
+                                  const android::StringPiece& attr_ns,
+                                  const android::StringPiece& attr_name,
+                                  const android::StringPiece& attr_value);
+  std::vector<Element*> GetChildElements();
+
+  // Due to overriding of subtypes not working with unique_ptr, define a convenience Clone method
+  // that knows cloning an element returns an element.
+  std::unique_ptr<Element> CloneElement(const ElementCloneFunc& el_cloner) const;
+
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) const override;
+
+  void Accept(Visitor* visitor) override;
 };
 
 // A Text (CDATA) XML node. Can not have any children.
-class Text : public BaseNode<Text> {
+class Text : public Node {
  public:
   std::string text;
 
-  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) const override;
+
+  void Accept(Visitor* visitor) override;
 };
 
 // An XML resource with a source, name, and XML tree.
@@ -131,7 +134,7 @@ class XmlResource {
   // is destroyed.
   StringPool string_pool;
 
-  std::unique_ptr<xml::Node> root;
+  std::unique_ptr<xml::Element> root;
 };
 
 // Inflates an XML DOM from an InputStream, logging errors to the logger.
@@ -143,42 +146,38 @@ std::unique_ptr<XmlResource> Inflate(io::InputStream* in, IDiagnostics* diag, co
 std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
                                      const Source& source);
 
-Element* FindRootElement(XmlResource* doc);
 Element* FindRootElement(Node* node);
 
-// A visitor interface for the different XML Node subtypes. This will not traverse into children.
-// Use Visitor for that.
-class RawVisitor {
- public:
-  virtual ~RawVisitor() = default;
-
-  virtual void Visit(Namespace* node) {}
-  virtual void Visit(Element* node) {}
-  virtual void Visit(Text* text) {}
-};
-
 // Visitor whose default implementation visits the children nodes of any node.
-class Visitor : public RawVisitor {
+class Visitor {
  public:
-  using RawVisitor::Visit;
+  virtual ~Visitor() = default;
 
-  void Visit(Namespace* node) override {
-    VisitChildren(node);
+  virtual void Visit(Element* el) {
+    VisitChildren(el);
   }
 
-  void Visit(Element* node) override {
-    VisitChildren(node);
+  virtual void Visit(Text* text) {
   }
 
-  void Visit(Text* text) override {
-    VisitChildren(text);
-  }
+ protected:
+  Visitor() = default;
 
-  void VisitChildren(Node* node) {
-    for (auto& child : node->children) {
+  void VisitChildren(Element* el) {
+    for (auto& child : el->children) {
       child->Accept(this);
     }
   }
+
+  virtual void BeforeVisitElement(Element* el) {
+  }
+  virtual void AfterVisitElement(Element* el) {
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Visitor);
+
+  friend class Element;
 };
 
 // An XML DOM visitor that will record the package name for a namespace prefix.
@@ -186,41 +185,70 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
   using Visitor::Visit;
 
-  void Visit(Namespace* ns) override;
   Maybe<ExtractedPackage> TransformPackageAlias(
       const android::StringPiece& alias, const android::StringPiece& local_package) const override;
 
+ protected:
+  PackageAwareVisitor() = default;
+
+  void BeforeVisitElement(Element* el) override;
+  void AfterVisitElement(Element* el) override;
+
  private:
+  DISALLOW_COPY_AND_ASSIGN(PackageAwareVisitor);
+
   struct PackageDecl {
     std::string prefix;
     ExtractedPackage package;
   };
 
-  std::vector<PackageDecl> package_decls_;
+  std::vector<std::vector<PackageDecl>> package_decls_;
 };
 
-// Implementations
+namespace internal {
 
-template <typename Derived>
-void BaseNode<Derived>::Accept(RawVisitor* visitor) {
-  visitor->Visit(static_cast<Derived*>(this));
-}
+// Base class that overrides the default behaviour and does not descend into child nodes.
+class NodeCastBase : public Visitor {
+ public:
+  void Visit(Element* el) override {
+  }
+  void Visit(Text* el) override {
+  }
+
+ protected:
+  NodeCastBase() = default;
+
+  void BeforeVisitElement(Element* el) override {
+  }
+  void AfterVisitElement(Element* el) override {
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeCastBase);
+};
 
 template <typename T>
-class NodeCastImpl : public RawVisitor {
+class NodeCastImpl : public NodeCastBase {
  public:
-  using RawVisitor::Visit;
+  using NodeCastBase::Visit;
+
+  NodeCastImpl() = default;
 
   T* value = nullptr;
 
   void Visit(T* v) override {
     value = v;
   }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeCastImpl);
 };
+
+}  // namespace internal
 
 template <typename T>
 T* NodeCast(Node* node) {
-  NodeCastImpl<T> visitor;
+  internal::NodeCastImpl<T> visitor;
   node->Accept(&visitor);
   return visitor.value;
 }
