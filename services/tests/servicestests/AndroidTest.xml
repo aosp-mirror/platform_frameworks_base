@@ -16,6 +16,7 @@
 <configuration description="Runs Frameworks Services Tests.">
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
         <option name="test-file-name" value="FrameworksServicesTests.apk" />
+        <option name="test-file-name" value="ConnTestApp.apk" />
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />
