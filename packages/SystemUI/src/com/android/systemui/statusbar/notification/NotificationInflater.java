@@ -193,7 +193,7 @@ public class NotificationInflater {
 
         int flag = FLAG_REINFLATE_CONTENT_VIEW;
         if ((reInflateFlags & flag) != 0) {
-            boolean isNewView = !compareRemoteViews(result.newContentView, entry.cachedContentView);
+            boolean isNewView = !canReapplyRemoteView(result.newContentView, entry.cachedContentView);
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -215,7 +215,7 @@ public class NotificationInflater {
         flag = FLAG_REINFLATE_EXPANDED_VIEW;
         if ((reInflateFlags & flag) != 0) {
             if (result.newExpandedView != null) {
-                boolean isNewView = !compareRemoteViews(result.newExpandedView,
+                boolean isNewView = !canReapplyRemoteView(result.newExpandedView,
                         entry.cachedBigContentView);
                 ApplyCallback applyCallback = new ApplyCallback() {
                     @Override
@@ -240,7 +240,7 @@ public class NotificationInflater {
         flag = FLAG_REINFLATE_HEADS_UP_VIEW;
         if ((reInflateFlags & flag) != 0) {
             if (result.newHeadsUpView != null) {
-                boolean isNewView = !compareRemoteViews(result.newHeadsUpView,
+                boolean isNewView = !canReapplyRemoteView(result.newHeadsUpView,
                         entry.cachedHeadsUpContentView);
                 ApplyCallback applyCallback = new ApplyCallback() {
                     @Override
@@ -264,7 +264,7 @@ public class NotificationInflater {
 
         flag = FLAG_REINFLATE_PUBLIC_VIEW;
         if ((reInflateFlags & flag) != 0) {
-            boolean isNewView = !compareRemoteViews(result.newPublicView,
+            boolean isNewView = !canReapplyRemoteView(result.newPublicView,
                     entry.cachedPublicContentView);
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
@@ -288,7 +288,7 @@ public class NotificationInflater {
         if ((reInflateFlags & flag) != 0) {
             NotificationContentView newParent = redactAmbient ? publicLayout : privateLayout;
             boolean isNewView = !canReapplyAmbient(row, redactAmbient) ||
-                    !compareRemoteViews(result.newAmbientView, entry.cachedAmbientContentView);
+                    !canReapplyRemoteView(result.newAmbientView, entry.cachedAmbientContentView);
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -486,14 +486,21 @@ public class NotificationInflater {
         return builder.createContentView(useLarge);
     }
 
-    // Returns true if the RemoteViews are the same.
-    private static boolean compareRemoteViews(final RemoteViews a, final RemoteViews b) {
-        return (a == null && b == null) ||
-                (a != null && b != null
-                        && b.getPackage() != null
-                        && a.getPackage() != null
-                        && a.getPackage().equals(b.getPackage())
-                        && a.getLayoutId() == b.getLayoutId());
+    /**
+     * @param newView The new view that will be applied
+     * @param oldView The old view that was applied to the existing view before
+     * @return {@code true} if the RemoteViews are the same and the view can be reused to reapply.
+     */
+     @VisibleForTesting
+     static boolean canReapplyRemoteView(final RemoteViews newView,
+            final RemoteViews oldView) {
+        return (newView == null && oldView == null) ||
+                (newView != null && oldView != null
+                        && oldView.getPackage() != null
+                        && newView.getPackage() != null
+                        && newView.getPackage().equals(oldView.getPackage())
+                        && newView.getLayoutId() == oldView.getLayoutId()
+                        && !oldView.isReapplyDisallowed());
     }
 
     public void setInflationCallback(InflationCallback callback) {

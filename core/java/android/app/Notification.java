@@ -6935,6 +6935,7 @@ public class Notification implements Parcelable
                 customContent = customContent.clone();
                 remoteViews.removeAllViewsExceptId(R.id.notification_main_column, R.id.progress);
                 remoteViews.addView(R.id.notification_main_column, customContent, 0 /* index */);
+                remoteViews.setReapplyDisallowed();
             }
             // also update the end margin if there is an image
             int endMargin = R.dimen.notification_content_margin_end;
@@ -7041,6 +7042,7 @@ public class Notification implements Parcelable
                 customContent = customContent.clone();
                 remoteViews.removeAllViews(id);
                 remoteViews.addView(id, customContent);
+                remoteViews.setReapplyDisallowed();
             }
             return remoteViews;
         }
