@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Siete sa nedajú vyhľadávať"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Žiadne"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Uložené"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Zakázané"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Vypnuté"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Zlyhanie konfigurácie adresy IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nepripojené z dôvodu siete nízkej kvality"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Zlyhanie pripojenia Wi-Fi"</string>
@@ -119,7 +119,7 @@
     <string name="user_guest" msgid="8475274842845401871">"Hosť"</string>
     <string name="unknown" msgid="1592123443519355854">"Neznáme"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Používateľ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"Predvolená pre niektoré akcie"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"Pre niektoré akcie"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nie je predvolená pre žiadne akcie"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Nastavenia prevodu textu na reč"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Prevod textu na reč"</string>
@@ -333,7 +333,7 @@
     <string name="button_convert_fbe" msgid="5152671181309826405">"Vymazať a konvertovať…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Farebný režim obrázka"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Použije sa sRGB"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Zakázané"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Vypnuté"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monochromázia (úplna farbosleposť)"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomália (červená a zelená)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomália (červená a zelená)"</string>
@@ -353,16 +353,15 @@
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> do úplného nabitia"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Neznáme"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Nabíjanie"</string>
-    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"nabíjanie"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Nabíja sa"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"nabíja sa"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nenabíja sa"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Pripojené, ale nie je možné nabíjať"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Nabitá"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ovládané správcom"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Povolené správcom"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Zakázané správcom"</string>
-    <string name="disabled" msgid="9206776641295849915">"Zakázané"</string>
+    <string name="disabled" msgid="9206776641295849915">"Deaktivované"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Povolené"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Nie je povolené"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"Inštalácia neznámych aplikácií"</string>
