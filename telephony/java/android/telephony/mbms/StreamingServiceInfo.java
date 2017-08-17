@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Describes a single MBMS streaming service.
  */
-public class StreamingServiceInfo extends ServiceInfo implements Parcelable {
+public final class StreamingServiceInfo extends ServiceInfo implements Parcelable {
 
     /**
      * @param names User displayable names listed by language.

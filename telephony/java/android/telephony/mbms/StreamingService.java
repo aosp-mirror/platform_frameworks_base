@@ -28,14 +28,14 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Class used to represent a single MBMS stream. After a stream has been started with
  * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo,
- * StreamingServiceCallback)},
+ * StreamingServiceCallback, android.os.Handler)},
  * this class is used to hold information about the stream and control it.
  */
 public class StreamingService {
     private static final String LOG_TAG = "MbmsStreamingService";
 
     /**
-     * The state of a stream, reported via {@link StreamingServiceCallback#streamStateUpdated}
+     * The state of a stream, reported via {@link StreamingServiceCallback#onStreamStateUpdated}
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -47,7 +47,7 @@ public class StreamingService {
 
     /**
      * The reason for a stream state change, reported via
-     * {@link StreamingServiceCallback#streamStateUpdated}
+     * {@link StreamingServiceCallback#onStreamStateUpdated}
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -64,7 +64,7 @@ public class StreamingService {
     /**
      * State changed due to a call to {@link #stopStreaming()} or
      * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo,
-     * StreamingServiceCallback)}
+     * StreamingServiceCallback, android.os.Handler)}
      */
     public static final int REASON_BY_USER_REQUEST = 1;
 
@@ -95,23 +95,24 @@ public class StreamingService {
 
     /**
      * The method of transmission currently used for a stream,
-     * reported via {@link StreamingServiceCallback#streamMethodUpdated}
+     * reported via {@link StreamingServiceCallback#onStreamMethodUpdated}
      */
     public final static int BROADCAST_METHOD = 1;
     public final static int UNICAST_METHOD   = 2;
 
     private final int mSubscriptionId;
     private final StreamingServiceInfo mServiceInfo;
-    private final IStreamingServiceCallback mCallback;
+    private final InternalStreamingServiceCallback mCallback;
 
     private IMbmsStreamingService mService;
+
     /**
      * @hide
      */
     public StreamingService(int subscriptionId,
             IMbmsStreamingService service,
             StreamingServiceInfo streamingServiceInfo,
-            IStreamingServiceCallback callback) {
+            InternalStreamingServiceCallback callback) {
         mSubscriptionId = subscriptionId;
         mService = service;
         mServiceInfo = streamingServiceInfo;
