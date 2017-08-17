@@ -59,6 +59,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.wallpaper.WallpaperService;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -855,16 +856,6 @@ public class WallpaperManager {
 
     /**
      * Registers a listener to get notified when the wallpaper colors change.
-     * Callback might be called from an arbitrary background thread.
-     *
-     * @param listener A listener to register
-     */
-    public void addOnColorsChangedListener(@NonNull OnColorsChangedListener listener) {
-        addOnColorsChangedListener(listener, null);
-    }
-
-    /**
-     * Registers a listener to get notified when the wallpaper colors change
      * @param listener A listener to register
      * @param handler Where to call it from. Will be called from the main thread
      *                if null.
@@ -907,10 +898,16 @@ public class WallpaperManager {
     }
 
     /**
-     * Get the primary colors of a wallpaper
-     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
-     *     {@link #FLAG_LOCK}
-     * @return {@link WallpaperColors} or null if colors are unknown.
+     * Get the primary colors of a wallpaper.
+     *
+     * <p>You can expect null if:
+     * • Colors are still being processed by the system.
+     * • A live wallpaper doesn't implement {@link WallpaperService.Engine#onComputeColors()}.
+     *
+     * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}.
+     * @return Current {@link WallpaperColors} or null if colors are unknown.
+     * @see #addOnColorsChangedListener(OnColorsChangedListener, Handler)
      */
     public @Nullable WallpaperColors getWallpaperColors(int which) {
         return getWallpaperColors(which, mContext.getUserId());
