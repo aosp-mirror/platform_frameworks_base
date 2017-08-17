@@ -16,20 +16,21 @@
 
 package com.android.systemui.statusbar.car;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.os.UserHandle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +38,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.internal.util.UserIcons;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.UserUtil;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
@@ -48,21 +47,44 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  * One of the uses of this is for the lock screen in auto.
  */
 public class UserGridView extends ViewPager {
+    private static final int EXPAND_ANIMATION_TIME_MS = 200;
+    private static final int HIDE_ANIMATION_TIME_MS = 133;
+
     private StatusBar mStatusBar;
     private UserSwitcherController mUserSwitcherController;
     private Adapter mAdapter;
     private UserSelectionListener mUserSelectionListener;
+    private ValueAnimator mHeightAnimator;
+    private int mTargetHeight;
+    private int mHeightChildren;
+    private boolean mShowing;
 
     public UserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController) {
+    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController,
+            boolean showInitially) {
         mStatusBar = statusBar;
         mUserSwitcherController = userSwitcherController;
         mAdapter = new Adapter(mUserSwitcherController);
         addOnLayoutChangeListener(mAdapter);
         setAdapter(mAdapter);
+        mShowing = showInitially;
+    }
+
+    public boolean isShowing() {
+        return mShowing;
+    }
+
+    public void show() {
+        mShowing = true;
+        animateHeightChange(getMeasuredHeight(), mHeightChildren);
+    }
+
+    public void hide() {
+        mShowing = false;
+        animateHeightChange(getMeasuredHeight(), 0);
     }
 
     public void onUserSwitched(int newUserId) {
@@ -83,14 +105,83 @@ public class UserGridView extends ViewPager {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Wrap content doesn't work in ViewPagers, so simulate the behavior in code.
         int height = 0;
-        for(int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            child.measure(widthMeasureSpec,
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-            height = Math.max(child.getMeasuredHeight(), height);
+        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY) {
+            height = MeasureSpec.getSize(heightMeasureSpec);
+        } else {
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                child.measure(widthMeasureSpec,
+                        MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+                height = Math.max(child.getMeasuredHeight(), height);
+            }
+
+            mHeightChildren = height;
+
+            // Override the height if it's not showing.
+            if (!mShowing) {
+                height = 0;
+            }
+
+            // Respect the AT_MOST request from parent.
+            if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
+                height = Math.min(MeasureSpec.getSize(heightMeasureSpec), height);
+            }
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    private void animateHeightChange(int oldHeight, int newHeight) {
+        // If there is no change in height or an animation is already in progress towards the
+        // desired height, then there's no need to make any changes.
+        if (oldHeight == newHeight || newHeight == mTargetHeight) {
+            return;
+        }
+
+        // Animation in progress is not going towards the new target, so cancel it.
+        if (mHeightAnimator != null){
+            mHeightAnimator.cancel();
+        }
+
+        mTargetHeight = newHeight;
+        mHeightAnimator = ValueAnimator.ofInt(oldHeight, mTargetHeight);
+        mHeightAnimator.addUpdateListener(valueAnimator -> {
+            ViewGroup.LayoutParams layoutParams = getLayoutParams();
+            layoutParams.height = (Integer) valueAnimator.getAnimatedValue();
+            requestLayout();
+        });
+        mHeightAnimator.addListener(new AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {}
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                // ValueAnimator does not guarantee that the update listener will get an update
+                // to the final value, so here, the final value is set.  Though the final calculated
+                // height (mTargetHeight) could be set, WRAP_CONTENT is more appropriate.
+                ViewGroup.LayoutParams layoutParams = getLayoutParams();
+                layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                requestLayout();
+                mHeightAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {}
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {}
+        });
+
+        mHeightAnimator.setInterpolator(new FastOutSlowInInterpolator());
+        if (oldHeight < newHeight) {
+            // Expanding
+            mHeightAnimator.setDuration(EXPAND_ANIMATION_TIME_MS);
+        } else {
+            // Hiding
+            mHeightAnimator.setDuration(HIDE_ANIMATION_TIME_MS);
+        }
+        mHeightAnimator.start();
     }
 
     /**

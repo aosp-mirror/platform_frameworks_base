@@ -22,9 +22,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFooter;
+import com.android.systemui.statusbar.car.UserGridView;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
  * A quick settings fragment for the car. For auto, there is no row for quick settings or ability
@@ -33,7 +36,8 @@ import com.android.systemui.qs.QSFooter;
  */
 public class CarQSFragment extends Fragment implements QS {
     private View mHeader;
-    private QSFooter mFooter;
+    private CarQSFooter mFooter;
+    private UserGridView mUserGridView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -46,6 +50,12 @@ public class CarQSFragment extends Fragment implements QS {
         super.onViewCreated(view, savedInstanceState);
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
+
+        mUserGridView = view.findViewById(R.id.user_grid);
+        mUserGridView.init(null, Dependency.get(UserSwitcherController.class),
+                false /* showInitially */);
+
+        mFooter.setUserGridView(mUserGridView);
     }
 
     @Override
