@@ -357,9 +357,11 @@
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_total_dwell_time" />
   <java-symbol type="integer" name="config_wifi_framework_associated_partial_scan_max_num_active_channels" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz" />
+  <java-symbol type="integer" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz" />
+  <java-symbol type="integer" name="config_wifi_framework_wifi_score_entry_rssi_threshold_5GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz" />
   <java-symbol type="integer" name="config_wifi_framework_wifi_score_bad_link_speed_24" />
