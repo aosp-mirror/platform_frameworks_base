@@ -804,6 +804,7 @@ public class NotificationManagerService extends SystemService {
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
                 mZenModeHelper.updateDefaultZenRules();
+                mRankingHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
             }
         }
     };

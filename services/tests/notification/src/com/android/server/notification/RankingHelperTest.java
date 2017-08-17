@@ -46,6 +46,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.net.Uri;
@@ -78,6 +79,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -127,6 +129,8 @@ public class RankingHelperTest extends NotificationTestCase {
         when(mPm.getPackageUidAsUser(eq(UPDATED_PKG), anyInt())).thenReturn(UID2);
         when(mContext.getResources()).thenReturn(
                 InstrumentationRegistry.getContext().getResources());
+        when(mContext.getContentResolver()).thenReturn(
+                InstrumentationRegistry.getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getApplicationInfo()).thenReturn(legacy);
         // most tests assume badging is enabled
@@ -1365,5 +1369,23 @@ public class RankingHelperTest extends NotificationTestCase {
         mHelper.updateBadgingEnabled(); // would be called by settings observer
         assertFalse(mHelper.badgingEnabled(USER));
         assertTrue(mHelper.badgingEnabled(USER2));
+    }
+
+    @Test
+    public void testOnLocaleChanged_updatesDefaultChannels() throws Exception {
+        String newLabel = "bananas!";
+        final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG, UID,
+                NotificationChannel.DEFAULT_CHANNEL_ID, false);
+        assertFalse(newLabel.equals(defaultChannel.getName()));
+
+        Resources res = mock(Resources.class);
+        when(mContext.getResources()).thenReturn(res);
+        when(res.getString(com.android.internal.R.string.default_notification_channel_label))
+                .thenReturn(newLabel);
+
+        mHelper.onLocaleChanged(mContext, USER.getIdentifier());
+
+        assertEquals(newLabel, mHelper.getNotificationChannel(PKG, UID,
+                NotificationChannel.DEFAULT_CHANNEL_ID, false).getName());
     }
 }
