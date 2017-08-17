@@ -715,6 +715,7 @@ public final class ShutdownThread extends Thread {
      * @param reason reason for reboot/shutdown
      */
     public static void rebootOrShutdown(final Context context, boolean reboot, String reason) {
+        SHUTDOWN_TIMINGS_LOG.traceEnd(); // SystemServerShutdown
         if (reboot) {
             Log.i(TAG, "Rebooting, reason: " + reason);
             PowerManagerService.lowLevelReboot(reason);
@@ -736,7 +737,6 @@ public final class ShutdownThread extends Thread {
             } catch (InterruptedException unused) {
             }
         }
-        SHUTDOWN_TIMINGS_LOG.traceEnd(); // SystemServerShutdown
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
         PowerManagerService.lowLevelShutdown(reason);
