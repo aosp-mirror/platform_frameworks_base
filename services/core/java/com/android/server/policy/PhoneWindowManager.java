@@ -3398,11 +3398,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!down) {
                 cancelPreloadRecentApps();
 
-                if (mHasFeatureLeanback) {
-                    // Clear flags
-                    mAccessibilityTvKey2Pressed = down;
-                }
-
                 mHomePressed = false;
                 if (mHomeConsumed) {
                     mHomeConsumed = false;
@@ -3457,13 +3452,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     preloadRecentApps();
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
-                if (mHasFeatureLeanback) {
-                    mAccessibilityTvKey2Pressed = down;
-                    if (interceptAccessibilityGestureTv()) {
-                        return -1;
-                    }
-                }
-
                 if (!keyguardOn) {
                     handleLongPressOnHome(event.getDeviceId());
                 }
@@ -3630,11 +3618,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (mHasFeatureLeanback && interceptBugreportGestureTv(keyCode, down)) {
             return -1;
-        } else if (mHasFeatureLeanback && keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            mAccessibilityTvKey1Pressed = down;
-            if (interceptAccessibilityGestureTv()) {
-                return -1;
-            }
+        } else if (mHasFeatureLeanback && interceptAccessibilityGestureTv(keyCode, down)) {
+            return -1;
         }
 
         // Toggle Caps Lock on META-ALT.
@@ -3855,20 +3840,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /**
      * TV only: recognizes a remote control gesture as Accessibility shortcut.
-     * Shortcut: Long press (HOME + DPAD_CENTER)
+     * Shortcut: Long press (BACK + DPAD_DOWN)
      */
-    private boolean interceptAccessibilityGestureTv() {
+    private boolean interceptAccessibilityGestureTv(int keyCode, boolean down) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            mAccessibilityTvKey1Pressed = down;
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            mAccessibilityTvKey2Pressed = down;
+        }
+
         if (mAccessibilityTvKey1Pressed && mAccessibilityTvKey2Pressed) {
             if (!mAccessibilityTvScheduled) {
                 mAccessibilityTvScheduled = true;
                 Message msg = Message.obtain(mHandler, MSG_ACCESSIBILITY_TV);
                 msg.setAsynchronous(true);
-                mHandler.sendMessage(msg);
+                mHandler.sendMessageDelayed(msg,
+                        ViewConfiguration.get(mContext).getAccessibilityShortcutKeyTimeout());
             }
         } else if (mAccessibilityTvScheduled) {
             mHandler.removeMessages(MSG_ACCESSIBILITY_TV);
             mAccessibilityTvScheduled = false;
         }
+
         return mAccessibilityTvScheduled;
     }
 
