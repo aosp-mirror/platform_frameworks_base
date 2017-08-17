@@ -2115,13 +2115,16 @@ public class TelephonyManager {
      * @hide
      */
     public String getSimOperatorNumeric() {
-        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        int subId = mSubId;
         if (!SubscriptionManager.isUsableSubIdValue(subId)) {
-            subId = SubscriptionManager.getDefaultSmsSubscriptionId();
+            subId = SubscriptionManager.getDefaultDataSubscriptionId();
             if (!SubscriptionManager.isUsableSubIdValue(subId)) {
-                subId = SubscriptionManager.getDefaultVoiceSubscriptionId();
+                subId = SubscriptionManager.getDefaultSmsSubscriptionId();
                 if (!SubscriptionManager.isUsableSubIdValue(subId)) {
-                    subId = SubscriptionManager.getDefaultSubscriptionId();
+                    subId = SubscriptionManager.getDefaultVoiceSubscriptionId();
+                    if (!SubscriptionManager.isUsableSubIdValue(subId)) {
+                        subId = SubscriptionManager.getDefaultSubscriptionId();
+                    }
                 }
             }
         }
