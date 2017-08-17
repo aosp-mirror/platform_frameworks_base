@@ -232,9 +232,6 @@ final class SelectionActionModeHelper {
                 firstRectangle.centerY());
 
         mSmartSelectSprite.startAnimation(
-                // TODO replace with colorControlActivated taken from the view attributes
-                // Color GBLUE700
-                0xFF3367D6,
                 halfPoint,
                 selectionRectangles,
                 onAnimationEndCallback);

@@ -136,11 +136,12 @@ public class DateUtilsTest {
                 fixedTime, java.text.DateFormat.SHORT, java.text.DateFormat.FULL));
 
         final long hourDuration = 2 * 60 * 60 * 1000;
-        assertEquals("5:30:15 AM GMT+00:00", DateUtils.formatSameDayTime(fixedTime + hourDuration,
-                fixedTime, java.text.DateFormat.FULL, java.text.DateFormat.FULL));
+        assertEquals("5:30:15 AM Greenwich Mean Time", DateUtils.formatSameDayTime(
+                fixedTime + hourDuration, fixedTime, java.text.DateFormat.FULL,
+                java.text.DateFormat.FULL));
         assertEquals("5:30:15 AM", DateUtils.formatSameDayTime(fixedTime + hourDuration,
                 fixedTime, java.text.DateFormat.FULL, java.text.DateFormat.DEFAULT));
-        assertEquals("5:30:15 AM GMT+00:00", DateUtils.formatSameDayTime(fixedTime + hourDuration,
+        assertEquals("5:30:15 AM GMT", DateUtils.formatSameDayTime(fixedTime + hourDuration,
                 fixedTime, java.text.DateFormat.FULL, java.text.DateFormat.LONG));
         assertEquals("5:30:15 AM", DateUtils.formatSameDayTime(fixedTime + hourDuration,
                 fixedTime, java.text.DateFormat.FULL, java.text.DateFormat.MEDIUM));

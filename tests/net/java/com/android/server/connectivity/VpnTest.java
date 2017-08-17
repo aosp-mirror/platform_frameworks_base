@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.net.NetworkInfo.DetailedState;
 import android.net.UidRange;
 import android.net.VpnService;
@@ -46,6 +47,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 
 import org.mockito.Answers;
@@ -116,6 +118,9 @@ public class VpnTest extends AndroidTestCase {
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         when(mContext.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
+        when(mContext.getString(R.string.config_customVpnAlwaysOnDisconnectedDialogComponent))
+                .thenReturn(Resources.getSystem().getString(
+                        R.string.config_customVpnAlwaysOnDisconnectedDialogComponent));
 
         // Used by {@link Notification.Builder}
         ApplicationInfo applicationInfo = new ApplicationInfo();

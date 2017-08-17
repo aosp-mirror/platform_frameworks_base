@@ -1118,6 +1118,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mToIndex = parcel.readInt();
         record.mScrollX = parcel.readInt();
         record.mScrollY =  parcel.readInt();
+        record.mScrollDeltaX =  parcel.readInt();
+        record.mScrollDeltaY =  parcel.readInt();
         record.mMaxScrollX = parcel.readInt();
         record.mMaxScrollY =  parcel.readInt();
         record.mAddedCount = parcel.readInt();
@@ -1170,6 +1172,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(record.mToIndex);
         parcel.writeInt(record.mScrollX);
         parcel.writeInt(record.mScrollY);
+        parcel.writeInt(record.mScrollDeltaX);
+        parcel.writeInt(record.mScrollDeltaY);
         parcel.writeInt(record.mMaxScrollX);
         parcel.writeInt(record.mMaxScrollY);
         parcel.writeInt(record.mAddedCount);

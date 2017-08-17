@@ -179,7 +179,7 @@ void SkiaCanvasProxy::onDrawImageLattice(const SkImage* image, const Lattice& la
     SkLatticeIter iter(lattice, dst);
     SkRect srcR, dstR;
     while (iter.next(&srcR, &dstR)) {
-        onDrawImageRect(image, &srcR, dstR, paint, SkCanvas::kStrict_SrcRectConstraint);
+        onDrawImageRect(image, &srcR, dstR, paint, SkCanvas::kFast_SrcRectConstraint);
     }
 }
 
@@ -452,7 +452,7 @@ void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScala
              break;
          }
          default:
-             SkFAIL("unhandled positioning mode");
+             SK_ABORT("unhandled positioning mode");
          }
      }
 }

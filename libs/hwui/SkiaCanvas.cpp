@@ -533,6 +533,9 @@ void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
 
 void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
+    if (CC_UNLIKELY(path.isEmpty() && (!path.isInverseFillType()))) {
+        return;
+    }
     mCanvas->drawPath(path, paint);
 }
 
@@ -597,7 +600,8 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
     SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mCanvas->drawImageRect(image, srcRect, dstRect, addFilter(paint, &tmpPaint, colorFilter));
+    mCanvas->drawImageRect(image, srcRect, dstRect, addFilter(paint, &tmpPaint, colorFilter),
+            SkCanvas::kFast_SrcRectConstraint);
 }
 
 void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,

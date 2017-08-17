@@ -4334,6 +4334,10 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1155;
 
+    // OPEN: Settings > Developer Options > Experiment dashboard
+    // CATEGORY: SETTINGS
+    SETTINGS_FEATURE_FLAGS_DASHBOARD = 1156;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

@@ -565,7 +565,7 @@ void Tree::draw(SkCanvas* canvas) {
     sk_sp<SkSurface> vdSurface = mCache.getSurface(&src);
     if (vdSurface) {
         canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src,
-                mutateProperties()->getBounds(), getPaint());
+                mutateProperties()->getBounds(), getPaint(), SkCanvas::kFast_SrcRectConstraint);
     } else {
         // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
         // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
@@ -585,7 +585,7 @@ void Tree::draw(SkCanvas* canvas) {
         draw(surface.get(), src);
         mCache.clear();
         canvas->drawImageRect(surface->makeImageSnapshot().get(), mutateProperties()->getBounds(),
-                getPaint());
+                getPaint(), SkCanvas::kFast_SrcRectConstraint);
         markDirty();
     }
 }

@@ -10761,13 +10761,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEditor.mProcessTextIntentActionsHandler.initializeAccessibilityActions();
         }
 
+        super.sendAccessibilityEventInternal(eventType);
+    }
+
+    @Override
+    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
         // Do not send scroll events since first they are not interesting for
         // accessibility and second such events a generated too frequently.
         // For details see the implementation of bringTextIntoView().
-        if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
             return;
         }
-        super.sendAccessibilityEventInternal(eventType);
+        super.sendAccessibilityEventUnchecked(event);
     }
 
     /**

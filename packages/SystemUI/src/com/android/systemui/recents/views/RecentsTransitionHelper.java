@@ -140,8 +140,10 @@ public class RecentsTransitionHelper {
                         mHandler.postDelayed(mStartScreenPinningRunnable, 350);
                     }
 
-                    // Reset the state where we are waiting for the transition to start
-                    EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    if (!Recents.getConfiguration().isLowRamDevice) {
+                        // Reset the state where we are waiting for the transition to start
+                        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    }
                 }
             };
         } else {
@@ -163,8 +165,10 @@ public class RecentsTransitionHelper {
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
                     stackView.cancelAllTaskViewAnimations();
 
-                    // Reset the state where we are waiting for the transition to start
-                    EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    if (!Recents.getConfiguration().isLowRamDevice) {
+                        // Reset the state where we are waiting for the transition to start
+                        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    }
                 }
             };
         }

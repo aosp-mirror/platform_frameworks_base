@@ -3535,6 +3535,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         DozeLog.dump(pw);
 
+        if (mFingerprintUnlockController != null) {
+            mFingerprintUnlockController.dump(pw);
+        }
+
+        if (mScrimController != null) {
+            mScrimController.dump(pw);
+        }
+
         if (DUMPTRUCK) {
             synchronized (mNotificationData) {
                 mNotificationData.dump(pw, "  ");
@@ -5153,6 +5161,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         recomputeDisableFlags(true /* animate */);
     }
 
+    public void cancelCurrentTouch() {
+        if (mNotificationPanel.isTracking()) {
+            mStatusBarWindow.cancelCurrentTouch();
+            if (mState == StatusBarState.SHADE) {
+                animateCollapsePanels();
+            }
+        }
+    }
 
     WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
