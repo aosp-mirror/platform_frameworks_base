@@ -6695,11 +6695,13 @@ public class TelephonyManager {
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *
-     * @param perUidStats True if requesting data usage per uid, otherwise overall usage.
+     * @param how one of the NetworkStats.STATS_PER_* constants depending on whether the request is
+     * for data usage per uid or overall usage.
      * @return Snapshot of video call data usage
      * @hide
      */
-    public NetworkStats getVtDataUsage(boolean perUidStats) {
+    public NetworkStats getVtDataUsage(int how) {
+        boolean perUidStats = (how == NetworkStats.STATS_PER_UID);
         try {
             ITelephony service = getITelephony();
             if (service != null) {
