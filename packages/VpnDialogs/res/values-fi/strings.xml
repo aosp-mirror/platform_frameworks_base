@@ -19,11 +19,25 @@
     <string name="prompt" msgid="3183836924226407828">"Yhteyspyyntö"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> haluaa tehdä asetukset VPN-yhteydellä, jonka kautta sovellus voi valvoa verkkoliikennettä. Hyväksy vain, jos lähde on luotettava. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; näkyy ruudun yläreunassa, kun VPN on käytössä."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN on yhdistetty"</string>
-    <string name="configure" msgid="4905518375574791375">"Asetukset"</string>
-    <string name="disconnect" msgid="971412338304200056">"Katkaise yhteys"</string>
     <string name="session" msgid="6470628549473641030">"Käyttökerta"</string>
     <string name="duration" msgid="3584782459928719435">"Kesto:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"Lähetetty:"</string>
     <string name="data_received" msgid="4062776929376067820">"Vastaanotettu:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> tavua / <xliff:g id="NUMBER_1">%2$s</xliff:g> pakettia"</string>
+    <!-- no translation found for always_on_disconnected_title (1906740176262776166) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message (555634519845992917) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_lockdown (4232225539869452120) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_separator (3310614409322581371) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_settings_link (6172280302829992412) -->
+    <skip />
+    <string name="configure" msgid="4905518375574791375">"Asetukset"</string>
+    <string name="disconnect" msgid="971412338304200056">"Katkaise yhteys"</string>
+    <!-- no translation found for open_app (3717639178595958667) -->
+    <skip />
+    <!-- no translation found for dismiss (6192859333764711227) -->
+    <skip />
 </resources>
