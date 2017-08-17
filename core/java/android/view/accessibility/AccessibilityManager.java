@@ -23,7 +23,6 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1113,9 +1112,7 @@ public final class AccessibilityManager {
      *
      * @return {@code true} if the accessibility button is supported on this device,
      * {@code false} otherwise
-     * @hide
      */
-    @SystemApi
     public static boolean isAccessibilityButtonSupported() {
         final Resources res = Resources.getSystem();
         return res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
