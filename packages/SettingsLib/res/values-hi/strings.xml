@@ -92,13 +92,13 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"फ़ाइल स्‍थानांतरण के लिए उपयोग करें"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"इनपुट के लिए उपयोग करें"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"युग्‍म बनाएं"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"युग्‍मित करें"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"दूसरे डिवाइस से जोड़ें"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"अभी नहीं"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"कनेक्ट रहने पर, पेयरिंग आपको अपने संपर्कों और कॉल इतिहास की एक्सेस प्रदान करता है."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> के साथ युग्‍मित नहीं हो सका."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"गलत पिन या पासकी के कारण <xliff:g id="DEVICE_NAME">%1$s</xliff:g> के साथ युग्‍मित नहीं हो सका."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> से संचार नहीं कर सकता."</string>
-    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> द्वारा युग्‍मन अस्‍वीकृत किया गया."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ने जोड़ने का अनुरोध नहीं माना."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"वाई-फ़ाई बंद है."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"वाई-फ़ाई डिसकनेक्ट है."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"वाई-फ़ाई का एक बार है."</string>
@@ -163,10 +163,10 @@
     <string name="choose_profile" msgid="6921016979430278661">"प्रोफ़ाइल चुनें"</string>
     <string name="category_personal" msgid="1299663247844969448">"व्यक्तिगत"</string>
     <string name="category_work" msgid="8699184680584175622">"कार्यालय"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"डेवलपर विकल्प"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"डेवलपर विकल्‍प सक्षम करें"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"डेवलपर के लिए सेटिंग और टूल"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"डेवलपर के लिए सेटिंग और टूल सक्षम करें"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"ऐप्स विकास के लिए विकल्‍प सेट करें"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"इस उपयोगकर्ता के लिए डेवलपर विकल्प उपलब्ध नहीं हैं"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"इस उपयोगकर्ता के लिए डेवलपर के लिए सेटिंग और टूल उपलब्ध नहीं हैं"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"टेदरिंग सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"एक्सेस पॉइंट नाम सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
@@ -175,8 +175,8 @@
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB डीबगिंग प्राधिकरणों को निरस्त करें"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"बग रिपोर्ट शॉर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"बग रिपोर्ट लेने के लिए पावर मेनू में कोई बटन दिखाएं"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"सचेत रहें"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"चार्ज होने के दौरान स्‍क्रीन कभी निष्‍क्रिय नहीं होगी"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"स्क्रीन को चालू रखें"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"चार्ज करते समय स्‍क्रीन कभी भी कम बैटरी मोड में नहीं जाएगी"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ब्लूटूथ HCI स्‍नूप लॉग सक्षम करें"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"फ़ाइल के सभी ब्लूटूथ HCI पैकेट कैप्‍चर करें"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM अनलॉक करना"</string>
@@ -230,10 +230,10 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"आपके द्वारा पूर्व में प्राधिकृत सभी कंप्यूटर से USB डीबगिंग की पहुंच निरस्त करें?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिंग की अनुमति दें?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ये सेटिंग केवल विकास संबंधी उपयोग के प्रयोजन से हैं. वे आपके डिवाइस और उस पर स्‍थित ऐप्स  को खराब कर सकती हैं या उनके दुर्व्यवहार का कारण हो सकती हैं."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB पर ऐप्स  सत्यापित करें"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB पर ऐप की पुष्टि करें"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"नुकसानदेह व्यवहार के लिए ADB/ADT के द्वारा इंस्टॉल किए गए ऐप्स  जांचें."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूरस्थ डिवाइस के साथ वॉल्यूम की समस्याओं जैसे अस्वीकार्य तेज़ वॉल्यूम या नियंत्रण की कमी की स्थिति में ब्लूटूथ पूर्ण वॉल्यूम सुविधा को अक्षम करता है."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"फ़ोन की रिंगटोन को ब्लूटूथ हैडसेट पर बजने दें"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"फ़ोन की रिंगटोन को ब्लूटूथ हेडसेट पर बजने दें"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानीय शेल एक्सेस ऑफ़र करने वाला टर्मिनल ऐप्स  सक्षम करें"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP जांच"</string>
@@ -298,7 +298,7 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"ऐप्स को बाहरी मेमोरी पर बाध्‍य करें"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"इससे कोई भी ऐप्लिकेशन, मेनिफेस्ट मानों को अनदेखा करके, बाहरी मेमोरी पर लिखने योग्य बन जाता है"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"आकार बदले जाने के लिए गतिविधियों को बाध्य करें"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"सभी गतिविधियों को एकाधिक विंडो के लिए आकार बदलने योग्य बनाएं, चाहे मेनिफेस्ट मान कुछ भी हों."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"मेनिफेस्ट मान पर ध्यान दिए बिना, सभी गतिविधियों को मल्टी-विंडो (एक से ज़्यादा ऐप, एक साथ) के लिए आकार बदलने लायक बनाएं."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"फ़्रीफ़ॉर्म विंडो सक्षम करें"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"प्रयोगात्मक फ़्रीफ़ॉर्म विंडो का समर्थन सक्षम करें."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"डेस्‍कटॉप बैकअप पासवर्ड"</string>
@@ -317,13 +317,13 @@
     <item msgid="8280754435979370728">"आंखों को दिखाई देने वाले प्राकृतिक रंग"</item>
     <item msgid="5363960654009010371">"डिजिटल सामग्री के लिए ऑप्टिमाइज़़ किए गए रंग"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"निष्क्रिय ऐप्स"</string>
-    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"निष्क्रिय. टॉगल करने के लिए टैप करें."</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"बंद एेप"</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"बंद है. टॉगल करने के लिए टैप करें."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करने पर टैप करें."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चल रही सेवाएं"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"वर्तमान में चल रही सेवाओं को देखें और नियंत्रित करें"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>
-    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView कार्यान्वयन सेट करें"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबव्यू लागू करें"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबव्यू सेट करें"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"यह चयन अब मान्य नहीं है. पुनः प्रयास करें."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फ़ाइल एन्क्रिप्शन में रूपांतरित करें"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करें..."</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज किया जा रहा है"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज नहीं हो रही है"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"प्लग इन है, अभी चार्ज नहीं हो सकती"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूरी"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"व्यवस्थापक द्वारा नियंत्रित"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"व्यवस्थापक ने सक्षम किया है"</string>

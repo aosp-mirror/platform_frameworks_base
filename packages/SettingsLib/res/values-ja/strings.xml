@@ -52,7 +52,7 @@
     <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"切断"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"切断中..."</string>
-    <string name="bluetooth_connecting" msgid="8555009514614320497">"接続中..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"接続処理中..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"接続"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"ペアとして設定中..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"接続済み（電話を除く）"</string>
@@ -119,7 +119,7 @@
     <string name="user_guest" msgid="8475274842845401871">"ゲスト"</string>
     <string name="unknown" msgid="1592123443519355854">"不明"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ユーザー: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトを設定"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトで設定"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"デフォルトの設定なし"</string>
     <string name="tts_settings" msgid="8186971894801348327">"テキスト読み上げの設定"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの出力"</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"充電中"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"充電しています"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"充電していません"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"接続されていますが、現在、充電できません"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for battery_info_status_full (2824614753861462808) -->
     <skip />

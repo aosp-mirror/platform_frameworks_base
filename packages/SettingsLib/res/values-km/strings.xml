@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"កំពុងបញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"កំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"ដោត​សាកថ្ម​រួចហើយ ប៉ុន្តែ​​សាកថ្ម​មិន​ចូលទេឥឡូវនេះ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"បើកដោយ​អ្នកគ្រប់គ្រង"</string>

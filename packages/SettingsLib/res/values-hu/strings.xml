@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Töltés"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"töltés"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nem tölt"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Csatlakoztatva, jelenleg nem tölt"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Feltöltve"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Rendszergazda által irányítva"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"A rendszergazda bekapcsolta"</string>
@@ -365,7 +364,7 @@
     <string name="disabled" msgid="9206776641295849915">"Letiltva"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Engedélyezett"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Nem engedélyezett"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Ismeretlen alkalmazások telepítése"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Új alkalmazások telepítése"</string>
     <string name="home" msgid="3256884684164448244">"Beállítások kezdőlapja"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
