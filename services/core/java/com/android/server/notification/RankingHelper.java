@@ -1073,6 +1073,22 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
+    protected void onLocaleChanged(Context context, int userId) {
+        synchronized (mRecords) {
+            int N = mRecords.size();
+            for (int i = 0; i < N; i++) {
+                Record record = mRecords.valueAt(i);
+                if (UserHandle.getUserId(record.uid) == userId) {
+                    if (record.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+                        record.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID).setName(
+                                context.getResources().getString(
+                                        R.string.default_notification_channel_label));
+                    }
+                }
+            }
+        }
+    }
+
     public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
             int[] uidList) {
         if (pkgList == null || pkgList.length == 0) {
