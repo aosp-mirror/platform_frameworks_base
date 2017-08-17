@@ -41,6 +41,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
@@ -632,12 +633,6 @@ final class AutofillManagerServiceImpl {
             output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
                     : null) + ":" + mSessions.keyAt(i));
         }
-    }
-
-    void dismissUi() {
-        if (sVerbose) Slog.v(TAG, "dismissUi()");
-
-        mUi.hideAll(null);
     }
 
     private void sendStateToClients(boolean resetClient) {

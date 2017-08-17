@@ -1006,11 +1006,6 @@ public class Activity extends ContextThemeWrapper
             Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
             mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
                     ? mLastNonConfigurationInstances.fragments : null);
-        } else {
-            AutofillManager afm = getAutofillManager();
-            if (afm != null) {
-                afm.dismissUi();
-            }
         }
         mFragments.dispatchCreate();
         getApplication().dispatchActivityCreated(this, savedInstanceState);
