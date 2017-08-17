@@ -504,6 +504,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
 
     private void setDate(int year, int month, int dayOfMonth) {
         mCurrentDate.set(year, month, dayOfMonth);
+        resetAutofilledValue();
         if (mCurrentDate.before(mMinDate)) {
             mCurrentDate.setTimeInMillis(mMinDate.getTimeInMillis());
         } else if (mCurrentDate.after(mMaxDate)) {
