@@ -761,6 +761,7 @@ public class Activity extends ContextThemeWrapper
     boolean mStartedActivity;
     private boolean mDestroyed;
     private boolean mDoReportFullyDrawn = true;
+    private boolean mRestoredFromBundle;
     /** true if the activity is going through a transient pause */
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
@@ -1012,6 +1013,7 @@ public class Activity extends ContextThemeWrapper
         if (mVoiceInteractor != null) {
             mVoiceInteractor.attachActivity(this);
         }
+        mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
     }
 
@@ -1948,7 +1950,7 @@ public class Activity extends ContextThemeWrapper
         if (mDoReportFullyDrawn) {
             mDoReportFullyDrawn = false;
             try {
-                ActivityManager.getService().reportActivityFullyDrawn(mToken);
+                ActivityManager.getService().reportActivityFullyDrawn(mToken, mRestoredFromBundle);
             } catch (RemoteException e) {
             }
         }

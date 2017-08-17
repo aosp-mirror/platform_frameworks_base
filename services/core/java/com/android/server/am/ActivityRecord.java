@@ -1834,7 +1834,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    public void reportFullyDrawnLocked() {
+    public void reportFullyDrawnLocked(boolean restoredFromBundle) {
         final long curTime = SystemClock.uptimeMillis();
         if (displayStartTime != 0) {
             reportLaunchTimeLocked(curTime);
@@ -1867,6 +1867,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             stack.mFullyDrawnStartTime = 0;
         }
+        mStackSupervisor.mActivityMetricsLogger.logAppTransitionReportedDrawn(this,
+                restoredFromBundle);
         fullyDrawnStartTime = 0;
     }
 
