@@ -74,6 +74,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
@@ -1340,7 +1341,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        final boolean isTopActivityWhileSleeping = service.isSleepingLocked() && isTopRunningActivity();
+        final ActivityStack stack = getStack();
+        final boolean isTopActivityWhileSleeping = isTopRunningActivity()
+                && (stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked());
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -1730,7 +1733,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // If the screen is going to turn on because the caller explicitly requested it and
             // the keyguard is not showing don't attempt to sleep. Otherwise the Activity will
             // pause and then resume again later, which will result in a double life-cycle event.
-            mStackSupervisor.checkReadyForSleepLocked();
+            stack.checkReadyForSleep();
         }
     }
 
@@ -2171,7 +2174,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setRequestedOrientation(int requestedOrientation) {
         if (ActivityInfo.isFixedOrientation(requestedOrientation) && !fullscreen
-                && appInfo.targetSdkVersion > O) {
+                && appInfo.targetSdkVersion >= O_MR1) {
             throw new IllegalStateException("Only fullscreen activities can request orientation");
         }
 

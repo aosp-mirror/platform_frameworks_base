@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -100,7 +101,9 @@ public class UserGridView extends ViewPager {
      */
     private final class Adapter extends PagerAdapter implements View.OnLayoutChangeListener {
         private final int mPodWidth;
-        private final int mPodMargin;
+        private final int mPodMarginBetween;
+        private final int mPodImageAvatarWidth;
+        private final int mPodImageAvatarHeight;
 
         private final WrappedBaseUserAdapter mUserAdapter;
         private int mContainerWidth;
@@ -108,10 +111,15 @@ public class UserGridView extends ViewPager {
         public Adapter(UserSwitcherController controller) {
             super();
             mUserAdapter = new WrappedBaseUserAdapter(controller, this);
-            mPodWidth = getResources().getDimensionPixelSize(
+
+            Resources res = getResources();
+            mPodWidth = res.getDimensionPixelSize(R.dimen.car_fullscreen_user_pod_width);
+            mPodMarginBetween = res.getDimensionPixelSize(
+                    R.dimen.car_fullscreen_user_pod_margin_between);
+            mPodImageAvatarWidth = res.getDimensionPixelSize(
                     R.dimen.car_fullscreen_user_pod_image_avatar_width);
-            mPodMargin = getResources().getDimensionPixelSize(
-                    R.dimen.car_fullscreen_user_pod_margin_side);
+            mPodImageAvatarHeight = res.getDimensionPixelSize(
+                    R.dimen.car_fullscreen_user_pod_image_avatar_height);
         }
 
         @Override
@@ -121,9 +129,12 @@ public class UserGridView extends ViewPager {
 
         private int getIconsPerPage() {
             // We need to know how many pods we need in this page. Each pod has its own width and
-            // margins on both sides. We can then divide the measured width of the parent by the
+            // a margin between them. We can then divide the measured width of the parent by the
             // sum of pod width and margin to get the number of pods that will completely fit.
-            return mContainerWidth / (mPodWidth + mPodMargin * 2);
+            // There is one less margin than the number of pods (eg. for 5 pods, there are 4
+            // margins), so need to add the margin to the measured width to account for that.
+            return (mContainerWidth + mPodMarginBetween) /
+                    (mPodWidth + mPodMarginBetween);
         }
 
         @Override
@@ -137,7 +148,17 @@ public class UserGridView extends ViewPager {
             int iconsPerPage = getIconsPerPage();
             int limit = Math.min(mUserAdapter.getCount(), (position + 1) * iconsPerPage);
             for (int i = position * iconsPerPage; i < limit; i++) {
-                pods.addView(makeUserPod(inflater, context, i, pods));
+                View v = makeUserPod(inflater, context, i, pods);
+                pods.addView(v);
+                // This is hacky, but the dividers on the pod container LinearLayout don't seem
+                // to work for whatever reason.  Instead, set a right margin on the pod if it's not
+                // the right-most pod and there is more than one pod in the container.
+                if (i < limit - 1 && limit > 1) {
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    params.setMargins(0, 0, mPodMarginBetween, 0);
+                    v.setLayoutParams(params);
+                }
             }
             container.addView(pods);
             return pods;
@@ -151,7 +172,8 @@ public class UserGridView extends ViewPager {
          */
         private Bitmap getDefaultUserIcon(CharSequence userName) {
             CharSequence displayText = userName.subSequence(0, 1);
-            Bitmap out = Bitmap.createBitmap(mPodWidth, mPodWidth, Bitmap.Config.ARGB_8888);
+            Bitmap out = Bitmap.createBitmap(mPodImageAvatarWidth, mPodImageAvatarHeight,
+                    Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(out);
 
             // Draw the circle background.
@@ -159,7 +181,7 @@ public class UserGridView extends ViewPager {
             shape.setShape(GradientDrawable.RADIAL_GRADIENT);
             shape.setGradientRadius(1.0f);
             shape.setColor(getContext().getColor(R.color.car_user_switcher_no_user_image_bgcolor));
-            shape.setBounds(0, 0, mPodWidth, mPodWidth);
+            shape.setBounds(0, 0, mPodImageAvatarWidth, mPodImageAvatarHeight);
             shape.draw(canvas);
 
             // Draw the letter in the center.
@@ -174,8 +196,8 @@ public class UserGridView extends ViewPager {
             // correct this, half the difference between the top and bottom distance metrics of the
             // font gives the offset of the font.  Bottom is a positive value, top is negative, so
             // the different is actually a sum.  The "half" operation is then factored out.
-            canvas.drawText(displayText.toString(),
-                    mPodWidth / 2, (mPodWidth - (metrics.bottom + metrics.top)) / 2, paint);
+            canvas.drawText(displayText.toString(), mPodImageAvatarWidth / 2,
+                    (mPodImageAvatarHeight - (metrics.bottom + metrics.top)) / 2, paint);
 
             return out;
         }

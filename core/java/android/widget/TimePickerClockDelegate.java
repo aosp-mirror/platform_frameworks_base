@@ -506,19 +506,29 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         mAmPmLayout.setLayoutParams(params);
     }
 
+    @Override
+    public void setDate(int hour, int minute) {
+        setHourInternal(hour, FROM_EXTERNAL_API, true, false);
+        setMinuteInternal(minute, FROM_EXTERNAL_API, false);
+
+        onTimeChanged();
+    }
+
     /**
      * Set the current hour.
      */
     @Override
     public void setHour(int hour) {
-        setHourInternal(hour, FROM_EXTERNAL_API, true);
+        setHourInternal(hour, FROM_EXTERNAL_API, true, true);
     }
 
-    private void setHourInternal(int hour, @ChangeSource int source, boolean announce) {
+    private void setHourInternal(int hour, @ChangeSource int source, boolean announce,
+            boolean notify) {
         if (mCurrentHour == hour) {
             return;
         }
 
+        resetAutofilledValue();
         mCurrentHour = hour;
         updateHeaderHour(hour, announce);
         updateHeaderAmPm();
@@ -532,7 +542,9 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         }
 
         mDelegator.invalidate();
-        onTimeChanged();
+        if (notify) {
+            onTimeChanged();
+        }
     }
 
     /**
@@ -557,14 +569,15 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
      */
     @Override
     public void setMinute(int minute) {
-        setMinuteInternal(minute, FROM_EXTERNAL_API);
+        setMinuteInternal(minute, FROM_EXTERNAL_API, true);
     }
 
-    private void setMinuteInternal(int minute, @ChangeSource int source) {
+    private void setMinuteInternal(int minute, @ChangeSource int source, boolean notify) {
         if (mCurrentMinute == minute) {
             return;
         }
 
+        resetAutofilledValue();
         mCurrentMinute = minute;
         updateHeaderMinute(minute, true);
 
@@ -576,7 +589,9 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         }
 
         mDelegator.invalidate();
-        onTimeChanged();
+        if (notify) {
+            onTimeChanged();
+        }
     }
 
     /**
@@ -870,7 +885,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
                         valueChanged = true;
                     }
                     final boolean isTransition = mAllowAutoAdvance && autoAdvance;
-                    setHourInternal(newValue, FROM_RADIAL_PICKER, !isTransition);
+                    setHourInternal(newValue, FROM_RADIAL_PICKER, !isTransition, true);
                     if (isTransition) {
                         setCurrentItemShowing(MINUTE_INDEX, true, false);
 
@@ -882,7 +897,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
                     if (getMinute() != newValue) {
                         valueChanged = true;
                     }
-                    setMinuteInternal(newValue, FROM_RADIAL_PICKER);
+                    setMinuteInternal(newValue, FROM_RADIAL_PICKER, true);
                     break;
             }
 
@@ -897,10 +912,10 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         public void onValueChanged(int pickerType, int newValue) {
             switch (pickerType) {
                 case TextInputTimePickerView.HOURS:
-                    setHourInternal(newValue, FROM_INPUT_PICKER, false);
+                    setHourInternal(newValue, FROM_INPUT_PICKER, false, true);
                     break;
                 case TextInputTimePickerView.MINUTES:
-                    setMinuteInternal(newValue, FROM_INPUT_PICKER);
+                    setMinuteInternal(newValue, FROM_INPUT_PICKER, true);
                     break;
                 case TextInputTimePickerView.AMPM:
                     setAmOrPm(newValue);

@@ -32,6 +32,8 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
+import java.io.PrintWriter;
+
 /**
  * Controller which coordinates all the fingerprint unlocking actions with the UI.
  */
@@ -264,6 +266,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onStartedGoingToSleep(int why) {
+        resetMode();
         mPendingAuthenticatedUserId = -1;
     }
 
@@ -346,6 +349,10 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     public void finishKeyguardFadingAway() {
+        resetMode();
+    }
+
+    private void resetMode() {
         mMode = MODE_NONE;
         mStatusBarWindowManager.setForceDozeBrightness(false);
         if (mStatusBar.getNavigationBarView() != null) {
@@ -374,5 +381,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     public boolean hasScreenTurnedOnSinceAuthenticating() {
         return mHasScreenTurnedOnSinceAuthenticating;
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println(" FingerprintUnlockController:");
+        pw.print("   mMode="); pw.println(mMode);
+        pw.print("   mWakeLock="); pw.println(mWakeLock);
     }
 }

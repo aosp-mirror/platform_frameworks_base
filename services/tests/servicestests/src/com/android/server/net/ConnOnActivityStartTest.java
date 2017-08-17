@@ -16,48 +16,37 @@
 
 package com.android.server.net;
 
-import static android.util.DebugUtils.valueToString;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.android.frameworks.servicestests.R;
+import com.android.servicestests.aidl.ICmdReceiverService;
 import com.android.servicestests.aidl.INetworkStateObserver;
 
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.PackageInstaller;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.RemoteException;
+import android.os.IBinder;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
-import libcore.io.IoUtils;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -76,62 +65,118 @@ import java.util.concurrent.TimeUnit;
  * Run: adb shell am instrument -e class com.android.server.net.ConnOnActivityStartTest -w \
  *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
-@Ignore
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class ConnOnActivityStartTest {
     private static final String TAG = ConnOnActivityStartTest.class.getSimpleName();
 
-    private static final String ACTION_INSTALL_COMPLETE = "com.android.server.net.INSTALL_COMPLETE";
-
-    private static final String TEST_APP_URI =
-            "android.resource://com.android.frameworks.servicestests/raw/conntestapp";
     private static final String TEST_PKG = "com.android.servicestests.apps.conntestapp";
     private static final String TEST_ACTIVITY_CLASS = TEST_PKG + ".ConnTestActivity";
-
-    private static final String ACTION_FINISH_ACTIVITY = TEST_PKG + ".FINISH";
+    private static final String TEST_SERVICE_CLASS = TEST_PKG + ".CmdReceiverService";
 
     private static final String EXTRA_NETWORK_STATE_OBSERVER = TEST_PKG + ".observer";
 
     private static final long BATTERY_OFF_TIMEOUT_MS = 2000; // 2 sec
     private static final long BATTERY_OFF_CHECK_INTERVAL_MS = 200; // 0.2 sec
 
-    private static final long WAIT_FOR_INSTALL_TIMEOUT_MS = 2000; // 2 sec
-
     private static final long NETWORK_CHECK_TIMEOUT_MS = 4000; // 4 sec
 
     private static final long SCREEN_ON_DELAY_MS = 500; // 0.5 sec
 
+    private static final long BIND_SERVICE_TIMEOUT_SEC = 4;
+
     private static final int REPEAT_TEST_COUNT = 5;
+
+    private static final String KEY_PAROLE_DURATION = "parole_duration";
+    private static final String DESIRED_PAROLE_DURATION = "0";
 
     private static Context mContext;
     private static UiDevice mUiDevice;
     private static int mTestPkgUid;
     private static BatteryManager mBatteryManager;
 
+    private static boolean mAppIdleConstsUpdated;
+    private static String mOriginalAppIdleConsts;
+
+    private static ServiceConnection mServiceConnection;
+    private static ICmdReceiverService mCmdReceiverService;
+
     @BeforeClass
     public static void setUpOnce() throws Exception {
         mContext = InstrumentationRegistry.getContext();
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
-        installAppAndAssertInstalled();
+        setDesiredParoleDuration();
         mContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         mTestPkgUid = mContext.getPackageManager().getPackageUid(TEST_PKG, 0);
 
         mBatteryManager = (BatteryManager) mContext.getSystemService(Context.BATTERY_SERVICE);
+        bindService();
     }
 
     @AfterClass
     public static void tearDownOnce() {
-        mContext.getPackageManager().deletePackage(TEST_PKG,
-                new IPackageDeleteObserver.Stub() {
-                    @Override
-                    public void packageDeleted(String packageName, int returnCode)
-                            throws RemoteException {
-                        Log.e(TAG, packageName + " deleted, returnCode: " + returnCode);
-                    }
-                }, 0);
+        if (mAppIdleConstsUpdated) {
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.APP_IDLE_CONSTANTS, mOriginalAppIdleConsts);
+        }
+        unbindService();
+    }
+
+    private static void bindService() throws Exception {
+        final CountDownLatch bindLatch = new CountDownLatch(1);
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.i(TAG, "Service connected");
+                mCmdReceiverService = ICmdReceiverService.Stub.asInterface(service);
+                bindLatch.countDown();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.i(TAG, "Service disconnected");
+            }
+        };
+        final Intent intent = new Intent()
+                .setComponent(new ComponentName(TEST_PKG, TEST_SERVICE_CLASS));
+        // Needs to use BIND_ALLOW_OOM_MANAGEMENT and BIND_NOT_FOREGROUND so that the test app
+        // does not run in the same process state as this app.
+        mContext.bindService(intent, mServiceConnection,
+                Context.BIND_AUTO_CREATE
+                        | Context.BIND_ALLOW_OOM_MANAGEMENT
+                        | Context.BIND_NOT_FOREGROUND);
+        if (!bindLatch.await(BIND_SERVICE_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for the service to bind in " + mTestPkgUid);
+        }
+    }
+
+    private static void unbindService() {
+        if (mCmdReceiverService != null) {
+            mContext.unbindService(mServiceConnection);
+        }
+    }
+
+    private static void setDesiredParoleDuration() {
+        mOriginalAppIdleConsts = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.APP_IDLE_CONSTANTS);
+        String newAppIdleConstants;
+        final String newConstant = KEY_PAROLE_DURATION + "=" + DESIRED_PAROLE_DURATION;
+        if (mOriginalAppIdleConsts == null || "null".equals(mOriginalAppIdleConsts)) {
+            // app_idle_constants is initially empty, so just assign the desired value.
+            newAppIdleConstants = newConstant;
+        } else if (mOriginalAppIdleConsts.contains(KEY_PAROLE_DURATION)) {
+            // app_idle_constants contains parole_duration, so replace it with the desired value.
+            newAppIdleConstants = mOriginalAppIdleConsts.replaceAll(
+                    KEY_PAROLE_DURATION + "=\\d+", newConstant);
+        } else {
+            // app_idle_constants didn't have parole_duration, so append the desired value.
+            newAppIdleConstants = mOriginalAppIdleConsts + "," + newConstant;
+        }
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.APP_IDLE_CONSTANTS, newAppIdleConstants);
+        mAppIdleConstsUpdated = true;
     }
 
     @Test
@@ -174,6 +219,7 @@ public class ConnOnActivityStartTest {
             startActivityAndCheckNetworkAccess();
         } finally {
             turnBatteryOn();
+            finishActivity();
             setAppIdle(false);
         }
     }
@@ -195,9 +241,9 @@ public class ConnOnActivityStartTest {
                 turnScreenOn();
                 SystemClock.sleep(SCREEN_ON_DELAY_MS);
                 startActivityAndCheckNetworkAccess();
-                Log.d(TAG, testName + " end #" + i);
             } finally {
                 finishActivity();
+                Log.d(TAG, testName + " end #" + i);
             }
         }
     }
@@ -348,74 +394,7 @@ public class ConnOnActivityStartTest {
         }
     }
 
-    private void finishActivity() {
-        final Intent finishIntent = new Intent(ACTION_FINISH_ACTIVITY)
-                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcast(finishIntent);
-    }
-    private static void installAppAndAssertInstalled() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final int[] result = {PackageInstaller.STATUS_SUCCESS};
-        final BroadcastReceiver installStatusReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String pkgName = intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME);
-                if (!TEST_PKG.equals(pkgName)) {
-                    return;
-                }
-                result[0] = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                        PackageInstaller.STATUS_FAILURE);
-                latch.countDown();
-            }
-        };
-        mContext.registerReceiver(installStatusReceiver, new IntentFilter(ACTION_INSTALL_COMPLETE));
-        try {
-            installApp();
-            if (latch.await(WAIT_FOR_INSTALL_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                if (result[0] != PackageInstaller.STATUS_SUCCESS) {
-                    fail("Couldn't install test app, result: "
-                            + valueToString(PackageInstaller.class, "STATUS_", result[0]));
-                }
-            } else {
-                fail("Timed out waiting for the test app to install");
-            }
-        } finally {
-            mContext.unregisterReceiver(installStatusReceiver);
-        }
-    }
-
-    private static void installApp() throws Exception {
-        final Uri packageUri = Uri.parse(TEST_APP_URI);
-        final InputStream in = mContext.getContentResolver().openInputStream(packageUri);
-
-        final PackageInstaller packageInstaller
-                = mContext.getPackageManager().getPackageInstaller();
-        final PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-        params.setAppPackageName(TEST_PKG);
-
-        final int sessionId = packageInstaller.createSession(params);
-        final PackageInstaller.Session session = packageInstaller.openSession(sessionId);
-
-        OutputStream out = null;
-        try {
-            out = session.openWrite(TAG, 0, -1);
-            final byte[] buffer = new byte[65536];
-            int c;
-            while ((c = in.read(buffer)) != -1) {
-                out.write(buffer, 0, c);
-            }
-            session.fsync(out);
-        } finally {
-            IoUtils.closeQuietly(in);
-            IoUtils.closeQuietly(out);
-        }
-        session.commit(createIntentSender(mContext, sessionId));
-    }
-
-    private static IntentSender createIntentSender(Context context, int sessionId) {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context, sessionId, new Intent(ACTION_INSTALL_COMPLETE), 0);
-        return pendingIntent.getIntentSender();
+    private void finishActivity() throws Exception {
+        mCmdReceiverService.finishActivity();
     }
 }

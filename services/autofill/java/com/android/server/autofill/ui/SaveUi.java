@@ -209,9 +209,6 @@ final class SaveUi {
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
-        final View closeButton = view.findViewById(R.id.autofill_save_close);
-        closeButton.setOnClickListener(cancelListener);
-
         mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
         mDialog.setContentView(view);
 

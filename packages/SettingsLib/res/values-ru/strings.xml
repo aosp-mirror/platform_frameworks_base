@@ -276,12 +276,12 @@
     <string name="debug_layout" msgid="5981361776594526155">"Показывать границы элементов"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Отразить интерфейс"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Включить написание справа налево для всех языков"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Принудительно расположить элементы интерфейса справа налево во всех локалях"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU-ускорение"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Всегда использовать GPU для двухмерного рисования"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Отладить операции непрямоугольного усечения"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Отладка операций усечения сложной формы"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Профилировать GPU-отрисовку"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Анимация окон"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Анимация переходов"</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Идет зарядка"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"заряжается"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не заряжается"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Подключено, не заряжается"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Батарея заряжена"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Контролируется администратором"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Включено администратором"</string>

@@ -218,6 +218,12 @@ public class ActivityTestsBase {
 
             return createTestStack(stackId, createOnTop);
         }
+
+        // Always keep things awake
+        @Override
+        boolean hasAwakeDisplay() {
+            return true;
+        }
     }
 
     private static WindowManagerService prepareMockWindowManager() {

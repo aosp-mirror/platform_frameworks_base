@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.ViewState;
 
+import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -767,5 +768,23 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println(" ScrimController:");
+
+        pw.print("   frontScrim:"); pw.print(" viewAlpha="); pw.print(mScrimInFront.getViewAlpha());
+        pw.print(" alpha="); pw.print(mCurrentInFrontAlpha);
+        pw.print(" dozeAlpha="); pw.print(mDozeInFrontAlpha);
+        pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimInFront.getTint()));
+
+        pw.print("   backScrim:"); pw.print(" viewAlpha="); pw.print(mScrimBehind.getViewAlpha());
+        pw.print(" alpha="); pw.print(mCurrentBehindAlpha);
+        pw.print(" dozeAlpha="); pw.print(mDozeBehindAlpha);
+        pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimBehind.getTint()));
+
+        pw.print("   mBouncerShowing="); pw.println(mBouncerShowing);
+        pw.print("   mTracking="); pw.println(mTracking);
+        pw.print("   mForceHideScrims="); pw.println(mForceHideScrims);
     }
 }
