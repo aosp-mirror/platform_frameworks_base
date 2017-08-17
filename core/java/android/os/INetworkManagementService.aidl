@@ -281,7 +281,7 @@ interface INetworkManagementService
     /**
      * Return summary of network statistics all tethering interfaces.
      */
-    NetworkStats getNetworkStatsTethering();
+    NetworkStats getNetworkStatsTethering(int how);
 
     /**
      * Set quota for an interface.
