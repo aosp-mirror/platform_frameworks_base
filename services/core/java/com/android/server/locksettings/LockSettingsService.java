@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
@@ -77,6 +78,7 @@ import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 
@@ -551,6 +553,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override // binder interface
     public void systemReady() {
+        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
+            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
+        }
+        checkWritePermission(UserHandle.USER_SYSTEM);
         migrateOldData();
         try {
             getGateKeeperService();
@@ -730,6 +736,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsRead");
     }
 
+    private final void checkPasswordHavePermission(int userId) {
+        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
+            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
+        }
+        mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
+    }
+
     private final void checkReadPermission(String requestedKey, int userId) {
         final int callingUid = Binder.getCallingUid();
 
@@ -859,6 +872,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean havePassword(int userId) throws RemoteException {
+        checkPasswordHavePermission(userId);
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 long handle = getSyntheticPasswordHandleLocked(userId);
@@ -872,6 +886,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean havePattern(int userId) throws RemoteException {
+        checkPasswordHavePermission(userId);
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 long handle = getSyntheticPasswordHandleLocked(userId);
