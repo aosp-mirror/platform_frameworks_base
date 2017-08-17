@@ -72,6 +72,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     public KeyguardEsimArea(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mEuiccManager = (EuiccManager) context.getSystemService(Context.EUICC_SERVICE);
         setOnClickListener(this);
     }
 

@@ -25,8 +25,7 @@
     android:id="@+id/keyguard_disable_esim"
     android:visibility="gone"
     android:text="@string/disable_carrier_button_text"
-    style="?android:attr/buttonBarButtonStyle"
+    style="@style/Keyguard.TextView"
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textSize="@dimen/kg_status_line_font_size"
-    android:textColor="?android:attr/textColorSecondary"
     android:textAllCaps="@bool/kg_use_all_caps" />
