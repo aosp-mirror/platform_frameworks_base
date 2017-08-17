@@ -592,6 +592,21 @@
     <!-- The size of the right icon -->
     <dimen name="notification_right_icon_size">40dp</dimen>
 
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
+    <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
+    <dimen name="notification_custom_view_max_image_width_low_ram">294dp</dimen>
+    <!-- The maximum height of a big picture in a notification. The images will be reduced to that height in case they are bigger. -->
+    <dimen name="notification_big_picture_max_height_low_ram">208dp</dimen>
+    <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. -->
+    <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
+    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. -->
+    <dimen name="notification_media_image_max_height_low_ram">100dp</dimen>
+    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
+    <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
+    <!-- The size of the right icon image when on low ram -->
+    <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
+
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>
 
