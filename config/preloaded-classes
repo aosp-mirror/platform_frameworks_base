@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
-#
 # Preloaded-classes filter file for phones.
 #
 # Classes in this file will be allocated into the boot image, and forcibly initialized in
@@ -1454,6 +1452,7 @@ android.icu.impl.UResource$Sink
 android.icu.impl.UResource$Table
 android.icu.impl.UResource$Value
 android.icu.impl.Utility
+android.icu.impl.coll.CollationRoot
 android.icu.impl.locale.AsciiUtil
 android.icu.impl.locale.BaseLocale
 android.icu.impl.locale.BaseLocale$Cache
@@ -2276,7 +2275,6 @@ android.util.Base64
 android.util.Base64$Coder
 android.util.Base64$Decoder
 android.util.Base64$Encoder
-android.util.TimingsTraceLog
 android.util.ContainerHelpers
 android.util.DisplayMetrics
 android.util.EventLog
@@ -2328,6 +2326,7 @@ android.util.SparseLongArray
 android.util.StateSet
 android.util.SuperNotCalledException
 android.util.TimeUtils
+android.util.TimingsTraceLog
 android.util.TypedValue
 android.util.Xml
 android.util.jar.StrictJarFile
