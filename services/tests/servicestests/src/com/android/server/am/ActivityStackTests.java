@@ -78,7 +78,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         service.mStackSupervisor.inResumeTopActivity = true;
         testStack.mResumedActivity = activityRecord;
 
-        final boolean waiting = testStack.checkReadyForSleepLocked();
+        final boolean waiting = testStack.goToSleepIfPossible(false);
 
         // Ensure we report not being ready for sleep.
         assertTrue(waiting);
