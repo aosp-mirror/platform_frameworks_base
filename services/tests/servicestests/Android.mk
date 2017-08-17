@@ -29,7 +29,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 
-LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl
+LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl \
+    aidl/com/android/servicestests/aidl/ICmdReceiverService.aidl
 LOCAL_SRC_FILES += $(call all-java-files-under, test-apps/JobTestApp/src)
 
 LOCAL_JAVA_LIBRARIES := android.test.mock legacy-android-test

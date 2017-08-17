@@ -18,6 +18,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := \
-        com/android/servicestests/aidl/INetworkStateObserver.aidl
+        com/android/servicestests/aidl/INetworkStateObserver.aidl \
+        com/android/servicestests/aidl/ICmdReceiverService.aidl
 LOCAL_MODULE := servicestests-aidl
 include $(BUILD_STATIC_JAVA_LIBRARY)

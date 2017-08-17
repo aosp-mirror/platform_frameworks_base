@@ -24,6 +24,8 @@
     <application>
         <activity android:name=".ConnTestActivity"
                   android:exported="true" />
+        <service android:name=".CmdReceiverService"
+                 android:exported="true" />
     </application>
 
 </manifest>
