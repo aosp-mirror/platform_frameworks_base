@@ -43,7 +43,6 @@ public class MbmsException extends Exception {
      * middleware. They are applicable to both streaming and file-download use-cases.
      */
     public static class InitializationErrors {
-        private InitializationErrors() {}
         /**
          * Indicates that the app tried to create more than one instance each of
          * {@link android.telephony.MbmsStreamingManager} or
@@ -61,10 +60,9 @@ public class MbmsException extends Exception {
      * streaming and file-download.
      */
     public static class GeneralErrors {
-        private GeneralErrors() {}
         /**
          * Indicates that the app attempted to perform an operation before receiving notification
-         * that the middleware is ready via {@link MbmsStreamingManagerCallback#onMiddlewareReady()}
+         * that the middleware is ready via {@link MbmsStreamingManagerCallback#middlewareReady()}
          * or TODO: link MbmsDownloadManagerCallback#middlewareReady
          */
         public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 201;
@@ -98,7 +96,6 @@ public class MbmsException extends Exception {
      * Indicates the errors that are applicable only to the streaming use-case
      */
     public static class StreamingErrors {
-        private StreamingErrors() {}
         /** Indicates that the middleware cannot start a stream due to too many ongoing streams */
         public static final int ERROR_CONCURRENT_SERVICE_LIMIT_REACHED = 301;
 
@@ -107,8 +104,7 @@ public class MbmsException extends Exception {
 
         /**
          * Indicates that the app called
-         * {@link android.telephony.MbmsStreamingManager#startStreaming(
-         * StreamingServiceInfo, StreamingServiceCallback, android.os.Handler)}
+         * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo, StreamingServiceCallback)}
          * more than once for the same {@link StreamingServiceInfo}.
          */
         public static final int ERROR_DUPLICATE_START_STREAM = 303;
