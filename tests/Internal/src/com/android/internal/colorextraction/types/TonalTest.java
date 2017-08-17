@@ -99,20 +99,39 @@ public class TonalTest {
     }
 
     @Test
-    public void tonal_excludeBlacklistedColor() {
+    public void tonal_blacklistTest() {
         // Make sure that palette generation will fail.
-        Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
+        final Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
 
         // Creating a WallpaperColors object that contains *only* blacklisted colors.
-        float[] hsl = tonal.getBlacklistedColors().get(0).getCenter();
-        WallpaperColors colors = new WallpaperColors(Color.valueOf(ColorUtils.HSLToColor(hsl)),
-                null, null, 0);
+        final float[] hsl = tonal.getBlacklistedColors().get(0).getCenter();
+        final int blacklistedColor = ColorUtils.HSLToColor(hsl);
+        WallpaperColors colorsFromBitmap = new WallpaperColors(Color.valueOf(blacklistedColor),
+                null, null, WallpaperColors.HINT_FROM_BITMAP);
 
         // Make sure that palette generation will fail
-        GradientColors normal = new GradientColors();
-        tonal.extractInto(colors, normal, new GradientColors(),
+        final GradientColors normal = new GradientColors();
+        tonal.extractInto(colorsFromBitmap, normal, new GradientColors(),
                 new GradientColors());
         assertTrue("Cannot generate a tonal palette from blacklisted colors.",
                 normal.getMainColor() == Tonal.MAIN_COLOR_DARK);
+    }
+
+    @Test
+    public void tonal_ignoreBlacklistTest() {
+        final Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
+
+        // Creating a WallpaperColors object that contains *only* blacklisted colors.
+        final float[] hsl = tonal.getBlacklistedColors().get(0).getCenter();
+        final int blacklistedColor = ColorUtils.HSLToColor(hsl);
+        WallpaperColors colors = new WallpaperColors(Color.valueOf(blacklistedColor),
+                null, null);
+
+        // Blacklist should be ignored when HINT_FROM_BITMAP isn't present.
+        final GradientColors normal = new GradientColors();
+        tonal.extractInto(colors, normal, new GradientColors(),
+                new GradientColors());
+        assertTrue("Blacklist should never be used on WallpaperColors generated using "
+                + "default constructor.", normal.getMainColor() == blacklistedColor);
     }
 }
