@@ -3000,9 +3000,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updateRestrictBackgroundRulesOnUidStatusChangedUL(uid, oldUidState, uidState);
                 if (isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
                         != isProcStateAllowedWhileIdleOrPowerSaveMode(uidState) ) {
-                    if (isUidIdle(uid)) {
-                        updateRuleForAppIdleUL(uid);
-                    }
+                    updateRuleForAppIdleUL(uid);
                     if (mDeviceIdleMode) {
                         updateRuleForDeviceIdleUL(uid);
                     }
