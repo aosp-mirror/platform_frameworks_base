@@ -768,7 +768,6 @@ public class CarrierConfigManager {
      * Determines whether High Definition audio property is displayed in the dialer UI.
      * If {@code false}, remove the HD audio property from the connection so that HD audio related
      * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
-     * @hide
      */
     public static final String KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL =
             "display_hd_audio_property_bool";
