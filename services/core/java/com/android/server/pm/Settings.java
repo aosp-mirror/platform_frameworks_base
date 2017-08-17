@@ -4867,7 +4867,7 @@ final class Settings {
             pw.print(" enabled=");
             pw.print(ps.getEnabled(user.id));
             pw.print(" instant=");
-            pw.println(ps.getInstantApp(user.id));
+            pw.print(ps.getInstantApp(user.id));
             pw.print(" virtual=");
             pw.println(ps.getVirtulalPreload(user.id));
 
