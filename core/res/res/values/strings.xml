@@ -593,17 +593,18 @@
     <!-- This is the label for the notification channel settings that controls the behavior
         of the notification about applications that are running in the background (that is,
         perhaps confusingly, running foreground services but not the foreground UI on the screen).
-        [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_foreground_service">Apps running in background</string>
+        [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6665375982962336520] -->
+    <string name="notification_channel_foreground_service">Apps consuming battery</string>
 
-    <!-- Label for foreground service notification when one app is running. [CHAR LIMIT=NONE] -->
+    <!-- Label for foreground service notification when one app is running.
+    [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
     <string name="foreground_service_app_in_background"><xliff:g id="app_name">%1$s</xliff:g> is
-        running in the background</string>
+        using battery</string>
 
     <!-- Label for foreground service notification when multiple apps are running.
-        [CHAR LIMIT=NONE] -->
+        [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=7150914856893450380] -->
     <string name="foreground_service_apps_in_background"><xliff:g id="number">%1$d</xliff:g> apps
-        are running in the background</string>
+        are using battery</string>
 
     <!-- Content for foreground service notification when one app is running.
         [CHAR LIMIT=NONE] -->
