@@ -23938,7 +23938,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
                 return;
             }
-            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
+            synchronized (ActivityManagerService.this) {
+                ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
+            }
         }
 
         @Override
