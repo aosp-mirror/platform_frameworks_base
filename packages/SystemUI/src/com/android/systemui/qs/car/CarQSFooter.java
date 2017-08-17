@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -38,15 +37,10 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  */
 public class CarQSFooter extends RelativeLayout implements QSFooter,
         UserInfoController.OnUserInfoChangedListener {
-    private static final String TAG = "CarQSFooter";
-
     private UserInfoController mUserInfoController;
 
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
-
-    private CarQSDetail mQsDetail;
-    private QSPanel mQsPanel;
 
     public CarQSFooter(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,21 +53,6 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
         mUserInfoController = Dependency.get(UserInfoController.class);
-
-        mMultiUserSwitch.setOnClickListener(v -> {
-            if (mQsDetail == null || mQsPanel == null) {
-                Log.e(TAG, "CarQSFooter not properly set up; cannot display user switcher.");
-                return;
-            }
-
-            // MultiUserSwitch.onClick() shows the detail, but does not close the detail, so need
-            // to use the detail's showing state to determine the correct action.
-            if (mQsDetail.isShowingDetail()) {
-                mQsPanel.closeDetail();
-            } else {
-                mMultiUserSwitch.onClick(v);
-            }
-        });
 
         findViewById(R.id.settings_button).setOnClickListener(v -> {
             ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
@@ -94,22 +73,11 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    /**
-     * Needed for setup in order to allow the multi user switch to show the users.
-     *
-     * @param panel the QSPanel that listens to the user switch controller.  This cannot be null
-     *              during normal operation.
-     */
     @Override
     public void setQSPanel(@Nullable QSPanel panel) {
         if (panel != null) {
             mMultiUserSwitch.setQsPanel(panel);
         }
-        mQsPanel = panel;
-    }
-
-    public void setQSDetail(CarQSDetail detail) {
-        mQsDetail = detail;
     }
 
     @Override

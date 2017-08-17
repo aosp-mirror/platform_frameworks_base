@@ -28,7 +28,6 @@ import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.statusbar.policy.Clock;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,8 +57,6 @@ public class CarQsFragmentTest extends SysuiBaseFragmentTest {
 
         mDependency.injectTestDependency(Dependency.BG_LOOPER,
                 TestableLooper.get(this).getLooper());
-        mDependency.injectMockDependency(UserSwitcherController.class);
-        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Test
