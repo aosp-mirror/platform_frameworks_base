@@ -1338,9 +1338,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"מחובר אל <xliff:g id="SESSION">%s</xliff:g>. הקש כדי לנהל את הרשת."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏ה-VPN שמופעל תמיד, מתחבר..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏ה-VPN שפועל תמיד, מחובר"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏חיבור תמידי ל-VPN מנותק"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏שגיאת VPN שמופעל תמיד"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"הקש כדי להגדיר"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"בחר קובץ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"לא נבחר קובץ"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
@@ -1652,7 +1654,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"נסה שוב מאוחר יותר"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"צפייה במסך מלא"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"כדי לצאת, החלק מלמעלה למטה."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"הבנתי"</string>
     <string name="done_label" msgid="2093726099505892398">"בוצע"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"מחוון שעות מעגלי"</string>

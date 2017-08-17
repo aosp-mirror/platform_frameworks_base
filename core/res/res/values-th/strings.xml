@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"เชื่อมต่อกับ <xliff:g id="SESSION">%s</xliff:g> แตะเพื่อจัดการเครือข่าย"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"กำลังเชื่อมต่อ VPN แบบเปิดตลอดเวลา…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"เชื่อมต่อ VPN แบบเปิดตลอดเวลาแล้ว"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ยกเลิกการเชื่อมต่อ VPN แบบเปิดตลอดเวลาแล้ว"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ข้อผิดพลาดของ VPN แบบเปิดตลอดเวลา"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"แตะเพื่อตั้งค่า"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"เลือกไฟล์"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ไม่ได้เลือกไฟล์ไว้"</string>
     <string name="reset" msgid="2448168080964209908">"รีเซ็ต"</string>

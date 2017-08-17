@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> سے منسلک ہے۔ نیٹ ورک کا نظم کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏ہمیشہ آن VPN مربوط ہو رہا ہے…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏ہمیشہ آن VPN مربوط ہوگیا"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏ہمیشہ آن VPN غیر منسلک ہو گیا"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏ہمیشہ آن VPN کی خرابی"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"سیٹ اپ کرنے کیلئے تھپتھپائیں"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"فائل منتخب کریں"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"کوئی فائل منتخب نہیں کی گئی"</string>
     <string name="reset" msgid="2448168080964209908">"دوبارہ ترتیب دیں"</string>

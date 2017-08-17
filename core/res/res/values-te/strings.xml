@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>కు కనెక్ట్ చేయబడింది. నెట్‌వర్క్‌ను నిర్వహించడానికి నొక్కండి."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN కనెక్ట్ చేయబడుతోంది…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN కనెక్ట్ చేయబడింది"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ఎల్లప్పుడూ ఆన్‌లో ఉండే VPN డిస్‌కనెక్ట్ చేయబడింది"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN లోపం"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"సెటప్ చేయడానికి నొక్కండి"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ఫైల్‌ను ఎంచుకోండి"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ఫైల్ ఎంచుకోబడలేదు"</string>
     <string name="reset" msgid="2448168080964209908">"రీసెట్ చేయి"</string>

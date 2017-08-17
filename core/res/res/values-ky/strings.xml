@@ -1073,18 +1073,18 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> процесси өзүнүн <xliff:g id="SIZE">%2$s</xliff:g> процесс чегинен ашып кетти. Үймө дамп сиз үчүн иштеп чыгуучу менен бөлүшүүгө даяр. Абайлаңыз: бул үймө дампта колдонмонун уруксаты бар жеке маалыматыңыз камтылышы мүмкүн."</string>
     <string name="sendText" msgid="5209874571959469142">"Текст үчүн аракет тандаңыз"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Коңгуроонун үн көлөмү"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Медианын үн көлөмү"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Мультимедианын үнү"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth аркылуу ойнотулууда"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Үнсүз рингтон орнотулду"</string>
     <string name="volume_call" msgid="3941680041282788711">"Чалуудагы үн көлөмү"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth чалуудагы үн көлөмү"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Ойготкучтун үн көлөмү"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Ойготкучтун үнү"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Эскертме үн көлөмү"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Үн көлөмү"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth үнүнүн деңгээли"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Коңгуроо үнүнүн деңгээли"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Чалуунун үн деңгээли"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Медиа үнүнүн деңгээли"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Мультимедианын үнү"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Эскертме үнүнүн деңгээли"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Демейки шыңгыр"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Демейки шыңгыр (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1295,9 +1295,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> сеансына туташуу ишке ашты. Желенин параметрлерин өзгөртүү үчүн бул жерди басыңыз."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Дайым иштеген VPN туташууда…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Дайым иштеген VPN туташтырылды"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Дайым иштеген VPN ажыратылды"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Дайым иштеген VPN\'де ката кетти"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Жөндөө үчүн таптаңыз"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Файл тандоо"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Эч файл тандалган жок"</string>
     <string name="reset" msgid="2448168080964209908">"Баштапкы абалга келтирүү"</string>
