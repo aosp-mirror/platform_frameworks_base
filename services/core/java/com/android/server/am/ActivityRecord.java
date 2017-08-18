@@ -955,8 +955,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // the user leaves that mode.
         mLastReportedMultiWindowMode = !task.mFullscreen;
         mLastReportedPictureInPictureMode = (task.getStackId() == PINNED_STACK_ID);
-
-        onOverrideConfigurationSent();
     }
 
     void removeWindowContainer() {
@@ -2220,15 +2218,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * a new merged configuration is sent to the client for this activity.
      */
     void setLastReportedConfiguration(@NonNull MergedConfiguration config) {
-        mLastReportedConfiguration.setTo(config);
+        setLastReportedConfiguration(config.getGlobalConfiguration(),
+            config.getOverrideConfiguration());
     }
 
-    /** Call when override config was sent to the Window Manager to update internal records. */
-    // TODO(b/36505427): Why do we set last reported based on sending the config to WM? Seems like
-    // we should only set this when we actually report to the activity which is what the method
-    // setLastReportedMergedOverrideConfiguration() does. Investigate if this is really needed.
-    void onOverrideConfigurationSent() {
-        mLastReportedConfiguration.setOverrideConfiguration(getMergedOverrideConfiguration());
+    void setLastReportedConfiguration(Configuration global, Configuration override) {
+        mLastReportedConfiguration.setConfiguration(global, override);
     }
 
     @Override
@@ -2242,9 +2237,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return;
         }
         mWindowContainerController.onOverrideConfigurationChanged(newConfig, mBounds);
-        // TODO(b/36505427): Can we consolidate the call points of onOverrideConfigurationSent()
-        // to just use this method instead?
-        onOverrideConfigurationSent();
     }
 
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
@@ -2431,8 +2423,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
-        mLastReportedConfiguration.setConfiguration(service.getGlobalConfiguration(),
-                newMergedOverrideConfig);
+
+        setLastReportedConfiguration(service.getGlobalConfiguration(), newMergedOverrideConfig);
 
         if (changes == 0 && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
