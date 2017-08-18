@@ -646,6 +646,7 @@ public final class ContentService extends IContentService.Stub {
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return;
         int userId = UserHandle.getCallingUserId();
+        final int callingUid = Binder.getCallingUid();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -658,7 +659,8 @@ public final class ContentService extends IContentService.Stub {
                 // Remove periodic sync.
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                         "no permission to write the sync settings");
-                getSyncManager().removePeriodicSync(info, extras);
+                getSyncManager().removePeriodicSync(info, extras,
+                        "cancelRequest() by uid=" + callingUid);
             }
             // Cancel active syncs and clear pending syncs from the queue.
             syncManager.cancelScheduledSyncOperation(info, extras);
@@ -814,13 +816,15 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
 
+        final int callingUid = Binder.getCallingUid();
+
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
             getSyncManager()
                     .removePeriodicSync(
                             new SyncStorageEngine.EndPoint(account, authority, userId),
-                            extras);
+                            extras, "removePeriodicSync() by uid=" + callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }

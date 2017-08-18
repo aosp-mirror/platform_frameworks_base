@@ -1835,6 +1835,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             }
         }
+
+        @Override
+        public int countJobs() {
+            synchronized (mLock) {
+                return mJobs.size();
+            }
+        }
     }
 
     /**
@@ -2015,6 +2022,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
         @Override
         public void cancelAll() throws RemoteException {
             final int uid = Binder.getCallingUid();
+            switch (uid) {
+                case Process.SYSTEM_UID:
+                    // This really shouldn't happen.
+                    Slog.wtf(TAG, "JobScheduler.cancelAll() called for uid=" + uid);
+                    return;
+            }
 
             long ident = Binder.clearCallingIdentity();
             try {

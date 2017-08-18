@@ -59,6 +59,7 @@ import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -140,6 +141,8 @@ public class SyncManager {
     static final String TAG = "SyncManager";
 
     private static final boolean DEBUG_ACCOUNT_ACCESS = false;
+
+    private static final boolean ENABLE_SUSPICIOUS_CHECK = Build.IS_DEBUGGABLE;
 
     /** Delay a sync due to local changes this long. In milliseconds */
     private static final long LOCAL_SYNC_DELAY;
@@ -463,7 +466,7 @@ public class SyncManager {
                         }
                         if (opx.key.equals(opy.key)) {
                             mLogger.log("Removing duplicate sync: ", opy);
-                            mJobScheduler.cancel(opy.jobId);
+                            cancelJob(opy, "cleanupJobs() x=" + opx + " y=" + opy);
                         }
                     }
                 }
@@ -501,15 +504,21 @@ public class SyncManager {
                     }
                 }
             }
-            if (mLogger.enabled()) {
-                mLogger.log("Connected to JobScheduler: "
-                        + numPersistedPeriodicSyncs + " periodic syncs "
-                        + numPersistedOneshotSyncs + " oneshot syncs.");
-            }
+            final int totalJobs = (mJobSchedulerInternal == null)
+                    ? -1 : mJobSchedulerInternal.countJobs();
+            final String summary = "Loaded persisted syncs: "
+                    + numPersistedPeriodicSyncs + " periodic syncs, "
+                    + numPersistedOneshotSyncs + " oneshot syncs, "
+                    + (pendingJobs.size()) + " total system server jobs, "
+                    + totalJobs + " total jobs.";
+            Slog.i(TAG, summary);
+            mLogger.log(summary);
+
             cleanupJobs();
 
-            if ((numPersistedPeriodicSyncs == 0) && likelyHasPeriodicSyncs()) {
-                Slog.wtf(TAG, "Device booted with no persisted periodic syncs.");
+            if (ENABLE_SUSPICIOUS_CHECK &&
+                    (numPersistedPeriodicSyncs == 0) && likelyHasPeriodicSyncs()) {
+                Slog.wtf(TAG, "Device booted with no persisted periodic syncs: " + summary);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -520,6 +529,7 @@ public class SyncManager {
      * @return whether the device most likely has some periodic syncs.
      */
     private boolean likelyHasPeriodicSyncs() {
+        // STOPSHIP Remove the google specific string.
         try {
             return AccountManager.get(mContext).getAccountsByType("com.google").length > 0;
         } catch (Throwable th) {
@@ -566,7 +576,7 @@ public class SyncManager {
         mSyncStorageEngine.setOnAuthorityRemovedListener(new SyncStorageEngine.OnAuthorityRemovedListener() {
             @Override
             public void onAuthorityRemoved(EndPoint removedAuthority) {
-                removeSyncsForAuthority(removedAuthority);
+                removeSyncsForAuthority(removedAuthority, "onAuthorityRemoved");
             }
         });
 
@@ -1118,14 +1128,14 @@ public class SyncManager {
         }
     }
 
-    private void removeSyncsForAuthority(EndPoint info) {
+    private void removeSyncsForAuthority(EndPoint info, String why) {
         mLogger.log("removeSyncsForAuthority: ", info);
         verifyJobScheduler();
         List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (op.target.matchesSpec(info)) {
                 mLogger.log("canceling: ", op);
-                getJobScheduler().cancel(op.jobId);
+                cancelJob(op, why);
             }
         }
     }
@@ -1133,8 +1143,9 @@ public class SyncManager {
     /**
      * Remove a specific periodic sync identified by its target and extras.
      */
-    public void removePeriodicSync(EndPoint target, Bundle extras) {
-        Message m = mSyncHandler.obtainMessage(mSyncHandler.MESSAGE_REMOVE_PERIODIC_SYNC, target);
+    public void removePeriodicSync(EndPoint target, Bundle extras, String why) {
+        Message m = mSyncHandler.obtainMessage(mSyncHandler.MESSAGE_REMOVE_PERIODIC_SYNC,
+                Pair.create(target, why));
         m.setData(extras);
         m.sendToTarget();
     }
@@ -1359,7 +1370,7 @@ public class SyncManager {
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(target)) {
                 count++;
-                getJobScheduler().cancel(op.jobId);
+                cancelJob(op, why);
                 postScheduleSyncMessage(op, 0 /* min delay */);
             }
         }
@@ -1484,7 +1495,7 @@ public class SyncManager {
                         if (isLoggable) {
                             Slog.v(TAG, "Cancelling duplicate sync " + op);
                         }
-                        getJobScheduler().cancel(op.jobId);
+                        cancelJob(op, "scheduleSyncOperationH-duplicate");
                     }
                 }
             }
@@ -1544,7 +1555,7 @@ public class SyncManager {
         List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(info)) {
-                getJobScheduler().cancel(op.jobId);
+                cancelJob(op, "clearScheduledSyncOperations");
                 getSyncStorageEngine().markPending(op.target, false);
             }
         }
@@ -1562,7 +1573,7 @@ public class SyncManager {
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(info)
                     && syncExtrasEquals(extras, op.extras, false)) {
-                getJobScheduler().cancel(op.jobId);
+                cancelJob(op, "cancelScheduledSyncOperation");
             }
         }
         setAuthorityPendingState(info);
@@ -1678,7 +1689,7 @@ public class SyncManager {
         List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (op.target.userId == userId) {
-                getJobScheduler().cancel(op.jobId);
+                cancelJob(op, "user removed u" + userId);
             }
         }
     }
@@ -2710,7 +2721,8 @@ public class SyncManager {
                                 data.flex, data.extras);
                         break;
                     case MESSAGE_REMOVE_PERIODIC_SYNC:
-                        removePeriodicSyncH((EndPoint)msg.obj, msg.getData());
+                        Pair<EndPoint, String> args = (Pair<EndPoint, String>) (msg.obj);
+                        removePeriodicSyncH(args.first, msg.getData(), args.second);
                         break;
 
                     case SyncHandler.MESSAGE_CANCEL:
@@ -2848,7 +2860,7 @@ public class SyncManager {
                 // mSyncJobService.callJobFinished is async, so cancel the job to ensure we don't
                 // find the this job in the pending jobs list while looking for duplicates
                 // before scheduling it at a later time.
-                getJobScheduler().cancel(op.jobId);
+                cancelJob(op, "deferSyncH()");
                 scheduleSyncOperationH(op, delay);
             }
         }
@@ -2998,7 +3010,7 @@ public class SyncManager {
             for (SyncOperation op: ops) {
                 if (!containsAccountAndUser(allAccounts, op.target.account, op.target.userId)) {
                     mLogger.log("canceling: ", op);
-                    getJobScheduler().cancel(op.jobId);
+                    cancelJob(op, "updateRunningAccountsH()");
                 }
             }
 
@@ -3105,7 +3117,7 @@ public class SyncManager {
         /**
          * Remove this periodic sync operation and all one-off operations initiated by it.
          */
-        private void removePeriodicSyncInternalH(SyncOperation syncOperation) {
+        private void removePeriodicSyncInternalH(SyncOperation syncOperation, String why) {
             // Remove this periodic sync and all one-off syncs initiated by it.
             List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
@@ -3117,18 +3129,18 @@ public class SyncManager {
                         runSyncFinishedOrCanceledH(null, asc);
                     }
                     mLogger.log("removePeriodicSyncInternalH-canceling: ", op);
-                    getJobScheduler().cancel(op.jobId);
+                    cancelJob(op, why);
                 }
             }
         }
 
-        private void removePeriodicSyncH(EndPoint target, Bundle extras) {
+        private void removePeriodicSyncH(EndPoint target, Bundle extras, String why) {
             verifyJobScheduler();
             List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
                         && syncExtrasEquals(op.extras, extras, true /* includeSyncSettings */)) {
-                    removePeriodicSyncInternalH(op);
+                    removePeriodicSyncInternalH(op, why);
                 }
             }
         }
@@ -3369,7 +3381,7 @@ public class SyncManager {
                 // Note this part is probably okay to do before closeActiveSyncContext()...
                 // But moved here to restore OC-dev's behavior.  See b/64597061.
                 if (!syncOperation.isPeriodic) {
-                    getJobScheduler().cancel(syncOperation.jobId);
+                    cancelJob(syncOperation, "runSyncFinishedOrCanceledH()-finished");
                 }
 
                 if (!syncResult.hasError()) {
@@ -3410,7 +3422,7 @@ public class SyncManager {
                 }
 
                 if (!syncOperation.isPeriodic) {
-                    getJobScheduler().cancel(syncOperation.jobId);
+                    cancelJob(syncOperation, "runSyncFinishedOrCanceledH()-canceled");
                 }
 
                 if (activeSyncContext.mSyncAdapter != null) {
@@ -3746,5 +3758,49 @@ public class SyncManager {
             // Default to mContext, not finding the package system is running as is unlikely.
             return mContext;
         }
+    }
+
+    private void cancelJob(SyncOperation op, String why) {
+        if (op == null) {
+            Slog.wtf(TAG, "Null sync operation detected.");
+            return;
+        }
+        if (op.isPeriodic) {
+            mLogger.log("Removing periodic sync ", op, " for ", why);
+
+            if (ENABLE_SUSPICIOUS_CHECK && isSuspiciousPeriodicSyncRemoval(op)) {
+                wtfWithLog("Suspicious removal of " + op + " for " + why);
+            }
+        }
+        getJobScheduler().cancel(op.jobId);
+    }
+
+    private boolean isSuspiciousPeriodicSyncRemoval(SyncOperation op) {
+        // STOPSHIP Remove the google specific string.
+        if (!op.isPeriodic){
+            return false;
+        }
+        switch (op.target.provider) {
+            case "gmail-ls":
+            case "com.android.contacts.metadata":
+                break;
+            default:
+                return false;
+        }
+        final Account account = op.target.account;
+        final Account[] accounts = AccountManager.get(mContext)
+                .getAccountsByTypeAsUser(account.type, UserHandle.of(op.target.userId));
+        for (Account a : accounts) {
+            if (a.equals(account)) {
+                return true; // Account still exists.  Suspicious!
+            }
+        }
+        // Account no longer exists. Makes sense...
+        return false;
+    }
+
+    private void wtfWithLog(String message) {
+        Slog.wtf(TAG, message);
+        mLogger.log("WTF: ", message);
     }
 }
