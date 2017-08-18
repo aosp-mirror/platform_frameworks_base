@@ -487,7 +487,7 @@ public abstract class Window {
         public void onAttachedToWindow();
 
         /**
-         * Called when the window has been attached to the window manager.
+         * Called when the window has been detached from the window manager.
          * See {@link View#onDetachedFromWindow() View.onDetachedFromWindow()}
          * for more information.
          */
