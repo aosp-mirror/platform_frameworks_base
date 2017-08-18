@@ -16,14 +16,19 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.isHapticFeedbackDisabled;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
+import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.ArraySet;
 import android.util.AttributeSet;
@@ -34,6 +39,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
@@ -623,15 +629,35 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 boolean wasInShelf = icon.isInShelf();
                 boolean inShelf = iconAppearAmount == 1.0f;
                 icon.setIsInShelf(inShelf);
-                if (mVibrateOnAnimation && !justAdded && mAnimationsEnabled
-                        && wasInShelf != inShelf) {
-                    mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_TICK));
+                if (shouldVibrateChange(wasInShelf != inShelf)) {
+                    AsyncTask.execute(
+                            () -> mVibrator.vibrate(VibrationEffect.get(
+                                    VibrationEffect.EFFECT_TICK)));
                 }
             }
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
             justUndarkened = false;
+        }
+
+        private boolean shouldVibrateChange(boolean inShelfChanged) {
+            if (!mVibrateOnAnimation) {
+                return false;
+            }
+            if (justAdded) {
+                return false;
+            }
+            if (!mAnimationsEnabled) {
+                return false;
+            }
+            if (!inShelfChanged) {
+                return false;
+            }
+            if (isHapticFeedbackDisabled(mContext)) {
+                return false;
+            }
+            return true;
         }
 
         public boolean hasCustomTransformHeight() {
