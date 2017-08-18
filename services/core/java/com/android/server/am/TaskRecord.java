@@ -1294,7 +1294,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             // created controller for the activity we are starting yet.
             mWindowContainerController.positionChildAt(appController, index);
         }
-        r.onOverrideConfigurationSent();
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
