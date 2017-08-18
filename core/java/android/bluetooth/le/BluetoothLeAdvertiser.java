@@ -455,8 +455,7 @@ public final class BluetoothLeAdvertiser {
             gatt.stopAdvertisingSet(wrapped);
        } catch (RemoteException e) {
             Log.e(TAG, "Failed to stop advertising - ", e);
-            throw new IllegalStateException("Failed to stop advertising");
-        }
+       }
     }
 
     /**
