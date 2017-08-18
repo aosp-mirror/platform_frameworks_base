@@ -174,7 +174,7 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
             if (rpos >= wpos) {
                 amt = ::read(fd, cirBuf + rpos, BUFFER_SIZE - rpos);
             } else {
-                amt = :: read(fd, cirBuf + rpos, wpos - rpos);
+                amt = ::read(fd, cirBuf + rpos, wpos - rpos);
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -241,6 +241,7 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
 size_t
 FdBuffer::size()
 {
+    if (mBuffers.empty()) return 0;
     return ((mBuffers.size() - 1) * BUFFER_SIZE) + mCurrentWritten;
 }
 
@@ -255,4 +256,30 @@ FdBuffer::write(ReportRequestSet* reporter)
     return NO_ERROR;
 }
 
+FdBuffer::iterator
+FdBuffer::end()
+{
+    if (mBuffers.empty() || mCurrentWritten < 0) return begin();
+    if (mCurrentWritten == BUFFER_SIZE)
+        // FdBuffer doesn't allocate another buf since no more bytes to read.
+        return FdBuffer::iterator(*this, mBuffers.size(), 0);
+    return FdBuffer::iterator(*this, mBuffers.size() - 1, mCurrentWritten);
+}
 
+FdBuffer::iterator&
+FdBuffer::iterator::operator+(size_t offset)
+{
+    size_t newOffset = mOffset + offset;
+    while (newOffset >= BUFFER_SIZE) {
+        mIndex++;
+        newOffset -= BUFFER_SIZE;
+    }
+    mOffset = newOffset;
+    return *this;
+}
+
+size_t
+FdBuffer::iterator::bytesRead()
+{
+    return mIndex * BUFFER_SIZE + mOffset;
+}

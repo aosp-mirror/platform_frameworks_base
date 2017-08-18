@@ -92,6 +92,30 @@ TEST_F(FdBufferTest, ReadAndWrite) {
     AssertBufferContent(testdata.c_str());
 }
 
+TEST_F(FdBufferTest, IterateEmpty) {
+    FdBuffer::iterator it = buffer.begin();
+    EXPECT_EQ(it, buffer.end());
+    it += 1;
+    EXPECT_TRUE(it.outOfBound());
+}
+
+TEST_F(FdBufferTest, ReadAndIterate) {
+    std::string testdata = "FdBuffer test string";
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path, false));
+    ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
+
+    int i=0;
+    for (FdBuffer::iterator it = buffer.begin(); it != buffer.end(); ++it) {
+        EXPECT_EQ(*it, (uint8_t)testdata[i++]);
+    }
+
+    FdBuffer::iterator it = buffer.begin();
+    it += buffer.size();
+    EXPECT_EQ(it, buffer.end());
+    EXPECT_EQ(it.bytesRead(), testdata.size());
+    EXPECT_FALSE(it.outOfBound());
+}
+
 TEST_F(FdBufferTest, ReadTimeout) {
     int pid = fork();
     ASSERT_TRUE(pid != -1);
@@ -202,6 +226,7 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
 
 TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
     const std::string testFile = kTestDataPath + "morethan4MB.txt";
+    size_t fourMB = (size_t) 4 * 1024 * 1024;
     int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_NE(fd, -1);
     int pid = fork();
@@ -220,10 +245,18 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
 
         ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(fd,
             p2cPipe.writeFd(), c2pPipe.readFd(), READ_TIMEOUT));
-        EXPECT_EQ(buffer.size(), (size_t) (4 * 1024 * 1024));
+        EXPECT_EQ(buffer.size(), fourMB);
         EXPECT_FALSE(buffer.timedOut());
         EXPECT_TRUE(buffer.truncated());
         wait(&pid);
+        FdBuffer::iterator it = buffer.begin();
+        it += fourMB;
+        EXPECT_EQ(it.bytesRead(), fourMB);
+        EXPECT_EQ(it, buffer.end());
+        for (FdBuffer::iterator it = buffer.begin(); it != buffer.end(); it++) {
+            char c = 'A' + (it.bytesRead() % 64 / 8);
+            ASSERT_TRUE(*it == c);
+        }
     }
 }
 

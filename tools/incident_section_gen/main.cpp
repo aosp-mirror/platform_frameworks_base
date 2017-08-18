@@ -27,21 +27,24 @@ using namespace google::protobuf::io;
 using namespace google::protobuf::internal;
 using namespace std;
 
-static void generateHead(const char* header) {
-    printf("// Auto generated file. Do not modify\n");
-    printf("\n");
-    printf("#include \"%s.h\"\n", header);
+static inline void emptyline() {
     printf("\n");
 }
 
+static void generateHead(const char* header) {
+    printf("// Auto generated file. Do not modify\n");
+    emptyline();
+    printf("#include \"%s.h\"\n", header);
+    emptyline();
+}
+
 // ================================================================================
-static bool generateIncidentSectionsCpp()
+static bool generateIncidentSectionsCpp(Descriptor const* descriptor)
 {
     generateHead("incident_sections");
 
     map<string,FieldDescriptor const*> sections;
     int N;
-    Descriptor const* descriptor = IncidentProto::descriptor();
     N = descriptor->field_count();
     for (int i=0; i<N; i++) {
         const FieldDescriptor* field = descriptor->field(i);
@@ -85,11 +88,100 @@ static void splitAndPrint(const string& args) {
     }
 }
 
-static bool generateSectionListCpp() {
+static const char* replaceAll(const string& field_name, const char oldC, const string& newS) {
+    if (field_name.find_first_of(oldC) == field_name.npos) return field_name.c_str();
+    size_t pos = 0, idx = 0;
+    char* res = new char[field_name.size() * newS.size() + 1]; // assign a larger buffer
+    while (pos != field_name.size()) {
+        char cur = field_name[pos++];
+        if (cur != oldC) {
+            res[idx++] = cur;
+            continue;
+        }
+
+        for (size_t i=0; i<newS.size(); i++) {
+            res[idx++] = newS[i];
+        }
+    }
+    res[idx] = '\0';
+    return res;
+}
+
+static inline bool isDefaultDest(const FieldDescriptor* field) {
+    return field->options().GetExtension(privacy).dest() == PrivacyFlags::default_instance().dest();
+}
+
+// Returns true if the descriptor doesn't have any non default privacy flags set, including its submessages
+static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias, map<string, bool> &msgNames) {
+    bool hasDefaultFlags[descriptor->field_count()];
+    // iterate though its field and generate sub flags first
+    for (int i=0; i<descriptor->field_count(); i++) {
+        hasDefaultFlags[i] = true; // set default to true
+        const FieldDescriptor* field = descriptor->field(i);
+        const char* field_name = replaceAll(field->full_name(), '.', "__");
+        // check if the same name is already defined
+        if (msgNames.find(field_name) != msgNames.end()) {
+            hasDefaultFlags[i] = msgNames[field_name];
+            continue;
+        };
+
+        PrivacyFlags p = field->options().GetExtension(privacy);
+
+        switch (field->type()) {
+            case FieldDescriptor::TYPE_MESSAGE:
+                if (generatePrivacyFlags(field->message_type(), field_name, msgNames) &&
+                    isDefaultDest(field)) break;
+
+                printf("static Privacy %s = { %d, %d, %d, NULL, %s_LIST };\n", field_name, field->number(),
+                        (int) field->type(), p.dest(), field_name);
+                hasDefaultFlags[i] = false;
+                break;
+            case FieldDescriptor::TYPE_STRING:
+                if (isDefaultDest(field) && p.patterns_size() == 0) break;
+
+                printf("static const char* %s_patterns[] = {\n", field_name);
+                for (int i=0; i<p.patterns_size(); i++) {
+                    // the generated string need to escape backslash as well, need to dup it here
+                    printf("    \"%s\",\n", replaceAll(p.patterns(i), '\\', "\\\\"));
+                }
+                printf("    NULL };\n");
+                printf("static Privacy %s = { %d, %d, %d, %s_patterns };\n", field_name, field->number(),
+                        (int) field->type(), p.dest(), field_name);
+                hasDefaultFlags[i] = false;
+                break;
+            default:
+                if (isDefaultDest(field)) break;
+                printf("static Privacy %s = { %d, %d, %d };\n", field_name, field->number(),
+                        (int) field->type(), p.dest());
+                hasDefaultFlags[i] = false;
+        }
+        // add the field name to message map, true means it has default flags
+        msgNames[field_name] = hasDefaultFlags[i];
+    }
+
+    bool allDefaults = true;
+    for (int i=0; i<descriptor->field_count(); i++) {
+        allDefaults &= hasDefaultFlags[i];
+    }
+    if (allDefaults) return true;
+
+    emptyline();
+    printf("const Privacy* %s_LIST[] = {\n", alias);
+    for (int i=0; i<descriptor->field_count(); i++) {
+        const FieldDescriptor* field = descriptor->field(i);
+        if (hasDefaultFlags[i]) continue;
+        printf("    &%s,\n", replaceAll(field->full_name(), '.', "__"));
+    }
+    printf("    NULL };\n");
+    emptyline();
+    return false;
+}
+
+static bool generateSectionListCpp(Descriptor const* descriptor) {
     generateHead("section_list");
 
+    // generates SECTION_LIST
     printf("const Section* SECTION_LIST[] = {\n");
-    Descriptor const* descriptor = IncidentProto::descriptor();
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
 
@@ -115,8 +207,30 @@ static bool generateSectionListCpp() {
                 break;
         }
     }
-    printf("    NULL\n");
-    printf("};\n");
+    printf("    NULL };\n");
+    emptyline();
+
+    // generates DESTINATION enum values
+    EnumDescriptor const* destination = Destination_descriptor();
+    for (int i=0; i<destination->value_count(); i++) {
+        EnumValueDescriptor const* val = destination->value(i);
+        printf("const uint8_t %s = %d;\n", val->name().c_str(), val->number());
+    }
+    emptyline();
+    printf("const uint8_t DEST_DEFAULT_VALUE = %d;\n", PrivacyFlags::default_instance().dest());
+    emptyline();
+    // populates string type and message type values
+    printf("const uint8_t TYPE_STRING = %d;\n", (int) FieldDescriptor::TYPE_STRING);
+    printf("const uint8_t TYPE_MESSAGE = %d;\n", (int) FieldDescriptor::TYPE_MESSAGE);
+    emptyline();
+
+    // generates PRIVACY_POLICY
+    map<string, bool> messageNames;
+    if (generatePrivacyFlags(descriptor, "PRIVACY_POLICY", messageNames)) {
+        // if no privacy options set at all, define an empty list
+        printf("const Privacy* PRIVACY_POLICY_LIST[] = { NULL };\n");
+    }
+
     return true;
 }
 
@@ -126,11 +240,13 @@ int main(int argc, char const *argv[])
     if (argc != 2) return 1;
     const char* module = argv[1];
 
+    Descriptor const* descriptor = IncidentProto::descriptor();
+
     if (strcmp(module, "incident") == 0) {
-        return !generateIncidentSectionsCpp();
+        return !generateIncidentSectionsCpp(descriptor);
     }
     if (strcmp(module, "incidentd") == 0 ) {
-        return !generateSectionListCpp();
+        return !generateSectionListCpp(descriptor);
     }
 
     // return failure if not called by the whitelisted modules

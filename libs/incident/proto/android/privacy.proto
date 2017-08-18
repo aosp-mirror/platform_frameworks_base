@@ -36,7 +36,7 @@ enum Destination {
     // off the device with an explicit user action.
     DEST_EXPLICIT = 1;
 
-    // Fields or messages annotated with DEST_LOCAL can be sent by
+    // Fields or messages annotated with DEST_AUTOMATIC can be sent by
     // automatic means, without per-sending user consent. The user
     // still must have previously accepted a consent to share this
     // information.
@@ -47,8 +47,11 @@ enum Destination {
 
 message PrivacyFlags {
   optional Destination dest = 1  [
-      default = DEST_LOCAL
+      default = DEST_EXPLICIT
   ];
+
+  // regex to filter pii sensitive info from a string field type
+  repeated string patterns = 2;
 }
 
 extend google.protobuf.FieldOptions {
