@@ -102,7 +102,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                 return;
             }
             while (i < N && reply.readInt() != 0) {
-                final T parcelable = reply.readCreator(creator, loader);
+                final T parcelable = readCreator(creator, reply, loader);
                 verifySameType(listElementClass, parcelable.getClass());
 
                 mList.add(parcelable);
