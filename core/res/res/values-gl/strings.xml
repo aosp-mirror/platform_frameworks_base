@@ -1600,7 +1600,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Téntao de novo máis tarde"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Vendo pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Para saír, pasa o dedo cara abaixo desde arriba."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"De acordo"</string>
     <string name="done_label" msgid="2093726099505892398">"Feito"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Control desprazable circular das horas"</string>

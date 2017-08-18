@@ -1599,7 +1599,7 @@
       <item quantity="one">Torna-ho a provar d\'aquí a 1 segon</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Visualització en pantalla completa"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Mode de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Per sortir, llisca cap avall des de la part superior."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"D\'acord"</string>
     <string name="done_label" msgid="2093726099505892398">"Fet"</string>

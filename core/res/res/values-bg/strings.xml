@@ -1600,7 +1600,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Опитайте отново по-късно"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Изглед на цял екран"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"За изход прекарайте пръст надолу от горната част."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"За изход плъзнете пръст надолу от горната част."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Разбрах"</string>
     <string name="done_label" msgid="2093726099505892398">"Готово"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Кръгов плъзгач за часовете"</string>

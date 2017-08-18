@@ -1648,7 +1648,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"נסה שוב מאוחר יותר"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"צפייה במסך מלא"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"כדי לצאת, החלק מלמעלה למטה."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"הבנתי"</string>
     <string name="done_label" msgid="2093726099505892398">"בוצע"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"מחוון שעות מעגלי"</string>

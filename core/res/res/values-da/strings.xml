@@ -275,7 +275,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersoner"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"have adgang til dine kontaktpersoner"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"at få adgang til enhedens placering"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"få adgang til enhedens placering"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"have adgang til din kalender"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
@@ -302,7 +302,7 @@
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, stryge, knibe sammen og udføre andre bevægelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingeraftryksbevægelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan registrere bevægelser, der foretages på enhedernes fingeraftrykslæser."</string>
-    <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller redigere statuslinje"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vær statusbjælken"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tillader, at appen er statusbjælken."</string>

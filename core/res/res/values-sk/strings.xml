@@ -92,7 +92,7 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Služba nie je poskytovaná."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nemôžete meniť nastavenia identifikácie volajúceho."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Žiadna dátová služba"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Žiadne núdzové hovory"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Žiadne tiesňové hovory"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Žiadne hlasové hovory"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hlasové ani tiesňové volania nie sú k dispozícii"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Momentálne nie sú v ponuke mobilnej siete na vašom mieste"</string>
@@ -1648,7 +1648,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Zobrazenie na celú obrazovku"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Ukončite prejdením prstom z hornej časti nadol."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Ukončíte prejdením prstom zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Dobre"</string>
     <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kruhový posúvač hodín"</string>

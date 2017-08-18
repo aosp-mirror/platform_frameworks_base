@@ -1302,7 +1302,7 @@
     <string name="tethered_notification_title" msgid="3146694234398202601">"Chức năng điểm truy cập Internet hoặc điểm phát sóng đang hoạt động"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Nhấn để thiết lập."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Đã tắt tính năng chia sẻ kết nối"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Liên hệ với quản trị viên của bạn để biết chi tiết"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Hãy liên hệ với quản trị viên của bạn để biết chi tiết"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Quay lại"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Tiếp theo"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Bỏ qua"</string>
@@ -1600,7 +1600,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Hãy thử lại sau"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Xem toàn màn hình"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt xuống từ trên cùng."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Xong"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Thanh trượt giờ hình tròn"</string>
