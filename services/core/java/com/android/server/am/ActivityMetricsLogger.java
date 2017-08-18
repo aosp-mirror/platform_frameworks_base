@@ -361,7 +361,7 @@ class ActivityMetricsLogger {
             builder.setType(type);
             builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivity.info.name);
             final boolean isInstantApp = info.launchedActivity.info.applicationInfo.isInstantApp();
-            if (isInstantApp && info.launchedActivity.launchedFromPackage != null) {
+            if (info.launchedActivity.launchedFromPackage != null) {
                 builder.addTaggedData(APP_TRANSITION_CALLING_PACKAGE_NAME,
                         info.launchedActivity.launchedFromPackage);
             }
