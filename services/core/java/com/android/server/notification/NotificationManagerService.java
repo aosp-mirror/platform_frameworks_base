@@ -3105,7 +3105,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
         if (summaryRecord != null && checkDisqualifyingFeatures(userId, MY_UID,
-                summaryRecord.sbn.getId(), summaryRecord.sbn.getTag(), summaryRecord)) {
+                summaryRecord.sbn.getId(), summaryRecord.sbn.getTag(), summaryRecord, true)) {
             mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord));
         }
     }
@@ -3450,7 +3450,8 @@ public class NotificationManagerService extends SystemService {
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
 
-        if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r)) {
+        if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
+                r.sbn.getOverrideGroupKey() != null)) {
             return;
         }
 
@@ -3505,7 +3506,7 @@ public class NotificationManagerService extends SystemService {
      * Has side effects.
      */
     private boolean checkDisqualifyingFeatures(int userId, int callingUid, int id, String tag,
-            NotificationRecord r) {
+            NotificationRecord r, boolean isAutogroup) {
         final String pkg = r.sbn.getPackageName();
         final String dialerPackage =
                 getContext().getSystemService(TelecomManager.class).getSystemDialerPackage();
@@ -3529,7 +3530,8 @@ public class NotificationManagerService extends SystemService {
 
                 // rate limit updates that aren't completed progress notifications
                 if (mNotificationsByKey.get(r.sbn.getKey()) != null
-                        && !r.getNotification().hasCompletedProgress()) {
+                        && !r.getNotification().hasCompletedProgress()
+                        && !isAutogroup) {
 
                     final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
                     if (appEnqueueRate > mMaxPackageEnqueueRate) {
@@ -3537,7 +3539,7 @@ public class NotificationManagerService extends SystemService {
                         final long now = SystemClock.elapsedRealtime();
                         if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
                             Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
-                                    + ". Shedding events. package=" + pkg);
+                                    + ". Shedding " + r.sbn.getKey() + ". package=" + pkg);
                             mLastOverRateLogTime = now;
                         }
                         return false;
