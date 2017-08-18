@@ -17,10 +17,13 @@
 
 package android.hardware.usb;
 
+import android.Manifest;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -520,6 +523,8 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
     public void grantPermission(UsbDevice device, String packageName) {
         try {
             int uid = mContext.getPackageManager()
