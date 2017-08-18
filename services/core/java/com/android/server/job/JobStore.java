@@ -544,6 +544,7 @@ public final class JobStore {
 
         @Override
         public void run() {
+            int numJobs = 0;
             try {
                 List<JobStatus> jobs;
                 FileInputStream fis = mJobsFile.openRead();
@@ -557,6 +558,7 @@ public final class JobStore {
                             js.prepareLocked(am);
                             js.enqueueTime = now;
                             this.jobSet.add(js);
+                            numJobs++;
                         }
                     }
                 }
@@ -565,15 +567,10 @@ public final class JobStore {
                 if (DEBUG) {
                     Slog.d(TAG, "Could not find jobs file, probably there was nothing to load.");
                 }
-            } catch (XmlPullParserException e) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Error parsing xml.", e);
-                }
-            } catch (IOException e) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Error parsing xml.", e);
-                }
+            } catch (XmlPullParserException | IOException e) {
+                Slog.wtf(TAG, "Error jobstore xml.", e);
             }
+            Slog.i(TAG, "Read " + numJobs + " jobs");
         }
 
         private List<JobStatus> readJobMapImpl(FileInputStream fis, boolean rtcIsGood)
