@@ -415,7 +415,8 @@ public final class BluetoothLeAdvertiser {
           gatt = mBluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
           Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
-          throw new IllegalStateException("Failed to get Bluetooth");
+          postStartSetFailure(handler, callback, AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+          return;
         }
 
         IAdvertisingSetCallback wrapped = wrap(callback, handler);
@@ -429,7 +430,8 @@ public final class BluetoothLeAdvertiser {
                                      periodicData, duration, maxExtendedAdvertisingEvents, wrapped);
         } catch (RemoteException e) {
           Log.e(TAG, "Failed to start advertising set - ", e);
-          throw new IllegalStateException("Failed to start advertising set");
+          postStartSetFailure(handler, callback, AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+          return;
         }
     }
 
@@ -645,6 +647,16 @@ public final class BluetoothLeAdvertiser {
                 });
             }
         };
+    }
+
+    private void postStartSetFailure(Handler handler, final AdvertisingSetCallback callback,
+        final int error) {
+        handler.post(new Runnable() {
+              @Override
+              public void run() {
+                  callback.onAdvertisingSetStarted(null, 0, error);
+              }
+          });
     }
 
     private void postStartFailure(final AdvertiseCallback callback, final int error) {
