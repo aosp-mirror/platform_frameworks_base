@@ -367,6 +367,8 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testSetActiveScorer_noScoreNetworksPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
         when(mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
 
@@ -411,8 +413,8 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testGetAllValidScorer_noRequestNetworkScoresPermission() {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
 
         try {
             mNetworkScoreService.getAllValidScorers();
@@ -805,8 +807,8 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testGetActiveScorer_notConnected_canNotRequestScores() throws Exception {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
         try {
             mNetworkScoreService.getActiveScorer();
             fail("SecurityException expected.");
@@ -830,8 +832,8 @@ public class NetworkScoreServiceTest {
     @Test
     public void testGetActiveScorer_connected_canNotRequestScores()
             throws Exception {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES), anyString());
         bindToScorer(false);
         try {
             mNetworkScoreService.getActiveScorer();
