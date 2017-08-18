@@ -16,11 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
 import android.app.ActivityManager.StackId;
-import android.app.RemoteAction;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -30,11 +28,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
 
-import com.android.server.UiThread;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -278,9 +274,9 @@ public class StackWindowController
             int width;
             int height;
 
-            final Rect parentAppBounds = parentConfig.appBounds;
+            final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
 
-            config.setAppBounds(!bounds.isEmpty() ? bounds : null);
+            config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
             boolean intersectParentBounds = false;
 
             if (StackId.tasksAreFloating(mStackId)) {
@@ -295,7 +291,7 @@ public class StackWindowController
                     nonDecorBounds.inset(mTmpNonDecorInsets);
                     // Move app bounds to zero to apply intersection with parent correctly. They are
                     // used only for evaluating width and height, so it's OK to move them around.
-                    config.appBounds.offsetTo(0, 0);
+                    config.windowConfiguration.getAppBounds().offsetTo(0, 0);
                     intersectParentBounds = true;
                 }
                 width = (int) (stableBounds.width() / density);
@@ -319,8 +315,8 @@ public class StackWindowController
                 intersectParentBounds = true;
             }
 
-            if (intersectParentBounds && config.appBounds != null) {
-                config.appBounds.intersect(parentAppBounds);
+            if (intersectParentBounds && config.windowConfiguration.getAppBounds() != null) {
+                config.windowConfiguration.getAppBounds().intersect(parentAppBounds);
             }
 
             config.screenWidthDp = width;

@@ -780,6 +780,13 @@ public class ActivityInfo extends ComponentInfo
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
+    /**
+     * Bit indicating changes to window configuration that isn't exposed to apps.
+     * This is for internal use only and apps don't handle it.
+     * @hide
+     * {@link Configuration}.
+     */
+    public static final int CONFIG_WINDOW_CONFIGURATION = 0x20000000;
 
     /** @hide
      * Unfortunately the constants for config changes in native code are
