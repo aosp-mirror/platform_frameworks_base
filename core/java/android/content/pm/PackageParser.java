@@ -1120,12 +1120,12 @@ public class PackageParser {
         final String cacheKey = getCacheKey(packageFile, flags);
         final File cacheFile = new File(mCacheDir, cacheKey);
 
-        // If the cache is not up to date, return null.
-        if (!isCacheUpToDate(packageFile, cacheFile)) {
-            return null;
-        }
-
         try {
+            // If the cache is not up to date, return null.
+            if (!isCacheUpToDate(packageFile, cacheFile)) {
+                return null;
+            }
+
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
             Package p = fromCacheEntry(bytes);
             if (mCallback != null) {
@@ -1140,7 +1140,7 @@ public class PackageParser {
                 }
             }
             return p;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Slog.w(TAG, "Error reading package cache: ", e);
 
             // If something went wrong while reading the cache entry, delete the cache file
@@ -1158,26 +1158,30 @@ public class PackageParser {
             return;
         }
 
-        final String cacheKey = getCacheKey(packageFile, flags);
-        final File cacheFile = new File(mCacheDir, cacheKey);
+        try {
+            final String cacheKey = getCacheKey(packageFile, flags);
+            final File cacheFile = new File(mCacheDir, cacheKey);
 
-        if (cacheFile.exists()) {
-            if (!cacheFile.delete()) {
-                Slog.e(TAG, "Unable to delete cache file: " + cacheFile);
+            if (cacheFile.exists()) {
+                if (!cacheFile.delete()) {
+                    Slog.e(TAG, "Unable to delete cache file: " + cacheFile);
+                }
             }
-        }
 
-        final byte[] cacheEntry = toCacheEntry(parsed);
+            final byte[] cacheEntry = toCacheEntry(parsed);
 
-        if (cacheEntry == null) {
-            return;
-        }
+            if (cacheEntry == null) {
+                return;
+            }
 
-        try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
-            fos.write(cacheEntry);
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Error writing cache entry.", ioe);
-            cacheFile.delete();
+            try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
+                fos.write(cacheEntry);
+            } catch (IOException ioe) {
+                Slog.w(TAG, "Error writing cache entry.", ioe);
+                cacheFile.delete();
+            }
+        } catch (Throwable e) {
+            Slog.w(TAG, "Error saving package cache.", e);
         }
     }
 
