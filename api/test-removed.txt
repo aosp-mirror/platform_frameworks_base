@@ -227,13 +227,6 @@ package android.net {
     field public static final int BADGING_SD = 10; // 0xa
   }
 
-  public abstract class PskKeyManager {
-    ctor public PskKeyManager();
-    field public static final int MAX_IDENTITY_HINT_LENGTH_BYTES = 128; // 0x80
-    field public static final int MAX_IDENTITY_LENGTH_BYTES = 128; // 0x80
-    field public static final int MAX_KEY_LENGTH_BYTES = 256; // 0x100
-  }
-
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
     method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
   }
