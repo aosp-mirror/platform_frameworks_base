@@ -207,9 +207,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         if (mAccessibilityController == null) {
             return;
         }
-        boolean clickToUnlock = mAccessibilityController.isTouchExplorationEnabled();
+        boolean clickToUnlock = mAccessibilityController.isAccessibilityEnabled();
         boolean clickToForceLock = mUnlockMethodCache.isTrustManaged()
-                && !mAccessibilityController.isAccessibilityEnabled();
+                && !clickToUnlock;
         boolean longClickToForceLock = mUnlockMethodCache.isTrustManaged()
                 && !clickToForceLock;
         setClickable(clickToForceLock || clickToUnlock);
