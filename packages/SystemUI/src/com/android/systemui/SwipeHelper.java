@@ -439,7 +439,12 @@ public class SwipeHelper implements Gefingerpoken {
             public void onAnimationEnd(Animator animation) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 mDismissPendingMap.remove(animView);
-                if (!mCancelled) {
+                boolean wasRemoved = false;
+                if (animView instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
+                    wasRemoved = row.isRemoved();
+                }
+                if (!mCancelled || wasRemoved) {
                     mCallback.onChildDismissed(animView);
                 }
                 if (endAction != null) {
