@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -27,6 +28,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.statusbar.car.UserGridView;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -37,10 +39,13 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  */
 public class CarQSFooter extends RelativeLayout implements QSFooter,
         UserInfoController.OnUserInfoChangedListener {
+    private static final String TAG = "CarQSFooter";
+
     private UserInfoController mUserInfoController;
 
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
+    private UserGridView mUserGridView;
 
     public CarQSFooter(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,6 +58,19 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
         mUserInfoController = Dependency.get(UserInfoController.class);
+
+        mMultiUserSwitch.setOnClickListener(v -> {
+            if (mUserGridView == null) {
+                Log.e(TAG, "CarQSFooter not properly set up; cannot display user switcher.");
+                return;
+            }
+
+            if (!mUserGridView.isShowing()) {
+                mUserGridView.show();
+            } else {
+                mUserGridView.hide();
+            }
+        });
 
         findViewById(R.id.settings_button).setOnClickListener(v -> {
             ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
@@ -78,6 +96,10 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
         if (panel != null) {
             mMultiUserSwitch.setQsPanel(panel);
         }
+    }
+
+    public void setUserGridView(UserGridView view) {
+        mUserGridView = view;
     }
 
     @Override
