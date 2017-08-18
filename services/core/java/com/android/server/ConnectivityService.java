@@ -4583,8 +4583,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void updateCapabilities(
             int oldScore, NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
         // Once a NetworkAgent is connected, complain if some immutable capabilities are removed.
-        if (nai.everConnected &&
-                !nai.networkCapabilities.satisfiedByNetworkCapabilities(networkCapabilities)) {
+        if (nai.everConnected && !nai.networkCapabilities.satisfiedByImmutableNetworkCapabilities(
+                networkCapabilities)) {
             // TODO: consider not complaining when a network agent degrade its capabilities if this
             // does not cause any request (that is not a listen) currently matching that agent to
             // stop being matched by the updated agent.
