@@ -82,6 +82,11 @@ public class NetworkStats implements Parcelable {
     /** {@link #roaming} value where roaming data is accounted. */
     public static final int ROAMING_YES = 1;
 
+    /** Denotes a request for stats at the interface level. */
+    public static final int STATS_PER_IFACE = 0;
+    /** Denotes a request for stats at the interface and UID level. */
+    public static final int STATS_PER_UID = 1;
+
     // TODO: move fields to "mVariable" notation
 
     /**
