@@ -37,6 +37,9 @@ public:
     void GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
         const minikin::MinikinPaint &paint) const;
 
+    void GetFontExtent(minikin::MinikinExtent* extent,
+        const minikin::MinikinPaint &paint) const;
+
     SkTypeface* GetSkTypeface() const;
     sk_sp<SkTypeface> RefSkTypeface() const;
 
