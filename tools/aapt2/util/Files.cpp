@@ -94,7 +94,9 @@ FileType GetFileType(const std::string& path) {
 
 bool mkdirs(const std::string& path) {
   constexpr const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP;
-  size_t current_pos = 0u;
+  // Start after the first character so that we don't consume the root '/'.
+  // This is safe to do with unicode because '/' will never match with a continuation character.
+  size_t current_pos = 1u;
   while ((current_pos = path.find(sDirSep, current_pos)) != std::string::npos) {
     std::string parent_path = path.substr(0, current_pos);
     int result = ::android::base::utf8::mkdir(parent_path.c_str(), mode);
