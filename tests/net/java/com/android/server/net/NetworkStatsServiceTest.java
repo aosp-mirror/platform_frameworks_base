@@ -31,6 +31,8 @@ import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.STATS_PER_IFACE;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
@@ -823,17 +825,24 @@ public class NetworkStatsServiceTest {
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectCurrentTime();
         expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 2048L, 16L, 512L, 4L));
 
+        // Traffic seen by kernel counters (includes software tethering).
+        final NetworkStats ifaceStats = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 1536L, 12L, 384L, 3L);
+        // Hardware tethering traffic, not seen by kernel counters.
+        final NetworkStats tetherStatsHardware = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 512L, 4L, 128L, 1L);
+
+        // Traffic for UID_RED.
         final NetworkStats uidStats = new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 0L);
-        final String[] tetherIfacePairs = new String[] { TEST_IFACE, "wlan0" };
+        // All tethering traffic, both hardware and software.
         final NetworkStats tetherStats = new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1920L, 14L, 384L, 2L,
                         0L);
 
-        expectNetworkStatsUidDetail(uidStats, tetherIfacePairs, tetherStats);
+        expectNetworkStatsSummary(ifaceStats, tetherStatsHardware);
+        expectNetworkStatsUidDetail(uidStats, tetherStats);
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -1013,10 +1022,16 @@ public class NetworkStatsServiceTest {
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
+        expectNetworkStatsSummary(summary, new NetworkStats(0L, 0));
+    }
+
+    private void expectNetworkStatsSummary(NetworkStats summary, NetworkStats tetherStats)
+            throws Exception {
         when(mConnManager.getAllVpnInfo()).thenReturn(new VpnInfo[0]);
 
-        expectNetworkStatsSummaryDev(summary);
-        expectNetworkStatsSummaryXt(summary);
+        expectNetworkStatsTethering(STATS_PER_IFACE, tetherStats);
+        expectNetworkStatsSummaryDev(summary.clone());
+        expectNetworkStatsSummaryXt(summary.clone());
     }
 
     private void expectNetworkStatsSummaryDev(NetworkStats summary) throws Exception {
@@ -1027,17 +1042,21 @@ public class NetworkStatsServiceTest {
         when(mNetManager.getNetworkStatsSummaryXt()).thenReturn(summary);
     }
 
-    private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
-        expectNetworkStatsUidDetail(detail, new String[0], new NetworkStats(0L, 0));
+    private void expectNetworkStatsTethering(int how, NetworkStats stats)
+            throws Exception {
+        when(mNetManager.getNetworkStatsTethering(how)).thenReturn(stats);
     }
 
-    private void expectNetworkStatsUidDetail(
-            NetworkStats detail, String[] tetherIfacePairs, NetworkStats tetherStats)
+    private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
+        expectNetworkStatsUidDetail(detail, new NetworkStats(0L, 0));
+    }
+
+    private void expectNetworkStatsUidDetail(NetworkStats detail, NetworkStats tetherStats)
             throws Exception {
         when(mNetManager.getNetworkStatsUidDetail(UID_ALL)).thenReturn(detail);
 
         // also include tethering details, since they are folded into UID
-        when(mNetManager.getNetworkStatsTethering()).thenReturn(tetherStats);
+        when(mNetManager.getNetworkStatsTethering(STATS_PER_UID)).thenReturn(tetherStats);
     }
 
     private void expectDefaultSettings() throws Exception {
