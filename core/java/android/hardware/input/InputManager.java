@@ -319,62 +319,6 @@ public final class InputManager {
     }
 
     /**
-     * Returns true if an input device is enabled. Should return true for most
-     * situations. Some system apps may disable an input device, for
-     * example to prevent unwanted touch events.
-     *
-     * @param id The input device Id.
-     *
-     * @hide
-     */
-    public boolean isInputDeviceEnabled(int id) {
-        try {
-            return mIm.isInputDeviceEnabled(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Enables an InputDevice.
-     * <p>
-     * Requires {@link android.Manifest.permissions.DISABLE_INPUT_DEVICE}.
-     * </p>
-     *
-     * @param id The input device Id.
-     *
-     * @hide
-     */
-    public void enableInputDevice(int id) {
-        try {
-            mIm.enableInputDevice(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not enable input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Disables an InputDevice.
-     * <p>
-     * Requires {@link android.Manifest.permissions.DISABLE_INPUT_DEVICE}.
-     * </p>
-     *
-     * @param id The input device Id.
-     *
-     * @hide
-     */
-    public void disableInputDevice(int id) {
-        try {
-            mIm.disableInputDevice(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not disable input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Registers an input device listener to receive notifications about when
      * input devices are added, removed or changed.
      *

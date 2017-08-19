@@ -1155,7 +1155,7 @@
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Verzenden"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Annuleren"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Mijn keuze onthouden"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"U kunt dit later wijzigen in \'Instellingen\' &gt; \'Apps\'"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"U kunt dit later wijzigen in Instellingen &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Altijd toestaan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nooit toestaan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Simkaart verwijderd"</string>

@@ -232,9 +232,6 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeReloadDeviceAliases(long ptr);
     private static native String nativeDump(long ptr);
     private static native void nativeMonitor(long ptr);
-    private static native boolean nativeIsInputDeviceEnabled(long ptr, int deviceId);
-    private static native void nativeEnableInputDevice(long ptr, int deviceId);
-    private static native void nativeDisableInputDevice(long ptr, int deviceId);
     private static native void nativeSetPointerIconType(long ptr, int iconId);
     private static native void nativeReloadPointerIcons(long ptr);
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
@@ -651,32 +648,6 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
         return null;
-    }
-
-    // Binder call
-    @Override
-    public boolean isInputDeviceEnabled(int deviceId) {
-        return nativeIsInputDeviceEnabled(mPtr, deviceId);
-    }
-
-    // Binder call
-    @Override
-    public void enableInputDevice(int deviceId) {
-        if (!checkCallingPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE,
-                "enableInputDevice()")) {
-            throw new SecurityException("Requires DISABLE_INPUT_DEVICE permission");
-        }
-        nativeEnableInputDevice(mPtr, deviceId);
-    }
-
-    // Binder call
-    @Override
-    public void disableInputDevice(int deviceId) {
-        if (!checkCallingPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE,
-                "disableInputDevice()")) {
-            throw new SecurityException("Requires DISABLE_INPUT_DEVICE permission");
-        }
-        nativeDisableInputDevice(mPtr, deviceId);
     }
 
     /**

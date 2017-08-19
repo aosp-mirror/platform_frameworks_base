@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.annotation.RequiresPermission;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
@@ -767,36 +765,6 @@ public final class InputDevice implements Parcelable {
             }
             return mVibrator;
         }
-    }
-
-    /**
-     * Returns true if input device is enabled.
-     * @return Whether the input device is enabled.
-     *
-     * @hide
-     */
-    public boolean isEnabled() {
-        return InputManager.getInstance().isInputDeviceEnabled(mId);
-    }
-
-    /**
-     * Enables the input device.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE)
-    public void enable() {
-        InputManager.getInstance().enableInputDevice(mId);
-    }
-
-    /**
-     * Disables the input device.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE)
-    public void disable() {
-        InputManager.getInstance().disableInputDevice(mId);
     }
 
     /**

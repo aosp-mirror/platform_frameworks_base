@@ -86,7 +86,6 @@ public final class DreamManagerService extends SystemService {
     private boolean mCurrentDreamCanDoze;
     private boolean mCurrentDreamIsDozing;
     private boolean mCurrentDreamIsWaking;
-    private Runnable mStopDreamRunnable;
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -355,12 +354,6 @@ public final class DreamManagerService extends SystemService {
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {
             Slog.i(TAG, "Already in target dream.");
-            // If dream is waking, cancel the wake.
-            mCurrentDreamIsWaking = false;
-            if (mStopDreamRunnable != null) {
-                mHandler.removeCallbacks(mStopDreamRunnable);
-                mStopDreamRunnable = null;
-            }
             return;
         }
 
@@ -393,15 +386,13 @@ public final class DreamManagerService extends SystemService {
                 mCurrentDreamIsWaking = true;
             }
 
-            mStopDreamRunnable = new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     Slog.i(TAG, "Performing gentle wake from dream.");
                     mController.stopDream(immediate);
-                    mStopDreamRunnable = null;
                 }
-            };
-            mHandler.post(mStopDreamRunnable);
+            });
         }
     }
 

@@ -193,11 +193,11 @@
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kada je omogućeno, Wi-Fi veza će u slučaju slabog signala agresivnije predavati vezu za prijenos podataka na mobilnu vezu"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/Zabrani Wi-Fi lutajuće skeniranje na osnovu količine podatkovnog prometa prisutnog na sučelju"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera za zapisnik"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izaberite veličine za Logger prema međumemoriji evidencije"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličine za Logger prema međumemoriji evidencije"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li izbrisati trajnu pohranu zapisivača?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kada više ne pratimo trajnog zapisivača, trebamo u potpunosti izbrisati podatke zapisivača na vašem uređaju."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Trajno pohranjuj podatke zapisivača na uređaju"</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Izaberite međuspremnike zapisnika za trajno pohranjivanje na uređaju"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Odaberite međuspremnike zapisnika za trajno pohranjivanje na uređaju"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Odaberite USB konfiguraciju"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Odaberite konfiguraciju USB-a"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Dozvoli lažne lokacije"</string>

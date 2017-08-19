@@ -768,10 +768,9 @@ public class AsyncChannel {
             /** Handle of the reply message */
             @Override
             public void handleMessage(Message msg) {
-                Message msgCopy = Message.obtain();
-                msgCopy.copyFrom(msg);
+                mResultMsg = Message.obtain();
+                mResultMsg.copyFrom(msg);
                 synchronized(mLockObject) {
-                    mResultMsg = msgCopy;
                     mLockObject.notify();
                 }
             }
@@ -813,26 +812,22 @@ public class AsyncChannel {
          */
         private static Message sendMessageSynchronously(Messenger dstMessenger, Message msg) {
             SyncMessenger sm = SyncMessenger.obtain();
-            Message resultMsg = null;
             try {
                 if (dstMessenger != null && msg != null) {
                     msg.replyTo = sm.mMessenger;
                     synchronized (sm.mHandler.mLockObject) {
-                        if (sm.mHandler.mResultMsg != null) {
-                            Slog.wtf(TAG, "mResultMsg should be null here");
-                            sm.mHandler.mResultMsg = null;
-                        }
                         dstMessenger.send(msg);
                         sm.mHandler.mLockObject.wait();
-                        resultMsg = sm.mHandler.mResultMsg;
-                        sm.mHandler.mResultMsg = null;
                     }
+                } else {
+                    sm.mHandler.mResultMsg = null;
                 }
             } catch (InterruptedException e) {
-                Slog.e(TAG, "error in sendMessageSynchronously", e);
+                sm.mHandler.mResultMsg = null;
             } catch (RemoteException e) {
-                Slog.e(TAG, "error in sendMessageSynchronously", e);
+                sm.mHandler.mResultMsg = null;
             }
+            Message resultMsg = sm.mHandler.mResultMsg;
             sm.recycle();
             return resultMsg;
         }

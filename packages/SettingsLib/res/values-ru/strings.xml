@@ -50,7 +50,7 @@
     <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Профиль HSP/HFP"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Профиль OPP"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Профиль HID"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Интернет-доступ"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Доступ к Интернету"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Обмен контактами"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Использовать для обмена контактами"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Профиль PAN"</string>
@@ -74,12 +74,12 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Использовать для аудиоустройства телефона"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Используется для передачи файлов"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Использовать для ввода"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Подключить"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ПОДКЛЮЧИТЬ"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Добавить"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ДОБАВИТЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Сопряжение обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает сопряжение."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi выключен"</string>
@@ -204,7 +204,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешить использование фиктивных местоположений"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Включить проверку атрибутов"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)."</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку USB?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку по USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отладка по USB – это режим, который позволяет использовать ваше устройство как внешний накопитель: перемещать файлы (с компьютера и на компьютер), напрямую устанавливать приложения, а также просматривать системные журналы."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Запретить доступ к USB-отладке для всех компьютеров, которым он был разрешен?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Изменение настроек"</string>

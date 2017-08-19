@@ -1093,9 +1093,6 @@ class ActivityStarter {
                         top.getTask().setIntent(mStartActivity);
                     }
                     ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.getTask());
-                    if (shouldActivityBeBroughtToFront(reusedActivity)) {
-                        mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                    }
                     top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                             mStartActivity.launchedFromPackage);
                 }
@@ -1567,16 +1564,6 @@ class ActivityStarter {
         return DEFAULT_DISPLAY;
     }
 
-    private boolean shouldActivityBeBroughtToFront(ActivityRecord intentActivity) {
-        final ActivityStack focusStack = mSupervisor.getFocusedStack();
-        ActivityRecord curTop = (focusStack == null)
-                ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
-        final TaskRecord topTask = curTop != null ? curTop.getTask() : null;
-        return topTask != null
-                && (topTask != intentActivity.getTask() || topTask != focusStack.topTask())
-                && !mAvoidMoveToFront;
-    }
-
     /**
      * Figure out which task and activity to bring to front when we have found an existing matching
      * activity record in history. May also clear the task if needed.
@@ -1591,8 +1578,14 @@ class ActivityStarter {
         // the same behavior as if a new instance was being started, which means not bringing it
         // to the front if the caller is not itself in the front.
         final ActivityStack focusStack = mSupervisor.getFocusedStack();
+        ActivityRecord curTop = (focusStack == null)
+                ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
 
-        if (shouldActivityBeBroughtToFront(intentActivity)) {
+        final TaskRecord topTask = curTop != null ? curTop.getTask() : null;
+        if (topTask != null
+                && (topTask != intentActivity.getTask() || topTask != focusStack.topTask())
+                && !mAvoidMoveToFront) {
+            mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             if (mSourceRecord == null || (mSourceStack.topActivity() != null &&
                     mSourceStack.topActivity().getTask() == mSourceRecord.getTask())) {
                 // We really do want to push this one into the user's face, right now.

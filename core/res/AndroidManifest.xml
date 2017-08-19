@@ -2734,13 +2734,6 @@
     <permission android:name="android.permission.ACCESS_INPUT_FLINGER"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to disable/enable input devices.
-         Could be used to prevent unwanted touch events
-         on a touchscreen, for example during swimming or rain.
-         @hide -->
-    <permission android:name="android.permission.DISABLE_INPUT_DEVICE"
-                android:protectionLevel="signature" />
-
     <!-- Allows an application to configure and connect to Wifi displays
          @hide -->
     <permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY"

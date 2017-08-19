@@ -1119,18 +1119,6 @@ public class ActivityManager {
     }
 
     /**
-     * Returns true if this is a small battery device. Exactly whether a device is considered to be
-     * small battery is ultimately up to the device configuration, but currently it generally means
-     * something in the class of a device with 1000 mAh or less. This is mostly intended to be used
-     * to determine whether certain features should be altered to account for a drastically smaller
-     * battery.
-     * @hide
-     */
-    public static boolean isSmallBatteryDevice() {
-        return RoSystemProperties.CONFIG_SMALL_BATTERY;
-    }
-
-    /**
      * Used by persistent processes to determine if they are running on a
      * higher-end device so should be okay using hardware drawing acceleration
      * (which tends to consume a lot more RAM).

@@ -36,7 +36,6 @@
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/threads.h>
-#include <utils/SortedVector.h>
 
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
@@ -204,7 +203,6 @@ public:
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
-    void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
@@ -290,9 +288,6 @@ private:
 
         // Pointer controller singleton, created and destroyed as needed.
         wp<PointerController> pointerController;
-
-        // Input devices to be disabled
-        SortedVector<int32_t> disabledInputDevices;
     } mLocked;
 
     std::atomic<bool> mInteractive;
@@ -517,8 +512,6 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->setPhysicalDisplayViewport(ViewportType::VIEWPORT_EXTERNAL,
                 mLocked.externalViewport);
         outConfig->setVirtualDisplayViewports(mLocked.virtualViewports);
-
-        outConfig->disabledDevices = mLocked.disabledInputDevices;
     } // release lock
 }
 
@@ -806,24 +799,6 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_POINTER_SPEED);
-}
-
-void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
-    { // acquire lock
-        AutoMutex _l(mLock);
-
-        ssize_t index = mLocked.disabledInputDevices.indexOf(deviceId);
-        bool currentlyEnabled = index < 0;
-        if (!enabled && currentlyEnabled) {
-            mLocked.disabledInputDevices.add(deviceId);
-        }
-        if (enabled && !currentlyEnabled) {
-            mLocked.disabledInputDevices.remove(deviceId);
-        }
-    } // release lock
-
-    mInputManager->getReader()->requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_ENABLED_STATE);
 }
 
 void NativeInputManager::setShowTouches(bool enabled) {
@@ -1554,27 +1529,6 @@ static void nativeMonitor(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
     im->getInputManager()->getDispatcher()->monitor();
 }
 
-static jboolean nativeIsInputDeviceEnabled(JNIEnv* env /* env */,
-        jclass /* clazz */, jlong ptr, jint deviceId) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    return im->getInputManager()->getReader()->isInputDeviceEnabled(deviceId);
-}
-
-static void nativeEnableInputDevice(JNIEnv* /* env */,
-        jclass /* clazz */, jlong ptr, jint deviceId) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    im->setInputDeviceEnabled(deviceId, true);
-}
-
-static void nativeDisableInputDevice(JNIEnv* /* env */,
-        jclass /* clazz */, jlong ptr, jint deviceId) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    im->setInputDeviceEnabled(deviceId, false);
-}
-
 static void nativeSetPointerIconType(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint iconId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     im->setPointerIconType(iconId);
@@ -1667,12 +1621,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeDump },
     { "nativeMonitor", "(J)V",
             (void*) nativeMonitor },
-    { "nativeIsInputDeviceEnabled", "(JI)Z",
-            (void*) nativeIsInputDeviceEnabled },
-    { "nativeEnableInputDevice", "(JI)V",
-            (void*) nativeEnableInputDevice },
-    { "nativeDisableInputDevice", "(JI)V",
-            (void*) nativeDisableInputDevice },
     { "nativeSetPointerIconType", "(JI)V",
             (void*) nativeSetPointerIconType },
     { "nativeReloadPointerIcons", "(J)V",

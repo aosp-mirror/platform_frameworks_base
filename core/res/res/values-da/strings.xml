@@ -1288,10 +1288,10 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN aktiveres af <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="1610714069627824309">"Tryk for at administrere netværket."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Forbundet til <xliff:g id="SESSION">%s</xliff:g>. Tryk for at administrere netværket."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til altid aktiveret VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Altid aktiveret VPN er forbundet"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Forbindelsen til altid aktiveret VPN er afbrudt"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i altid aktiveret VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til konstant VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Konstant VPN er forbundet"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Forbindelsen til konstant VPN er afbrudt"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i konstant VPN"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tryk for at konfigurere"</string>
     <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>

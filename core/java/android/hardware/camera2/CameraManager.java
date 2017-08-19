@@ -16,29 +16,28 @@
 
 package android.hardware.camera2;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.CameraInfo;
-import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
+import android.hardware.CameraInfo;
+import android.hardware.CameraStatus;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.legacy.CameraDeviceUserShim;
 import android.hardware.camera2.legacy.LegacyMetadataMapper;
+import android.os.IBinder;
 import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.os.SystemProperties;
-import android.util.ArrayMap;
 import android.util.Log;
+import android.util.ArrayMap;
 
 import java.util.ArrayList;
 
@@ -211,9 +210,7 @@ public final class CameraManager {
     public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId)
             throws CameraAccessException {
         CameraCharacteristics characteristics = null;
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new IllegalArgumentException("No cameras available on device");
-        }
+
         synchronized (mLock) {
             /*
              * Get the camera characteristics from the camera service directly if it supports it,
@@ -465,9 +462,6 @@ public final class CameraManager {
                         "Handler argument is null, but no looper exists in the calling thread");
             }
         }
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new IllegalArgumentException("No cameras available on device");
-        }
 
         openCameraDeviceUserAsync(cameraId, callback, handler, clientUid);
     }
@@ -513,9 +507,6 @@ public final class CameraManager {
      */
     public void setTorchMode(@NonNull String cameraId, boolean enabled)
             throws CameraAccessException {
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new IllegalArgumentException("No cameras available on device");
-        }
         CameraManagerGlobal.get().setTorchMode(cameraId, enabled);
     }
 
@@ -754,9 +745,6 @@ public final class CameraManager {
         private CameraManagerGlobal() {
         }
 
-        public static final boolean sCameraServiceDisabled =
-                SystemProperties.getBoolean("config.disable_cameraservice", false);
-
         public static CameraManagerGlobal get() {
             return gCameraManager;
         }
@@ -776,7 +764,7 @@ public final class CameraManager {
         public ICameraService getCameraService() {
             synchronized(mLock) {
                 connectCameraServiceLocked();
-                if (mCameraService == null && !sCameraServiceDisabled) {
+                if (mCameraService == null) {
                     Log.e(TAG, "Camera service is unavailable");
                 }
                 return mCameraService;
@@ -791,7 +779,7 @@ public final class CameraManager {
          */
         private void connectCameraServiceLocked() {
             // Only reconnect if necessary
-            if (mCameraService != null || sCameraServiceDisabled) return;
+            if (mCameraService != null) return;
 
             Log.i(TAG, "Connecting to camera service");
 

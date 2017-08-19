@@ -101,7 +101,7 @@
     <string name="unknown" msgid="1592123443519355854">"不明"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ユーザー: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトを設定"</string>
-    <string name="launch_defaults_none" msgid="4241129108140034876">"既定の設定なし"</string>
+    <string name="launch_defaults_none" msgid="4241129108140034876">"デフォルトの設定なし"</string>
     <string name="tts_settings" msgid="8186971894801348327">"テキスト読み上げの設定"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの出力"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"音声の速度"</string>

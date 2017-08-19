@@ -198,7 +198,7 @@
     <item msgid="1069584980746680398">"Razmera animacije 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"Nijedno"</item>
+    <item msgid="1606809880904982133">"Ništa"</item>
     <item msgid="9033194758688161545">"480 piksela"</item>
     <item msgid="1025306206556583600">"480 piksela (bezbedno)"</item>
     <item msgid="1853913333042744661">"720 piksela"</item>
