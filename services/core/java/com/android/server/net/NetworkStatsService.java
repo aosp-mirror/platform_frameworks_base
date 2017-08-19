@@ -31,6 +31,8 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.STATS_PER_IFACE;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
@@ -1042,6 +1044,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats xtSnapshot = getNetworkStatsXt();
         final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
+        // Tethering snapshot for dev and xt stats. Counts per-interface data from tethering stats
+        // providers that isn't already counted by dev and XT stats.
+        final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_IFACE);
+        xtSnapshot.combineAllValues(tetherSnapshot);
+        devSnapshot.combineAllValues(tetherSnapshot);
 
         // For xt/dev, we pass a null VPN array because usage is aggregated by UID, so VPN traffic
         // can't be reattributed to responsible apps.
@@ -1372,14 +1379,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
 
         // fold tethering stats and operations into uid snapshot
-        final NetworkStats tetherSnapshot = getNetworkStatsTethering();
+        final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
         final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
 
         // fold video calling data usage stats into uid snapshot
-        final NetworkStats vtStats = telephonyManager.getVtDataUsage(true);
+        final NetworkStats vtStats = telephonyManager.getVtDataUsage(STATS_PER_UID);
         if (vtStats != null) {
             uidSnapshot.combineAllValues(vtStats);
         }
@@ -1398,7 +1405,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 Context.TELEPHONY_SERVICE);
 
         // Merge video calling data usage into XT
-        final NetworkStats vtSnapshot = telephonyManager.getVtDataUsage(false);
+        final NetworkStats vtSnapshot = telephonyManager.getVtDataUsage(STATS_PER_IFACE);
         if (vtSnapshot != null) {
             xtSnapshot.combineAllValues(vtSnapshot);
         }
@@ -1410,9 +1417,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Return snapshot of current tethering statistics. Will return empty
      * {@link NetworkStats} if any problems are encountered.
      */
-    private NetworkStats getNetworkStatsTethering() throws RemoteException {
+    private NetworkStats getNetworkStatsTethering(int how) throws RemoteException {
         try {
-            return mNetworkManager.getNetworkStatsTethering();
+            return mNetworkManager.getNetworkStatsTethering(how);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
             return new NetworkStats(0L, 10);
