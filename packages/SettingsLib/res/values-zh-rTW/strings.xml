@@ -79,7 +79,7 @@
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"取消"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"配對完成後，所配對的裝置即可在連線後存取你的聯絡人和通話紀錄。"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對。"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對，因為 PIN 碼或密碼金鑰不正確。"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對，因為 PIN 或密碼金鑰不正確。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 通訊。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"「<xliff:g id="DEVICE_NAME">%1$s</xliff:g>」拒絕配對要求。"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"已關閉 Wi-Fi。"</string>

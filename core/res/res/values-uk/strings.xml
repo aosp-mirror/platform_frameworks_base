@@ -1064,7 +1064,7 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Очистити налаштування за умовчанням у меню Налаштування системи &gt; Програми &gt; Завантажені."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Виберіть дію"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Вибрати програму для пристрою USB"</string>
-    <string name="noApplications" msgid="2991814273936504689">"Жодний додаток не може виконати цю дію."</string>
+    <string name="noApplications" msgid="2991814273936504689">"Жодна програма не може виконати цю дію."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g>: збій у роботі"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g>: збій у роботі"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> періодично перестає працювати"</string>
@@ -1231,7 +1231,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Торкніться, щоб переглянути більше опцій."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB завершено"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Торкніться, щоб вимкнути налагодження USB."</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Виберіть, щоб вимкнути налагодження за USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Вибер., щоб вимкн. налагодж. USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Створюється повідомлення про помилку…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Надіслати звіт про помилку?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Надсилається звіт про помилку…"</string>

@@ -398,7 +398,7 @@
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռախոսում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"փոխել ձեր աուդիո կարգավորումները"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ` ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"ձայնագրել աուդիո ֆայլ"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"ձայնագրել ձայնանյութ"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Այս հավելվածը ցանկացած պահի կարող է ձայնագրել խոսափողի օգնությամբ:"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ուղարկել հրամաններ SIM քարտին"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Թույլ է տալիս հավելվածին հրամաններ ուղարկել SIM-ին: Սա շատ վտանգավոր է:"</string>
@@ -1418,7 +1418,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Համակցված բարձրախոսներ"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Համակարգ"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ի աուդիո ֆայլ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ի ձայնանյութ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Անլար էկրան"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Հեռարձակում"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Միանալ սարքին"</string>

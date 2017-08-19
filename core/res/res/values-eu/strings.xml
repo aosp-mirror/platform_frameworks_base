@@ -1138,7 +1138,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Gonbidapena bidali da"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Konektatzeko gonbidapena"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Igorlea:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Hartzailea:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Nori:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Idatzi beharrezko PINa:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PINa:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tableta Wi-Fi saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>

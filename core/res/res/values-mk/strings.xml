@@ -1041,7 +1041,7 @@
     <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> не реагира"</string>
     <string name="anr_process" msgid="6156880875555921105">"Процесот <xliff:g id="PROCESS">%1$s</xliff:g> не реагира"</string>
     <string name="force_close" msgid="8346072094521265605">"Во ред"</string>
-    <string name="report" msgid="4060218260984795706">"Пријави"</string>
+    <string name="report" msgid="4060218260984795706">"Извештај"</string>
     <string name="wait" msgid="7147118217226317732">"Почекај"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Страницата не реагира.\n\nДали сакате да ја затворите?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Пренасочена апликација"</string>

@@ -39,9 +39,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.PacketKeepalive;
@@ -100,7 +98,6 @@ import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.LocalLog.ReadOnlyLocalLog;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -122,7 +119,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
-import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.KeepaliveTracker;
@@ -383,6 +379,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * obj = NetworkRequestInfo
      */
     private static final int EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT = 31;
+
+    /**
+     *
+     */
+    private static final int EVENT_CONFIGURE_NET_TRANSITION_WAKELOCK_OVERRIDE = 32;
 
     /** Handler thread used for both of the handlers below. */
     @VisibleForTesting
@@ -878,6 +879,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void updateNetTransitionWakelockOverride() {
+        int override = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.NET_TRANSITION_WAKELOCK_OVERRIDE_MS,
+                -1);
+        if (override >= 0) {
+            mNetTransitionWakeLockTimeout = override;
+            if (DBG) log("mNetTransitionWakeLockTimeout overridden to " +
+                    mNetTransitionWakeLockTimeout + " ms");
+        } else {
+            mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_networkTransitionTimeout);
+            if (DBG) log("mNetTransitionWakeLockTimeout configured to " +
+                    mNetTransitionWakeLockTimeout + " ms");
+        }
+    }
+
     private void registerSettingsCallbacks() {
         // Watch for global HTTP proxy changes.
         mSettingsObserver.observe(
@@ -888,6 +906,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSettingsObserver.observe(
                 Settings.Global.getUriFor(Settings.Global.MOBILE_DATA_ALWAYS_ON),
                 EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
+
+        // Watch for changes to the override of the net transition wakelock duration.
+        mSettingsObserver.observe(
+                Settings.Global.getUriFor(Settings.Global.NET_TRANSITION_WAKELOCK_OVERRIDE_MS),
+                EVENT_CONFIGURE_NET_TRANSITION_WAKELOCK_OVERRIDE);
     }
 
     private synchronized int nextNetworkRequestId() {
@@ -1637,6 +1660,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Configure whether mobile data is always on.
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON));
+
+        mHandler.sendMessage(
+                mHandler.obtainMessage(EVENT_CONFIGURE_NET_TRANSITION_WAKELOCK_OVERRIDE));
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
 
@@ -2851,6 +2877,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleMobileDataAlwaysOn();
                     break;
                 }
+                case EVENT_CONFIGURE_NET_TRANSITION_WAKELOCK_OVERRIDE: {
+                    updateNetTransitionWakelockOverride();
+                    break;
+                }
                 // Sent by KeepaliveTracker to process an app request on the state machine thread.
                 case NetworkAgent.CMD_START_PACKET_KEEPALIVE: {
                     mKeepaliveTracker.handleStartKeepalive(msg);
@@ -3023,6 +3053,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // becomes CONNECTED, whichever happens first.  The timer is started by the
     // first caller and not restarted by subsequent callers.
     private void requestNetworkTransitionWakelock(String forWhom) {
+        if (mNetTransitionWakeLockTimeout <= 0) {
+            return;
+        }
+
         int serialNum = 0;
         synchronized (this) {
             if (mNetTransitionWakeLock.isHeld()) return;
