@@ -32,6 +32,7 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.FIREWALL_TYPE_BLACKLIST;
 import static android.net.NetworkPolicyManager.FIREWALL_TYPE_WHITELIST;
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
@@ -526,6 +527,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(NETWORK_STACK, TAG);
         synchronized(mTetheringStatsProviders) {
             mTetheringStatsProviders.remove(provider);
+        }
+    }
+
+    @Override
+    public void tetherLimitReached(ITetheringStatsProvider provider) {
+        mContext.enforceCallingOrSelfPermission(NETWORK_STACK, TAG);
+        synchronized(mTetheringStatsProviders) {
+            if (!mTetheringStatsProviders.containsKey(provider)) {
+                return;
+            }
+            // No current code examines the interface parameter in a global alert. Just pass null.
+            notifyLimitReached(LIMIT_GLOBAL_ALERT, null);
         }
     }
 
@@ -1810,7 +1823,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {
         @Override
-        public NetworkStats getTetherStats() {
+        public NetworkStats getTetherStats(int how) {
+            // We only need to return per-UID stats. Per-device stats are already counted by
+            // interface counters.
+            if (how != STATS_PER_UID) {
+                return new NetworkStats(SystemClock.elapsedRealtime(), 0);
+            }
+
             final NativeDaemonEvent[] events;
             try {
                 events = mConnector.executeForList("bandwidth", "gettetherstats");
@@ -1853,14 +1872,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public NetworkStats getNetworkStatsTethering() {
+    public NetworkStats getNetworkStatsTethering(int how) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
         synchronized (mTetheringStatsProviders) {
             for (ITetheringStatsProvider provider: mTetheringStatsProviders.keySet()) {
                 try {
-                    stats.combineAllValues(provider.getTetherStats());
+                    stats.combineAllValues(provider.getTetherStats(how));
                 } catch (RemoteException e) {
                     Log.e(TAG, "Problem reading tethering stats from " +
                             mTetheringStatsProviders.get(provider) + ": " + e);

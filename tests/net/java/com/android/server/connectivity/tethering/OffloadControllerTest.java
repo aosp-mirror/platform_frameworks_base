@@ -17,7 +17,10 @@
 package com.android.server.connectivity.tethering;
 
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.STATS_PER_IFACE;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 import static com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
@@ -85,6 +88,8 @@ public class OffloadControllerTest {
             ArgumentCaptor.forClass(ArrayList.class);
     private final ArgumentCaptor<ITetheringStatsProvider.Stub> mTetherStatsProviderCaptor =
             ArgumentCaptor.forClass(ITetheringStatsProvider.Stub.class);
+    private final ArgumentCaptor<OffloadHardwareInterface.ControlCallback> mControlCallbackCaptor =
+            ArgumentCaptor.forClass(OffloadHardwareInterface.ControlCallback.class);
     private MockContentResolver mContentResolver;
 
     @Before public void setUp() {
@@ -105,7 +110,7 @@ public class OffloadControllerTest {
 
     private void setupFunctioningHardwareInterface() {
         when(mHardware.initOffloadConfig()).thenReturn(true);
-        when(mHardware.initOffloadControl(any(OffloadHardwareInterface.ControlCallback.class)))
+        when(mHardware.initOffloadControl(mControlCallbackCaptor.capture()))
                 .thenReturn(true);
         when(mHardware.getForwardedStats(any())).thenReturn(new ForwardedStats());
     }
@@ -375,7 +380,6 @@ public class OffloadControllerTest {
         assertEquals(stats.txBytes, entry.txBytes);
         assertEquals(SET_DEFAULT, entry.set);
         assertEquals(TAG_NONE, entry.tag);
-        assertEquals(UID_TETHERING, entry.uid);
     }
 
     @Test
@@ -414,19 +418,32 @@ public class OffloadControllerTest {
         ethernetStats.txBytes = 100000;
         offload.setUpstreamLinkProperties(null);
 
-        NetworkStats stats = mTetherStatsProviderCaptor.getValue().getTetherStats();
+        ITetheringStatsProvider provider = mTetherStatsProviderCaptor.getValue();
+        NetworkStats stats = provider.getTetherStats(STATS_PER_IFACE);
+        NetworkStats perUidStats = provider.getTetherStats(STATS_PER_UID);
+
         assertEquals(2, stats.size());
+        assertEquals(2, perUidStats.size());
 
         NetworkStats.Entry entry = null;
+        for (int i = 0; i < stats.size(); i++) {
+            assertEquals(UID_ALL, stats.getValues(i, entry).uid);
+            assertEquals(UID_TETHERING, perUidStats.getValues(i, entry).uid);
+        }
+
         int ethernetPosition = ethernetIface.equals(stats.getValues(0, entry).iface) ? 0 : 1;
         int mobilePosition = 1 - ethernetPosition;
 
         entry = stats.getValues(mobilePosition, entry);
         assertNetworkStats(mobileIface, mobileStats, entry);
+        entry = perUidStats.getValues(mobilePosition, entry);
+        assertNetworkStats(mobileIface, mobileStats, entry);
 
         ethernetStats.rxBytes = 12345 + 100000;
         ethernetStats.txBytes = 54321 + 100000;
         entry = stats.getValues(ethernetPosition, entry);
+        assertNetworkStats(ethernetIface, ethernetStats, entry);
+        entry = perUidStats.getValues(ethernetPosition, entry);
         assertNetworkStats(ethernetIface, ethernetStats, entry);
     }
 
@@ -492,5 +509,18 @@ public class OffloadControllerTest {
         provider.setInterfaceQuota(mobileIface, mobileLimit);
         waitForIdle();
         inOrder.verify(mHardware).stopOffloadControl();
+    }
+
+    @Test
+    public void testDataLimitCallback() throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        OffloadHardwareInterface.ControlCallback callback = mControlCallbackCaptor.getValue();
+        callback.onStoppedLimitReached();
+        verify(mNMService, times(1)).tetherLimitReached(mTetherStatsProviderCaptor.getValue());
     }
 }
