@@ -17,7 +17,9 @@
 package com.android.server.connectivity.tethering;
 
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
@@ -202,16 +204,18 @@ public class OffloadController {
 
     private class OffloadTetheringStatsProvider extends ITetheringStatsProvider.Stub {
         @Override
-        public NetworkStats getTetherStats() {
+        public NetworkStats getTetherStats(int how) {
             NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
 
             // We can't just post to mHandler because we are mostly (but not always) called by
             // NetworkStatsService#performPollLocked, which is (currently) on the same thread as us.
             mHandler.runWithScissors(() -> {
+                // We have to report both per-interface and per-UID stats, because offloaded traffic
+                // is not seen by kernel interface counters.
                 NetworkStats.Entry entry = new NetworkStats.Entry();
                 entry.set = SET_DEFAULT;
                 entry.tag = TAG_NONE;
-                entry.uid = UID_TETHERING;
+                entry.uid = (how == STATS_PER_UID) ? UID_TETHERING : UID_ALL;
 
                 updateStatsForCurrentUpstream();
 
