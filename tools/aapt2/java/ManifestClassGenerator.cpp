@@ -81,7 +81,10 @@ static bool WriteSymbol(const Source& source, IDiagnostics* diag,
       util::make_unique<StringMember>(result.value(), attr->value);
   string_member->GetCommentBuilder()->AppendComment(el->comment);
 
-  class_def->AddMember(std::move(string_member));
+  if (class_def->AddMember(std::move(string_member)) == ClassDefinition::Result::kOverridden) {
+    diag->Warn(DiagMessage(source.WithLine(el->line_number))
+               << "duplicate definitions of '" << result.value() << "', overriding previous");
+  }
   return true;
 }
 
