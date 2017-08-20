@@ -38,12 +38,10 @@ namespace {
 
 constexpr uint32_t kLowPriority = 0xffffffffu;
 
-static bool cmp_xml_attribute_by_id(const xml::Attribute* a,
-                                    const xml::Attribute* b) {
+static bool cmp_xml_attribute_by_id(const xml::Attribute* a, const xml::Attribute* b) {
   if (a->compiled_attribute && a->compiled_attribute.value().id) {
     if (b->compiled_attribute && b->compiled_attribute.value().id) {
-      return a->compiled_attribute.value().id.value() <
-             b->compiled_attribute.value().id.value();
+      return a->compiled_attribute.value().id.value() < b->compiled_attribute.value().id.value();
     }
     return true;
   } else if (!b->compiled_attribute) {
@@ -75,17 +73,6 @@ class XmlFlattenerVisitor : public xml::Visitor {
   XmlFlattenerVisitor(BigBuffer* buffer, XmlFlattenerOptions options)
       : buffer_(buffer), options_(options) {}
 
-  void Visit(xml::Namespace* node) override {
-    if (node->namespace_uri == xml::kSchemaTools) {
-      // Skip dedicated tools namespace.
-      xml::Visitor::Visit(node);
-    } else {
-      WriteNamespace(node, android::RES_XML_START_NAMESPACE_TYPE);
-      xml::Visitor::Visit(node);
-      WriteNamespace(node, android::RES_XML_END_NAMESPACE_TYPE);
-    }
-  }
-
   void Visit(xml::Text* node) override {
     if (util::TrimWhitespace(node->text).empty()) {
       // Skip whitespace only text nodes.
@@ -93,8 +80,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
     }
 
     ChunkWriter writer(buffer_);
-    ResXMLTree_node* flat_node =
-        writer.StartChunk<ResXMLTree_node>(RES_XML_CDATA_TYPE);
+    ResXMLTree_node* flat_node = writer.StartChunk<ResXMLTree_node>(RES_XML_CDATA_TYPE);
     flat_node->lineNumber = util::HostToDevice32(node->line_number);
     flat_node->comment.index = util::HostToDevice32(-1);
 
@@ -109,6 +95,13 @@ class XmlFlattenerVisitor : public xml::Visitor {
   }
 
   void Visit(xml::Element* node) override {
+    for (const xml::NamespaceDecl& decl : node->namespace_decls) {
+      // Skip dedicated tools namespace.
+      if (decl.uri != xml::kSchemaTools) {
+        WriteNamespace(decl, android::RES_XML_START_NAMESPACE_TYPE);
+      }
+    }
+
     {
       ChunkWriter start_writer(buffer_);
       ResXMLTree_node* flat_node =
@@ -116,19 +109,15 @@ class XmlFlattenerVisitor : public xml::Visitor {
       flat_node->lineNumber = util::HostToDevice32(node->line_number);
       flat_node->comment.index = util::HostToDevice32(-1);
 
-      ResXMLTree_attrExt* flat_elem =
-          start_writer.NextBlock<ResXMLTree_attrExt>();
+      ResXMLTree_attrExt* flat_elem = start_writer.NextBlock<ResXMLTree_attrExt>();
 
-      // A missing namespace must be null, not an empty string. Otherwise the
-      // runtime complains.
+      // A missing namespace must be null, not an empty string. Otherwise the runtime complains.
       AddString(node->namespace_uri, kLowPriority, &flat_elem->ns,
                 true /* treat_empty_string_as_null */);
-      AddString(node->name, kLowPriority, &flat_elem->name,
-                true /* treat_empty_string_as_null */);
+      AddString(node->name, kLowPriority, &flat_elem->name, true /* treat_empty_string_as_null */);
 
       flat_elem->attributeStart = util::HostToDevice16(sizeof(*flat_elem));
-      flat_elem->attributeSize =
-          util::HostToDevice16(sizeof(ResXMLTree_attribute));
+      flat_elem->attributeSize = util::HostToDevice16(sizeof(ResXMLTree_attribute));
 
       WriteAttributes(node, flat_elem, &start_writer);
 
@@ -144,13 +133,19 @@ class XmlFlattenerVisitor : public xml::Visitor {
       flat_end_node->lineNumber = util::HostToDevice32(node->line_number);
       flat_end_node->comment.index = util::HostToDevice32(-1);
 
-      ResXMLTree_endElementExt* flat_end_elem =
-          end_writer.NextBlock<ResXMLTree_endElementExt>();
+      ResXMLTree_endElementExt* flat_end_elem = end_writer.NextBlock<ResXMLTree_endElementExt>();
       AddString(node->namespace_uri, kLowPriority, &flat_end_elem->ns,
                 true /* treat_empty_string_as_null */);
       AddString(node->name, kLowPriority, &flat_end_elem->name);
 
       end_writer.Finish();
+    }
+
+    for (auto iter = node->namespace_decls.rbegin(); iter != node->namespace_decls.rend(); ++iter) {
+      // Skip dedicated tools namespace.
+      if (iter->uri != xml::kSchemaTools) {
+        WriteNamespace(*iter, android::RES_XML_END_NAMESPACE_TYPE);
+      }
     }
   }
 
@@ -173,16 +168,16 @@ class XmlFlattenerVisitor : public xml::Visitor {
     string_refs.push_back(StringFlattenDest{ref, dest});
   }
 
-  void WriteNamespace(xml::Namespace* node, uint16_t type) {
+  void WriteNamespace(const xml::NamespaceDecl& decl, uint16_t type) {
     ChunkWriter writer(buffer_);
 
     ResXMLTree_node* flatNode = writer.StartChunk<ResXMLTree_node>(type);
-    flatNode->lineNumber = util::HostToDevice32(node->line_number);
+    flatNode->lineNumber = util::HostToDevice32(decl.line_number);
     flatNode->comment.index = util::HostToDevice32(-1);
 
     ResXMLTree_namespaceExt* flat_ns = writer.NextBlock<ResXMLTree_namespaceExt>();
-    AddString(node->namespace_prefix, kLowPriority, &flat_ns->prefix);
-    AddString(node->namespace_uri, kLowPriority, &flat_ns->uri);
+    AddString(decl.prefix, kLowPriority, &flat_ns->prefix);
+    AddString(decl.uri, kLowPriority, &flat_ns->uri);
 
     writer.Finish();
   }

@@ -1131,7 +1131,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vill ansluta till Wi-Fi-nätverket %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi direkt"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Starta direkt Wi-Fi-användning. Detta inaktiverar Wi-Fi-användning med klient/trådlös surfzon."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Starta direkt Wi-Fi-användning. Detta inaktiverar Wi-Fi-användning med klient/surfzon."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Det gick inte att starta Wi-Fi direkt."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct är aktiverat"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Tryck för inställningar"</string>
@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Ansluten till <xliff:g id="SESSION">%s</xliff:g>. Knacka lätt för att hantera nätverket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Ansluter till Always-on VPN ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Ansluten till Always-on VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Always-on VPN har kopplats från"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fel på Always-on VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tryck för att konfigurera"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Välj fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil har valts"</string>
     <string name="reset" msgid="2448168080964209908">"Återställ"</string>

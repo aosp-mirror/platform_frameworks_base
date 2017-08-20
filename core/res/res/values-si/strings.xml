@@ -1296,9 +1296,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> වෙත සම්බන්ධිතයි. ජාලය කළමනාකරණය කිරීමට තට්ටු කරන්න."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"සැමවිටම VPN සම්බන්ධ වෙමින්…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"නිරතුරුවම VPN සම්බන්ධ කර ඇත"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"සැමවිට ක්‍රියාත්මක VPN විසන්ධි කරන ලදී"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"සැමවිට සක්‍රිය VPN දෝෂය"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"පිහිටුවීමට තට්ටු කරන්න"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ගොනුව තෝරන්න"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ගොනුවක් තෝරාගෙන නැත"</string>
     <string name="reset" msgid="2448168080964209908">"යළි පිහිටුවන්න"</string>

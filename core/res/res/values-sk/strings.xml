@@ -1338,9 +1338,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Pripojené k relácii <xliff:g id="SESSION">%s</xliff:g>. Po klepnutí môžete sieť spravovať."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Pripájanie k vždy zapnutej sieti VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Pripojenie k vždy zapnutej sieti VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Vždy zapnutá sieť VPN bola odpojená"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Chyba vždy zapnutej siete VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Klepnutím prejdete do Nastavení"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Zvoliť súbor"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie je vybratý žiadny súbor"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>

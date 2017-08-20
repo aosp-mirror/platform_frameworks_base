@@ -22,10 +22,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFooter;
-import com.android.systemui.qs.QSPanel;
+import com.android.systemui.statusbar.car.UserGridView;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
  * A quick settings fragment for the car. For auto, there is no row for quick settings or ability
@@ -35,8 +37,7 @@ import com.android.systemui.qs.QSPanel;
 public class CarQSFragment extends Fragment implements QS {
     private View mHeader;
     private CarQSFooter mFooter;
-    private QSPanel mQsPanel;
-    private CarQSDetail mQsDetail;
+    private UserGridView mUserGridView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -49,13 +50,12 @@ public class CarQSFragment extends Fragment implements QS {
         super.onViewCreated(view, savedInstanceState);
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
-        mQsPanel = view.findViewById(R.id.quick_settings_panel);
-        mQsDetail = view.findViewById(R.id.qs_detail);
 
-        // Inform each other about their existence.
-        mQsDetail.setQsPanel(mQsPanel);
-        mFooter.setQSDetail(mQsDetail);
-        mFooter.setQSPanel(mQsPanel);
+        mUserGridView = view.findViewById(R.id.user_grid);
+        mUserGridView.init(null, Dependency.get(UserSwitcherController.class),
+                false /* showInitially */);
+
+        mFooter.setUserGridView(mUserGridView);
     }
 
     @Override
@@ -133,13 +133,13 @@ public class CarQSFragment extends Fragment implements QS {
 
     @Override
     public boolean isShowingDetail() {
-        return mQsDetail.isShowingDetail();
+        // No detail panel to close.
+        return false;
     }
 
     @Override
     public void closeDetail() {
-        mQsDetail.setVisibility(View.GONE);
-        mQsPanel.closeDetail();
+        // No detail panel to close.
     }
 
     @Override

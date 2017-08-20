@@ -567,18 +567,25 @@ public class CarrierConfigManager {
             "carrier_data_call_retry_config_strings";
 
     /**
-     * Delay between trying APN from the pool
+     * Delay in milliseconds between trying APN from the pool
      * @hide
      */
     public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG =
             "carrier_data_call_apn_delay_default_long";
 
     /**
-     * Faster delay between trying APN from the pool
+     * Faster delay in milliseconds between trying APN from the pool
      * @hide
      */
     public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
             "carrier_data_call_apn_delay_faster_long";
+
+    /**
+     * Delay in milliseconds for retrying APN after disconnect
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG =
+            "carrier_data_call_apn_retry_after_disconnect_long";
 
     /**
      * Data call setup permanent failure causes by the carrier
@@ -768,7 +775,6 @@ public class CarrierConfigManager {
      * Determines whether High Definition audio property is displayed in the dialer UI.
      * If {@code false}, remove the HD audio property from the connection so that HD audio related
      * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
-     * @hide
      */
     public static final String KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL =
             "display_hd_audio_property_bool";
@@ -1167,8 +1173,6 @@ public class CarrierConfigManager {
     /** @hide */
     public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
     /** @hide */
-    public static final int IMSI_ENCRYPTION_DAYS_TIME_DISABLED = -1;
-    /** @hide */
     public static final int CDMA_ROAMING_MODE_ANY = 2;
     /**
      * Boolean indicating if support is provided for directly dialing FDN number from FDN list.
@@ -1527,14 +1531,15 @@ public class CarrierConfigManager {
     public static final String IMSI_KEY_DOWNLOAD_URL_STRING = "imsi_key_download_url_string";
 
     /**
-     * Time in days, after which the key will expire, and a new key will need to be downloaded.
-     * default value is {@link IMSI_ENCRYPTION_DAYS_TIME_DISABLED}, and indicates that IMSI
-     * encryption is not enabled by default for a carrier. Value of 0 indicates that the key
-     * does not expire.
+     * Identifies if the key is available for WLAN or EPDG or both. The value is a bitmask.
+     * 0 indicates that neither EPDG or WLAN is enabled.
+     * 1 indicates that key type {@link TelephonyManager#KEY_TYPE_EPDG} is enabled.
+     * 2 indicates that key type {@link TelephonyManager#KEY_TYPE_WLAN} is enabled.
+     * 3 indicates that both are enabled.
      * @hide
      */
-    public static final String IMSI_KEY_EXPIRATION_DAYS_TIME_INT =
-            "imsi_key_expiration_days_time_int";
+    public static final String IMSI_KEY_AVAILABILITY_INT = "imsi_key_availability_int";
+
 
     /**
      * Key identifying if the CDMA Caller ID presentation and suppression MMI codes
@@ -1646,6 +1651,7 @@ public class CarrierConfigManager {
                 "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 10000);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
@@ -1807,7 +1813,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
         sDefaults.putStringArray(KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL, false);
-        sDefaults.putInt(IMSI_KEY_EXPIRATION_DAYS_TIME_INT, IMSI_ENCRYPTION_DAYS_TIME_DISABLED);
+        sDefaults.putInt(IMSI_KEY_AVAILABILITY_INT, 0);
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
         sDefaults.putBoolean(KEY_CONVERT_CDMA_CALLER_ID_MMI_CODES_WHILE_ROAMING_ON_3GPP_BOOL,
                 false);

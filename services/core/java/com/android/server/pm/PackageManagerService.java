@@ -3884,8 +3884,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new SecurityException("Package " + packageName + " is currently frozen!");
             }
 
-            if (!userKeyUnlocked && !(ps.pkg.applicationInfo.isDirectBootAware()
-                    || ps.pkg.applicationInfo.isPartiallyDirectBootAware())) {
+            if (!userKeyUnlocked && !ps.pkg.applicationInfo.isEncryptionAware()) {
                 throw new SecurityException("Package " + packageName + " is not encryption aware!");
             }
         }

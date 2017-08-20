@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"ເຊື່ອມຕໍ່ກັບ <xliff:g id="SESSION">%s</xliff:g> ແລ້ວ. ແຕະເພື່ອຈັດການເຄືອຂ່າຍ."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ກຳລັງເຊື່ອມຕໍ່ Always-on VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ເຊື່ອມຕໍ່ VPN ແບບເປີດຕະຫຼອດເວລາແລ້ວ"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ຕັດການເຊື່ອມຕໍ່ VPN ແບບເປີດໃຊ້ຕະຫຼອດເວລາແລ້ວ"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"VPN ແບບເປີດຕະຫຼອດເກີດຄວາມຜິດພາດ"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ແຕະເພື່ອຕັ້ງຄ່າ"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ເລືອກໄຟລ໌"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ບໍ່ໄດ້ເລືອກໄຟລ໌ເທື່ອ"</string>
     <string name="reset" msgid="2448168080964209908">"ຣີເຊັດ"</string>

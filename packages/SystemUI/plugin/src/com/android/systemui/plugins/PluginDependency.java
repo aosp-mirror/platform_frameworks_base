@@ -21,11 +21,6 @@ public class PluginDependency {
     public static final int VERSION = 1;
     static DependencyProvider sProvider;
 
-    /**
-     * Allows a plugin to get a hold of static dependencies if they have declared dependence
-     * on their interface. For one-shot plugins this will only work during onCreate and will
-     * not work afterwards.
-     */
     public static <T> T get(Plugin p, Class<T> cls) {
         return sProvider.get(p, cls);
     }

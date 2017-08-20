@@ -29,8 +29,7 @@ LOCAL_SRC_FILES := \
         src/Section.cpp \
         src/main.cpp \
         src/protobuf.cpp \
-        src/report_directory.cpp \
-        src/section_list.cpp \
+        src/report_directory.cpp
 
 LOCAL_CFLAGS += \
         -Wall -Werror -Wno-missing-field-initializers -Wno-unused-variable -Wunused-parameter
@@ -44,6 +43,8 @@ else
             -Os
 endif
 
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
+
 LOCAL_SHARED_LIBRARIES := \
         libbase \
         libbinder \
@@ -53,6 +54,20 @@ LOCAL_SHARED_LIBRARIES := \
         libselinux \
         libservices \
         libutils
+
+LOCAL_MODULE_CLASS := EXECUTABLES
+gen_src_dir := $(local-generated-sources-dir)
+
+GEN := $(gen_src_dir)/src/section_list.cpp
+$(GEN): $(HOST_OUT_EXECUTABLES)/incident-section-gen
+$(GEN): PRIVATE_CUSTOM_TOOL = \
+    $(HOST_OUT_EXECUTABLES)/incident-section-gen incidentd > $@
+$(GEN): $(HOST_OUT_EXECUTABLES)/incident-section-gen
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN)
+
+gen_src_dir:=
+GEN:=
 
 LOCAL_INIT_RC := incidentd.rc
 
@@ -78,7 +93,7 @@ LOCAL_SRC_FILES := \
     src/Section.cpp \
     src/protobuf.cpp \
     src/report_directory.cpp \
-    src/section_list.cpp \
+    tests/section_list.cpp \
     tests/FdBuffer_test.cpp \
     tests/Reporter_test.cpp \
     tests/Section_test.cpp \

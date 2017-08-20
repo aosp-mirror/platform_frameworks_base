@@ -19,11 +19,25 @@
     <string name="prompt" msgid="3183836924226407828">"בקשת חיבור"</string>
     <string name="warning" msgid="809658604548412033">"‏<xliff:g id="APP">%s</xliff:g> רוצה להגדיר חיבור VPN שיאפשר לו לפקח על תעבורת הרשת. אשר את הבקשה רק אם אתה נותן אמון במקור. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; מופיע בחלק העליון של המסך כאשר VPN פעיל."</string>
     <string name="legacy_title" msgid="192936250066580964">"‏VPN מחובר"</string>
-    <string name="configure" msgid="4905518375574791375">"הגדר"</string>
-    <string name="disconnect" msgid="971412338304200056">"נתק"</string>
     <string name="session" msgid="6470628549473641030">"הפעלה"</string>
     <string name="duration" msgid="3584782459928719435">"משך:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"נשלח:"</string>
     <string name="data_received" msgid="4062776929376067820">"התקבל:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> בתים / <xliff:g id="NUMBER_1">%2$s</xliff:g> מנות"</string>
+    <!-- no translation found for always_on_disconnected_title (1906740176262776166) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message (555634519845992917) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_lockdown (4232225539869452120) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_separator (3310614409322581371) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_settings_link (6172280302829992412) -->
+    <skip />
+    <string name="configure" msgid="4905518375574791375">"הגדר"</string>
+    <string name="disconnect" msgid="971412338304200056">"נתק"</string>
+    <!-- no translation found for open_app (3717639178595958667) -->
+    <skip />
+    <!-- no translation found for dismiss (6192859333764711227) -->
+    <skip />
 </resources>

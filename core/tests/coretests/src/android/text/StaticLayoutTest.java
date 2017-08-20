@@ -21,20 +21,33 @@ import static android.text.Layout.Alignment.ALIGN_NORMAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Canvas;
+import android.graphics.FontFamily;
 import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Typeface;
 import android.os.LocaleList;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
 import android.text.method.EditorState;
 import android.text.style.LocaleSpan;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -798,5 +811,130 @@ public class StaticLayoutTest {
         final Canvas canvas = new Canvas();
         layout.drawText(canvas, 0, 0);
         assertEquals(31, paint.getHyphenEdit());
+    }
+
+    private String getTestFontsDir() {
+        final Context targetCtx = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        final File cacheDir = new File(targetCtx.getCacheDir(), "StaticLayoutTest");
+        if (!cacheDir.isDirectory()) {
+            final boolean dirsCreated = cacheDir.mkdirs();
+            if (!dirsCreated) {
+                throw new RuntimeException("Creating test directories for fonts failed.");
+            }
+        }
+        return cacheDir.getAbsolutePath() + "/";
+    }
+
+    private TextPaint setupPaintForFallbackFonts(String[] fontFiles, String xml) {
+        final String testFontsDir = getTestFontsDir();
+        final String testFontsXml = new File(testFontsDir, "fonts.xml").getAbsolutePath();
+        final AssetManager am =
+                InstrumentationRegistry.getInstrumentation().getContext().getAssets();
+        for (String fontFile : fontFiles) {
+            final String sourceInAsset = "fonts/" + fontFile;
+            final File outInCache = new File(testFontsDir, fontFile);
+            try (InputStream is = am.open(sourceInAsset)) {
+                Files.copy(is, outInCache.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(testFontsXml)) {
+            fos.write(xml.getBytes(Charset.forName("UTF-8")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+        Typeface.buildSystemFallback(testFontsXml, testFontsDir, fontMap, fallbackMap);
+
+        final TextPaint paint = new TextPaint();
+        final Typeface testTypeface = fontMap.get("sans-serif");
+        paint.setTypeface(testTypeface);
+        return paint;
+    }
+
+    void destroyFallbackFonts(String[] fontFiles) {
+        final String testFontsDir = getTestFontsDir();
+        for (String fontFile : fontFiles) {
+            final File outInCache = new File(testFontsDir, fontFile);
+            outInCache.delete();
+        }
+    }
+
+    @Test
+    public void testFallbackLineSpacing() {
+        // All glyphs in the fonts are 1em wide.
+        final String[] testFontFiles = {
+            // ascent == 1em, descent == 2em, only supports 'a' and space
+            "ascent1em-descent2em.ttf",
+            // ascent == 3em, descent == 4em, only supports 'b'
+            "ascent3em-descent4em.ttf"
+        };
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>ascent1em-descent2em.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>ascent3em-descent4em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try {
+            final TextPaint paint = setupPaintForFallbackFonts(testFontFiles, xml);
+            final int textSize = 100;
+            paint.setTextSize(textSize);
+            assertEquals(-textSize, paint.ascent(), 0.0f);
+            assertEquals(2 * textSize, paint.descent(), 0.0f);
+
+            final int paraWidth = 5 * textSize;
+            final String text = "aaaaa aabaa aaaaa"; // This should result in three lines.
+
+            // Old line spacing. All lines should get their ascent and descents from the first font.
+            StaticLayout layout = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(false)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+
+            // New line spacing. The second line has a 'b', so it needs more ascent and descent.
+            layout = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(true)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-3 * textSize, layout.getLineAscent(1));
+            assertEquals(4 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+
+            // The default is the old line spacing, for backward compatibility.
+            layout = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setIncludePad(false)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+        } finally {
+            destroyFallbackFonts(testFontFiles);
+        }
     }
 }

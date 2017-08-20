@@ -34,7 +34,6 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.PluginActivityManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginManagerImpl;
@@ -295,8 +294,6 @@ public class Dependency extends SystemUI {
 
         mProviders.put(UiOffloadThread.class, UiOffloadThread::new);
 
-        mProviders.put(PluginActivityManager.class,
-                () -> new PluginActivityManager(mContext, getDependency(PluginManager.class)));
 
         mProviders.put(PowerUI.WarningsUI.class, () -> new PowerNotificationWarnings(mContext));
 

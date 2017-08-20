@@ -18,11 +18,12 @@
 <resources>
     <dimen name="car_margin">148dp</dimen>
 
-    <dimen name="car_fullscreen_user_pod_margin_side">44dp</dimen>
     <dimen name="car_fullscreen_user_pod_margin_above_text">24dp</dimen>
+    <dimen name="car_fullscreen_user_pod_margin_between">24dp</dimen>
     <dimen name="car_fullscreen_user_pod_icon_text_size">96dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_width">192dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_height">192dp</dimen>
+    <dimen name="car_fullscreen_user_pod_width">264dp</dimen>
     <dimen name="car_fullscreen_user_pod_text_size">40sp</dimen> <!-- B1 -->
 
     <dimen name="car_navigation_button_width">64dp</dimen>

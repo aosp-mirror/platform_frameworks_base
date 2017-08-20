@@ -1164,7 +1164,8 @@ public class Notification implements Parcelable
      * Constant for {@link Builder#setGroupAlertBehavior(int)}, meaning that all children
      * notification in a group should be silenced (no sound or vibration) even if they are posted
      * to a {@link NotificationChannel} that has sound and/or vibration. Use this constant to
-     * mute this notification if this notification is a group child.
+     * mute this notification if this notification is a group child. This must be applied to all
+     * children notifications you want to mute.
      *
      * <p> For example, you might want to use this constant if you post a number of children
      * notifications at once (say, after a periodic sync), and only need to notify the user
@@ -1179,7 +1180,8 @@ public class Notification implements Parcelable
      * to mute this notification if this notification is a group summary.
      *
      * <p>For example, you might want to use this constant if only the children notifications
-     * in your group have content and the summary is only used to visually group notifications.
+     * in your group have content and the summary is only used to visually group notifications
+     * rather than to alert the user that new information is available.
      */
     public static final int GROUP_ALERT_CHILDREN = 2;
 
@@ -2914,7 +2916,9 @@ public class Notification implements Parcelable
          * Sets the group alert behavior for this notification. Use this method to mute this
          * notification if alerts for this notification's group should be handled by a different
          * notification. This is only applicable for notifications that belong to a
-         * {@link #setGroup(String) group}.
+         * {@link #setGroup(String) group}. This must be called on all notifications you want to
+         * mute. For example, if you want only the summary of your group to make noise, all
+         * children in the group should have the group alert behavior {@link #GROUP_ALERT_SUMMARY}.
          *
          * <p> The default value is {@link #GROUP_ALERT_ALL}.</p>
          */
@@ -5182,17 +5186,22 @@ public class Notification implements Parcelable
         if (extras.getBoolean(EXTRA_REDUCED_IMAGES)) {
             return;
         }
+        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
         if (mLargeIcon != null || largeIcon != null) {
             Resources resources = context.getResources();
             Class<? extends Style> style = getNotificationStyle();
-            int maxWidth = resources.getDimensionPixelSize(R.dimen.notification_right_icon_size);
+            int maxWidth = resources.getDimensionPixelSize(isLowRam
+                    ? R.dimen.notification_right_icon_size_low_ram
+                    : R.dimen.notification_right_icon_size);
             int maxHeight = maxWidth;
             if (MediaStyle.class.equals(style)
                     || DecoratedMediaCustomViewStyle.class.equals(style)) {
-                maxHeight = resources.getDimensionPixelSize(
-                        R.dimen.notification_media_image_max_height);
-                maxWidth = resources.getDimensionPixelSize(
-                        R.dimen.notification_media_image_max_width);
+                maxHeight = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_media_image_max_height_low_ram
+                        : R.dimen.notification_media_image_max_height);
+                maxWidth = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_media_image_max_width_low_ram
+                        : R.dimen.notification_media_image_max_width);
             }
             if (mLargeIcon != null) {
                 mLargeIcon.scaleDownIfNecessary(maxWidth, maxHeight);
@@ -5201,19 +5210,22 @@ public class Notification implements Parcelable
                 largeIcon = Icon.scaleDownIfNecessary(largeIcon, maxWidth, maxHeight);
             }
         }
-        reduceImageSizesForRemoteView(contentView, context);
-        reduceImageSizesForRemoteView(headsUpContentView, context);
-        reduceImageSizesForRemoteView(bigContentView, context);
+        reduceImageSizesForRemoteView(contentView, context, isLowRam);
+        reduceImageSizesForRemoteView(headsUpContentView, context, isLowRam);
+        reduceImageSizesForRemoteView(bigContentView, context, isLowRam);
         extras.putBoolean(EXTRA_REDUCED_IMAGES, true);
     }
 
-    private void reduceImageSizesForRemoteView(RemoteViews remoteView, Context context) {
+    private void reduceImageSizesForRemoteView(RemoteViews remoteView, Context context,
+            boolean isLowRam) {
         if (remoteView != null) {
             Resources resources = context.getResources();
-            int maxWidth = resources.getDimensionPixelSize(
-                    R.dimen.notification_custom_view_max_image_width);
-            int maxHeight = resources.getDimensionPixelSize(
-                    R.dimen.notification_custom_view_max_image_height);
+            int maxWidth = resources.getDimensionPixelSize(isLowRam
+                    ? R.dimen.notification_custom_view_max_image_width_low_ram
+                    : R.dimen.notification_custom_view_max_image_width);
+            int maxHeight = resources.getDimensionPixelSize(isLowRam
+                    ? R.dimen.notification_custom_view_max_image_height_low_ram
+                    : R.dimen.notification_custom_view_max_image_height);
             remoteView.reduceImageSizes(maxWidth, maxHeight);
         }
     }
@@ -5629,16 +5641,20 @@ public class Notification implements Parcelable
         public void reduceImageSizes(Context context) {
             super.reduceImageSizes(context);
             Resources resources = context.getResources();
+            boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
             if (mPicture != null) {
-                int maxPictureWidth = resources.getDimensionPixelSize(
-                        R.dimen.notification_big_picture_max_height);
-                int maxPictureHeight = resources.getDimensionPixelSize(
-                        R.dimen.notification_big_picture_max_width);
+                int maxPictureWidth = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_big_picture_max_height_low_ram
+                        : R.dimen.notification_big_picture_max_height);
+                int maxPictureHeight = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_big_picture_max_width_low_ram
+                        : R.dimen.notification_big_picture_max_width);
                 mPicture = Icon.scaleDownIfNecessary(mPicture, maxPictureWidth, maxPictureHeight);
             }
             if (mBigLargeIcon != null) {
-                int rightIconSize = resources.getDimensionPixelSize(
-                        R.dimen.notification_right_icon_size);
+                int rightIconSize = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_right_icon_size_low_ram
+                        : R.dimen.notification_right_icon_size);
                 mBigLargeIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
             }
         }

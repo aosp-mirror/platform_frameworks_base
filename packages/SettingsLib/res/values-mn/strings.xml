@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Цэнэглэж байна"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"цэнэглэж байна"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Цэнэглэхгүй байна"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Залгаастай тул одоо цэнэглэх боломжгүй"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Дүүрэн"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Админ удирдсан"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Админ идэвхжүүлсэн"</string>

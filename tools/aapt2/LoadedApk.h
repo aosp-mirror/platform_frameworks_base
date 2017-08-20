@@ -47,16 +47,17 @@ class LoadedApk {
    * Writes the APK on disk at the given path, while also removing the resource
    * files that are not referenced in the resource table.
    */
-  bool WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
-                      IArchiveWriter* writer);
+  virtual bool WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
+                              IArchiveWriter* writer);
 
   /**
    * Writes the APK on disk at the given path, while also removing the resource
    * files that are not referenced in the resource table. The provided filter
    * chain is applied to each entry in the APK file.
    */
-  bool WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
-                      FilterChain* filters, IArchiveWriter* writer);
+  virtual bool WriteToArchive(IAaptContext* context, ResourceTable* split_table,
+                              const TableFlattenerOptions& options, FilterChain* filters,
+                              IArchiveWriter* writer);
 
   static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
                                                     const android::StringPiece& path);

@@ -79,20 +79,20 @@ class XmlReferenceLinkerTest : public ::testing::Test {
 };
 
 TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-        <View xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:background="@color/green"
-              android:text="hello"
-              android:attr="\?hello"
-              nonAaptAttr="1"
-              nonAaptAttrRef="@id/id"
-              class="hello" />)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+      <View xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:background="@color/green"
+            android:text="hello"
+            android:attr="\?hello"
+            nonAaptAttr="1"
+            nonAaptAttrRef="@id/id"
+            class="hello" />)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
-  xml::Element* view_el = xml::FindRootElement(doc.get());
+  xml::Element* view_el = doc->root.get();
   ASSERT_THAT(view_el, NotNull());
 
   xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "layout_width");
@@ -138,32 +138,32 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
 }
 
 TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreNotLinked) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-        <View xmlns:android="http://schemas.android.com/apk/res/android"
-              android:colorAccent="@android:color/hidden" />)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+      <View xmlns:android="http://schemas.android.com/apk/res/android"
+          android:colorAccent="@android:color/hidden" />)");
 
   XmlReferenceLinker linker;
   ASSERT_FALSE(linker.Consume(context_.get(), doc.get()));
 }
 
 TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreLinkedWhenReferenceHasStarPrefix) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
     <View xmlns:android="http://schemas.android.com/apk/res/android"
-          android:colorAccent="@*android:color/hidden" />)EOF");
+          android:colorAccent="@*android:color/hidden" />)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-            <View xmlns:support="http://schemas.android.com/apk/res/com.android.support"
-                  support:colorAccent="#ff0000" />)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+      <View xmlns:support="http://schemas.android.com/apk/res/com.android.support"
+          support:colorAccent="#ff0000" />)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
-  xml::Element* view_el = xml::FindRootElement(doc.get());
+  xml::Element* view_el = doc->root.get();
   ASSERT_THAT(view_el, NotNull());
 
   xml::Attribute* xml_attr =
@@ -175,14 +175,14 @@ TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-            <View xmlns:app="http://schemas.android.com/apk/res-auto"
-                  app:colorAccent="@app:color/red" />)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+      <View xmlns:app="http://schemas.android.com/apk/res-auto"
+          app:colorAccent="@app:color/red" />)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
-  xml::Element* view_el = xml::FindRootElement(doc.get());
+  xml::Element* view_el = doc->root.get();
   ASSERT_THAT(view_el, NotNull());
 
   xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAuto, "colorAccent");
@@ -196,17 +196,15 @@ TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-            <View xmlns:app="http://schemas.android.com/apk/res/android"
-                  app:attr="@app:id/id">
-              <View xmlns:app="http://schemas.android.com/apk/res/com.app.test"
-                    app:attr="@app:id/id"/>
-            </View>)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+      <View xmlns:app="http://schemas.android.com/apk/res/android" app:attr="@app:id/id">
+        <View xmlns:app="http://schemas.android.com/apk/res/com.app.test" app:attr="@app:id/id"/>
+      </View>)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
-  xml::Element* view_el = xml::FindRootElement(doc.get());
+  xml::Element* view_el = doc->root.get();
   ASSERT_THAT(view_el, NotNull());
 
   // All attributes and references in this element should be referring to
@@ -235,14 +233,14 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkViewWithLocalPackageAndAliasOfTheSameName) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-            <View xmlns:android="http://schemas.android.com/apk/res/com.app.test"
-                  android:attr="@id/id"/>)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+      <View xmlns:android="http://schemas.android.com/apk/res/com.app.test"
+          android:attr="@id/id"/>)");
 
   XmlReferenceLinker linker;
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
-  xml::Element* view_el = xml::FindRootElement(doc.get());
+  xml::Element* view_el = doc->root.get();
   ASSERT_THAT(view_el, NotNull());
 
   // All attributes and references in this element should be referring to

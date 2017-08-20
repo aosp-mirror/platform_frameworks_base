@@ -58,14 +58,15 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
 bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
                                IArchiveWriter* writer) {
   FilterChain empty;
-  return WriteToArchive(context, options, &empty, writer);
+  return WriteToArchive(context, table_.get(), options, &empty, writer);
 }
 
-bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
-                               FilterChain* filters, IArchiveWriter* writer) {
+bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table,
+                               const TableFlattenerOptions& options, FilterChain* filters,
+                               IArchiveWriter* writer) {
   std::set<std::string> referenced_resources;
   // List the files being referenced in the resource table.
-  for (auto& pkg : table_->packages) {
+  for (auto& pkg : split_table->packages) {
     for (auto& type : pkg->types) {
       for (auto& entry : type->entries) {
         for (auto& config_value : entry->values) {
@@ -108,7 +109,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
       // TODO(adamlesinski): How to determine if there were sparse entries (and if to encode
       // with sparse entries) b/35389232.
       TableFlattener flattener(options, &buffer);
-      if (!flattener.Consume(context, table_.get())) {
+      if (!flattener.Consume(context, split_table)) {
         return false;
       }
 

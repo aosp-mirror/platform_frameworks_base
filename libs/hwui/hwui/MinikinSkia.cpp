@@ -67,6 +67,17 @@ void MinikinFontSkia::GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
     bounds->mBottom = skBounds.fBottom;
 }
 
+void MinikinFontSkia::GetFontExtent(minikin::MinikinExtent* extent,
+        const minikin::MinikinPaint& paint) const {
+    SkPaint skPaint;
+    MinikinFontSkia_SetSkiaPaint(this, &skPaint, paint);
+    SkPaint::FontMetrics metrics;
+    skPaint.getFontMetrics(&metrics);
+    extent->ascent = metrics.fAscent;
+    extent->descent = metrics.fDescent;
+    extent->line_gap = metrics.fLeading;
+}
+
 SkTypeface *MinikinFontSkia::GetSkTypeface() const {
     return mTypeface.get();
 }

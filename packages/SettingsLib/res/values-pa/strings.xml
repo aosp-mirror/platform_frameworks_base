@@ -66,7 +66,7 @@
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ਮੀਡੀਆ ਔਡੀਓ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ਫ਼ੋਨ ਕਾਲਾਂ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ"</string>
-    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ਇਨਪੁਟ ਡੀਵਾਈਸ"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ਇਨਪੁੱਟ ਡੀਵਾਈਸ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ਇੰਟਰਨੈਟ ਪਹੁੰਚ"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ਸੰਪਰਕ ਸ਼ੇਅਰਿੰਗ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"ਸੰਪਰਕ ਸ਼ੇਅਰਿੰਗ ਲਈ ਵਰਤੋ"</string>
@@ -81,9 +81,9 @@
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"ਨਕਸ਼ੇ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ ਸਰਵਰ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ"</string>
-    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ਇਨਪੁਟ ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ਇੰਟਰਨੈਟ ਪਹੁੰਚ ਲਈ ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ਡੀਵਾਈਸ ਨਾਲ ਸਥਾਨਕ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਸ਼ੇਅਰ ਕਰ ਰਿਹਾ ਹੈ"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ਇਨਪੁੱਟ ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ ਲਈ ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ਡੀਵਾਈਸ ਨਾਲ ਸਥਾਨਕ ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਸਾਂਝਾ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ਇੰਟਰਨੈਟ ਪਹੁੰਚ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"ਨਕਸ਼ੇ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM ਪਹੁੰਚ ਲਈ ਵਰਤੋ"</string>
@@ -96,7 +96,7 @@
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ਰੱਦ ਕਰੋ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ਪੇਅਰ ਕਰਨਾ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ ਤੱਕ ਪਹੁੰਚ ਦੀ ਅਨੁਮਤੀ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਪੇਅਰ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ਇੱਕ ਗ਼ਲਤ PIN ਜਾਂ ਪਾਸਕੁੰਜੀ ਦੇ ਕਾਰਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਪੇਅਰ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ਇੱਕ ਗ਼ਲਤ ਪਿੰਨ ਜਾਂ ਪਾਸਕੁੰਜੀ ਦੇ ਕਾਰਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਜੋੜਾਬੱਧ ਨਹੀਂ ਹੋ ਸਕਿਆ।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਸੰਚਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"ਪੇਅਰਿੰਗ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi ਬੰਦ।"</string>
@@ -182,7 +182,7 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ਅਨਲੌਕ ਕਰਨਾ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ਬੂਟਲੋਡਰ ਨੂੰ ਅਨਲੌਕ ਕੀਤੇ ਜਾਣ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"ਕੀ OEM ਨੂੰ ਅਨਲੌਕ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ਚਿਤਾਵਨੀ: ਡੀਵਾਈਸ ਸੁਰੱਖਿਆ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਉਦੋਂ ਇਸ ਡੀਵਾਈਸ ਤੇ ਕੰਮ ਨਹੀਂ ਕਰਨਗੀਆਂ ਜਦੋਂ ਇਹ ਸੈਟਿੰਗ ਚਾਲੂ ਹੋਵੇਗੀ।"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ਚਿਤਾਵਨੀ: ਉਦੋਂ ਇਸ ਡੀਵਾਈਸ ਤੇ ਕੰਮ ਨਹੀਂ ਕਰਨਗੀਆਂ ਜਦੋਂ ਇਹ ਸੈਟਿੰਗ ਚਾਲੂ ਹੋਵੇਗੀ।"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"ਮੌਕ ਸਥਾਨ ਐਪ ਚੁਣੋ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"ਕੋਈ ਵੀ ਮੌਕ ਸਥਾਨ ਐਪ ਸੈੱਟ ਨਹੀਂ ਕੀਤੀ ਗਈ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"ਮੌਕ ਸਥਾਨ ਐਪ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -215,7 +215,7 @@
     <string name="select_logd_size_title" msgid="7433137108348553508">"ਲੌਗਰ ਬਫਰ ਆਕਾਰ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ ਲੌਗਰ ਆਕਾਰ ਚੁਣੋ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ਕੀ ਲੌਗਰ ਪ੍ਰਸਿੱਸਟੈਂਟ ਸਟੋਰੇਜ ਨੂੰ ਸਾਫ਼ ਕਰਨਾ ਹੈ?"</string>
-    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"ਜਦੋਂ ਅਸੀਂ ਪ੍ਰਸਿੱਸਟੈਂਟ ਲੌਗਰ ਨਾਲ ਨਿਗਰਾਨੀ ਨਹੀਂ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹਾਂ, ਤਾਂ ਸਾਨੂੰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਵਿੱਚ ਮੌਜੂਦ ਲੌਗਰ ਡੈਟੇ ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਲੋੜ ਪੈਂਦੀ ਹੈ।"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"ਜਦੋਂ ਅਸੀਂ ਪ੍ਰਸਿੱਸਟੈਂਟ ਲੌਗਰ ਨਾਲ ਨਿਗਰਾਨੀ ਨਹੀਂ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹਾਂ, ਤਾਂ ਸਾਨੂੰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਵਿੱਚ ਮੌਜੂਦ ਲੌਗਰ ਡਾਟੇ ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਲੋੜ ਪੈਂਦੀ ਹੈ।"</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"ਡੀਵਾਈਸ \'ਤੇ ਲੌਗ ਬਫ਼ਰਾਂ ਨੂੰ ਸਥਾਈ ਤੌਰ \'ਤੇ ਸਟੋਰ ਕਰੋ"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ਡੀਵਾਈਸ \'ਤੇ ਸਥਾਈ ਤੌਰ \'ਤੇ ਸਟੋਰ ਕਰਨ ਲਈ ਲੌਗ ਬਫ਼ਰਾਂ ਨੂੰ ਚੁਣੋ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB ਕੌਂਫਿਗਰੇਸ਼ਨ ਚੁਣੋ"</string>
@@ -226,10 +226,10 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾ ਮੋਬਾਈਲ ਡੇਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ Wi‑Fi ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ਉਪਲਬਧ ਹੋਣ \'ਤੇ ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਸ਼ਨ ਵਰਤੋ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB ਡੀਬਗਿੰਗ ਕੇਵਲ ਵਿਕਾਸ ਮੰਤਵਾਂ ਲਈ ਹੁੰਦੀ ਹੈ। ਇਸਨੂੰ ਆਪਣੇ ਕੰਪਿਊਟਰ ਅਤੇ ਆਪਣੀ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਡੈਟਾ ਕਾਪੀ ਕਰਨ ਲਈ ਵਰਤੋ, ਸੂਚਨਾ ਦੇ ਬਿਨਾਂ ਆਪਣੀ ਡੀਵਾਈਸ ਤੇ ਐਪਸ ਇੰਸਟੌਲ ਕਰੋ ਅਤੇ ਲੌਗ ਡੈਟਾ ਪੜ੍ਹੋ।"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB ਡੀਬਗਿੰਗ ਕੇਵਲ ਵਿਕਾਸ ਮੰਤਵਾਂ ਲਈ ਹੁੰਦੀ ਹੈ। ਇਸਨੂੰ ਆਪਣੇ ਕੰਪਿਊਟਰ ਅਤੇ ਆਪਣੇ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਡਾਟਾ ਕਾਪੀ ਕਰਨ ਲਈ ਵਰਤੋ, ਸੂਚਨਾ ਦੇ ਬਿਨਾਂ ਆਪਣੇ ਡੀਵਾਈਸ ਤੇ ਐਪਾਂ ਸਥਾਪਤ ਕਰੋ ਅਤੇ ਲੌਗ ਡਾਟਾ ਪੜ੍ਹੋ।"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ਕੀ ਉਹਨਾਂ ਸਾਰੇ ਕੰਪਿਊਟਰਾਂ ਤੋਂ USB ਡੀਬਗਿੰਗ ਤੱਕ ਪਹੁੰਚ ਰੱਦ ਕਰਨੀ ਹੈ, ਜਿਹਨਾਂ ਲਈ ਪਹਿਲਾਂ ਤੁਸੀਂ ਅਧਿਕਾਰਤ ਕੀਤਾ ਹੈ?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"ਕੀ ਵਿਕਾਸ ਸੈਟਿੰਗਾਂ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਸ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਿਊਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਿਊਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਿਊਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
@@ -356,8 +356,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
-    <!-- no translation found for battery_info_status_not_charging (8523453668342598579) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"ਪਲੱਗ ਲੱਗਾ ਹੋਇਆ ਹੈ, ਇਸ ਸਮੇਂ ਚਾਰਜ ਨਹੀਂ ਹੋ ਸਕਦੀ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ਪੂਰੀ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕੀਤੀ ਗਈ"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>

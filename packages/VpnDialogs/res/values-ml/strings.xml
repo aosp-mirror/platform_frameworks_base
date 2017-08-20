@@ -19,11 +19,25 @@
     <string name="prompt" msgid="3183836924226407828">"കണക്ഷൻ അഭ്യർത്ഥന"</string>
     <string name="warning" msgid="809658604548412033">"നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കാൻ അനുവദിക്കുന്ന ഒരു VPN കണക്ഷൻ <xliff:g id="APP">%s</xliff:g> സജ്ജീകരിക്കേണ്ടതുണ്ട്. ഉറവിടം പരിചിതമാണെങ്കിൽ മാത്രം അംഗീകരിക്കുക. VPN സജീവമാകുമ്പോൾ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; നിങ്ങളുടെ സ്ക്രീനിന്റെ മുകളിൽ ദൃശ്യമാകുന്നു."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN കണക്‌റ്റുചെയ്‌തു"</string>
-    <string name="configure" msgid="4905518375574791375">"കോൺഫിഗർ ചെയ്യുക"</string>
-    <string name="disconnect" msgid="971412338304200056">"വിച്ഛേദിക്കുക"</string>
     <string name="session" msgid="6470628549473641030">"സെഷൻ:"</string>
     <string name="duration" msgid="3584782459928719435">"സമയദൈര്‍ഘ്യം:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"അയച്ചത്:"</string>
     <string name="data_received" msgid="4062776929376067820">"ലഭിച്ചത്:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> ബൈറ്റുകൾ / <xliff:g id="NUMBER_1">%2$s</xliff:g> പാക്കറ്റുകൾ"</string>
+    <!-- no translation found for always_on_disconnected_title (1906740176262776166) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message (555634519845992917) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_lockdown (4232225539869452120) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_separator (3310614409322581371) -->
+    <skip />
+    <!-- no translation found for always_on_disconnected_message_settings_link (6172280302829992412) -->
+    <skip />
+    <string name="configure" msgid="4905518375574791375">"കോൺഫിഗർ ചെയ്യുക"</string>
+    <string name="disconnect" msgid="971412338304200056">"വിച്ഛേദിക്കുക"</string>
+    <!-- no translation found for open_app (3717639178595958667) -->
+    <skip />
+    <!-- no translation found for dismiss (6192859333764711227) -->
+    <skip />
 </resources>

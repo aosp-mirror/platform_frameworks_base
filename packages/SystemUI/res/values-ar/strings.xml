@@ -68,8 +68,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏لا يُسمح بتصحيح أخطاء USB"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"جارٍ حفظ لقطة الشاشة..."</string>
@@ -465,8 +464,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"مزيد من المعلومات"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"فتح بيانات الاعتماد الموثوق بها"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
@@ -611,8 +609,8 @@
       <item quantity="one">دقيقة واحدة</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"استخدام البطارية"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"وضع توفير شحن البطارية غير متاح أثناء الشحن."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"توفير شحن البطارية"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"توفير شحن البطارية غير متاح أثناء الشحن"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"توفير شحن البطارية"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"لخفض مستوى الأداء وبيانات الخلفية"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"الزر <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -752,7 +750,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"تصغير"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"إغلاق"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"اسحب لأسفل للإلغاء"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"قائمة صورة داخل صورة"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"القائمة"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> يظهر في صورة داخل صورة"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم أوقِف تشغيل هذه الميزة."</string>
     <string name="pip_play" msgid="1417176722760265888">"تشغيل"</string>
@@ -780,8 +778,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"القائمة"</string>
     <string name="tuner_app" msgid="3507057938640108777">"تطبيق <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"التنبيهات"</string>
-    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
-    <skip />
+    <string name="notification_channel_battery" msgid="5786118169182888462">"البطارية"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"لقطات الشاشة"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"رسائل عامة"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"سعة التخزين"</string>

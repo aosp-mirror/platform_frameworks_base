@@ -37,6 +37,7 @@ import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * System level service for managing companion devices
@@ -271,6 +272,8 @@ public final class CompanionDeviceManager {
         private Handler mHandler;
         private AssociationRequest mRequest;
 
+        final Object mLock = new Object();
+
         private CallbackProxy(AssociationRequest request, Callback callback, Handler handler) {
             mCallback = callback;
             mHandler = handler;
@@ -280,38 +283,44 @@ public final class CompanionDeviceManager {
 
         @Override
         public void onSuccess(PendingIntent launcher) {
-            Handler handler = mHandler;
-            if (handler == null) return;
-            handler.post(() -> {
-                Callback callback = mCallback;
-                if (callback == null) return;
-                callback.onDeviceFound(launcher.getIntentSender());
-            });
+            lockAndPost(Callback::onDeviceFound, launcher.getIntentSender());
         }
 
         @Override
         public void onFailure(CharSequence reason) {
-            Handler handler = mHandler;
-            if (handler == null) return;
-            handler.post(() -> {
-                Callback callback = mCallback;
-                if (callback == null) return;
-                callback.onFailure(reason);
-            });
+            lockAndPost(Callback::onFailure, reason);
+        }
+
+        <T> void lockAndPost(BiConsumer<Callback, T> action, T payload) {
+            synchronized (mLock) {
+                if (mHandler != null) {
+                    mHandler.post(() -> {
+                        Callback callback = null;
+                        synchronized (mLock) {
+                            callback = mCallback;
+                        }
+                        if (callback != null) {
+                            action.accept(callback, payload);
+                        }
+                    });
+                }
+            }
         }
 
         @Override
         public void onActivityDestroyed(Activity activity) {
-            if (activity != getActivity()) return;
-            try {
-                mService.stopScan(mRequest, this, getCallingPackage());
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+            synchronized (mLock) {
+                if (activity != getActivity()) return;
+                try {
+                    mService.stopScan(mRequest, this, getCallingPackage());
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+                getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
+                mCallback = null;
+                mHandler = null;
+                mRequest = null;
             }
-            getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
-            mCallback = null;
-            mHandler = null;
-            mRequest = null;
         }
 
         @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}

@@ -19,6 +19,7 @@ package android.view;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
+import android.annotation.TestApi;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.Looper;
@@ -195,6 +196,7 @@ public final class Choreographer {
      * Callback type: Animation callback.  Runs before traversals.
      * @hide
      */
+    @TestApi
     public static final int CALLBACK_ANIMATION = 1;
 
     /**
@@ -286,6 +288,7 @@ public final class Choreographer {
      * @return the requested time between frames, in milliseconds
      * @hide
      */
+    @TestApi
     public static long getFrameDelay() {
         return sFrameDelay;
     }
@@ -305,6 +308,7 @@ public final class Choreographer {
      * @param frameDelay the requested time between frames, in milliseconds
      * @hide
      */
+    @TestApi
     public static void setFrameDelay(long frameDelay) {
         sFrameDelay = frameDelay;
     }

@@ -19,15 +19,14 @@ package android.content.res;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.view.DisplayInfo;
 import android.view.View;
 
 import com.android.internal.util.XmlUtils;
@@ -41,7 +40,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Locale;
-
 
 /**
  * This class describes all device configuration information that can
@@ -298,13 +296,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
     /**
      * @hide
-     * {@link android.graphics.Rect} defining app bounds. The dimensions override usages of
-     * {@link DisplayInfo#appHeight} and {@link DisplayInfo#appWidth} and mirrors these values at
-     * the display level. Lower levels can override these values to provide custom bounds to enforce
-     * features such as a max aspect ratio.
-     * TODO(b/36812336): Move appBounds out of {@link Configuration}.
+     * Configuration relating to the windowing state of the object associated with this
+     * Configuration. Contents of this field are not intended to affect resources, but need to be
+     * communicated and propagated at the same time as the rest of Configuration.
      */
-    public Rect appBounds;
+    public final WindowConfiguration windowConfiguration = new WindowConfiguration();
 
     /** @hide */
     static public int resetScreenLayout(int curLayout) {
@@ -895,9 +891,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = o.compatScreenWidthDp;
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
-        setAppBounds(o.appBounds);
         assetsSeq = o.assetsSeq;
         seq = o.seq;
+        windowConfiguration.setTo(o.windowConfiguration);
     }
 
     public String toString() {
@@ -1046,9 +1042,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
-        if (appBounds != null) {
-            sb.append(" appBounds="); sb.append(appBounds);
-        }
+        sb.append(" winConfig="); sb.append(windowConfiguration);
         if (assetsSeq != 0) {
             sb.append(" as.").append(assetsSeq);
         }
@@ -1083,8 +1077,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         assetsSeq = ASSETS_SEQ_UNDEFINED;
-        appBounds = null;
         seq = 0;
+        windowConfiguration.setToDefaults();
     }
 
     /**
@@ -1183,7 +1177,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ORIENTATION;
             orientation = delta.orientation;
         }
-
         if (((delta.screenLayout & SCREENLAYOUT_SIZE_MASK) != SCREENLAYOUT_SIZE_UNDEFINED)
                 && (delta.screenLayout & SCREENLAYOUT_SIZE_MASK)
                 != (screenLayout & SCREENLAYOUT_SIZE_MASK)) {
@@ -1271,16 +1264,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.compatSmallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             compatSmallestScreenWidthDp = delta.compatSmallestScreenWidthDp;
         }
-        if (delta.appBounds != null && !delta.appBounds.equals(appBounds)) {
-            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
-            setAppBounds(delta.appBounds);
-        }
         if (delta.assetsSeq != ASSETS_SEQ_UNDEFINED && delta.assetsSeq != assetsSeq) {
             changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
             assetsSeq = delta.assetsSeq;
         }
         if (delta.seq != 0) {
             seq = delta.seq;
+        }
+        if (windowConfiguration.updateFrom(delta.windowConfiguration) != 0) {
+            changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
         return changed;
@@ -1433,13 +1425,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
         }
 
-        // Make sure that one of the values is not null and that they are not equal.
-        if ((compareUndefined || delta.appBounds != null)
-                && appBounds != delta.appBounds
-                && (appBounds == null || (!publicOnly && !appBounds.equals(delta.appBounds))
-                        || (publicOnly && (appBounds.width() != delta.appBounds.width()
-                                || appBounds.height() != delta.appBounds.height())))) {
-            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        // WindowConfiguration differences aren't considered public...
+        if (!publicOnly
+                && windowConfiguration.diff(delta.windowConfiguration, compareUndefined) != 0) {
+            changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
         return changed;
@@ -1537,7 +1526,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
-        dest.writeValue(appBounds);
+        dest.writeValue(windowConfiguration);
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
     }
@@ -1573,7 +1562,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
-        appBounds = (Rect) source.readValue(null);
+        windowConfiguration.setTo((WindowConfiguration) source.readValue(null));
         assetsSeq = source.readInt();
         seq = source.readInt();
     }
@@ -1663,21 +1652,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.assetsSeq - that.assetsSeq;
         if (n != 0) return n;
-
-        if (this.appBounds == null && that.appBounds != null) {
-            return 1;
-        } else if (this.appBounds != null && that.appBounds == null) {
-            return -1;
-        } else if (this.appBounds != null && that.appBounds != null) {
-            n = this.appBounds.left - that.appBounds.left;
-            if (n != 0) return n;
-            n = this.appBounds.top - that.appBounds.top;
-            if (n != 0) return n;
-            n = this.appBounds.right - that.appBounds.right;
-            if (n != 0) return n;
-            n = this.appBounds.bottom - that.appBounds.bottom;
-            if (n != 0) return n;
-        }
+        n = windowConfiguration.compareTo(that.windowConfiguration);
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -1763,33 +1739,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public void setLocale(@Nullable Locale loc) {
         setLocales(loc == null ? LocaleList.getEmptyLocaleList() : new LocaleList(loc));
-    }
-
-    /**
-     * @hide
-     *
-     * Helper method for setting the app bounds.
-     */
-    public void setAppBounds(Rect rect) {
-        if (rect == null) {
-            appBounds = null;
-            return;
-        }
-
-        setAppBounds(rect.left, rect.top, rect.right, rect.bottom);
-    }
-
-    /**
-     * @hide
-     *
-     * Helper method for setting the app bounds.
-     */
-    public void setAppBounds(int left, int top, int right, int bottom) {
-        if (appBounds == null) {
-            appBounds = new Rect();
-        }
-
-        appBounds.set(left, top, right, bottom);
     }
 
     /**
@@ -2282,6 +2231,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (base.assetsSeq != change.assetsSeq) {
             delta.assetsSeq = change.assetsSeq;
         }
+
+        if (!base.windowConfiguration.equals(change.windowConfiguration)) {
+            delta.windowConfiguration.setTo(change.windowConfiguration);
+        }
         return delta;
     }
 
@@ -2354,10 +2307,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
-        configOut.appBounds =
-            Rect.unflattenFromString(XmlUtils.readStringAttribute(parser, XML_ATTR_APP_BOUNDS));
 
-        // For persistence, we don't care about assetsSeq, so do not read it out.
+        // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
+        // out.
     }
 
 
@@ -2427,11 +2379,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
         }
 
-        if (config.appBounds != null) {
-            XmlUtils.writeStringAttribute(xml, XML_ATTR_APP_BOUNDS,
-                config.appBounds.flattenToString());
-        }
-
-        // For persistence, we do not care about assetsSeq, so do not write it out.
+        // For persistence, we do not care about assetsSeq and window configuration, so do not write
+        // it out.
     }
 }

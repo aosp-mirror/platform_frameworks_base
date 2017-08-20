@@ -850,6 +850,7 @@ class AlarmManagerService extends SystemService {
 
     static final class InFlight {
         final PendingIntent mPendingIntent;
+        final long mWhenElapsed;
         final IBinder mListener;
         final WorkSource mWorkSource;
         final int mUid;
@@ -862,6 +863,7 @@ class AlarmManagerService extends SystemService {
                 WorkSource workSource, int uid, String alarmPkg, int alarmType, String tag,
                 long nowELAPSED) {
             mPendingIntent = pendingIntent;
+            mWhenElapsed = nowELAPSED;
             mListener = listener != null ? listener.asBinder() : null;
             mWorkSource = workSource;
             mUid = uid;
@@ -883,6 +885,7 @@ class AlarmManagerService extends SystemService {
         public String toString() {
             return "InFlight{"
                     + "pendingIntent=" + mPendingIntent
+                    + ", when=" + mWhenElapsed
                     + ", workSource=" + mWorkSource
                     + ", uid=" + mUid
                     + ", tag=" + mTag
@@ -1567,8 +1570,10 @@ class AlarmManagerService extends SystemService {
 
             pw.println();
             pw.print("  Broadcast ref count: "); pw.println(mBroadcastRefCount);
-            pw.print("  PendingIntent send/finish count: "); pw.println(mSendCount);
-            pw.print("  Listener send/complete count: "); pw.println(mListenerCount);
+            pw.print("  PendingIntent send count: "); pw.println(mSendCount);
+            pw.print("  PendingIntent finish count: "); pw.println(mSendFinishCount);
+            pw.print("  Listener send count: "); pw.println(mListenerCount);
+            pw.print("  Listener finish count: "); pw.println(mListenerFinishCount);
             pw.println();
 
             if (mInFlight.size() > 0) {
@@ -2949,13 +2954,17 @@ class AlarmManagerService extends SystemService {
     @GuardedBy("mLock")
     private int mSendCount = 0;
     @GuardedBy("mLock")
+    private int mSendFinishCount = 0;
+    @GuardedBy("mLock")
     private int mListenerCount = 0;
+    @GuardedBy("mLock")
+    private int mListenerFinishCount = 0;
 
     class DeliveryTracker extends IAlarmCompleteListener.Stub implements PendingIntent.OnFinished {
 
         private InFlight removeLocked(PendingIntent pi, Intent intent) {
             for (int i = 0; i < mInFlight.size(); i++) {
-                if (mInFlight.get(i).mPendingIntent == pi) {
+                if (mInFlight.get(i).mPendingIntent.equals(pi)) {
                     return mInFlight.remove(i);
                 }
             }
@@ -3054,7 +3063,7 @@ class AlarmManagerService extends SystemService {
                             Slog.i(TAG, "alarmComplete() from " + who);
                         }
                         updateTrackingLocked(inflight);
-                        mListenerCount--;
+                        mListenerFinishCount++;
                     } else {
                         // Delivery timed out, and the timeout handling already took care of
                         // updating our tracking here, so we needn't do anything further.
@@ -3075,7 +3084,7 @@ class AlarmManagerService extends SystemService {
         public void onSendFinished(PendingIntent pi, Intent intent, int resultCode,
                 String resultData, Bundle resultExtras) {
             synchronized (mLock) {
-                mSendCount--;
+                mSendFinishCount++;
                 updateTrackingLocked(removeLocked(pi, intent));
             }
         }
@@ -3092,7 +3101,7 @@ class AlarmManagerService extends SystemService {
                         Slog.i(TAG, "Alarm listener " + who + " timed out in delivery");
                     }
                     updateTrackingLocked(inflight);
-                    mListenerCount--;
+                    mListenerFinishCount++;
                 } else {
                     if (DEBUG_LISTENER_CALLBACK) {
                         Slog.i(TAG, "Spurious timeout of listener " + who);
@@ -3125,7 +3134,7 @@ class AlarmManagerService extends SystemService {
                     // 'finished' callback won't be invoked.  We also don't need
                     // to do any wakelock or stats tracking, so we have nothing
                     // left to do here but go on to the next thing.
-                    mSendCount--;
+                    mSendFinishCount++;
                     return;
                 }
             } else {
@@ -3150,6 +3159,7 @@ class AlarmManagerService extends SystemService {
                     // alarm was not possible, so we have no wakelock or timeout or
                     // stats management to do.  It threw before we posted the delayed
                     // timeout message, so we're done here.
+                    mListenerFinishCount++;
                     return;
                 }
             }

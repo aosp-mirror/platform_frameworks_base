@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
@@ -33,15 +34,19 @@
 #include "flatten/XmlFlattener.h"
 #include "io/BigBufferInputStream.h"
 #include "io/Util.h"
+#include "optimize/MultiApkGenerator.h"
 #include "optimize/ResourceDeduper.h"
 #include "optimize/VersionCollapser.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
+#include "util/Util.h"
 
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::Artifact;
 using ::aapt::configuration::PostProcessingConfiguration;
+using ::android::ResTable_config;
 using ::android::StringPiece;
+using ::android::base::StringAppendF;
 using ::android::base::StringPrintf;
 
 namespace aapt {
@@ -188,42 +193,10 @@ class OptimizeCommand {
     }
 
     if (options_.configuration && options_.output_dir) {
-      PostProcessingConfiguration& config = options_.configuration.value();
-
-      // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
-      for (const Artifact& artifact : config.artifacts) {
-        if (artifact.abi_group) {
-          const std::string& group = artifact.abi_group.value();
-
-          auto abi_group = config.abi_groups.find(group);
-          // TODO: Remove validation when configuration parser ensures referential integrity.
-          if (abi_group == config.abi_groups.end()) {
-            context_->GetDiagnostics()->Note(
-                DiagMessage() << "could not find referenced ABI group '" << group << "'");
-            return 1;
-          }
-          FilterChain filters;
-          filters.AddFilter(AbiFilter::FromAbiList(abi_group->second));
-
-          const std::string& path = apk->GetSource().path;
-          const StringPiece ext = file::GetExtension(path);
-          const std::string name = path.substr(0, path.rfind(ext.to_string()));
-
-          // Name is hard coded for now since only one split dimension is supported.
-          // TODO: Incorporate name generation into the configuration objects.
-          const std::string file_name =
-              StringPrintf("%s.%s%s", name.c_str(), group.c_str(), ext.data());
-          std::string out = options_.output_dir.value();
-          file::AppendPath(&out, file_name);
-
-          std::unique_ptr<IArchiveWriter> writer =
-              CreateZipFileArchiveWriter(context_->GetDiagnostics(), out);
-
-          if (!apk->WriteToArchive(context_, options_.table_flattener_options, &filters,
-                                   writer.get())) {
-            return 1;
-          }
-        }
+      MultiApkGenerator generator{apk.get(), context_};
+      if (!generator.FromBaseApk(options_.output_dir.value(), options_.configuration.value(),
+                                 options_.table_flattener_options)) {
+        return 1;
       }
     }
 
@@ -260,7 +233,7 @@ class OptimizeCommand {
 
         for (auto& entry : type->entries) {
           for (auto& config_value : entry->values) {
-            FileReference* file_ref = ValueCast<FileReference>(config_value->value.get());
+            auto* file_ref = ValueCast<FileReference>(config_value->value.get());
             if (file_ref == nullptr) {
               continue;
             }
@@ -297,11 +270,8 @@ class OptimizeCommand {
     }
 
     io::BigBufferInputStream table_buffer_in(&table_buffer);
-    if (!io::CopyInputStreamToArchive(context_, &table_buffer_in, "resources.arsc",
-                                      ArchiveEntry::kAlign, writer)) {
-      return false;
-    }
-    return true;
+    return io::CopyInputStreamToArchive(context_, &table_buffer_in, "resources.arsc",
+                                        ArchiveEntry::kAlign, writer);
   }
 
   OptimizeOptions options_;
@@ -349,6 +319,7 @@ int Optimize(const std::vector<StringPiece>& args) {
   OptimizeOptions options;
   Maybe<std::string> config_path;
   Maybe<std::string> target_densities;
+  Maybe<std::string> target_abis;
   std::vector<std::string> configs;
   std::vector<std::string> split_args;
   bool verbose = false;
@@ -363,6 +334,12 @@ int Optimize(const std::vector<StringPiece>& args) {
               "All the resources that would be unused on devices of the given densities will be \n"
               "removed from the APK.",
               &target_densities)
+          .OptionalFlag(
+              "--target-abis",
+              "Comma separated list of the CPU ABIs that the APK will be optimized for.\n"
+              "All the native libraries that would be unused on devices of the given ABIs will \n"
+              "be removed from the APK.",
+              &target_abis)
           .OptionalFlagList("-c",
                             "Comma separated list of configurations to include. The default\n"
                             "is all configurations.",
@@ -388,7 +365,8 @@ int Optimize(const std::vector<StringPiece>& args) {
     return 1;
   }
 
-  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[0]);
+  const std::string& apk_path = flags.GetArgs()[0];
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(&context, apk_path);
   if (!apk) {
     return 1;
   }
@@ -418,8 +396,8 @@ int Optimize(const std::vector<StringPiece>& args) {
 
   // Parse the split parameters.
   for (const std::string& split_arg : split_args) {
-    options.split_paths.push_back({});
-    options.split_constraints.push_back({});
+    options.split_paths.emplace_back();
+    options.split_constraints.emplace_back();
     if (!ParseSplitParameter(split_arg, context.GetDiagnostics(), &options.split_paths.back(),
                              &options.split_constraints.back())) {
       return 1;

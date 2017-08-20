@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕觸一下即可管理網路。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在連線至永久連線的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"永久連線的 VPN 已中斷連線"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"永久連線的 VPN 發生錯誤"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"輕觸即可進行設定"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未選擇任何檔案"</string>
     <string name="reset" msgid="2448168080964209908">"重設"</string>

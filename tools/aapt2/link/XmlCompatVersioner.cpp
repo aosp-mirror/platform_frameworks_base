@@ -107,7 +107,7 @@ std::unique_ptr<xml::XmlResource> XmlCompatVersioner::ProcessDoc(
   std::unique_ptr<xml::XmlResource> cloned_doc = util::make_unique<xml::XmlResource>(doc->file);
   cloned_doc->file.config.sdkVersion = static_cast<uint16_t>(target_api);
 
-  cloned_doc->root = doc->root->Clone([&](const xml::Element& el, xml::Element* out_el) {
+  cloned_doc->root = doc->root->CloneElement([&](const xml::Element& el, xml::Element* out_el) {
     for (const auto& attr : el.attributes) {
       if (!attr.compiled_attribute) {
         // Just copy if this isn't a compiled attribute.

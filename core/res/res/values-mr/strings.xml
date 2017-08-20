@@ -148,7 +148,7 @@
     <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्व्हरवरील कनेक्शन टाइमआउट झाले."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"पृष्ठामध्ये बरीच सर्व्हर पुनर्निर्देशने आहेत."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"प्रोटोकॉल समर्थित नाही."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"सुरक्षित कनेक्शन स्थापित करू शकलो नाही."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"सुरक्षित कनेक्शन इंस्टॉल करू शकलो नाही."</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"URL अवैध असल्यामुळे पृष्ठ उघडू शकलो नाही."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"फायलीवर प्रवेश करू शकलो नाही."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"विनंती केलेली फाईल शोधू शकलो नाही."</string>
@@ -162,8 +162,8 @@
     <string name="low_memory" product="tv" msgid="516619861191025923">"टीव्ही संचयन भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"फोन संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
-      <item quantity="one">प्रमाणपत्र अधिकार स्थापित केला</item>
-      <item quantity="other">प्रमाणपत्र अधिकार स्थापित केले</item>
+      <item quantity="one">प्रमाणपत्र अधिकार इंस्टॉल केला</item>
+      <item quantity="other">प्रमाणपत्र अधिकार इंस्टॉल केले</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"एका अज्ञात तृतीय पक्षाद्वारे"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"आपल्या कार्य प्रोफाइल प्रशासकाद्वारे"</string>
@@ -201,7 +201,7 @@
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"आपला फोन बंद होईल."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"आपण बंद करू इच्छिता?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"सुरक्षित मोडमध्ये रीबूट करा"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"आपण सुरक्षित मोडमध्ये रीबूट करू इच्छिता? हे आपण स्थापित केलेले सर्व तृतीय पक्ष अनुप्रयोग अक्षम करेल. आपण पुन्हा रीबूट करता तेव्हा ते पुनर्संचयित केले जातील."</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"आपण सुरक्षित मोडमध्ये रीबूट करू इच्छिता? हे आपण इंस्टॉल केलेले सर्व तृतीय पक्ष अॅप्लिकेशन अक्षम करेल. आपण पुन्हा रीबूट करता तेव्हा ते पुनर्संचयित केले जातील."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"अलीकडील"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"अलीकडील कोणतेही अॅप्स नाहीत."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"टॅबलेट पर्याय"</string>
@@ -239,7 +239,7 @@
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"कार मोड"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"खाते स्थिती"</string>
     <string name="notification_channel_developer" msgid="7579606426860206060">"विकसक संदेश"</string>
-    <string name="notification_channel_updates" msgid="4794517569035110397">"अद्यतने"</string>
+    <string name="notification_channel_updates" msgid="4794517569035110397">"अपडेट"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"नेटवर्क स्थिती"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्क सूचना"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"नेटवर्क उपलब्ध"</string>
@@ -327,7 +327,7 @@
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"मजकूर संदेश प्राप्त करा (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले संदेश आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अनुप्रयोग वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अॅप्लिकेशन वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाईल आणि डीव्हाइस मालक व्यवस्थापित करा"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"प्रोफाईल मालक आणि डीव्हाइस मालक सेट करण्याची अॅप्सना अनुमती द्या."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चालणारे अॅप्स पुनर्क्रमित करा"</string>
@@ -429,13 +429,13 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"टीव्हीचा टाईम झोन बदलण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"फोनचा टाइम झोन बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"डिव्हाइसवरील खाती शोधा"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"टॅब्लेटद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण स्थापित केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट होऊ शकतात."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"टीव्हीद्वारे ज्ञात खात्यांची सूची मिळविण्यासाठी अॅपला अनुमती देतो. यात आपण स्थापित केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट असू शकतात."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"फोनद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण स्थापित केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट करू शकतात."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"टॅब्लेटद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण इंस्टॉल केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट होऊ शकतात."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"टीव्हीद्वारे ज्ञात खात्यांची सूची मिळविण्यासाठी अॅपला अनुमती देतो. यात आपण इंस्टॉल केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट असू शकतात."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"फोनद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण इंस्टॉल केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट करू शकतात."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"नेटवर्क कनेक्शन पहा"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"कोणती नेटवर्क अस्तित्वात आहेत आणि कनेक्ट केलेली आहेत यासारख्या नेटवर्क कनेक्शनविषयीची माहिती पाहण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"पूर्ण नेटवर्क प्रवेश आहे"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"नेटवर्क सॉकेट तयार करण्यासाठी आणि सानुकूल नेटवर्क प्रोटोकॉल वापरण्यासाठी अॅप ला अनुमती देते. ब्राउझर आणि अन्य अनुप्रयोग म्हणजे इंटरनेटवर डेटा पाठवण्याचा मार्ग, म्हणजे इंटरनेटवर डेटा पाठविण्यासाठी परवानगीची आवश्यकता नसते."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"नेटवर्क सॉकेट तयार करण्यासाठी आणि सानुकूल नेटवर्क प्रोटोकॉल वापरण्यासाठी अॅप ला अनुमती देते. ब्राउझर आणि अन्य अॅप्लिकेशन म्हणजे इंटरनेटवर डेटा पाठवण्याचा मार्ग, म्हणजे इंटरनेटवर डेटा पाठविण्यासाठी परवानगीची आवश्यकता नसते."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"नेटवर्क कनेक्टिव्हिटी बदला"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"नेटवर्क कनेक्टिव्हिटीची स्थिती बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"टिथर केलेली कनेक्टिव्हिटी बदला"</string>
@@ -797,7 +797,7 @@
     <string name="granularity_label_link" msgid="5815508880782488267">"दुवा"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"रेखा"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"फॅक्टरी चाचणी अयशस्वी"</string>
-    <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST क्रिया फक्त /सिस्टम/अॅप मध्ये स्थापित केलेल्या पॅकेजसाठी समर्थित आहे."</string>
+    <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST क्रिया फक्त /सिस्टम/अॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी समर्थित आहे."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"रीबूट करा"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
@@ -1070,7 +1070,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"हीप डंप संकलित केला गेला आहे; सामायिक करण्यासाठी टॅप करा"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी आपल्याकरिता हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये आपली कोणतीही वैयक्तिक माहिती असू शकते ज्यात अनुप्रयोग प्रवेश करू शकतो."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी आपल्याकरिता हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये आपली कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर व्हॉल्यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया व्हॉल्यूम"</string>
@@ -1128,8 +1128,8 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाय-फाय ला कनेक्ट करू शकलो नाही"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" खराब इंटरनेट कनेक्शन आहे."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"कनेक्शनला अनुमती द्यायची?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s अनुप्रयोग %2$s वायफाय नेटवर्कशी कनेक्ट करू इच्छित आहे"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"अनुप्रयोग"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s अॅप्लिकेशन %2$s वायफाय नेटवर्कशी कनेक्ट करू इच्छित आहे"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"अॅप्लिकेशन"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाय-फाय थेट"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाय-फाय थेट प्रारंभ करा. हे वाय-फाय क्लायंट/हॉटस्पॉट बंद करेल."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"वाय-फाय थेट प्रारंभ करू शकलो नाही."</string>
@@ -1166,7 +1166,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोडले"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अॅक्सेस करण्यासाठी तुमचे डीव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"रीस्टार्ट"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"आपल्या नवीन सिमने योग्यरित्या कार्य करण्यासाठी, आपल्याला अॅप स्थापित करण्याची आणि तो आपल्या वाहकामधून उघडण्याची आवश्यकता असेल."</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"आपल्या नवीन सिमने योग्यरित्या कार्य करण्यासाठी, आपल्याला अॅप इंस्टॉल करण्याची आणि तो आपल्या वाहकामधून उघडण्याची आवश्यकता असेल."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"अ‍ॅप मिळवा"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"आता नाही"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"नवीन सिम घाला"</string>
@@ -1253,7 +1253,7 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"अन्य बाह्य डिव्हाइसेसवरील रूट मीडिया आउटपुट वर अनुप्रयोगास अनुमती देते."</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"स्‍थापना सत्र वाचा"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"अनुप्रयोगास स्‍थापना सत्र वाचण्‍याची अनुमती देते. हे सक्रिय पॅकेज स्‍थापनांविषयी तपशील पाहाण्‍याची यास अनुमती देते."</string>
-    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"पॅकेज स्थापित करण्यासाठी विनंती करा"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"पॅकेज इंस्टॉल करण्यासाठी विनंती करा"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"पॅकेजच्या स्थापना करण्यासाठी अनुप्रयोगास अनुमती देते."</string>
     <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"पॅकेज हटवण्याची विनंती"</string>
     <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"अनुप्रयोगास पॅकेज हटवण्यासाठी विनंती करण्याची अनुमती देते."</string>
@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> शी कनेक्ट केले. नेटवर्क व्यवस्थापित करण्यासाठी टॅप करा."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN कनेक्ट करणे नेहमी-चालू…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN कनेक्ट केलेले नेहमी-चालू"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"नेहमी-चालू असलेले VPN डिस्कनेक्ट केले"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"VPN त्रुटी नेहमी-चालू"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"सेट करण्यासाठी टॅप करा"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"फाईल निवडा"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"फाईल निवडली नाही"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करा"</string>
@@ -1498,7 +1500,7 @@
     <string name="owner_name" msgid="2716755460376028154">"मालक"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटी"</string>
     <string name="error_message_change_not_allowed" msgid="1238035947357923497">"या बदलास आपल्या प्रशासकाद्वारे अनुमती नाही"</string>
-    <string name="app_not_found" msgid="3429141853498927379">"ही क्रिया हाताळण्यासाठी कोणताही अनुप्रयोग आढळला नाही"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"ही क्रिया हाताळण्यासाठी कोणताही अॅप्लिकेशन आढळला नाही"</string>
     <string name="revoke" msgid="5404479185228271586">"मागे घ्‍या"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
@@ -1624,8 +1626,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
-    <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने स्थापित केले"</string>
-    <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अद्यतनित केले"</string>
+    <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरी लाइफ सुधारित करण्‍यासाठी, बॅटरी सेव्हर तुमच्या डीव्हाइस ची कामगिरी कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. सिंकवर अवलंबून असणारे ईमेल, मेसेजिंग आणि इतर अ‍ॅप्स तुम्ही उघडल्याशिवाय अपडेट होऊ शकत नाहीत.\n\nतुमचे डीव्हाइस चार्ज होत असते तेव्हा बॅटरी सेव्हर आपोआप बंद होतो."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण प्रतिमा टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>

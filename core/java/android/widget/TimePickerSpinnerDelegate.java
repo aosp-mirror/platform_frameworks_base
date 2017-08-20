@@ -284,6 +284,14 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
+    public void setDate(int hour, int minute) {
+        setCurrentHour(hour, false);
+        setCurrentMinute(minute, false);
+
+        onTimeChanged();
+    }
+
+    @Override
     public void setHour(int hour) {
         setCurrentHour(hour, true);
     }
@@ -293,6 +301,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (currentHour == getHour()) {
             return;
         }
+        resetAutofilledValue();
         if (!is24Hour()) {
             // convert [0,23] ordinal to wall clock display
             if (currentHour >= HOURS_IN_HALF_DAY) {
@@ -328,11 +337,18 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     @Override
     public void setMinute(int minute) {
+        setCurrentMinute(minute, true);
+    }
+
+    private void setCurrentMinute(int minute, boolean notifyTimeChanged) {
         if (minute == getMinute()) {
             return;
         }
+        resetAutofilledValue();
         mMinuteSpinner.setValue(minute);
-        onTimeChanged();
+        if (notifyTimeChanged) {
+            onTimeChanged();
+        }
     }
 
     @Override

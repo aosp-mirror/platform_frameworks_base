@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>에 연결되어 있습니다. 네트워크를 관리하려면 누르세요."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"연결 유지 VPN에 연결하는 중…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"연결 유지 VPN에 연결됨"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"연결 유지 VPN 연결 해제됨"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"연결 유지 VPN 오류"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"탭하여 설정"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"파일을 선택하지 않았습니다."</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>
@@ -1603,7 +1605,7 @@
       <item quantity="one">1초 후에 다시 시도하세요.</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"나중에 다시 시도"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 보기"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 보기 중"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"확인"</string>
     <string name="done_label" msgid="2093726099505892398">"완료"</string>

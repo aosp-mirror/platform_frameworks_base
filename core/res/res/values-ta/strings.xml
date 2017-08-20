@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> உடன் இணைக்கப்பட்டது. நெட்வொர்க்கை நிர்வகிக்க, தட்டவும்."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"எப்போதும் இயங்கும் VPN உடன் இணைக்கிறது…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"எப்போதும் இயங்கும் VPN இணைக்கப்பட்டது"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"எப்போதும் இயங்கும் VPN துண்டிக்கப்பட்டது"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"எப்போதும் இயங்கும் VPN பிழை"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"அமைக்க, தட்டவும்"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"கோப்பைத் தேர்வுசெய்"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"எந்தக் கோப்பும் தேர்வுசெய்யப்படவில்லை"</string>
     <string name="reset" msgid="2448168080964209908">"மீட்டமை"</string>

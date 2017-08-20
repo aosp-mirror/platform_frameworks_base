@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> എന്ന സെഷനിലേക്ക് കണക്റ്റുചെയ്തു. നെറ്റ്‌വർക്ക് മാനേജുചെയ്യാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN കണക്റ്റുചെയ്യുന്നു…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN കണക്റ്റുചെയ്‌തു"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"\'എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN\' വിച്ഛേദിച്ചു"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN പിശക്"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"സജ്ജമാക്കാൻ ടാപ്പുചെയ്യുക"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ഫയല്‍‌ തിരഞ്ഞെടുക്കുക"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ഫയലൊന്നും തിരഞ്ഞെടുത്തില്ല"</string>
     <string name="reset" msgid="2448168080964209908">"പുനഃസജ്ജമാക്കുക"</string>

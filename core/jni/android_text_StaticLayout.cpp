@@ -44,6 +44,8 @@ namespace android {
 struct JLineBreaksID {
     jfieldID breaks;
     jfieldID widths;
+    jfieldID ascents;
+    jfieldID descents;
     jfieldID flags;
 };
 
@@ -73,35 +75,45 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
-                        jfloatArray recycleWidths, jintArray recycleFlags,
+                        jfloatArray recycleWidths, jfloatArray recycleAscents,
+                        jfloatArray recycleDescents, jintArray recycleFlags,
                         jint recycleLength, size_t nBreaks, const jint* breaks,
-                        const jfloat* widths, const jint* flags) {
+                        const jfloat* widths, const jfloat* ascents, const jfloat* descents,
+                        const jint* flags) {
     if ((size_t)recycleLength < nBreaks) {
         // have to reallocate buffers
         recycleBreaks = env->NewIntArray(nBreaks);
         recycleWidths = env->NewFloatArray(nBreaks);
+        recycleAscents = env->NewFloatArray(nBreaks);
+        recycleDescents = env->NewFloatArray(nBreaks);
         recycleFlags = env->NewIntArray(nBreaks);
 
         env->SetObjectField(recycle, gLineBreaks_fieldID.breaks, recycleBreaks);
         env->SetObjectField(recycle, gLineBreaks_fieldID.widths, recycleWidths);
+        env->SetObjectField(recycle, gLineBreaks_fieldID.ascents, recycleAscents);
+        env->SetObjectField(recycle, gLineBreaks_fieldID.descents, recycleDescents);
         env->SetObjectField(recycle, gLineBreaks_fieldID.flags, recycleFlags);
     }
     // copy data
     env->SetIntArrayRegion(recycleBreaks, 0, nBreaks, breaks);
     env->SetFloatArrayRegion(recycleWidths, 0, nBreaks, widths);
+    env->SetFloatArrayRegion(recycleAscents, 0, nBreaks, ascents);
+    env->SetFloatArrayRegion(recycleDescents, 0, nBreaks, descents);
     env->SetIntArrayRegion(recycleFlags, 0, nBreaks, flags);
 }
 
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
                                jobject recycle, jintArray recycleBreaks,
-                               jfloatArray recycleWidths, jintArray recycleFlags,
+                               jfloatArray recycleWidths, jfloatArray recycleAscents,
+                               jfloatArray recycleDescents, jintArray recycleFlags,
                                jint recycleLength) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
 
     size_t nBreaks = b->computeBreaks();
 
-    recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleFlags, recycleLength,
-            nBreaks, b->getBreaks(), b->getWidths(), b->getFlags());
+    recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleAscents, recycleDescents,
+            recycleFlags, recycleLength, nBreaks, b->getBreaks(), b->getWidths(), b->getAscents(),
+            b->getDescents(), b->getFlags());
 
     b->finish();
 
@@ -205,7 +217,7 @@ static const JNINativeMethod gMethods[] = {
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
     {"nGetWidths", "(J[F)V", (void*) nGetWidths},
-    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[II)I",
+    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[F[F[II)I",
         (void*) nComputeLineBreaks}
 };
 
@@ -216,6 +228,8 @@ int register_android_text_StaticLayout(JNIEnv* env)
 
     gLineBreaks_fieldID.breaks = GetFieldIDOrDie(env, gLineBreaks_class, "breaks", "[I");
     gLineBreaks_fieldID.widths = GetFieldIDOrDie(env, gLineBreaks_class, "widths", "[F");
+    gLineBreaks_fieldID.ascents = GetFieldIDOrDie(env, gLineBreaks_class, "ascents", "[F");
+    gLineBreaks_fieldID.descents = GetFieldIDOrDie(env, gLineBreaks_class, "descents", "[F");
     gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[I");
 
     return RegisterMethodsOrDie(env, "android/text/StaticLayout", gMethods, NELEM(gMethods));

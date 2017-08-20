@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> saiora konektatuta. Sakatu sarea kudeatzeko."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Beti aktibatuta dagoen VPNa konektatzen…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Beti aktibatuta dagoen VPNa konektatu da"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Deskonektatu egin da beti aktibatuta dagoen VPN konexioa"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Beti aktibatuta dagoen VPN errorea"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Konfiguratzeko, sakatu hau"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Aukeratu fitxategia"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ez da fitxategirik aukeratu"</string>
     <string name="reset" msgid="2448168080964209908">"Berrezarri"</string>
@@ -1380,7 +1382,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB unitatea"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB memoria"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editatu"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datu-erabilerari buruzko abisua"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datuen erabilerari buruzko abisua"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Sakatu erabilera eta ezarpenak ikusteko."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2-3 GB-ko mugara iritsi zara"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4 GB-ko mugara iritsi zara"</string>
@@ -1603,7 +1605,7 @@
       <item quantity="one">Saiatu berriro segundo bat igarotakoan</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Saiatu berriro geroago"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Pantaila osoan ikusten"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Pantaila osoko ikuspegia"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Irteteko, pasatu hatza goitik behera."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Ados"</string>
     <string name="done_label" msgid="2093726099505892398">"Eginda"</string>

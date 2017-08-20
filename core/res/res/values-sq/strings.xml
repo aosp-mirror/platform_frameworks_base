@@ -1294,9 +1294,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Lidhur me <xliff:g id="SESSION">%s</xliff:g>. Trokit për të menaxhuar rrjetin."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Po lidh VPN-në për aktivizim të përhershëm…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN e lidhur në mënyrë të përhershme"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Rrjeti VPN gjithmonë aktiv u shkëput"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Gabimi VPN-je për aktivizimin e përhershëm"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Trokit për ta konfiguruar"</string>
+    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Zgjidh skedarin"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nuk u zgjodh asnjë skedar"</string>
     <string name="reset" msgid="2448168080964209908">"Rivendos"</string>

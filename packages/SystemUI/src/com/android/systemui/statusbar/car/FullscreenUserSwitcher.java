@@ -53,7 +53,7 @@ public class FullscreenUserSwitcher {
         mParent = containerStub.inflate();
         mContainer = mParent.findViewById(R.id.container);
         mUserGridView = mContainer.findViewById(R.id.user_grid);
-        mUserGridView.init(statusBar, mUserSwitcherController);
+        mUserGridView.init(statusBar, mUserSwitcherController, true /* showInitially */);
         mUserGridView.setUserSelectionListener(record -> {
             if (!record.isCurrent) {
                 toggleSwitchInProgress(true);

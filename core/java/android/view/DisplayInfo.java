@@ -23,6 +23,7 @@ import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -568,10 +569,10 @@ public final class DisplayInfo implements Parcelable {
         outMetrics.xdpi = outMetrics.noncompatXdpi = physicalXDpi;
         outMetrics.ydpi = outMetrics.noncompatYdpi = physicalYDpi;
 
-        width = configuration != null && configuration.appBounds != null
-                ? configuration.appBounds.width() : width;
-        height = configuration != null && configuration.appBounds != null
-                ? configuration.appBounds.height() : height;
+        final Rect appBounds = configuration != null
+                ? configuration.windowConfiguration.getAppBounds() : null;
+        width = appBounds != null ? appBounds.width() : width;
+        height = appBounds != null ? appBounds.height() : height;
 
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;

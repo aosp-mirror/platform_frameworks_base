@@ -78,7 +78,7 @@ bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* di
                                 XmlResource* doc) const {
   SourcePathDiagnostics source_diag(doc->file.source, diag);
 
-  Element* el = FindRootElement(doc);
+  Element* el = doc->root.get();
   if (!el) {
     if (policy == XmlActionExecutorPolicy::kWhitelist) {
       source_diag.Error(DiagMessage() << "no root XML tag found");

@@ -25,8 +25,10 @@ using ::aapt::io::StringInputStream;
 using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::SizeIs;
+using ::testing::StrEq;
 
 namespace aapt {
+namespace xml {
 
 TEST(XmlDomTest, Inflate) {
   std::string input = R"(<?xml version="1.0" encoding="utf-8"?>
@@ -40,24 +42,23 @@ TEST(XmlDomTest, Inflate) {
 
   StdErrDiagnostics diag;
   StringInputStream in(input);
-  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, Source("test.xml"));
+  std::unique_ptr<XmlResource> doc = Inflate(&in, &diag, Source("test.xml"));
   ASSERT_THAT(doc, NotNull());
 
-  xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());
-  ASSERT_THAT(ns, NotNull());
-  EXPECT_THAT(ns->namespace_uri, Eq(xml::kSchemaAndroid));
-  EXPECT_THAT(ns->namespace_prefix, Eq("android"));
+  Element* el = doc->root.get();
+  EXPECT_THAT(el->namespace_decls, SizeIs(1u));
+  EXPECT_THAT(el->namespace_decls[0].uri, StrEq(xml::kSchemaAndroid));
+  EXPECT_THAT(el->namespace_decls[0].prefix, StrEq("android"));
 }
 
 // Escaping is handled after parsing of the values for resource-specific values.
 TEST(XmlDomTest, ForwardEscapes) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
       <element value="\?hello" pattern="\\d{5}">\\d{5}</element>)");
 
-  xml::Element* el = xml::FindRootElement(doc.get());
-  ASSERT_THAT(el, NotNull());
+  Element* el = doc->root.get();
 
-  xml::Attribute* attr = el->FindAttribute({}, "pattern");
+  Attribute* attr = el->FindAttribute({}, "pattern");
   ASSERT_THAT(attr, NotNull());
   EXPECT_THAT(attr->value, Eq("\\\\d{5}"));
 
@@ -67,21 +68,54 @@ TEST(XmlDomTest, ForwardEscapes) {
 
   ASSERT_THAT(el->children, SizeIs(1u));
 
-  xml::Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
+  Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
   ASSERT_THAT(text, NotNull());
   EXPECT_THAT(text->text, Eq("\\\\d{5}"));
 }
 
 TEST(XmlDomTest, XmlEscapeSequencesAreParsed) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element value="&quot;" />)");
-
-  xml::Element* el = xml::FindRootElement(doc.get());
-  ASSERT_THAT(el, NotNull());
-
-  xml::Attribute* attr = el->FindAttribute({}, "value");
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(<element value="&quot;" />)");
+  Attribute* attr = doc->root->FindAttribute({}, "value");
   ASSERT_THAT(attr, NotNull());
-
   EXPECT_THAT(attr->value, Eq("\""));
 }
 
+class TestVisitor : public PackageAwareVisitor {
+ public:
+  using PackageAwareVisitor::Visit;
+
+  void Visit(Element* el) override {
+    if (el->name == "View1") {
+      EXPECT_THAT(TransformPackageAlias("one", "local"),
+                  Eq(make_value(ExtractedPackage{"com.one", false})));
+    } else if (el->name == "View2") {
+      EXPECT_THAT(TransformPackageAlias("one", "local"),
+                  Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two", "local"),
+                  Eq(make_value(ExtractedPackage{"com.two", false})));
+    } else if (el->name == "View3") {
+      EXPECT_THAT(TransformPackageAlias("one", "local"),
+                  Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two", "local"),
+                  Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("three", "local"),
+                  Eq(make_value(ExtractedPackage{"com.three", false})));
+    }
+  }
+};
+
+TEST(XmlDomTest, PackageAwareXmlVisitor) {
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
+      <View1 xmlns:one="http://schemas.android.com/apk/res/com.one">
+        <View2 xmlns:two="http://schemas.android.com/apk/res/com.two">
+          <View3 xmlns:three="http://schemas.android.com/apk/res/com.three" />
+        </View2>
+      </View1>)");
+
+  Debug::DumpXml(doc.get());
+  TestVisitor visitor;
+  doc->root->Accept(&visitor);
+}
+
+}  // namespace xml
 }  // namespace aapt

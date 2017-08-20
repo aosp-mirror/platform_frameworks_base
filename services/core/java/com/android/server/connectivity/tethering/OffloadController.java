@@ -17,7 +17,9 @@
 package com.android.server.connectivity.tethering;
 
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
@@ -60,6 +62,8 @@ public class OffloadController {
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
     private final ContentResolver mContentResolver;
+    private final INetworkManagementService mNms;
+    private final ITetheringStatsProvider mStatsProvider;
     private final SharedLog mLog;
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
@@ -89,13 +93,14 @@ public class OffloadController {
         mHandler = h;
         mHwInterface = hwi;
         mContentResolver = contentResolver;
+        mNms = nms;
+        mStatsProvider = new OffloadTetheringStatsProvider();
         mLog = log.forSubComponent(TAG);
         mExemptPrefixes = new HashSet<>();
         mLastLocalPrefixStrs = new HashSet<>();
 
         try {
-            nms.registerTetheringStatsProvider(
-                    new OffloadTetheringStatsProvider(), getClass().getSimpleName());
+            mNms.registerTetheringStatsProvider(mStatsProvider, getClass().getSimpleName());
         } catch (RemoteException e) {
             mLog.e("Cannot register offload stats provider: " + e);
         }
@@ -150,7 +155,26 @@ public class OffloadController {
                     @Override
                     public void onStoppedLimitReached() {
                         mLog.log("onStoppedLimitReached");
-                        // Poll for statistics and notify NetworkStats
+
+                        // We cannot reliably determine on which interface the limit was reached,
+                        // because the HAL interface does not specify it. We cannot just use the
+                        // current upstream, because that might have changed since the time that
+                        // the HAL queued the callback.
+                        // TODO: rev the HAL so that it provides an interface name.
+
+                        // Fetch current stats, so that when our notification reaches
+                        // NetworkStatsService and triggers a poll, we will respond with
+                        // current data (which will be above the limit that was reached).
+                        // Note that if we just changed upstream, this is unnecessary but harmless.
+                        // The stats for the previous upstream were already updated on this thread
+                        // just after the upstream was changed, so they are also up-to-date.
+                        updateStatsForCurrentUpstream();
+
+                        try {
+                            mNms.tetherLimitReached(mStatsProvider);
+                        } catch (RemoteException e) {
+                            mLog.e("Cannot report data limit reached: " + e);
+                        }
                     }
 
                     @Override
@@ -180,16 +204,18 @@ public class OffloadController {
 
     private class OffloadTetheringStatsProvider extends ITetheringStatsProvider.Stub {
         @Override
-        public NetworkStats getTetherStats() {
+        public NetworkStats getTetherStats(int how) {
             NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
 
             // We can't just post to mHandler because we are mostly (but not always) called by
             // NetworkStatsService#performPollLocked, which is (currently) on the same thread as us.
             mHandler.runWithScissors(() -> {
+                // We have to report both per-interface and per-UID stats, because offloaded traffic
+                // is not seen by kernel interface counters.
                 NetworkStats.Entry entry = new NetworkStats.Entry();
                 entry.set = SET_DEFAULT;
                 entry.tag = TAG_NONE;
-                entry.uid = UID_TETHERING;
+                entry.uid = (how == STATS_PER_UID) ? UID_TETHERING : UID_ALL;
 
                 updateStatsForCurrentUpstream();
 

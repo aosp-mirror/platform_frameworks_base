@@ -152,9 +152,10 @@ public class VpnService extends Service {
      * </service>
      * } </pre>
      *
-     * <p>This meta-data field defaults to {@code true} if absent.
+     * <p>This meta-data field defaults to {@code true} if absent. It will only have effect on
+     * {@link android.os.Build.VERSION_CODES#O_MR1} or higher.
      */
-    public static final String METADATA_SUPPORTS_ALWAYS_ON =
+    public static final String SERVICE_META_DATA_SUPPORTS_ALWAYS_ON =
             "android.net.VpnService.SUPPORTS_ALWAYS_ON";
 
     /**

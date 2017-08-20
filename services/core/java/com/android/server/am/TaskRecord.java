@@ -97,6 +97,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -1294,7 +1295,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             // created controller for the activity we are starting yet.
             mWindowContainerController.positionChildAt(appController, index);
         }
-        r.onOverrideConfigurationSent();
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
@@ -1581,8 +1581,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         // A task can not be docked even if it is considered resizeable because it only supports
         // picture-in-picture mode but has a non-resizeable resizeMode
         return mService.mSupportsSplitScreenMultiWindow
-                && isResizeable(false /* checkSupportsPip */)
-                && !ActivityInfo.isPreserveOrientationMode(mResizeMode);
+                && (mService.mForceResizableActivities
+                        || (isResizeable(false /* checkSupportsPip */)
+                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
     }
 
     /**
