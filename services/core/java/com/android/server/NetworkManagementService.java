@@ -34,6 +34,7 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.FIREWALL_TYPE_BLACKLIST;
 import static android.net.NetworkPolicyManager.FIREWALL_TYPE_WHITELIST;
 import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
@@ -66,6 +67,7 @@ import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
+import android.net.util.NetdService;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.BatteryStats;
@@ -361,7 +363,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (DBG) Slog.d(TAG, "Awaiting socket connection");
         connectedSignal.await();
         if (DBG) Slog.d(TAG, "Connected");
+        if (DBG) Slog.d(TAG, "Connecting native netd service");
         service.connectNativeNetdService();
+        if (DBG) Slog.d(TAG, "Connected");
         return service;
     }
 
@@ -547,6 +551,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
+    public void tetherLimitReached(ITetheringStatsProvider provider) {
+        mContext.enforceCallingOrSelfPermission(NETWORK_STACK, TAG);
+        synchronized(mTetheringStatsProviders) {
+            if (!mTetheringStatsProviders.containsKey(provider)) {
+                return;
+            }
+            // No current code examines the interface parameter in a global alert. Just pass null.
+            notifyLimitReached(LIMIT_GLOBAL_ALERT, null);
+        }
+    }
+
     // Sync the state of the given chain with the native daemon.
     private void syncFirewallChainLocked(int chain, String name) {
         SparseIntArray rules;
@@ -573,14 +589,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private void connectNativeNetdService() {
-        boolean nativeServiceAvailable = false;
-        try {
-            mNetdService = INetd.Stub.asInterface(ServiceManager.getService(NETD_SERVICE_NAME));
-            nativeServiceAvailable = mNetdService.isAlive();
-        } catch (RemoteException e) {}
-        if (!nativeServiceAvailable) {
-            Slog.wtf(TAG, "Can't connect to NativeNetdService " + NETD_SERVICE_NAME);
-        }
+        mNetdService = NetdService.get();
     }
 
     /**
@@ -593,36 +602,30 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         // only enable bandwidth control when support exists
         final boolean hasKernelSupport = new File("/proc/net/xt_qtaguid/ctrl").exists();
-        if (hasKernelSupport) {
-            Slog.d(TAG, "enabling bandwidth control");
-            try {
-                mConnector.execute("bandwidth", "enable");
-                mBandwidthControlEnabled = true;
-            } catch (NativeDaemonConnectorException e) {
-                Log.wtf(TAG, "problem enabling bandwidth controls", e);
-            }
-        } else {
-            Slog.i(TAG, "not enabling bandwidth control");
-        }
-
-        SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
-
-        if (mBandwidthControlEnabled) {
-            try {
-                getBatteryStats().noteNetworkStatsEnabled();
-            } catch (RemoteException e) {
-            }
-        }
-
-        try {
-            mConnector.execute("strict", "enable");
-            mStrictEnabled = true;
-        } catch (NativeDaemonConnectorException e) {
-            Log.wtf(TAG, "Failed strict enable", e);
-        }
 
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
+
+            if (hasKernelSupport) {
+                Slog.d(TAG, "enabling bandwidth control");
+                try {
+                    mConnector.execute("bandwidth", "enable");
+                    mBandwidthControlEnabled = true;
+                } catch (NativeDaemonConnectorException e) {
+                    Log.wtf(TAG, "problem enabling bandwidth controls", e);
+                }
+            } else {
+                Slog.i(TAG, "not enabling bandwidth control");
+            }
+
+            SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
+
+            try {
+                mConnector.execute("strict", "enable");
+                mStrictEnabled = true;
+            } catch (NativeDaemonConnectorException e) {
+                Log.wtf(TAG, "Failed strict enable", e);
+            }
 
             setDataSaverModeEnabled(mDataSaverMode);
 
@@ -701,6 +704,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             }
         }
+
+        if (mBandwidthControlEnabled) {
+            try {
+                getBatteryStats().noteNetworkStatsEnabled();
+            } catch (RemoteException e) {
+            }
+        }
+
     }
 
     /**
@@ -1779,6 +1790,30 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    private void applyUidCleartextNetworkPolicy(int uid, int policy) {
+        final String policyString;
+        switch (policy) {
+            case StrictMode.NETWORK_POLICY_ACCEPT:
+                policyString = "accept";
+                break;
+            case StrictMode.NETWORK_POLICY_LOG:
+                policyString = "log";
+                break;
+            case StrictMode.NETWORK_POLICY_REJECT:
+                policyString = "reject";
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown policy " + policy);
+        }
+
+        try {
+            mConnector.execute("strict", "set_uid_cleartext_policy", uid, policyString);
+            mUidCleartextPolicy.put(uid, policy);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
     @Override
     public void setUidCleartextNetworkPolicy(int uid, int policy) {
         if (Binder.getCallingUid() != uid) {
@@ -1788,6 +1823,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         synchronized (mQuotaLock) {
             final int oldPolicy = mUidCleartextPolicy.get(uid, StrictMode.NETWORK_POLICY_ACCEPT);
             if (oldPolicy == policy) {
+                // This also ensures we won't needlessly apply an ACCEPT policy if we've just
+                // enabled strict and the underlying iptables rules are empty.
                 return;
             }
 
@@ -1798,28 +1835,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return;
             }
 
-            final String policyString;
-            switch (policy) {
-                case StrictMode.NETWORK_POLICY_ACCEPT:
-                    policyString = "accept";
-                    break;
-                case StrictMode.NETWORK_POLICY_LOG:
-                    policyString = "log";
-                    break;
-                case StrictMode.NETWORK_POLICY_REJECT:
-                    policyString = "reject";
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown policy " + policy);
-            }
-
-            try {
-                mConnector.execute("strict", "set_uid_cleartext_policy", uid, policyString);
-                mUidCleartextPolicy.put(uid, policy);
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+            // netd does not keep state on strict mode policies, and cannot replace a non-accept
+            // policy without deleting it first. Rather than add state to netd, just always send
+            // it an accept policy when switching between two non-accept policies.
+            if (oldPolicy != StrictMode.NETWORK_POLICY_ACCEPT &&
+                    policy != StrictMode.NETWORK_POLICY_ACCEPT) {
+                applyUidCleartextNetworkPolicy(uid, policy);
             }
         }
+        applyUidCleartextNetworkPolicy(uid, policy);
     }
 
     @Override
@@ -1840,7 +1864,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {
         @Override
-        public NetworkStats getTetherStats() {
+        public NetworkStats getTetherStats(int how) {
+            // We only need to return per-UID stats. Per-device stats are already counted by
+            // interface counters.
+            if (how != STATS_PER_UID) {
+                return new NetworkStats(SystemClock.elapsedRealtime(), 0);
+            }
+
             final NativeDaemonEvent[] events;
             try {
                 events = mConnector.executeForList("bandwidth", "gettetherstats");
@@ -1883,14 +1913,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public NetworkStats getNetworkStatsTethering() {
+    public NetworkStats getNetworkStatsTethering(int how) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
         synchronized (mTetheringStatsProviders) {
             for (ITetheringStatsProvider provider: mTetheringStatsProviders.keySet()) {
                 try {
-                    stats.combineAllValues(provider.getTetherStats());
+                    stats.combineAllValues(provider.getTetherStats(how));
                 } catch (RemoteException e) {
                     Log.e(TAG, "Problem reading tethering stats from " +
                             mTetheringStatsProviders.get(provider) + ": " + e);

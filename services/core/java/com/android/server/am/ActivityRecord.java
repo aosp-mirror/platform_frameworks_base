@@ -146,6 +146,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Log;
@@ -2011,6 +2012,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     /** Checks whether the activity should be shown for current user. */
     public boolean okToShowLocked() {
+        // We cannot show activities when the device is locked and the application is not
+        // encryption aware.
+        if (!StorageManager.isUserKeyUnlocked(userId)
+                && !info.applicationInfo.isEncryptionAware()) {
+            return false;
+        }
+
         return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
                 || (mStackSupervisor.isCurrentProfileLocked(userId)
                 && service.mUserController.isUserRunningLocked(userId, 0 /* flags */));

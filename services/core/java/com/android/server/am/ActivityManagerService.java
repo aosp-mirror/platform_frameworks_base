@@ -28,6 +28,7 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
@@ -3230,6 +3231,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final void applyUpdateVrModeLocked(ActivityRecord r) {
+        // VR apps are expected to run in a main display. If an app is turning on VR for
+        // itself, but lives in a dynamic stack, then make sure that it is moved to the main
+        // fullscreen stack before enabling VR Mode.
+        // TODO: The goal of this code is to keep the VR app on the main display. When the
+        // stack implementation changes in the future, keep in mind that the use of the fullscreen
+        // stack is a means to move the activity to the main display and a moveActivityToDisplay()
+        // option would be a better choice here.
+        if (r.requestedVrComponent != null && r.getStackId() >= FIRST_DYNAMIC_STACK_ID) {
+            Slog.i(TAG, "Moving " + r.shortComponentName + " from stack " + r.getStackId()
+                    + " to main stack for VR");
+            moveTaskToStack(r.getTask().taskId, FULLSCREEN_WORKSPACE_STACK_ID, true /* toTop */);
+        }
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }

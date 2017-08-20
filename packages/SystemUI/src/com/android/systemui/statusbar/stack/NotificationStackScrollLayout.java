@@ -4539,7 +4539,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                     anim.start();
                 }
             } else if (mMenuExposedView instanceof ExpandableNotificationRow) {
-                ((ExpandableNotificationRow) mMenuExposedView).resetTranslation();
+                ExpandableNotificationRow row = (ExpandableNotificationRow) mMenuExposedView;
+                if (!row.isRemoved()) {
+                    row.resetTranslation();
+                }
             }
             mMenuExposedView = null;
         }

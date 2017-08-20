@@ -37,4 +37,9 @@ public interface JobSchedulerInternal {
     void addBackingUpUid(int uid);
     void removeBackingUpUid(int uid);
     void clearAllBackingUpUids();
+
+    /**
+     * @return the total number of jobs across all UIDs.
+     */
+    int countJobs();
 }

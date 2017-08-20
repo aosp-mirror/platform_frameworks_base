@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -57,4 +60,10 @@ public class NotificationUtils {
         offsetView.getLocationOnScreen(sLocationOffset);
         return sLocationOffset[1] - sLocationBase[1];
     }
+
+    public static boolean isHapticFeedbackDisabled(Context context) {
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
+    }
+
 }

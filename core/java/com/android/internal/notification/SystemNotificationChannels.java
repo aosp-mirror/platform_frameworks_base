@@ -132,10 +132,12 @@ public class SystemNotificationChannels {
                 context.getString(R.string.notification_channel_usb),
                 NotificationManager.IMPORTANCE_MIN));
 
-        channelsList.add(new NotificationChannel(
+        NotificationChannel foregroundChannel = new NotificationChannel(
                 FOREGROUND_SERVICE,
                 context.getString(R.string.notification_channel_foreground_service),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        foregroundChannel.setBlockableSystem(true);
+        channelsList.add(foregroundChannel);
 
         nm.createNotificationChannels(channelsList);
     }

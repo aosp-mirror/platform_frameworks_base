@@ -305,8 +305,8 @@ public class Vpn {
      * In order to support the always-on feature, an app has to
      * <ul>
      *     <li>target {@link VERSION_CODES#N API 24} or above, and
-     *     <li>not opt out through the {@link VpnService#METADATA_SUPPORTS_ALWAYS_ON} meta-data
-     *         field.
+     *     <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
+     *         meta-data field.
      * </ul>
      *
      * @param packageName the canonical package name of the VPN app
@@ -340,8 +340,8 @@ public class Vpn {
 
         for (ResolveInfo rInfo : services) {
             final Bundle metaData = rInfo.serviceInfo.metaData;
-            if (metaData != null
-                    && !metaData.getBoolean(VpnService.METADATA_SUPPORTS_ALWAYS_ON, true)) {
+            if (metaData != null &&
+                    !metaData.getBoolean(VpnService.SERVICE_META_DATA_SUPPORTS_ALWAYS_ON, true)) {
                 return false;
             }
         }

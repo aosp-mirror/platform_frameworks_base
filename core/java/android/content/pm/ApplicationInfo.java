@@ -1508,6 +1508,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
     }
 
+    /** @hide */
+    public boolean isEncryptionAware() {
+        return isDirectBootAware() || isPartiallyDirectBootAware();
+    }
+
     /**
      * @hide
      */
