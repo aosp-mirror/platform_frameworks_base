@@ -1926,8 +1926,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final boolean update = res.removedInfo != null
                     && res.removedInfo.removedPackage != null;
-            final String origInstallerPackageName = res.removedInfo != null
-                    ? res.removedInfo.installerPackageName : null;
+            final String installerPackageName =
+                    res.installerPackageName != null
+                            ? res.installerPackageName
+                            : res.removedInfo != null
+                                    ? res.removedInfo.installerPackageName
+                                    : null;
 
             // If this is the first time we have child packages for a disabled privileged
             // app that had no children, we grant requested runtime permissions to the new
@@ -1992,10 +1996,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/,
                         null /*targetPackage*/, null /*finishedReceiver*/, updateUsers);
-                if (origInstallerPackageName != null) {
+                if (installerPackageName != null) {
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
-                            origInstallerPackageName, null /*finishedReceiver*/, updateUsers);
+                            installerPackageName, null /*finishedReceiver*/, updateUsers);
                 }
 
                 // Send replaced for users that don't see the package for the first time
@@ -2004,10 +2008,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             packageName, extras, 0 /*flags*/,
                             null /*targetPackage*/, null /*finishedReceiver*/,
                             updateUsers);
-                    if (origInstallerPackageName != null) {
+                    if (installerPackageName != null) {
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
-                                origInstallerPackageName, null /*finishedReceiver*/, updateUsers);
+                                installerPackageName, null /*finishedReceiver*/, updateUsers);
                     }
                     sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                             null /*package*/, null /*extras*/, 0 /*flags*/,
@@ -17330,6 +17334,7 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageParser.Package pkg;
         int returnCode;
         String returnMsg;
+        String installerPackageName;
         PackageRemovedInfo removedInfo;
         ArrayMap<String, PackageInstalledInfo> addedChildPackages;
 
@@ -18250,6 +18255,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Result object to be returned
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
+        res.installerPackageName = installerPackageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
 
