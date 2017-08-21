@@ -62,6 +62,14 @@ message MetricsEvent {
 
     // The action failed
     TYPE_FAILURE = 11;
+
+    // Type for APP_TRANSITION_REPORTED_DRAWN event: The activity was started without restoring from
+    // a bundle.
+    TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE = 12;
+
+    // Type for APP_TRANSITION_REPORTED_DRAWN event: The activity was started with restoring from
+    // a bundle.
+    TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE = 13;
   }
 
   // Types of alerts, as bit field values
@@ -4264,6 +4272,14 @@ message MetricsEvent {
 
     // FIELD: The numeric preference value (of type int) when it is changed in Settings
     FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE = 1089;
+
+    // ACTION: Logged when the app has notified that it has fully drawn. See
+    // Activity.reportFullyDrawn().
+    APP_TRANSITION_REPORTED_DRAWN = 1090;
+
+    // FIELD: The delay of the activity reporting to be fully drawn measured from the beginning of
+    // the app transition.
+    APP_TRANSITION_REPORTED_DRAWN_MS = 1091;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
