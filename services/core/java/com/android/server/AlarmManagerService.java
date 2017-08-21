@@ -2964,7 +2964,7 @@ class AlarmManagerService extends SystemService {
 
         private InFlight removeLocked(PendingIntent pi, Intent intent) {
             for (int i = 0; i < mInFlight.size(); i++) {
-                if (mInFlight.get(i).mPendingIntent.equals(pi)) {
+                if (mInFlight.get(i).mPendingIntent == pi) {
                     return mInFlight.remove(i);
                 }
             }
