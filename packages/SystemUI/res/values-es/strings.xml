@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Nivel de batería bajo"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. La función de ahorro de energía está activada."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. La función de ahorro de batería está activada."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"No se admite la carga por USB.\nUtiliza solo el cargador proporcionado."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"No se admite la carga por USB."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utiliza solo el cargador proporcionado."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ajustes"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"¿Activar ahorro de batería?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activar"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar ahorro de energía"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar ahorro de batería"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ajustes"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Girar pantalla automáticamente"</string>
