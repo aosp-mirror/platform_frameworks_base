@@ -1940,13 +1940,14 @@ public class WebView extends AbsoluteLayout
      * For applications targeted to API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below,
      * all public methods (including the inherited ones) can be accessed, see the
      * important security note below for implications.
-     * <p> Note that injected objects will not
-     * appear in JavaScript until the page is next (re)loaded. For example:
+     * <p> Note that injected objects will not appear in JavaScript until the page is next
+     * (re)loaded. JavaScript should be enabled before injecting the object. For example:
      * <pre>
      * class JsObject {
      *    {@literal @}JavascriptInterface
      *    public String toString() { return "injectedObject"; }
      * }
+     * webview.getSettings().setJavaScriptEnabled(true);
      * webView.addJavascriptInterface(new JsObject(), "injectedObject");
      * webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
      * webView.loadUrl("javascript:alert(injectedObject.toString())");</pre>
