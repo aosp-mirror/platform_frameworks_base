@@ -74,11 +74,11 @@ constexpr const char* kValidConfig = R"(<?xml version="1.0" encoding="utf-8" ?>
       <locale>es-rMX</locale>
       <locale>fr-rCA</locale>
     </locale-group>
-    <android-sdk-group label="19">
+    <android-sdk-group label="v19">
       <android-sdk
-          minSdkVersion="19"
-          targetSdkVersion="24"
-          maxSdkVersion="25">
+          minSdkVersion="v19"
+          targetSdkVersion="v24"
+          maxSdkVersion="v25">
         <manifest>
           <!--- manifest additions here XSLT? TODO -->
         </manifest>
@@ -102,7 +102,7 @@ constexpr const char* kValidConfig = R"(<?xml version="1.0" encoding="utf-8" ?>
         abi-group="arm"
         screen-density-group="large"
         locale-group="europe"
-        android-sdk-group="19"
+        android-sdk-group="v19"
         gl-texture-group="dxt1"
         device-feature-group="low-latency"/>
     <artifact
@@ -110,7 +110,7 @@ constexpr const char* kValidConfig = R"(<?xml version="1.0" encoding="utf-8" ?>
         abi-group="other"
         screen-density-group="alldpi"
         locale-group="north-america"
-        android-sdk-group="19"
+        android-sdk-group="v19"
         gl-texture-group="dxt1"
         device-feature-group="low-latency"/>
   </artifacts>
@@ -155,7 +155,8 @@ TEST_F(ConfigurationParserTest, ValidateFile) {
   EXPECT_EQ(3ul, value.locale_groups["north-america"].size());
 
   EXPECT_EQ(1ul, value.android_sdk_groups.size());
-  EXPECT_EQ(1ul, value.android_sdk_groups["19"].size());
+  EXPECT_TRUE(value.android_sdk_groups["v19"].min_sdk_version);
+  EXPECT_EQ("v19", value.android_sdk_groups["v19"].min_sdk_version.value());
 
   EXPECT_EQ(1ul, value.gl_texture_groups.size());
   EXPECT_EQ(1ul, value.gl_texture_groups["dxt1"].size());
@@ -178,7 +179,7 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
         abi-group="arm"
         screen-density-group="large"
         locale-group="europe"
-        android-sdk-group="19"
+        android-sdk-group="v19"
         gl-texture-group="dxt1"
         device-feature-group="low-latency"/>)xml";
 
@@ -195,7 +196,7 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
   EXPECT_EQ("arm", artifact.abi_group.value());
   EXPECT_EQ("large", artifact.screen_density_group.value());
   EXPECT_EQ("europe", artifact.locale_group.value());
-  EXPECT_EQ("19", artifact.android_sdk_group.value());
+  EXPECT_EQ("v19", artifact.android_sdk_group.value());
   EXPECT_EQ("dxt1", artifact.gl_texture_group.value());
   EXPECT_EQ("low-latency", artifact.device_feature_group.value());
 
@@ -205,7 +206,7 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
         abi-group="other"
         screen-density-group="large"
         locale-group="europe"
-        android-sdk-group="19"
+        android-sdk-group="v19"
         gl-texture-group="dxt1"
         device-feature-group="low-latency"/>)xml";
   doc = test::BuildXmlDom(second);
@@ -318,11 +319,11 @@ TEST_F(ConfigurationParserTest, LocaleGroupAction) {
 
 TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
   static constexpr const char* xml = R"xml(
-    <android-sdk-group label="19">
+    <android-sdk-group label="v19">
       <android-sdk
-          minSdkVersion="19"
-          targetSdkVersion="24"
-          maxSdkVersion="25">
+          minSdkVersion="v19"
+          targetSdkVersion="v24"
+          maxSdkVersion="v25">
         <manifest>
           <!--- manifest additions here XSLT? TODO -->
         </manifest>
@@ -336,18 +337,17 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
   ASSERT_TRUE(ok);
 
   ASSERT_EQ(1ul, config.android_sdk_groups.size());
-  ASSERT_EQ(1u, config.android_sdk_groups.count("19"));
+  ASSERT_EQ(1u, config.android_sdk_groups.count("v19"));
 
-  auto& out = config.android_sdk_groups["19"];
+  auto& out = config.android_sdk_groups["v19"];
 
   AndroidSdk sdk;
-  sdk.min_sdk_version = std::string("19");
-  sdk.target_sdk_version = std::string("24");
-  sdk.max_sdk_version = std::string("25");
+  sdk.min_sdk_version = std::string("v19");
+  sdk.target_sdk_version = std::string("v24");
+  sdk.max_sdk_version = std::string("v25");
   sdk.manifest = AndroidManifest();
 
-  ASSERT_EQ(1ul, out.size());
-  ASSERT_EQ(sdk, out[0]);
+  ASSERT_EQ(sdk, out);
 }
 
 TEST_F(ConfigurationParserTest, GlTextureGroupAction) {
@@ -454,41 +454,41 @@ TEST(ArtifactTest, Complex) {
   artifact.device_feature_group = {"df1"};
   artifact.gl_texture_group = {"glx1"};
   artifact.locale_group = {"en-AU"};
-  artifact.android_sdk_group = {"26"};
+  artifact.android_sdk_group = {"v26"};
 
   {
     auto result = artifact.ToArtifactName(
-        "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", "", &diag);
+        "app.${density}_${locale}_${feature}_${gl}.${sdk}.${abi}.apk", "", &diag);
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.v26.mips64.apk");
   }
 
   {
     auto result = artifact.ToArtifactName(
-        "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", "app.apk", &diag);
+        "app.${density}_${locale}_${feature}_${gl}.${sdk}.${abi}.apk", "app.apk", &diag);
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.v26.mips64.apk");
   }
 
   {
     auto result = artifact.ToArtifactName(
-        "${basename}.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", "app.apk", &diag);
+        "${basename}.${density}_${locale}_${feature}_${gl}.${sdk}.${abi}.apk", "app.apk", &diag);
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.v26.mips64.apk");
   }
 
   {
     auto result = artifact.ToArtifactName(
-        "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.${ext}", "app.apk", &diag);
+        "app.${density}_${locale}_${feature}_${gl}.${sdk}.${abi}.${ext}", "app.apk", &diag);
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.v26.mips64.apk");
   }
 
   {
     auto result = artifact.ToArtifactName(
-        "${basename}.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}", "app.apk", &diag);
+        "${basename}.${density}_${locale}_${feature}_${gl}.${sdk}.${abi}", "app.apk", &diag);
     ASSERT_TRUE(result);
-    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.v26.mips64.apk");
   }
 }
 

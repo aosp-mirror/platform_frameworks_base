@@ -35,13 +35,22 @@ namespace aapt {
 namespace {
 
 using ::aapt::configuration::Abi;
+using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::Artifact;
 using ::aapt::configuration::PostProcessingConfiguration;
-
+using ::aapt::test::GetValue;
+using ::aapt::test::GetValueForConfig;
+using ::aapt::test::ParseConfigOrDie;
 using ::testing::Eq;
+using ::testing::IsNull;
+using ::testing::Not;
+using ::testing::NotNull;
+using ::testing::PrintToString;
 using ::testing::Return;
+using ::testing::Test;
 using ::testing::_;
 
+/** Subclass the LoadedApk class so that we can mock the WriteToArchive method. */
 class MockApk : public LoadedApk {
  public:
   MockApk(std::unique_ptr<ResourceTable> table) : LoadedApk({"test.apk"}, {}, std::move(table)){};
@@ -49,19 +58,61 @@ class MockApk : public LoadedApk {
                                     FilterChain*, IArchiveWriter*));
 };
 
-TEST(MultiApkGeneratorTest, FromBaseApk) {
-  std::unique_ptr<ResourceTable> table =
-      test::ResourceTableBuilder()
-          .AddFileReference("android:drawable/icon", "res/drawable-mdpi/icon.png",
-                            test::ParseConfigOrDie("mdpi"))
-          .AddFileReference("android:drawable/icon", "res/drawable-hdpi/icon.png",
-                            test::ParseConfigOrDie("hdpi"))
-          .AddFileReference("android:drawable/icon", "res/drawable-xhdpi/icon.png",
-                            test::ParseConfigOrDie("xhdpi"))
-          .AddFileReference("android:drawable/icon", "res/drawable-xxhdpi/icon.png",
-                            test::ParseConfigOrDie("xxhdpi"))
-          .AddSimple("android:string/one")
-          .Build();
+/**
+ * Subclass the MultiApkGenerator class so that we can access the protected FilterTable method to
+ * directly test table filter.
+ */
+class MultiApkGeneratorWrapper : public MultiApkGenerator {
+ public:
+  MultiApkGeneratorWrapper(LoadedApk* apk, IAaptContext* context)
+      : MultiApkGenerator(apk, context) {
+  }
+
+  std::unique_ptr<ResourceTable> FilterTable(
+      const configuration::Artifact& artifact,
+      const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
+      FilterChain* pChain) override {
+    return MultiApkGenerator::FilterTable(artifact, config, old_table, pChain);
+  }
+};
+
+/** MultiApkGenerator test fixture. */
+class MultiApkGeneratorTest : public ::testing::Test {
+ public:
+  std::unique_ptr<ResourceTable> BuildTable() {
+    return test::ResourceTableBuilder()
+        .AddFileReference(kResourceName, "res/drawable-mdpi/icon.png", mdpi_)
+        .AddFileReference(kResourceName, "res/drawable-hdpi/icon.png", hdpi_)
+        .AddFileReference(kResourceName, "res/drawable-xhdpi/icon.png", xhdpi_)
+        .AddFileReference(kResourceName, "res/drawable-xxhdpi/icon.png", xxhdpi_)
+        .AddFileReference(kResourceName, "res/drawable-v19/icon.xml", v19_)
+        .AddFileReference(kResourceName, "res/drawable-v21/icon.xml", v21_)
+        .AddSimple("android:string/one")
+        .Build();
+  }
+
+  inline FileReference* ValueForConfig(ResourceTable* table, const ConfigDescription& config) {
+    return GetValueForConfig<FileReference>(table, kResourceName, config);
+  };
+
+  void SetUp() override {
+  }
+
+ protected:
+  static constexpr const char* kResourceName = "android:drawable/icon";
+
+  ConfigDescription default_ = ParseConfigOrDie("").CopyWithoutSdkVersion();
+  ConfigDescription mdpi_ = ParseConfigOrDie("mdpi").CopyWithoutSdkVersion();
+  ConfigDescription hdpi_ = ParseConfigOrDie("hdpi").CopyWithoutSdkVersion();
+  ConfigDescription xhdpi_ = ParseConfigOrDie("xhdpi").CopyWithoutSdkVersion();
+  ConfigDescription xxhdpi_ = ParseConfigOrDie("xxhdpi").CopyWithoutSdkVersion();
+  ConfigDescription xxxhdpi_ = ParseConfigOrDie("xxxhdpi").CopyWithoutSdkVersion();
+  ConfigDescription v19_ = ParseConfigOrDie("v19");
+  ConfigDescription v21_ = ParseConfigOrDie("v21");
+};
+
+TEST_F(MultiApkGeneratorTest, FromBaseApk) {
+  std::unique_ptr<ResourceTable> table = BuildTable();
 
   MockApk apk{std::move(table)};
 
@@ -72,7 +123,7 @@ TEST(MultiApkGeneratorTest, FromBaseApk) {
   TableFlattenerOptions table_flattener_options;
 
   MultiApkGenerator generator{&apk, &ctx};
-  EXPECT_TRUE(generator.FromBaseApk("out", empty_config, table_flattener_options));
+  EXPECT_TRUE(generator.FromBaseApk({"out", empty_config, table_flattener_options}));
 
   Artifact x64 = test::ArtifactBuilder()
                      .SetName("${basename}.x64.apk")
@@ -101,7 +152,122 @@ TEST(MultiApkGeneratorTest, FromBaseApk) {
 
   // Called once for each artifact.
   EXPECT_CALL(apk, WriteToArchive(Eq(&ctx), _, _, _, _)).Times(2).WillRepeatedly(Return(true));
-  EXPECT_TRUE(generator.FromBaseApk("out", config, table_flattener_options));
+  EXPECT_TRUE(generator.FromBaseApk({"out", config, table_flattener_options}));
+}
+
+TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
+  std::unique_ptr<ResourceTable> table = BuildTable();
+
+  MockApk apk{std::move(table)};
+  std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(19).Build();
+  PostProcessingConfiguration empty_config;
+  TableFlattenerOptions table_flattener_options;
+  FilterChain chain;
+
+  Artifact x64 = test::ArtifactBuilder()
+                     .SetName("${basename}.${sdk}.apk")
+                     .SetDensityGroup("xhdpi")
+                     .SetAndroidSdk("v23")
+                     .Build();
+
+  auto config = test::PostProcessingConfigurationBuilder()
+                    .SetLocaleGroup("en", {"en"})
+                    .SetAbiGroup("x64", {Abi::kX86_64})
+                    .SetDensityGroup("xhdpi", {"xhdpi"})
+                    .SetAndroidSdk("v23", AndroidSdk::ForMinSdk("v23"))
+                    .AddArtifact(x64)
+                    .Build();
+
+  MultiApkGeneratorWrapper generator{&apk, ctx.get()};
+  std::unique_ptr<ResourceTable> split =
+      generator.FilterTable(x64, config, *apk.GetResourceTable(), &chain);
+
+  ResourceTable* new_table = split.get();
+  EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, hdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, xxhdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, xxxhdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, v19_), IsNull());
+
+  // xhdpi directly matches one of the required dimensions.
+  EXPECT_THAT(ValueForConfig(new_table, xhdpi_), NotNull());
+  // drawable-v21 was converted to drawable.
+  EXPECT_THAT(ValueForConfig(new_table, default_), NotNull());
+  EXPECT_THAT(GetValue<Id>(new_table, "android:string/one"), NotNull());
+}
+
+TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
+  std::unique_ptr<ResourceTable> table = BuildTable();
+
+  MockApk apk{std::move(table)};
+  std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
+  PostProcessingConfiguration empty_config;
+  TableFlattenerOptions table_flattener_options;
+  FilterChain chain;
+
+  Artifact x64 = test::ArtifactBuilder()
+                     .SetName("${basename}.${sdk}.apk")
+                     .SetDensityGroup("xhdpi")
+                     .SetAndroidSdk("v4")
+                     .Build();
+
+  auto config = test::PostProcessingConfigurationBuilder()
+                    .SetLocaleGroup("en", {"en"})
+                    .SetAbiGroup("x64", {Abi::kX86_64})
+                    .SetDensityGroup("xhdpi", {"xhdpi"})
+                    .SetAndroidSdk("v4", AndroidSdk::ForMinSdk("v4"))
+                    .AddArtifact(x64)
+                    .Build();
+
+  MultiApkGeneratorWrapper generator{&apk, ctx.get()};;
+  std::unique_ptr<ResourceTable> split =
+      generator.FilterTable(x64, config, *apk.GetResourceTable(), &chain);
+
+  ResourceTable* new_table = split.get();
+  EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, hdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, xxhdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, xxxhdpi_), IsNull());
+
+  EXPECT_THAT(ValueForConfig(new_table, xhdpi_), NotNull());
+  EXPECT_THAT(ValueForConfig(new_table, v19_), NotNull());
+  EXPECT_THAT(ValueForConfig(new_table, v21_), NotNull());
+  EXPECT_THAT(GetValue<Id>(new_table, "android:string/one"), NotNull());
+}
+
+TEST_F(MultiApkGeneratorTest, VersionFilterNoVersion) {
+  std::unique_ptr<ResourceTable> table = BuildTable();
+
+  MockApk apk{std::move(table)};
+  std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
+  PostProcessingConfiguration empty_config;
+  TableFlattenerOptions table_flattener_options;
+  FilterChain chain;
+
+  Artifact x64 =
+      test::ArtifactBuilder().SetName("${basename}.${sdk}.apk").SetDensityGroup("xhdpi").Build();
+
+  auto config = test::PostProcessingConfigurationBuilder()
+                    .SetLocaleGroup("en", {"en"})
+                    .SetAbiGroup("x64", {Abi::kX86_64})
+                    .SetDensityGroup("xhdpi", {"xhdpi"})
+                    .AddArtifact(x64)
+                    .Build();
+
+  MultiApkGeneratorWrapper generator{&apk, ctx.get()};
+  std::unique_ptr<ResourceTable> split =
+      generator.FilterTable(x64, config, *apk.GetResourceTable(), &chain);
+
+  ResourceTable* new_table = split.get();
+  EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, hdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, xxhdpi_), IsNull());
+  EXPECT_THAT(ValueForConfig(new_table, xxxhdpi_), IsNull());
+
+  EXPECT_THAT(ValueForConfig(new_table, xhdpi_), NotNull());
+  EXPECT_THAT(ValueForConfig(new_table, v19_), NotNull());
+  EXPECT_THAT(ValueForConfig(new_table, v21_), NotNull());
+  EXPECT_THAT(GetValue<Id>(new_table, "android:string/one"), NotNull());
 }
 
 }  // namespace

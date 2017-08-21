@@ -23,6 +23,12 @@
 
 namespace aapt {
 
+struct MultiApkGeneratorOptions {
+  std::string out_dir;
+  configuration::PostProcessingConfiguration config;
+  TableFlattenerOptions table_flattener_options;
+};
+
 /**
  * Generates a set of APKs that are a subset of the original base APKs. Each of the new APKs contain
  * only the resources and assets for an artifact in the configuration file.
@@ -35,9 +41,13 @@ class MultiApkGenerator {
    * Writes a set of APKs to the provided output directory. Each APK is a subset fo the base APK and
    * represents an artifact in the post processing configuration.
    */
-  bool FromBaseApk(const std::string& out_dir,
-                   const configuration::PostProcessingConfiguration& config,
-                   const TableFlattenerOptions& table_flattener_options);
+  bool FromBaseApk(const MultiApkGeneratorOptions& options);
+
+ protected:
+  virtual std::unique_ptr<ResourceTable> FilterTable(
+      const configuration::Artifact& artifact,
+      const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
+      FilterChain* chain);
 
  private:
   IDiagnostics* GetDiagnostics() {

@@ -26,25 +26,77 @@
 #include "filter/AbiFilter.h"
 #include "filter/Filter.h"
 #include "flatten/Archive.h"
+#include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
 
 namespace aapt {
 
+using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::Artifact;
 using ::aapt::configuration::PostProcessingConfiguration;
 using ::android::StringPiece;
+
+/**
+ * Context wrapper that allows the min Android SDK value to be overridden.
+ */
+class ContextWrapper : public IAaptContext {
+ public:
+  explicit ContextWrapper(IAaptContext* context)
+      : context_(context), min_sdk_(context_->GetMinSdkVersion()) {
+  }
+
+  PackageType GetPackageType() override {
+    return context_->GetPackageType();
+  }
+
+  SymbolTable* GetExternalSymbols() override {
+    return context_->GetExternalSymbols();
+  }
+
+  IDiagnostics* GetDiagnostics() override {
+    return context_->GetDiagnostics();
+  }
+
+  const std::string& GetCompilationPackage() override {
+    return context_->GetCompilationPackage();
+  }
+
+  uint8_t GetPackageId() override {
+    return context_->GetPackageId();
+  }
+
+  NameMangler* GetNameMangler() override {
+    return context_->GetNameMangler();
+  }
+
+  bool IsVerbose() override {
+    return context_->IsVerbose();
+  }
+
+  int GetMinSdkVersion() override {
+    return min_sdk_;
+  }
+
+  void SetMinSdkVersion(int min_sdk) {
+    min_sdk_ = min_sdk;
+  }
+
+ private:
+  IAaptContext* context_;
+
+  int min_sdk_ = -1;
+};
 
 MultiApkGenerator::MultiApkGenerator(LoadedApk* apk, IAaptContext* context)
     : apk_(apk), context_(context) {
 }
 
-bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
-                                    const PostProcessingConfiguration& config,
-                                    const TableFlattenerOptions& table_flattener_options) {
+bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
   // TODO(safarmer): Handle APK version codes for the generated APKs.
   IDiagnostics* diag = context_->GetDiagnostics();
+  const PostProcessingConfiguration& config = options.config;
 
   const std::string& apk_name = file::GetFilename(apk_->GetSource().path).to_string();
   const StringPiece ext = file::GetExtension(apk_name);
@@ -53,8 +105,6 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
   // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
   for (const Artifact& artifact : config.artifacts) {
     FilterChain filters;
-    TableSplitterOptions splits;
-    AxisConfigFilter axis_filter;
 
     if (!artifact.name && !config.artifact_format) {
       diag->Error(
@@ -71,74 +121,131 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
       return false;
     }
 
-    if (artifact.abi_group) {
-      const std::string& group_name = artifact.abi_group.value();
-
-      auto group = config.abi_groups.find(group_name);
-      // TODO: Remove validation when configuration parser ensures referential integrity.
-      if (group == config.abi_groups.end()) {
-        diag->Error(DiagMessage() << "could not find referenced ABI group '" << group_name << "'");
-        return false;
-      }
-      filters.AddFilter(AbiFilter::FromAbiList(group->second));
+    std::unique_ptr<ResourceTable> table =
+        FilterTable(artifact, config, *apk_->GetResourceTable(), &filters);
+    if (!table) {
+      return false;
     }
 
-    if (artifact.screen_density_group) {
-      const std::string& group_name = artifact.screen_density_group.value();
-
-      auto group = config.screen_density_groups.find(group_name);
-      // TODO: Remove validation when configuration parser ensures referential integrity.
-      if (group == config.screen_density_groups.end()) {
-        diag->Error(DiagMessage() << "could not find referenced group '" << group_name << "'");
-        return false;
-      }
-
-      const std::vector<ConfigDescription>& densities = group->second;
-      std::for_each(densities.begin(), densities.end(), [&](const ConfigDescription& c) {
-        splits.preferred_densities.push_back(c.density);
-      });
-    }
-
-    if (artifact.locale_group) {
-      const std::string& group_name = artifact.locale_group.value();
-      auto group = config.locale_groups.find(group_name);
-      // TODO: Remove validation when configuration parser ensures referential integrity.
-      if (group == config.locale_groups.end()) {
-        diag->Error(DiagMessage() << "could not find referenced group '" << group_name << "'");
-        return false;
-      }
-
-      const std::vector<ConfigDescription>& locales = group->second;
-      std::for_each(locales.begin(), locales.end(),
-                    [&](const ConfigDescription& c) { axis_filter.AddConfig(c); });
-      splits.config_filter = &axis_filter;
-    }
-
-    std::unique_ptr<ResourceTable> table = apk_->GetResourceTable()->Clone();
-
-
-    TableSplitter splitter{{}, splits};
-    splitter.SplitTable(table.get());
-
-    std::string out = out_dir;
+    std::string out = options.out_dir;
     if (!file::mkdirs(out)) {
       context_->GetDiagnostics()->Warn(DiagMessage() << "could not create out dir: " << out);
     }
     file::AppendPath(&out, artifact_name.value());
 
-    std::unique_ptr<IArchiveWriter> writer = CreateZipFileArchiveWriter(diag, out);
+    if (context_->IsVerbose()) {
+      context_->GetDiagnostics()->Note(DiagMessage() << "Generating split: " << out);
+    }
+
+    std::unique_ptr<IArchiveWriter> writer =
+        CreateZipFileArchiveWriter(context_->GetDiagnostics(), out);
 
     if (context_->IsVerbose()) {
       diag->Note(DiagMessage() << "Writing output: " << out);
     }
 
-    if (!apk_->WriteToArchive(context_, table.get(), table_flattener_options, &filters,
+    if (!apk_->WriteToArchive(context_, table.get(), options.table_flattener_options, &filters,
                               writer.get())) {
       return false;
     }
   }
 
   return true;
+}
+
+std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
+    const configuration::Artifact& artifact,
+    const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
+    FilterChain* filters) {
+  TableSplitterOptions splits;
+  AxisConfigFilter axis_filter;
+  ContextWrapper wrappedContext{context_};
+
+  if (artifact.abi_group) {
+    const std::string& group_name = artifact.abi_group.value();
+
+    auto group = config.abi_groups.find(group_name);
+    // TODO: Remove validation when configuration parser ensures referential integrity.
+    if (group == config.abi_groups.end()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced ABI group '"
+                                                      << group_name << "'");
+      return {};
+    }
+    filters->AddFilter(AbiFilter::FromAbiList(group->second));
+  }
+
+  if (artifact.screen_density_group) {
+    const std::string& group_name = artifact.screen_density_group.value();
+
+    auto group = config.screen_density_groups.find(group_name);
+    // TODO: Remove validation when configuration parser ensures referential integrity.
+    if (group == config.screen_density_groups.end()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
+                                                      << group_name << "'");
+      return {};
+    }
+
+    const std::vector<ConfigDescription>& densities = group->second;
+    for(const auto& density_config : densities) {
+      splits.preferred_densities.push_back(density_config.density);
+    }
+  }
+
+  if (artifact.locale_group) {
+    const std::string& group_name = artifact.locale_group.value();
+    auto group = config.locale_groups.find(group_name);
+    // TODO: Remove validation when configuration parser ensures referential integrity.
+    if (group == config.locale_groups.end()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
+                                                      << group_name << "'");
+      return {};
+    }
+
+    const std::vector<ConfigDescription>& locales = group->second;
+    for (const auto& locale : locales) {
+      axis_filter.AddConfig(locale);
+    }
+    splits.config_filter = &axis_filter;
+  }
+
+  if (artifact.android_sdk_group) {
+    const std::string& group_name = artifact.android_sdk_group.value();
+    auto group = config.android_sdk_groups.find(group_name);
+    // TODO: Remove validation when configuration parser ensures referential integrity.
+    if (group == config.android_sdk_groups.end()) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
+                                                      << group_name << "'");
+      return {};
+    }
+
+    const AndroidSdk& sdk = group->second;
+    if (!sdk.min_sdk_version) {
+      context_->GetDiagnostics()->Error(DiagMessage()
+                                        << "skipping SDK version. No min SDK: " << group_name);
+      return {};
+    }
+
+    ConfigDescription c;
+    const std::string& version = sdk.min_sdk_version.value();
+    if (!ConfigDescription::Parse(version, &c)) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "could not parse min SDK: " << version);
+      return {};
+    }
+
+    wrappedContext.SetMinSdkVersion(c.sdkVersion);
+  }
+
+  std::unique_ptr<ResourceTable> table = old_table.Clone();
+
+  VersionCollapser collapser;
+  if (!collapser.Consume(context_, table.get())) {
+    context_->GetDiagnostics()->Error(DiagMessage() << "Failed to strip versioned resources");
+    return {};
+  }
+
+  TableSplitter splitter{{}, splits};
+  splitter.SplitTable(table.get());
+  return table;
 }
 
 }  // namespace aapt
