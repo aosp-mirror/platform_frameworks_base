@@ -7956,10 +7956,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean useSaved) {
         Layout result = null;
         if (mText instanceof Spannable) {
-            result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
-                    alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
-                    mBreakStrategy, mHyphenationFrequency, mJustificationMode,
-                    getKeyListener() == null ? effectiveEllipsize : null, ellipsisWidth);
+            final DynamicLayout.Builder builder = DynamicLayout.Builder.obtain(mText, mTextPaint,
+                    wantWidth)
+                    .setDisplayText(mTransformed)
+                    .setAlignment(alignment)
+                    .setTextDirection(mTextDir)
+                    .setLineSpacing(mSpacingAdd, mSpacingMult)
+                    .setIncludePad(mIncludePad)
+                    .setBreakStrategy(mBreakStrategy)
+                    .setHyphenationFrequency(mHyphenationFrequency)
+                    .setJustificationMode(mJustificationMode)
+                    .setEllipsize(getKeyListener() == null ? effectiveEllipsize : null)
+                    .setEllipsizedWidth(ellipsisWidth);
+            result = builder.build();
         } else {
             if (boring == UNKNOWN_BORING) {
                 boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);

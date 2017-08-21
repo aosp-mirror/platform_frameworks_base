@@ -16,6 +16,9 @@
 
 package android.text;
 
+import android.annotation.FloatRange;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Paint;
 import android.os.LocaleList;
@@ -49,12 +52,11 @@ public class StaticLayout extends Layout {
     static final String TAG = "StaticLayout";
 
     /**
-     * Builder for static layouts. The builder is a newer pattern for constructing
-     * StaticLayout objects and should be preferred over the constructors,
-     * particularly to access newer features. To build a static layout, first
-     * call {@link #obtain} with the required arguments (text, paint, and width),
-     * then call setters for optional parameters, and finally {@link #build}
-     * to build the StaticLayout object. Parameters not explicitly set will get
+     * Builder for static layouts. The builder is the preferred pattern for constructing
+     * StaticLayout objects and should be preferred over the constructors, particularly to access
+     * newer features. To build a static layout, first call {@link #obtain} with the required
+     * arguments (text, paint, and width), then call setters for optional parameters, and finally
+     * {@link #build} to build the StaticLayout object. Parameters not explicitly set will get
      * default values.
      */
     public final static class Builder {
@@ -63,7 +65,7 @@ public class StaticLayout extends Layout {
         }
 
         /**
-         * Obtain a builder for constructing StaticLayout objects
+         * Obtain a builder for constructing StaticLayout objects.
          *
          * @param source The text to be laid out, optionally with spans
          * @param start The index of the start of the text
@@ -72,8 +74,10 @@ public class StaticLayout extends Layout {
          * @param width The width in pixels
          * @return a builder object used for constructing the StaticLayout
          */
-        public static Builder obtain(CharSequence source, int start, int end, TextPaint paint,
-                int width) {
+        @NonNull
+        public static Builder obtain(@NonNull CharSequence source, @IntRange(from = 0) int start,
+                @IntRange(from = 0) int end, @NonNull TextPaint paint,
+                @IntRange(from = 0) int width) {
             Builder b = sPool.acquire();
             if (b == null) {
                 b = new Builder();
@@ -87,8 +91,8 @@ public class StaticLayout extends Layout {
             b.mWidth = width;
             b.mAlignment = Alignment.ALIGN_NORMAL;
             b.mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
-            b.mSpacingMult = 1.0f;
-            b.mSpacingAdd = 0.0f;
+            b.mSpacingMult = DEFAULT_LINESPACING_MULTIPLIER;
+            b.mSpacingAdd = DEFAULT_LINESPACING_ADDITION;
             b.mIncludePad = true;
             b.mFallbackLineSpacing = false;
             b.mEllipsizedWidth = width;
@@ -102,7 +106,11 @@ public class StaticLayout extends Layout {
             return b;
         }
 
-        private static void recycle(Builder b) {
+        /**
+         * This method should be called after the layout is finished getting constructed and the
+         * builder needs to be cleaned up and returned to the pool.
+         */
+        private static void recycle(@NonNull Builder b) {
             b.mPaint = null;
             b.mText = null;
             MeasuredText.recycle(b.mMeasuredText);
@@ -139,7 +147,8 @@ public class StaticLayout extends Layout {
          *
          * @hide
          */
-        public Builder setText(CharSequence source, int start, int end) {
+        @NonNull
+        public Builder setText(@NonNull CharSequence source, int start, int end) {
             mText = source;
             mStart = start;
             mEnd = end;
@@ -154,7 +163,8 @@ public class StaticLayout extends Layout {
          *
          * @hide
          */
-        public Builder setPaint(TextPaint paint) {
+        @NonNull
+        public Builder setPaint(@NonNull TextPaint paint) {
             mPaint = paint;
             return this;
         }
@@ -167,7 +177,8 @@ public class StaticLayout extends Layout {
          *
          * @hide
          */
-        public Builder setWidth(int width) {
+        @NonNull
+        public Builder setWidth(@IntRange(from = 0) int width) {
             mWidth = width;
             if (mEllipsize == null) {
                 mEllipsizedWidth = width;
@@ -181,34 +192,38 @@ public class StaticLayout extends Layout {
          * @param alignment Alignment for the resulting {@link StaticLayout}
          * @return this builder, useful for chaining
          */
-        public Builder setAlignment(Alignment alignment) {
+        @NonNull
+        public Builder setAlignment(@NonNull Alignment alignment) {
             mAlignment = alignment;
             return this;
         }
 
         /**
          * Set the text direction heuristic. The text direction heuristic is used to
-         * resolve text direction based per-paragraph based on the input text. The default is
+         * resolve text direction per-paragraph based on the input text. The default is
          * {@link TextDirectionHeuristics#FIRSTSTRONG_LTR}.
          *
-         * @param textDir text direction heuristic for resolving BiDi behavior.
+         * @param textDir text direction heuristic for resolving bidi behavior.
          * @return this builder, useful for chaining
          */
-        public Builder setTextDirection(TextDirectionHeuristic textDir) {
+        @NonNull
+        public Builder setTextDirection(@NonNull TextDirectionHeuristic textDir) {
             mTextDir = textDir;
             return this;
         }
 
         /**
-         * Set line spacing parameters. The default is 0.0 for {@code spacingAdd}
-         * and 1.0 for {@code spacingMult}.
+         * Set line spacing parameters. Each line will have its line spacing multiplied by
+         * {@code spacingMult} and then increased by {@code spacingAdd}. The default is 0.0 for
+         * {@code spacingAdd} and 1.0 for {@code spacingMult}.
          *
-         * @param spacingAdd line spacing add
-         * @param spacingMult line spacing multiplier
+         * @param spacingAdd the amount of line spacing addition
+         * @param spacingMult the line spacing multiplier
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setLineSpacing
          */
-        public Builder setLineSpacing(float spacingAdd, float spacingMult) {
+        @NonNull
+        public Builder setLineSpacing(float spacingAdd, @FloatRange(from = 0.0) float spacingMult) {
             mSpacingAdd = spacingAdd;
             mSpacingMult = spacingMult;
             return this;
@@ -223,6 +238,7 @@ public class StaticLayout extends Layout {
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setIncludeFontPadding
          */
+        @NonNull
         public Builder setIncludePad(boolean includePad) {
             mIncludePad = includePad;
             return this;
@@ -241,6 +257,7 @@ public class StaticLayout extends Layout {
          * @param useLineSpacingFromFallbacks whether to expand linespacing based on fallback fonts
          * @return this builder, useful for chaining
          */
+        @NonNull
         public Builder setUseLineSpacingFromFallbacks(boolean useLineSpacingFromFallbacks) {
             mFallbackLineSpacing = useLineSpacingFromFallbacks;
             return this;
@@ -255,7 +272,8 @@ public class StaticLayout extends Layout {
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setEllipsize
          */
-        public Builder setEllipsizedWidth(int ellipsizedWidth) {
+        @NonNull
+        public Builder setEllipsizedWidth(@IntRange(from = 0) int ellipsizedWidth) {
             mEllipsizedWidth = ellipsizedWidth;
             return this;
         }
@@ -265,13 +283,13 @@ public class StaticLayout extends Layout {
          * is wide, or exceeding the number of lines (see #setMaxLines) in the case
          * of {@link android.text.TextUtils.TruncateAt#END} or
          * {@link android.text.TextUtils.TruncateAt#MARQUEE}, to be ellipsized instead
-         * of broken. The default is
-         * {@code null}, indicating no ellipsis is to be applied.
+         * of broken. The default is {@code null}, indicating no ellipsis is to be applied.
          *
          * @param ellipsize type of ellipsis behavior
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setEllipsize
          */
+        @NonNull
         public Builder setEllipsize(@Nullable TextUtils.TruncateAt ellipsize) {
             mEllipsize = ellipsize;
             return this;
@@ -286,7 +304,8 @@ public class StaticLayout extends Layout {
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setMaxLines
          */
-        public Builder setMaxLines(int maxLines) {
+        @NonNull
+        public Builder setMaxLines(@IntRange(from = 0) int maxLines) {
             mMaxLines = maxLines;
             return this;
         }
@@ -299,6 +318,7 @@ public class StaticLayout extends Layout {
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setBreakStrategy
          */
+        @NonNull
         public Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
             mBreakStrategy = breakStrategy;
             return this;
@@ -306,12 +326,15 @@ public class StaticLayout extends Layout {
 
         /**
          * Set hyphenation frequency, to control the amount of automatic hyphenation used. The
-         * default is {@link Layout#HYPHENATION_FREQUENCY_NONE}.
+         * possible values are defined in {@link Layout}, by constants named with the pattern
+         * {@code HYPHENATION_FREQUENCY_*}. The default is
+         * {@link Layout#HYPHENATION_FREQUENCY_NONE}.
          *
          * @param hyphenationFrequency hyphenation frequency for the paragraph
          * @return this builder, useful for chaining
          * @see android.widget.TextView#setHyphenationFrequency
          */
+        @NonNull
         public Builder setHyphenationFrequency(@HyphenationFrequency int hyphenationFrequency) {
             mHyphenationFrequency = hyphenationFrequency;
             return this;
@@ -325,7 +348,8 @@ public class StaticLayout extends Layout {
          * @param rightIndents array of indent values for right margin, in pixels
          * @return this builder, useful for chaining
          */
-        public Builder setIndents(int[] leftIndents, int[] rightIndents) {
+        @NonNull
+        public Builder setIndents(@Nullable int[] leftIndents, @Nullable int[] rightIndents) {
             mLeftIndents = leftIndents;
             mRightIndents = rightIndents;
             int leftLen = leftIndents == null ? 0 : leftIndents.length;
@@ -348,6 +372,7 @@ public class StaticLayout extends Layout {
          * @param justificationMode justification mode for the paragraph.
          * @return this builder, useful for chaining.
          */
+        @NonNull
         public Builder setJustificationMode(@JustificationMode int justificationMode) {
             mJustificationMode = justificationMode;
             return this;
@@ -359,12 +384,14 @@ public class StaticLayout extends Layout {
          *
          * @hide
          */
+        @NonNull
         /* package */ Builder setAddLastLineLineSpacing(boolean value) {
             mAddLastLineLineSpacing = value;
             return this;
         }
 
-        private long[] getHyphenators(LocaleList locales) {
+        @NonNull
+        private long[] getHyphenators(@NonNull LocaleList locales) {
             final int length = locales.size();
             final long[] result = new long[length];
             for (int i = 0; i < length; i++) {
@@ -424,6 +451,7 @@ public class StaticLayout extends Layout {
          *
          * @return the newly constructed {@link StaticLayout} object
          */
+        @NonNull
         public StaticLayout build() {
             StaticLayout result = new StaticLayout(this);
             Builder.recycle(this);
@@ -441,33 +469,33 @@ public class StaticLayout extends Layout {
 
         /* package */ long mNativePtr;
 
-        CharSequence mText;
-        int mStart;
-        int mEnd;
-        TextPaint mPaint;
-        int mWidth;
-        Alignment mAlignment;
-        TextDirectionHeuristic mTextDir;
-        float mSpacingMult;
-        float mSpacingAdd;
-        boolean mIncludePad;
-        boolean mFallbackLineSpacing;
-        int mEllipsizedWidth;
-        TextUtils.TruncateAt mEllipsize;
-        int mMaxLines;
-        int mBreakStrategy;
-        int mHyphenationFrequency;
-        int[] mLeftIndents;
-        int[] mRightIndents;
-        int mJustificationMode;
-        boolean mAddLastLineLineSpacing;
+        private CharSequence mText;
+        private int mStart;
+        private int mEnd;
+        private TextPaint mPaint;
+        private int mWidth;
+        private Alignment mAlignment;
+        private TextDirectionHeuristic mTextDir;
+        private float mSpacingMult;
+        private float mSpacingAdd;
+        private boolean mIncludePad;
+        private boolean mFallbackLineSpacing;
+        private int mEllipsizedWidth;
+        private TextUtils.TruncateAt mEllipsize;
+        private int mMaxLines;
+        private int mBreakStrategy;
+        private int mHyphenationFrequency;
+        private int[] mLeftIndents;
+        private int[] mRightIndents;
+        private int mJustificationMode;
+        private boolean mAddLastLineLineSpacing;
 
-        Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
+        private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
         // This will go away and be subsumed by native builder code
-        MeasuredText mMeasuredText;
+        private MeasuredText mMeasuredText;
 
-        LocaleList mLocales;
+        private LocaleList mLocales;
 
         private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<Builder>(3);
     }
@@ -548,12 +576,17 @@ public class StaticLayout extends Layout {
             .setEllipsize(ellipsize)
             .setMaxLines(maxLines);
         /*
-         * This is annoying, but we can't refer to the layout until
-         * superclass construction is finished, and the superclass
-         * constructor wants the reference to the display text.
+         * This is annoying, but we can't refer to the layout until superclass construction is
+         * finished, and the superclass constructor wants the reference to the display text.
          *
-         * This will break if the superclass constructor ever actually
-         * cares about the content instead of just holding the reference.
+         * In other words, the two Ellipsizer classes in Layout.java need a (Dynamic|Static)Layout
+         * as a parameter to do their calculations, but the Ellipsizers also need to be the input
+         * to the superclass's constructor (Layout). In order to go around the circular
+         * dependency, we construct the Ellipsizer with only one of the parameters, the text. And
+         * we fill in the rest of the needed information (layout, width, and method) later, here.
+         *
+         * This will break if the superclass constructor ever actually cares about the content
+         * instead of just holding the reference.
          */
         if (ellipsize != null) {
             Ellipsizer e = (Ellipsizer) getText();
