@@ -31,7 +31,7 @@ import android.graphics.Rect;
  * {@link java.nio.ByteBuffer ByteBuffers}. Each buffer is encapsulated in a
  * {@link Plane} that describes the layout of the pixel data in that plane. Due
  * to this direct access, and unlike the {@link android.graphics.Bitmap Bitmap} class,
- * Images are not directly usable as as UI resources.</p>
+ * Images are not directly usable as UI resources.</p>
  *
  * <p>Since Images are often directly produced or consumed by hardware
  * components, they are a limited resource shared across the system, and should
