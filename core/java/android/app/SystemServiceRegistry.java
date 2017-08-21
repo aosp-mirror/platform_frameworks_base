@@ -81,10 +81,10 @@ import android.net.INetworkPolicyManager;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
-import android.net.nsd.INsdManager;
-import android.net.nsd.NsdManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
+import android.net.nsd.INsdManager;
+import android.net.nsd.NsdManager;
 import android.net.wifi.IRttManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.IWifiScanner;
@@ -95,6 +95,8 @@ import android.net.wifi.aware.IWifiAwareManager;
 import android.net.wifi.aware.WifiAwareManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.rtt.IWifiRttManager;
+import android.net.wifi.rtt.WifiRttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -602,6 +604,16 @@ final class SystemServiceRegistry {
                 return new RttManager(ctx.getOuterContext(), service,
                         ConnectivityThread.getInstanceLooper());
             }});
+
+        registerService(Context.WIFI_RTT2_SERVICE, WifiRttManager.class,
+                new CachedServiceFetcher<WifiRttManager>() {
+                    @Override
+                    public WifiRttManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_RTT2_SERVICE);
+                        IWifiRttManager service = IWifiRttManager.Stub.asInterface(b);
+                        return new WifiRttManager(ctx.getOuterContext(), service);
+                    }});
 
         registerService(Context.ETHERNET_SERVICE, EthernetManager.class,
                 new CachedServiceFetcher<EthernetManager>() {
