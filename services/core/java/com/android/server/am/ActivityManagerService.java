@@ -1685,6 +1685,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
+    static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 70;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -2141,6 +2142,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             case USER_SWITCH_TIMEOUT_MSG: {
                 mUserController.timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                break;
+            }
+            case USER_SWITCH_CALLBACKS_TIMEOUT_MSG: {
+                mUserController.timeoutUserSwitchCallbacks(msg.arg1, msg.arg2);
                 break;
             }
             case IMMERSIVE_MODE_LOCK_MSG: {
