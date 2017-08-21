@@ -595,6 +595,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.FORMAT_XML_DOCUMENT,
             MtpConstants.FORMAT_FLAC,
             MtpConstants.FORMAT_DNG,
+            MtpConstants.FORMAT_HEIF,
         };
     }
 
@@ -705,6 +706,7 @@ public class MtpDatabase implements AutoCloseable {
             case MtpConstants.FORMAT_PNG:
             case MtpConstants.FORMAT_BMP:
             case MtpConstants.FORMAT_DNG:
+            case MtpConstants.FORMAT_HEIF:
                 return IMAGE_PROPERTIES;
             default:
                 return FILE_PROPERTIES;
