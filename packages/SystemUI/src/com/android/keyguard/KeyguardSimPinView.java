@@ -60,9 +60,19 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onSimStateChanged(int subId, int slotId, State simState) {
-           if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
-           resetState();
-       };
+            if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
+            switch(simState) {
+                // If the SIM is removed, then we must remove the keyguard. It will be put up
+                // again when the PUK locked SIM is re-entered.
+                case ABSENT: {
+                    KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked(mSubId);
+                    mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                    break;
+                }
+                default:
+                    resetState();
+            }
+        }
     };
 
     public KeyguardSimPinView(Context context) {
