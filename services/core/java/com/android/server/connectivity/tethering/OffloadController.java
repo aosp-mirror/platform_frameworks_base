@@ -127,21 +127,25 @@ public class OffloadController {
                 new OffloadHardwareInterface.ControlCallback() {
                     @Override
                     public void onStarted() {
+                        if (!started()) return;
                         mLog.log("onStarted");
                     }
 
                     @Override
                     public void onStoppedError() {
+                        if (!started()) return;
                         mLog.log("onStoppedError");
                     }
 
                     @Override
                     public void onStoppedUnsupported() {
+                        if (!started()) return;
                         mLog.log("onStoppedUnsupported");
                     }
 
                     @Override
                     public void onSupportAvailable() {
+                        if (!started()) return;
                         mLog.log("onSupportAvailable");
 
                         // [1] Poll for statistics and notify NetworkStats
@@ -149,11 +153,12 @@ public class OffloadController {
                         //     [a] push local prefixes
                         //     [b] push downstreams
                         //     [c] push upstream parameters
-                        pushUpstreamParameters();
+                        pushUpstreamParameters(null);
                     }
 
                     @Override
                     public void onStoppedLimitReached() {
+                        if (!started()) return;
                         mLog.log("onStoppedLimitReached");
 
                         // We cannot reliably determine on which interface the limit was reached,
@@ -181,6 +186,7 @@ public class OffloadController {
                     public void onNatTimeoutUpdate(int proto,
                                                    String srcAddr, int srcPort,
                                                    String dstAddr, int dstPort) {
+                        if (!started()) return;
                         mLog.log(String.format("NAT timeout update: %s (%s,%s) -> (%s,%s)",
                                 proto, srcAddr, srcPort, dstAddr, dstPort));
                     }
@@ -193,6 +199,9 @@ public class OffloadController {
     }
 
     public void stop() {
+        // Completely stops tethering offload. After this method is called, it is no longer safe to
+        // call any HAL method, no callbacks from the hardware will be delivered, and any in-flight
+        // callbacks must be ignored. Offload may be started again by calling start().
         final boolean wasStarted = started();
         updateStatsForCurrentUpstream();
         mUpstreamLinkProperties = null;
@@ -288,10 +297,7 @@ public class OffloadController {
         // onOffloadEvent() callback to tell us offload is available again and
         // then reapply all state).
         computeAndPushLocalPrefixes();
-        pushUpstreamParameters();
-
-        // Update stats after we've told the hardware to change routing so we don't miss packets.
-        maybeUpdateStats(prevUpstream);
+        pushUpstreamParameters(prevUpstream);
     }
 
     public void setLocalPrefixes(Set<IpPrefix> localPrefixes) {
@@ -325,8 +331,9 @@ public class OffloadController {
         return mConfigInitialized && mControlInitialized;
     }
 
-    private boolean pushUpstreamParameters() {
+    private boolean pushUpstreamParameters(String prevUpstream) {
         if (mUpstreamLinkProperties == null) {
+            maybeUpdateStats(prevUpstream);
             return mHwInterface.setUpstreamParameters(null, null, null, null);
         }
 
@@ -365,9 +372,14 @@ public class OffloadController {
            return success;
         }
 
+        // Update stats after we've told the hardware to change routing so we don't miss packets.
+        maybeUpdateStats(prevUpstream);
+
         // Data limits can only be set once offload is running on the upstream.
         success = maybeUpdateDataLimit(iface);
         if (!success) {
+            // If we failed to set a data limit, don't use this upstream, because we don't want to
+            // blow through the data limit that we were told to apply.
             mLog.log("Setting data limit for " + iface + " failed, disabling offload.");
             stop();
         }
