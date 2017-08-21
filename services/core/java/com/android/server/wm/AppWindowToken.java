@@ -63,6 +63,7 @@ import android.util.Slog;
 import android.view.IApplicationToken;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.util.ToBooleanFunction;
@@ -469,6 +470,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         return delayed;
+    }
+
+    /**
+     * @return The to top most child window for which {@link LayoutParams#isFullscreen()} returns
+     *         true.
+     */
+    WindowState getTopFullscreenWindow() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
+            if (win != null && win.mAttrs.isFullscreen()) {
+                return win;
+            }
+        }
+        return null;
     }
 
     WindowState findMainWindow() {
