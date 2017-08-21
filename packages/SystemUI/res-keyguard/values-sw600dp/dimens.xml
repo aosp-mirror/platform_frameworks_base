@@ -23,7 +23,7 @@
     <dimen name="kg_status_line_font_size">16sp</dimen>
 
     <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">12dp</dimen>
+    <dimen name="keyguard_security_view_top_margin">12dp</dimen>
 
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">100dp</dimen>
