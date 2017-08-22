@@ -195,6 +195,14 @@ public class ActivityOptions {
     private static final String KEY_DOCK_CREATE_MODE = "android:activity.dockCreateMode";
 
     /**
+     * Determines whether to disallow the outgoing activity from entering picture-in-picture as the
+     * result of a new activity being launched.
+     * @hide
+     */
+    private static final String KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING =
+            "android:activity.disallowEnterPictureInPictureWhileLaunching";
+
+    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -267,6 +275,7 @@ public class ActivityOptions {
     private int mLaunchStackId = INVALID_STACK_ID;
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
     private AppTransitionAnimationSpec mAnimSpecs[];
@@ -856,6 +865,8 @@ public class ActivityOptions {
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
+        mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
+                KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
             mAnimSpecs = new AppTransitionAnimationSpec[specs.length];
@@ -1121,6 +1132,16 @@ public class ActivityOptions {
         mDockCreateMode = dockCreateMode;
     }
 
+    /** @hide */
+    public void setDisallowEnterPictureInPictureWhileLaunching(boolean disallow) {
+        mDisallowEnterPictureInPictureWhileLaunching = disallow;
+    }
+
+    /** @hide */
+    public boolean disallowEnterPictureInPictureWhileLaunching() {
+        return mDisallowEnterPictureInPictureWhileLaunching;
+    }
+
     /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
@@ -1275,6 +1296,8 @@ public class ActivityOptions {
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
         b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
+        b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
+                mDisallowEnterPictureInPictureWhileLaunching);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
         }
