@@ -1628,39 +1628,25 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Starts Safe Browsing initialization. This should only be called once.
-     *
+     * Starts Safe Browsing initialization.
      * <p>
-     * Because the Safe Browsing feature takes time to initialize, WebView may temporarily whitelist
-     * URLs until the feature is ready. The callback will be invoked with true once initialization
-     * is complete.
-     * </p>
-     *
+     * URL loads are not guaranteed to be protected by Safe Browsing until after {@code callback} is
+     * invoked with {@code true}. Safe Browsing is not fully supported on all devices. For those
+     * devices {@code callback} will receive {@code false}.
      * <p>
-     * This does not enable the Safe Browsing feature itself, and should only be used if the feature
-     * is otherwise enabled.
-     * </p>
-     *
+     * This does not enable the Safe Browsing feature itself, and should only be called if Safe
+     * Browsing is enabled by the manifest tag or {@link WebSettings#setSafeBrowsingEnabled}. This
+     * prepares resources used for Safe Browsing.
      * <p>
-     * This does not require an Activity Context, and will always use the application Context to do
-     * its work.
-     * </p>
+     * This should be called with the Application Context (and will always use the Application
+     * context to do its work regardless).
      *
      * @param context Application Context.
-     * @param callback will be called with the value true if initialization is
-     * successful. The callback will be run on the UI thread.
+     * @param callback will be called on the UI thread with {@code true} if initialization is
+     * successful, {@code false} otherwise.
      */
-    public static void initSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
+    public static void startSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
         getFactory().getStatics().initSafeBrowsing(context, callback);
-    }
-
-    /**
-     * Shuts down Safe Browsing. This should only be called once. This does not disable the feature,
-     * it only frees resources used by Safe Browsing code. To disable Safe Browsing on an individual
-     * WebView, see {@link WebSettings#setSafeBrowsingEnabled}
-     */
-    public static void shutdownSafeBrowsing() {
-        getFactory().getStatics().shutdownSafeBrowsing();
     }
 
     /**
