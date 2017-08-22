@@ -20,23 +20,22 @@ import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_REQUEST_PULSE;
+import static com.android.systemui.doze.DozeMachine.State.FINISH;
 import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
 import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
+import static com.android.systemui.utils.os.FakeHandler.Mode.QUEUEING;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Display;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,13 +47,13 @@ public class DozeScreenStateTest extends SysuiTestCase {
 
     DozeServiceFake mServiceFake;
     DozeScreenState mScreen;
-    private ImmediateHandler mHandler;
+    FakeHandler mHandlerFake;
 
     @Before
     public void setUp() throws Exception {
         mServiceFake = new DozeServiceFake();
-        mHandler = spy(new ImmediateHandler(Looper.getMainLooper()));
-        mScreen = new DozeScreenState(mServiceFake, mHandler);
+        mHandlerFake = new FakeHandler(Looper.getMainLooper());
+        mScreen = new DozeScreenState(mServiceFake, mHandlerFake);
     }
 
     @Test
@@ -105,27 +104,34 @@ public class DozeScreenStateTest extends SysuiTestCase {
     }
 
     @Test
-    public void test_postedToHandler() {
+    public void test_initialScreenStatePostedToHandler() {
+        mHandlerFake.setMode(QUEUEING);
+
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mServiceFake.screenStateSet = false;
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
 
-        verify(mHandler).sendMessageAtTime(any(), anyLong());
+        assertFalse(mServiceFake.screenStateSet);
+
+        mHandlerFake.dispatchQueuedMessages();
+
+        assertTrue(mServiceFake.screenStateSet);
+        assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
     }
 
-    private static class ImmediateHandler extends Handler {
+    @Test
+    public void test_noScreenStateSetAfterFinish() {
+        mHandlerFake.setMode(QUEUEING);
 
-        public ImmediateHandler(Looper looper) {
-            super(looper);
-        }
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        mScreen.transitionTo(DOZE_AOD, FINISH);
 
-        @Override
-        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
-            Runnable callback = msg.getCallback();
-            if (callback != null) {
-                callback.run();
-                return false;
-            }
-            return super.sendMessageAtTime(msg, uptimeMillis);
-        }
+        mServiceFake.screenStateSet = false;
+
+        mHandlerFake.dispatchQueuedMessages();
+
+        assertFalse(mServiceFake.screenStateSet);
     }
+
 }
