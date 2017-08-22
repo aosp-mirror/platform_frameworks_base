@@ -609,7 +609,7 @@ public class StaticLayout extends Layout {
 
         mLineCount = 0;
         mEllipsized = false;
-        mMaxLineHeight = DEFAULT_MAX_LINE_HEIGHT;
+        mMaxLineHeight = mMaximumVisibleLineCount < 1 ? 0 : DEFAULT_MAX_LINE_HEIGHT;
 
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
