@@ -27,7 +27,10 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayInfo;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -71,6 +74,10 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertEquals(WINDOW_CONFIG_APP_BOUNDS,
                 winConfig1.diff(winConfig2, false /* compareUndefined */));
 
+        winConfig2.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(WINDOW_CONFIG_APP_BOUNDS | WINDOW_CONFIG_WINDOWING_MODE,
+                winConfig1.diff(winConfig2, false /* compareUndefined */));
+
         assertEquals(0, config1.diff(config3));
         assertEquals(0, config1.diffPublicOnly(config3));
         assertEquals(0, winConfig1.diff(winConfig3, false /* compareUndefined */));
@@ -92,9 +99,14 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertEquals(config1.compareTo(config2), 0);
         assertEquals(winConfig1.compareTo(winConfig2), 0);
 
+        // Different windowing mode
+        winConfig2.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertNotEquals(config1.compareTo(config2), 0);
+        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        winConfig2.setWindowingMode(winConfig1.getWindowingMode());
+
         // Different bounds
         winConfig2.setAppBounds(0, 2, 3, 4);
-
         assertNotEquals(config1.compareTo(config2), 0);
         assertNotEquals(winConfig1.compareTo(winConfig2), 0);
 

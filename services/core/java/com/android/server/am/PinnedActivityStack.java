@@ -39,8 +39,9 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
 
     @Override
     PinnedStackWindowController createStackWindowController(int displayId, boolean onTop,
-            Rect outBounds) {
-        return new PinnedStackWindowController(mStackId, this, displayId, onTop, outBounds);
+            Rect outBounds, Configuration outOverrideConfig) {
+        return new PinnedStackWindowController(mStackId, this, displayId, onTop, outBounds,
+                outOverrideConfig);
     }
 
     Rect getDefaultPictureInPictureBounds(float aspectRatio) {

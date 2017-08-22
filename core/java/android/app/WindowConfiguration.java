@@ -44,15 +44,42 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      */
     private Rect mAppBounds;
 
-    @IntDef(flag = true,
-            value = {
-                    WINDOW_CONFIG_APP_BOUNDS,
-            })
+    /** The current windowing mode of the configuration. */
+    private @WindowingMode int mWindowingMode;
+
+    /** Windowing mode is currently not defined. */
+    public static final int WINDOWING_MODE_UNDEFINED = 0;
+    /** Occupies the full area of the screen or the parent container. */
+    public static final int WINDOWING_MODE_FULLSCREEN = 1;
+    /** Always on-top (always visible). of other siblings in its parent container. */
+    public static final int WINDOWING_MODE_PINNED = 2;
+    /** Occupies a dedicated region of the screen or its parent container. */
+    public static final int WINDOWING_MODE_DOCKED = 3;
+    /** Can be freely resized within its parent container. */
+    public static final int WINDOWING_MODE_FREEFORM = 4;
+
+    @IntDef(value = {
+            WINDOWING_MODE_UNDEFINED,
+            WINDOWING_MODE_FULLSCREEN,
+            WINDOWING_MODE_PINNED,
+            WINDOWING_MODE_DOCKED,
+            WINDOWING_MODE_FREEFORM,
+    })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface WindowConfig {}
+    public @interface WindowingMode {}
 
     /** Bit that indicates that the {@link #mAppBounds} changed. */
     public static final int WINDOW_CONFIG_APP_BOUNDS = 1 << 0;
+    /** Bit that indicates that the {@link #mWindowingMode} changed. */
+    public static final int WINDOW_CONFIG_WINDOWING_MODE = 1 << 1;
+
+    @IntDef(flag = true,
+            value = {
+                    WINDOW_CONFIG_APP_BOUNDS,
+                    WINDOW_CONFIG_WINDOWING_MODE,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WindowConfig {}
 
     public WindowConfiguration() {
         unset();
@@ -69,10 +96,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(mAppBounds, flags);
+        dest.writeInt(mWindowingMode);
     }
 
     private void readFromParcel(Parcel source) {
         mAppBounds = source.readParcelable(Rect.class.getClassLoader());
+        mWindowingMode = source.readInt();
     }
 
     @Override
@@ -125,8 +154,18 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mAppBounds;
     }
 
+    public void setWindowingMode(@WindowingMode int windowingMode) {
+        mWindowingMode = windowingMode;
+    }
+
+    @WindowingMode
+    public int getWindowingMode() {
+        return mWindowingMode;
+    }
+
     public void setTo(WindowConfiguration other) {
         setAppBounds(other.mAppBounds);
+        setWindowingMode(other.mWindowingMode);
     }
 
     /** Set this object to completely undefined. */
@@ -136,6 +175,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     public void setToDefaults() {
         setAppBounds(null);
+        setWindowingMode(WINDOWING_MODE_UNDEFINED);
     }
 
     /**
@@ -150,6 +190,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (delta.mAppBounds != null && !delta.mAppBounds.equals(mAppBounds)) {
             changed |= WINDOW_CONFIG_APP_BOUNDS;
             setAppBounds(delta.mAppBounds);
+        }
+        if (delta.mWindowingMode != WINDOWING_MODE_UNDEFINED
+                && mWindowingMode != delta.mWindowingMode) {
+            changed |= WINDOW_CONFIG_WINDOWING_MODE;
+            setWindowingMode(delta.mWindowingMode);
         }
         return changed;
     }
@@ -174,6 +219,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             changes |= WINDOW_CONFIG_APP_BOUNDS;
         }
 
+        if ((compareUndefined || other.mWindowingMode != WINDOWING_MODE_UNDEFINED)
+                && mWindowingMode != other.mWindowingMode) {
+            changes |= WINDOW_CONFIG_WINDOWING_MODE;
+        }
+
         return changes;
     }
 
@@ -194,6 +244,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             n = mAppBounds.bottom - that.mAppBounds.bottom;
             if (n != 0) return n;
         }
+        n = mWindowingMode - that.mWindowingMode;
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -215,11 +267,24 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (mAppBounds != null) {
             result = 31 * result + mAppBounds.hashCode();
         }
+        result = 31 * result + mWindowingMode;
         return result;
     }
 
     @Override
     public String toString() {
-        return "{mAppBounds=" + mAppBounds + "}";
+        return "{mAppBounds=" + mAppBounds
+                + " mWindowingMode=" + windowingModeToString(mWindowingMode) + "}";
+    }
+
+    private static String windowingModeToString(@WindowingMode int windowingMode) {
+        switch (windowingMode) {
+            case WINDOWING_MODE_UNDEFINED: return "undefined";
+            case WINDOWING_MODE_FULLSCREEN: return "fullscreen";
+            case WINDOWING_MODE_PINNED: return "pinned";
+            case WINDOWING_MODE_DOCKED: return "docked";
+            case WINDOWING_MODE_FREEFORM: return "freeform";
+        }
+        return String.valueOf(windowingMode);
     }
 }
