@@ -4022,6 +4022,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.type = mAttrs.type;
         windowInfo.layer = mLayer;
         windowInfo.token = mClient.asBinder();
+        if (mAppToken != null) {
+            windowInfo.activityToken = mAppToken.appToken.asBinder();
+        }
         windowInfo.title = mAttrs.accessibilityTitle;
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
         windowInfo.focused = isFocused();
