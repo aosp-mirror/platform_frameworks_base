@@ -10383,16 +10383,19 @@ public class PackageManagerService extends IPackageManager.Stub
         ArraySet<String> usesLibraryFiles = null;
         if (pkg.usesLibraries != null) {
             usesLibraryFiles = addSharedLibrariesLPw(pkg.usesLibraries,
-                    null, null, pkg.packageName, changingLib, true, null);
+                    null, null, pkg.packageName, changingLib, true,
+                    pkg.applicationInfo.targetSdkVersion, null);
         }
         if (pkg.usesStaticLibraries != null) {
             usesLibraryFiles = addSharedLibrariesLPw(pkg.usesStaticLibraries,
                     pkg.usesStaticLibrariesVersions, pkg.usesStaticLibrariesCertDigests,
-                    pkg.packageName, changingLib, true, usesLibraryFiles);
+                    pkg.packageName, changingLib, true,
+                    pkg.applicationInfo.targetSdkVersion, usesLibraryFiles);
         }
         if (pkg.usesOptionalLibraries != null) {
             usesLibraryFiles = addSharedLibrariesLPw(pkg.usesOptionalLibraries,
-                    null, null, pkg.packageName, changingLib, false, usesLibraryFiles);
+                    null, null, pkg.packageName, changingLib, false,
+                    pkg.applicationInfo.targetSdkVersion, usesLibraryFiles);
         }
         if (!ArrayUtils.isEmpty(usesLibraryFiles)) {
             pkg.usesLibraryFiles = usesLibraryFiles.toArray(new String[usesLibraryFiles.size()]);
@@ -10402,9 +10405,9 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private ArraySet<String> addSharedLibrariesLPw(@NonNull List<String> requestedLibraries,
-            @Nullable int[] requiredVersions, @Nullable String[] requiredCertDigests,
+            @Nullable int[] requiredVersions, @Nullable String[][] requiredCertDigests,
             @NonNull String packageName, @Nullable PackageParser.Package changingLib,
-            boolean required, @Nullable ArraySet<String> outUsedLibraries)
+            boolean required, int targetSdk, @Nullable ArraySet<String> outUsedLibraries)
             throws PackageManagerException {
         final int libCount = requestedLibraries.size();
         for (int i = 0; i < libCount; i++) {
@@ -10438,13 +10441,34 @@ public class PackageManagerService extends IPackageManager.Stub
                                         + " library; failing!");
                     }
 
-                    String expectedCertDigest = requiredCertDigests[i];
-                    String libCertDigest = PackageUtils.computeCertSha256Digest(
-                                libPkg.mSignatures[0]);
-                    if (!libCertDigest.equalsIgnoreCase(expectedCertDigest)) {
+                    final String[] expectedCertDigests = requiredCertDigests[i];
+                    // For apps targeting O MR1 we require explicit enumeration of all certs.
+                    final String[] libCertDigests = (targetSdk > Build.VERSION_CODES.O)
+                            ? PackageUtils.computeSignaturesSha256Digests(libPkg.mSignatures)
+                            : PackageUtils.computeSignaturesSha256Digests(
+                                    new Signature[]{libPkg.mSignatures[0]});
+
+                    // Take a shortcut if sizes don't match. Note that if an app doesn't
+                    // target O we don't parse the "additional-certificate" tags similarly
+                    // how we only consider all certs only for apps targeting O (see above).
+                    // Therefore, the size check is safe to make.
+                    if (expectedCertDigests.length != libCertDigests.length) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                 "Package " + packageName + " requires differently signed" +
-                                        " static shared library; failing!");
+                                        " static sDexLoadReporter.java:45.19hared library; failing!");
+                    }
+
+                    // Use a predictable order as signature order may vary
+                    Arrays.sort(libCertDigests);
+                    Arrays.sort(expectedCertDigests);
+
+                    final int certCount = libCertDigests.length;
+                    for (int j = 0; j < certCount; j++) {
+                        if (!libCertDigests[j].equalsIgnoreCase(expectedCertDigests[j])) {
+                            throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                                    "Package " + packageName + " requires differently signed" +
+                                            " static shared library; failing!");
+                        }
                     }
                 }
 
