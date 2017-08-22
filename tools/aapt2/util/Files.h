@@ -34,8 +34,10 @@ namespace file {
 
 #ifdef _WIN32
 constexpr const char sDirSep = '\\';
+constexpr const char sPathSep = ';';
 #else
 constexpr const char sDirSep = '/';
+constexpr const char sPathSep = ':';
 #endif
 
 enum class FileType {
