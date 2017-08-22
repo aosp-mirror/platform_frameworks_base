@@ -651,7 +651,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static AtomicInteger sNumInstancesInUse;
 
     /**
-     * Gets the accessibility view id which identifies a View in the view tree.
+     * Gets the accessibility view id which identifies a View in the view three.
      *
      * @param accessibilityNodeId The id of an {@link AccessibilityNodeInfo}.
      * @return The accessibility view id part of the node id.
@@ -743,7 +743,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     private RangeInfo mRangeInfo;
     private CollectionInfo mCollectionInfo;
     private CollectionItemInfo mCollectionItemInfo;
-    private boolean mRecycled;
 
     /**
      * Hide constructor from clients.
@@ -786,7 +785,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual descendant.
      */
     public void setSource(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         mWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED_ITEM_ID;
         final int rootAccessibilityViewId =
@@ -806,7 +804,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #FOCUS_ACCESSIBILITY
      */
     public AccessibilityNodeInfo findFocus(int focus) {
-        enforceNotRecycled();
         enforceSealed();
         enforceValidFocusType(focus);
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
@@ -831,7 +828,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The node info for the view that can take accessibility focus.
      */
     public AccessibilityNodeInfo focusSearch(int direction) {
-        enforceNotRecycled();
         enforceSealed();
         enforceValidFocusDirection(direction);
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
@@ -847,7 +843,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The window id.
      */
     public int getWindowId() {
-        enforceNotRecycled();
         return mWindowId;
     }
 
@@ -865,7 +860,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public boolean refresh(Bundle arguments, boolean bypassCache) {
-        enforceNotRecycled();
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
@@ -929,7 +923,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public long getChildId(int index) {
-        enforceNotRecycled();
         if (mChildNodeIds == null) {
             throw new IndexOutOfBoundsException();
         }
@@ -942,7 +935,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The child count.
      */
     public int getChildCount() {
-        enforceNotRecycled();
         return mChildNodeIds == null ? 0 : mChildNodeIds.size();
     }
 
@@ -961,7 +953,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      */
     public AccessibilityNodeInfo getChild(int index) {
-        enforceNotRecycled();
         enforceSealed();
         if (mChildNodeIds == null) {
             return null;
@@ -1038,7 +1029,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     private void addChildInternal(View root, int virtualDescendantId, boolean checked) {
-        enforceNotRecycled();
         enforceNotSealed();
         if (mChildNodeIds == null) {
             mChildNodeIds = new LongArray();
@@ -1064,7 +1054,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #addChild(View, int)
      */
     public boolean removeChild(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         final LongArray childIds = mChildNodeIds;
         if (childIds == null) {
@@ -1085,7 +1074,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Gets the actions that can be performed on the node.
      */
     public List<AccessibilityAction> getActionList() {
-        enforceNotRecycled();
         return CollectionUtils.emptyIfNull(mActions);
     }
 
@@ -1113,7 +1101,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     @Deprecated
     public int getActions() {
-        enforceNotRecycled();
         int returnValue = 0;
 
         if (mActions == null) {
@@ -1152,7 +1139,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addAction(AccessibilityAction action) {
-        enforceNotRecycled();
         enforceNotSealed();
 
         addActionUnchecked(action);
@@ -1188,7 +1174,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     @Deprecated
     public void addAction(int action) {
-        enforceNotRecycled();
         enforceNotSealed();
 
         if ((action & ACTION_TYPE_MASK) != 0) {
@@ -1215,7 +1200,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     @Deprecated
     public void removeAction(int action) {
-        enforceNotRecycled();
         enforceNotSealed();
 
         removeAction(getActionSingleton(action));
@@ -1236,7 +1220,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public boolean removeAction(AccessibilityAction action) {
-        enforceNotRecycled();
         enforceNotSealed();
 
         if (mActions == null || action == null) {
@@ -1252,7 +1235,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public void removeAllActions() {
-        enforceNotRecycled();
         if (mActions != null) {
             mActions.clear();
         }
@@ -1268,7 +1250,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #setTraversalBefore(android.view.View, int)
      */
     public AccessibilityNodeInfo getTraversalBefore() {
-        enforceNotRecycled();
         enforceSealed();
         return getNodeForAccessibilityId(mTraversalBefore);
     }
@@ -1313,7 +1294,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual descendant.
      */
     public void setTraversalBefore(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
@@ -1331,7 +1311,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #setTraversalAfter(android.view.View, int)
      */
     public AccessibilityNodeInfo getTraversalAfter() {
-        enforceNotRecycled();
         enforceSealed();
         return getNodeForAccessibilityId(mTraversalAfter);
     }
@@ -1375,7 +1354,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual descendant.
      */
     public void setTraversalAfter(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
@@ -1393,7 +1371,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public List<String> getAvailableExtraData() {
-        enforceNotRecycled();
         if (mExtraDataKeys != null) {
             return Collections.unmodifiableList(mExtraDataKeys);
         } else {
@@ -1418,7 +1395,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setAvailableExtraData(List<String> extraDataKeys) {
-        enforceNotRecycled();
         enforceNotSealed();
         mExtraDataKeys = new ArrayList<>(extraDataKeys);
     }
@@ -1439,7 +1415,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setMaxTextLength(int max) {
-        enforceNotRecycled();
         enforceNotSealed();
         mMaxTextLength = max;
     }
@@ -1451,7 +1426,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #setMaxTextLength(int)
      */
     public int getMaxTextLength() {
-        enforceNotRecycled();
         return mMaxTextLength;
     }
 
@@ -1468,7 +1442,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setMovementGranularities(int granularities) {
-        enforceNotRecycled();
         enforceNotSealed();
         mMovementGranularities = granularities;
     }
@@ -1479,7 +1452,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The bit mask with granularities.
      */
     public int getMovementGranularities() {
-        enforceNotRecycled();
         return mMovementGranularities;
     }
 
@@ -1496,7 +1468,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called outside of an AccessibilityService.
      */
     public boolean performAction(int action) {
-        enforceNotRecycled();
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
@@ -1520,7 +1491,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called outside of an AccessibilityService.
      */
     public boolean performAction(int action, Bundle arguments) {
-        enforceNotRecycled();
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
@@ -1545,7 +1515,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return A list of node info.
      */
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text) {
-        enforceNotRecycled();
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return Collections.emptyList();
@@ -1577,7 +1546,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return A list of node info.
      */
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String viewId) {
-        enforceNotRecycled();
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return Collections.emptyList();
@@ -1595,7 +1563,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see android.accessibilityservice.AccessibilityService#getWindows()
      */
     public AccessibilityWindowInfo getWindow() {
-        enforceNotRecycled();
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
@@ -1615,7 +1582,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The parent.
      */
     public AccessibilityNodeInfo getParent() {
-        enforceNotRecycled();
         enforceSealed();
         return getNodeForAccessibilityId(mParentNodeId);
     }
@@ -1665,7 +1631,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual descendant.
      */
     public void setParent(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
@@ -1678,7 +1643,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param outBounds The output node bounds.
      */
     public void getBoundsInParent(Rect outBounds) {
-        enforceNotRecycled();
         outBounds.set(mBoundsInParent.left, mBoundsInParent.top,
                 mBoundsInParent.right, mBoundsInParent.bottom);
     }
@@ -1696,7 +1660,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setBoundsInParent(Rect bounds) {
-        enforceNotRecycled();
         enforceNotSealed();
         mBoundsInParent.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
     }
@@ -1707,7 +1670,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param outBounds The output node bounds.
      */
     public void getBoundsInScreen(Rect outBounds) {
-        enforceNotRecycled();
         outBounds.set(mBoundsInScreen.left, mBoundsInScreen.top,
                 mBoundsInScreen.right, mBoundsInScreen.bottom);
     }
@@ -1718,7 +1680,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide Not safe to expose outside the framework.
      */
     public Rect getBoundsInScreen() {
-        enforceNotRecycled();
         return mBoundsInScreen;
     }
 
@@ -1735,7 +1696,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setBoundsInScreen(Rect bounds) {
-        enforceNotRecycled();
         enforceNotSealed();
         mBoundsInScreen.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
     }
@@ -2077,7 +2037,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The drawing position of the view corresponding to this node relative to its siblings.
      */
     public int getDrawingOrder() {
-        enforceNotRecycled();
         return mDrawingOrderInParent;
     }
 
@@ -2093,7 +2052,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setDrawingOrder(int drawingOrderInParent) {
-        enforceNotRecycled();
         enforceNotSealed();
         mDrawingOrderInParent = drawingOrderInParent;
     }
@@ -2105,7 +2063,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The collection info.
      */
     public CollectionInfo getCollectionInfo() {
-        enforceNotRecycled();
         return mCollectionInfo;
     }
 
@@ -2121,7 +2078,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param collectionInfo The collection info.
      */
     public void setCollectionInfo(CollectionInfo collectionInfo) {
-        enforceNotRecycled();
         enforceNotSealed();
         mCollectionInfo = collectionInfo;
     }
@@ -2133,7 +2089,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The collection item info.
      */
     public CollectionItemInfo getCollectionItemInfo() {
-        enforceNotRecycled();
         return mCollectionItemInfo;
     }
 
@@ -2147,7 +2102,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      */
     public void setCollectionItemInfo(CollectionItemInfo collectionItemInfo) {
-        enforceNotRecycled();
         enforceNotSealed();
         mCollectionItemInfo = collectionItemInfo;
     }
@@ -2158,7 +2112,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The range.
      */
     public RangeInfo getRangeInfo() {
-        enforceNotRecycled();
         return mRangeInfo;
     }
 
@@ -2173,7 +2126,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param rangeInfo The range info.
      */
     public void setRangeInfo(RangeInfo rangeInfo) {
-        enforceNotRecycled();
         enforceNotSealed();
         mRangeInfo = rangeInfo;
     }
@@ -2246,7 +2198,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see android.view.View#getAccessibilityLiveRegion()
      */
     public int getLiveRegion() {
-        enforceNotRecycled();
         return mLiveRegion;
     }
 
@@ -2263,7 +2214,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see android.view.View#setAccessibilityLiveRegion(int)
      */
     public void setLiveRegion(int mode) {
-        enforceNotRecycled();
         enforceNotSealed();
         mLiveRegion = mode;
     }
@@ -2311,6 +2261,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param opensPopup If the the node opens a popup.
      */
     public void setCanOpenPopup(boolean opensPopup) {
+        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP, opensPopup);
     }
 
@@ -2397,7 +2348,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The package name.
      */
     public CharSequence getPackageName() {
-        enforceNotRecycled();
         return mPackageName;
     }
 
@@ -2414,7 +2364,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setPackageName(CharSequence packageName) {
-        enforceNotRecycled();
         enforceNotSealed();
         mPackageName = packageName;
     }
@@ -2425,7 +2374,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The class name.
      */
     public CharSequence getClassName() {
-        enforceNotRecycled();
         return mClassName;
     }
 
@@ -2442,7 +2390,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setClassName(CharSequence className) {
-        enforceNotRecycled();
         enforceNotSealed();
         mClassName = className;
     }
@@ -2466,7 +2413,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The text.
      */
     public CharSequence getText() {
-        enforceNotRecycled();
         // Attach this node to any spans that need it
         if (mText instanceof Spanned) {
             Spanned spanned = (Spanned) mText;
@@ -2489,7 +2435,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public CharSequence getOriginalText() {
-        enforceNotRecycled();
         return mOriginalText;
     }
 
@@ -2506,7 +2451,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setText(CharSequence text) {
-        enforceNotRecycled();
         enforceNotSealed();
         mOriginalText = text;
         // Replace any ClickableSpans in mText with placeholders
@@ -2545,7 +2489,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The hint text.
      */
     public CharSequence getHintText() {
-        enforceNotRecycled();
         return mHintText;
     }
 
@@ -2562,7 +2505,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setHintText(CharSequence hintText) {
-        enforceNotRecycled();
         enforceNotSealed();
         mHintText = (hintText == null) ? null : hintText.subSequence(0, hintText.length());
     }
@@ -2580,7 +2522,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setError(CharSequence error) {
-        enforceNotRecycled();
         enforceNotSealed();
         mError = (error == null) ? null : error.subSequence(0, error.length());
     }
@@ -2591,7 +2532,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The error text.
      */
     public CharSequence getError() {
-        enforceNotRecycled();
         return mError;
     }
 
@@ -2601,7 +2541,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The content description.
      */
     public CharSequence getContentDescription() {
-        enforceNotRecycled();
         return mContentDescription;
     }
 
@@ -2618,7 +2557,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setContentDescription(CharSequence contentDescription) {
-        enforceNotRecycled();
         enforceNotSealed();
         mContentDescription = (contentDescription == null) ? null
                 : contentDescription.subSequence(0, contentDescription.length());
@@ -2631,7 +2569,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param labeled The view for which this info serves as a label.
      */
     public void setLabelFor(View labeled) {
-        enforceNotRecycled();
         setLabelFor(labeled, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
@@ -2655,7 +2592,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual descendant.
      */
     public void setLabelFor(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
@@ -2674,7 +2610,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The labeled info.
      */
     public AccessibilityNodeInfo getLabelFor() {
-        enforceNotRecycled();
         enforceSealed();
         return getNodeForAccessibilityId(mLabelForId);
     }
@@ -2709,7 +2644,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param virtualDescendantId The id of the virtual descendant.
      */
     public void setLabeledBy(View root, int virtualDescendantId) {
-        enforceNotRecycled();
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
@@ -2728,7 +2662,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The label.
      */
     public AccessibilityNodeInfo getLabeledBy() {
-        enforceNotRecycled();
         enforceSealed();
         return getNodeForAccessibilityId(mLabeledById);
     }
@@ -2745,7 +2678,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param viewIdResName The id resource name.
      */
     public void setViewIdResourceName(String viewIdResName) {
-        enforceNotRecycled();
         enforceNotSealed();
         mViewIdResourceName = viewIdResName;
     }
@@ -2763,7 +2695,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The id resource name.
      */
     public String getViewIdResourceName() {
-        enforceNotRecycled();
         return mViewIdResourceName;
     }
 
@@ -2779,7 +2710,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *         there is no text selection and no cursor.
      */
     public int getTextSelectionStart() {
-        enforceNotRecycled();
         return mTextSelectionStart;
     }
 
@@ -2795,7 +2725,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *         there is no text selection and no cursor.
      */
     public int getTextSelectionEnd() {
-        enforceNotRecycled();
         return mTextSelectionEnd;
     }
 
@@ -2813,7 +2742,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setTextSelection(int start, int end) {
-        enforceNotRecycled();
         enforceNotSealed();
         mTextSelectionStart = start;
         mTextSelectionEnd = end;
@@ -2825,7 +2753,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The input type.
      */
     public int getInputType() {
-        enforceNotRecycled();
         return mInputType;
     }
 
@@ -2843,7 +2770,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setInputType(int inputType) {
-        enforceNotRecycled();
         enforceNotSealed();
         mInputType = inputType;
     }
@@ -2862,7 +2788,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The bundle.
      */
     public Bundle getExtras() {
-        enforceNotRecycled();
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -2884,7 +2809,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The value.
      */
     private boolean getBooleanProperty(int property) {
-        enforceNotRecycled();
         return (mBooleanProperties & property) != 0;
     }
 
@@ -2897,7 +2821,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     private void setBooleanProperty(int property, boolean value) {
-        enforceNotRecycled();
         enforceNotSealed();
         if (value) {
             mBooleanProperties |= property;
@@ -2927,7 +2850,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public int getConnectionId() {
-        enforceNotRecycled();
         return mConnectionId;
     }
 
@@ -2948,7 +2870,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public void setSourceNodeId(long sourceId, int windowId) {
-        enforceNotRecycled();
         enforceNotSealed();
         mSourceNodeId = sourceId;
         mWindowId = windowId;
@@ -2962,7 +2883,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public long getSourceNodeId() {
-        enforceNotRecycled();
         return mSourceNodeId;
     }
 
@@ -2974,7 +2894,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public void setSealed(boolean sealed) {
-        enforceNotRecycled();
         mSealed = sealed;
     }
 
@@ -3041,11 +2960,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
-    private void enforceNotRecycled() {
-        if (mRecycled) {
-            throw new IllegalStateException("Cannot interact with recycled instance");
-        }
-    }
     /**
      * Returns a cached instance if such is available otherwise a new one
      * and sets the source.
@@ -3087,11 +3001,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (sNumInstancesInUse != null) {
             sNumInstancesInUse.incrementAndGet();
         }
-        if (info != null) {
-            info.mRecycled = false;
-            return info;
-        }
-        return new AccessibilityNodeInfo();
+        return (info != null) ? info : new AccessibilityNodeInfo();
     }
 
     /**
@@ -3117,7 +3027,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void recycle() {
         clear();
-        mRecycled = true;
         sPool.release(this);
         if (sNumInstancesInUse != null) {
             sNumInstancesInUse.decrementAndGet();
@@ -3143,7 +3052,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        enforceNotRecycled();
         // Write bit set of indices of fields with values differing from default
         long nonDefaultFields = 0;
         int fieldIndex = 0; // index of the current field
@@ -3378,7 +3286,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param other The other instance.
      */
     private void init(AccessibilityNodeInfo other) {
-        enforceNotRecycled();
         mSealed = other.mSealed;
         mSourceNodeId = other.mSourceNodeId;
         mParentNodeId = other.mParentNodeId;
@@ -3450,7 +3357,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param parcel A parcel containing the state of a {@link AccessibilityNodeInfo}.
      */
     private void initFromParcel(Parcel parcel) {
-        enforceNotRecycled();
         // Bit mask of non-default-valued field indices
         long nonDefaultFields = parcel.readLong();
         int fieldIndex = 0;

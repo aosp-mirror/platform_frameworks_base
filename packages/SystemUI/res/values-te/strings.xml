@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ఇది కంప్యూటర్ యొక్క RSA కీ వేలిముద్ర:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ఈ కంప్యూటర్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"స్క్రీన్‌కు నింపేలా జూమ్ చేయండి"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"స్క్రీన్‌కు నింపేలా విస్తరించండి"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
@@ -457,8 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"మరింత తెలుసుకోండి"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN సెట్టింగ్‌లను తెరవండి"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"విశ్వసనీయ ఆధారాలను తెరువు"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేసారు.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి."</string>
@@ -756,8 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"మెను"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> అనురవర్తనం"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"హెచ్చరికలు"</string>
-    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
-    <skip />
+    <string name="notification_channel_battery" msgid="5786118169182888462">"బ్యాటరీ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"స్క్రీన్‌షాట్‌లు"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"సాధారణ సందేశాలు"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"నిల్వ"</string>
