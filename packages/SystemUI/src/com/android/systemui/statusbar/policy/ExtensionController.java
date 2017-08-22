@@ -56,6 +56,7 @@ public interface ExtensionController {
         ExtensionBuilder<T> withDefault(Supplier<T> def);
         ExtensionBuilder<T> withCallback(Consumer<T> callback);
         ExtensionBuilder<T> withUiMode(int mode, Supplier<T> def);
+        ExtensionBuilder<T> withFeature(String feature, Supplier<T> def);
         Extension build();
     }
 
