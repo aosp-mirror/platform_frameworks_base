@@ -16,16 +16,23 @@
 package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 
+import android.graphics.drawable.ColorDrawable;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -34,6 +41,22 @@ import org.robolectric.annotation.Config;
 public class AccessPointPreferenceTest {
 
     private Context mContext = RuntimeEnvironment.application;
+
+    @Mock private AccessPoint mockAccessPoint;
+    @Mock private AccessPointPreference.UserBadgeCache mockUserBadgeCache;
+    @Mock private AccessPointPreference.IconInjector mockIconInjector;
+
+    private AccessPointPreference createWithAccessPoint(AccessPoint accessPoint) {
+        return new AccessPointPreference(accessPoint, mContext, mockUserBadgeCache,
+                0, true, null, -1, mockIconInjector);
+    }
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
+        when(mockIconInjector.getIcon(anyInt())).thenReturn(new ColorDrawable());
+    }
 
     @Test
     public void generatePreferenceKey_shouldReturnSsidPlusSecurity() {
@@ -77,5 +100,17 @@ public class AccessPointPreferenceTest {
         assertThat(AccessPointPreference.buildContentDescription(
                 RuntimeEnvironment.application, pref, ap))
                 .isEqualTo("ssid,connected,Wifi signal full.,Secure network");
+    }
+
+    @Test
+    public void refresh_shouldUpdateIcon() {
+        int level = 1;
+        when(mockAccessPoint.getSpeed()).thenReturn(0);
+        when(mockAccessPoint.getLevel()).thenReturn(level);
+
+        AccessPointPreference pref = createWithAccessPoint(mockAccessPoint);
+        pref.refresh();
+
+        verify(mockIconInjector).getIcon(level);
     }
 }
