@@ -149,6 +149,20 @@ public class WifiTracker {
     @GuardedBy("mLock")
     private boolean mStaleScanResults = true;
 
+    private static IntentFilter newIntentFilter() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
+        filter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+
+        return filter;
+    }
+
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
         this(context, wifiListener, null, includeSaved, includeScans);
@@ -165,19 +179,20 @@ public class WifiTracker {
     }
 
     public WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
-            boolean includeSaved, boolean includeScans, boolean includePasspoints) {
+                       boolean includeSaved, boolean includeScans, boolean includePasspoints) {
         this(context, wifiListener, workerLooper, includeSaved, includeScans, includePasspoints,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
-                context.getSystemService(NetworkScoreManager.class), Looper.myLooper()
-        );
+                context.getSystemService(NetworkScoreManager.class),
+                Looper.myLooper(), newIntentFilter());
     }
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
-            boolean includeSaved, boolean includeScans, boolean includePasspoints,
-            WifiManager wifiManager, ConnectivityManager connectivityManager,
-            NetworkScoreManager networkScoreManager, Looper currentLooper) {
+                boolean includeSaved, boolean includeScans, boolean includePasspoints,
+                WifiManager wifiManager, ConnectivityManager connectivityManager,
+                NetworkScoreManager networkScoreManager, Looper currentLooper,
+                IntentFilter filter) {
         if (!includeSaved && !includeScans) {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
@@ -199,15 +214,7 @@ public class WifiTracker {
         // check if verbose logging has been turned on or off
         sVerboseLogging = (mWifiManager.getVerboseLoggingLevel() > 0);
 
-        mFilter = new IntentFilter();
-        mFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        mFilter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+        mFilter = filter;
 
         mNetworkRequest = new NetworkRequest.Builder()
                 .clearCapabilities()

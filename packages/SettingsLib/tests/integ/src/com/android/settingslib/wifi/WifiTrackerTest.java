@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -265,21 +266,18 @@ public class WifiTrackerTest {
     }
 
     private WifiTracker createMockedWifiTracker() {
-        WifiTracker tracker =
-                new WifiTracker(
-                        mContext,
-                        mockWifiListener,
-                        mWorkerLooper,
-                        true,
-                        true,
-                        true,
-                        mockWifiManager,
-                        mockConnectivityManager,
-                        mockNetworkScoreManager,
-                        mMainLooper
-                );
-
-        return tracker;
+        return new WifiTracker(
+                mContext,
+                mockWifiListener,
+                mWorkerLooper,
+                true,
+                true,
+                true,
+                mockWifiManager,
+                mockConnectivityManager,
+                mockNetworkScoreManager,
+                mMainLooper,
+                new IntentFilter()); // empty filter to ignore system broadcasts
     }
 
     private void startTracking(WifiTracker tracker)  throws InterruptedException {
