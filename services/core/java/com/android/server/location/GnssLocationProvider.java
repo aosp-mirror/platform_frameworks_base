@@ -2314,6 +2314,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
             networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
             networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_BLUETOOTH);
             NetworkRequest networkRequest = networkRequestBuilder.build();
             mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
 
