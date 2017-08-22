@@ -19,6 +19,8 @@ package com.android.server.accessibility;
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -27,6 +29,7 @@ import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
+import android.app.ActivityManagerInternal;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -847,7 +850,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (resolvedUserId != mCurrentUserId) {
                 return null;
             }
-            if (mSecurityPolicy.findWindowById(windowId) == null) {
+            if (mSecurityPolicy.findA11yWindowInfoById(windowId) == null) {
                 return null;
             }
             IBinder token = mGlobalWindowTokens.get(windowId);
@@ -3010,7 +3013,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (!permissionGranted) {
                     return null;
                 }
-                AccessibilityWindowInfo window = mSecurityPolicy.findWindowById(windowId);
+                AccessibilityWindowInfo window = mSecurityPolicy.findA11yWindowInfoById(windowId);
                 if (window != null) {
                     AccessibilityWindowInfo windowClone = AccessibilityWindowInfo.obtain(window);
                     windowClone.setConnectionId(mId);
@@ -3332,31 +3335,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
+            IBinder activityToken = null;
             synchronized (mLock) {
                 if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
-                final boolean permissionGranted = mSecurityPolicy.canGetAccessibilityNodeInfoLocked(
-                        this, resolvedWindowId);
-                if (!permissionGranted) {
+                if (!mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId)) {
                     return false;
-                } else {
-                    connection = getConnectionLocked(resolvedWindowId);
-                    if (connection == null) {
-                        return false;
-                    }
-                    AccessibilityWindowInfo windowInfo =
-                            mSecurityPolicy.findWindowById(resolvedWindowId);
-                    if ((windowInfo != null) && windowInfo.inPictureInPicture()) {
-                        boolean isA11yFocusAction =
-                                (action == AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)
-                                || (action ==
-                                        AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
-                        if ((mPictureInPictureActionReplacingConnection != null)
-                                && !isA11yFocusAction) {
-                            connection = mPictureInPictureActionReplacingConnection.mConnection;
-                        }
+                }
+                connection = getConnectionLocked(resolvedWindowId);
+                if (connection == null) return false;
+                final boolean isA11yFocusAction = (action == ACTION_ACCESSIBILITY_FOCUS)
+                        || (action == ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+                final AccessibilityWindowInfo a11yWindowInfo =
+                        mSecurityPolicy.findA11yWindowInfoById(resolvedWindowId);
+                if (!isA11yFocusAction) {
+                    final WindowInfo windowInfo =
+                            mSecurityPolicy.findWindowInfoById(resolvedWindowId);
+                    if (windowInfo != null) activityToken = windowInfo.activityToken;
+                }
+                if ((a11yWindowInfo != null) && a11yWindowInfo.inPictureInPicture()) {
+                    if ((mPictureInPictureActionReplacingConnection != null)
+                            && !isA11yFocusAction) {
+                        connection = mPictureInPictureActionReplacingConnection.mConnection;
                     }
                 }
             }
@@ -3368,6 +3370,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mPowerManager.userActivity(SystemClock.uptimeMillis(),
                         PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY, 0);
 
+                if (activityToken != null) {
+                    LocalServices.getService(ActivityManagerInternal.class)
+                            .setFocusedActivity(activityToken);
+                }
                 connection.performAccessibilityAction(accessibilityNodeId, action, arguments,
                         interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
@@ -4072,7 +4078,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 IAccessibilityInteractionConnectionCallback originalCallback,
                 int resolvedWindowId, int interactionId, int interrogatingPid,
                 long interrogatingTid) {
-            AccessibilityWindowInfo windowInfo = mSecurityPolicy.findWindowById(resolvedWindowId);
+            AccessibilityWindowInfo windowInfo =
+                    mSecurityPolicy.findA11yWindowInfoById(resolvedWindowId);
             if ((windowInfo == null) || !windowInfo.inPictureInPicture()
                     || (mPictureInPictureActionReplacingConnection == null)) {
                 return originalCallback;
@@ -4193,24 +4200,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public void onWindowsForAccessibilityChanged(List<WindowInfo> windows) {
             synchronized (mLock) {
-                // Populate the windows to report.
-                List<AccessibilityWindowInfo> reportedWindows = new ArrayList<>();
-                final int receivedWindowCount = windows.size();
-                for (int i = 0; i < receivedWindowCount; i++) {
-                    WindowInfo receivedWindow = windows.get(i);
-                    AccessibilityWindowInfo reportedWindow = populateReportedWindow(
-                            receivedWindow);
-                    if (reportedWindow != null) {
-                        reportedWindows.add(reportedWindow);
-                    }
-                }
-
                 if (DEBUG) {
-                    Slog.i(LOG_TAG, "Windows changed: " + reportedWindows);
+                    Slog.i(LOG_TAG, "Windows changed: " + windows);
                 }
 
                 // Let the policy update the focused and active windows.
-                mSecurityPolicy.updateWindowsLocked(reportedWindows);
+                mSecurityPolicy.updateWindowsLocked(windows);
 
                 // Someone may be waiting for the windows - advertise it.
                 mLock.notifyAll();
@@ -4432,7 +4427,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         // In Z order
         public List<AccessibilityWindowInfo> mWindows;
-        public SparseArray<AccessibilityWindowInfo> mWindowsById = new SparseArray<>();
+        public SparseArray<AccessibilityWindowInfo> mA11yWindowInfoById = new SparseArray<>();
+        public SparseArray<WindowInfo> mWindowInfoById = new SparseArray<>();
 
         public int mActiveWindowId = INVALID_WINDOW_ID;
         public int mFocusedWindowId = INVALID_WINDOW_ID;
@@ -4476,14 +4472,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public void clearWindowsLocked() {
-            List<AccessibilityWindowInfo> windows = Collections.emptyList();
+            List<WindowInfo> windows = Collections.emptyList();
             final int activeWindowId = mActiveWindowId;
             updateWindowsLocked(windows);
             mActiveWindowId = activeWindowId;
             mWindows = null;
         }
 
-        public void updateWindowsLocked(List<AccessibilityWindowInfo> windows) {
+        public void updateWindowsLocked(List<WindowInfo> windows) {
             if (mWindows == null) {
                 mWindows = new ArrayList<>();
             }
@@ -4492,7 +4488,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             for (int i = oldWindowCount - 1; i >= 0; i--) {
                 mWindows.remove(i).recycle();
             }
-            mWindowsById.clear();
+            mA11yWindowInfoById.clear();
+
+            for (int i = 0; i < mWindowInfoById.size(); i++) {
+                mWindowInfoById.valueAt(i).recycle();
+            }
+            mWindowInfoById.clear();
 
             mFocusedWindowId = INVALID_WINDOW_ID;
             if (!mTouchInteractionInProgress) {
@@ -4509,19 +4510,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int windowCount = windows.size();
             if (windowCount > 0) {
                 for (int i = 0; i < windowCount; i++) {
-                    AccessibilityWindowInfo window = windows.get(i);
-                    final int windowId = window.getId();
-                    if (window.isFocused()) {
-                        mFocusedWindowId = windowId;
-                        if (!mTouchInteractionInProgress) {
-                            mActiveWindowId = windowId;
-                            window.setActive(true);
-                        } else if (windowId == mActiveWindowId) {
-                            activeWindowGone = false;
+                    WindowInfo windowInfo = windows.get(i);
+                    AccessibilityWindowInfo window = (mWindowsForAccessibilityCallback != null)
+                            ? mWindowsForAccessibilityCallback.populateReportedWindow(windowInfo)
+                            : null;
+                    if (window != null) {
+                        final int windowId = window.getId();
+                        if (window.isFocused()) {
+                            mFocusedWindowId = windowId;
+                            if (!mTouchInteractionInProgress) {
+                                mActiveWindowId = windowId;
+                                window.setActive(true);
+                            } else if (windowId == mActiveWindowId) {
+                                activeWindowGone = false;
+                            }
                         }
+                        mWindows.add(window);
+                        mA11yWindowInfoById.put(windowId, window);
+                        mWindowInfoById.put(windowId, WindowInfo.obtain(windowInfo));
                     }
-                    mWindows.add(window);
-                    mWindowsById.put(windowId, window);
                 }
 
                 if (mTouchInteractionInProgress && activeWindowGone) {
@@ -4530,7 +4537,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
                 // Focused window may change the active one, so set the
                 // active window once we decided which it is.
-                for (int i = 0; i < windowCount; i++) {
+                final int accessibilityWindowCount = mWindows.size();
+                for (int i = 0; i < accessibilityWindowCount; i++) {
                     AccessibilityWindowInfo window = mWindows.get(i);
                     if (window.getId() == mActiveWindowId) {
                         window.setActive(true);
@@ -4833,11 +4841,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (windowId == mActiveWindowId) {
                 return true;
             }
-            return findWindowById(windowId) != null;
+            return findA11yWindowInfoById(windowId) != null;
         }
 
-        private AccessibilityWindowInfo findWindowById(int windowId) {
-            return mWindowsById.get(windowId);
+        private AccessibilityWindowInfo findA11yWindowInfoById(int windowId) {
+            return mA11yWindowInfoById.get(windowId);
+        }
+
+        private WindowInfo findWindowInfoById(int windowId) {
+            return mWindowInfoById.get(windowId);
         }
 
         private AccessibilityWindowInfo getPictureInPictureWindow() {
