@@ -1523,6 +1523,13 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL =
             "show_ims_registration_status_bool";
 
+    /**
+     * The flag to disable the popup dialog which warns the user of data charges.
+     * @hide
+     */
+    public static final String KEY_DISABLE_CHARGE_INDICATION_BOOL =
+            "disable_charge_indication_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1777,6 +1784,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(IMSI_KEY_EXPIRATION_DAYS_TIME_INT, IMSI_ENCRYPTION_DAYS_TIME_DISABLED);
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
+        sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
     }
 
     /**
