@@ -2207,7 +2207,12 @@ public class Intent implements Parcelable, Cloneable {
      * Note that the cleared package does <em>not</em>
      * receive this broadcast. The data contains the name of the package.
      * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. If the
+     *      package whose data was cleared is an uninstalled instant app, then the UID
+     *      will be -1. The platform keeps some meta-data associated with instant apps
+     *      after they are uninstalled.
+     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name only if the cleared
+     *      data was for an instant app.
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent

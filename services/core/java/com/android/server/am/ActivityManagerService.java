@@ -5842,26 +5842,53 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
-        userId = mUserController.handleIncomingUser(pid, uid, userId, false,
+        final int resolvedUserId = mUserController.handleIncomingUser(pid, uid, userId, false,
                 ALLOW_FULL_ONLY, "clearApplicationUserData", null);
 
+        final ApplicationInfo appInfo;
+        final boolean isInstantApp;
 
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
-            int pkgUid = -1;
             synchronized(this) {
+                // Instant packages are not protected
                 if (getPackageManagerInternalLocked().isPackageDataProtected(
-                        userId, packageName)) {
+                        resolvedUserId, packageName)) {
                     throw new SecurityException(
                             "Cannot clear data for a protected package: " + packageName);
                 }
 
+                ApplicationInfo applicationInfo = null;
                 try {
-                    pkgUid = pm.getPackageUid(packageName, MATCH_UNINSTALLED_PACKAGES, userId);
+                    applicationInfo = pm.getApplicationInfo(packageName,
+                            MATCH_UNINSTALLED_PACKAGES, resolvedUserId);
                 } catch (RemoteException e) {
+                    /* ignore */
                 }
-                if (pkgUid == -1) {
+                appInfo = applicationInfo;
+
+                final boolean clearingOwnUidData = appInfo != null && appInfo.uid == uid;
+
+                if (!clearingOwnUidData && checkComponentPermission(permission.CLEAR_APP_USER_DATA,
+                        pid, uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("PID " + pid + " does not have permission "
+                            + android.Manifest.permission.CLEAR_APP_USER_DATA + " to clear data"
+                            + " of package " + packageName);
+                }
+
+                final boolean hasInstantMetadata = getPackageManagerInternalLocked()
+                        .hasInstantApplicationMetadata(packageName, resolvedUserId);
+                final boolean isUninstalledAppWithoutInstantMetadata =
+                        (appInfo == null && !hasInstantMetadata);
+                isInstantApp = (appInfo != null && appInfo.isInstantApp())
+                        || hasInstantMetadata;
+                final boolean canAccessInstantApps = checkComponentPermission(
+                        permission.ACCESS_INSTANT_APPS, pid, uid, -1, true)
+                        == PackageManager.PERMISSION_GRANTED;
+
+                if (isUninstalledAppWithoutInstantMetadata || (isInstantApp
+                        && !canAccessInstantApps)) {
                     Slog.w(TAG, "Invalid packageName: " + packageName);
                     if (observer != null) {
                         try {
@@ -5872,45 +5899,45 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     return false;
                 }
-                if (uid == pkgUid || checkComponentPermission(
-                        android.Manifest.permission.CLEAR_APP_USER_DATA,
-                        pid, uid, -1, true)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    forceStopPackageLocked(packageName, pkgUid, "clear data");
-                } else {
-                    throw new SecurityException("PID " + pid + " does not have permission "
-                            + android.Manifest.permission.CLEAR_APP_USER_DATA + " to clear data"
-                                    + " of package " + packageName);
-                }
 
-                // Remove all tasks match the cleared application package and user
-                for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
-                    final TaskRecord tr = mRecentTasks.get(i);
-                    final String taskPackageName =
-                            tr.getBaseIntent().getComponent().getPackageName();
-                    if (tr.userId != userId) continue;
-                    if (!taskPackageName.equals(packageName)) continue;
-                    mStackSupervisor.removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
+                if (appInfo != null) {
+                    forceStopPackageLocked(packageName, appInfo.uid, "clear data");
+                    // Remove all tasks match the cleared application package and user
+                    for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+                        final TaskRecord tr = mRecentTasks.get(i);
+                        final String taskPackageName =
+                                tr.getBaseIntent().getComponent().getPackageName();
+                        if (tr.userId != resolvedUserId) continue;
+                        if (!taskPackageName.equals(packageName)) continue;
+                        mStackSupervisor.removeTaskByIdLocked(tr.taskId, false,
+                                REMOVE_FROM_RECENTS);
+                    }
                 }
             }
 
-            final int pkgUidF = pkgUid;
-            final int userIdF = userId;
             final IPackageDataObserver localObserver = new IPackageDataObserver.Stub() {
                 @Override
                 public void onRemoveCompleted(String packageName, boolean succeeded)
                         throws RemoteException {
-                    synchronized (ActivityManagerService.this) {
-                        finishForceStopPackageLocked(packageName, pkgUidF);
+                    if (appInfo != null) {
+                        synchronized (ActivityManagerService.this) {
+                            finishForceStopPackageLocked(packageName, appInfo.uid);
+                        }
                     }
-
                     final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                             Uri.fromParts("package", packageName, null));
                     intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                    intent.putExtra(Intent.EXTRA_UID, pkgUidF);
-                    intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(pkgUidF));
-                    broadcastIntentInPackage("android", SYSTEM_UID, intent,
-                            null, null, 0, null, null, null, null, false, false, userIdF);
+                    intent.putExtra(Intent.EXTRA_UID, (appInfo != null) ? appInfo.uid : -1);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
+                    if (isInstantApp) {
+                        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+                        broadcastIntentInPackage("android", SYSTEM_UID, intent, null, null, 0,
+                                null, null, permission.ACCESS_INSTANT_APPS, null, false, false,
+                                resolvedUserId);
+                    } else {
+                        broadcastIntentInPackage("android", SYSTEM_UID, intent, null, null, 0,
+                                null, null, null, null, false, false, resolvedUserId);
+                    }
 
                     if (observer != null) {
                         observer.onRemoveCompleted(packageName, succeeded);
@@ -5920,16 +5947,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             try {
                 // Clear application user data
-                pm.clearApplicationUserData(packageName, localObserver, userId);
+                pm.clearApplicationUserData(packageName, localObserver, resolvedUserId);
 
-                synchronized(this) {
-                    // Remove all permissions granted from/to this package
-                    removeUriPermissionsForPackageLocked(packageName, userId, true);
+                if (appInfo != null) {
+                    synchronized (this) {
+                        // Remove all permissions granted from/to this package
+                        removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true);
+                    }
+
+                    // Reset notification settings.
+                    INotificationManager inm = NotificationManager.getService();
+                    inm.clearData(packageName, appInfo.uid, uid == appInfo.uid);
                 }
-
-                // Reset notification settings.
-                INotificationManager inm = NotificationManager.getService();
-                inm.clearData(packageName, pkgUidF, uid == pkgUidF);
             } catch (RemoteException e) {
             }
         } finally {
