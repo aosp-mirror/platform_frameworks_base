@@ -24101,6 +24101,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mLastANRState = null;
             }
         }
+
+        @Override
+        public void setFocusedActivity(IBinder token) {
+            synchronized (ActivityManagerService.this) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null) {
+                    throw new IllegalArgumentException(
+                            "setFocusedActivity: No activity record matching token=" + token);
+                }
+                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
+                        r, "setFocusedActivity")) {
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                }
+            }
+        }
     }
 
     /**
