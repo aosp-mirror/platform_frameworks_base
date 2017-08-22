@@ -2907,6 +2907,8 @@ public class ActivityManager {
     /**
      * @hide
      */
+    @RequiresPermission(anyOf={Manifest.permission.CLEAR_APP_USER_DATA,
+            Manifest.permission.ACCESS_INSTANT_APPS})
     public boolean clearApplicationUserData(String packageName, IPackageDataObserver observer) {
         try {
             return getService().clearApplicationUserData(packageName,
