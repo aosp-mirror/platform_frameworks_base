@@ -7729,6 +7729,10 @@
              wallpaper. -->
         <attr name="showMetadataInPreview" format="boolean" />
 
+        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true.
+            @hide -->
+        <attr name="supportsAmbientMode" format="boolean" />
+
     </declare-styleable>
 
     <!-- Use <code>dream</code> as the root tag of the XML resource that

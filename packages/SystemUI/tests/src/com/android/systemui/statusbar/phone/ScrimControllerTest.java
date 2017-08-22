@@ -31,6 +31,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -92,7 +93,35 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToAod() {
+    public void transitionToAod_withRegularWallpaper() {
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be visible with tint
+        assertScrimVisibility(false /* front */, true /* behind */);
+        assertScrimTint(mScrimBehind, true /* tinted */);
+        assertScrimTint(mScrimInFront, true /* tinted */);
+    }
+
+    @Test
+    public void transitionToAod_withAodWallpaper() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be transparent
+        assertScrimVisibility(false /* front */, false /* behind */);
+    }
+
+    @Test
+    public void transitionToAod_withAodWallpaperAndLockScreenWallpaper() {
+        ScrimState.AOD.mKeyguardUpdateMonitor = new KeyguardUpdateMonitor(getContext()) {
+            @Override
+            public boolean hasLockscreenWallpaper() {
+                return true;
+            }
+        };
+        mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent

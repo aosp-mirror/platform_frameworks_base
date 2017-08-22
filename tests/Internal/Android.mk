@@ -14,6 +14,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := junit \
     android-support-test \
     mockito-target-minus-junit4
 
+LOCAL_JAVA_RESOURCE_DIRS := res
 LOCAL_CERTIFICATE := platform
 
 LOCAL_PACKAGE_NAME := InternalTests

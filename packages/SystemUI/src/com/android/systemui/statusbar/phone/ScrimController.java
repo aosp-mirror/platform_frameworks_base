@@ -811,6 +811,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         pw.print("   mTracking="); pw.println(mTracking);
     }
 
+    public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
+        ScrimState.AOD.setWallpaperSupportsAmbientMode(wallpaperSupportsAmbientMode);
+    }
+
     public interface Callback {
         default void onStart() {
         }

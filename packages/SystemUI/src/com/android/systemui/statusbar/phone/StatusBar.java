@@ -53,6 +53,7 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskStackBuilder;
 import android.app.WallpaperColors;
+import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -526,7 +527,22 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
 
+    private BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
+            if (wallpaperManager == null) {
+                Log.w(TAG, "WallpaperManager not available");
+                return;
+            }
+            WallpaperInfo info = wallpaperManager.getWallpaperInfo();
+            final boolean supportsAmbientMode = info != null &&
+                    info.getSupportsAmbientMode();
 
+            mStatusBarWindowManager.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+            mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+        }
+    };
 
     private Runnable mLaunchTransitionEndRunnable;
     protected boolean mLaunchTransitionFadingAway;
@@ -703,6 +719,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         createAndAddWindows();
+
+        // Make sure we always have the most current wallpaper info.
+        IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
+        mContext.registerReceiver(mWallpaperChangedReceiver, wallpaperChangedFilter);
+        mWallpaperChangedReceiver.onReceive(mContext, null);
 
         mCommandQueue.disable(switches[0], switches[6], false /* animate */);
         setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,

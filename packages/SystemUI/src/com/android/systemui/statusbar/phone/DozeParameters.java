@@ -83,6 +83,11 @@ public class DozeParameters {
         return getPulseInDuration() + getPulseVisibleDuration() + getPulseOutDuration();
     }
 
+    public float getScreenBrightnessDoze() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDoze) / 255f;
+    }
+
     public int getPulseInDuration() {
         return getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
     }
@@ -115,6 +120,10 @@ public class DozeParameters {
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
     }
 
+    /**
+     * Checks if always on is available and enabled for the current user.
+     * @return {@code true} if enabled and available.
+     */
     public boolean getAlwaysOn() {
         return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
@@ -123,7 +132,7 @@ public class DozeParameters {
      * Some screens need to be completely black before changing the display power mode,
      * unexpected behavior might happen if this parameter isn't respected.
      *
-     * @return true if screen needs to be completely black before a power transition.
+     * @return {@code true} if screen needs to be completely black before a power transition.
      */
     public boolean getDisplayNeedsBlanking() {
         return mContext.getResources().getBoolean(
@@ -134,7 +143,7 @@ public class DozeParameters {
      * Whether we can implement our own screen off animation or if we need
      * to rely on DisplayPowerManager to dim the display.
      *
-     * @return true if SystemUI can control the screen off animation.
+     * @return {@code true} if SystemUI can control the screen off animation.
      */
     public boolean getCanControlScreenOffAnimation() {
         return !mContext.getResources().getBoolean(

@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -84,13 +87,21 @@ public enum ScrimState {
      */
     AOD {
         @Override
+        public void init(ScrimView scrimInFront, ScrimView scrimBehind,
+                DozeParameters dozeParameters) {
+            super.init(scrimInFront, scrimBehind, dozeParameters);
+            mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(scrimInFront.getContext());
+        }
+
+        @Override
         public void prepare(ScrimState previousState) {
             if (previousState == ScrimState.PULSING && !mCanControlScreenOff) {
                 updateScrimColor(mScrimInFront, 1, Color.BLACK);
             }
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
             mBlankScreen = previousState == ScrimState.PULSING;
-            mCurrentBehindAlpha = 1;
+            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode
+                    && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
             mCurrentInFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
@@ -158,6 +169,8 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     boolean mDisplayRequiresBlanking;
     boolean mCanControlScreenOff;
+    boolean mWallpaperSupportsAmbientMode;
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters) {
         mScrimInFront = scrimInFront;
@@ -217,5 +230,9 @@ public enum ScrimState {
 
     public void setScrimBehindAlphaKeyguard(float scrimBehindAlphaKeyguard) {
         mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
+    }
+
+    public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
+        mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
     }
 }
