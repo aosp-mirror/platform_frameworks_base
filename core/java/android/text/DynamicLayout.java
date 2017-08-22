@@ -80,6 +80,7 @@ public class DynamicLayout extends Layout
             b.mSpacingMult = DEFAULT_LINESPACING_MULTIPLIER;
             b.mSpacingAdd = DEFAULT_LINESPACING_ADDITION;
             b.mIncludePad = true;
+            b.mFallbackLineSpacing = false;
             b.mEllipsizedWidth = width;
             b.mEllipsize = null;
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
@@ -168,6 +169,25 @@ public class DynamicLayout extends Layout
         @NonNull
         public Builder setIncludePad(boolean includePad) {
             mIncludePad = includePad;
+            return this;
+        }
+
+        /**
+         * Set whether to respect the ascent and descent of the fallback fonts that are used in
+         * displaying the text (which is needed to avoid text from consecutive lines running into
+         * each other). If set, fallback fonts that end up getting used can increase the ascent
+         * and descent of the lines that they are used on.
+         *
+         * <p>For backward compatibility reasons, the default is {@code false}, but setting this to
+         * true is strongly recommended. It is required to be true if text could be in languages
+         * like Burmese or Tibetan where text is typically much taller or deeper than Latin text.
+         *
+         * @param useLineSpacingFromFallbacks whether to expand linespacing based on fallback fonts
+         * @return this builder, useful for chaining
+         */
+        @NonNull
+        public Builder setUseLineSpacingFromFallbacks(boolean useLineSpacingFromFallbacks) {
+            mFallbackLineSpacing = useLineSpacingFromFallbacks;
             return this;
         }
 
@@ -270,6 +290,7 @@ public class DynamicLayout extends Layout
         private float mSpacingMult;
         private float mSpacingAdd;
         private boolean mIncludePad;
+        private boolean mFallbackLineSpacing;
         private int mBreakStrategy;
         private int mHyphenationFrequency;
         private int mJustificationMode;
@@ -320,7 +341,7 @@ public class DynamicLayout extends Layout
                          @IntRange(from = 0) int ellipsizedWidth) {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingmult, spacingadd, includepad,
-                StaticLayout.BREAK_STRATEGY_SIMPLE, StaticLayout.HYPHENATION_FREQUENCY_NONE,
+                Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NONE,
                 Layout.JUSTIFICATION_MODE_NONE, ellipsize, ellipsizedWidth);
     }
 
@@ -388,6 +409,7 @@ public class DynamicLayout extends Layout
 
     private void generate(@NonNull Builder b) {
         mBase = b.mBase;
+        mFallbackLineSpacing = b.mFallbackLineSpacing;
         if (b.mEllipsize != null) {
             mInts = new PackedIntVector(COLUMNS_ELLIPSIZE);
             mEllipsizedWidth = b.mEllipsizedWidth;
@@ -573,6 +595,7 @@ public class DynamicLayout extends Layout
                 .setWidth(getWidth())
                 .setTextDirection(getTextDirectionHeuristic())
                 .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
+                .setUseLineSpacingFromFallbacks(mFallbackLineSpacing)
                 .setEllipsizedWidth(mEllipsizedWidth)
                 .setEllipsize(mEllipsizeAt)
                 .setBreakStrategy(mBreakStrategy)
@@ -1033,10 +1056,11 @@ public class DynamicLayout extends Layout
         private void reflow(CharSequence s, int where, int before, int after) {
             DynamicLayout ml = mLayout.get();
 
-            if (ml != null)
+            if (ml != null) {
                 ml.reflow(s, where, before, after);
-            else if (s instanceof Spannable)
+            } else if (s instanceof Spannable) {
                 ((Spannable) s).removeSpan(this);
+            }
         }
 
         public void beforeTextChanged(CharSequence s, int where, int before, int after) {
@@ -1093,6 +1117,7 @@ public class DynamicLayout extends Layout
     private CharSequence mDisplay;
     private ChangeWatcher mWatcher;
     private boolean mIncludePad;
+    private boolean mFallbackLineSpacing;
     private boolean mEllipsize;
     private int mEllipsizedWidth;
     private TextUtils.TruncateAt mEllipsizeAt;
