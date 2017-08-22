@@ -32,11 +32,13 @@ import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
+import com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -46,8 +48,10 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -79,8 +83,8 @@ public class OffloadController {
     // Maps upstream interface names to offloaded traffic statistics.
     // Always contains the latest value received from the hardware for each interface, regardless of
     // whether offload is currently running on that interface.
-    private HashMap<String, OffloadHardwareInterface.ForwardedStats>
-            mForwardedStats = new HashMap<>();
+    private ConcurrentHashMap<String, ForwardedStats> mForwardedStats =
+            new ConcurrentHashMap<>(16, 0.75F, 1);
 
     // Maps upstream interface names to interface quotas.
     // Always contains the latest value received from the framework for each interface, regardless
@@ -205,27 +209,29 @@ public class OffloadController {
     private class OffloadTetheringStatsProvider extends ITetheringStatsProvider.Stub {
         @Override
         public NetworkStats getTetherStats(int how) {
+            // getTetherStats() is the only function in OffloadController that can be called from
+            // a different thread. Do not attempt to update stats by querying the offload HAL
+            // synchronously from a different thread than our Handler thread. http://b/64771555.
+            Runnable updateStats = () -> { updateStatsForCurrentUpstream(); };
+            if (Looper.myLooper() == mHandler.getLooper()) {
+                updateStats.run();
+            } else {
+                mHandler.post(updateStats);
+            }
+
             NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
+            NetworkStats.Entry entry = new NetworkStats.Entry();
+            entry.set = SET_DEFAULT;
+            entry.tag = TAG_NONE;
+            entry.uid = (how == STATS_PER_UID) ? UID_TETHERING : UID_ALL;
 
-            // We can't just post to mHandler because we are mostly (but not always) called by
-            // NetworkStatsService#performPollLocked, which is (currently) on the same thread as us.
-            mHandler.runWithScissors(() -> {
-                // We have to report both per-interface and per-UID stats, because offloaded traffic
-                // is not seen by kernel interface counters.
-                NetworkStats.Entry entry = new NetworkStats.Entry();
-                entry.set = SET_DEFAULT;
-                entry.tag = TAG_NONE;
-                entry.uid = (how == STATS_PER_UID) ? UID_TETHERING : UID_ALL;
-
-                updateStatsForCurrentUpstream();
-
-                for (String iface : mForwardedStats.keySet()) {
-                    entry.iface = iface;
-                    entry.rxBytes = mForwardedStats.get(iface).rxBytes;
-                    entry.txBytes = mForwardedStats.get(iface).txBytes;
-                    stats.addValues(entry);
-                }
-            }, 0);
+            for (Map.Entry<String, ForwardedStats> kv : mForwardedStats.entrySet()) {
+                ForwardedStats value = kv.getValue();
+                entry.iface = kv.getKey();
+                entry.rxBytes = value.rxBytes;
+                entry.txBytes = value.txBytes;
+                stats.addValues(entry);
+            }
 
             return stats;
         }
@@ -247,10 +253,21 @@ public class OffloadController {
             return;
         }
 
-        if (!mForwardedStats.containsKey(iface)) {
-            mForwardedStats.put(iface, new OffloadHardwareInterface.ForwardedStats());
+        // Always called on the handler thread.
+        //
+        // Use get()/put() instead of updating ForwardedStats in place because we can be called
+        // concurrently with getTetherStats. In combination with the guarantees provided by
+        // ConcurrentHashMap, this ensures that getTetherStats always gets the most recent copy of
+        // the stats for each interface, and does not observe partial writes where rxBytes is
+        // updated and txBytes is not.
+        ForwardedStats diff = mHwInterface.getForwardedStats(iface);
+        ForwardedStats base = mForwardedStats.get(iface);
+        if (base != null) {
+            diff.add(base);
         }
-        mForwardedStats.get(iface).add(mHwInterface.getForwardedStats(iface));
+        mForwardedStats.put(iface, diff);
+        // diff is a new object, just created by getForwardedStats(). Therefore, anyone reading from
+        // mForwardedStats (i.e., any caller of getTetherStats) will see the new stats immediately.
     }
 
     private boolean maybeUpdateDataLimit(String iface) {
