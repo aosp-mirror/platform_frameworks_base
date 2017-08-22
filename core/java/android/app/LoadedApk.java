@@ -625,8 +625,21 @@ public final class LoadedApk {
         final List<String> zipPaths = new ArrayList<>(10);
         final List<String> libPaths = new ArrayList<>(10);
 
-        final boolean isBundledApp = mApplicationInfo.isSystemApp()
+        boolean isBundledApp = mApplicationInfo.isSystemApp()
                 && !mApplicationInfo.isUpdatedSystemApp();
+
+        // Vendor apks are treated as bundled only when /vendor/lib is in the default search
+        // paths. If not, they are treated as unbundled; access to system libs is limited.
+        // Having /vendor/lib in the default search paths means that all system processes
+        // are allowed to use any vendor library, which in turn means that system is dependent
+        // on vendor partition. In the contrary, not having /vendor/lib in the default search
+        // paths mean that the two partitions are separated and thus we can treat vendor apks
+        // as unbundled.
+        final String defaultSearchPaths = System.getProperty("java.library.path");
+        final boolean treatVendorApkAsUnbundled = !defaultSearchPaths.contains("/vendor/lib");
+        if (mApplicationInfo.getCodePath().startsWith("/vendor/") && treatVendorApkAsUnbundled) {
+            isBundledApp = false;
+        }
 
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
@@ -634,8 +647,7 @@ public final class LoadedApk {
         if (isBundledApp) {
             // This is necessary to grant bundled apps access to
             // libraries located in subdirectories of /system/lib
-            libraryPermittedPath += File.pathSeparator +
-                                    System.getProperty("java.library.path");
+            libraryPermittedPath += File.pathSeparator + defaultSearchPaths;
         }
 
         final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
