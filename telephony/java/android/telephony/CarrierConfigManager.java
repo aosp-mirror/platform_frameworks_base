@@ -825,8 +825,6 @@ public class CarrierConfigManager {
      * If user has explicitly disabled some packages in the list, won't re-enable.
      * Other carrier specific apps which are not in this list may be disabled for current carrier,
      * and only be re-enabled when this config for another carrier includes it.
-     *
-     * @hide
      */
     public static final String KEY_ENABLE_APPS_STRING_ARRAY = "enable_apps_string_array";
 
