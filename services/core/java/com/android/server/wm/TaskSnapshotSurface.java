@@ -162,7 +162,7 @@ class TaskSnapshotSurface implements StartingSurface {
                         + task);
                 return null;
             }
-            final WindowState topFullscreenWindow = topFullscreenToken.findMainWindow();
+            final WindowState topFullscreenWindow = topFullscreenToken.getTopFullscreenWindow();
             if (mainWindow == null || topFullscreenWindow == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for token="
                         + token);
