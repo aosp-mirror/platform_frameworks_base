@@ -312,9 +312,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return false;
         }
 
-        final boolean isPermissionGranted =
+        final boolean isInstallPermissionGranted =
                 (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+        final boolean isSelfUpdatePermissionGranted =
+                (mPm.checkUidPermission(android.Manifest.permission.INSTALL_SELF_UPDATES,
+                        mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+        final boolean isPermissionGranted = isInstallPermissionGranted
+                || (isSelfUpdatePermissionGranted
+                    && mPm.getPackageUid(mPackageName, 0, userId) == mInstallerUid);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean forcePermissionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0;
