@@ -1797,12 +1797,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // netd does not keep state on strict mode policies, and cannot replace a non-accept
             // policy without deleting it first. Rather than add state to netd, just always send
             // it an accept policy when switching between two non-accept policies.
+            // TODO: consider keeping state in netd so we can simplify this code.
             if (oldPolicy != StrictMode.NETWORK_POLICY_ACCEPT &&
                     policy != StrictMode.NETWORK_POLICY_ACCEPT) {
-                applyUidCleartextNetworkPolicy(uid, policy);
+                applyUidCleartextNetworkPolicy(uid, StrictMode.NETWORK_POLICY_ACCEPT);
             }
+
+            applyUidCleartextNetworkPolicy(uid, policy);
         }
-        applyUidCleartextNetworkPolicy(uid, policy);
     }
 
     @Override
