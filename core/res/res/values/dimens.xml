@@ -438,15 +438,6 @@
     <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
     <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
 
-    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_width">320dp</dimen>
-
-    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_height">400dp</dimen>
-
-    <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">8dp</dimen>
-
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
