@@ -347,10 +347,10 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * Send an SMS message to either the contacts primary number or the telephone number specified.
      *
-     * @param device          Bluetooth device
-     * @param contacts        Uri[] of the contacts
-     * @param message         Message to be sent
-     * @param sentIntent      intent issued when message is sent
+     * @param device Bluetooth device
+     * @param contacts Uri[] of the contacts
+     * @param message Message to be sent
+     * @param sentIntent intent issued when message is sent
      * @param deliveredIntent intent issued when message is delivered
      * @return true if the message is enqueued, false on error
      */
@@ -393,7 +393,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
             mService = IBluetoothMapClient.Stub.asInterface(service);
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.MAP_CLIENT,
-                    BluetoothMapClient.this);
+                        BluetoothMapClient.this);
             }
         }
 

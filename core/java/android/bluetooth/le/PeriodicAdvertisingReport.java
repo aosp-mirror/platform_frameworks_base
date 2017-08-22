@@ -24,6 +24,7 @@ import java.util.Objects;
 
 /**
  * PeriodicAdvertisingReport for Bluetooth LE synchronized advertising.
+ *
  * @hide
  */
 public final class PeriodicAdvertisingReport implements Parcelable {
@@ -53,10 +54,9 @@ public final class PeriodicAdvertisingReport implements Parcelable {
 
     /**
      * Constructor of periodic advertising result.
-     *
      */
     public PeriodicAdvertisingReport(int syncHandle, int txPower, int rssi,
-                                     int dataStatus, ScanRecord data) {
+            int dataStatus, ScanRecord data) {
         this.syncHandle = syncHandle;
         this.txPower = txPower;
         this.rssi = rssi;
@@ -157,29 +157,30 @@ public final class PeriodicAdvertisingReport implements Parcelable {
         }
         PeriodicAdvertisingReport other = (PeriodicAdvertisingReport) obj;
         return (syncHandle == other.syncHandle) &&
-            (txPower == other.txPower) &&
-            (rssi == other.rssi) &&
-            (dataStatus == other.dataStatus) &&
-            Objects.equals(data, other.data) &&
-            (timestampNanos == other.timestampNanos);
+                (txPower == other.txPower) &&
+                (rssi == other.rssi) &&
+                (dataStatus == other.dataStatus) &&
+                Objects.equals(data, other.data) &&
+                (timestampNanos == other.timestampNanos);
     }
 
     @Override
     public String toString() {
-      return "PeriodicAdvertisingReport{syncHandle=" + syncHandle +
-          ", txPower=" + txPower + ", rssi=" + rssi + ", dataStatus=" + dataStatus +
-          ", data=" + Objects.toString(data) + ", timestampNanos=" + timestampNanos + '}';
+        return "PeriodicAdvertisingReport{syncHandle=" + syncHandle +
+                ", txPower=" + txPower + ", rssi=" + rssi + ", dataStatus=" + dataStatus +
+                ", data=" + Objects.toString(data) + ", timestampNanos=" + timestampNanos + '}';
     }
 
-    public static final Parcelable.Creator<PeriodicAdvertisingReport> CREATOR = new Creator<PeriodicAdvertisingReport>() {
-            @Override
-        public PeriodicAdvertisingReport createFromParcel(Parcel source) {
-            return new PeriodicAdvertisingReport(source);
-        }
+    public static final Parcelable.Creator<PeriodicAdvertisingReport> CREATOR =
+            new Creator<PeriodicAdvertisingReport>() {
+                @Override
+                public PeriodicAdvertisingReport createFromParcel(Parcel source) {
+                    return new PeriodicAdvertisingReport(source);
+                }
 
-            @Override
-        public PeriodicAdvertisingReport[] newArray(int size) {
-            return new PeriodicAdvertisingReport[size];
-        }
-    };
+                @Override
+                public PeriodicAdvertisingReport[] newArray(int size) {
+                    return new PeriodicAdvertisingReport[size];
+                }
+            };
 }

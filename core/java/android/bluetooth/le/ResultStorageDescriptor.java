@@ -80,14 +80,14 @@ public final class ResultStorageDescriptor implements Parcelable {
 
     public static final Parcelable.Creator<ResultStorageDescriptor>
             CREATOR = new Creator<ResultStorageDescriptor>() {
-                    @Override
-                public ResultStorageDescriptor createFromParcel(Parcel source) {
-                    return new ResultStorageDescriptor(source);
-                }
+        @Override
+        public ResultStorageDescriptor createFromParcel(Parcel source) {
+            return new ResultStorageDescriptor(source);
+        }
 
-                    @Override
-                public ResultStorageDescriptor[] newArray(int size) {
-                    return new ResultStorageDescriptor[size];
-                }
-            };
+        @Override
+        public ResultStorageDescriptor[] newArray(int size) {
+            return new ResultStorageDescriptor[size];
+        }
+    };
 }

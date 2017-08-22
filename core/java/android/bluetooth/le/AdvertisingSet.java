@@ -19,7 +19,6 @@ package android.bluetooth.le;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
-import android.bluetooth.le.IAdvertisingSetCallback;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -41,19 +40,19 @@ public final class AdvertisingSet {
     private int advertiserId;
 
     /* package */ AdvertisingSet(int advertiserId,
-                                 IBluetoothManager bluetoothManager) {
+            IBluetoothManager bluetoothManager) {
         this.advertiserId = advertiserId;
 
         try {
-          this.gatt = bluetoothManager.getBluetoothGatt();
+            this.gatt = bluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
-          Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
-          throw new IllegalStateException("Failed to get Bluetooth");
+            Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
+            throw new IllegalStateException("Failed to get Bluetooth");
         }
     }
 
     /* package */ void setAdvertiserId(int advertiserId) {
-      this.advertiserId = advertiserId;
+        this.advertiserId = advertiserId;
     }
 
     /**
@@ -63,18 +62,17 @@ public final class AdvertisingSet {
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      * @param enable whether the advertising should be enabled (true), or disabled (false)
-     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to
-     *                     65535 (655,350 ms)
+     * @param duration advertising duration, in 10ms unit. Valid range is from 1 (10ms) to 65535
+     * (655,350 ms)
      * @param maxExtendedAdvertisingEvents maximum number of extended advertising events the
-     *                     controller shall attempt to send prior to terminating the extended
-     *                     advertising, even if the duration has not expired. Valid range is
-     *                     from 1 to 255.
+     * controller shall attempt to send prior to terminating the extended advertising, even if the
+     * duration has not expired. Valid range is from 1 to 255.
      */
     public void enableAdvertising(boolean enable, int duration,
             int maxExtendedAdvertisingEvents) {
         try {
             gatt.enableAdvertisingSet(this.advertiserId, enable, duration,
-                                      maxExtendedAdvertisingEvents);
+                    maxExtendedAdvertisingEvents);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -87,11 +85,10 @@ public final class AdvertisingSet {
      * <p>
      * Advertising data must be empty if non-legacy scannable advertising is used.
      *
-     * @param advertiseData Advertisement data to be broadcasted. Size must not exceed
-     *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
-     *                     advertisement is connectable, three bytes will be added for flags. If the
-     *                     update takes place when the advertising set is enabled, the data can be
-     *                     maximum 251 bytes long.
+     * @param advertiseData Advertisement data to be broadcasted. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the advertisement is connectable,
+     * three bytes will be added for flags. If the update takes place when the advertising set is
+     * enabled, the data can be maximum 251 bytes long.
      */
     public void setAdvertisingData(AdvertiseData advertiseData) {
         try {
@@ -107,9 +104,8 @@ public final class AdvertisingSet {
      * is delivered through {@code callback.onScanResponseDataSet()}.
      *
      * @param scanResponse Scan response associated with the advertisement data. Size must not
-     *                     exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
-     *                     update takes place when the advertising set is enabled, the data can be
-     *                     maximum 251 bytes long.
+     * exceed {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the update takes place
+     * when the advertising set is enabled, the data can be maximum 251 bytes long.
      */
     public void setScanResponseData(AdvertiseData scanResponse) {
         try {
@@ -153,10 +149,9 @@ public final class AdvertisingSet {
      * immediately, the operation status is delivered through
      * {@code callback.onPeriodicAdvertisingDataSet()}.
      *
-     * @param periodicData Periodic advertising data. Size must not exceed
-     *                     {@link BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the
-     *                     update takes place when the periodic advertising is enabled for this set,
-     *                     the data can be maximum 251 bytes long.
+     * @param periodicData Periodic advertising data. Size must not exceed {@link
+     * BluetoothAdapter#getLeMaximumAdvertisingDataLength}. If the update takes place when the
+     * periodic advertising is enabled for this set, the data can be maximum 251 bytes long.
      */
     public void setPeriodicAdvertisingData(AdvertiseData periodicData) {
         try {
@@ -170,7 +165,8 @@ public final class AdvertisingSet {
      * Used to enable/disable periodic advertising. This method returns immediately, the operation
      * status is delivered through {@code callback.onPeriodicAdvertisingEnable()}.
      *
-     * @param enable whether the periodic advertising should be enabled (true), or disabled (false).
+     * @param enable whether the periodic advertising should be enabled (true), or disabled
+     * (false).
      */
     public void setPeriodicAdvertisingEnabled(boolean enable) {
         try {
@@ -186,9 +182,10 @@ public final class AdvertisingSet {
      * should ever use it.
      *
      * This method requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission.
+     *
      * @hide
      */
-    public void getOwnAddress(){
+    public void getOwnAddress() {
         try {
             gatt.getOwnAddress(this.advertiserId);
         } catch (RemoteException e) {
@@ -201,7 +198,7 @@ public final class AdvertisingSet {
      *
      * @hide
      */
-    public int getAdvertiserId(){
-      return advertiserId;
+    public int getAdvertiserId() {
+        return advertiserId;
     }
 }

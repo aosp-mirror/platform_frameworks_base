@@ -231,9 +231,9 @@ public final class ScanRecord {
                     case DATA_TYPE_SERVICE_DATA_128_BIT:
                         int serviceUuidLength = BluetoothUuid.UUID_BYTES_16_BIT;
                         if (fieldType == DATA_TYPE_SERVICE_DATA_32_BIT) {
-                         serviceUuidLength = BluetoothUuid.UUID_BYTES_32_BIT;
+                            serviceUuidLength = BluetoothUuid.UUID_BYTES_32_BIT;
                         } else if (fieldType == DATA_TYPE_SERVICE_DATA_128_BIT) {
-                         serviceUuidLength = BluetoothUuid.UUID_BYTES_128_BIT;
+                            serviceUuidLength = BluetoothUuid.UUID_BYTES_128_BIT;
                         }
 
                         byte[] serviceDataUuidBytes = extractBytes(scanRecord, currentPos,
@@ -276,7 +276,8 @@ public final class ScanRecord {
     @Override
     public String toString() {
         return "ScanRecord [mAdvertiseFlags=" + mAdvertiseFlags + ", mServiceUuids=" + mServiceUuids
-                + ", mManufacturerSpecificData=" + BluetoothLeUtils.toString(mManufacturerSpecificData)
+                + ", mManufacturerSpecificData=" + BluetoothLeUtils.toString(
+                mManufacturerSpecificData)
                 + ", mServiceData=" + BluetoothLeUtils.toString(mServiceData)
                 + ", mTxPowerLevel=" + mTxPowerLevel + ", mDeviceName=" + mDeviceName + "]";
     }

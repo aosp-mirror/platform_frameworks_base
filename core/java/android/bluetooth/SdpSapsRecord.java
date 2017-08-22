@@ -41,7 +41,7 @@ public class SdpSapsRecord implements Parcelable {
 
     @Override
     public int describeContents() {
-         return 0;
+        return 0;
     }
 
     public int getRfcommCannelNumber() {
@@ -84,6 +84,7 @@ public class SdpSapsRecord implements Parcelable {
         public SdpSapsRecord createFromParcel(Parcel in) {
             return new SdpSapsRecord(in);
         }
+
         public SdpRecord[] newArray(int size) {
             return new SdpRecord[size];
         }

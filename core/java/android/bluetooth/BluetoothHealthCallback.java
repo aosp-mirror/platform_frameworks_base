@@ -33,12 +33,11 @@ public abstract class BluetoothHealthCallback {
      * <p> This callback is called on the binder thread (not on the UI thread)
      *
      * @param config Bluetooth Health app configuration
-     * @param status Success or failure of the registration or unregistration
-     *            calls. Can be one of
-     *            {@link BluetoothHealth#APP_CONFIG_REGISTRATION_SUCCESS} or
-     *            {@link BluetoothHealth#APP_CONFIG_REGISTRATION_FAILURE} or
-     *            {@link BluetoothHealth#APP_CONFIG_UNREGISTRATION_SUCCESS} or
-     *            {@link BluetoothHealth#APP_CONFIG_UNREGISTRATION_FAILURE}
+     * @param status Success or failure of the registration or unregistration calls. Can be one of
+     * {@link BluetoothHealth#APP_CONFIG_REGISTRATION_SUCCESS} or {@link
+     * BluetoothHealth#APP_CONFIG_REGISTRATION_FAILURE} or
+     * {@link BluetoothHealth#APP_CONFIG_UNREGISTRATION_SUCCESS}
+     * or {@link BluetoothHealth#APP_CONFIG_UNREGISTRATION_FAILURE}
      */
     @BinderThread
     public void onHealthAppConfigurationStatusChange(BluetoothHealthAppConfiguration config,
@@ -57,15 +56,15 @@ public abstract class BluetoothHealthCallback {
      * @param prevState The previous state of the channel
      * @param newState The new state of the channel.
      * @param fd The Parcel File Descriptor when the channel state is connected.
-     * @param channelId The id associated with the channel. This id will be used
-     *            in future calls like when disconnecting the channel.
+     * @param channelId The id associated with the channel. This id will be used in future calls
+     * like when disconnecting the channel.
      */
     @BinderThread
     public void onHealthChannelStateChange(BluetoothHealthAppConfiguration config,
             BluetoothDevice device, int prevState, int newState, ParcelFileDescriptor fd,
             int channelId) {
         Log.d(TAG, "onHealthChannelStateChange: " + config + "Device: " + device +
-              "prevState:" + prevState + "newState:" + newState + "ParcelFd:" + fd +
-              "ChannelId:" + channelId);
+                "prevState:" + prevState + "newState:" + newState + "ParcelFd:" + fd +
+                "ChannelId:" + channelId);
     }
 }

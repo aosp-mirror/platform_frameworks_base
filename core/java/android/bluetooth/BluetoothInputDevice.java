@@ -35,12 +35,13 @@ import java.util.List;
  * This class provides the public APIs to control the Bluetooth Input
  * Device Profile.
  *
- *<p>BluetoothInputDevice is a proxy object for controlling the Bluetooth
+ * <p>BluetoothInputDevice is a proxy object for controlling the Bluetooth
  * Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
  * the BluetoothInputDevice proxy object.
  *
- *<p>Each method is protected with its appropriate permission.
- *@hide
+ * <p>Each method is protected with its appropriate permission.
+ *
+ * @hide
  */
 public final class BluetoothInputDevice implements BluetoothProfile {
     private static final String TAG = "BluetoothInputDevice";
@@ -53,9 +54,9 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      *
      * <p>This intent will have 3 extras:
      * <ul>
-     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
-     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
-     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     * <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
      *
      * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
@@ -67,45 +68,46 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-        "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
+            "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROTOCOL_MODE_CHANGED =
-        "android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED";
+            "android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED";
 
     /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_HANDSHAKE =
-        "android.bluetooth.input.profile.action.HANDSHAKE";
+            "android.bluetooth.input.profile.action.HANDSHAKE";
 
     /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_REPORT =
-        "android.bluetooth.input.profile.action.REPORT";
+            "android.bluetooth.input.profile.action.REPORT";
 
     /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VIRTUAL_UNPLUG_STATUS =
-        "android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS";
+            "android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS";
 
     /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_IDLE_TIME_CHANGED =
-        "android.bluetooth.input.profile.action.IDLE_TIME_CHANGED";
+            "android.bluetooth.input.profile.action.IDLE_TIME_CHANGED";
 
     /**
      * Return codes for the connect and disconnect Bluez / Dbus calls.
+     *
      * @hide
      */
     public static final int INPUT_DISCONNECT_FAILED_NOT_CONNECTED = 5000;
@@ -174,22 +176,26 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     /**
      * @hide
      */
-    public static final String EXTRA_PROTOCOL_MODE = "android.bluetooth.BluetoothInputDevice.extra.PROTOCOL_MODE";
+    public static final String EXTRA_PROTOCOL_MODE =
+            "android.bluetooth.BluetoothInputDevice.extra.PROTOCOL_MODE";
 
     /**
      * @hide
      */
-    public static final String EXTRA_REPORT_TYPE = "android.bluetooth.BluetoothInputDevice.extra.REPORT_TYPE";
+    public static final String EXTRA_REPORT_TYPE =
+            "android.bluetooth.BluetoothInputDevice.extra.REPORT_TYPE";
 
     /**
      * @hide
      */
-    public static final String EXTRA_REPORT_ID = "android.bluetooth.BluetoothInputDevice.extra.REPORT_ID";
+    public static final String EXTRA_REPORT_ID =
+            "android.bluetooth.BluetoothInputDevice.extra.REPORT_ID";
 
     /**
      * @hide
      */
-    public static final String EXTRA_REPORT_BUFFER_SIZE = "android.bluetooth.BluetoothInputDevice.extra.REPORT_BUFFER_SIZE";
+    public static final String EXTRA_REPORT_BUFFER_SIZE =
+            "android.bluetooth.BluetoothInputDevice.extra.REPORT_BUFFER_SIZE";
 
     /**
      * @hide
@@ -204,12 +210,14 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     /**
      * @hide
      */
-    public static final String EXTRA_VIRTUAL_UNPLUG_STATUS = "android.bluetooth.BluetoothInputDevice.extra.VIRTUAL_UNPLUG_STATUS";
+    public static final String EXTRA_VIRTUAL_UNPLUG_STATUS =
+            "android.bluetooth.BluetoothInputDevice.extra.VIRTUAL_UNPLUG_STATUS";
 
     /**
      * @hide
      */
-    public static final String EXTRA_IDLE_TIME = "android.bluetooth.BluetoothInputDevice.extra.IDLE_TIME";
+    public static final String EXTRA_IDLE_TIME =
+            "android.bluetooth.BluetoothInputDevice.extra.IDLE_TIME";
 
     private Context mContext;
     private ServiceListener mServiceListener;
@@ -221,34 +229,33 @@ public final class BluetoothInputDevice implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (VDBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG, "Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
                                 mContext.unbindService(mConnection);
                             } catch (Exception re) {
-                                Log.e(TAG,"",re);
+                                Log.e(TAG, "", re);
                             }
                         }
                     } else {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (VDBG) Log.d(TAG,"Binding service...");
+                                    if (VDBG) Log.d(TAG, "Binding service...");
                                     doBind();
                                 }
                             } catch (Exception re) {
-                                Log.e(TAG,"",re);
+                                Log.e(TAG, "", re);
                             }
                         }
                     }
                 }
-        };
+            };
 
     /**
      * Create a BluetoothInputDevice proxy object for interacting with the local
      * Bluetooth Service which handles the InputDevice profile
-     *
      */
     /*package*/ BluetoothInputDevice(Context context, ServiceListener l) {
         mContext = context;
@@ -260,7 +267,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
             try {
                 mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
             } catch (RemoteException e) {
-                Log.e(TAG,"",e);
+                Log.e(TAG, "", e);
             }
         }
 
@@ -286,7 +293,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
             try {
                 mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
             } catch (Exception e) {
-                Log.e(TAG,"",e);
+                Log.e(TAG, "", e);
             }
         }
 
@@ -296,9 +303,9 @@ public final class BluetoothInputDevice implements BluetoothProfile {
                     mService = null;
                     mContext.unbindService(mConnection);
                 } catch (Exception re) {
-                    Log.e(TAG,"",re);
+                    Log.e(TAG, "", re);
                 }
-           }
+            }
         }
         mServiceListener = null;
     }
@@ -319,8 +326,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * permission.
      *
      * @param device Remote Bluetooth Device
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean connect(BluetoothDevice device) {
@@ -359,8 +365,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * permission.
      *
      * @param device Remote Bluetooth Device
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean disconnect(BluetoothDevice device) {
@@ -432,7 +437,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     *  Priority can be one of {@link #PRIORITY_ON} or
+     * Priority can be one of {@link #PRIORITY_ON} or
      * {@link #PRIORITY_OFF},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
@@ -447,8 +452,8 @@ public final class BluetoothInputDevice implements BluetoothProfile {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
             if (priority != BluetoothProfile.PRIORITY_OFF &&
-                priority != BluetoothProfile.PRIORITY_ON) {
-              return false;
+                    priority != BluetoothProfile.PRIORITY_ON) {
+                return false;
             }
             try {
                 return mService.setPriority(device, priority);
@@ -494,9 +499,11 @@ public final class BluetoothInputDevice implements BluetoothProfile {
             mService = IBluetoothInputDevice.Stub.asInterface(Binder.allowBlocking(service));
 
             if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.INPUT_DEVICE, BluetoothInputDevice.this);
+                mServiceListener.onServiceConnected(BluetoothProfile.INPUT_DEVICE,
+                        BluetoothInputDevice.this);
             }
         }
+
         public void onServiceDisconnected(ComponentName className) {
             if (DBG) Log.d(TAG, "Proxy object disconnected");
             mService = null;
@@ -507,15 +514,15 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     };
 
     private boolean isEnabled() {
-       if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
-       return false;
+        if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+        return false;
     }
 
     private boolean isValidDevice(BluetoothDevice device) {
-       if (device == null) return false;
+        if (device == null) return false;
 
-       if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
-       return false;
+        if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
+        return false;
     }
 
 
@@ -525,8 +532,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param device Remote Bluetooth Device
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean virtualUnplug(BluetoothDevice device) {
@@ -546,15 +552,14 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     }
 
     /**
-    * Send Get_Protocol_Mode command to the connected HID input device.
-    *
-    * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-    *
-    * @param device Remote Bluetooth Device
-    * @return false on immediate error,
-    *true otherwise
-    * @hide
-    */
+     * Send Get_Protocol_Mode command to the connected HID input device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
     public boolean getProtocolMode(BluetoothDevice device) {
         if (VDBG) log("getProtocolMode(" + device + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
@@ -566,7 +571,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
             }
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
+        return false;
     }
 
     /**
@@ -575,8 +580,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param device Remote Bluetooth Device
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean setProtocolMode(BluetoothDevice device, int protocolMode) {
@@ -602,12 +606,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @param reportType Report type
      * @param reportId Report ID
      * @param bufferSize Report receiving buffer size
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
-    public boolean getReport(BluetoothDevice device, byte reportType, byte reportId, int bufferSize) {
-        if (VDBG) log("getReport(" + device + "), reportType=" + reportType + " reportId=" + reportId + "bufferSize=" + bufferSize);
+    public boolean getReport(BluetoothDevice device, byte reportType, byte reportId,
+            int bufferSize) {
+        if (VDBG) {
+            log(
+                    "getReport(" + device + "), reportType=" + reportType + " reportId=" + reportId
+                            + "bufferSize=" + bufferSize);
+        }
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getReport(device, reportType, reportId, bufferSize);
@@ -628,8 +636,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @param device Remote Bluetooth Device
      * @param reportType Report type
      * @param report Report receiving buffer size
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean setReport(BluetoothDevice device, byte reportType, String report) {
@@ -653,8 +660,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      *
      * @param device Remote Bluetooth Device
      * @param report Report to send
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean sendData(BluetoothDevice device, String report) {
@@ -677,8 +683,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
      *
      * @param device Remote Bluetooth Device
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean getIdleTime(BluetoothDevice device) {
@@ -702,8 +707,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      *
      * @param device Remote Bluetooth Device
      * @param idleTime Idle time to be set on HID Device
-     * @return false on immediate error,
-     *               true otherwise
+     * @return false on immediate error, true otherwise
      * @hide
      */
     public boolean setIdleTime(BluetoothDevice device, byte idleTime) {
@@ -721,6 +725,6 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     }
 
     private static void log(String msg) {
-      Log.d(TAG, msg);
+        Log.d(TAG, msg);
     }
 }

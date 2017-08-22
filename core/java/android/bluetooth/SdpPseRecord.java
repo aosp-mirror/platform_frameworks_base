@@ -32,7 +32,7 @@ public class SdpPseRecord implements Parcelable {
             int profile_version,
             int supported_features,
             int supported_repositories,
-            String service_name){
+            String service_name) {
         this.mL2capPsm = l2cap_psm;
         this.mRfcommChannelNumber = rfcomm_channel_number;
         this.mProfileVersion = profile_version;
@@ -41,14 +41,15 @@ public class SdpPseRecord implements Parcelable {
         this.mServiceName = service_name;
     }
 
-    public SdpPseRecord(Parcel in){
-           this.mRfcommChannelNumber = in.readInt();
-           this.mL2capPsm = in.readInt();
-           this.mProfileVersion = in.readInt();
-           this.mSupportedFeatures = in.readInt();
-           this.mSupportedRepositories = in.readInt();
-           this.mServiceName = in.readString();
+    public SdpPseRecord(Parcel in) {
+        this.mRfcommChannelNumber = in.readInt();
+        this.mL2capPsm = in.readInt();
+        this.mProfileVersion = in.readInt();
+        this.mSupportedFeatures = in.readInt();
+        this.mSupportedRepositories = in.readInt();
+        this.mServiceName = in.readString();
     }
+
     @Override
     public int describeContents() {
         // TODO Auto-generated method stub
@@ -78,6 +79,7 @@ public class SdpPseRecord implements Parcelable {
     public int getSupportedRepositories() {
         return mSupportedRepositories;
     }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mRfcommChannelNumber);
@@ -89,25 +91,25 @@ public class SdpPseRecord implements Parcelable {
 
     }
 
-    public String toString(){
+    public String toString() {
         String ret = "Bluetooth MNS SDP Record:\n";
 
-        if(mRfcommChannelNumber != -1){
+        if (mRfcommChannelNumber != -1) {
             ret += "RFCOMM Chan Number: " + mRfcommChannelNumber + "\n";
         }
-        if(mL2capPsm != -1){
+        if (mL2capPsm != -1) {
             ret += "L2CAP PSM: " + mL2capPsm + "\n";
         }
-        if(mProfileVersion != -1){
+        if (mProfileVersion != -1) {
             ret += "profile version: " + mProfileVersion + "\n";
         }
-        if(mServiceName != null){
+        if (mServiceName != null) {
             ret += "Service Name: " + mServiceName + "\n";
         }
-        if(mSupportedFeatures != -1){
+        if (mSupportedFeatures != -1) {
             ret += "Supported features: " + mSupportedFeatures + "\n";
         }
-        if(mSupportedRepositories != -1){
+        if (mSupportedRepositories != -1) {
             ret += "Supported repositories: " + mSupportedRepositories + "\n";
         }
 
@@ -118,6 +120,7 @@ public class SdpPseRecord implements Parcelable {
         public SdpPseRecord createFromParcel(Parcel in) {
             return new SdpPseRecord(in);
         }
+
         public SdpPseRecord[] newArray(int size) {
             return new SdpPseRecord[size];
         }

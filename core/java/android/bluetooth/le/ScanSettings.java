@@ -202,8 +202,8 @@ public final class ScanSettings implements Parcelable {
     }
 
     private ScanSettings(int scanMode, int callbackType, int scanResultType,
-                         long reportDelayMillis, int matchMode,
-                         int numOfMatchesPerFilter, boolean legacy, int phy) {
+            long reportDelayMillis, int matchMode,
+            int numOfMatchesPerFilter, boolean legacy, int phy) {
         mScanMode = scanMode;
         mCallbackType = callbackType;
         mScanResultType = scanResultType;
@@ -244,16 +244,16 @@ public final class ScanSettings implements Parcelable {
 
     public static final Parcelable.Creator<ScanSettings>
             CREATOR = new Creator<ScanSettings>() {
-                    @Override
-                public ScanSettings[] newArray(int size) {
-                    return new ScanSettings[size];
-                }
+        @Override
+        public ScanSettings[] newArray(int size) {
+            return new ScanSettings[size];
+        }
 
-                    @Override
-                public ScanSettings createFromParcel(Parcel in) {
-                    return new ScanSettings(in);
-                }
-            };
+        @Override
+        public ScanSettings createFromParcel(Parcel in) {
+            return new ScanSettings(in);
+        }
+    };
 
     /**
      * Builder for {@link ScanSettings}.
@@ -264,7 +264,7 @@ public final class ScanSettings implements Parcelable {
         private int mScanResultType = SCAN_RESULT_TYPE_FULL;
         private long mReportDelayMillis = 0;
         private int mMatchMode = MATCH_MODE_AGGRESSIVE;
-        private int mNumOfMatchesPerFilter  = MATCH_NUM_MAX_ADVERTISEMENT;
+        private int mNumOfMatchesPerFilter = MATCH_NUM_MAX_ADVERTISEMENT;
         private boolean mLegacy = true;
         private int mPhy = PHY_LE_ALL_SUPPORTED;
 
@@ -272,8 +272,7 @@ public final class ScanSettings implements Parcelable {
          * Set scan mode for Bluetooth LE scan.
          *
          * @param scanMode The scan mode can be one of {@link ScanSettings#SCAN_MODE_LOW_POWER},
-         *            {@link ScanSettings#SCAN_MODE_BALANCED} or
-         *            {@link ScanSettings#SCAN_MODE_LOW_LATENCY}.
+         * {@link ScanSettings#SCAN_MODE_BALANCED} or {@link ScanSettings#SCAN_MODE_LOW_LATENCY}.
          * @throws IllegalArgumentException If the {@code scanMode} is invalid.
          */
         public Builder setScanMode(int scanMode) {
@@ -312,9 +311,8 @@ public final class ScanSettings implements Parcelable {
         /**
          * Set scan result type for Bluetooth LE scan.
          *
-         * @param scanResultType Type for scan result, could be either
-         *            {@link ScanSettings#SCAN_RESULT_TYPE_FULL} or
-         *            {@link ScanSettings#SCAN_RESULT_TYPE_ABBREVIATED}.
+         * @param scanResultType Type for scan result, could be either {@link
+         * ScanSettings#SCAN_RESULT_TYPE_FULL} or {@link ScanSettings#SCAN_RESULT_TYPE_ABBREVIATED}.
          * @throws IllegalArgumentException If the {@code scanResultType} is invalid.
          * @hide
          */
@@ -333,8 +331,8 @@ public final class ScanSettings implements Parcelable {
          * Set report delay timestamp for Bluetooth LE scan.
          *
          * @param reportDelayMillis Delay of report in milliseconds. Set to 0 to be notified of
-         *            results immediately. Values &gt; 0 causes the scan results to be queued up and
-         *            delivered after the requested delay or when the internal buffers fill up.
+         * results immediately. Values &gt; 0 causes the scan results to be queued up and delivered
+         * after the requested delay or when the internal buffers fill up.
          * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
          */
         public Builder setReportDelay(long reportDelayMillis) {
@@ -349,9 +347,9 @@ public final class ScanSettings implements Parcelable {
          * Set the number of matches for Bluetooth LE scan filters hardware match
          *
          * @param numOfMatches The num of matches can be one of
-         *              {@link ScanSettings#MATCH_NUM_ONE_ADVERTISEMENT} or
-         *              {@link ScanSettings#MATCH_NUM_FEW_ADVERTISEMENT} or
-         *              {@link ScanSettings#MATCH_NUM_MAX_ADVERTISEMENT}
+         * {@link ScanSettings#MATCH_NUM_ONE_ADVERTISEMENT}
+         * or {@link ScanSettings#MATCH_NUM_FEW_ADVERTISEMENT} or {@link
+         * ScanSettings#MATCH_NUM_MAX_ADVERTISEMENT}
          * @throws IllegalArgumentException If the {@code matchMode} is invalid.
          */
         public Builder setNumOfMatches(int numOfMatches) {
@@ -366,9 +364,8 @@ public final class ScanSettings implements Parcelable {
         /**
          * Set match mode for Bluetooth LE scan filters hardware match
          *
-         * @param matchMode The match mode can be one of
-         *              {@link ScanSettings#MATCH_MODE_AGGRESSIVE} or
-         *              {@link ScanSettings#MATCH_MODE_STICKY}
+         * @param matchMode The match mode can be one of {@link ScanSettings#MATCH_MODE_AGGRESSIVE}
+         * or {@link ScanSettings#MATCH_MODE_STICKY}
          * @throws IllegalArgumentException If the {@code matchMode} is invalid.
          */
         public Builder setMatchMode(int matchMode) {
@@ -402,10 +399,8 @@ public final class ScanSettings implements Parcelable {
          * {@link android.bluetooth.BluetoothAdapter#isLeCodedPhySupported}.
          * Selecting an unsupported phy will result in failure to start scan.
          *
-         * @param phy Can be one of
-         *   {@link BluetoothDevice#PHY_LE_1M},
-         *   {@link BluetoothDevice#PHY_LE_CODED} or
-         *   {@link ScanSettings#PHY_LE_ALL_SUPPORTED}
+         * @param phy Can be one of {@link BluetoothDevice#PHY_LE_1M}, {@link
+         * BluetoothDevice#PHY_LE_CODED} or {@link ScanSettings#PHY_LE_ALL_SUPPORTED}
          */
         public Builder setPhy(int phy) {
             mPhy = phy;
@@ -417,8 +412,8 @@ public final class ScanSettings implements Parcelable {
          */
         public ScanSettings build() {
             return new ScanSettings(mScanMode, mCallbackType, mScanResultType,
-                                    mReportDelayMillis, mMatchMode,
-                                    mNumOfMatchesPerFilter, mLegacy, mPhy);
+                    mReportDelayMillis, mMatchMode,
+                    mNumOfMatchesPerFilter, mLegacy, mPhy);
         }
     }
 }

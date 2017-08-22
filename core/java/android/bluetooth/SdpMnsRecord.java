@@ -29,7 +29,7 @@ public class SdpMnsRecord implements Parcelable {
             int rfcomm_channel_number,
             int profile_version,
             int supported_features,
-            String service_name){
+            String service_name) {
         this.mL2capPsm = l2cap_psm;
         this.mRfcommChannelNumber = rfcomm_channel_number;
         this.mSupportedFeatures = supported_features;
@@ -37,13 +37,14 @@ public class SdpMnsRecord implements Parcelable {
         this.mProfileVersion = profile_version;
     }
 
-    public SdpMnsRecord(Parcel in){
-           this.mRfcommChannelNumber = in.readInt();
-           this.mL2capPsm = in.readInt();
-           this.mServiceName = in.readString();
-           this.mSupportedFeatures = in.readInt();
-           this.mProfileVersion = in.readInt();
+    public SdpMnsRecord(Parcel in) {
+        this.mRfcommChannelNumber = in.readInt();
+        this.mL2capPsm = in.readInt();
+        this.mServiceName = in.readString();
+        this.mSupportedFeatures = in.readInt();
+        this.mProfileVersion = in.readInt();
     }
+
     @Override
     public int describeContents() {
         // TODO Auto-generated method stub
@@ -80,23 +81,23 @@ public class SdpMnsRecord implements Parcelable {
         dest.writeInt(mProfileVersion);
     }
 
-    public String toString(){
+    public String toString() {
         String ret = "Bluetooth MNS SDP Record:\n";
 
-        if(mRfcommChannelNumber != -1){
+        if (mRfcommChannelNumber != -1) {
             ret += "RFCOMM Chan Number: " + mRfcommChannelNumber + "\n";
         }
-        if(mL2capPsm != -1){
+        if (mL2capPsm != -1) {
             ret += "L2CAP PSM: " + mL2capPsm + "\n";
         }
-        if(mServiceName != null){
+        if (mServiceName != null) {
             ret += "Service Name: " + mServiceName + "\n";
         }
-        if(mSupportedFeatures != -1){
+        if (mSupportedFeatures != -1) {
             ret += "Supported features: " + mSupportedFeatures + "\n";
         }
-        if(mProfileVersion != -1){
-            ret += "Profile_version: " + mProfileVersion+"\n";
+        if (mProfileVersion != -1) {
+            ret += "Profile_version: " + mProfileVersion + "\n";
         }
         return ret;
     }
@@ -105,6 +106,7 @@ public class SdpMnsRecord implements Parcelable {
         public SdpMnsRecord createFromParcel(Parcel in) {
             return new SdpMnsRecord(in);
         }
+
         public SdpMnsRecord[] newArray(int size) {
             return new SdpMnsRecord[size];
         }

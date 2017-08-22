@@ -14,14 +14,15 @@
 */
 package android.bluetooth;
 
-import java.util.Arrays;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Arrays;
 
 /**
  * Data representation of a Object Push Profile Server side SDP record.
  */
+
 /** @hide */
 public class SdpOppOpsRecord implements Parcelable {
 
@@ -67,13 +68,13 @@ public class SdpOppOpsRecord implements Parcelable {
         return 0;
     }
 
-    public SdpOppOpsRecord(Parcel in){
+    public SdpOppOpsRecord(Parcel in) {
         this.mRfcommChannel = in.readInt();
         this.mL2capPsm = in.readInt();
         this.mProfileVersion = in.readInt();
         this.mServiceName = in.readString();
         int arrayLength = in.readInt();
-        if(arrayLength > 0) {
+        if (arrayLength > 0) {
             byte[] bytes = new byte[arrayLength];
             in.readByteArray(bytes);
             this.mFormatsList = bytes;
@@ -88,7 +89,7 @@ public class SdpOppOpsRecord implements Parcelable {
         dest.writeInt(mL2capPsm);
         dest.writeInt(mProfileVersion);
         dest.writeString(mServiceName);
-        if(mFormatsList!= null && mFormatsList.length > 0) {
+        if (mFormatsList != null && mFormatsList.length > 0) {
             dest.writeInt(mFormatsList.length);
             dest.writeByteArray(mFormatsList);
         } else {
@@ -96,7 +97,7 @@ public class SdpOppOpsRecord implements Parcelable {
         }
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder("Bluetooth OPP Server SDP Record:\n");
         sb.append("  RFCOMM Chan Number: ").append(mRfcommChannel);
         sb.append("\n  L2CAP PSM: ").append(mL2capPsm);
@@ -110,6 +111,7 @@ public class SdpOppOpsRecord implements Parcelable {
         public SdpOppOpsRecord createFromParcel(Parcel in) {
             return new SdpOppOpsRecord(in);
         }
+
         public SdpOppOpsRecord[] newArray(int size) {
             return new SdpOppOpsRecord[size];
         }

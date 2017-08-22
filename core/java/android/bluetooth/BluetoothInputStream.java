@@ -51,15 +51,14 @@ import java.io.InputStream;
      * stream is detected or an exception is thrown.
      *
      * @return the byte read or -1 if the end of stream has been reached.
-     * @throws IOException
-     *             if the stream is closed or another IOException occurs.
+     * @throws IOException if the stream is closed or another IOException occurs.
      * @since Android 1.5
      */
     public int read() throws IOException {
         byte b[] = new byte[1];
         int ret = mSocket.read(b, 0, 1);
         if (ret == 1) {
-            return (int)b[0] & 0xff;
+            return (int) b[0] & 0xff;
         } else {
             return -1;
         }
@@ -69,21 +68,14 @@ import java.io.InputStream;
      * Reads at most {@code length} bytes from this stream and stores them in
      * the byte array {@code b} starting at {@code offset}.
      *
-     * @param b
-     *            the byte array in which to store the bytes read.
-     * @param offset
-     *            the initial position in {@code buffer} to store the bytes
-     *            read from this stream.
-     * @param length
-     *            the maximum number of bytes to store in {@code b}.
-     * @return the number of bytes actually read or -1 if the end of the stream
-     *         has been reached.
-     * @throws IndexOutOfBoundsException
-     *             if {@code offset < 0} or {@code length < 0}, or if
-     *             {@code offset + length} is greater than the length of
-     *             {@code b}.
-     * @throws IOException
-     *             if the stream is closed or another IOException occurs.
+     * @param b the byte array in which to store the bytes read.
+     * @param offset the initial position in {@code buffer} to store the bytes read from this
+     * stream.
+     * @param length the maximum number of bytes to store in {@code b}.
+     * @return the number of bytes actually read or -1 if the end of the stream has been reached.
+     * @throws IndexOutOfBoundsException if {@code offset < 0} or {@code length < 0}, or if {@code
+     * offset + length} is greater than the length of {@code b}.
+     * @throws IOException if the stream is closed or another IOException occurs.
      * @since Android 1.5
      */
     public int read(byte[] b, int offset, int length) throws IOException {

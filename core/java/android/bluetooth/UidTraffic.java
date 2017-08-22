@@ -20,6 +20,7 @@ import android.os.Parcelable;
 
 /**
  * Record of data traffic (in bytes) by an application identified by its UID.
+ *
  * @hide
  */
 public class UidTraffic implements Cloneable, Parcelable {

@@ -45,13 +45,17 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
     /**
      * Returns whether the TX Power will be included.
      */
-    public boolean getIncludeTxPower() { return includeTxPower; }
+    public boolean getIncludeTxPower() {
+        return includeTxPower;
+    }
 
     /**
      * Returns the periodic advertising interval, in 1.25ms unit.
      * Valid values are from 80 (100ms) to 65519 (81.89875s).
      */
-    public int getInterval() { return interval; }
+    public int getInterval() {
+        return interval;
+    }
 
     @Override
     public int describeContents() {
@@ -65,18 +69,18 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
     }
 
     public static final Parcelable
-        .Creator<PeriodicAdvertisingParameters> CREATOR =
-        new Creator<PeriodicAdvertisingParameters>() {
-            @Override
-            public PeriodicAdvertisingParameters[] newArray(int size) {
-                return new PeriodicAdvertisingParameters[size];
-            }
+            .Creator<PeriodicAdvertisingParameters> CREATOR =
+            new Creator<PeriodicAdvertisingParameters>() {
+                @Override
+                public PeriodicAdvertisingParameters[] newArray(int size) {
+                    return new PeriodicAdvertisingParameters[size];
+                }
 
-            @Override
-            public PeriodicAdvertisingParameters createFromParcel(Parcel in) {
-                return new PeriodicAdvertisingParameters(in);
-            }
-        };
+                @Override
+                public PeriodicAdvertisingParameters createFromParcel(Parcel in) {
+                    return new PeriodicAdvertisingParameters(in);
+                }
+            };
 
     public static final class Builder {
         private boolean includeTxPower = false;
@@ -95,12 +99,13 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
          * Set advertising interval for periodic advertising, in 1.25ms unit.
          * Valid values are from 80 (100ms) to 65519 (81.89875s).
          * Value from range [interval, interval+20ms] will be picked as the actual value.
+         *
          * @throws IllegalArgumentException If the interval is invalid.
          */
         public Builder setInterval(int interval) {
             if (interval < INTERVAL_MIN || interval > INTERVAL_MAX) {
                 throw new IllegalArgumentException("Invalid interval (must be " + INTERVAL_MIN +
-                                                   "-" + INTERVAL_MAX + ")");
+                        "-" + INTERVAL_MAX + ")");
             }
             this.interval = interval;
             return this;

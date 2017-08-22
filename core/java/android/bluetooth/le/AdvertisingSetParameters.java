@@ -31,9 +31,9 @@ import android.os.Parcelable;
 public final class AdvertisingSetParameters implements Parcelable {
 
     /**
-    * Advertise on low frequency, around every 1000ms. This is the default and
-    * preferred advertising mode as it consumes the least power.
-    */
+     * Advertise on low frequency, around every 1000ms. This is the default and
+     * preferred advertising mode as it consumes the least power.
+     */
     public static final int INTERVAL_HIGH = 1600;
 
     /**
@@ -108,9 +108,9 @@ public final class AdvertisingSetParameters implements Parcelable {
     private final int txPowerLevel;
 
     private AdvertisingSetParameters(boolean connectable, boolean scannable, boolean isLegacy,
-                                     boolean isAnonymous, boolean includeTxPower,
-                                     int primaryPhy, int secondaryPhy,
-                                     int interval, int txPowerLevel) {
+            boolean isAnonymous, boolean includeTxPower,
+            int primaryPhy, int secondaryPhy,
+            int interval, int txPowerLevel) {
         this.connectable = connectable;
         this.scannable = scannable;
         this.isLegacy = isLegacy;
@@ -137,63 +137,81 @@ public final class AdvertisingSetParameters implements Parcelable {
     /**
      * Returns whether the advertisement will be connectable.
      */
-    public boolean isConnectable() { return connectable; }
+    public boolean isConnectable() {
+        return connectable;
+    }
 
     /**
      * Returns whether the advertisement will be scannable.
      */
-    public boolean isScannable() { return scannable; }
+    public boolean isScannable() {
+        return scannable;
+    }
 
     /**
      * Returns whether the legacy advertisement will be used.
      */
-    public boolean isLegacy() { return isLegacy; }
+    public boolean isLegacy() {
+        return isLegacy;
+    }
 
     /**
      * Returns whether the advertisement will be anonymous.
      */
-    public boolean isAnonymous() { return isAnonymous; }
+    public boolean isAnonymous() {
+        return isAnonymous;
+    }
 
     /**
      * Returns whether the TX Power will be included.
      */
-    public boolean includeTxPower() { return includeTxPower; }
+    public boolean includeTxPower() {
+        return includeTxPower;
+    }
 
     /**
      * Returns the primary advertising phy.
      */
-    public int getPrimaryPhy() { return primaryPhy; }
+    public int getPrimaryPhy() {
+        return primaryPhy;
+    }
 
     /**
      * Returns the secondary advertising phy.
      */
-    public int getSecondaryPhy() { return secondaryPhy; }
+    public int getSecondaryPhy() {
+        return secondaryPhy;
+    }
 
     /**
      * Returns the advertising interval.
      */
-    public int getInterval() { return interval; }
+    public int getInterval() {
+        return interval;
+    }
 
     /**
      * Returns the TX power level for advertising.
      */
-    public int getTxPowerLevel() { return txPowerLevel; }
+    public int getTxPowerLevel() {
+        return txPowerLevel;
+    }
 
     @Override
     public String toString() {
         return "AdvertisingSetParameters [connectable=" + connectable
-             + ", isLegacy=" + isLegacy
-             + ", isAnonymous=" + isAnonymous
-             + ", includeTxPower=" + includeTxPower
-             + ", primaryPhy=" + primaryPhy
-             + ", secondaryPhy=" + secondaryPhy
-             + ", interval=" + interval
-             + ", txPowerLevel=" + txPowerLevel + "]";
+                + ", isLegacy=" + isLegacy
+                + ", isAnonymous=" + isAnonymous
+                + ", includeTxPower=" + includeTxPower
+                + ", primaryPhy=" + primaryPhy
+                + ", secondaryPhy=" + secondaryPhy
+                + ", interval=" + interval
+                + ", txPowerLevel=" + txPowerLevel + "]";
     }
 
     @Override
     public int describeContents() {
-       return 0;
+        return 0;
     }
 
     @Override
@@ -210,17 +228,17 @@ public final class AdvertisingSetParameters implements Parcelable {
     }
 
     public static final Parcelable.Creator<AdvertisingSetParameters> CREATOR =
-        new Creator<AdvertisingSetParameters>() {
-          @Override
-          public AdvertisingSetParameters[] newArray(int size) {
-            return new AdvertisingSetParameters[size];
-          }
+            new Creator<AdvertisingSetParameters>() {
+                @Override
+                public AdvertisingSetParameters[] newArray(int size) {
+                    return new AdvertisingSetParameters[size];
+                }
 
-          @Override
-          public AdvertisingSetParameters createFromParcel(Parcel in) {
-            return new AdvertisingSetParameters(in);
-          }
-        };
+                @Override
+                public AdvertisingSetParameters createFromParcel(Parcel in) {
+                    return new AdvertisingSetParameters(in);
+                }
+            };
 
     /**
      * Builder class for {@link AdvertisingSetParameters}.
@@ -242,8 +260,9 @@ public final class AdvertisingSetParameters implements Parcelable {
          * non-connectable.
          * Legacy advertisements can be both connectable and scannable. Non-legacy
          * advertisements can be only scannable or only connectable.
-         * @param connectable Controls whether the advertisement type will be
-         * connectable (true) or non-connectable (false).
+         *
+         * @param connectable Controls whether the advertisement type will be connectable (true) or
+         * non-connectable (false).
          */
         public Builder setConnectable(boolean connectable) {
             this.connectable = connectable;
@@ -254,8 +273,9 @@ public final class AdvertisingSetParameters implements Parcelable {
          * Set whether the advertisement type should be scannable.
          * Legacy advertisements can be both connectable and scannable. Non-legacy
          * advertisements can be only scannable or only connectable.
-         * @param scannable Controls whether the advertisement type will be
-         * scannable (true) or non-scannable (false).
+         *
+         * @param scannable Controls whether the advertisement type will be scannable (true) or
+         * non-scannable (false).
          */
         public Builder setScannable(boolean scannable) {
             this.scannable = scannable;
@@ -291,8 +311,7 @@ public final class AdvertisingSetParameters implements Parcelable {
          *
          * This is used only if legacy mode is not used.
          *
-         * @param includeTxPower whether TX power should be included in extended
-         *            header
+         * @param includeTxPower whether TX power should be included in extended header
          */
         public Builder setIncludeTxPower(boolean includeTxPower) {
             this.includeTxPower = includeTxPower;
@@ -306,15 +325,15 @@ public final class AdvertisingSetParameters implements Parcelable {
          *
          * Use {@link BluetoothAdapter#isLeCodedPhySupported} to determine if LE Coded PHY is
          * supported on this device.
-         * @param primaryPhy Primary advertising physical channel, can only be
-         *            {@link BluetoothDevice#PHY_LE_1M} or
-         *            {@link BluetoothDevice#PHY_LE_CODED}.
+         *
+         * @param primaryPhy Primary advertising physical channel, can only be {@link
+         * BluetoothDevice#PHY_LE_1M} or {@link BluetoothDevice#PHY_LE_CODED}.
          * @throws IllegalArgumentException If the primaryPhy is invalid.
          */
         public Builder setPrimaryPhy(int primaryPhy) {
             if (primaryPhy != BluetoothDevice.PHY_LE_1M &&
-                primaryPhy != BluetoothDevice.PHY_LE_CODED) {
-               throw new IllegalArgumentException("bad primaryPhy " + primaryPhy);
+                    primaryPhy != BluetoothDevice.PHY_LE_CODED) {
+                throw new IllegalArgumentException("bad primaryPhy " + primaryPhy);
             }
             this.primaryPhy = primaryPhy;
             return this;
@@ -329,17 +348,16 @@ public final class AdvertisingSetParameters implements Parcelable {
          * {@link BluetoothAdapter#isLe2MPhySupported} to determine if LE Coded PHY or 2M PHY is
          * supported on this device.
          *
-         * @param secondaryPhy Secondary advertising physical channel, can only be
-         *            one of {@link BluetoothDevice#PHY_LE_1M},
-         *            {@link BluetoothDevice#PHY_LE_2M} or
-         *            {@link BluetoothDevice#PHY_LE_CODED}.
+         * @param secondaryPhy Secondary advertising physical channel, can only be one of {@link
+         * BluetoothDevice#PHY_LE_1M}, {@link BluetoothDevice#PHY_LE_2M} or {@link
+         * BluetoothDevice#PHY_LE_CODED}.
          * @throws IllegalArgumentException If the secondaryPhy is invalid.
          */
         public Builder setSecondaryPhy(int secondaryPhy) {
             if (secondaryPhy != BluetoothDevice.PHY_LE_1M &&
-                secondaryPhy != BluetoothDevice.PHY_LE_2M &&
-                secondaryPhy != BluetoothDevice.PHY_LE_CODED) {
-               throw new IllegalArgumentException("bad secondaryPhy " + secondaryPhy);
+                    secondaryPhy != BluetoothDevice.PHY_LE_2M &&
+                    secondaryPhy != BluetoothDevice.PHY_LE_CODED) {
+                throw new IllegalArgumentException("bad secondaryPhy " + secondaryPhy);
             }
             this.secondaryPhy = secondaryPhy;
             return this;
@@ -348,17 +366,15 @@ public final class AdvertisingSetParameters implements Parcelable {
         /**
          * Set advertising interval.
          *
-         * @param interval Bluetooth LE Advertising interval, in 0.625ms unit. Valid
-         *            range is from 160 (100ms) to 16777215 (10,485.759375 s).
-         *            Recommended values are:
-         *            {@link AdvertisingSetParameters#INTERVAL_LOW},
-         *            {@link AdvertisingSetParameters#INTERVAL_MEDIUM}, or
-         *            {@link AdvertisingSetParameters#INTERVAL_HIGH}.
+         * @param interval Bluetooth LE Advertising interval, in 0.625ms unit. Valid range is from
+         * 160 (100ms) to 16777215 (10,485.759375 s). Recommended values are: {@link
+         * AdvertisingSetParameters#INTERVAL_LOW}, {@link AdvertisingSetParameters#INTERVAL_MEDIUM},
+         * or {@link AdvertisingSetParameters#INTERVAL_HIGH}.
          * @throws IllegalArgumentException If the interval is invalid.
          */
         public Builder setInterval(int interval) {
             if (interval < INTERVAL_MIN || interval > INTERVAL_MAX) {
-               throw new IllegalArgumentException("unknown interval " + interval);
+                throw new IllegalArgumentException("unknown interval " + interval);
             }
             this.interval = interval;
             return this;
@@ -366,19 +382,19 @@ public final class AdvertisingSetParameters implements Parcelable {
 
         /**
          * Set the transmission power level for the advertising.
-         * @param txPowerLevel Transmission power of Bluetooth LE Advertising, in
-         *             dBm. The valid range is [-127, 1] Recommended values are:
-         *             {@link AdvertisingSetParameters#TX_POWER_ULTRA_LOW},
-         *             {@link AdvertisingSetParameters#TX_POWER_LOW},
-         *             {@link AdvertisingSetParameters#TX_POWER_MEDIUM}, or
-         *             {@link AdvertisingSetParameters#TX_POWER_HIGH}.
          *
+         * @param txPowerLevel Transmission power of Bluetooth LE Advertising, in dBm. The valid
+         * range is [-127, 1] Recommended values are:
+         * {@link AdvertisingSetParameters#TX_POWER_ULTRA_LOW},
+         * {@link AdvertisingSetParameters#TX_POWER_LOW},
+         * {@link AdvertisingSetParameters#TX_POWER_MEDIUM},
+         * or {@link AdvertisingSetParameters#TX_POWER_HIGH}.
          * @throws IllegalArgumentException If the {@code txPowerLevel} is invalid.
          */
         public Builder setTxPowerLevel(int txPowerLevel) {
             if (txPowerLevel < TX_POWER_MIN || txPowerLevel > TX_POWER_MAX) {
                 throw new IllegalArgumentException("unknown txPowerLevel " +
-                                                   txPowerLevel);
+                        txPowerLevel);
             }
             this.txPowerLevel = txPowerLevel;
             return this;
@@ -386,6 +402,7 @@ public final class AdvertisingSetParameters implements Parcelable {
 
         /**
          * Build the {@link AdvertisingSetParameters} object.
+         *
          * @throws IllegalStateException if invalid combination of parameters is used.
          */
         public AdvertisingSetParameters build() {
@@ -396,28 +413,28 @@ public final class AdvertisingSetParameters implements Parcelable {
 
                 if (connectable == true && scannable == false) {
                     throw new IllegalStateException(
-                        "Legacy advertisement can't be connectable and non-scannable");
+                            "Legacy advertisement can't be connectable and non-scannable");
                 }
 
                 if (includeTxPower) {
                     throw new IllegalStateException(
-                        "Legacy advertising can't include TX power level in header");
+                            "Legacy advertising can't include TX power level in header");
                 }
             } else {
                 if (connectable && scannable) {
                     throw new IllegalStateException(
-                        "Advertising can't be both connectable and scannable");
+                            "Advertising can't be both connectable and scannable");
                 }
 
                 if (isAnonymous && connectable) {
                     throw new IllegalStateException(
-                        "Advertising can't be both connectable and anonymous");
+                            "Advertising can't be both connectable and anonymous");
                 }
             }
 
             return new AdvertisingSetParameters(connectable, scannable, isLegacy, isAnonymous,
-                                                includeTxPower, primaryPhy,
-                                                secondaryPhy, interval, txPowerLevel);
+                    includeTxPower, primaryPhy,
+                    secondaryPhy, interval, txPowerLevel);
         }
     }
 }

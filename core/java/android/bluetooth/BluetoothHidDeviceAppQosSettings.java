@@ -19,8 +19,6 @@ package android.bluetooth;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Random;
-
 /** @hide */
 public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
@@ -63,21 +61,22 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
     }
 
     public static final Parcelable.Creator<BluetoothHidDeviceAppQosSettings> CREATOR =
-        new Parcelable.Creator<BluetoothHidDeviceAppQosSettings>() {
+            new Parcelable.Creator<BluetoothHidDeviceAppQosSettings>() {
 
-        @Override
-        public BluetoothHidDeviceAppQosSettings createFromParcel(Parcel in) {
+                @Override
+                public BluetoothHidDeviceAppQosSettings createFromParcel(Parcel in) {
 
-            return new BluetoothHidDeviceAppQosSettings(in.readInt(), in.readInt(), in.readInt(),
-                    in.readInt(),
-                    in.readInt(), in.readInt());
-        }
+                    return new BluetoothHidDeviceAppQosSettings(in.readInt(), in.readInt(),
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt(), in.readInt());
+                }
 
-        @Override
-        public BluetoothHidDeviceAppQosSettings[] newArray(int size) {
-            return new BluetoothHidDeviceAppQosSettings[size];
-        }
-    };
+                @Override
+                public BluetoothHidDeviceAppQosSettings[] newArray(int size) {
+                    return new BluetoothHidDeviceAppQosSettings[size];
+                }
+            };
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
@@ -90,7 +89,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
     }
 
     public int[] toArray() {
-        return new int[] {
+        return new int[]{
                 serviceType, tokenRate, tokenBucketSize, peakBandwidth, latency, delayVariation
         };
     }

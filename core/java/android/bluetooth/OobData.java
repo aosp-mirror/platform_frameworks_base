@@ -19,8 +19,6 @@ package android.bluetooth;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import android.util.Log;
-
 /**
  * Out Of Band Data for Bluetooth device pairing.
  *
@@ -77,7 +75,8 @@ public class OobData implements Parcelable {
         this.leSecureConnectionsRandom = leSecureConnectionsRandom;
     }
 
-    public OobData() { }
+    public OobData() {
+    }
 
     private OobData(Parcel in) {
         leBluetoothDeviceAddress = in.createByteArray();

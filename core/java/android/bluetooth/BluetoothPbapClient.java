@@ -16,20 +16,22 @@
 
 package android.bluetooth;
 
-import java.util.List;
-import java.util.ArrayList;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.RemoteException;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class provides the APIs to control the Bluetooth PBAP Client Profile.
- *@hide
+ *
+ * @hide
  */
 public final class BluetoothPbapClient implements BluetoothProfile {
 
@@ -38,7 +40,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
     private static final boolean VDBG = false;
 
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-        "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
+            "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
 
     private IBluetoothPbapClient mService;
     private final Context mContext;
@@ -46,7 +48,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
     private BluetoothAdapter mAdapter;
 
     /** There was an error trying to obtain the state */
-    public static final int STATE_ERROR        = -1;
+    public static final int STATE_ERROR = -1;
 
     public static final int RESULT_FAILURE = 0;
     public static final int RESULT_SUCCESS = 1;
@@ -61,14 +63,14 @@ public final class BluetoothPbapClient implements BluetoothProfile {
                     }
                     if (!up) {
                         if (VDBG) {
-                            Log.d(TAG,"Unbinding service...");
+                            Log.d(TAG, "Unbinding service...");
                         }
                         synchronized (mConnection) {
                             try {
                                 mService = null;
                                 mContext.unbindService(mConnection);
                             } catch (Exception re) {
-                                Log.e(TAG,"",re);
+                                Log.e(TAG, "", re);
                             }
                         }
                     } else {
@@ -76,17 +78,17 @@ public final class BluetoothPbapClient implements BluetoothProfile {
                             try {
                                 if (mService == null) {
                                     if (VDBG) {
-                                        Log.d(TAG,"Binding service...");
+                                        Log.d(TAG, "Binding service...");
                                     }
                                     doBind();
                                 }
                             } catch (Exception re) {
-                                Log.e(TAG,"",re);
+                                Log.e(TAG, "", re);
                             }
                         }
                     }
                 }
-        };
+            };
 
     /**
      * Create a BluetoothPbapClient proxy object.
@@ -103,7 +105,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
             try {
                 mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
             } catch (RemoteException e) {
-                Log.e(TAG,"",e);
+                Log.e(TAG, "", e);
             }
         }
         doBind();
@@ -141,7 +143,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
             try {
                 mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
             } catch (Exception e) {
-                Log.e(TAG,"",e);
+                Log.e(TAG, "", e);
             }
         }
 
@@ -151,7 +153,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
                     mService = null;
                     mContext.unbindService(mConnection);
                 } catch (Exception re) {
-                    Log.e(TAG,"",re);
+                    Log.e(TAG, "", re);
                 }
             }
         }
@@ -163,9 +165,9 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      * Upon successful connection to remote PBAP server the Client will
      * attempt to automatically download the users phonebook and call log.
      *
-     * @param device    a remote device we want connect to
-     * @return <code>true</code> if command has been issued successfully;
-     *         <code>false</code> otherwise;
+     * @param device a remote device we want connect to
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise;
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) {
@@ -189,20 +191,19 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      * Initiate disconnect.
      *
      * @param device Remote Bluetooth Device
-     * @return false on error,
-     *               true otherwise
+     * @return false on error, true otherwise
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) {
-            log("disconnect(" + device + ")" + new Exception() );
+            log("disconnect(" + device + ")" + new Exception());
         }
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 mService.disconnect(device);
                 return true;
             } catch (RemoteException e) {
-              Log.e(TAG, Log.getStackTraceString(new Throwable()));
-              return false;
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
             }
         }
         if (mService == null) {
@@ -291,9 +292,11 @@ public final class BluetoothPbapClient implements BluetoothProfile {
             }
             mService = IBluetoothPbapClient.Stub.asInterface(Binder.allowBlocking(service));
             if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.PBAP_CLIENT, BluetoothPbapClient.this);
+                mServiceListener.onServiceConnected(BluetoothProfile.PBAP_CLIENT,
+                        BluetoothPbapClient.this);
             }
         }
+
         public void onServiceDisconnected(ComponentName className) {
             if (DBG) {
                 log("Proxy object disconnected");
@@ -319,20 +322,20 @@ public final class BluetoothPbapClient implements BluetoothProfile {
     }
 
     private boolean isValidDevice(BluetoothDevice device) {
-       if (device == null) {
-           return false;
-       }
-       if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) {
-           return true;
-       }
-       return false;
+        if (device == null) {
+            return false;
+        }
+        if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) {
+            return true;
+        }
+        return false;
     }
 
     /**
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     *  Priority can be one of {@link #PRIORITY_ON} or
+     * Priority can be one of {@link #PRIORITY_ON} or
      * {@link #PRIORITY_OFF},
      *
      * @param device Paired bluetooth device
@@ -344,10 +347,10 @@ public final class BluetoothPbapClient implements BluetoothProfile {
             log("setPriority(" + device + ", " + priority + ")");
         }
         if (mService != null && isEnabled() &&
-            isValidDevice(device)) {
+                isValidDevice(device)) {
             if (priority != BluetoothProfile.PRIORITY_OFF &&
-                priority != BluetoothProfile.PRIORITY_ON) {
-              return false;
+                    priority != BluetoothProfile.PRIORITY_ON) {
+                return false;
             }
             try {
                 return mService.setPriority(device, priority);

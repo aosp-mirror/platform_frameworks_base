@@ -16,14 +16,14 @@
 package android.bluetooth;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.ParcelUuid;
-import java.util.ArrayList;
-import java.util.List;
+import android.os.Parcelable;
+
 import java.util.UUID;
 
 /**
  * Represents a Bluetooth GATT Included Service
+ *
  * @hide
  */
 public class BluetoothGattIncludedService implements Parcelable {
@@ -60,7 +60,7 @@ public class BluetoothGattIncludedService implements Parcelable {
         out.writeParcelable(new ParcelUuid(mUuid), 0);
         out.writeInt(mInstanceId);
         out.writeInt(mServiceType);
-     }
+    }
 
     public static final Parcelable.Creator<BluetoothGattIncludedService> CREATOR
             = new Parcelable.Creator<BluetoothGattIncludedService>() {
@@ -74,7 +74,7 @@ public class BluetoothGattIncludedService implements Parcelable {
     };
 
     private BluetoothGattIncludedService(Parcel in) {
-        mUuid = ((ParcelUuid)in.readParcelable(null)).getUuid();
+        mUuid = ((ParcelUuid) in.readParcelable(null)).getUuid();
         mInstanceId = in.readInt();
         mServiceType = in.readInt();
     }

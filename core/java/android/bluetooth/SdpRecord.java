@@ -21,7 +21,7 @@ import android.os.Parcelable;
 import java.util.Arrays;
 
 /** @hide */
-public class SdpRecord implements Parcelable{
+public class SdpRecord implements Parcelable {
 
     private final byte[] mRawData;
     private final int mRawSize;
@@ -32,12 +32,12 @@ public class SdpRecord implements Parcelable{
                 + ", rawSize=" + mRawSize + "]";
     }
 
-    public SdpRecord(int size_record, byte[] record){
+    public SdpRecord(int size_record, byte[] record) {
         this.mRawData = record;
         this.mRawSize = size_record;
     }
 
-    public SdpRecord(Parcel in){
+    public SdpRecord(Parcel in) {
         this.mRawSize = in.readInt();
         this.mRawData = new byte[mRawSize];
         in.readByteArray(this.mRawData);
@@ -56,6 +56,7 @@ public class SdpRecord implements Parcelable{
 
 
     }
+
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public SdpRecord createFromParcel(Parcel in) {
             return new SdpRecord(in);
