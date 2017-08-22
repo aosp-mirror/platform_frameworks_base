@@ -6778,7 +6778,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Bundle verificationBundle, int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
                 new InstantAppRequest(responseObj, origIntent, resolvedType,
-                        callingPackage, userId, verificationBundle));
+                        callingPackage, userId, verificationBundle, false /*resolveForStart*/));
         mHandler.sendMessage(msg);
     }
 
@@ -7362,7 +7362,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if (addEphemeral) {
-            result = maybeAddInstantAppInstaller(result, intent, resolvedType, flags, userId);
+            result = maybeAddInstantAppInstaller(
+                    result, intent, resolvedType, flags, userId, resolveForStart);
         }
         if (sortResult) {
             Collections.sort(result, mResolvePrioritySorter);
@@ -7372,7 +7373,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
-            String resolvedType, int flags, int userId) {
+            String resolvedType, int flags, int userId, boolean resolveForStart) {
         // first, check to see if we've got an instant app already installed
         final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
         ResolveInfo localInstantApp = null;
@@ -7421,7 +7422,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
                 final InstantAppRequest requestObject = new InstantAppRequest(
                         null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                        null /*callingPackage*/, userId, null /*verificationBundle*/);
+                        null /*callingPackage*/, userId, null /*verificationBundle*/,
+                        resolveForStart);
                 auxiliaryResponse =
                         InstantAppResolver.doInstantAppResolutionPhaseOne(
                                 mContext, mInstantAppResolverConnection, requestObject);
