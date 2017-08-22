@@ -984,6 +984,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             Slog.d(TAG, "Animating brightness: target=" + target +", rate=" + rate);
         }
         if (mScreenBrightnessRampAnimator.animateTo(target, rate)) {
+            Trace.traceCounter(Trace.TRACE_TAG_POWER, "TargetScreenBrightness", target);
             try {
                 mBatteryStats.noteScreenBrightness(target);
             } catch (RemoteException ex) {
