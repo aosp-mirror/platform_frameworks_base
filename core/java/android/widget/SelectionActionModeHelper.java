@@ -189,8 +189,8 @@ final class SelectionActionModeHelper {
         final Runnable onAnimationEndCallback = () -> startActionMode(result);
         // TODO do not trigger the animation if the change included only non-printable characters
         final boolean didSelectionChange =
-                textView.getSelectionStart() != result.mStart
-                        || textView.getSelectionEnd() != result.mEnd;
+                result != null && (textView.getSelectionStart() != result.mStart
+                        || textView.getSelectionEnd() != result.mEnd);
 
         if (!didSelectionChange) {
             onAnimationEndCallback.run();
