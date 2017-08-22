@@ -4899,13 +4899,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void reportActivityFullyDrawn(IBinder token) {
+    public void reportActivityFullyDrawn(IBinder token, boolean restoredFromBundle) {
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
                 return;
             }
-            r.reportFullyDrawnLocked();
+            r.reportFullyDrawnLocked(restoredFromBundle);
         }
     }
 

@@ -376,7 +376,7 @@ interface IActivityManager {
     boolean convertFromTranslucent(in IBinder token);
     boolean convertToTranslucent(in IBinder token, in Bundle options);
     void notifyActivityDrawn(in IBinder token);
-    void reportActivityFullyDrawn(in IBinder token);
+    void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
     void restart();
     void performIdleMaintenance();
     void takePersistableUriPermission(in Uri uri, int modeFlags, int userId);
