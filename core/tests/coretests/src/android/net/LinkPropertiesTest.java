@@ -19,6 +19,7 @@ package android.net;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
 import android.system.OsConstants;
@@ -29,9 +30,11 @@ import android.util.ArraySet;
 import junit.framework.TestCase;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 
@@ -747,6 +750,27 @@ public class LinkPropertiesTest extends TestCase {
 
     }
 
+    @SmallTest
+    public void testCompareResult() {
+        // Either adding or removing items
+        testCompareResult(Arrays.asList(1), Arrays.asList(1, 2, 3, 4),
+                Arrays.asList(2, 3, 4), new ArrayList<>());
+        testCompareResult(Arrays.asList(1, 2), Arrays.asList(3, 2, 1, 4),
+                new ArrayList<>(), Arrays.asList(3, 4));
+
+
+        // adding and removing items at the same time
+        testCompareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(2, 3, 4, 5),
+                Arrays.asList(1), Arrays.asList(5));
+        testCompareResult(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6),
+                Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6));
+
+        // null cases
+        testCompareResult(Arrays.asList(1, 2, 3), null, Arrays.asList(1, 2, 3), new ArrayList<>());
+        testCompareResult(null, Arrays.asList(3, 2, 1), new ArrayList<>(), Arrays.asList(1, 2, 3));
+        testCompareResult(null, null, new ArrayList<>(), new ArrayList<>());
+    }
+
     private void assertEqualRoutes(Collection<RouteInfo> expected, Collection<RouteInfo> actual) {
         Set<RouteInfo> expectedSet = new ArraySet<>(expected);
         Set<RouteInfo> actualSet = new ArraySet<>(actual);
@@ -754,5 +778,12 @@ public class LinkPropertiesTest extends TestCase {
         assertEquals(actual.size(), actualSet.size());
 
         assertEquals(expectedSet, actualSet);
+    }
+
+    private <T> void testCompareResult(List<T> oldItems, List<T> newItems, List<T> expectAdded,
+            List<T> expectRemoved) {
+        CompareResult<T> result = new CompareResult<>(newItems, oldItems);
+        assertEquals(new ArraySet<>(expectAdded), new ArraySet<>(result.added));
+        assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
 }
