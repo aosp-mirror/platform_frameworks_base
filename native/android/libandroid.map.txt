@@ -184,11 +184,9 @@ LIBANDROID {
     ATrace_beginSection; # introduced=23
     ATrace_endSection; # introduced=23
     ATrace_isEnabled; # introduced=23
-    android_getTtsEngine; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
     android_getaddrinfofornetwork; # introduced=23
     android_setprocnetwork; # introduced=23
     android_setsocknetwork; # introduced=23
-    getTtsEngine; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
   local:
     *;
 };
