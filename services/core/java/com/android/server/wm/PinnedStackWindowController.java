@@ -24,6 +24,7 @@ import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_
 import static com.android.server.wm.BoundsAnimationController.SchedulePipModeChangedState;
 
 import android.app.RemoteAction;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.server.UiThread;
@@ -39,8 +40,9 @@ public class PinnedStackWindowController extends StackWindowController {
     private Rect mTmpToBounds = new Rect();
 
     public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
-            int displayId, boolean onTop, Rect outBounds) {
-        super(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
+            int displayId, boolean onTop, Rect outBounds, Configuration outOverrideConfig) {
+        super(stackId, listener, displayId, onTop, outBounds, outOverrideConfig,
+                WindowManagerService.getInstance());
     }
 
     /**

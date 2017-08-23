@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 
 /**
@@ -107,6 +108,13 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             final ConfigurationContainer child = getChildAt(i);
             child.onMergedOverrideConfigurationChanged();
         }
+    }
+
+    /** Sets the windowing mode for the configuration container. */
+    void setWindowingMode(/*@WindowConfiguration.WindowingMode TODO: causes build error...why?*/
+            int windowingMode) {
+        mOverrideConfiguration.windowConfiguration.setWindowingMode(windowingMode);
+        onOverrideConfigurationChanged(mOverrideConfiguration);
     }
 
     /**

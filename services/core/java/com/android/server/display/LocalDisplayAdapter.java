@@ -532,7 +532,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         try {
                             mBacklight.setBrightness(brightness);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
-                                    "DisplayBrightness", brightness);
+                                    "ScreenBrightness", brightness);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }

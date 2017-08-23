@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.VISIBLE;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.view.Display;
@@ -238,7 +239,7 @@ class WindowTestsBase {
     StackWindowController createStackControllerOnStackOnDisplay(int stackId,
             DisplayContent dc) {
         return new StackWindowController(stackId, null, dc.getDisplayId(),
-                true /* onTop */, new Rect(), sWm);
+                true /* onTop */, new Rect(), new Configuration(), sWm);
     }
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */

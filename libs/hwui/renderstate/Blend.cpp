@@ -118,7 +118,7 @@ void Blend::getFactors(SkBlendMode mode, ModeOrderSwap modeUsage, GLenum* outSrc
 }
 
 void Blend::setFactors(GLenum srcMode, GLenum dstMode) {
-    if (srcMode == GL_ZERO && dstMode == GL_ZERO) {
+    if ((srcMode == GL_ZERO || srcMode == GL_ONE) && dstMode == GL_ZERO) {
         // disable blending
         if (mEnabled) {
             glDisable(GL_BLEND);

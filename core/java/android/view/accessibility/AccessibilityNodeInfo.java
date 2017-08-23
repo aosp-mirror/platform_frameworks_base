@@ -870,6 +870,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (refreshedInfo == null) {
             return false;
         }
+        // Hard-to-reproduce bugs seem to be due to some tools recycling a node on another
+        // thread. If that happens, the init will re-seal the node, which then is in a bad state
+        // when it is obtained. Enforce sealing again before we init to fail when a node has been
+        // recycled during a refresh to catch such errors earlier.
+        enforceSealed();
         init(refreshedInfo);
         refreshedInfo.recycle();
         return true;

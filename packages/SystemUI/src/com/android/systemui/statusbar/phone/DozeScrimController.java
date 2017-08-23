@@ -304,7 +304,7 @@ public class DozeScrimController {
             mHandler.removeCallbacks(mSetDozeInFrontAlphaDelayed);
             mSetDozeInFrontAlphaDelayed = null;
         }
-        if (delayMs < 0) {
+        if (delayMs <= 0) {
             mScrimController.setDozeInFrontAlpha(opacity);
         } else {
             mHandler.postDelayed(mSetDozeInFrontAlphaDelayed = () -> {

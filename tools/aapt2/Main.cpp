@@ -24,10 +24,16 @@
 #include <iostream>
 #include <vector>
 
+#include "android-base/stringprintf.h"
 #include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
+#include "util/Files.h"
+#include "util/Util.h"
+
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
@@ -37,53 +43,103 @@ static const char* sMajorVersion = "2";
 // Update minor version whenever a feature or flag is added.
 static const char* sMinorVersion = "18";
 
-int PrintVersion() {
-  std::cerr << "Android Asset Packaging Tool (aapt) " << sMajorVersion << "."
-            << sMinorVersion << std::endl;
-  return 0;
+static void PrintVersion() {
+  std::cerr << StringPrintf("Android Asset Packaging Tool (aapt) %s:%s", sMajorVersion,
+                            sMinorVersion)
+            << std::endl;
 }
 
-extern int Compile(const std::vector<android::StringPiece>& args, IDiagnostics* diagnostics);
-extern int Link(const std::vector<android::StringPiece>& args, IDiagnostics* diagnostics);
-extern int Dump(const std::vector<android::StringPiece>& args);
-extern int Diff(const std::vector<android::StringPiece>& args);
-extern int Optimize(const std::vector<android::StringPiece>& args);
+static void PrintUsage() {
+  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|version] ..." << std::endl;
+}
+
+extern int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics);
+extern int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics);
+extern int Dump(const std::vector<StringPiece>& args);
+extern int Diff(const std::vector<StringPiece>& args);
+extern int Optimize(const std::vector<StringPiece>& args);
+
+static int ExecuteCommand(const StringPiece& command, const std::vector<StringPiece>& args,
+                          IDiagnostics* diagnostics) {
+  if (command == "compile" || command == "c") {
+    return Compile(args, diagnostics);
+  } else if (command == "link" || command == "l") {
+    return Link(args, diagnostics);
+  } else if (command == "dump" || command == "d") {
+    return Dump(args);
+  } else if (command == "diff") {
+    return Diff(args);
+  } else if (command == "optimize") {
+    return Optimize(args);
+  } else if (command == "version") {
+    PrintVersion();
+    return 0;
+  }
+  diagnostics->Error(DiagMessage() << "unknown command '" << command << "'");
+  return -1;
+}
+
+static void RunDaemon(IDiagnostics* diagnostics) {
+  std::cout << "Ready" << std::endl;
+
+  // Run in daemon mode. Each line of input from stdin is treated as a command line argument
+  // invocation. This means we need to split the line into a vector of args.
+  for (std::string line; std::getline(std::cin, line);) {
+    const util::Tokenizer tokenizer = util::Tokenize(line, file::sPathSep);
+    auto token_iter = tokenizer.begin();
+    if (token_iter == tokenizer.end()) {
+      diagnostics->Error(DiagMessage() << "no command");
+      continue;
+    }
+
+    const StringPiece command(*token_iter);
+    if (command == "quit") {
+      break;
+    }
+
+    ++token_iter;
+
+    std::vector<StringPiece> args;
+    args.insert(args.end(), token_iter, tokenizer.end());
+    ExecuteCommand(command, args, diagnostics);
+    std::cout << "Done" << std::endl;
+  }
+
+  std::cout << "Exiting daemon" << std::endl;
+}
 
 }  // namespace aapt
 
 int MainImpl(int argc, char** argv) {
-  if (argc >= 2) {
-    argv += 1;
-    argc -= 1;
-
-    std::vector<android::StringPiece> args;
-    for (int i = 1; i < argc; i++) {
-      args.push_back(argv[i]);
-    }
-
-    android::StringPiece command(argv[0]);
-    if (command == "compile" || command == "c") {
-      aapt::StdErrDiagnostics diagnostics;
-      return aapt::Compile(args, &diagnostics);
-    } else if (command == "link" || command == "l") {
-      aapt::StdErrDiagnostics diagnostics;
-      return aapt::Link(args, &diagnostics);
-    } else if (command == "dump" || command == "d") {
-      return aapt::Dump(args);
-    } else if (command == "diff") {
-      return aapt::Diff(args);
-    } else if (command == "optimize") {
-      return aapt::Optimize(args);
-    } else if (command == "version") {
-      return aapt::PrintVersion();
-    }
-    std::cerr << "unknown command '" << command << "'\n";
-  } else {
+  if (argc < 2) {
     std::cerr << "no command specified\n";
+    aapt::PrintUsage();
+    return -1;
   }
 
-  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|version] ..." << std::endl;
-  return 1;
+  argv += 1;
+  argc -= 1;
+
+  aapt::StdErrDiagnostics diagnostics;
+
+  // Collect the arguments starting after the program name and command name.
+  std::vector<StringPiece> args;
+  for (int i = 1; i < argc; i++) {
+    args.push_back(argv[i]);
+  }
+
+  const StringPiece command(argv[0]);
+  if (command != "daemon" && command != "m") {
+    // Single execution.
+    const int result = aapt::ExecuteCommand(command, args, &diagnostics);
+    if (result < 0) {
+      aapt::PrintUsage();
+    }
+    return result;
+  }
+
+  aapt::RunDaemon(&diagnostics);
+  return 0;
 }
 
 int main(int argc, char** argv) {

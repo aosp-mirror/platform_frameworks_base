@@ -298,7 +298,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     }
 
     private void updateWindowWidthH() {
-        final ViewGroup.LayoutParams lp = mDialogView.getLayoutParams();
+        final ViewGroup.MarginLayoutParams lp =
+                (ViewGroup.MarginLayoutParams) mDialogView.getLayoutParams();
         final DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
         if (D.BUG) Log.d(TAG, "updateWindowWidth dm.w=" + dm.widthPixels);
         int w = dm.widthPixels;
@@ -307,7 +308,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         if (w > max) {
             w = max;
         }
-        lp.width = w;
+        lp.width = w - lp.getMarginEnd() - lp.getMarginStart();
         mDialogView.setLayoutParams(lp);
     }
 
@@ -713,6 +714,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF
                 && (mAudioManager.isStreamAffectedByRingerMode(mActiveStream) || mExpanded)
                 && !mZenPanel.isEditing();
+
         TransitionManager.beginDelayedTransition(mDialogView, getTransition());
         if (wasVisible != visible && !visible) {
             prepareForCollapse();
@@ -838,6 +840,11 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             }
         } else {
             row.icon.setContentDescription(getStreamLabelH(ss));
+        }
+
+        // ensure tracking is disabled if zenMuted
+        if (zenMuted) {
+            row.tracking = false;
         }
 
         // update slider

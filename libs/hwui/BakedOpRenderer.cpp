@@ -208,7 +208,6 @@ void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* pa
     // TODO: Currently assume full FBO damage, due to FrameInfoVisualizer::unionDirty.
     // Should should scissor/set mHasDrawn safely.
     mRenderState.scissor().setEnabled(false);
-    mHasDrawn = true;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setRoundRectClipState(nullptr)
@@ -217,7 +216,11 @@ void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* pa
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    // Disable blending if this is the first draw to the main framebuffer, in case app has defined
+    // transparency where it doesn't make sense - as first draw in opaque window.
+    bool overrideDisableBlending = !mHasDrawn && mOpaque && !mRenderTarget.frameBufferId;
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, overrideDisableBlending);
+    mHasDrawn = true;
 }
 
 // clears and re-fills stencil with provided rendertarget space quads,
@@ -234,7 +237,7 @@ void BakedOpRenderer::setupStencilQuads(std::vector<Vertex>& quadVertices,
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, false);
     mRenderState.stencil().enableTest(incrementThreshold);
 }
 
@@ -346,7 +349,10 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
 void BakedOpRenderer::renderGlopImpl(const Rect* dirtyBounds, const ClipBase* clip,
         const Glop& glop) {
     prepareRender(dirtyBounds, clip);
-    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    // Disable blending if this is the first draw to the main framebuffer, in case app has defined
+    // transparency where it doesn't make sense - as first draw in opaque window.
+    bool overrideDisableBlending = !mHasDrawn && mOpaque && !mRenderTarget.frameBufferId;
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, overrideDisableBlending);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 

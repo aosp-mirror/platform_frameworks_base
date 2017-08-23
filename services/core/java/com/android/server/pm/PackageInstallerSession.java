@@ -41,6 +41,7 @@ import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
@@ -312,9 +313,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return false;
         }
 
-        final boolean isPermissionGranted =
+        final boolean isInstallPermissionGranted =
                 (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+        final boolean isSelfUpdatePermissionGranted =
+                (mPm.checkUidPermission(android.Manifest.permission.INSTALL_SELF_UPDATES,
+                        mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+        final boolean isPermissionGranted = isInstallPermissionGranted
+                || (isSelfUpdatePermissionGranted
+                    && mPm.getPackageUid(mPackageName, 0, userId) == mInstallerUid);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean forcePermissionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0;
@@ -731,7 +738,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *
      * @param pkgInfo The package info for {@link #params}.packagename
      */
-    private void sealAndValidateLocked(PackageInfo pkgInfo)
+    private void sealAndValidateLocked(@Nullable PackageInfo pkgInfo)
             throws PackageManagerException {
         assertNoWriteFileTransfersOpenLocked();
 
@@ -923,7 +930,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Note that upgrade compatibility is still performed by
      * {@link PackageManagerService}.
      */
-    private void validateInstallLocked(PackageInfo pkgInfo) throws PackageManagerException {
+    private void validateInstallLocked(@Nullable PackageInfo pkgInfo)
+            throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
         mSignatures = null;
@@ -1004,6 +1012,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (removeSplitList.size() > 0) {
+            if (pkgInfo == null) {
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                        "Missing existing base package for " + mPackageName);
+            }
+
             // validate split names marked for removal
             for (String splitName : removeSplitList) {
                 if (!ArrayUtils.contains(pkgInfo.splitNames, splitName)) {

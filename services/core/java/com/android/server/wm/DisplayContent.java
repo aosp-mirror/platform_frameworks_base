@@ -20,9 +20,12 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Surface.ROTATION_0;
@@ -109,6 +112,7 @@ import static com.android.server.wm.proto.DisplayProto.STACKS;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
+import android.app.WindowConfiguration;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -1191,8 +1195,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
-        config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
-                Configuration.ORIENTATION_LANDSCAPE;
+        config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        // TODO: Probably best to set this based on some setting in the display content object,
+        // so the display can be configured for things like fullscreen.
+        config.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
         config.screenWidthDp =
                 (int)(mService.mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,

@@ -504,6 +504,11 @@ class InstantAppRegistry {
         }
     }
 
+    boolean hasInstantApplicationMetadataLPr(String packageName, int userId) {
+        return hasUninstalledInstantAppStateLPr(packageName, userId)
+                || hasInstantAppMetadataLPr(packageName, userId);
+    }
+
     public void deleteInstantApplicationMetadataLPw(@NonNull String packageName,
             @UserIdInt int userId) {
         removeUninstalledInstantAppStateLPw((UninstalledInstantAppState state) ->
@@ -545,6 +550,33 @@ class InstantAppRegistry {
                 return;
             }
         }
+    }
+
+    private boolean hasUninstalledInstantAppStateLPr(String packageName, @UserIdInt int userId) {
+        if (mUninstalledInstantApps == null) {
+            return false;
+        }
+        final List<UninstalledInstantAppState> uninstalledAppStates =
+                mUninstalledInstantApps.get(userId);
+        if (uninstalledAppStates == null) {
+            return false;
+        }
+        final int appCount = uninstalledAppStates.size();
+        for (int i = 0; i < appCount; i++) {
+            final UninstalledInstantAppState uninstalledAppState = uninstalledAppStates.get(i);
+            if (packageName.equals(uninstalledAppState.mInstantAppInfo.getPackageName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasInstantAppMetadataLPr(String packageName, @UserIdInt int userId) {
+        final File instantAppDir = getInstantApplicationDir(packageName, userId);
+        return new File(instantAppDir, INSTANT_APP_METADATA_FILE).exists()
+                || new File(instantAppDir, INSTANT_APP_ICON_FILE).exists()
+                || new File(instantAppDir, INSTANT_APP_ANDROID_ID_FILE).exists()
+                || peekInstantCookieFile(packageName, userId) != null;
     }
 
     void pruneInstantApps() {
@@ -1071,7 +1103,7 @@ class InstantAppRegistry {
     }
 
     private static @NonNull File getInstantApplicationDir(String packageName, int userId) {
-        return new File (getInstantApplicationsDir(userId), packageName);
+        return new File(getInstantApplicationsDir(userId), packageName);
     }
 
     private static void deleteDir(@NonNull File dir) {

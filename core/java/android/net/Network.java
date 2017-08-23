@@ -22,6 +22,9 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 
+import libcore.net.http.Dns;
+import libcore.net.http.HttpURLConnectionFactory;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -35,17 +38,8 @@ import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.SocketFactory;
-
-import com.android.okhttp.ConnectionPool;
-import com.android.okhttp.Dns;
-import com.android.okhttp.HttpHandler;
-import com.android.okhttp.HttpsHandler;
-import com.android.okhttp.OkHttpClient;
-import com.android.okhttp.OkUrlFactory;
-import com.android.okhttp.internal.Internal;
 
 /**
  * Identifies a {@code Network}.  This is supplied to applications via
@@ -66,10 +60,9 @@ public class Network implements Parcelable {
     // Objects used to perform per-network operations such as getSocketFactory
     // and openConnection, and a lock to protect access to them.
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
-    // mLock should be used to control write access to mConnectionPool and mDns.
-    // maybeInitHttpClient() must be called prior to reading either variable.
-    private volatile ConnectionPool mConnectionPool = null;
-    private volatile Dns mDns = null;
+    // mLock should be used to control write access to mUrlConnectionFactory.
+    // maybeInitUrlConnectionFactory() must be called prior to reading this field.
+    private volatile HttpURLConnectionFactory mUrlConnectionFactory;
     private final Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
@@ -221,19 +214,19 @@ public class Network implements Parcelable {
     // will be instantiated in the near future with the same NetID. A good
     // solution would involve purging empty (or when all connections are timed
     // out) ConnectionPools.
-    private void maybeInitHttpClient() {
+    private void maybeInitUrlConnectionFactory() {
         synchronized (mLock) {
-            if (mDns == null) {
-                mDns = new Dns() {
-                    @Override
-                    public List<InetAddress> lookup(String hostname) throws UnknownHostException {
-                        return Arrays.asList(Network.this.getAllByName(hostname));
-                    }
-                };
-            }
-            if (mConnectionPool == null) {
-                mConnectionPool = new ConnectionPool(httpMaxConnections,
+            if (mUrlConnectionFactory == null) {
+                // Set configuration on the HttpURLConnectionFactory that will be good for all
+                // connections created by this Network. Configuration that might vary is left
+                // until openConnection() and passed as arguments.
+                Dns dnsLookup = hostname -> Arrays.asList(Network.this.getAllByName(hostname));
+                HttpURLConnectionFactory urlConnectionFactory = new HttpURLConnectionFactory();
+                urlConnectionFactory.setDns(dnsLookup); // Let traffic go via dnsLookup
+                // A private connection pool just for this Network.
+                urlConnectionFactory.setNewConnectionPool(httpMaxConnections,
                         httpKeepAliveDurationMs, TimeUnit.MILLISECONDS);
+                mUrlConnectionFactory = urlConnectionFactory;
             }
         }
     }
@@ -254,7 +247,7 @@ public class Network implements Parcelable {
         }
         // TODO: Should this be optimized to avoid fetching the global proxy for every request?
         final ProxyInfo proxyInfo = cm.getProxyForNetwork(this);
-        java.net.Proxy proxy = null;
+        final java.net.Proxy proxy;
         if (proxyInfo != null) {
             proxy = proxyInfo.makeProxy();
         } else {
@@ -276,26 +269,9 @@ public class Network implements Parcelable {
      */
     public URLConnection openConnection(URL url, java.net.Proxy proxy) throws IOException {
         if (proxy == null) throw new IllegalArgumentException("proxy is null");
-        maybeInitHttpClient();
-        String protocol = url.getProtocol();
-        OkUrlFactory okUrlFactory;
-        // TODO: HttpHandler creates OkUrlFactory instances that share the default ResponseCache.
-        // Could this cause unexpected behavior?
-        if (protocol.equals("http")) {
-            okUrlFactory = HttpHandler.createHttpOkUrlFactory(proxy);
-        } else if (protocol.equals("https")) {
-            okUrlFactory = HttpsHandler.createHttpsOkUrlFactory(proxy);
-        } else {
-            // OkHttp only supports HTTP and HTTPS and returns a null URLStreamHandler if
-            // passed another protocol.
-            throw new MalformedURLException("Invalid URL or unrecognized protocol " + protocol);
-        }
-        OkHttpClient client = okUrlFactory.client();
-        client.setSocketFactory(getSocketFactory()).setConnectionPool(mConnectionPool);
-        // Let network traffic go via mDns
-        client.setDns(mDns);
-
-        return okUrlFactory.open(url);
+        maybeInitUrlConnectionFactory();
+        SocketFactory socketFactory = getSocketFactory();
+        return mUrlConnectionFactory.openConnection(url, socketFactory, proxy);
     }
 
     /**

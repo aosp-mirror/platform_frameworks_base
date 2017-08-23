@@ -80,15 +80,9 @@ public interface WebViewFactoryProvider {
 
         /**
          * Implement the API method
-         * {@link android.webkit.WebView#initSafeBrowsing(Context , ValueCallback<Boolean>)}
+         * {@link android.webkit.WebView#startSafeBrowsing(Context , ValueCallback<Boolean>)}
          */
         void initSafeBrowsing(Context context, ValueCallback<Boolean> callback);
-
-        /**
-         * Implement the API method
-         * {@link android.webkit.WebView#shutdownSafeBrowsing()}
-         */
-        void shutdownSafeBrowsing();
 
         /**
         * Implement the API method

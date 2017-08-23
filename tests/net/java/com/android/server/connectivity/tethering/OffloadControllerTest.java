@@ -110,7 +110,9 @@ public class OffloadControllerTest {
         when(mHardware.initOffloadConfig()).thenReturn(true);
         when(mHardware.initOffloadControl(mControlCallbackCaptor.capture()))
                 .thenReturn(true);
+        when(mHardware.setUpstreamParameters(anyString(), any(), any(), any())).thenReturn(true);
         when(mHardware.getForwardedStats(any())).thenReturn(new ForwardedStats());
+        when(mHardware.setDataLimit(anyString(), anyLong())).thenReturn(true);
     }
 
     private void enableOffload() {
@@ -256,6 +258,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(null), eq(null), eq(null));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv4Addr = "192.0.2.5";
@@ -273,6 +276,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(null), eq(null));
         inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv4Gateway = "192.0.2.1";
@@ -283,6 +287,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), eq(null));
         inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv6Gw1 = "fe80::cafe";
@@ -296,6 +301,7 @@ public class OffloadControllerTest {
         ArrayList<String> v6gws = mStringArrayCaptor.getValue();
         assertEquals(1, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv6Gw2 = "fe80::d00d";
@@ -310,6 +316,7 @@ public class OffloadControllerTest {
         assertEquals(2, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
         assertTrue(v6gws.contains(ipv6Gw2));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         final LinkProperties stacked = new LinkProperties();
@@ -328,6 +335,7 @@ public class OffloadControllerTest {
         assertEquals(2, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
         assertTrue(v6gws.contains(ipv6Gw2));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         // Add in some IPv6 upstream info. When there is a tethered downstream
@@ -359,6 +367,7 @@ public class OffloadControllerTest {
         assertTrue(v6gws.contains(ipv6Gw1));
         assertTrue(v6gws.contains(ipv6Gw2));
         inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
+        inOrder.verify(mHardware, times(1)).setDataLimit(eq(testIfName), eq(Long.MAX_VALUE));
         inOrder.verifyNoMoreInteractions();
 
         // Completely identical LinkProperties updates are de-duped.
@@ -400,23 +409,39 @@ public class OffloadControllerTest {
         when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(ethernetStats);
         when(mHardware.getForwardedStats(eq(mobileIface))).thenReturn(mobileStats);
 
+        InOrder inOrder = inOrder(mHardware);
+
         final LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(ethernetIface);
         offload.setUpstreamLinkProperties(lp);
+        // Previous upstream was null, so no stats are fetched.
+        inOrder.verify(mHardware, never()).getForwardedStats(any());
 
         lp.setInterfaceName(mobileIface);
         offload.setUpstreamLinkProperties(lp);
+        // Expect that we fetch stats from the previous upstream.
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(ethernetIface));
 
         lp.setInterfaceName(ethernetIface);
         offload.setUpstreamLinkProperties(lp);
+        // Expect that we fetch stats from the previous upstream.
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(mobileIface));
 
+        ethernetStats = new ForwardedStats();
         ethernetStats.rxBytes = 100000;
         ethernetStats.txBytes = 100000;
+        when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(ethernetStats);
         offload.setUpstreamLinkProperties(null);
+        // Expect that we fetch stats from the previous upstream.
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(ethernetIface));
 
         ITetheringStatsProvider provider = mTetherStatsProviderCaptor.getValue();
         NetworkStats stats = provider.getTetherStats(STATS_PER_IFACE);
         NetworkStats perUidStats = provider.getTetherStats(STATS_PER_UID);
+        waitForIdle();
+        // There is no current upstream, so no stats are fetched.
+        inOrder.verify(mHardware, never()).getForwardedStats(eq(ethernetIface));
+        inOrder.verifyNoMoreInteractions();
 
         assertEquals(2, stats.size());
         assertEquals(2, perUidStats.size());
@@ -504,6 +529,7 @@ public class OffloadControllerTest {
         offload.setUpstreamLinkProperties(lp);
         provider.setInterfaceQuota(mobileIface, mobileLimit);
         waitForIdle();
+        inOrder.verify(mHardware).getForwardedStats(ethernetIface);
         inOrder.verify(mHardware).stopOffloadControl();
     }
 

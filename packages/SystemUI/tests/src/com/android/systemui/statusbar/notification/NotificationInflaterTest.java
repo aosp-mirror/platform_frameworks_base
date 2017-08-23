@@ -198,6 +198,18 @@ public class NotificationInflaterTest extends SysuiTestCase {
         runningTask.abort();
     }
 
+    @Test
+    public void doesntReapplyDisallowedRemoteView() throws Exception {
+        mBuilder.setStyle(new Notification.MediaStyle());
+        RemoteViews mediaView = mBuilder.createContentView();
+        mBuilder.setStyle(new Notification.DecoratedCustomViewStyle());
+        mBuilder.setCustomContentView(new RemoteViews(getContext().getPackageName(),
+                R.layout.custom_view_dark));
+        RemoteViews decoratedMediaView = mBuilder.createContentView();
+        Assert.assertFalse("The decorated media style doesn't allow a view to be reapplied!",
+                NotificationInflater.canReapplyRemoteView(mediaView, decoratedMediaView));
+    }
+
     public static void runThenWaitForInflation(Runnable block,
             NotificationInflater inflater) throws Exception {
         runThenWaitForInflation(block, false /* expectingException */, inflater);

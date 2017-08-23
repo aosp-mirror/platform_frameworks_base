@@ -26,6 +26,8 @@ import android.content.pm.Signature;
 import android.os.Process;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
+
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
  */
@@ -91,9 +93,18 @@ public class AppBackupUtils {
     }
 
     /**
-     * Old style: directly match the stored vs on device signature blocks.
+     * Returns whether the signatures stored {@param storedSigs}, coming from the source apk, match
+     * the signatures of the apk installed on the device, the target apk. If the target resides in
+     * the system partition we return true. Otherwise it's considered a match if both conditions
+     * hold:
+     *
+     * <ul>
+     *   <li>Source and target have at least one signature each
+     *   <li>Target contains all signatures in source
+     * </ul>
+     *
+     * Note that if {@param target} is null we return false.
      */
-    // TODO(b/37977154): Resolve questionable policies.
     public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
             return false;
@@ -111,24 +122,18 @@ public class AppBackupUtils {
             return true;
         }
 
-        // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // TODO(b/37977154): is this the right policy?
         Signature[] deviceSigs = target.signatures;
         if (MORE_DEBUG) {
             Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device=" + deviceSigs);
         }
-        if ((storedSigs == null || storedSigs.length == 0)
-                && (deviceSigs == null || deviceSigs.length == 0)) {
-            return true;
-        }
-        // TODO(b/37977154): This allows empty stored signature, is this right?
-        if (storedSigs == null || deviceSigs == null) {
+
+        // Don't allow unsigned apps on either end
+        if (ArrayUtils.isEmpty(storedSigs) || ArrayUtils.isEmpty(deviceSigs)) {
             return false;
         }
 
-        // TODO(b/37977154): this demands that every stored signature match one
-        // that is present on device, and does not demand the converse.
-        // Is this this right policy?
+        // Signatures can be added over time, so the target-device apk needs to contain all the
+        // source-device apk signatures, but not necessarily the other way around.
         int nStored = storedSigs.length;
         int nDevice = deviceSigs.length;
 

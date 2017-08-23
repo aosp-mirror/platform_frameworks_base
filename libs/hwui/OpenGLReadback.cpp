@@ -228,7 +228,7 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
                 .build();
         Matrix4 ortho;
         ortho.loadOrtho(destWidth, destHeight);
-        renderState.render(glop, ortho);
+        renderState.render(glop, ortho, false);
 
         // TODO: We should convert to linear space when the target is RGBA16F
         glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
+import android.content.res.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.Before;
@@ -51,7 +52,8 @@ public class TaskStackContainersTests extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mPinnedStack = new StackWindowController(PINNED_STACK_ID, null,
-                mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
+                mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), new Configuration(),
+                sWm).mContainer;
 
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);

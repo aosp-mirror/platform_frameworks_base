@@ -18,9 +18,18 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -43,6 +52,7 @@ import static com.android.server.wm.proto.StackProto.ID;
 import static com.android.server.wm.proto.StackProto.TASKS;
 
 import android.app.ActivityManager.StackId;
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -153,6 +163,32 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
+
+        // TODO: Remove once we are no longer using Stacks for windowing mode or grouping tasks.
+        final int windowingMode;
+        switch (stackId) {
+            case FULLSCREEN_WORKSPACE_STACK_ID:
+            case HOME_STACK_ID:
+            case RECENTS_STACK_ID:
+            case ASSISTANT_STACK_ID:
+                windowingMode = WINDOWING_MODE_FULLSCREEN;
+                break;
+            case PINNED_STACK_ID:
+                windowingMode = WINDOWING_MODE_PINNED;
+                break;
+            case DOCKED_STACK_ID:
+                windowingMode = WINDOWING_MODE_DOCKED;
+                break;
+            case FREEFORM_WORKSPACE_STACK_ID:
+                windowingMode = WINDOWING_MODE_FREEFORM;
+                break;
+            default :
+                windowingMode = WINDOWING_MODE_UNDEFINED;
+        }
+
+        if (windowingMode != WINDOWING_MODE_UNDEFINED) {
+            setWindowingMode(windowingMode);
+        }
     }
 
     DisplayContent getDisplayContent() {
