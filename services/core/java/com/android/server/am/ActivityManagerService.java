@@ -13112,6 +13112,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + " couldn't be found");
                     return null;
                 }
+                if (activity.app == null || activity.app.thread == null) {
+                    Slog.w(TAG, "enqueueAssistContext failed: no process for " + activity);
+                    return null;
+                }
             }
 
             PendingAssistExtras pae;
