@@ -151,7 +151,7 @@ public class KeyguardClockPositionAlgorithm {
         progress = Math.max(0.0f, Math.min(progress, 1.0f));
         progress = mAccelerateInterpolator.getInterpolation(progress);
         progress *= Math.pow(1 + mEmptyDragAmount / mDensity / 300, 0.3f);
-        return progress;
+        return interpolate(progress, 1, mDarkAmount);
     }
 
     private int getClockNotificationsPadding() {

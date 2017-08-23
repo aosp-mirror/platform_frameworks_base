@@ -280,7 +280,7 @@ class ScreenRotationAnimation {
                 // capture a screenshot into the surface we just created
                 Surface sur = new Surface();
                 sur.copyFrom(mSurfaceControl);
-                // FIXME: we should use the proper display
+                // TODO(multidisplay): we should use the proper display
                 SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
                         SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
                 mSurfaceControl.setLayerStack(display.getLayerStack());

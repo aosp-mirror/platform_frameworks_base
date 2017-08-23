@@ -298,6 +298,22 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
+    public void resetSettingDefaultValueLocked(String name) {
+        Setting oldSetting = getSettingLocked(name);
+        if (oldSetting != null && !oldSetting.isNull() && oldSetting.getDefaultValue() != null) {
+            String oldValue = oldSetting.getValue();
+            String oldDefaultValue = oldSetting.getDefaultValue();
+            Setting newSetting = new Setting(name, oldSetting.getValue(), null,
+                    oldSetting.getPackageName(), oldSetting.getTag(), false,
+                    oldSetting.getId());
+            mSettings.put(name, newSetting);
+            updateMemoryUsagePerPackageLocked(newSetting.getPackageName(), oldValue,
+                    newSetting.getValue(), oldDefaultValue, newSetting.getDefaultValue());
+            scheduleWriteIfNeededLocked();
+        }
+    }
+
+    // The settings provider must hold its lock when calling here.
     public boolean insertSettingLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
         if (TextUtils.isEmpty(name)) {
@@ -1007,6 +1023,10 @@ final class SettingsState {
     }
 
     public static boolean isSystemPackage(Context context, String packageName) {
+        return isSystemPackage(context, packageName, Binder.getCallingUid());
+    }
+
+    public static boolean isSystemPackage(Context context, String packageName, int callingUid) {
         synchronized (sLock) {
             if (SYSTEM_PACKAGE_NAME.equals(packageName)) {
                 return true;
@@ -1019,7 +1039,7 @@ final class SettingsState {
             }
 
             // Native services running as a special UID get a pass
-            final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
+            final int callingAppId = UserHandle.getAppId(callingUid);
             if (callingAppId < FIRST_APPLICATION_UID) {
                 sSystemUids.put(callingAppId, callingAppId);
                 return true;
@@ -1030,7 +1050,7 @@ final class SettingsState {
             // profile for the purpose of determining whether the other end is a
             // system component we need to use the user id of the caller for
             // pulling information about the caller from the package manager.
-            final int callingUserId = UserHandle.getCallingUserId();
+            final int callingUserId = UserHandle.getUserId(callingUid);
 
             final long identity = Binder.clearCallingIdentity();
             try {

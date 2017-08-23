@@ -111,10 +111,4 @@
 
     <!-- Size of the text under the avator on the multiuser lockscreen. -->
     <dimen name="keyguard_avatar_name_size">12sp</dimen>
-
-    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_width">420dp</dimen>
-
-    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_height">420dp</dimen>
 </resources>

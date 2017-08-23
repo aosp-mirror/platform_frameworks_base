@@ -38,14 +38,18 @@ public final class InstantAppRequest {
      * Optional extra bundle provided by the source application to the installer for additional
      * verification. */
     public final Bundle verificationBundle;
+    /** Whether resolution occurs because an application is starting */
+    public final boolean resolveForStart;
 
     public InstantAppRequest(AuxiliaryResolveInfo responseObj, Intent origIntent,
-            String resolvedType, String callingPackage, int userId, Bundle verificationBundle) {
+            String resolvedType, String callingPackage, int userId, Bundle verificationBundle,
+            boolean resolveForStart) {
         this.responseObj = responseObj;
         this.origIntent = origIntent;
         this.resolvedType = resolvedType;
         this.callingPackage = callingPackage;
         this.userId = userId;
         this.verificationBundle = verificationBundle;
+        this.resolveForStart = resolveForStart;
     }
 }

@@ -1930,8 +1930,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final boolean update = res.removedInfo != null
                     && res.removedInfo.removedPackage != null;
-            final String origInstallerPackageName = res.removedInfo != null
-                    ? res.removedInfo.installerPackageName : null;
+            final String installerPackageName =
+                    res.installerPackageName != null
+                            ? res.installerPackageName
+                            : res.removedInfo != null
+                                    ? res.removedInfo.installerPackageName
+                                    : null;
 
             // If this is the first time we have child packages for a disabled privileged
             // app that had no children, we grant requested runtime permissions to the new
@@ -1996,10 +2000,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/,
                         null /*targetPackage*/, null /*finishedReceiver*/, updateUsers);
-                if (origInstallerPackageName != null) {
+                if (installerPackageName != null) {
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
-                            origInstallerPackageName, null /*finishedReceiver*/, updateUsers);
+                            installerPackageName, null /*finishedReceiver*/, updateUsers);
                 }
 
                 // Send replaced for users that don't see the package for the first time
@@ -2008,10 +2012,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             packageName, extras, 0 /*flags*/,
                             null /*targetPackage*/, null /*finishedReceiver*/,
                             updateUsers);
-                    if (origInstallerPackageName != null) {
+                    if (installerPackageName != null) {
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
-                                origInstallerPackageName, null /*finishedReceiver*/, updateUsers);
+                                installerPackageName, null /*finishedReceiver*/, updateUsers);
                     }
                     sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                             null /*package*/, null /*extras*/, 0 /*flags*/,
@@ -6774,7 +6778,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Bundle verificationBundle, int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
                 new InstantAppRequest(responseObj, origIntent, resolvedType,
-                        callingPackage, userId, verificationBundle));
+                        callingPackage, userId, verificationBundle, false /*resolveForStart*/));
         mHandler.sendMessage(msg);
     }
 
@@ -7358,7 +7362,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if (addEphemeral) {
-            result = maybeAddInstantAppInstaller(result, intent, resolvedType, flags, userId);
+            result = maybeAddInstantAppInstaller(
+                    result, intent, resolvedType, flags, userId, resolveForStart);
         }
         if (sortResult) {
             Collections.sort(result, mResolvePrioritySorter);
@@ -7368,7 +7373,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
-            String resolvedType, int flags, int userId) {
+            String resolvedType, int flags, int userId, boolean resolveForStart) {
         // first, check to see if we've got an instant app already installed
         final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
         ResolveInfo localInstantApp = null;
@@ -7417,7 +7422,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
                 final InstantAppRequest requestObject = new InstantAppRequest(
                         null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                        null /*callingPackage*/, userId, null /*verificationBundle*/);
+                        null /*callingPackage*/, userId, null /*verificationBundle*/,
+                        resolveForStart);
                 auxiliaryResponse =
                         InstantAppResolver.doInstantAppResolutionPhaseOne(
                                 mContext, mInstantAppResolverConnection, requestObject);
@@ -17406,6 +17412,7 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageParser.Package pkg;
         int returnCode;
         String returnMsg;
+        String installerPackageName;
         PackageRemovedInfo removedInfo;
         ArrayMap<String, PackageInstalledInfo> addedChildPackages;
 
@@ -18326,6 +18333,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Result object to be returned
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
+        res.installerPackageName = installerPackageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
 
@@ -25445,6 +25453,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public boolean canAccessInstantApps(int callingUid, int userId) {
             return PackageManagerService.this.canViewInstantApps(callingUid, userId);
+        }
+
+        @Override
+        public boolean hasInstantApplicationMetadata(String packageName, int userId) {
+            synchronized (mPackages) {
+                return mInstantAppRegistry.hasInstantApplicationMetadataLPr(packageName, userId);
+            }
         }
     }
 

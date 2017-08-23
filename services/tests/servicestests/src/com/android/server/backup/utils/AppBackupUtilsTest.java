@@ -31,8 +31,6 @@ import com.android.server.backup.RefactoredBackupManagerService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Random;
-
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -40,7 +38,10 @@ public class AppBackupUtilsTest {
     private static final String CUSTOM_BACKUP_AGENT_NAME = "custom.backup.agent";
     private static final String TEST_PACKAGE_NAME = "test_package";
 
-    private final Random mRandom = new Random(1000000009);
+    private static final Signature SIGNATURE_1 = generateSignature((byte) 1);
+    private static final Signature SIGNATURE_2 = generateSignature((byte) 2);
+    private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
+    private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
 
     @Test
     public void appIsEligibleForBackup_backupNotAllowed_returnsFalse() throws Exception {
@@ -220,7 +221,7 @@ public class AppBackupUtilsTest {
 
     @Test
     public void signaturesMatch_targetIsNull_returnsFalse() throws Exception {
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], null);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, null);
 
         assertThat(result).isFalse();
     }
@@ -237,61 +238,10 @@ public class AppBackupUtilsTest {
     }
 
     @Test
-    public void signaturesMatch_allowsUnsignedApps_bothSignaturesNull_returnsTrue()
+    public void signaturesMatch_disallowsUnsignedApps_storedSignatureNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
-        packageInfo.applicationInfo = new ApplicationInfo();
-
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void signaturesMatch_allowsUnsignedApps_bothSignaturesEmpty_returnsTrue()
-            throws Exception {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
-        packageInfo.applicationInfo = new ApplicationInfo();
-
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void
-    signaturesMatch_allowsUnsignedApps_storedSignatureNullTargetSignatureEmpty_returnsTrue()
-            throws Exception {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
-        packageInfo.applicationInfo = new ApplicationInfo();
-
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void
-    signaturesMatch_allowsUnsignedApps_storedSignatureEmptyTargetSignatureNull_returnsTrue()
-            throws Exception {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
-        packageInfo.applicationInfo = new ApplicationInfo();
-
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void
-    signaturesMatch_disallowsAppsUnsignedOnOnlyOneDevice_storedSignatureIsNull_returnsFalse()
-            throws Exception {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{generateRandomSignature()};
+        packageInfo.signatures = new Signature[] {SIGNATURE_1};
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
@@ -300,37 +250,78 @@ public class AppBackupUtilsTest {
     }
 
     @Test
-    public void
-    signaturesMatch_disallowsAppsUnsignedOnOnlyOneDevice_targetSignatureIsNull_returnsFalse()
+    public void signaturesMatch_disallowsUnsignedApps_storedSignatureEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
+        packageInfo.signatures = new Signature[] {SIGNATURE_1};
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[]{generateRandomSignature()},
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+
+        assertThat(result).isFalse();
+    }
+
+
+    @Test
+    public void
+    signaturesMatch_disallowsUnsignedApps_targetSignatureEmpty_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signatures = new Signature[0];
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1},
                 packageInfo);
 
         assertThat(result).isFalse();
     }
 
     @Test
-    public void signaturesMatch_signaturesMatch_returnsTrue() throws Exception {
-        Signature signature1 = generateRandomSignature();
-        Signature signature2 = generateRandomSignature();
-        Signature signature3 = generateRandomSignature();
-        assertThat(signature1).isNotEqualTo(signature2);
-        assertThat(signature2).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature3);
+    public void
+    signaturesMatch_disallowsUnsignedApps_targetSignatureNull_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signatures = null;
+        packageInfo.applicationInfo = new ApplicationInfo();
 
-        Signature signature1Copy = new Signature(signature1.toByteArray());
-        Signature signature2Copy = new Signature(signature2.toByteArray());
-        Signature signature3Copy = new Signature(signature3.toByteArray());
-        assertThat(signature1Copy).isEqualTo(signature1);
-        assertThat(signature2Copy).isEqualTo(signature2);
-        assertThat(signature3Copy).isEqualTo(signature3);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1},
+                packageInfo);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_disallowsUnsignedApps_bothSignaturesNull_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signatures = null;
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_disallowsUnsignedApps_bothSignaturesEmpty_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signatures = new Signature[0];
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_equalSignatures_returnsTrue() throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+        Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
+        Signature signature3Copy = new Signature(SIGNATURE_3.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{signature1, signature2, signature3};
+        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
@@ -341,20 +332,11 @@ public class AppBackupUtilsTest {
 
     @Test
     public void signaturesMatch_extraSignatureInTarget_returnsTrue() throws Exception {
-        Signature signature1 = generateRandomSignature();
-        Signature signature2 = generateRandomSignature();
-        Signature signature3 = generateRandomSignature();
-        assertThat(signature1).isNotEqualTo(signature2);
-        assertThat(signature2).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature3);
-
-        Signature signature1Copy = new Signature(signature1.toByteArray());
-        Signature signature2Copy = new Signature(signature2.toByteArray());
-        assertThat(signature1Copy).isEqualTo(signature1);
-        assertThat(signature2Copy).isEqualTo(signature2);
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+        Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{signature1, signature2, signature3};
+        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
@@ -365,96 +347,37 @@ public class AppBackupUtilsTest {
 
     @Test
     public void signaturesMatch_extraSignatureInStored_returnsFalse() throws Exception {
-        Signature signature1 = generateRandomSignature();
-        Signature signature2 = generateRandomSignature();
-        Signature signature3 = generateRandomSignature();
-        assertThat(signature1).isNotEqualTo(signature2);
-        assertThat(signature2).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature3);
-
-        Signature signature1Copy = new Signature(signature1.toByteArray());
-        Signature signature2Copy = new Signature(signature2.toByteArray());
-        assertThat(signature1Copy).isEqualTo(signature1);
-        assertThat(signature2Copy).isEqualTo(signature2);
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+        Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.signatures = new Signature[]{signature1Copy, signature2Copy};
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature1, signature2, signature3}, packageInfo);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void signaturesMatch_emptyStoredSignatures_returnsTrue() throws Exception {
-        Signature signature1 = generateRandomSignature();
-        Signature signature2 = generateRandomSignature();
-        Signature signature3 = generateRandomSignature();
-        assertThat(signature1).isNotEqualTo(signature2);
-        assertThat(signature2).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature3);
-
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{signature1, signature2, signature3};
-        packageInfo.applicationInfo = new ApplicationInfo();
-
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void signaturesMatch_emptyTargetSignatures_returnsFalse() throws Exception {
-        Signature signature1 = generateRandomSignature();
-        Signature signature2 = generateRandomSignature();
-        Signature signature3 = generateRandomSignature();
-        assertThat(signature1).isNotEqualTo(signature2);
-        assertThat(signature2).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature3);
-
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
-        packageInfo.applicationInfo = new ApplicationInfo();
-
-        boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature1, signature2, signature3}, packageInfo);
+                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo);
 
         assertThat(result).isFalse();
     }
 
     @Test
     public void signaturesMatch_oneNonMatchingSignature_returnsFalse() throws Exception {
-        Signature signature1 = generateRandomSignature();
-        Signature signature2 = generateRandomSignature();
-        Signature signature3 = generateRandomSignature();
-        Signature signature4 = generateRandomSignature();
-        assertThat(signature1).isNotEqualTo(signature2);
-        assertThat(signature2).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature3);
-        assertThat(signature1).isNotEqualTo(signature4);
-        assertThat(signature2).isNotEqualTo(signature4);
-        assertThat(signature3).isNotEqualTo(signature4);
-
-        Signature signature1Copy = new Signature(signature1.toByteArray());
-        Signature signature2Copy = new Signature(signature2.toByteArray());
-        assertThat(signature1Copy).isEqualTo(signature1);
-        assertThat(signature2Copy).isEqualTo(signature2);
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+        Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{signature1, signature2, signature3};
+        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature1Copy, signature2Copy, signature4}, packageInfo);
+                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo);
 
         assertThat(result).isFalse();
     }
 
-    private Signature generateRandomSignature() {
+    private static Signature generateSignature(byte i) {
         byte[] signatureBytes = new byte[256];
-        mRandom.nextBytes(signatureBytes);
+        signatureBytes[0] = i;
         return new Signature(signatureBytes);
     }
 }
