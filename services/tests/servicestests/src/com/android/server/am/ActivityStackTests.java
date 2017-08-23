@@ -17,9 +17,9 @@
 package com.android.server.am;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -81,7 +81,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         final boolean waiting = testStack.goToSleepIfPossible(false);
 
         // Ensure we report not being ready for sleep.
-        assertTrue(waiting);
+        assertFalse(waiting);
 
         // Make sure the resumed activity is untouched.
         assertEquals(testStack.mResumedActivity, activityRecord);
