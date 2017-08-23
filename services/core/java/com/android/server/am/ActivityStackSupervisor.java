@@ -3173,15 +3173,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         boolean timedout = false;
         final long endTime = System.currentTimeMillis() + timeout;
         while (true) {
-            boolean cantShutdown = false;
-            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-                final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
-                for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    cantShutdown |=
-                            stacks.get(stackNdx).goToSleepIfPossible(true /* shuttingDown */);
-                }
-            }
-            if (cantShutdown) {
+            if (!putStacksToSleepLocked(true /* allowDelay */, true /* shuttingDown */)) {
                 long timeRemaining = endTime - System.currentTimeMillis();
                 if (timeRemaining > 0) {
                     try {
@@ -3268,19 +3260,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
-        if (allowDelay) {
-            boolean dontSleep = false;
-            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-                final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
-                final ArrayList<ActivityStack> stacks = display.mStacks;
-                for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    dontSleep |= stacks.get(stackNdx).goToSleepIfPossible(false /* shuttingDown */);
-                }
-            }
-
-            if (dontSleep) {
-                return;
-            }
+        if (!putStacksToSleepLocked(allowDelay, false /* shuttingDown */)) {
+            return;
         }
 
         // Send launch end powerhint before going sleep
@@ -3294,6 +3275,23 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (mService.mShuttingDown) {
             mService.notifyAll();
         }
+    }
+
+    // Tries to put all activity stacks to sleep. Returns true if all stacks were
+    // successfully put to sleep.
+    private boolean putStacksToSleepLocked(boolean allowDelay, boolean shuttingDown) {
+        boolean allSleep = true;
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                if (allowDelay) {
+                    allSleep &= stacks.get(stackNdx).goToSleepIfPossible(shuttingDown);
+                } else {
+                    stacks.get(stackNdx).goToSleep();
+                }
+            }
+        }
+        return allSleep;
     }
 
     boolean reportResumedActivityLocked(ActivityRecord r) {

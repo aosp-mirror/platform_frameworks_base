@@ -1189,7 +1189,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * function get called again when those actions complete.
      *
      * @param shuttingDown true when the called because the device is shutting down.
-     * @return true if something must be done before going to sleep.
+     * @return true if the stack finished going to sleep, false if the stack only started the
+     * process of going to sleep (checkReadyForSleep will be called when that process finishes).
      */
     boolean goToSleepIfPossible(boolean shuttingDown) {
         boolean shouldSleep = true;
@@ -1240,10 +1241,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             goToSleep();
         }
 
-        return !shouldSleep;
+        return shouldSleep;
     }
 
-    private void goToSleep() {
+    void goToSleep() {
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
 
         // Make sure any paused or stopped but visible activities are now sleeping.
