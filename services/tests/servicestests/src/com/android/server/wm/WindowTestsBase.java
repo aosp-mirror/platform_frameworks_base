@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.VISIBLE;
 
@@ -238,8 +239,10 @@ class WindowTestsBase {
 
     StackWindowController createStackControllerOnStackOnDisplay(int stackId,
             DisplayContent dc) {
+        final Configuration overrideConfig = new Configuration();
+        overrideConfig.windowConfiguration.setWindowingMode(getWindowingModeForStackId(stackId));
         return new StackWindowController(stackId, null, dc.getDisplayId(),
-                true /* onTop */, new Rect(), new Configuration(), sWm);
+                true /* onTop */, new Rect(), overrideConfig, sWm);
     }
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */

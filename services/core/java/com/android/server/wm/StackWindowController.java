@@ -58,14 +58,14 @@ public class StackWindowController
     private final Rect mTmpDisplayBounds = new Rect();
 
     public StackWindowController(int stackId, StackWindowListener listener,
-            int displayId, boolean onTop, Rect outBounds, Configuration outOverriderConfig) {
-        this(stackId, listener, displayId, onTop, outBounds, outOverriderConfig,
+            int displayId, boolean onTop, Rect outBounds, Configuration overriderConfig) {
+        this(stackId, listener, displayId, onTop, outBounds, overriderConfig,
                 WindowManagerService.getInstance());
     }
 
     @VisibleForTesting
     public StackWindowController(int stackId, StackWindowListener listener,
-            int displayId, boolean onTop, Rect outBounds, Configuration outOverrideConfig,
+            int displayId, boolean onTop, Rect outBounds, Configuration overrideConfig,
             WindowManagerService service) {
         super(listener, service);
         mStackId = stackId;
@@ -79,9 +79,11 @@ public class StackWindowController
             }
 
             final TaskStack stack = dc.addStackToDisplay(stackId, onTop);
+            if (overrideConfig != null) {
+                stack.onOverrideConfigurationChanged(overrideConfig);
+            }
             stack.setController(this);
             getRawBounds(outBounds);
-            outOverrideConfig.setTo(mContainer.getOverrideConfiguration());
         }
     }
 

@@ -197,8 +197,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
                 false /*overrideHeight*/, mDisplayInfo.logicalDensityDpi, config, parentConfig);
         // Assert that both expected and actual are null or are equal to each other
 
-        assertTrue((expectedConfigBounds == null && winConfig.getAppBounds() == null)
-                || expectedConfigBounds.equals(winConfig.getAppBounds()));
+        assertEquals(expectedConfigBounds, winConfig.getAppBounds());
     }
 
 }

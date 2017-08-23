@@ -272,7 +272,7 @@ public class ActivityTestsBase {
 
         @Override
         protected T createStackWindowController(int displayId, boolean onTop, Rect outBounds,
-                Configuration outOverrideConfig) {
+                Configuration overrideConfig) {
             mContainerController = (T) WindowTestUtils.createMockStackWindowContainerController();
             return mContainerController;
         }

@@ -163,32 +163,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
-
-        // TODO: Remove once we are no longer using Stacks for windowing mode or grouping tasks.
-        final int windowingMode;
-        switch (stackId) {
-            case FULLSCREEN_WORKSPACE_STACK_ID:
-            case HOME_STACK_ID:
-            case RECENTS_STACK_ID:
-            case ASSISTANT_STACK_ID:
-                windowingMode = WINDOWING_MODE_FULLSCREEN;
-                break;
-            case PINNED_STACK_ID:
-                windowingMode = WINDOWING_MODE_PINNED;
-                break;
-            case DOCKED_STACK_ID:
-                windowingMode = WINDOWING_MODE_DOCKED;
-                break;
-            case FREEFORM_WORKSPACE_STACK_ID:
-                windowingMode = WINDOWING_MODE_FREEFORM;
-                break;
-            default :
-                windowingMode = WINDOWING_MODE_UNDEFINED;
-        }
-
-        if (windowingMode != WINDOWING_MODE_UNDEFINED) {
-            setWindowingMode(windowingMode);
-        }
     }
 
     DisplayContent getDisplayContent() {
