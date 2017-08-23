@@ -122,6 +122,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
+import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
@@ -2645,7 +2646,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void onConfigurationChanged() {
         // TODO(multi-display): Define policy for secondary displays.
-        final Resources res = mContext.getResources();
+        Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        final Resources res = uiContext.getResources();
 
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
