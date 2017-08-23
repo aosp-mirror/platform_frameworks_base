@@ -4282,6 +4282,11 @@ message MetricsEvent {
     // the app transition.
     APP_TRANSITION_REPORTED_DRAWN_MS = 1091;
 
+    // OPEN: Settings > Storage > Photos & Videos
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    APPLICATIONS_STORAGE_PHOTOS = 1092;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
