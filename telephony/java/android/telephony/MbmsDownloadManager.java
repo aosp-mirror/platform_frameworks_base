@@ -30,7 +30,6 @@ import android.os.RemoteException;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.IDownloadProgressListener;
-import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
 import android.telephony.mbms.MbmsException;
@@ -44,6 +43,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -207,8 +207,16 @@ public class MbmsDownloadManager {
     public static final int STATUS_PENDING_REPAIR = 3;
     public static final int STATUS_PENDING_DOWNLOAD_WINDOW = 4;
 
+    private static AtomicBoolean sIsInitialized = new AtomicBoolean(false);
+
     private final Context mContext;
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
+    private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
+        @Override
+        public void binderDied() {
+            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, "Received death notification");
+        }
+    };
 
     private AtomicReference<IMbmsDownloadService> mService = new AtomicReference<>(null);
     private final MbmsDownloadManagerCallback mCallback;
@@ -236,10 +244,21 @@ public class MbmsDownloadManager {
      *
      * Note that this call will bind a remote service and that may take a bit. The instance of
      * {@link MbmsDownloadManager} that is returned will not be ready for use until
-     * {@link IMbmsDownloadManagerCallback#middlewareReady()} is called on the provided callback.
+     * {@link MbmsDownloadManagerCallback#middlewareReady()} is called on the provided callback.
      * If you attempt to use the manager before it is ready, a {@link MbmsException} will be thrown.
      *
-     * This also may throw an {@link IllegalArgumentException} or a {@link MbmsException}.
+     * This also may throw an {@link IllegalArgumentException} or an {@link IllegalStateException}.
+     *
+     * You may only have one instance of {@link MbmsDownloadManager} per UID. If you call this
+     * method while there is an active instance of {@link MbmsDownloadManager} in your process
+     * (in other words, one that has not had {@link #dispose()} called on it), this method will
+     * throw an {@link MbmsException}. If you call this method in a different process
+     * running under the same UID, an error will be indicated via
+     * {@link MbmsDownloadManagerCallback#error(int, String)}.
+     *
+     * Note that initialization may fail asynchronously. If you wish to try again after you
+     * receive such an asynchronous error, you must call dispose() on the instance of
+     * {@link MbmsDownloadManager} that you received before calling this method again.
      *
      * @param context The instance of {@link Context} to use
      * @param listener A callback to get asynchronous error messages and file service updates.
@@ -249,8 +268,16 @@ public class MbmsDownloadManager {
     public static MbmsDownloadManager create(Context context,
             MbmsDownloadManagerCallback listener, int subscriptionId)
             throws MbmsException {
+        if (!sIsInitialized.compareAndSet(false, true)) {
+            throw new MbmsException(MbmsException.InitializationErrors.ERROR_DUPLICATE_INITIALIZE);
+        }
         MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, subscriptionId);
-        mdm.bindAndInitialize();
+        try {
+            mdm.bindAndInitialize();
+        } catch (MbmsException e) {
+            sIsInitialized.set(false);
+            throw e;
+        }
         return mdm;
     }
 
@@ -266,16 +293,27 @@ public class MbmsDownloadManager {
                             result = downloadService.initialize(mSubscriptionId, mCallback);
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
+                            sIsInitialized.set(false);
                             return;
                         } catch (RuntimeException e) {
                             Log.e(LOG_TAG, "Runtime exception during initialization");
-                            mCallback.error(
+                            sendErrorToApp(
                                     MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
                                     e.toString());
+                            sIsInitialized.set(false);
                             return;
                         }
                         if (result != MbmsException.SUCCESS) {
-                            mCallback.error(result, "Error returned during initialization");
+                            sendErrorToApp(result, "Error returned during initialization");
+                            sIsInitialized.set(false);
+                            return;
+                        }
+                        try {
+                            downloadService.asBinder().linkToDeath(mDeathRecipient, 0);
+                        } catch (RemoteException e) {
+                            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST,
+                                    "Middleware lost during initialization");
+                            sIsInitialized.set(false);
                             return;
                         }
                         mService.set(downloadService);
@@ -283,6 +321,7 @@ public class MbmsDownloadManager {
 
                     @Override
                     public void onServiceDisconnected(ComponentName name) {
+                        sIsInitialized.set(false);
                         mService.set(null);
                     }
                 });
@@ -292,7 +331,7 @@ public class MbmsDownloadManager {
      * An inspection API to retrieve the list of available
      * {@link android.telephony.mbms.FileServiceInfo}s currently being advertised.
      * The results are returned asynchronously via a call to
-     * {@link IMbmsDownloadManagerCallback#fileServicesUpdated(List)}
+     * {@link MbmsDownloadManagerCallback#fileServicesUpdated(List)}
      *
      * The serviceClasses argument lets the app filter on types of programming and is opaque data
      * negotiated beforehand between the app and the carrier.
@@ -306,7 +345,7 @@ public class MbmsDownloadManager {
      * {@link MbmsException.StreamingErrors#ERROR_UNABLE_TO_START_SERVICE}
      *
      * @param classList A list of service classes which the app wishes to receive
-     *                  {@link IMbmsDownloadManagerCallback#fileServicesUpdated(List)} callbacks
+     *                  {@link MbmsDownloadManagerCallback#fileServicesUpdated(List)} callbacks
      *                  about. Subsequent calls to this method will replace this list of service
      *                  classes (i.e. the middleware will no longer send updates for services
      *                  matching classes only in the old list).
@@ -336,7 +375,7 @@ public class MbmsDownloadManager {
      * local instance of {@link android.content.SharedPreferences} and by the middleware.
      *
      * If this method is not called at least once before calling
-     * {@link #download(DownloadRequest, IDownloadCallback)}, the framework
+     * {@link #download(DownloadRequest, IDownloadProgressListener)}, the framework
      * will default to a directory formed by the concatenation of the app's files directory and
      * {@link android.telephony.mbms.MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
      *
@@ -434,7 +473,7 @@ public class MbmsDownloadManager {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from this application.
      * A pending request is one that was issued via
-     * {@link #download(DownloadRequest, IDownloadCallback)} but not cancelled through
+     * {@link #download(DownloadRequest, IDownloadProgressListener)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * @return A list, possibly empty, of {@link DownloadRequest}s
      */
@@ -550,10 +589,12 @@ public class MbmsDownloadManager {
                 return;
             }
             downloadService.dispose(mSubscriptionId);
-            mService.set(null);
         } catch (RemoteException e) {
             // Ignore
             Log.i(LOG_TAG, "Remote exception while disposing of service");
+        } finally {
+            mService.set(null);
+            sIsInitialized.set(false);
         }
     }
 
@@ -649,6 +690,14 @@ public class MbmsDownloadManager {
             if (toFile.exists()) {
                 throw new IllegalArgumentException("Destination file must not exist.");
             }
+        }
+    }
+
+    private void sendErrorToApp(int errorCode, String message) {
+        try {
+            mCallback.error(errorCode, message);
+        } catch (RemoteException e) {
+            // Ignore, should not happen locally.
         }
     }
 }

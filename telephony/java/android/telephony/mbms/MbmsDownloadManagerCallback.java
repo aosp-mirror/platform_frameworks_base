@@ -16,6 +16,9 @@
 
 package android.telephony.mbms;
 
+import android.os.RemoteException;
+import android.telephony.MbmsDownloadManager;
+
 import java.util.List;
 
 /**
@@ -24,12 +27,8 @@ import java.util.List;
  */
 public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.Stub {
 
-    public final static int ERROR_CARRIER_NOT_SUPPORTED      = 1;
-    public final static int ERROR_UNABLE_TO_INITIALIZE       = 2;
-    public final static int ERROR_UNABLE_TO_ALLOCATE_MEMORY  = 3;
-
-
-    public void error(int errorCode, String message) {
+    @Override
+    public void error(int errorCode, String message) throws RemoteException {
         // default implementation empty
     }
 
@@ -45,7 +44,8 @@ public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.St
      * @param services a List of FileServiceInfos
      *
      */
-    public void fileServicesUpdated(List<FileServiceInfo> services) {
+    @Override
+    public void fileServicesUpdated(List<FileServiceInfo> services) throws RemoteException {
         // default implementation empty
     }
 
@@ -58,7 +58,7 @@ public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.St
      * or {@link MbmsException.GeneralErrors#ERROR_MIDDLEWARE_NOT_YET_READY}
      */
     @Override
-    public void middlewareReady() {
+    public void middlewareReady() throws RemoteException {
         // default implementation empty
     }
 }
