@@ -732,6 +732,18 @@ void RenderProxy::repackVectorDrawableAtlas() {
     thread.queue(task);
 }
 
+CREATE_BRIDGE1(releaseVDAtlasEntries, RenderThread* thread) {
+    args->thread->cacheManager().acquireVectorDrawableAtlas()->delayedReleaseEntries();
+    return nullptr;
+}
+
+void RenderProxy::releaseVDAtlasEntries() {
+    RenderThread& thread = RenderThread::getInstance();
+    SETUP_TASK(releaseVDAtlasEntries);
+    args->thread = &thread;
+    thread.queue(task);
+}
+
 void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {
     void* retval;
     task->setReturnPtr(&retval);

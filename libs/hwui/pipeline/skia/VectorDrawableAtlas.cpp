@@ -21,6 +21,7 @@
 #include <cmath>
 #include "utils/TraceUtils.h"
 #include "renderthread/RenderProxy.h"
+#include "renderthread/RenderThread.h"
 
 namespace android {
 namespace uirenderer {
@@ -228,6 +229,15 @@ AtlasEntry VectorDrawableAtlas::getEntry(AtlasKey atlasKey) {
 
 void VectorDrawableAtlas::releaseEntry(AtlasKey atlasKey) {
     if (INVALID_ATLAS_KEY != atlasKey) {
+        if (!renderthread::RenderThread::isCurrent()) {
+            {
+                AutoMutex _lock(mReleaseKeyLock);
+                mKeysForRelease.push_back(atlasKey);
+            }
+            // invoke releaseEntry on the renderthread
+            renderthread::RenderProxy::releaseVDAtlasEntries();
+            return;
+        }
         CacheEntry* entry = reinterpret_cast<CacheEntry*>(atlasKey);
         if (!entry->surface) {
             // Store freed atlas rectangles in "mFreeRects" and try to reuse them later, when atlas
@@ -243,6 +253,14 @@ void VectorDrawableAtlas::releaseEntry(AtlasKey atlasKey) {
         auto eraseIt = entry->eraseIt;
         mRects.erase(eraseIt);
     }
+}
+
+void VectorDrawableAtlas::delayedReleaseEntries() {
+    AutoMutex _lock(mReleaseKeyLock);
+    for (auto key : mKeysForRelease) {
+        releaseEntry(key);
+    }
+    mKeysForRelease.clear();
 }
 
 sk_sp<SkSurface> VectorDrawableAtlas::createSurface(int width, int height, GrContext* context) {

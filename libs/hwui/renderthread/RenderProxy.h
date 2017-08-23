@@ -143,6 +143,8 @@ public:
 
     static void repackVectorDrawableAtlas();
 
+    static void releaseVDAtlasEntries();
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
