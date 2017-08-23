@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -70,6 +71,7 @@ public final class DropBoxManagerService extends SystemService {
     private static final String TAG = "DropBoxManagerService";
     private static final int DEFAULT_AGE_SECONDS = 3 * 86400;
     private static final int DEFAULT_MAX_FILES = 1000;
+    private static final int DEFAULT_MAX_FILES_LOWRAM = 300;
     private static final int DEFAULT_QUOTA_KB = 5 * 1024;
     private static final int DEFAULT_QUOTA_PERCENT = 10;
     private static final int DEFAULT_RESERVE_PERCENT = 10;
@@ -105,6 +107,8 @@ public final class DropBoxManagerService extends SystemService {
 
     // Provide a way to perform sendBroadcast asynchronously to avoid deadlocks.
     private final Handler mHandler;
+
+    private int mMaxFiles = -1; // -1 means uninitialized.
 
     /** Receives events that might indicate a need to clean up files. */
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -394,6 +398,7 @@ public final class DropBoxManagerService extends SystemService {
         }
 
         out.append("Drop box contents: ").append(mAllFiles.contents.size()).append(" entries\n");
+        out.append("Max entries: ").append(mMaxFiles).append("\n");
 
         if (!searchArgs.isEmpty()) {
             out.append("Searching for:");
@@ -819,12 +824,16 @@ public final class DropBoxManagerService extends SystemService {
 
         int ageSeconds = Settings.Global.getInt(mContentResolver,
                 Settings.Global.DROPBOX_AGE_SECONDS, DEFAULT_AGE_SECONDS);
-        int maxFiles = Settings.Global.getInt(mContentResolver,
-                Settings.Global.DROPBOX_MAX_FILES, DEFAULT_MAX_FILES);
+        mMaxFiles = Settings.Global.getInt(mContentResolver,
+                Settings.Global.DROPBOX_MAX_FILES,
+                (ActivityManager.isLowRamDeviceStatic()
+                        ?  DEFAULT_MAX_FILES_LOWRAM : DEFAULT_MAX_FILES));
         long cutoffMillis = System.currentTimeMillis() - ageSeconds * 1000;
         while (!mAllFiles.contents.isEmpty()) {
             EntryFile entry = mAllFiles.contents.first();
-            if (entry.timestampMillis > cutoffMillis && mAllFiles.contents.size() < maxFiles) break;
+            if (entry.timestampMillis > cutoffMillis && mAllFiles.contents.size() < mMaxFiles) {
+                break;
+            }
 
             FileList tag = mFilesByTag.get(entry.tag);
             if (tag != null && tag.contents.remove(entry)) tag.blocks -= entry.blocks;
