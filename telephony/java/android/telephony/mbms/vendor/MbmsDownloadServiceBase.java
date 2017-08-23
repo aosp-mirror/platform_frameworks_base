@@ -18,6 +18,7 @@ package android.telephony.mbms.vendor;
 
 import android.annotation.NonNull;
 import android.os.RemoteException;
+import android.telephony.mbms.DownloadProgressListener;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.FileServiceInfo;
@@ -59,8 +60,8 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @hide
      */
     @Override
-    public int initialize(int subscriptionId,
-            IMbmsDownloadManagerCallback callback) throws RemoteException {
+    public final int initialize(int subscriptionId,
+            final IMbmsDownloadManagerCallback callback) throws RemoteException {
         return initialize(subscriptionId, new MbmsDownloadManagerCallback() {
             @Override
             public void error(int errorCode, String message) throws RemoteException {
@@ -133,12 +134,29 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @param downloadRequest An object describing the set of files to be downloaded.
      * @param listener A listener through which the middleware can provide progress updates to
      *                 the app while both are still running.
-     * @return TODO: enumerate possible return values
+     * @return Any error from {@link android.telephony.mbms.MbmsException.GeneralErrors}
+     *         or {@link MbmsException#SUCCESS}
+     */
+    public int download(DownloadRequest downloadRequest, DownloadProgressListener listener) {
+        return 0;
+    }
+
+    /**
+     * Actual AIDL implementation -- hides the callback AIDL from the API.
+     * @hide
      */
     @Override
-    public int download(DownloadRequest downloadRequest, IDownloadProgressListener listener)
+    public final int download(DownloadRequest downloadRequest, IDownloadProgressListener listener)
             throws RemoteException {
-        return 0;
+        return download(downloadRequest, new DownloadProgressListener() {
+            @Override
+            public void progress(DownloadRequest request, FileInfo fileInfo, int
+                    currentDownloadSize, int fullDownloadSize, int currentDecodedSize, int
+                    fullDecodedSize) throws RemoteException {
+                listener.progress(request, fileInfo, currentDownloadSize, fullDownloadSize,
+                        currentDecodedSize, fullDecodedSize);
+            }
+        });
     }
 
 
