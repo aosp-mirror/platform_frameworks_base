@@ -122,7 +122,7 @@ public abstract class InstantAppResolver {
             }
         }
         // Only log successful instant application resolution
-        if (resolutionStatus == RESOLUTION_SUCCESS) {
+        if (requestObj.resolveForStart && resolutionStatus == RESOLUTION_SUCCESS) {
             logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
                     resolutionStatus);
         }
