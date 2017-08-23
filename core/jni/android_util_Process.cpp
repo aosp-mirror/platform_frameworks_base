@@ -31,6 +31,7 @@
 
 #include "android_util_Binder.h"
 #include <nativehelper/JNIHelp.h>
+#include "android_os_Debug.h"
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -1092,26 +1093,20 @@ static jlong android_os_Process_getElapsedCpuTime(JNIEnv* env, jobject clazz)
 
 static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
 {
-    char filename[64];
-
-    snprintf(filename, sizeof(filename), "/proc/%" PRId32 "/smaps", pid);
-
-    FILE * file = fopen(filename, "r");
-    if (!file) {
+    UniqueFile file = OpenSmapsOrRollup(pid);
+    if (file == nullptr) {
         return (jlong) -1;
     }
 
     // Tally up all of the Pss from the various maps
     char line[256];
     jlong pss = 0;
-    while (fgets(line, sizeof(line), file)) {
+    while (fgets(line, sizeof(line), file.get())) {
         jlong v;
         if (sscanf(line, "Pss: %" SCNd64 " kB", &v) == 1) {
             pss += v;
         }
     }
-
-    fclose(file);
 
     // Return the Pss value in bytes, not kilobytes
     return pss * 1024;
