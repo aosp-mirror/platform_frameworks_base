@@ -18,18 +18,19 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telephony.mbms.DownloadProgressListener;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.DownloadRequest;
-import android.telephony.mbms.IDownloadProgressListener;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
 import android.telephony.mbms.MbmsException;
@@ -52,132 +53,23 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 public class MbmsDownloadManager {
     private static final String LOG_TAG = MbmsDownloadManager.class.getSimpleName();
 
+    /** @hide */
+    // TODO: systemapi
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String MBMS_DOWNLOAD_SERVICE_ACTION =
             "android.telephony.action.EmbmsDownload";
-    /**
-     * The MBMS middleware should send this when a download of single file has completed or
-     * failed. Mandatory extras are
-     * {@link #EXTRA_RESULT}
-     * {@link #EXTRA_FILE_INFO}
-     * {@link #EXTRA_REQUEST}
-     * {@link #EXTRA_TEMP_LIST}
-     * {@link #EXTRA_FINAL_URI}
-     *
-     * TODO: future systemapi
-     */
-    public static final String ACTION_DOWNLOAD_RESULT_INTERNAL =
-            "android.telephony.mbms.action.DOWNLOAD_RESULT_INTERNAL";
-
-    /**
-     * The MBMS middleware should send this when it wishes to request {@code content://} URIs to
-     * serve as temp files for downloads or when it wishes to resume paused downloads. Mandatory
-     * extras are
-     * {@link #EXTRA_REQUEST}
-     *
-     * Optional extras are
-     * {@link #EXTRA_FD_COUNT} (0 if not present)
-     * {@link #EXTRA_PAUSED_LIST} (empty if not present)
-     *
-     * TODO: future systemapi
-     */
-    public static final String ACTION_FILE_DESCRIPTOR_REQUEST =
-            "android.telephony.mbms.action.FILE_DESCRIPTOR_REQUEST";
-
-    /**
-     * The MBMS middleware should send this when it wishes to clean up temp  files in the app's
-     * filesystem. Mandatory extras are:
-     * {@link #EXTRA_TEMP_FILES_IN_USE}
-     *
-     * TODO: future systemapi
-     */
-    public static final String ACTION_CLEANUP =
-            "android.telephony.mbms.action.CLEANUP";
 
     /**
      * Integer extra indicating the result code of the download. One of
      * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, or {@link #RESULT_CANCELLED}.
-     * TODO: Not systemapi.
      */
     public static final String EXTRA_RESULT = "android.telephony.mbms.extra.RESULT";
 
     /**
      * Extra containing the {@link android.telephony.mbms.FileInfo} for which the download result
      * is for. Must not be null.
-     * TODO: Not systemapi.
      */
     public static final String EXTRA_FILE_INFO = "android.telephony.mbms.extra.FILE_INFO";
-
-    /**
-     * Extra containing the {@link DownloadRequest} for which the download result or file
-     * descriptor request is for. Must not be null.
-     * TODO: future systemapi (here and and all extras) except the three for the app intent
-     */
-    public static final String EXTRA_REQUEST = "android.telephony.mbms.extra.REQUEST";
-
-    /**
-     * Extra containing a {@link List} of {@link Uri}s that were used as temp files for this
-     * completed file. These {@link Uri}s should have scheme {@code file://}, and the temp
-     * files will be deleted upon receipt of the intent.
-     * May be null.
-     */
-    public static final String EXTRA_TEMP_LIST = "android.telephony.mbms.extra.TEMP_LIST";
-
-    /**
-     * Extra containing a single {@link Uri} indicating the path to the temp file in which the
-     * decoded downloaded file resides. Must not be null.
-     */
-    public static final String EXTRA_FINAL_URI = "android.telephony.mbms.extra.FINAL_URI";
-
-    /**
-     * Extra containing an integer indicating the number of temp files requested.
-     */
-    public static final String EXTRA_FD_COUNT = "android.telephony.mbms.extra.FD_COUNT";
-
-    /**
-     * Extra containing a list of {@link Uri}s that the middleware is requesting access to via
-     * {@link #ACTION_FILE_DESCRIPTOR_REQUEST} in order to resume downloading. These {@link Uri}s
-     * should have scheme {@code file://}.
-     */
-    public static final String EXTRA_PAUSED_LIST = "android.telephony.mbms.extra.PAUSED_LIST";
-
-    /**
-     * Extra containing a list of {@link android.telephony.mbms.UriPathPair}s, used in the
-     * response to {@link #ACTION_FILE_DESCRIPTOR_REQUEST}. These are temp files that are meant
-     * to be used for new file downloads.
-     */
-    public static final String EXTRA_FREE_URI_LIST = "android.telephony.mbms.extra.FREE_URI_LIST";
-
-    /**
-     * Extra containing a list of {@link android.telephony.mbms.UriPathPair}s, used in the
-     * response to {@link #ACTION_FILE_DESCRIPTOR_REQUEST}. These
-     * {@link android.telephony.mbms.UriPathPair}s contain {@code content://} URIs that provide
-     * access to previously paused downloads.
-     */
-    public static final String EXTRA_PAUSED_URI_LIST =
-            "android.telephony.mbms.extra.PAUSED_URI_LIST";
-
-    /**
-     * Extra containing a string that points to the middleware's knowledge of where the temp file
-     * root for the app is. The path should be a canonical path as returned by
-     * {@link File#getCanonicalPath()}
-     */
-    public static final String EXTRA_TEMP_FILE_ROOT =
-            "android.telephony.mbms.extra.TEMP_FILE_ROOT";
-
-    /**
-     * Extra containing a list of {@link Uri}s indicating temp files which the middleware is
-     * still using.
-     */
-    public static final String EXTRA_TEMP_FILES_IN_USE =
-            "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
-
-    /**
-     * Extra containing an instance of {@link android.telephony.mbms.ServiceInfo}, used by
-     * file-descriptor requests and cleanup requests to specify which service they want to
-     * request temp files or clean up temp files for, respectively.
-     */
-    public static final String EXTRA_SERVICE_INFO =
-            "android.telephony.mbms.extra.SERVICE_INFO";
 
     /**
      * Extra containing a single {@link Uri} indicating the location of the successfully
@@ -185,14 +77,14 @@ public class MbmsDownloadManager {
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}.
      * Will always be set to a non-null value if {@link #EXTRA_RESULT} is set to
      * {@link #RESULT_SUCCESSFUL}.
-     * TODO: Not systemapi.
      */
     public static final String EXTRA_COMPLETED_FILE_URI =
             "android.telephony.mbms.extra.COMPLETED_FILE_URI";
 
     public static final int RESULT_SUCCESSFUL = 1;
-    public static final int RESULT_CANCELLED  = 2;
-    public static final int RESULT_EXPIRED    = 3;
+    public static final int RESULT_CANCELLED = 2;
+    public static final int RESULT_EXPIRED = 3;
+    public static final int RESULT_IO_ERROR = 4;
     // TODO - more results!
 
     /** @hide */
@@ -375,14 +267,15 @@ public class MbmsDownloadManager {
      * local instance of {@link android.content.SharedPreferences} and by the middleware.
      *
      * If this method is not called at least once before calling
-     * {@link #download(DownloadRequest, IDownloadProgressListener)}, the framework
+     * {@link #download(DownloadRequest, DownloadProgressListener)}, the framework
      * will default to a directory formed by the concatenation of the app's files directory and
      * {@link android.telephony.mbms.MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
      *
      * Before calling this method, the app must cancel all of its pending
      * {@link DownloadRequest}s via {@link #cancelDownload(DownloadRequest)}. If this is not done,
      * an {@link MbmsException} will be thrown with code
-     * {@link MbmsException.DownloadErrors#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT}
+     * {@link MbmsException.DownloadErrors#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT} unless the
+     * provided directory is the same as what has been previously configured.
      *
      * The {@link File} supplied as a root temp file directory must already exist. If not, an
      * {@link IllegalArgumentException} will be thrown.
@@ -423,6 +316,26 @@ public class MbmsDownloadManager {
     }
 
     /**
+     * Retrieves the currently configured temp file root directory. Returns the file that was
+     * configured via {@link #setTempFileRootDirectory(File)} or the default directory
+     * {@link #download(DownloadRequest, DownloadProgressListener)} was called without ever setting
+     * the temp file root. If neither method has been called since the last time the app's shared
+     * preferences were reset, returns null.
+     *
+     * @return A {@link File} pointing to the configured temp file directory, or null if not yet
+     *         configured.
+     */
+    public @Nullable File getTempFileRootDirectory() {
+        SharedPreferences prefs = mContext.getSharedPreferences(
+                MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_FILE_NAME, 0);
+        String path = prefs.getString(MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_NAME, null);
+        if (path != null) {
+            return new File(path);
+        }
+        return null;
+    }
+
+    /**
      * Requests a download of a file that is available via multicast.
      *
      * downloadListener is an optional callback object which can be used to get progress reports
@@ -443,7 +356,7 @@ public class MbmsDownloadManager {
      * @param progressListener Optional listener that will be provided progress updates
      *                         if the app is running.
      */
-    public void download(DownloadRequest request, IDownloadProgressListener progressListener)
+    public void download(DownloadRequest request, DownloadProgressListener progressListener)
             throws MbmsException {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
@@ -473,7 +386,7 @@ public class MbmsDownloadManager {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from this application.
      * A pending request is one that was issued via
-     * {@link #download(DownloadRequest, IDownloadProgressListener)} but not cancelled through
+     * {@link #download(DownloadRequest, DownloadProgressListener)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * @return A list, possibly empty, of {@link DownloadRequest}s
      */
@@ -596,36 +509,6 @@ public class MbmsDownloadManager {
             mService.set(null);
             sIsInitialized.set(false);
         }
-    }
-
-    /**
-     * Retrieves the {@link ComponentName} for the {@link android.content.BroadcastReceiver} that
-     * the various intents from the middleware should be targeted towards.
-     * @param uid The uid of the frontend app.
-     * @return The component name of the receiver that the middleware should send its intents to,
-     * or null if the app didn't declare it in the manifest.
-     *
-     * @hide
-     * future systemapi
-     */
-    public static ComponentName getAppReceiverFromUid(Context context, int uid) {
-        String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
-        if (packageNames == null) {
-            return null;
-        }
-
-        for (String packageName : packageNames) {
-            ComponentName candidate = new ComponentName(packageName,
-                    MbmsDownloadReceiver.class.getCanonicalName());
-            Intent queryIntent = new Intent();
-            queryIntent.setComponent(candidate);
-            List<ResolveInfo> receivers =
-                    context.getPackageManager().queryBroadcastReceivers(queryIntent, 0);
-            if (receivers != null && receivers.size() > 0) {
-                return candidate;
-            }
-        }
-        return null;
     }
 
     private void writeDownloadRequestToken(DownloadRequest request) {
