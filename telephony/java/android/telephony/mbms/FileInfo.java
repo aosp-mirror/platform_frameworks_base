@@ -38,16 +38,6 @@ public class FileInfo implements Parcelable {
      */
     private final String mimeType;
 
-    /**
-     * The size of the file in bytes.
-     */
-    private final long size;
-
-    /**
-     * The MD5 hash of the file.
-     */
-    private final byte md5Hash[];
-
     public static final Parcelable.Creator<FileInfo> CREATOR =
             new Parcelable.Creator<FileInfo>() {
         @Override
@@ -65,29 +55,20 @@ public class FileInfo implements Parcelable {
      * @hide
      * TODO: systemapi
      */
-    public FileInfo(Uri uri, String mimeType, long size, byte[] md5Hash) {
+    public FileInfo(Uri uri, String mimeType) {
         this.uri = uri;
         this.mimeType = mimeType;
-        this.size = size;
-        this.md5Hash = md5Hash;
     }
 
     private FileInfo(Parcel in) {
         uri = in.readParcelable(null);
         mimeType = in.readString();
-        size = in.readLong();
-        int arraySize = in.readInt();
-        md5Hash = new byte[arraySize];
-        in.readByteArray(md5Hash);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(uri, flags);
         dest.writeString(mimeType);
-        dest.writeLong(size);
-        dest.writeInt(md5Hash.length);
-        dest.writeByteArray(md5Hash);
     }
 
     @Override
@@ -101,13 +82,5 @@ public class FileInfo implements Parcelable {
 
     public String getMimeType() {
         return mimeType;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public byte[] getMd5Hash() {
-        return md5Hash;
     }
 }
