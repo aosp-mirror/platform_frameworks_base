@@ -805,13 +805,12 @@ bool Array::Equals(const Value* value) const {
     return false;
   }
 
-  if (items.size() != other->items.size()) {
+  if (elements.size() != other->elements.size()) {
     return false;
   }
 
-  return std::equal(items.begin(), items.end(), other->items.begin(),
-                    [](const std::unique_ptr<Item>& a,
-                       const std::unique_ptr<Item>& b) -> bool {
+  return std::equal(elements.begin(), elements.end(), other->elements.begin(),
+                    [](const std::unique_ptr<Item>& a, const std::unique_ptr<Item>& b) -> bool {
                       return a->Equals(b.get());
                     });
 }
@@ -820,14 +819,14 @@ Array* Array::Clone(StringPool* new_pool) const {
   Array* array = new Array();
   array->comment_ = comment_;
   array->source_ = source_;
-  for (auto& item : items) {
-    array->items.emplace_back(std::unique_ptr<Item>(item->Clone(new_pool)));
+  for (auto& item : elements) {
+    array->elements.emplace_back(std::unique_ptr<Item>(item->Clone(new_pool)));
   }
   return array;
 }
 
 void Array::Print(std::ostream* out) const {
-  *out << "(array) [" << util::Joiner(items, ", ") << "]";
+  *out << "(array) [" << util::Joiner(elements, ", ") << "]";
 }
 
 bool Plural::Equals(const Value* value) const {

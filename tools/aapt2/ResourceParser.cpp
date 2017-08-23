@@ -1219,7 +1219,7 @@ bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
         continue;
       }
       item->SetSource(item_source);
-      array->items.emplace_back(std::move(item));
+      array->elements.emplace_back(std::move(item));
 
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
       diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))

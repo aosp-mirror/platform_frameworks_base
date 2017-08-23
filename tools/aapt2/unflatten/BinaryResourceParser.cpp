@@ -544,7 +544,7 @@ std::unique_ptr<Array> BinaryResourceParser::ParseArray(
     const ResTable_map_entry* map) {
   std::unique_ptr<Array> array = util::make_unique<Array>();
   for (const ResTable_map& map_entry : map) {
-    array->items.push_back(ParseValue(name, config, map_entry.value));
+    array->elements.push_back(ParseValue(name, config, map_entry.value));
   }
   return array;
 }
