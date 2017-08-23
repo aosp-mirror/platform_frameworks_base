@@ -60,7 +60,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
@@ -3923,7 +3922,7 @@ public class Notification implements Parcelable
 
         private CharSequence processTextSpans(CharSequence text) {
             if (hasForegroundColor()) {
-                return clearColorSpans(text);
+                return NotificationColorUtil.clearColorSpans(text);
             }
             return text;
         }
@@ -4683,7 +4682,7 @@ public class Notification implements Parcelable
                 CharSequence title = action.title;
                 ColorStateList[] outResultColor = null;
                 if (isLegacy()) {
-                    title = clearColorSpans(title);
+                    title = NotificationColorUtil.clearColorSpans(title);
                 } else {
                     outResultColor = new ColorStateList[1];
                     title = ensureColorSpanContrast(title, bgColor, outResultColor);
@@ -4708,45 +4707,6 @@ public class Notification implements Parcelable
                 }
             }
             return button;
-        }
-
-        /**
-         * Clears all color spans of a text
-         * @param charSequence the input text
-         * @return the same text but without color spans
-         */
-        private CharSequence clearColorSpans(CharSequence charSequence) {
-            if (charSequence instanceof Spanned) {
-                Spanned ss = (Spanned) charSequence;
-                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
-                SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
-                for (Object span : spans) {
-                    Object resultSpan = span;
-                    if (resultSpan instanceof CharacterStyle) {
-                        resultSpan = ((CharacterStyle) span).getUnderlying();
-                    }
-                    if (resultSpan instanceof TextAppearanceSpan) {
-                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
-                        if (originalSpan.getTextColor() != null) {
-                            resultSpan = new TextAppearanceSpan(
-                                    originalSpan.getFamily(),
-                                    originalSpan.getTextStyle(),
-                                    originalSpan.getTextSize(),
-                                    null,
-                                    originalSpan.getLinkTextColor());
-                        }
-                    } else if (resultSpan instanceof ForegroundColorSpan
-                            || (resultSpan instanceof BackgroundColorSpan)) {
-                        continue;
-                    } else {
-                        resultSpan = span;
-                    }
-                    builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
-                            ss.getSpanFlags(span));
-                }
-                return builder;
-            }
-            return charSequence;
         }
 
         /**
@@ -7075,6 +7035,7 @@ public class Notification implements Parcelable
                 // Need to clone customContent before adding, because otherwise it can no longer be
                 // parceled independently of remoteViews.
                 customContent = customContent.clone();
+                customContent.overrideTextColors(mBuilder.getPrimaryTextColor());
                 remoteViews.removeAllViews(id);
                 remoteViews.addView(id, customContent);
                 remoteViews.setReapplyDisallowed();
