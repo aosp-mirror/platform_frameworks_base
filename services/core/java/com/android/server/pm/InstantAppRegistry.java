@@ -293,14 +293,35 @@ class InstantAppRegistry {
             if (currentCookieFile == null) {
                 continue;
             }
-            File expectedCookeFile = computeInstantCookieFile(pkg, userId);
-            if (!currentCookieFile.equals(expectedCookeFile)) {
-                Slog.i(LOG_TAG, "Signature for package " + pkg.packageName
-                        + " changed - dropping cookie");
-                // Make sure a pending write for the old signed app is cancelled
-                mCookiePersistence.cancelPendingPersistLPw(pkg, userId);
-                currentCookieFile.delete();
+
+            // Before we used only the first signature to compute the SHA 256 but some
+            // apps could be singed by multiple certs and the cert order is undefined.
+            // We prefer the modern computation procedure where all certs are taken
+            // into account but also allow the value from the old computation to avoid
+            // data loss.
+            final String[] signaturesSha256Digests = PackageUtils.computeSignaturesSha256Digests(
+                    pkg.mSignatures);
+            final String signaturesSha256Digest = PackageUtils.computeSignaturesSha256Digest(
+                    signaturesSha256Digests);
+
+            // We prefer a match based on all signatures
+            if (currentCookieFile.equals(computeInstantCookieFile(pkg.packageName,
+                    signaturesSha256Digest, userId))) {
+                return;
             }
+
+            // For backwards compatibility we accept match based on first signature
+            if (pkg.mSignatures.length > 1 && currentCookieFile.equals(computeInstantCookieFile(
+                    pkg.packageName, signaturesSha256Digests[0], userId))) {
+                return;
+            }
+
+            // Sorry, you are out of luck - different signatures - nuke data
+            Slog.i(LOG_TAG, "Signature for package " + pkg.packageName
+                    + " changed - dropping cookie");
+                // Make sure a pending write for the old signed app is cancelled
+            mCookiePersistence.cancelPendingPersistLPw(pkg, userId);
+            currentCookieFile.delete();
         }
     }
 
@@ -968,11 +989,11 @@ class InstantAppRegistry {
         }
     }
 
-    private static @NonNull File computeInstantCookieFile(@NonNull PackageParser.Package pkg,
-            @UserIdInt int userId) {
-        File appDir = getInstantApplicationDir(pkg.packageName, userId);
-        String cookieFile = INSTANT_APP_COOKIE_FILE_PREFIX + PackageUtils.computeSha256Digest(
-                pkg.mSignatures[0].toByteArray()) + INSTANT_APP_COOKIE_FILE_SIFFIX;
+    private static @NonNull File computeInstantCookieFile(@NonNull String packageName,
+            @NonNull String sha256Digest, @UserIdInt int userId) {
+        final File appDir = getInstantApplicationDir(packageName, userId);
+        final String cookieFile = INSTANT_APP_COOKIE_FILE_PREFIX
+                + sha256Digest + INSTANT_APP_COOKIE_FILE_SIFFIX;
         return new File(appDir, cookieFile);
     }
 
@@ -1147,9 +1168,20 @@ class InstantAppRegistry {
 
         public void schedulePersistLPw(@UserIdInt int userId, @NonNull PackageParser.Package pkg,
                 @NonNull byte[] cookie) {
-            File cookieFile = computeInstantCookieFile(pkg, userId);
+            // Before we used only the first signature to compute the SHA 256 but some
+            // apps could be singed by multiple certs and the cert order is undefined.
+            // We prefer the modern computation procedure where all certs are taken
+            // into account and delete the file derived via the legacy hash computation.
+            File newCookieFile = computeInstantCookieFile(pkg.packageName,
+                    PackageUtils.computeSignaturesSha256Digest(pkg.mSignatures), userId);
+            if (pkg.mSignatures.length > 0) {
+                File oldCookieFile = peekInstantCookieFile(pkg.packageName, userId);
+                if (oldCookieFile != null && !newCookieFile.equals(oldCookieFile)) {
+                    oldCookieFile.delete();
+                }
+            }
             cancelPendingPersistLPw(pkg, userId);
-            addPendingPersistCookieLPw(userId, pkg, cookie, cookieFile);
+            addPendingPersistCookieLPw(userId, pkg, cookie, newCookieFile);
             sendMessageDelayed(obtainMessage(userId, pkg),
                     PERSIST_COOKIE_DELAY_MILLIS);
         }
