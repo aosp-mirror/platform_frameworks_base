@@ -187,8 +187,17 @@ public class PackageInfo implements Parcelable {
     public static final int REQUESTED_PERMISSION_GRANTED = 1<<1;
 
     /**
-     * Array of all signatures read from the package file.  This is only filled
-     * in if the flag {@link PackageManager#GET_SIGNATURES} was set.
+     * Array of all signatures read from the package file. This is only filled
+     * in if the flag {@link PackageManager#GET_SIGNATURES} was set. A package
+     * must be singed with at least one certificate which is at position zero.
+     * The package can be signed with additional certificates which appear as
+     * subsequent entries.
+     *
+     * <strong>Note:</strong> Signature ordering is not guaranteed to be
+     * stable which means that a package signed with certificates A and B is
+     * equivalent to being signed with certificates B and A. This means that
+     * in case multiple signatures are reported you cannot assume the one at
+     * the first position to be the same across updates.
      */
     public Signature[] signatures;
     
