@@ -20,12 +20,14 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.TypeEvaluator;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.DisplayListCanvas;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -126,8 +128,11 @@ public class TransitionUtils {
         }
         int bitmapWidth = (int) (width * scale);
         int bitmapHeight = (int) (height * scale);
-        Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
+        final RenderNode node = RenderNode.create("TransitionUtils", null);
+        node.setLeftTopRightBottom(0, 0, width, height);
+        node.setClipToBounds(false);
+        final DisplayListCanvas canvas = node.start(width, height);
+        // Do stuff with the canvas
         Rect existingBounds = drawable.getBounds();
         int left = existingBounds.left;
         int top = existingBounds.top;
@@ -136,7 +141,8 @@ public class TransitionUtils {
         drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
         drawable.draw(canvas);
         drawable.setBounds(left, top, right, bottom);
-        return bitmap;
+        node.end(canvas);
+        return ThreadedRenderer.createHardwareBitmap(node, width, height);
     }
 
     /**
@@ -162,10 +168,15 @@ public class TransitionUtils {
             bitmapHeight *= scale;
             matrix.postTranslate(-bounds.left, -bounds.top);
             matrix.postScale(scale, scale);
-            bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
+
+            final RenderNode node = RenderNode.create("TransitionUtils", null);
+            node.setLeftTopRightBottom(0, 0, bitmapWidth, bitmapHeight);
+            node.setClipToBounds(false);
+            final DisplayListCanvas canvas = node.start(bitmapWidth, bitmapHeight);
             canvas.concat(matrix);
             view.draw(canvas);
+            node.end(canvas);
+            bitmap = ThreadedRenderer.createHardwareBitmap(node, bitmapWidth, bitmapHeight);
         }
         return bitmap;
     }

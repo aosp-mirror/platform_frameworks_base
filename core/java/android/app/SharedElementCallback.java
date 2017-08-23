@@ -18,6 +18,7 @@ package android.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -44,6 +45,8 @@ import java.util.Map;
 public abstract class SharedElementCallback {
     private Matrix mTempMatrix;
     private static final String BUNDLE_SNAPSHOT_BITMAP = "sharedElement:snapshot:bitmap";
+    private static final String BUNDLE_SNAPSHOT_GRAPHIC_BUFFER =
+            "sharedElement:snapshot:graphicBuffer";
     private static final String BUNDLE_SNAPSHOT_IMAGE_SCALETYPE = "sharedElement:snapshot:imageScaleType";
     private static final String BUNDLE_SNAPSHOT_IMAGE_MATRIX = "sharedElement:snapshot:imageMatrix";
 
@@ -176,7 +179,12 @@ public abstract class SharedElementCallback {
                 Bitmap bitmap = TransitionUtils.createDrawableBitmap(d);
                 if (bitmap != null) {
                     Bundle bundle = new Bundle();
-                    bundle.putParcelable(BUNDLE_SNAPSHOT_BITMAP, bitmap);
+                    if (bitmap.getConfig() != Bitmap.Config.HARDWARE) {
+                        bundle.putParcelable(BUNDLE_SNAPSHOT_BITMAP, bitmap);
+                    } else {
+                        GraphicBuffer graphicBuffer = bitmap.createGraphicBufferHandle();
+                        bundle.putParcelable(BUNDLE_SNAPSHOT_GRAPHIC_BUFFER, graphicBuffer);
+                    }
                     bundle.putString(BUNDLE_SNAPSHOT_IMAGE_SCALETYPE,
                             imageView.getScaleType().toString());
                     if (imageView.getScaleType() == ScaleType.MATRIX) {
@@ -218,9 +226,13 @@ public abstract class SharedElementCallback {
         View view = null;
         if (snapshot instanceof Bundle) {
             Bundle bundle = (Bundle) snapshot;
-            Bitmap bitmap = (Bitmap) bundle.getParcelable(BUNDLE_SNAPSHOT_BITMAP);
-            if (bitmap == null) {
+            GraphicBuffer buffer = bundle.getParcelable(BUNDLE_SNAPSHOT_GRAPHIC_BUFFER);
+            Bitmap bitmap = bundle.getParcelable(BUNDLE_SNAPSHOT_BITMAP);
+            if (buffer == null && bitmap == null) {
                 return null;
+            }
+            if (bitmap == null) {
+                bitmap = Bitmap.createHardwareBitmap(buffer);
             }
             ImageView imageView = new ImageView(context);
             view = imageView;
