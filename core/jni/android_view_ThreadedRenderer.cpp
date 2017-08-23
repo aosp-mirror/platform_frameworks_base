@@ -923,7 +923,8 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         // Continue I guess?
     }
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
-    return createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_Mutable);
+    return bitmap::createBitmap(env, bitmap.release(),
+            android::bitmap::kBitmapCreateFlag_Premultiplied);
 }
 
 static void android_view_ThreadedRenderer_disableVsync(JNIEnv*, jclass) {
