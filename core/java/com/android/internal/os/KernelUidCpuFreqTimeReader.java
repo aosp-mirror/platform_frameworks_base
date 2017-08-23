@@ -172,7 +172,7 @@ public class KernelUidCpuFreqTimeReader {
                 sb.append("times=").append("(");
                 TimeUtils.formatDuration(mLastTimeReadMs, sb); sb.append(",");
                 TimeUtils.formatDuration(mNowTimeMs, sb); sb.append(")");
-                Slog.wtf(TAG, sb.toString());
+                Slog.e(TAG, sb.toString());
                 return;
             }
             curUidTimeMs[i] = totalTimeMs;
