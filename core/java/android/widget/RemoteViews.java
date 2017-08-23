@@ -154,6 +154,12 @@ public class RemoteViews implements Parcelable, Filter {
     private boolean mIsRoot = true;
 
     /**
+     * Whether reapply is disallowed on this remoteview. This maybe be true if some actions modify
+     * the layout in a way that isn't recoverable, since views are being removed.
+     */
+    private boolean mReapplyDisallowed;
+
+    /**
      * Constants to whether or not this RemoteViews is composed of a landscape and portrait
      * RemoteViews.
      */
@@ -212,6 +218,26 @@ public class RemoteViews implements Parcelable, Filter {
             Bitmap bitmap = cache.get(i);
             cache.set(i, Icon.scaleDownIfNecessary(bitmap, maxWidth, maxHeight));
         }
+    }
+
+    /**
+     * Set that it is disallowed to reapply another remoteview with the same layout as this view.
+     * This should be done if an action is destroying the view tree of the base layout.
+     *
+     * @hide
+     */
+    public void setReapplyDisallowed() {
+        mReapplyDisallowed = true;
+    }
+
+    /**
+     * @return Whether it is disallowed to reapply another remoteview with the same layout as this
+     * view. True if this remoteview has actions that destroyed view tree of the base layout.
+     *
+     * @hide
+     */
+    public boolean isReapplyDisallowed() {
+        return mReapplyDisallowed;
     }
 
     /**
@@ -2429,6 +2455,7 @@ public class RemoteViews implements Parcelable, Filter {
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.getLayoutId();
         }
+        mReapplyDisallowed = parcel.readInt() == 0;
 
         // setup the memory usage statistics
         mMemoryUsageCounter = new MemoryUsageCounter();
@@ -3738,6 +3765,7 @@ public class RemoteViews implements Parcelable, Filter {
             // Both RemoteViews already share the same package and user
             mPortrait.writeToParcel(dest, flags | PARCELABLE_ELIDE_DUPLICATES);
         }
+        dest.writeInt(mReapplyDisallowed ? 1 : 0);
     }
 
     private static ApplicationInfo getApplicationInfo(String packageName, int userId) {
