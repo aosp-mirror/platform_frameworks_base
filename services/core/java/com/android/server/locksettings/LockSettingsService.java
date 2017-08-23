@@ -74,6 +74,7 @@ import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.security.keystore.UserNotAuthenticatedException;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -503,12 +504,34 @@ public class LockSettingsService extends ILockSettings.Stub {
         maybeShowEncryptionNotificationForUser(userId);
     }
 
+    /**
+     * Check if profile got unlocked but the keystore is still locked. This happens on full disk
+     * encryption devices since the profile may not yet be running when we consider unlocking it
+     * during the normal flow. In this case unlock the keystore for the profile.
+     */
+    private void ensureProfileKeystoreUnlocked(int userId) {
+        final KeyStore ks = KeyStore.getInstance();
+        if (ks.state(userId) == KeyStore.State.LOCKED
+                && tiedManagedProfileReadyToUnlock(mUserManager.getUserInfo(userId))) {
+            Slog.i(TAG, "Managed profile got unlocked, will unlock its keystore");
+            try {
+                // If boot took too long and the password in vold got expired, parent keystore will
+                // be still locked, we ignore this case since the user will be prompted to unlock
+                // the device after boot.
+                unlockChildProfile(userId, true /* ignoreUserNotAuthenticated */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to unlock child profile");
+            }
+        }
+    }
+
     public void onUnlockUser(final int userId) {
         // Perform tasks which require locks in LSS on a handler, as we are callbacks from
         // ActivityManager.unlockUser()
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                ensureProfileKeystoreUnlocked(userId);
                 // Hide notification first, as tie managed profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
@@ -1027,7 +1050,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new String(decryptionResult, StandardCharsets.UTF_8);
     }
 
-    private void unlockChildProfile(int profileHandle) throws RemoteException {
+    private void unlockChildProfile(int profileHandle, boolean ignoreUserNotAuthenticated)
+            throws RemoteException {
         try {
             doVerifyCredential(getDecryptedPasswordForTiedProfile(profileHandle),
                     LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
@@ -1038,6 +1062,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 | BadPaddingException | CertificateException | IOException e) {
             if (e instanceof FileNotFoundException) {
                 Slog.i(TAG, "Child profile key not found");
+            } else if (ignoreUserNotAuthenticated && e instanceof UserNotAuthenticatedException) {
+                Slog.i(TAG, "Parent keystore seems locked, ignoring");
             } else {
                 Slog.e(TAG, "Failed to decrypt child profile key", e);
             }
@@ -1081,17 +1107,21 @@ public class LockSettingsService extends ILockSettings.Stub {
                 final List<UserInfo> profiles = mUserManager.getProfiles(userId);
                 for (UserInfo pi : profiles) {
                     // Unlock managed profile with unified lock
-                    if (pi.isManagedProfile()
-                            && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id)
-                            && mStorage.hasChildProfileLock(pi.id)
-                            && mUserManager.isUserRunning(pi.id)) {
-                        unlockChildProfile(pi.id);
+                    if (tiedManagedProfileReadyToUnlock(pi)) {
+                        unlockChildProfile(pi.id, false /* ignoreUserNotAuthenticated */);
                     }
                 }
             }
         } catch (RemoteException e) {
             Log.d(TAG, "Failed to unlock child profile", e);
         }
+    }
+
+    private boolean tiedManagedProfileReadyToUnlock(UserInfo userInfo) {
+        return userInfo.isManagedProfile()
+                && !mLockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id)
+                && mStorage.hasChildProfileLock(userInfo.id)
+                && mUserManager.isUserRunning(userInfo.id);
     }
 
     private Map<Integer, String> getDecryptedPasswordsForAllTiedProfiles(int userId) {
