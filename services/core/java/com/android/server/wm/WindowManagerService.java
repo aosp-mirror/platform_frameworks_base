@@ -6075,7 +6075,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
 
-        if (CUSTOM_SCREEN_ROTATION) {
+        // TODO(multidisplay): rotation on non-default displays
+        if (CUSTOM_SCREEN_ROTATION && displayContent.isDefaultDisplay) {
             mExitAnimId = exitAnim;
             mEnterAnimId = enterAnim;
             ScreenRotationAnimation screenRotationAnimation =
@@ -6087,7 +6088,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Check whether the current screen contains any secure content.
             boolean isSecure = displayContent.hasSecureWindowOnScreen();
 
-            // TODO(multidisplay): rotation on main screen only.
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
                     mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure,
