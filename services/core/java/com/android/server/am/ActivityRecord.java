@@ -1693,7 +1693,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      */
     void completeResumeLocked() {
         final boolean wasVisible = visible;
-        visible = true;
+        setVisible(true);
         if (!wasVisible) {
             // Visibility has changed, so take a note of it so we call the TaskStackChangedListener
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
