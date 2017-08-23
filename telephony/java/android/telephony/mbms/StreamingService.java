@@ -91,7 +91,7 @@ public class StreamingService {
     /**
      * State changed due to the device leaving the where this stream is being broadcast.
      */
-    public static final int REASON_LEFT_MBMS_BROADCAST_AREA = 5;
+    public static final int REASON_LEFT_MBMS_BROADCAST_AREA = 6;
 
     /**
      * The method of transmission currently used for a stream,

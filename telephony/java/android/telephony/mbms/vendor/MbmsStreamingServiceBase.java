@@ -39,7 +39,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
      *
-     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}, which
+     * May throw an {@link IllegalArgumentException} or a {@link SecurityException}, which
      * will be intercepted and passed to the app as
      * {@link android.telephony.mbms.MbmsException.InitializationErrors#ERROR_UNABLE_TO_INITIALIZE}
      *
