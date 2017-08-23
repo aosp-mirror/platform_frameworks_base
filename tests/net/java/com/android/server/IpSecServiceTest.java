@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -297,24 +296,23 @@ public class IpSecServiceTest {
         IpSecAlgorithm authAlgo =
                 new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 8);
 
-        InetAddress localAddr = InetAddress.getByAddress(new byte[] {127, 0, 0, 1});
-
+        InetAddress remoteAddr = InetAddress.getByName("8.8.4.4");
         /** Allocate and add SPI records in the IpSecService through IpSecManager interface. */
         IpSecManager.SecurityParameterIndex outSpi =
-                ipSecManager.reserveSecurityParameterIndex(IpSecTransform.DIRECTION_OUT, localAddr);
+                ipSecManager.reserveSecurityParameterIndex(
+                        IpSecTransform.DIRECTION_OUT, remoteAddr);
         IpSecManager.SecurityParameterIndex inSpi =
-                ipSecManager.reserveSecurityParameterIndex(IpSecTransform.DIRECTION_IN, localAddr);
+                ipSecManager.reserveSecurityParameterIndex(IpSecTransform.DIRECTION_IN, remoteAddr);
 
-        IpSecConfig ipSecConfig =
-                new IpSecTransform.Builder(mMockContext)
-                        .setSpi(IpSecTransform.DIRECTION_OUT, outSpi)
-                        .setSpi(IpSecTransform.DIRECTION_IN, inSpi)
-                        .setEncryption(IpSecTransform.DIRECTION_OUT, encryptAlgo)
-                        .setAuthentication(IpSecTransform.DIRECTION_OUT, authAlgo)
-                        .setEncryption(IpSecTransform.DIRECTION_IN, encryptAlgo)
-                        .setAuthentication(IpSecTransform.DIRECTION_IN, authAlgo)
-                        .getIpSecConfig();
-        return ipSecConfig;
+        IpSecConfig config = new IpSecConfig();
+        config.setSpiResourceId(IpSecTransform.DIRECTION_IN, inSpi.getResourceId());
+        config.setSpiResourceId(IpSecTransform.DIRECTION_OUT, outSpi.getResourceId());
+        config.setEncryption(IpSecTransform.DIRECTION_OUT, encryptAlgo);
+        config.setAuthentication(IpSecTransform.DIRECTION_OUT, authAlgo);
+        config.setEncryption(IpSecTransform.DIRECTION_IN, encryptAlgo);
+        config.setAuthentication(IpSecTransform.DIRECTION_IN, authAlgo);
+        config.setRemoteAddress(remoteAddr.getHostName());
+        return config;
     }
 
     @Test
@@ -431,5 +429,26 @@ public class IpSecServiceTest {
         mIpSecService.removeTransportModeTransform(pfd, 1);
 
         verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
+    }
+
+    @Test
+    public void testValidateIpAddresses() throws Exception {
+        String[] invalidAddresses =
+                new String[] {"www.google.com", "::", "2001::/64", "0.0.0.0", ""};
+        for (String address : invalidAddresses) {
+            try {
+                IpSecSpiResponse spiResp =
+                        mIpSecService.reserveSecurityParameterIndex(
+                                IpSecTransform.DIRECTION_OUT, address, DROID_SPI, new Binder());
+                fail("Invalid address was passed through IpSecService validation: " + address);
+            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
+                fail(
+                        "Invalid InetAddress was not caught in validation: "
+                                + address
+                                + ", Exception: "
+                                + e);
+            }
+        }
     }
 }
