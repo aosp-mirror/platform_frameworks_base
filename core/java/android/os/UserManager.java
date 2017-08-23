@@ -322,6 +322,8 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring Tethering
      * & portable hotspots. This can only be set by device owners and profile owners on the
      * primary user. The default value is <code>false</code>.
+     * <p>In Android 9.0 or higher, if tethering is enabled when this restriction is set,
+     * tethering will be automatically turned off.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
