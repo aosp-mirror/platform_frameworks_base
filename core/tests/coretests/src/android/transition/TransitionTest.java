@@ -28,6 +28,8 @@ import android.widget.TextView;
 
 import com.android.frameworks.coretests.R;
 
+import java.lang.reflect.Field;
+
 public class TransitionTest extends ActivityInstrumentationTestCase2<AnimatorSetActivity> {
     Activity mActivity;
     public TransitionTest() {
@@ -77,27 +79,47 @@ public class TransitionTest extends ActivityInstrumentationTestCase2<AnimatorSet
         fade.setEpicenterCallback(epicenterCallback);
 
         Fade clone = (Fade) fade.clone();
-        assertEquals(fade.mStartDelay, clone.mStartDelay);
-        assertEquals(fade.mDuration, clone.mDuration);
-        assertEquals(fade.mInterpolator, clone.mInterpolator);
-        assertEquals(fade.mPropagation, clone.mPropagation);
+        assertFieldEquals(fade, clone, "mStartDelay");
+        assertFieldEquals(fade, clone, "mDuration");
+        assertFieldEquals(fade, clone, "mInterpolator");
+        assertFieldEquals(fade, clone, "mPropagation");
         assertEquals(fade.getPathMotion(), clone.getPathMotion());
         assertEquals(fade.getEpicenterCallback(), clone.getEpicenterCallback());
-        assertEquals(fade.mNameOverrides, clone.mNameOverrides);
-        assertEquals(fade.mMatchOrder, clone.mMatchOrder);
+        assertFieldEquals(fade, clone, "mNameOverrides");
+        assertFieldEquals(fade, clone, "mMatchOrder");
 
-        assertEquals(fade.mTargets, clone.mTargets);
-        assertEquals(fade.mTargetExcludes, clone.mTargetExcludes);
-        assertEquals(fade.mTargetChildExcludes, clone.mTargetChildExcludes);
+        assertFieldEquals(fade, clone, "mTargets");
+        assertFieldEquals(fade, clone, "mTargetExcludes");
+        assertFieldEquals(fade, clone, "mTargetChildExcludes");
 
-        assertEquals(fade.mTargetIds, clone.mTargetIds);
-        assertEquals(fade.mTargetIdExcludes, clone.mTargetIdExcludes);
-        assertEquals(fade.mTargetIdChildExcludes, clone.mTargetIdChildExcludes);
+        assertFieldEquals(fade, clone, "mTargetIds");
+        assertFieldEquals(fade, clone, "mTargetIdExcludes");
+        assertFieldEquals(fade, clone, "mTargetIdChildExcludes");
 
-        assertEquals(fade.mTargetNames, clone.mTargetNames);
-        assertEquals(fade.mTargetNameExcludes, clone.mTargetNameExcludes);
+        assertFieldEquals(fade, clone, "mTargetNames");
+        assertFieldEquals(fade, clone, "mTargetNameExcludes");
 
-        assertEquals(fade.mTargetTypes, clone.mTargetTypes);
-        assertEquals(fade.mTargetTypeExcludes, clone.mTargetTypeExcludes);
+        assertFieldEquals(fade, clone, "mTargetTypes");
+        assertFieldEquals(fade, clone, "mTargetTypeExcludes");
+    }
+
+    private static void assertFieldEquals(Fade fade1, Fade fade2, String fieldName)
+            throws NoSuchFieldException, IllegalAccessException {
+        Field field = findField(Fade.class, fieldName);
+        field.setAccessible(true);
+        assertEquals("Field '" + fieldName + "' value mismatch", field.get(fade1),
+                field.get(fade2));
+    }
+
+    private static Field findField(Class<?> type, String fieldName) throws NoSuchFieldException {
+        while (type != null) {
+            try {
+                return type.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                // try the parent
+                type = type.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(fieldName);
     }
 }
