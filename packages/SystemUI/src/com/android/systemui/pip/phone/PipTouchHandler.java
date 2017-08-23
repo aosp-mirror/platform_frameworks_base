@@ -385,7 +385,7 @@ public class PipTouchHandler {
             }
             case MotionEvent.ACTION_HOVER_ENTER:
             case MotionEvent.ACTION_HOVER_MOVE: {
-                if (!mSendingHoverAccessibilityEvents) {
+                if (mAccessibilityManager.isEnabled() && !mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
                     event.setImportantForAccessibility(true);
@@ -398,7 +398,7 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
-                if (mSendingHoverAccessibilityEvents) {
+                if (mAccessibilityManager.isEnabled() && mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                     event.setImportantForAccessibility(true);
