@@ -22,17 +22,20 @@
     <!-- Size of the generic status lines keyguard's status view  -->
     <dimen name="kg_status_line_font_size">14sp</dimen>
 
-    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_width">320dp</dimen>
+    <!-- Maximum width of the sliding KeyguardSecurityContainer -->
+    <dimen name="keyguard_security_width">420dp</dimen>
 
-    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <!-- Height of the sliding KeyguardSecurityContainer
+         (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">400dp</dimen>
 
-    <!-- Max Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
+    <!-- Max Height of the sliding KeyguardSecurityContainer
+         (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_max_height">450dp</dimen>
 
     <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">8dp</dimen>
+    <dimen name="keyguard_security_view_top_margin">8dp</dimen>
+    <dimen name="keyguard_security_view_lateral_margin">36dp</dimen>
 
     <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
          Should be 0 on devices with plenty of room (e.g. tablets) -->
