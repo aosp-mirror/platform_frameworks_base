@@ -45,6 +45,10 @@ SkiaPipeline::SkiaPipeline(RenderThread& thread) :  mRenderThread(thread) {
     mVectorDrawables.reserve(30);
 }
 
+SkiaPipeline::~SkiaPipeline() {
+    unpinImages();
+}
+
 TaskManager* SkiaPipeline::getTaskManager() {
     return mRenderThread.cacheManager().getTaskManager();
 }

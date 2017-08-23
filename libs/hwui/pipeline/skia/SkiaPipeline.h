@@ -28,7 +28,7 @@ namespace skiapipeline {
 class SkiaPipeline : public renderthread::IRenderPipeline {
 public:
     SkiaPipeline(renderthread::RenderThread& thread);
-    virtual ~SkiaPipeline() {}
+    virtual ~SkiaPipeline();
 
     TaskManager* getTaskManager() override;
 
