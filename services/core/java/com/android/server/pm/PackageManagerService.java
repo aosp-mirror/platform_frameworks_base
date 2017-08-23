@@ -25466,6 +25466,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public boolean canAccessInstantApps(int callingUid, int userId) {
             return PackageManagerService.this.canViewInstantApps(callingUid, userId);
         }
+
+        @Override
+        public boolean hasInstantApplicationMetadata(String packageName, int userId) {
+            synchronized (mPackages) {
+                return mInstantAppRegistry.hasInstantApplicationMetadataLPr(packageName, userId);
+            }
+        }
     }
 
     @Override
