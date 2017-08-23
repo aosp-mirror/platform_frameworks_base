@@ -256,8 +256,11 @@ public class SubtitleView extends View {
         // StaticLayout.getWidth(), so this is non-trivial.
         mHasMeasurements = true;
         mLastMeasuredWidth = maxWidth;
-        mLayout = new StaticLayout(
-                mText, mTextPaint, maxWidth, mAlignment, mSpacingMult, mSpacingAdd, true);
+        mLayout = StaticLayout.Builder.obtain(mText, 0, mText.length(), mTextPaint, maxWidth)
+                .setAlignment(mAlignment)
+                .setLineSpacing(mSpacingAdd, mSpacingMult)
+                .setUseLineSpacingFromFallbacks(true)
+                .build();
 
         return true;
     }

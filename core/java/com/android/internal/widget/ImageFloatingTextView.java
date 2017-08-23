@@ -81,6 +81,7 @@ public class ImageFloatingTextView extends TextView {
                 .setTextDirection(getTextDirectionHeuristic())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
                 .setIncludePad(getIncludeFontPadding())
+                .setUseLineSpacingFromFallbacks(true)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
         int maxLines;

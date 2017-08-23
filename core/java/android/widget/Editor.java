@@ -754,14 +754,18 @@ public class Editor {
         }
     }
 
-    private void chooseSize(PopupWindow pop, CharSequence text, TextView tv) {
-        int wid = tv.getPaddingLeft() + tv.getPaddingRight();
-        int ht = tv.getPaddingTop() + tv.getPaddingBottom();
+    private void chooseSize(@NonNull PopupWindow pop, @NonNull CharSequence text,
+            @NonNull TextView tv) {
+        final int wid = tv.getPaddingLeft() + tv.getPaddingRight();
+        final int ht = tv.getPaddingTop() + tv.getPaddingBottom();
 
-        int defaultWidthInPixels = mTextView.getResources().getDimensionPixelSize(
+        final int defaultWidthInPixels = mTextView.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.textview_error_popup_default_width);
-        Layout l = new StaticLayout(text, tv.getPaint(), defaultWidthInPixels,
-                                    Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+        final StaticLayout l = StaticLayout.Builder.obtain(text, 0, text.length(), tv.getPaint(),
+                defaultWidthInPixels)
+                .setUseLineSpacingFromFallbacks(tv.mUseFallbackLineSpacing)
+                .build();
+
         float max = 0;
         for (int i = 0; i < l.getLineCount(); i++) {
             max = Math.max(max, l.getLineWidth(i));
