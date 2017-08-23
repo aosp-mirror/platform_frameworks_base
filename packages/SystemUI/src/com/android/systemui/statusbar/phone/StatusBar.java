@@ -4943,6 +4943,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setEmptyDragAmount(amount);
     }
 
+    @Override
+    public boolean isFalsingCheckNeeded() {
+        return mState == StatusBarState.KEYGUARD;
+    }
+
     /**
      * If secure with redaction: Show bouncer, go to unlocked shade.
      *
