@@ -4281,6 +4281,11 @@ message MetricsEvent {
     // the app transition.
     APP_TRANSITION_REPORTED_DRAWN_MS = 1091;
 
+    // OPEN: Settings > Storage > Photos & Videos
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    APPLICATIONS_STORAGE_PHOTOS = 1092;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // OPEN: Settings > Network & Internet > Mobile network

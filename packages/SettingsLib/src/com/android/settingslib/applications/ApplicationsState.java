@@ -1638,6 +1638,21 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_PHOTOS =
+            new AppFilter() {
+                @Override
+                public void init() {}
+
+                @Override
+                public boolean filterApp(AppEntry entry) {
+                    boolean isPhotosApp;
+                    synchronized (entry) {
+                        isPhotosApp = entry.info.category == ApplicationInfo.CATEGORY_IMAGE;
+                    }
+                    return isPhotosApp;
+                }
+            };
+
     public static final AppFilter FILTER_OTHER_APPS =
             new AppFilter() {
                 @Override
