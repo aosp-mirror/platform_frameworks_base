@@ -33,6 +33,7 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.VectorDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.TextAppearanceSpan;
@@ -238,6 +239,45 @@ public class NotificationColorUtil {
             }
         }
         return span;
+    }
+
+    /**
+     * Clears all color spans of a text
+     * @param charSequence the input text
+     * @return the same text but without color spans
+     */
+    public static CharSequence clearColorSpans(CharSequence charSequence) {
+        if (charSequence instanceof Spanned) {
+            Spanned ss = (Spanned) charSequence;
+            Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+            SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+            for (Object span : spans) {
+                Object resultSpan = span;
+                if (resultSpan instanceof CharacterStyle) {
+                    resultSpan = ((CharacterStyle) span).getUnderlying();
+                }
+                if (resultSpan instanceof TextAppearanceSpan) {
+                    TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                    if (originalSpan.getTextColor() != null) {
+                        resultSpan = new TextAppearanceSpan(
+                                originalSpan.getFamily(),
+                                originalSpan.getTextStyle(),
+                                originalSpan.getTextSize(),
+                                null,
+                                originalSpan.getLinkTextColor());
+                    }
+                } else if (resultSpan instanceof ForegroundColorSpan
+                        || (resultSpan instanceof BackgroundColorSpan)) {
+                    continue;
+                } else {
+                    resultSpan = span;
+                }
+                builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                        ss.getSpanFlags(span));
+            }
+            return builder;
+        }
+        return charSequence;
     }
 
     private int processColor(int color) {
