@@ -1127,6 +1127,80 @@ def verify_closable(clazz):
             return
 
 
+def verify_member_name_not_kotlin_keyword(clazz):
+    """Prevent method names which are keywords in Kotlin."""
+
+    # https://kotlinlang.org/docs/reference/keyword-reference.html#hard-keywords
+    # This list does not include Java keywords as those are already impossible to use.
+    keywords = [
+        'as',
+        'fun',
+        'in',
+        'is',
+        'object',
+        'typealias',
+        'val',
+        'var',
+        'when',
+    ]
+
+    for m in clazz.methods:
+        if m.name in keywords:
+            error(clazz, m, None, "Method name must not be a Kotlin keyword")
+    for f in clazz.fields:
+        if f.name in keywords:
+            error(clazz, f, None, "Field name must not be a Kotlin keyword")
+
+
+def verify_method_name_not_kotlin_operator(clazz):
+    """Warn about method names which become operators in Kotlin."""
+
+    binary = set()
+
+    def unique_binary_op(m, op):
+        if op in binary:
+            error(clazz, m, None, "Only one of '{0}' and '{0}Assign' methods should be present for Kotlin".format(op))
+        binary.add(op)
+
+    for m in clazz.methods:
+        if 'static' in m.split:
+            continue
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#unary-prefix-operators
+        if m.name in ['unaryPlus', 'unaryMinus', 'not'] and len(m.args) == 0:
+            warn(clazz, m, None, "Method can be invoked as a unary operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#increments-and-decrements
+        if m.name in ['inc', 'dec'] and len(m.args) == 0 and m.typ != 'void':
+            # This only applies if the return type is the same or a subtype of the enclosing class, but we have no
+            # practical way of checking that relationship here.
+            warn(clazz, m, None, "Method can be invoked as a pre/postfix inc/decrement operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#arithmetic
+        if m.name in ['plus', 'minus', 'times', 'div', 'rem', 'mod', 'rangeTo'] and len(m.args) == 1:
+            warn(clazz, m, None, "Method can be invoked as a binary operator from Kotlin")
+            unique_binary_op(m, m.name)
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#in
+        if m.name == 'contains' and len(m.args) == 1 and m.typ == 'boolean':
+            warn(clazz, m, None, "Method can be invoked as a 'in' operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#indexed
+        if (m.name == 'get' and len(m.args) > 0) or (m.name == 'set' and len(m.args) > 1):
+            warn(clazz, m, None, "Method can be invoked with an indexing operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#invoke
+        if m.name == 'invoke':
+            warn(clazz, m, None, "Method can be invoked with function call syntax from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#assignments
+        if m.name in ['plusAssign', 'minusAssign', 'timesAssign', 'divAssign', 'remAssign', 'modAssign'] \
+                and len(m.args) == 1 \
+                and m.typ == 'void':
+            warn(clazz, m, None, "Method can be invoked as a compound assignment operator from Kotlin")
+            unique_binary_op(m, m.name[:-6])  # Remove 'Assign' suffix
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
     if clazz.pkg.name.startswith("java"): return
@@ -1178,6 +1252,8 @@ def examine_clazz(clazz):
     verify_error(clazz)
     verify_units(clazz)
     verify_closable(clazz)
+    verify_member_name_not_kotlin_keyword(clazz)
+    verify_method_name_not_kotlin_operator(clazz)
 
 
 def examine_stream(stream):
