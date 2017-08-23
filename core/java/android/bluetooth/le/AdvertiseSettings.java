@@ -86,7 +86,7 @@ public final class AdvertiseSettings implements Parcelable {
     private AdvertiseSettings(Parcel in) {
         mAdvertiseMode = in.readInt();
         mAdvertiseTxPowerLevel = in.readInt();
-        mAdvertiseConnectable = in.readInt() != 0 ? true : false;
+        mAdvertiseConnectable = in.readInt() != 0;
         mAdvertiseTimeoutMillis = in.readInt();
     }
 

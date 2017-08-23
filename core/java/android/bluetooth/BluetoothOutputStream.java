@@ -49,7 +49,7 @@ import java.io.OutputStream;
      * @since Android 1.0
      */
     public void write(int oneByte) throws IOException {
-        byte b[] = new byte[1];
+        byte[] b = new byte[1];
         b[0] = (byte) oneByte;
         mSocket.write(b, 0, 1);
     }

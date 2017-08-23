@@ -221,7 +221,7 @@ public final class ScanSettings implements Parcelable {
         mReportDelayMillis = in.readLong();
         mMatchMode = in.readInt();
         mNumOfMatchesPerFilter = in.readInt();
-        mLegacy = in.readInt() != 0 ? true : false;
+        mLegacy = in.readInt() != 0;
         mPhy = in.readInt();
     }
 
@@ -242,8 +242,8 @@ public final class ScanSettings implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ScanSettings>
-            CREATOR = new Creator<ScanSettings>() {
+    public static final Parcelable.Creator<ScanSettings> CREATOR =
+            new Creator<ScanSettings>() {
         @Override
         public ScanSettings[] newArray(int size) {
             return new ScanSettings[size];
@@ -300,9 +300,9 @@ public final class ScanSettings implements Parcelable {
 
         // Returns true if the callbackType is valid.
         private boolean isValidCallbackType(int callbackType) {
-            if (callbackType == CALLBACK_TYPE_ALL_MATCHES ||
-                    callbackType == CALLBACK_TYPE_FIRST_MATCH ||
-                    callbackType == CALLBACK_TYPE_MATCH_LOST) {
+            if (callbackType == CALLBACK_TYPE_ALL_MATCHES
+                    || callbackType == CALLBACK_TYPE_FIRST_MATCH
+                    || callbackType == CALLBACK_TYPE_MATCH_LOST) {
                 return true;
             }
             return callbackType == (CALLBACK_TYPE_FIRST_MATCH | CALLBACK_TYPE_MATCH_LOST);

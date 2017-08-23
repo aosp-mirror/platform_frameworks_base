@@ -32,15 +32,15 @@ public class SdpRecord implements Parcelable {
                 + ", rawSize=" + mRawSize + "]";
     }
 
-    public SdpRecord(int size_record, byte[] record) {
-        this.mRawData = record;
-        this.mRawSize = size_record;
+    public SdpRecord(int sizeRecord, byte[] record) {
+        mRawData = record;
+        mRawSize = sizeRecord;
     }
 
     public SdpRecord(Parcel in) {
-        this.mRawSize = in.readInt();
-        this.mRawData = new byte[mRawSize];
-        in.readByteArray(this.mRawData);
+        mRawSize = in.readInt();
+        mRawData = new byte[mRawSize];
+        in.readByteArray(mRawData);
 
     }
 
@@ -51,8 +51,8 @@ public class SdpRecord implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mRawSize);
-        dest.writeByteArray(this.mRawData);
+        dest.writeInt(mRawSize);
+        dest.writeByteArray(mRawData);
 
 
     }

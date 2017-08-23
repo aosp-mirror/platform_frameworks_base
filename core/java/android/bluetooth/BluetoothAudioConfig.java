@@ -42,9 +42,8 @@ public final class BluetoothAudioConfig implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof BluetoothAudioConfig) {
             BluetoothAudioConfig bac = (BluetoothAudioConfig) o;
-            return (bac.mSampleRate == mSampleRate &&
-                    bac.mChannelConfig == mChannelConfig &&
-                    bac.mAudioFormat == mAudioFormat);
+            return (bac.mSampleRate == mSampleRate && bac.mChannelConfig == mChannelConfig
+                    && bac.mAudioFormat == mAudioFormat);
         }
         return false;
     }
@@ -60,6 +59,7 @@ public final class BluetoothAudioConfig implements Parcelable {
                 + ",mAudioFormat:" + mAudioFormat + "}";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -78,6 +78,7 @@ public final class BluetoothAudioConfig implements Parcelable {
                 }
             };
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSampleRate);
         out.writeInt(mChannelConfig);

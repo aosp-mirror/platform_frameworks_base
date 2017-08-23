@@ -96,12 +96,12 @@ public interface BluetoothProfile {
     /**
      * GATT
      */
-    static public final int GATT = 7;
+    public static final int GATT = 7;
 
     /**
      * GATT_SERVER
      */
-    static public final int GATT_SERVER = 8;
+    public static final int GATT_SERVER = 8;
 
     /**
      * MAP Profile
@@ -156,7 +156,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    static public final int INPUT_HOST = 19;
+    public static final int INPUT_HOST = 19;
 
     /**
      * Max profile ID. This value should be updated whenever a new profile is added to match

@@ -27,6 +27,7 @@ public class SdpMasRecord implements Parcelable {
     private final int mSupportedMessageTypes;
     private final String mServiceName;
 
+    /** Message type */
     public static final class MessageType {
         public static final int EMAIL = 0x01;
         public static final int SMS_GSM = 0x02;
@@ -34,30 +35,30 @@ public class SdpMasRecord implements Parcelable {
         public static final int MMS = 0x08;
     }
 
-    public SdpMasRecord(int mas_instance_id,
-            int l2cap_psm,
-            int rfcomm_channel_number,
-            int profile_version,
-            int supported_features,
-            int supported_message_types,
-            String service_name) {
-        this.mMasInstanceId = mas_instance_id;
-        this.mL2capPsm = l2cap_psm;
-        this.mRfcommChannelNumber = rfcomm_channel_number;
-        this.mProfileVersion = profile_version;
-        this.mSupportedFeatures = supported_features;
-        this.mSupportedMessageTypes = supported_message_types;
-        this.mServiceName = service_name;
+    public SdpMasRecord(int masInstanceId,
+            int l2capPsm,
+            int rfcommChannelNumber,
+            int profileVersion,
+            int supportedFeatures,
+            int supportedMessageTypes,
+            String serviceName) {
+        mMasInstanceId = masInstanceId;
+        mL2capPsm = l2capPsm;
+        mRfcommChannelNumber = rfcommChannelNumber;
+        mProfileVersion = profileVersion;
+        mSupportedFeatures = supportedFeatures;
+        mSupportedMessageTypes = supportedMessageTypes;
+        mServiceName = serviceName;
     }
 
     public SdpMasRecord(Parcel in) {
-        this.mMasInstanceId = in.readInt();
-        this.mL2capPsm = in.readInt();
-        this.mRfcommChannelNumber = in.readInt();
-        this.mProfileVersion = in.readInt();
-        this.mSupportedFeatures = in.readInt();
-        this.mSupportedMessageTypes = in.readInt();
-        this.mServiceName = in.readString();
+        mMasInstanceId = in.readInt();
+        mL2capPsm = in.readInt();
+        mRfcommChannelNumber = in.readInt();
+        mProfileVersion = in.readInt();
+        mSupportedFeatures = in.readInt();
+        mSupportedMessageTypes = in.readInt();
+        mServiceName = in.readString();
     }
 
     @Override
@@ -100,15 +101,13 @@ public class SdpMasRecord implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
-        dest.writeInt(this.mMasInstanceId);
-        dest.writeInt(this.mL2capPsm);
-        dest.writeInt(this.mRfcommChannelNumber);
-        dest.writeInt(this.mProfileVersion);
-        dest.writeInt(this.mSupportedFeatures);
-        dest.writeInt(this.mSupportedMessageTypes);
-        dest.writeString(this.mServiceName);
-
+        dest.writeInt(mMasInstanceId);
+        dest.writeInt(mL2capPsm);
+        dest.writeInt(mRfcommChannelNumber);
+        dest.writeInt(mProfileVersion);
+        dest.writeInt(mSupportedFeatures);
+        dest.writeInt(mSupportedMessageTypes);
+        dest.writeString(mServiceName);
     }
 
     @Override

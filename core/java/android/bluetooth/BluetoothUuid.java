@@ -185,11 +185,11 @@ public final class BluetoothUuid {
         if (uuidA == null && uuidB == null) return true;
 
         if (uuidA == null) {
-            return uuidB.length == 0 ? true : false;
+            return uuidB.length == 0;
         }
 
         if (uuidB == null) {
-            return uuidA.length == 0 ? true : false;
+            return uuidA.length == 0;
         }
 
         HashSet<ParcelUuid> uuidSet = new HashSet<ParcelUuid>(Arrays.asList(uuidA));
@@ -210,7 +210,7 @@ public final class BluetoothUuid {
         if (uuidA == null && uuidB == null) return true;
 
         if (uuidA == null) {
-            return uuidB.length == 0 ? true : false;
+            return uuidB.length == 0;
         }
 
         if (uuidB == null) return true;
@@ -250,8 +250,8 @@ public final class BluetoothUuid {
             throw new IllegalArgumentException("uuidBytes cannot be null");
         }
         int length = uuidBytes.length;
-        if (length != UUID_BYTES_16_BIT && length != UUID_BYTES_32_BIT &&
-                length != UUID_BYTES_128_BIT) {
+        if (length != UUID_BYTES_16_BIT && length != UUID_BYTES_32_BIT
+                && length != UUID_BYTES_128_BIT) {
             throw new IllegalArgumentException("uuidBytes length invalid - " + length);
         }
 

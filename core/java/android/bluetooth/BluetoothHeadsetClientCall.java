@@ -200,10 +200,16 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
         return mOutgoing;
     }
 
+    @Override
     public String toString() {
         return toString(false);
     }
 
+    /**
+     * Generate a log string for this call
+     * @param loggable whether device address should be logged
+     * @return log string
+     */
     public String toString(boolean loggable) {
         StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mDevice: ");
         builder.append(loggable ? mDevice : mDevice.hashCode());

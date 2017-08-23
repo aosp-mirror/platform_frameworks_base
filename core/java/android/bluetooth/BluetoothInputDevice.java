@@ -224,7 +224,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     private BluetoothAdapter mAdapter;
     private IBluetoothInputDevice mService;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
@@ -385,6 +385,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
@@ -402,6 +403,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
@@ -419,6 +421,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
@@ -451,8 +454,8 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
-            if (priority != BluetoothProfile.PRIORITY_OFF &&
-                    priority != BluetoothProfile.PRIORITY_ON) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
                 return false;
             }
             try {

@@ -115,8 +115,8 @@ public final class BluetoothLeAdvertiser {
                 throw new IllegalArgumentException("callback cannot be null");
             }
             boolean isConnectable = settings.isConnectable();
-            if (totalBytes(advertiseData, isConnectable) > MAX_LEGACY_ADVERTISING_DATA_BYTES ||
-                    totalBytes(scanResponse, false) > MAX_LEGACY_ADVERTISING_DATA_BYTES) {
+            if (totalBytes(advertiseData, isConnectable) > MAX_LEGACY_ADVERTISING_DATA_BYTES
+                    || totalBytes(scanResponse, false) > MAX_LEGACY_ADVERTISING_DATA_BYTES) {
                 postStartFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE);
                 return;
             }
@@ -177,9 +177,9 @@ public final class BluetoothLeAdvertiser {
             @Override
             public void onAdvertisingEnabled(AdvertisingSet advertisingSet, boolean enabled,
                     int status) {
-                if (enabled == true) {
-                    Log.e(TAG, "Legacy advertiser should be only disabled on timeout," +
-                            " but was enabled!");
+                if (enabled) {
+                    Log.e(TAG, "Legacy advertiser should be only disabled on timeout,"
+                            + " but was enabled!");
                     return;
                 }
 
@@ -396,11 +396,11 @@ public final class BluetoothLeAdvertiser {
                     "maxExtendedAdvertisingEvents out of range: " + maxExtendedAdvertisingEvents);
         }
 
-        if (maxExtendedAdvertisingEvents != 0 &&
-                !mBluetoothAdapter.isLePeriodicAdvertisingSupported()) {
+        if (maxExtendedAdvertisingEvents != 0
+                && !mBluetoothAdapter.isLePeriodicAdvertisingSupported()) {
             throw new IllegalArgumentException(
-                    "Can't use maxExtendedAdvertisingEvents with controller that don't support " +
-                            "LE Extended Advertising");
+                    "Can't use maxExtendedAdvertisingEvents with controller that don't support "
+                            + "LE Extended Advertising");
         }
 
         if (duration < 0 || duration > 65535) {
@@ -488,18 +488,16 @@ public final class BluetoothLeAdvertiser {
             }
             // 16 bit service uuids are grouped into one field when doing advertising.
             if (num16BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD +
-                        num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
+                size += OVERHEAD_BYTES_PER_FIELD + num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
             }
             // 32 bit service uuids are grouped into one field when doing advertising.
             if (num32BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD +
-                        num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
+                size += OVERHEAD_BYTES_PER_FIELD + num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
             }
             // 128 bit service uuids are grouped into one field when doing advertising.
             if (num128BitUuids != 0) {
-                size += OVERHEAD_BYTES_PER_FIELD +
-                        num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
+                size += OVERHEAD_BYTES_PER_FIELD
+                        + num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
             }
         }
         for (ParcelUuid uuid : data.getServiceData().keySet()) {
@@ -508,8 +506,8 @@ public final class BluetoothLeAdvertiser {
                     + byteLength(data.getServiceData().get(uuid));
         }
         for (int i = 0; i < data.getManufacturerSpecificData().size(); ++i) {
-            size += OVERHEAD_BYTES_PER_FIELD + MANUFACTURER_SPECIFIC_DATA_LENGTH +
-                    byteLength(data.getManufacturerSpecificData().valueAt(i));
+            size += OVERHEAD_BYTES_PER_FIELD + MANUFACTURER_SPECIFIC_DATA_LENGTH
+                    + byteLength(data.getManufacturerSpecificData().valueAt(i));
         }
         if (data.getIncludeTxPowerLevel()) {
             size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.

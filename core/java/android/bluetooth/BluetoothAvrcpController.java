@@ -84,7 +84,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     private IBluetoothAvrcpController mService;
     private BluetoothAdapter mAdapter;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
@@ -168,6 +168,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         }
     }
 
+    @Override
     public void finalize() {
         close();
     }
@@ -175,6 +176,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
@@ -192,6 +194,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
@@ -209,6 +212,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         if (mService != null && isEnabled()
@@ -261,7 +265,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         return false;
     }
 
-    /*
+    /**
      * Send Group Navigation Command to Remote.
      * possible keycode values: next_grp, previous_grp defined above
      */

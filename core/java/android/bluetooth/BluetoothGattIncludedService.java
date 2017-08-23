@@ -52,18 +52,20 @@ public class BluetoothGattIncludedService implements Parcelable {
         mServiceType = serviceType;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(new ParcelUuid(mUuid), 0);
         out.writeInt(mInstanceId);
         out.writeInt(mServiceType);
     }
 
-    public static final Parcelable.Creator<BluetoothGattIncludedService> CREATOR
-            = new Parcelable.Creator<BluetoothGattIncludedService>() {
+    public static final Parcelable.Creator<BluetoothGattIncludedService> CREATOR =
+            new Parcelable.Creator<BluetoothGattIncludedService>() {
         public BluetoothGattIncludedService createFromParcel(Parcel in) {
             return new BluetoothGattIncludedService(in);
         }

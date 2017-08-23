@@ -40,28 +40,28 @@ public final class PeriodicAdvertisingReport implements Parcelable {
      */
     public static final int DATA_INCOMPLETE_TRUNCATED = 2;
 
-    private int syncHandle;
-    private int txPower;
-    private int rssi;
-    private int dataStatus;
+    private int mSyncHandle;
+    private int mTxPower;
+    private int mRssi;
+    private int mDataStatus;
 
     // periodic advertising data.
     @Nullable
-    private ScanRecord data;
+    private ScanRecord mData;
 
     // Device timestamp when the result was last seen.
-    private long timestampNanos;
+    private long mTimestampNanos;
 
     /**
      * Constructor of periodic advertising result.
      */
     public PeriodicAdvertisingReport(int syncHandle, int txPower, int rssi,
             int dataStatus, ScanRecord data) {
-        this.syncHandle = syncHandle;
-        this.txPower = txPower;
-        this.rssi = rssi;
-        this.dataStatus = dataStatus;
-        this.data = data;
+        mSyncHandle = syncHandle;
+        mTxPower = txPower;
+        mRssi = rssi;
+        mDataStatus = dataStatus;
+        mData = data;
     }
 
     private PeriodicAdvertisingReport(Parcel in) {
@@ -70,25 +70,25 @@ public final class PeriodicAdvertisingReport implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(syncHandle);
-        dest.writeLong(txPower);
-        dest.writeInt(rssi);
-        dest.writeInt(dataStatus);
-        if (data != null) {
+        dest.writeInt(mSyncHandle);
+        dest.writeLong(mTxPower);
+        dest.writeInt(mRssi);
+        dest.writeInt(mDataStatus);
+        if (mData != null) {
             dest.writeInt(1);
-            dest.writeByteArray(data.getBytes());
+            dest.writeByteArray(mData.getBytes());
         } else {
             dest.writeInt(0);
         }
     }
 
     private void readFromParcel(Parcel in) {
-        syncHandle = in.readInt();
-        txPower = in.readInt();
-        rssi = in.readInt();
-        dataStatus = in.readInt();
+        mSyncHandle = in.readInt();
+        mTxPower = in.readInt();
+        mRssi = in.readInt();
+        mDataStatus = in.readInt();
         if (in.readInt() == 1) {
-            data = ScanRecord.parseFromBytes(in.createByteArray());
+            mData = ScanRecord.parseFromBytes(in.createByteArray());
         }
     }
 
@@ -101,7 +101,7 @@ public final class PeriodicAdvertisingReport implements Parcelable {
      * Returns the synchronization handle.
      */
     public int getSyncHandle() {
-        return syncHandle;
+        return mSyncHandle;
     }
 
     /**
@@ -109,14 +109,14 @@ public final class PeriodicAdvertisingReport implements Parcelable {
      * of 127 means information was not available.
      */
     public int getTxPower() {
-        return txPower;
+        return mTxPower;
     }
 
     /**
      * Returns the received signal strength in dBm. The valid range is [-127, 20].
      */
     public int getRssi() {
-        return rssi;
+        return mRssi;
     }
 
     /**
@@ -124,7 +124,7 @@ public final class PeriodicAdvertisingReport implements Parcelable {
      * or {@link PeriodicAdvertisingReport#DATA_INCOMPLETE_TRUNCATED}.
      */
     public int getDataStatus() {
-        return dataStatus;
+        return mDataStatus;
     }
 
     /**
@@ -132,19 +132,19 @@ public final class PeriodicAdvertisingReport implements Parcelable {
      */
     @Nullable
     public ScanRecord getData() {
-        return data;
+        return mData;
     }
 
     /**
      * Returns timestamp since boot when the scan record was observed.
      */
     public long getTimestampNanos() {
-        return timestampNanos;
+        return mTimestampNanos;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(syncHandle, txPower, rssi, dataStatus, data, timestampNanos);
+        return Objects.hash(mSyncHandle, mTxPower, mRssi, mDataStatus, mData, mTimestampNanos);
     }
 
     @Override
@@ -156,19 +156,19 @@ public final class PeriodicAdvertisingReport implements Parcelable {
             return false;
         }
         PeriodicAdvertisingReport other = (PeriodicAdvertisingReport) obj;
-        return (syncHandle == other.syncHandle) &&
-                (txPower == other.txPower) &&
-                (rssi == other.rssi) &&
-                (dataStatus == other.dataStatus) &&
-                Objects.equals(data, other.data) &&
-                (timestampNanos == other.timestampNanos);
+        return (mSyncHandle == other.mSyncHandle)
+                && (mTxPower == other.mTxPower)
+                && (mRssi == other.mRssi)
+                && (mDataStatus == other.mDataStatus)
+                && Objects.equals(mData, other.mData)
+                && (mTimestampNanos == other.mTimestampNanos);
     }
 
     @Override
     public String toString() {
-        return "PeriodicAdvertisingReport{syncHandle=" + syncHandle +
-                ", txPower=" + txPower + ", rssi=" + rssi + ", dataStatus=" + dataStatus +
-                ", data=" + Objects.toString(data) + ", timestampNanos=" + timestampNanos + '}';
+        return "PeriodicAdvertisingReport{syncHandle=" + mSyncHandle
+                + ", txPower=" + mTxPower + ", rssi=" + mRssi + ", dataStatus=" + mDataStatus
+                + ", data=" + Objects.toString(mData) + ", timestampNanos=" + mTimestampNanos + '}';
     }
 
     public static final Parcelable.Creator<PeriodicAdvertisingReport> CREATOR =

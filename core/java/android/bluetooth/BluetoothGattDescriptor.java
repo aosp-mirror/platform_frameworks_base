@@ -162,21 +162,20 @@ public class BluetoothGattDescriptor implements Parcelable {
         mPermissions = permissions;
     }
 
-    /**
-     * @hide
-     */
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(new ParcelUuid(mUuid), 0);
         out.writeInt(mInstance);
         out.writeInt(mPermissions);
     }
 
-    public static final Parcelable.Creator<BluetoothGattDescriptor> CREATOR
-            = new Parcelable.Creator<BluetoothGattDescriptor>() {
+    public static final Parcelable.Creator<BluetoothGattDescriptor> CREATOR =
+            new Parcelable.Creator<BluetoothGattDescriptor>() {
         public BluetoothGattDescriptor createFromParcel(Parcel in) {
             return new BluetoothGattDescriptor(in);
         }

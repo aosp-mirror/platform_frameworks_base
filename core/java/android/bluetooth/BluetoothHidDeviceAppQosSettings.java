@@ -22,18 +22,18 @@ import android.os.Parcelable;
 /** @hide */
 public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
-    final public int serviceType;
-    final public int tokenRate;
-    final public int tokenBucketSize;
-    final public int peakBandwidth;
-    final public int latency;
-    final public int delayVariation;
+    public final int serviceType;
+    public final int tokenRate;
+    public final int tokenBucketSize;
+    public final int peakBandwidth;
+    public final int latency;
+    public final int delayVariation;
 
-    final static public int SERVICE_NO_TRAFFIC = 0x00;
-    final static public int SERVICE_BEST_EFFORT = 0x01;
-    final static public int SERVICE_GUARANTEED = 0x02;
+    public static final int SERVICE_NO_TRAFFIC = 0x00;
+    public static final int SERVICE_BEST_EFFORT = 0x01;
+    public static final int SERVICE_GUARANTEED = 0x02;
 
-    final static public int MAX = (int) 0xffffffff;
+    public static final int MAX = (int) 0xffffffff;
 
     public BluetoothHidDeviceAppQosSettings(int serviceType, int tokenRate, int tokenBucketSize,
             int peakBandwidth,
@@ -88,6 +88,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
         out.writeInt(delayVariation);
     }
 
+    /** @return an int array representation of this instance */
     public int[] toArray() {
         return new int[]{
                 serviceType, tokenRate, tokenBucketSize, peakBandwidth, latency, delayVariation

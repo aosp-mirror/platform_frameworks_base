@@ -721,13 +721,13 @@ public final class BluetoothDevice implements Parcelable {
         synchronized (BluetoothDevice.class) {
             if (sService == null) {
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                sService = adapter.getBluetoothService(mStateChangeCallback);
+                sService = adapter.getBluetoothService(sStateChangeCallback);
             }
         }
         return sService;
     }
 
-    static IBluetoothManagerCallback mStateChangeCallback = new IBluetoothManagerCallback.Stub() {
+    static IBluetoothManagerCallback sStateChangeCallback = new IBluetoothManagerCallback.Stub() {
 
         public void onBluetoothServiceUp(IBluetooth bluetoothService)
                 throws RemoteException {
@@ -796,6 +796,7 @@ public final class BluetoothDevice implements Parcelable {
         return mAddress;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -811,6 +812,7 @@ public final class BluetoothDevice implements Parcelable {
                 }
             };
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAddress);
     }
@@ -969,9 +971,9 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            Log.i(TAG, "createBond() for device " + getAddress() +
-                    " called by pid: " + Process.myPid() +
-                    " tid: " + Process.myTid());
+            Log.i(TAG, "createBond() for device " + getAddress()
+                    + " called by pid: " + Process.myPid()
+                    + " tid: " + Process.myTid());
             return sService.createBond(this, TRANSPORT_AUTO);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1004,9 +1006,9 @@ public final class BluetoothDevice implements Parcelable {
             throw new IllegalArgumentException(transport + " is not a valid Bluetooth transport");
         }
         try {
-            Log.i(TAG, "createBond() for device " + getAddress() +
-                    " called by pid: " + Process.myPid() +
-                    " tid: " + Process.myTid());
+            Log.i(TAG, "createBond() for device " + getAddress()
+                    + " called by pid: " + Process.myPid()
+                    + " tid: " + Process.myTid());
             return sService.createBond(this, transport);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1085,9 +1087,9 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            Log.i(TAG, "cancelBondProcess() for device " + getAddress() +
-                    " called by pid: " + Process.myPid() +
-                    " tid: " + Process.myTid());
+            Log.i(TAG, "cancelBondProcess() for device " + getAddress()
+                    + " called by pid: " + Process.myPid()
+                    + " tid: " + Process.myTid());
             return sService.cancelBondProcess(this);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1111,9 +1113,9 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            Log.i(TAG, "removeBond() for device " + getAddress() +
-                    " called by pid: " + Process.myPid() +
-                    " tid: " + Process.myTid());
+            Log.i(TAG, "removeBond() for device " + getAddress()
+                    + " called by pid: " + Process.myPid()
+                    + " tid: " + Process.myTid());
             return sService.removeBond(this);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1143,8 +1145,8 @@ public final class BluetoothDevice implements Parcelable {
         } catch (NullPointerException npe) {
             // Handle case where bluetooth service proxy
             // is already null.
-            Log.e(TAG, "NullPointerException for getBondState() of device (" +
-                    getAddress() + ")", npe);
+            Log.e(TAG, "NullPointerException for getBondState() of device ("
+                    + getAddress() + ")", npe);
         }
         return BOND_NONE;
     }
@@ -1225,7 +1227,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public ParcelUuid[] getUuids() {
-        if (sService == null || isBluetoothEnabled() == false) {
+        if (sService == null || !isBluetoothEnabled()) {
             Log.e(TAG, "BT not enabled. Cannot get remote device Uuids");
             return null;
         }
@@ -1253,7 +1255,7 @@ public final class BluetoothDevice implements Parcelable {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean fetchUuidsWithSdp() {
         IBluetooth service = sService;
-        if (service == null || isBluetoothEnabled() == false) {
+        if (service == null || !isBluetoothEnabled()) {
             Log.e(TAG, "BT not enabled. Cannot fetchUuidsWithSdp");
             return false;
         }
@@ -1384,7 +1386,7 @@ public final class BluetoothDevice implements Parcelable {
     boolean isBluetoothEnabled() {
         boolean ret = false;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.isEnabled() == true) {
+        if (adapter != null && adapter.isEnabled()) {
             ret = true;
         }
         return ret;
@@ -1536,7 +1538,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createRfcommSocket(int channel) throws IOException {
-        if (isBluetoothEnabled() == false) {
+        if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
             throw new IOException();
         }
@@ -1627,7 +1629,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
-        if (isBluetoothEnabled() == false) {
+        if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
             throw new IOException();
         }
@@ -1665,7 +1667,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothSocket createInsecureRfcommSocketToServiceRecord(UUID uuid) throws IOException {
-        if (isBluetoothEnabled() == false) {
+        if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
             throw new IOException();
         }
@@ -1688,8 +1690,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createInsecureRfcommSocket(int port) throws IOException {
-
-        if (isBluetoothEnabled() == false) {
+        if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
             throw new IOException();
         }
@@ -1708,8 +1709,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createScoSocket() throws IOException {
-
-        if (isBluetoothEnabled() == false) {
+        if (!isBluetoothEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled");
             throw new IOException();
         }

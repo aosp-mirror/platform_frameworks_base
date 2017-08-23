@@ -92,15 +92,15 @@ public final class BluetoothCodecConfig implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof BluetoothCodecConfig) {
             BluetoothCodecConfig other = (BluetoothCodecConfig) o;
-            return (other.mCodecType == mCodecType &&
-                    other.mCodecPriority == mCodecPriority &&
-                    other.mSampleRate == mSampleRate &&
-                    other.mBitsPerSample == mBitsPerSample &&
-                    other.mChannelMode == mChannelMode &&
-                    other.mCodecSpecific1 == mCodecSpecific1 &&
-                    other.mCodecSpecific2 == mCodecSpecific2 &&
-                    other.mCodecSpecific3 == mCodecSpecific3 &&
-                    other.mCodecSpecific4 == mCodecSpecific4);
+            return (other.mCodecType == mCodecType
+                    && other.mCodecPriority == mCodecPriority
+                    && other.mSampleRate == mSampleRate
+                    && other.mBitsPerSample == mBitsPerSample
+                    && other.mChannelMode == mChannelMode
+                    && other.mCodecSpecific1 == mCodecSpecific1
+                    && other.mCodecSpecific2 == mCodecSpecific2
+                    && other.mCodecSpecific3 == mCodecSpecific3
+                    && other.mCodecSpecific4 == mCodecSpecific4);
         }
         return false;
     }
@@ -118,9 +118,9 @@ public final class BluetoothCodecConfig implements Parcelable {
      * @return true if the object contains valid codec configuration, otherwise false.
      */
     public boolean isValid() {
-        return (mSampleRate != SAMPLE_RATE_NONE) &&
-                (mBitsPerSample != BITS_PER_SAMPLE_NONE) &&
-                (mChannelMode != CHANNEL_MODE_NONE);
+        return (mSampleRate != SAMPLE_RATE_NONE)
+                && (mBitsPerSample != BITS_PER_SAMPLE_NONE)
+                && (mChannelMode != CHANNEL_MODE_NONE);
     }
 
     /**
@@ -188,21 +188,22 @@ public final class BluetoothCodecConfig implements Parcelable {
             channelModeStr = appendCapabilityToString(channelModeStr, "STEREO");
         }
 
-        return "{codecName:" + getCodecName() +
-                ",mCodecType:" + mCodecType +
-                ",mCodecPriority:" + mCodecPriority +
-                ",mSampleRate:" + String.format("0x%x", mSampleRate) +
-                "(" + sampleRateStr + ")" +
-                ",mBitsPerSample:" + String.format("0x%x", mBitsPerSample) +
-                "(" + bitsPerSampleStr + ")" +
-                ",mChannelMode:" + String.format("0x%x", mChannelMode) +
-                "(" + channelModeStr + ")" +
-                ",mCodecSpecific1:" + mCodecSpecific1 +
-                ",mCodecSpecific2:" + mCodecSpecific2 +
-                ",mCodecSpecific3:" + mCodecSpecific3 +
-                ",mCodecSpecific4:" + mCodecSpecific4 + "}";
+        return "{codecName:" + getCodecName()
+                + ",mCodecType:" + mCodecType
+                + ",mCodecPriority:" + mCodecPriority
+                + ",mSampleRate:" + String.format("0x%x", mSampleRate)
+                + "(" + sampleRateStr + ")"
+                + ",mBitsPerSample:" + String.format("0x%x", mBitsPerSample)
+                + "(" + bitsPerSampleStr + ")"
+                + ",mChannelMode:" + String.format("0x%x", mChannelMode)
+                + "(" + channelModeStr + ")"
+                + ",mCodecSpecific1:" + mCodecSpecific1
+                + ",mCodecSpecific2:" + mCodecSpecific2
+                + ",mCodecSpecific3:" + mCodecSpecific3
+                + ",mCodecSpecific4:" + mCodecSpecific4 + "}";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -231,6 +232,7 @@ public final class BluetoothCodecConfig implements Parcelable {
                 }
             };
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mCodecType);
         out.writeInt(mCodecPriority);
@@ -396,8 +398,8 @@ public final class BluetoothCodecConfig implements Parcelable {
      * @return true if the audio feeding parameters are same, otherwise false
      */
     public boolean sameAudioFeedingParameters(BluetoothCodecConfig other) {
-        return (other != null && other.mSampleRate == mSampleRate &&
-                other.mBitsPerSample == mBitsPerSample &&
-                other.mChannelMode == mChannelMode);
+        return (other != null && other.mSampleRate == mSampleRate
+                && other.mBitsPerSample == mBitsPerSample
+                && other.mChannelMode == mChannelMode);
     }
 }

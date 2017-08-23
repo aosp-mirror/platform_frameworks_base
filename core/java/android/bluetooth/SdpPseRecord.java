@@ -27,27 +27,27 @@ public class SdpPseRecord implements Parcelable {
     private final int mSupportedRepositories;
     private final String mServiceName;
 
-    public SdpPseRecord(int l2cap_psm,
-            int rfcomm_channel_number,
-            int profile_version,
-            int supported_features,
-            int supported_repositories,
-            String service_name) {
-        this.mL2capPsm = l2cap_psm;
-        this.mRfcommChannelNumber = rfcomm_channel_number;
-        this.mProfileVersion = profile_version;
-        this.mSupportedFeatures = supported_features;
-        this.mSupportedRepositories = supported_repositories;
-        this.mServiceName = service_name;
+    public SdpPseRecord(int l2capPsm,
+            int rfcommChannelNumber,
+            int profileVersion,
+            int supportedFeatures,
+            int supportedRepositories,
+            String serviceName) {
+        mL2capPsm = l2capPsm;
+        mRfcommChannelNumber = rfcommChannelNumber;
+        mProfileVersion = profileVersion;
+        mSupportedFeatures = supportedFeatures;
+        mSupportedRepositories = supportedRepositories;
+        mServiceName = serviceName;
     }
 
     public SdpPseRecord(Parcel in) {
-        this.mRfcommChannelNumber = in.readInt();
-        this.mL2capPsm = in.readInt();
-        this.mProfileVersion = in.readInt();
-        this.mSupportedFeatures = in.readInt();
-        this.mSupportedRepositories = in.readInt();
-        this.mServiceName = in.readString();
+        mRfcommChannelNumber = in.readInt();
+        mL2capPsm = in.readInt();
+        mProfileVersion = in.readInt();
+        mSupportedFeatures = in.readInt();
+        mSupportedRepositories = in.readInt();
+        mServiceName = in.readString();
     }
 
     @Override
@@ -91,6 +91,7 @@ public class SdpPseRecord implements Parcelable {
 
     }
 
+    @Override
     public String toString() {
         String ret = "Bluetooth MNS SDP Record:\n";
 

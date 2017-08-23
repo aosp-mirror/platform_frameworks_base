@@ -87,6 +87,8 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
                 }
             };
 
+
+    @Override
     @SuppressWarnings("unchecked")
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mTimestamp);
@@ -98,6 +100,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         out.writeTypedArray(mUidTraffic, flags);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -158,8 +161,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
      * @return if the record is valid
      */
     public boolean isValid() {
-        return ((mControllerTxTimeMs >= 0) &&
-                (mControllerRxTimeMs >= 0) &&
-                (mControllerIdleTimeMs >= 0));
+        return ((mControllerTxTimeMs >= 0) && (mControllerRxTimeMs >= 0)
+                && (mControllerIdleTimeMs >= 0));
     }
 }

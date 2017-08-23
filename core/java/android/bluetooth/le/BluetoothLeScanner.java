@@ -62,8 +62,8 @@ public final class BluetoothLeScanner {
      * error. In case of error, {@link #EXTRA_ERROR_CODE} will contain the error code and this
      * extra will not be available.
      */
-    public static final String EXTRA_LIST_SCAN_RESULT
-            = "android.bluetooth.le.extra.LIST_SCAN_RESULT";
+    public static final String EXTRA_LIST_SCAN_RESULT =
+            "android.bluetooth.le.extra.LIST_SCAN_RESULT";
 
     /**
      * Optional extra indicating the error code, if any. The error code will be one of the
@@ -419,8 +419,8 @@ public final class BluetoothLeScanner {
          */
         @Override
         public void onScannerRegistered(int status, int scannerId) {
-            Log.d(TAG, "onScannerRegistered() - status=" + status +
-                    " scannerId=" + scannerId + " mScannerId=" + mScannerId);
+            Log.d(TAG, "onScannerRegistered() - status=" + status
+                    + " scannerId=" + scannerId + " mScannerId=" + mScannerId);
             synchronized (this) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     try {
@@ -481,8 +481,7 @@ public final class BluetoothLeScanner {
         @Override
         public void onFoundOrLost(final boolean onFound, final ScanResult scanResult) {
             if (VDBG) {
-                Log.d(TAG, "onFoundOrLost() - onFound = " + onFound +
-                        " " + scanResult.toString());
+                Log.d(TAG, "onFoundOrLost() - onFound = " + onFound + " " + scanResult.toString());
             }
 
             // Check null in case the scan has been stopped
@@ -574,8 +573,8 @@ public final class BluetoothLeScanner {
         if ((callbackType & ScanSettings.CALLBACK_TYPE_FIRST_MATCH) != 0
                 || (callbackType & ScanSettings.CALLBACK_TYPE_MATCH_LOST) != 0) {
             // For onlost/onfound, we required hw support be available
-            return (mBluetoothAdapter.isOffloadedFilteringSupported() &&
-                    mBluetoothAdapter.isHardwareTrackingFiltersAvailable());
+            return (mBluetoothAdapter.isOffloadedFilteringSupported()
+                    && mBluetoothAdapter.isHardwareTrackingFiltersAvailable());
         }
         return true;
     }

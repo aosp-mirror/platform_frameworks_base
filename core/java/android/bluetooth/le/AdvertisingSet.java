@@ -36,15 +36,15 @@ import android.util.Log;
 public final class AdvertisingSet {
     private static final String TAG = "AdvertisingSet";
 
-    private final IBluetoothGatt gatt;
-    private int advertiserId;
+    private final IBluetoothGatt mGatt;
+    private int mAdvertiserId;
 
     /* package */ AdvertisingSet(int advertiserId,
             IBluetoothManager bluetoothManager) {
-        this.advertiserId = advertiserId;
+        mAdvertiserId = advertiserId;
 
         try {
-            this.gatt = bluetoothManager.getBluetoothGatt();
+            mGatt = bluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get Bluetooth gatt - ", e);
             throw new IllegalStateException("Failed to get Bluetooth");
@@ -52,7 +52,7 @@ public final class AdvertisingSet {
     }
 
     /* package */ void setAdvertiserId(int advertiserId) {
-        this.advertiserId = advertiserId;
+        mAdvertiserId = advertiserId;
     }
 
     /**
@@ -71,7 +71,7 @@ public final class AdvertisingSet {
     public void enableAdvertising(boolean enable, int duration,
             int maxExtendedAdvertisingEvents) {
         try {
-            gatt.enableAdvertisingSet(this.advertiserId, enable, duration,
+            mGatt.enableAdvertisingSet(mAdvertiserId, enable, duration,
                     maxExtendedAdvertisingEvents);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
@@ -92,7 +92,7 @@ public final class AdvertisingSet {
      */
     public void setAdvertisingData(AdvertiseData advertiseData) {
         try {
-            gatt.setAdvertisingData(this.advertiserId, advertiseData);
+            mGatt.setAdvertisingData(mAdvertiserId, advertiseData);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -109,7 +109,7 @@ public final class AdvertisingSet {
      */
     public void setScanResponseData(AdvertiseData scanResponse) {
         try {
-            gatt.setScanResponseData(this.advertiserId, scanResponse);
+            mGatt.setScanResponseData(mAdvertiserId, scanResponse);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -124,7 +124,7 @@ public final class AdvertisingSet {
      */
     public void setAdvertisingParameters(AdvertisingSetParameters parameters) {
         try {
-            gatt.setAdvertisingParameters(this.advertiserId, parameters);
+            mGatt.setAdvertisingParameters(mAdvertiserId, parameters);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -137,7 +137,7 @@ public final class AdvertisingSet {
      */
     public void setPeriodicAdvertisingParameters(PeriodicAdvertisingParameters parameters) {
         try {
-            gatt.setPeriodicAdvertisingParameters(this.advertiserId, parameters);
+            mGatt.setPeriodicAdvertisingParameters(mAdvertiserId, parameters);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -155,7 +155,7 @@ public final class AdvertisingSet {
      */
     public void setPeriodicAdvertisingData(AdvertiseData periodicData) {
         try {
-            gatt.setPeriodicAdvertisingData(this.advertiserId, periodicData);
+            mGatt.setPeriodicAdvertisingData(mAdvertiserId, periodicData);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -170,7 +170,7 @@ public final class AdvertisingSet {
      */
     public void setPeriodicAdvertisingEnabled(boolean enable) {
         try {
-            gatt.setPeriodicAdvertisingEnable(this.advertiserId, enable);
+            mGatt.setPeriodicAdvertisingEnable(mAdvertiserId, enable);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -187,7 +187,7 @@ public final class AdvertisingSet {
      */
     public void getOwnAddress() {
         try {
-            gatt.getOwnAddress(this.advertiserId);
+            mGatt.getOwnAddress(mAdvertiserId);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -199,6 +199,6 @@ public final class AdvertisingSet {
      * @hide
      */
     public int getAdvertiserId() {
-        return advertiserId;
+        return mAdvertiserId;
     }
 }

@@ -94,7 +94,7 @@ public final class BluetoothSap implements BluetoothProfile {
      */
     public static final int RESULT_CANCELED = 2;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
@@ -279,8 +279,7 @@ public final class BluetoothSap implements BluetoothProfile {
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.disconnect(device);
             } catch (RemoteException e) {
@@ -340,8 +339,7 @@ public final class BluetoothSap implements BluetoothProfile {
      */
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) log("getConnectionState(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getConnectionState(device);
             } catch (RemoteException e) {
@@ -365,10 +363,9 @@ public final class BluetoothSap implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            if (priority != BluetoothProfile.PRIORITY_OFF &&
-                    priority != BluetoothProfile.PRIORITY_ON) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
                 return false;
             }
             try {
@@ -391,8 +388,7 @@ public final class BluetoothSap implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getPriority(device);
             } catch (RemoteException e) {

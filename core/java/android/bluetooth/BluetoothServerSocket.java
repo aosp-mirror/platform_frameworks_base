@@ -183,8 +183,8 @@ public final class BluetoothServerSocket implements Closeable {
         mMessage = message;
     }
 
-    /*package*/ void setServiceName(String ServiceName) {
-        mSocket.setServiceName(ServiceName);
+    /*package*/ void setServiceName(String serviceName) {
+        mSocket.setServiceName(serviceName);
     }
 
     /**

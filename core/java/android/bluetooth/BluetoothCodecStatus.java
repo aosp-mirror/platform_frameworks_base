@@ -56,11 +56,10 @@ public final class BluetoothCodecStatus implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof BluetoothCodecStatus) {
             BluetoothCodecStatus other = (BluetoothCodecStatus) o;
-            return (Objects.equals(other.mCodecConfig, mCodecConfig) &&
-                    Objects.equals(other.mCodecsLocalCapabilities,
-                            mCodecsLocalCapabilities) &&
-                    Objects.equals(other.mCodecsSelectableCapabilities,
-                            mCodecsSelectableCapabilities));
+            return (Objects.equals(other.mCodecConfig, mCodecConfig)
+                    && Objects.equals(other.mCodecsLocalCapabilities, mCodecsLocalCapabilities)
+                    && Objects.equals(other.mCodecsSelectableCapabilities,
+                    mCodecsSelectableCapabilities));
         }
         return false;
     }
@@ -73,12 +72,13 @@ public final class BluetoothCodecStatus implements Parcelable {
 
     @Override
     public String toString() {
-        return "{mCodecConfig:" + mCodecConfig +
-                ",mCodecsLocalCapabilities:" + Arrays.toString(mCodecsLocalCapabilities) +
-                ",mCodecsSelectableCapabilities:" + Arrays.toString(mCodecsSelectableCapabilities) +
-                "}";
+        return "{mCodecConfig:" + mCodecConfig
+                + ",mCodecsLocalCapabilities:" + Arrays.toString(mCodecsLocalCapabilities)
+                + ",mCodecsSelectableCapabilities:" + Arrays.toString(mCodecsSelectableCapabilities)
+                + "}";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -103,6 +103,7 @@ public final class BluetoothCodecStatus implements Parcelable {
                 }
             };
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeTypedObject(mCodecConfig, 0);
         out.writeTypedArray(mCodecsLocalCapabilities, 0);

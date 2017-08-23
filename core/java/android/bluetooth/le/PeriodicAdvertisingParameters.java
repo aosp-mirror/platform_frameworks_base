@@ -29,24 +29,24 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
     private static final int INTERVAL_MIN = 80;
     private static final int INTERVAL_MAX = 65519;
 
-    private final boolean includeTxPower;
-    private final int interval;
+    private final boolean mIncludeTxPower;
+    private final int mInterval;
 
     private PeriodicAdvertisingParameters(boolean includeTxPower, int interval) {
-        this.includeTxPower = includeTxPower;
-        this.interval = interval;
+        mIncludeTxPower = includeTxPower;
+        mInterval = interval;
     }
 
     private PeriodicAdvertisingParameters(Parcel in) {
-        includeTxPower = in.readInt() != 0 ? true : false;
-        interval = in.readInt();
+        mIncludeTxPower = in.readInt() != 0;
+        mInterval = in.readInt();
     }
 
     /**
      * Returns whether the TX Power will be included.
      */
     public boolean getIncludeTxPower() {
-        return includeTxPower;
+        return mIncludeTxPower;
     }
 
     /**
@@ -54,7 +54,7 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
      * Valid values are from 80 (100ms) to 65519 (81.89875s).
      */
     public int getInterval() {
-        return interval;
+        return mInterval;
     }
 
     @Override
@@ -64,8 +64,8 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(includeTxPower ? 1 : 0);
-        dest.writeInt(interval);
+        dest.writeInt(mIncludeTxPower ? 1 : 0);
+        dest.writeInt(mInterval);
     }
 
     public static final Parcelable
@@ -83,15 +83,15 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
             };
 
     public static final class Builder {
-        private boolean includeTxPower = false;
-        private int interval = INTERVAL_MAX;
+        private boolean mIncludeTxPower = false;
+        private int mInterval = INTERVAL_MAX;
 
         /**
          * Whether the transmission power level should be included in the periodic
          * packet.
          */
         public Builder setIncludeTxPower(boolean includeTxPower) {
-            this.includeTxPower = includeTxPower;
+            mIncludeTxPower = includeTxPower;
             return this;
         }
 
@@ -104,10 +104,10 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
          */
         public Builder setInterval(int interval) {
             if (interval < INTERVAL_MIN || interval > INTERVAL_MAX) {
-                throw new IllegalArgumentException("Invalid interval (must be " + INTERVAL_MIN +
-                        "-" + INTERVAL_MAX + ")");
+                throw new IllegalArgumentException("Invalid interval (must be " + INTERVAL_MIN
+                        + "-" + INTERVAL_MAX + ")");
             }
-            this.interval = interval;
+            mInterval = interval;
             return this;
         }
 
@@ -115,7 +115,7 @@ public final class PeriodicAdvertisingParameters implements Parcelable {
          * Build the {@link AdvertisingSetParameters} object.
          */
         public PeriodicAdvertisingParameters build() {
-            return new PeriodicAdvertisingParameters(includeTxPower, interval);
+            return new PeriodicAdvertisingParameters(mIncludeTxPower, mInterval);
         }
     }
 }

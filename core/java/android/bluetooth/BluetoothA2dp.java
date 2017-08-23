@@ -187,7 +187,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
     private IBluetoothA2dp mService;
     private BluetoothAdapter mAdapter;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
@@ -274,6 +274,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
         }
     }
 
+    @Override
     public void finalize() {
         // The empty finalize needs to be kept or the
         // cts signature tests would fail.
@@ -304,8 +305,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
         if (DBG) log("connect(" + device + ")");
         try {
             mServiceLock.readLock().lock();
-            if (mService != null && isEnabled() &&
-                    isValidDevice(device)) {
+            if (mService != null && isEnabled() && isValidDevice(device)) {
                 return mService.connect(device);
             }
             if (mService == null) Log.w(TAG, "Proxy not attached to service");
@@ -347,8 +347,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
         if (DBG) log("disconnect(" + device + ")");
         try {
             mServiceLock.readLock().lock();
-            if (mService != null && isEnabled() &&
-                    isValidDevice(device)) {
+            if (mService != null && isEnabled() && isValidDevice(device)) {
                 return mService.disconnect(device);
             }
             if (mService == null) Log.w(TAG, "Proxy not attached to service");
@@ -364,6 +363,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         try {
@@ -384,6 +384,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         try {
@@ -404,6 +405,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         try {
@@ -443,8 +445,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
             mServiceLock.readLock().lock();
             if (mService != null && isEnabled()
                     && isValidDevice(device)) {
-                if (priority != BluetoothProfile.PRIORITY_OFF &&
-                        priority != BluetoothProfile.PRIORITY_ON) {
+                if (priority != BluetoothProfile.PRIORITY_OFF
+                        && priority != BluetoothProfile.PRIORITY_ON) {
                     return false;
                 }
                 return mService.setPriority(device, priority);
@@ -758,9 +760,9 @@ public final class BluetoothA2dp implements BluetoothProfile {
      */
     public void setOptionalCodecsEnabled(BluetoothDevice device, int value) {
         try {
-            if (value != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN &&
-                    value != BluetoothA2dp.OPTIONAL_CODECS_PREF_DISABLED &&
-                    value != BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED) {
+            if (value != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN
+                    && value != BluetoothA2dp.OPTIONAL_CODECS_PREF_DISABLED
+                    && value != BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED) {
                 Log.e(TAG, "Invalid value passed to setOptionalCodecsEnabled: " + value);
                 return;
             }

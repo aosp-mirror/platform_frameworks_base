@@ -283,13 +283,12 @@ public class BluetoothGattCharacteristic implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(new ParcelUuid(mUuid), 0);
         out.writeInt(mInstance);
@@ -300,8 +299,8 @@ public class BluetoothGattCharacteristic implements Parcelable {
         out.writeTypedList(mDescriptors);
     }
 
-    public static final Parcelable.Creator<BluetoothGattCharacteristic> CREATOR
-            = new Parcelable.Creator<BluetoothGattCharacteristic>() {
+    public static final Parcelable.Creator<BluetoothGattCharacteristic> CREATOR =
+            new Parcelable.Creator<BluetoothGattCharacteristic>() {
         public BluetoothGattCharacteristic createFromParcel(Parcel in) {
             return new BluetoothGattCharacteristic(in);
         }

@@ -145,8 +145,8 @@ public final class ScanFilter implements Parcelable {
     /**
      * A {@link android.os.Parcelable.Creator} to create {@link ScanFilter} from parcel.
      */
-    public static final Creator<ScanFilter>
-            CREATOR = new Creator<ScanFilter>() {
+    public static final Creator<ScanFilter> CREATOR =
+            new Creator<ScanFilter>() {
 
         @Override
         public ScanFilter[] newArray(int size) {
@@ -403,16 +403,16 @@ public final class ScanFilter implements Parcelable {
             return false;
         }
         ScanFilter other = (ScanFilter) obj;
-        return Objects.equals(mDeviceName, other.mDeviceName) &&
-                Objects.equals(mDeviceAddress, other.mDeviceAddress) &&
-                mManufacturerId == other.mManufacturerId &&
-                Objects.deepEquals(mManufacturerData, other.mManufacturerData) &&
-                Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask) &&
-                Objects.equals(mServiceDataUuid, other.mServiceDataUuid) &&
-                Objects.deepEquals(mServiceData, other.mServiceData) &&
-                Objects.deepEquals(mServiceDataMask, other.mServiceDataMask) &&
-                Objects.equals(mServiceUuid, other.mServiceUuid) &&
-                Objects.equals(mServiceUuidMask, other.mServiceUuidMask);
+        return Objects.equals(mDeviceName, other.mDeviceName)
+                && Objects.equals(mDeviceAddress, other.mDeviceAddress)
+                && mManufacturerId == other.mManufacturerId
+                && Objects.deepEquals(mManufacturerData, other.mManufacturerData)
+                && Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask)
+                && Objects.equals(mServiceDataUuid, other.mServiceDataUuid)
+                && Objects.deepEquals(mServiceData, other.mServiceData)
+                && Objects.deepEquals(mServiceDataMask, other.mServiceDataMask)
+                && Objects.equals(mServiceUuid, other.mServiceUuid)
+                && Objects.equals(mServiceUuidMask, other.mServiceUuidMask);
     }
 
     /**

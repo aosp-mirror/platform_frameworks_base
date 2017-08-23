@@ -78,8 +78,8 @@ public final class ResultStorageDescriptor implements Parcelable {
         mLength = in.readInt();
     }
 
-    public static final Parcelable.Creator<ResultStorageDescriptor>
-            CREATOR = new Creator<ResultStorageDescriptor>() {
+    public static final Parcelable.Creator<ResultStorageDescriptor> CREATOR =
+            new Creator<ResultStorageDescriptor>() {
         @Override
         public ResultStorageDescriptor createFromParcel(Parcel source) {
             return new ResultStorageDescriptor(source);

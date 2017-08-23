@@ -91,11 +91,8 @@ public class UidTraffic implements Cloneable, Parcelable {
 
     @Override
     public String toString() {
-        return "UidTraffic{" +
-                "mAppUid=" + mAppUid +
-                ", mRxBytes=" + mRxBytes +
-                ", mTxBytes=" + mTxBytes +
-                '}';
+        return "UidTraffic{mAppUid=" + mAppUid + ", mRxBytes=" + mRxBytes + ", mTxBytes="
+                + mTxBytes + '}';
     }
 
     public static final Creator<UidTraffic> CREATOR = new Creator<UidTraffic>() {

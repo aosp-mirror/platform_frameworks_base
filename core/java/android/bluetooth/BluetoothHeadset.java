@@ -309,7 +309,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private IBluetoothHeadset mService;
     private BluetoothAdapter mAdapter;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
@@ -418,8 +418,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.connect(device);
             } catch (RemoteException e) {
@@ -458,8 +457,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.disconnect(device);
             } catch (RemoteException e) {
@@ -474,6 +472,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
@@ -491,6 +490,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
@@ -508,10 +508,10 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getConnectionState(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getConnectionState(device);
             } catch (RemoteException e) {
@@ -540,10 +540,9 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            if (priority != BluetoothProfile.PRIORITY_OFF &&
-                    priority != BluetoothProfile.PRIORITY_ON) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
                 return false;
             }
             try {
@@ -572,8 +571,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getPriority(device);
             } catch (RemoteException e) {
@@ -607,8 +605,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.startVoiceRecognition(device);
             } catch (RemoteException e) {
@@ -630,8 +627,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.stopVoiceRecognition(device);
             } catch (RemoteException e) {
@@ -652,8 +648,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean isAudioConnected(BluetoothDevice device) {
         if (VDBG) log("isAudioConnected()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.isAudioConnected(device);
             } catch (RemoteException e) {
@@ -679,8 +674,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public int getBatteryUsageHint(BluetoothDevice device) {
         if (VDBG) log("getBatteryUsageHint()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getBatteryUsageHint(device);
             } catch (RemoteException e) {
@@ -1012,8 +1006,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
         if (command == null) {
             throw new IllegalArgumentException("command is null");
         }
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.sendVendorSpecificResultCode(device, command, arg);
             } catch (RemoteException e) {
@@ -1083,16 +1076,16 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Send Headset the BIND response from AG to report change in the status of the
      * HF indicators to the headset
      *
-     * @param ind_id Assigned Number of the indicator (defined by SIG)
-     * @param ind_status possible values- false-Indicator is disabled, no value changes shall be
+     * @param indId Assigned Number of the indicator (defined by SIG)
+     * @param indStatus possible values- false-Indicator is disabled, no value changes shall be
      * sent for this indicator true-Indicator is enabled, value changes may be sent for this
      * indicator
      * @hide
      */
-    public void bindResponse(int ind_id, boolean ind_status) {
+    public void bindResponse(int indId, boolean indStatus) {
         if (mService != null && isEnabled()) {
             try {
-                mService.bindResponse(ind_id, ind_status);
+                mService.bindResponse(indId, indStatus);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -1102,8 +1095,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
         }
     }
 
-    private final IBluetoothProfileServiceConnection mConnection
-            = new IBluetoothProfileServiceConnection.Stub() {
+    private final IBluetoothProfileServiceConnection mConnection =
+            new IBluetoothProfileServiceConnection.Stub() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");

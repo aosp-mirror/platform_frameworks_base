@@ -48,10 +48,11 @@ public final class BluetoothMasInstance implements Parcelable {
 
     @Override
     public String toString() {
-        return Integer.toString(mId) + ":" + mName + ":" + mChannel + ":" +
-                Integer.toHexString(mMsgTypes);
+        return Integer.toString(mId) + ":" + mName + ":" + mChannel + ":"
+                + Integer.toHexString(mMsgTypes);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -68,6 +69,7 @@ public final class BluetoothMasInstance implements Parcelable {
                 }
             };
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
         out.writeString(mName);

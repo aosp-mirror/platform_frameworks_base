@@ -101,6 +101,7 @@ public final class ScanResult implements Parcelable {
      * @deprecated use {@link #ScanResult(BluetoothDevice, int, int, int, int, int, int, int,
      * ScanRecord, long)}
      */
+    @Deprecated
     public ScanResult(BluetoothDevice device, ScanRecord scanRecord, int rssi,
             long timestampNanos) {
         mDevice = device;
@@ -316,25 +317,25 @@ public final class ScanResult implements Parcelable {
             return false;
         }
         ScanResult other = (ScanResult) obj;
-        return Objects.equals(mDevice, other.mDevice) && (mRssi == other.mRssi) &&
-                Objects.equals(mScanRecord, other.mScanRecord) &&
-                (mTimestampNanos == other.mTimestampNanos) &&
-                mEventType == other.mEventType &&
-                mPrimaryPhy == other.mPrimaryPhy &&
-                mSecondaryPhy == other.mSecondaryPhy &&
-                mAdvertisingSid == other.mAdvertisingSid &&
-                mTxPower == other.mTxPower &&
-                mPeriodicAdvertisingInterval == other.mPeriodicAdvertisingInterval;
+        return Objects.equals(mDevice, other.mDevice) && (mRssi == other.mRssi)
+                && Objects.equals(mScanRecord, other.mScanRecord)
+                && (mTimestampNanos == other.mTimestampNanos)
+                && mEventType == other.mEventType
+                && mPrimaryPhy == other.mPrimaryPhy
+                && mSecondaryPhy == other.mSecondaryPhy
+                && mAdvertisingSid == other.mAdvertisingSid
+                && mTxPower == other.mTxPower
+                && mPeriodicAdvertisingInterval == other.mPeriodicAdvertisingInterval;
     }
 
     @Override
     public String toString() {
-        return "ScanResult{" + "device=" + mDevice + ", scanRecord=" +
-                Objects.toString(mScanRecord) + ", rssi=" + mRssi +
-                ", timestampNanos=" + mTimestampNanos + ", eventType=" + mEventType +
-                ", primaryPhy=" + mPrimaryPhy + ", secondaryPhy=" + mSecondaryPhy +
-                ", advertisingSid=" + mAdvertisingSid + ", txPower=" + mTxPower +
-                ", periodicAdvertisingInterval=" + mPeriodicAdvertisingInterval + '}';
+        return "ScanResult{" + "device=" + mDevice + ", scanRecord="
+                + Objects.toString(mScanRecord) + ", rssi=" + mRssi
+                + ", timestampNanos=" + mTimestampNanos + ", eventType=" + mEventType
+                + ", primaryPhy=" + mPrimaryPhy + ", secondaryPhy=" + mSecondaryPhy
+                + ", advertisingSid=" + mAdvertisingSid + ", txPower=" + mTxPower
+                + ", periodicAdvertisingInterval=" + mPeriodicAdvertisingInterval + '}';
     }
 
     public static final Parcelable.Creator<ScanResult> CREATOR = new Creator<ScanResult>() {

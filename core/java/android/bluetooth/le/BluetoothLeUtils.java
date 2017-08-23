@@ -92,8 +92,8 @@ public class BluetoothLeUtils {
 
         // Keys are guaranteed in ascending order when indices are in ascending order.
         for (int i = 0; i < array.size(); ++i) {
-            if (array.keyAt(i) != otherArray.keyAt(i) ||
-                    !Arrays.equals(array.valueAt(i), otherArray.valueAt(i))) {
+            if (array.keyAt(i) != otherArray.keyAt(i)
+                    || !Arrays.equals(array.valueAt(i), otherArray.valueAt(i))) {
                 return false;
             }
         }
@@ -132,8 +132,7 @@ public class BluetoothLeUtils {
      * BluetoothAdapter#STATE_ON}.
      */
     static void checkAdapterStateOn(BluetoothAdapter adapter) {
-        if (adapter == null
-                || !adapter.isLeEnabled()) {//adapter.getState() != BluetoothAdapter.STATE_ON) {
+        if (adapter == null || !adapter.isLeEnabled()) {
             throw new IllegalStateException("BT Adapter is not turned ON");
         }
     }

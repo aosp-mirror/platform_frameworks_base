@@ -126,9 +126,9 @@ public final class BluetoothSocket implements Closeable {
     private int mPort;  /* RFCOMM channel or L2CAP psm */
     private int mFd;
     private String mServiceName;
-    private static int PROXY_CONNECTION_TIMEOUT = 5000;
+    private static final int PROXY_CONNECTION_TIMEOUT = 5000;
 
-    private static int SOCK_SIGNAL_SIZE = 20;
+    private static final int SOCK_SIGNAL_SIZE = 20;
 
     private ByteBuffer mL2capBuffer = null;
     private int mMaxTxPacketSize = 0; // The l2cap maximum packet size supported by the peer.
@@ -235,7 +235,7 @@ public final class BluetoothSocket implements Closeable {
         mMin16DigitPin = s.mMin16DigitPin;
     }
 
-    private BluetoothSocket acceptSocket(String RemoteAddr) throws IOException {
+    private BluetoothSocket acceptSocket(String remoteAddr) throws IOException {
         BluetoothSocket as = new BluetoothSocket(this);
         as.mSocketState = SocketState.CONNECTED;
         FileDescriptor[] fds = mSocket.getAncillaryFileDescriptors();
@@ -250,8 +250,8 @@ public final class BluetoothSocket implements Closeable {
         as.mSocket = LocalSocket.createConnectedLocalSocket(fds[0]);
         as.mSocketIS = as.mSocket.getInputStream();
         as.mSocketOS = as.mSocket.getOutputStream();
-        as.mAddress = RemoteAddr;
-        as.mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(RemoteAddr);
+        as.mAddress = remoteAddr;
+        as.mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(remoteAddr);
         return as;
     }
 
@@ -428,8 +428,7 @@ public final class BluetoothSocket implements Closeable {
         try {
             synchronized (this) {
                 if (DBG) {
-                    Log.d(TAG, "bindListen(), SocketState: " + mSocketState + ", mPfd: " +
-                            mPfd);
+                    Log.d(TAG, "bindListen(), SocketState: " + mSocketState + ", mPfd: " + mPfd);
                 }
                 if (mSocketState != SocketState.INIT) return EBADFD;
                 if (mPfd == null) return -1;
@@ -589,9 +588,9 @@ public final class BluetoothSocket implements Closeable {
 
     @Override
     public void close() throws IOException {
-        Log.d(TAG, "close() this: " + this + ", channel: " + mPort +
-                ", mSocketIS: " + mSocketIS + ", mSocketOS: " + mSocketOS +
-                "mSocket: " + mSocket + ", mSocketState: " + mSocketState);
+        Log.d(TAG, "close() this: " + this + ", channel: " + mPort + ", mSocketIS: " + mSocketIS
+                + ", mSocketOS: " + mSocketOS + "mSocket: " + mSocket + ", mSocketState: "
+                + mSocketState);
         if (mSocketState == SocketState.CLOSED) {
             return;
         } else {
@@ -658,12 +657,12 @@ public final class BluetoothSocket implements Closeable {
      * Change if a SDP entry should be automatically created.
      * Must be called before calling .bind, for the call to have any effect.
      *
-     * @param mExcludeSdp <li>TRUE  - do not auto generate SDP record. <li>FALSE - default - auto
+     * @param excludeSdp <li>TRUE - do not auto generate SDP record. <li>FALSE - default - auto
      * generate SPP SDP record.
      * @hide
      */
     public void setExcludeSdp(boolean excludeSdp) {
-        this.mExcludeSdp = excludeSdp;
+        mExcludeSdp = excludeSdp;
     }
 
     private String convertAddr(final byte[] addr) {
@@ -675,8 +674,7 @@ public final class BluetoothSocket implements Closeable {
         byte[] sig = new byte[SOCK_SIGNAL_SIZE];
         int ret = readAll(is, sig);
         if (VDBG) {
-            Log.d(TAG, "waitSocketSignal read " + SOCK_SIGNAL_SIZE +
-                    " bytes signal ret: " + ret);
+            Log.d(TAG, "waitSocketSignal read " + SOCK_SIGNAL_SIZE + " bytes signal ret: " + ret);
         }
         ByteBuffer bb = ByteBuffer.wrap(sig);
         /* the struct in native is decorated with __attribute__((packed)), hence this is possible */
@@ -711,8 +709,7 @@ public final class BluetoothSocket implements Closeable {
             if (VDBG) Log.v(TAG, "mL2capBuffer.remaining()" + mL2capBuffer.remaining());
             mL2capBuffer.limit(0); // Ensure we do a real read at the first read-request
             if (VDBG) {
-                Log.v(TAG, "mL2capBuffer.remaining() after limit(0):" +
-                        mL2capBuffer.remaining());
+                Log.v(TAG, "mL2capBuffer.remaining() after limit(0):" + mL2capBuffer.remaining());
             }
         }
     }
@@ -727,8 +724,8 @@ public final class BluetoothSocket implements Closeable {
             }
             left -= ret;
             if (left != 0) {
-                Log.w(TAG, "readAll() looping, read partial size: " + (b.length - left) +
-                        ", expect size: " + b.length);
+                Log.w(TAG, "readAll() looping, read partial size: " + (b.length - left)
+                        + ", expect size: " + b.length);
             }
         }
         return b.length;

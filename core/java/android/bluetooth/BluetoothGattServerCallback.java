@@ -184,7 +184,7 @@ public abstract class BluetoothGattServerCallback {
     /**
      * Callback indicating the connection parameters were updated.
      *
-     * @param device The remote device involved
+     * @param gatt The remote device involved
      * @param interval Connection interval used on this connection, 1.25ms unit. Valid range is from
      * 6 (7.5ms) to 3200 (4000ms).
      * @param latency Slave latency for the connection in number of connection events. Valid range

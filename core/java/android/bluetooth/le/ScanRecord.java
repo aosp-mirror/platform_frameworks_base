@@ -247,8 +247,8 @@ public final class ScanRecord {
                     case DATA_TYPE_MANUFACTURER_SPECIFIC_DATA:
                         // The first two bytes of the manufacturer specific data are
                         // manufacturer ids in little endian.
-                        int manufacturerId = ((scanRecord[currentPos + 1] & 0xFF) << 8) +
-                                (scanRecord[currentPos] & 0xFF);
+                        int manufacturerId = ((scanRecord[currentPos + 1] & 0xFF) << 8)
+                                + (scanRecord[currentPos] & 0xFF);
                         byte[] manufacturerDataBytes = extractBytes(scanRecord, currentPos + 2,
                                 dataLength - 2);
                         manufacturerData.put(manufacturerId, manufacturerDataBytes);

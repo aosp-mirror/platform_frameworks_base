@@ -22,11 +22,11 @@ import android.os.Parcelable;
 /** @hide */
 public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
 
-    final public String name;
-    final public String description;
-    final public String provider;
-    final public byte subclass;
-    final public byte[] descriptors;
+    public final String name;
+    public final String description;
+    public final String provider;
+    public final byte subclass;
+    public final byte[] descriptors;
 
     public BluetoothHidDeviceAppSdpSettings(String name, String description, String provider,
             byte subclass, byte[] descriptors) {

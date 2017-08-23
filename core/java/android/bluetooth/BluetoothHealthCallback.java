@@ -63,8 +63,8 @@ public abstract class BluetoothHealthCallback {
     public void onHealthChannelStateChange(BluetoothHealthAppConfiguration config,
             BluetoothDevice device, int prevState, int newState, ParcelFileDescriptor fd,
             int channelId) {
-        Log.d(TAG, "onHealthChannelStateChange: " + config + "Device: " + device +
-                "prevState:" + prevState + "newState:" + newState + "ParcelFd:" + fd +
-                "ChannelId:" + channelId);
+        Log.d(TAG, "onHealthChannelStateChange: " + config + "Device: " + device
+                + "prevState:" + prevState + "newState:" + newState + "ParcelFd:" + fd
+                + "ChannelId:" + channelId);
     }
 }

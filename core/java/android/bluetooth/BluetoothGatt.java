@@ -352,8 +352,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                             || status == GATT_INSUFFICIENT_ENCRYPTION)
                             && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                         try {
-                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
-                                    AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
+                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
+                                    ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                             mService.readCharacteristic(mClientIf, address, handle, authReq);
                             mAuthRetryState++;
                             return;
@@ -412,8 +412,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                             || status == GATT_INSUFFICIENT_ENCRYPTION)
                             && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                         try {
-                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
-                                    AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
+                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
+                                    ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                             mService.writeCharacteristic(mClientIf, address, handle,
                                     characteristic.getWriteType(), authReq,
                                     characteristic.getValue());
@@ -495,8 +495,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                             || status == GATT_INSUFFICIENT_ENCRYPTION)
                             && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                         try {
-                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
-                                    AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
+                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
+                                    ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                             mService.readDescriptor(mClientIf, address, handle, authReq);
                             mAuthRetryState++;
                             return;
@@ -543,8 +543,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                             || status == GATT_INSUFFICIENT_ENCRYPTION)
                             && (mAuthRetryState != AUTH_RETRY_STATE_MITM)) {
                         try {
-                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE) ?
-                                    AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
+                            final int authReq = (mAuthRetryState == AUTH_RETRY_STATE_IDLE)
+                                    ? AUTHENTICATION_NO_MITM : AUTHENTICATION_MITM;
                             mService.writeDescriptor(mClientIf, address, handle,
                                     authReq, descriptor.getValue());
                             mAuthRetryState++;
@@ -601,8 +601,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                 @Override
                 public void onReadRemoteRssi(String address, int rssi, int status) {
                     if (VDBG) {
-                        Log.d(TAG, "onReadRemoteRssi() - Device=" + address +
-                                " rssi=" + rssi + " status=" + status);
+                        Log.d(TAG, "onReadRemoteRssi() - Device=" + address
+                                + " rssi=" + rssi + " status=" + status);
                     }
                     if (!address.equals(mDevice.getAddress())) {
                         return;
@@ -624,8 +624,8 @@ public final class BluetoothGatt implements BluetoothProfile {
                 @Override
                 public void onConfigureMTU(String address, int mtu, int status) {
                     if (DBG) {
-                        Log.d(TAG, "onConfigureMTU() - Device=" + address +
-                                " mtu=" + mtu + " status=" + status);
+                        Log.d(TAG, "onConfigureMTU() - Device=" + address
+                                + " mtu=" + mtu + " status=" + status);
                     }
                     if (!address.equals(mDevice.getAddress())) {
                         return;
@@ -649,9 +649,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                 public void onConnectionUpdated(String address, int interval, int latency,
                         int timeout, int status) {
                     if (DBG) {
-                        Log.d(TAG, "onConnectionUpdated() - Device=" + address +
-                                " interval=" + interval + " latency=" + latency +
-                                " timeout=" + timeout + " status=" + status);
+                        Log.d(TAG, "onConnectionUpdated() - Device=" + address
+                                + " interval=" + interval + " latency=" + latency
+                                + " timeout=" + timeout + " status=" + status);
                     }
                     if (!address.equals(mDevice.getAddress())) {
                         return;
@@ -704,10 +704,10 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ BluetoothGattService getService(BluetoothDevice device, UUID uuid,
             int instanceId, int type) {
         for (BluetoothGattService svc : mServices) {
-            if (svc.getDevice().equals(device) &&
-                    svc.getType() == type &&
-                    svc.getInstanceId() == instanceId &&
-                    svc.getUuid().equals(uuid)) {
+            if (svc.getDevice().equals(device)
+                    && svc.getType() == type
+                    && svc.getInstanceId() == instanceId
+                    && svc.getUuid().equals(uuid)) {
                 return svc;
             }
         }
@@ -1043,8 +1043,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     public BluetoothGattService getService(UUID uuid) {
         for (BluetoothGattService service : mServices) {
-            if (service.getDevice().equals(mDevice) &&
-                    service.getUuid().equals(uuid)) {
+            if (service.getDevice().equals(mDevice) && service.getUuid().equals(uuid)) {
                 return service;
             }
         }
@@ -1065,8 +1064,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the read operation was initiated successfully
      */
     public boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if ((characteristic.getProperties() &
-                BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
+        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
             return false;
         }
 
@@ -1145,8 +1143,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0
-                && (characteristic.getProperties() &
-                BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
+                && (characteristic.getProperties()
+                & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
             return false;
         }
 
@@ -1480,8 +1478,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws IllegalArgumentException If the parameters are outside of their specified range.
      */
     public boolean requestConnectionPriority(int connectionPriority) {
-        if (connectionPriority < CONNECTION_PRIORITY_BALANCED ||
-                connectionPriority > CONNECTION_PRIORITY_LOW_POWER) {
+        if (connectionPriority < CONNECTION_PRIORITY_BALANCED
+                || connectionPriority > CONNECTION_PRIORITY_LOW_POWER) {
             throw new IllegalArgumentException("connectionPriority not within valid range");
         }
 
@@ -1517,8 +1515,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
-        throw new UnsupportedOperationException
-                ("Use BluetoothManager#getConnectedDevices instead.");
+        throw new UnsupportedOperationException(
+                "Use BluetoothManager#getConnectedDevices instead.");
     }
 
     /**
@@ -1530,7 +1528,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        throw new UnsupportedOperationException
-                ("Use BluetoothManager#getDevicesMatchingConnectionStates instead.");
+        throw new UnsupportedOperationException(
+                "Use BluetoothManager#getDevicesMatchingConnectionStates instead.");
     }
 }

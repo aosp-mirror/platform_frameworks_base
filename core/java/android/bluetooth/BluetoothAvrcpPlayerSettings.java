@@ -82,14 +82,14 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
     /**
      * All track repeat/shuffle.
      *
-     * Applies to {@link SETTING_REPEAT}, {@link SETTING_SHUFFLE} and {@link SETTING_SCAN}.
+     * Applies to {@link #SETTING_REPEAT}, {@link #SETTING_SHUFFLE} and {@link #SETTING_SCAN}.
      */
     public static final int STATE_ALL_TRACK = 0x03;
 
     /**
      * Group repeat/shuffle.
      *
-     * Applies to {@link SETTING_REPEAT}, {@link SETTING_SHUFFLE} and {@link SETTING_SCAN}.
+     * Applies to {@link #SETTING_REPEAT}, {@link #SETTING_SHUFFLE} and {@link #SETTING_SCAN}.
      */
     public static final int STATE_GROUP = 0x04;
 
@@ -103,10 +103,12 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
      */
     private Map<Integer, Integer> mSettingsValue = new HashMap<Integer, Integer>();
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSettings);
         out.writeInt(mSettingsValue.size());
@@ -116,8 +118,8 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<BluetoothAvrcpPlayerSettings> CREATOR
-            = new Parcelable.Creator<BluetoothAvrcpPlayerSettings>() {
+    public static final Parcelable.Creator<BluetoothAvrcpPlayerSettings> CREATOR =
+            new Parcelable.Creator<BluetoothAvrcpPlayerSettings>() {
         public BluetoothAvrcpPlayerSettings createFromParcel(Parcel in) {
             return new BluetoothAvrcpPlayerSettings(in);
         }

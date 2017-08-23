@@ -118,12 +118,12 @@ public final class AdvertiseData implements Parcelable {
             return false;
         }
         AdvertiseData other = (AdvertiseData) obj;
-        return Objects.equals(mServiceUuids, other.mServiceUuids) &&
-                BluetoothLeUtils.equals(mManufacturerSpecificData, other.mManufacturerSpecificData)
-                &&
-                BluetoothLeUtils.equals(mServiceData, other.mServiceData) &&
-                mIncludeDeviceName == other.mIncludeDeviceName &&
-                mIncludeTxPowerLevel == other.mIncludeTxPowerLevel;
+        return Objects.equals(mServiceUuids, other.mServiceUuids)
+                && BluetoothLeUtils.equals(mManufacturerSpecificData,
+                    other.mManufacturerSpecificData)
+                && BluetoothLeUtils.equals(mServiceData, other.mServiceData)
+                && mIncludeDeviceName == other.mIncludeDeviceName
+                && mIncludeTxPowerLevel == other.mIncludeTxPowerLevel;
     }
 
     @Override

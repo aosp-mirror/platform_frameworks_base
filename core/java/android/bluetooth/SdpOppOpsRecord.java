@@ -35,11 +35,11 @@ public class SdpOppOpsRecord implements Parcelable {
     public SdpOppOpsRecord(String serviceName, int rfcommChannel,
             int l2capPsm, int version, byte[] formatsList) {
         super();
-        this.mServiceName = serviceName;
-        this.mRfcommChannel = rfcommChannel;
-        this.mL2capPsm = l2capPsm;
-        this.mProfileVersion = version;
-        this.mFormatsList = formatsList;
+        mServiceName = serviceName;
+        mRfcommChannel = rfcommChannel;
+        mL2capPsm = l2capPsm;
+        mProfileVersion = version;
+        mFormatsList = formatsList;
     }
 
     public String getServiceName() {
@@ -69,17 +69,17 @@ public class SdpOppOpsRecord implements Parcelable {
     }
 
     public SdpOppOpsRecord(Parcel in) {
-        this.mRfcommChannel = in.readInt();
-        this.mL2capPsm = in.readInt();
-        this.mProfileVersion = in.readInt();
-        this.mServiceName = in.readString();
+        mRfcommChannel = in.readInt();
+        mL2capPsm = in.readInt();
+        mProfileVersion = in.readInt();
+        mServiceName = in.readString();
         int arrayLength = in.readInt();
         if (arrayLength > 0) {
             byte[] bytes = new byte[arrayLength];
             in.readByteArray(bytes);
-            this.mFormatsList = bytes;
+            mFormatsList = bytes;
         } else {
-            this.mFormatsList = null;
+            mFormatsList = null;
         }
     }
 
@@ -97,6 +97,7 @@ public class SdpOppOpsRecord implements Parcelable {
         }
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Bluetooth OPP Server SDP Record:\n");
         sb.append("  RFCOMM Chan Number: ").append(mRfcommChannel);

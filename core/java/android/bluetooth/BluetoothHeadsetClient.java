@@ -250,53 +250,53 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * AG feature: three way calling.
      */
-    public final static String EXTRA_AG_FEATURE_3WAY_CALLING =
+    public static final String EXTRA_AG_FEATURE_3WAY_CALLING =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_3WAY_CALLING";
     /**
      * AG feature: voice recognition.
      */
-    public final static String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
+    public static final String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_VOICE_RECOGNITION";
     /**
      * AG feature: fetching phone number for voice tagging procedure.
      */
-    public final static String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
+    public static final String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT";
     /**
      * AG feature: ability to reject incoming call.
      */
-    public final static String EXTRA_AG_FEATURE_REJECT_CALL =
+    public static final String EXTRA_AG_FEATURE_REJECT_CALL =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_REJECT_CALL";
     /**
      * AG feature: enhanced call handling (terminate specific call, private consultation).
      */
-    public final static String EXTRA_AG_FEATURE_ECC =
+    public static final String EXTRA_AG_FEATURE_ECC =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ECC";
     /**
      * AG feature: response and hold.
      */
-    public final static String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
+    public static final String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RESPONSE_AND_HOLD";
     /**
      * AG call handling feature: accept held or waiting call in three way calling scenarios.
      */
-    public final static String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
+    public static final String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL";
     /**
      * AG call handling feature: release held or waiting call in three way calling scenarios.
      */
-    public final static String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
+    public static final String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL";
     /**
      * AG call handling feature: release active call and accept held or waiting call in three way
      * calling scenarios.
      */
-    public final static String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
+    public static final String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT";
     /**
      * AG call handling feature: merge two calls, held and active - multi party conference mode.
      */
-    public final static String EXTRA_AG_FEATURE_MERGE =
+    public static final String EXTRA_AG_FEATURE_MERGE =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE";
     /**
      * AG call handling feature: merge calls and disconnect from multi party
@@ -304,61 +304,61 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Note that this feature needs to be supported by mobile network operator
      * as it requires connection and billing transfer.
      */
-    public final static String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
+    public static final String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE_AND_DETACH";
 
     /* Action result codes */
-    public final static int ACTION_RESULT_OK = 0;
-    public final static int ACTION_RESULT_ERROR = 1;
-    public final static int ACTION_RESULT_ERROR_NO_CARRIER = 2;
-    public final static int ACTION_RESULT_ERROR_BUSY = 3;
-    public final static int ACTION_RESULT_ERROR_NO_ANSWER = 4;
-    public final static int ACTION_RESULT_ERROR_DELAYED = 5;
-    public final static int ACTION_RESULT_ERROR_BLACKLISTED = 6;
-    public final static int ACTION_RESULT_ERROR_CME = 7;
+    public static final int ACTION_RESULT_OK = 0;
+    public static final int ACTION_RESULT_ERROR = 1;
+    public static final int ACTION_RESULT_ERROR_NO_CARRIER = 2;
+    public static final int ACTION_RESULT_ERROR_BUSY = 3;
+    public static final int ACTION_RESULT_ERROR_NO_ANSWER = 4;
+    public static final int ACTION_RESULT_ERROR_DELAYED = 5;
+    public static final int ACTION_RESULT_ERROR_BLACKLISTED = 6;
+    public static final int ACTION_RESULT_ERROR_CME = 7;
 
     /* Detailed CME error codes */
-    public final static int CME_PHONE_FAILURE = 0;
-    public final static int CME_NO_CONNECTION_TO_PHONE = 1;
-    public final static int CME_OPERATION_NOT_ALLOWED = 3;
-    public final static int CME_OPERATION_NOT_SUPPORTED = 4;
-    public final static int CME_PHSIM_PIN_REQUIRED = 5;
-    public final static int CME_PHFSIM_PIN_REQUIRED = 6;
-    public final static int CME_PHFSIM_PUK_REQUIRED = 7;
-    public final static int CME_SIM_NOT_INSERTED = 10;
-    public final static int CME_SIM_PIN_REQUIRED = 11;
-    public final static int CME_SIM_PUK_REQUIRED = 12;
-    public final static int CME_SIM_FAILURE = 13;
-    public final static int CME_SIM_BUSY = 14;
-    public final static int CME_SIM_WRONG = 15;
-    public final static int CME_INCORRECT_PASSWORD = 16;
-    public final static int CME_SIM_PIN2_REQUIRED = 17;
-    public final static int CME_SIM_PUK2_REQUIRED = 18;
-    public final static int CME_MEMORY_FULL = 20;
-    public final static int CME_INVALID_INDEX = 21;
-    public final static int CME_NOT_FOUND = 22;
-    public final static int CME_MEMORY_FAILURE = 23;
-    public final static int CME_TEXT_STRING_TOO_LONG = 24;
-    public final static int CME_INVALID_CHARACTER_IN_TEXT_STRING = 25;
-    public final static int CME_DIAL_STRING_TOO_LONG = 26;
-    public final static int CME_INVALID_CHARACTER_IN_DIAL_STRING = 27;
-    public final static int CME_NO_NETWORK_SERVICE = 30;
-    public final static int CME_NETWORK_TIMEOUT = 31;
-    public final static int CME_EMERGENCY_SERVICE_ONLY = 32;
-    public final static int CME_NO_SIMULTANOUS_VOIP_CS_CALLS = 33;
-    public final static int CME_NOT_SUPPORTED_FOR_VOIP = 34;
-    public final static int CME_SIP_RESPONSE_CODE = 35;
-    public final static int CME_NETWORK_PERSONALIZATION_PIN_REQUIRED = 40;
-    public final static int CME_NETWORK_PERSONALIZATION_PUK_REQUIRED = 41;
-    public final static int CME_NETWORK_SUBSET_PERSONALIZATION_PIN_REQUIRED = 42;
-    public final static int CME_NETWORK_SUBSET_PERSONALIZATION_PUK_REQUIRED = 43;
-    public final static int CME_SERVICE_PROVIDER_PERSONALIZATION_PIN_REQUIRED = 44;
-    public final static int CME_SERVICE_PROVIDER_PERSONALIZATION_PUK_REQUIRED = 45;
-    public final static int CME_CORPORATE_PERSONALIZATION_PIN_REQUIRED = 46;
-    public final static int CME_CORPORATE_PERSONALIZATION_PUK_REQUIRED = 47;
-    public final static int CME_HIDDEN_KEY_REQUIRED = 48;
-    public final static int CME_EAP_NOT_SUPPORTED = 49;
-    public final static int CME_INCORRECT_PARAMETERS = 50;
+    public static final int CME_PHONE_FAILURE = 0;
+    public static final int CME_NO_CONNECTION_TO_PHONE = 1;
+    public static final int CME_OPERATION_NOT_ALLOWED = 3;
+    public static final int CME_OPERATION_NOT_SUPPORTED = 4;
+    public static final int CME_PHSIM_PIN_REQUIRED = 5;
+    public static final int CME_PHFSIM_PIN_REQUIRED = 6;
+    public static final int CME_PHFSIM_PUK_REQUIRED = 7;
+    public static final int CME_SIM_NOT_INSERTED = 10;
+    public static final int CME_SIM_PIN_REQUIRED = 11;
+    public static final int CME_SIM_PUK_REQUIRED = 12;
+    public static final int CME_SIM_FAILURE = 13;
+    public static final int CME_SIM_BUSY = 14;
+    public static final int CME_SIM_WRONG = 15;
+    public static final int CME_INCORRECT_PASSWORD = 16;
+    public static final int CME_SIM_PIN2_REQUIRED = 17;
+    public static final int CME_SIM_PUK2_REQUIRED = 18;
+    public static final int CME_MEMORY_FULL = 20;
+    public static final int CME_INVALID_INDEX = 21;
+    public static final int CME_NOT_FOUND = 22;
+    public static final int CME_MEMORY_FAILURE = 23;
+    public static final int CME_TEXT_STRING_TOO_LONG = 24;
+    public static final int CME_INVALID_CHARACTER_IN_TEXT_STRING = 25;
+    public static final int CME_DIAL_STRING_TOO_LONG = 26;
+    public static final int CME_INVALID_CHARACTER_IN_DIAL_STRING = 27;
+    public static final int CME_NO_NETWORK_SERVICE = 30;
+    public static final int CME_NETWORK_TIMEOUT = 31;
+    public static final int CME_EMERGENCY_SERVICE_ONLY = 32;
+    public static final int CME_NO_SIMULTANOUS_VOIP_CS_CALLS = 33;
+    public static final int CME_NOT_SUPPORTED_FOR_VOIP = 34;
+    public static final int CME_SIP_RESPONSE_CODE = 35;
+    public static final int CME_NETWORK_PERSONALIZATION_PIN_REQUIRED = 40;
+    public static final int CME_NETWORK_PERSONALIZATION_PUK_REQUIRED = 41;
+    public static final int CME_NETWORK_SUBSET_PERSONALIZATION_PIN_REQUIRED = 42;
+    public static final int CME_NETWORK_SUBSET_PERSONALIZATION_PUK_REQUIRED = 43;
+    public static final int CME_SERVICE_PROVIDER_PERSONALIZATION_PIN_REQUIRED = 44;
+    public static final int CME_SERVICE_PROVIDER_PERSONALIZATION_PUK_REQUIRED = 45;
+    public static final int CME_CORPORATE_PERSONALIZATION_PIN_REQUIRED = 46;
+    public static final int CME_CORPORATE_PERSONALIZATION_PUK_REQUIRED = 47;
+    public static final int CME_HIDDEN_KEY_REQUIRED = 48;
+    public static final int CME_EAP_NOT_SUPPORTED = 49;
+    public static final int CME_INCORRECT_PARAMETERS = 50;
 
     /* Action policy for other calls when accepting call */
     public static final int CALL_ACCEPT_NONE = 0;
@@ -370,7 +370,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     private IBluetoothHeadsetClient mService;
     private BluetoothAdapter mAdapter;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 @Override
                 public void onBluetoothStateChange(boolean up) {
@@ -478,8 +478,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.connect(device);
             } catch (RemoteException e) {
@@ -500,8 +499,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.disconnect(device);
             } catch (RemoteException e) {
@@ -564,8 +562,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getConnectionState(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getConnectionState(device);
             } catch (RemoteException e) {
@@ -584,10 +581,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            if (priority != BluetoothProfile.PRIORITY_OFF &&
-                    priority != BluetoothProfile.PRIORITY_ON) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
                 return false;
             }
             try {
@@ -606,8 +602,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getPriority(device);
             } catch (RemoteException e) {
@@ -632,8 +627,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.startVoiceRecognition(device);
             } catch (RemoteException e) {
@@ -657,8 +651,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.stopVoiceRecognition(device);
             } catch (RemoteException e) {
@@ -677,8 +670,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public List<BluetoothHeadsetClientCall> getCurrentCalls(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getCurrentCalls(device);
             } catch (RemoteException e) {
@@ -697,8 +689,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getCurrentAgEvents(device);
             } catch (RemoteException e) {
@@ -720,8 +711,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean acceptCall(BluetoothDevice device, int flag) {
         if (DBG) log("acceptCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.acceptCall(device, flag);
             } catch (RemoteException e) {
@@ -741,8 +731,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean holdCall(BluetoothDevice device) {
         if (DBG) log("holdCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.holdCall(device);
             } catch (RemoteException e) {
@@ -766,8 +755,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean rejectCall(BluetoothDevice device) {
         if (DBG) log("rejectCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.rejectCall(device);
             } catch (RemoteException e) {
@@ -784,8 +772,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Works only when Extended Call Control is supported by Audio Gateway.
      *
      * @param device remote device
-     * @param call Handle of call obtained in {@link dial()} or obtained via {@link
-     * ACTION_CALL_CHANGED}. {@code call} may be null in which case we will hangup all active
+     * @param call Handle of call obtained in {@link #dial(BluetoothDevice, String)} or obtained via
+     * {@link #ACTION_CALL_CHANGED}. {@code call} may be null in which case we will hangup all active
      * calls.
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
@@ -796,8 +784,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean terminateCall(BluetoothDevice device, BluetoothHeadsetClientCall call) {
         if (DBG) log("terminateCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.terminateCall(device, call);
             } catch (RemoteException e) {
@@ -824,8 +811,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean enterPrivateMode(BluetoothDevice device, int index) {
         if (DBG) log("enterPrivateMode()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.enterPrivateMode(device, index);
             } catch (RemoteException e) {
@@ -851,8 +837,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean explicitCallTransfer(BluetoothDevice device) {
         if (DBG) log("explicitCallTransfer()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.explicitCallTransfer(device);
             } catch (RemoteException e) {
@@ -874,8 +859,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public BluetoothHeadsetClientCall dial(BluetoothDevice device, String number) {
         if (DBG) log("dial()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.dial(device, number);
             } catch (RemoteException e) {
@@ -898,8 +882,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean sendDTMF(BluetoothDevice device, byte code) {
         if (DBG) log("sendDTMF()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.sendDTMF(device, code);
             } catch (RemoteException e) {
@@ -924,8 +907,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean getLastVoiceTagNumber(BluetoothDevice device) {
         if (DBG) log("getLastVoiceTagNumber()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getLastVoiceTagNumber(device);
             } catch (RemoteException e) {

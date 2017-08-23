@@ -25,24 +25,24 @@ public class SdpMnsRecord implements Parcelable {
     private final int mProfileVersion;
     private final String mServiceName;
 
-    public SdpMnsRecord(int l2cap_psm,
-            int rfcomm_channel_number,
-            int profile_version,
-            int supported_features,
-            String service_name) {
-        this.mL2capPsm = l2cap_psm;
-        this.mRfcommChannelNumber = rfcomm_channel_number;
-        this.mSupportedFeatures = supported_features;
-        this.mServiceName = service_name;
-        this.mProfileVersion = profile_version;
+    public SdpMnsRecord(int l2capPsm,
+            int rfcommChannelNumber,
+            int profileVersion,
+            int supportedFeatures,
+            String serviceName) {
+        mL2capPsm = l2capPsm;
+        mRfcommChannelNumber = rfcommChannelNumber;
+        mSupportedFeatures = supportedFeatures;
+        mServiceName = serviceName;
+        mProfileVersion = profileVersion;
     }
 
     public SdpMnsRecord(Parcel in) {
-        this.mRfcommChannelNumber = in.readInt();
-        this.mL2capPsm = in.readInt();
-        this.mServiceName = in.readString();
-        this.mSupportedFeatures = in.readInt();
-        this.mProfileVersion = in.readInt();
+        mRfcommChannelNumber = in.readInt();
+        mL2capPsm = in.readInt();
+        mServiceName = in.readString();
+        mSupportedFeatures = in.readInt();
+        mProfileVersion = in.readInt();
     }
 
     @Override
