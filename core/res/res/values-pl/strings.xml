@@ -268,9 +268,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerty"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Tryb demo dla sklepów"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Połączenie USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikacje działające w tle"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> działa w tle"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Aplikacje (<xliff:g id="NUMBER">%1$d</xliff:g>) działają w tle"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacje zużywające baterię"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Liczba aplikacji zużywających baterię: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i transmisji danych"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
@@ -1653,7 +1653,7 @@
       <item quantity="one">Spróbuj ponownie za sekundę</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Spróbuj ponownie później"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Widok na pełnym ekranie"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Włączony pełny ekran"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Aby wyjść, przesuń palcem z góry na dół."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Gotowe"</string>

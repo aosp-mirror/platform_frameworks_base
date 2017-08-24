@@ -262,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Izexwayiso"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Idemo yokuthenga"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Ukuxhumeka kwe-USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Izinhlelo zokusebenza zisebenza ngasemuva"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> iyasebenza ngemuva"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> izinhlelo zokusebenza ziyasebenza ngemuva"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Izinhlelo zokusebenza ezidla ibhethri"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> isebenzisa ibhethri"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> izinhlelo zokusebenza zisebenzisa ibhethri"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Thepha ngemininingwane ekusetshenzisweni kwebhethri nedatha"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Imodi ephephile"</string>

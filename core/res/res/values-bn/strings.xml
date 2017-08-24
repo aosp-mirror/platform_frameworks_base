@@ -154,9 +154,9 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"ঠিক আছে"</string>
     <string name="httpError" msgid="7956392511146698522">"একটি নেটওয়ার্ক ত্রুটি ঘটেছে৷"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL খুঁজে পাওয়া যায়নি৷"</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"এই সাইট প্রমাণীকরণ স্কীমটি সমর্থিত নয়৷"</string>
-    <string name="httpErrorAuth" msgid="1435065629438044534">"প্রমাণীকরণ করা যায়নি৷"</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"প্রক্সী সার্ভারের মাধ্যমে প্রমাণীকরণ ব্যর্থ হয়েছে৷"</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"এই সাইট যাচাইকরণ স্কীমটি সমর্থিত নয়৷"</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"যাচাইকরণ করা যায়নি৷"</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"প্রক্সী সার্ভারের মাধ্যমে যাচাইকরণ ব্যর্থ হয়েছে৷"</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি৷"</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"সার্ভারের সাথে যোগাযোগ করা যায়নি৷ পরে আবার চেষ্টা করুন৷"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"সার্ভারের সাথে সংযোগের সময় শেষ হয়েছে৷"</string>
@@ -189,7 +189,7 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"প্রশাসক অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনো প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের প্রশাসকের সাথে যোগাযোগ করুন।"</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"প্রশাসক অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের প্রশাসকের সাথে যোগাযোগ করুন।"</string>
     <string name="me" msgid="6545696007631404292">"আমাকে"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ট্যাবলেট বিকল্পগুলি"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"টিভি বিকল্পগুলি"</string>
@@ -262,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"সতর্কতাগুলি"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"খুচরা বিক্রয়ের ডেমো"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB সংযোগ"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"পটভূমিতে অ্যাপ চালু আছে"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"পটভূমিতে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ চালু আছে"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"পটভূমিতে <xliff:g id="NUMBER">%1$d</xliff:g>টি অ্যাপ চালু আছে"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"কিছু অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপটি ব্যাটারি ব্যবহার করছে"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g>টি অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ব্যাটারি এবং ডেটার ব্যবহারের বিশদ বিবরণের জন্য ট্যাপ করুন"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"নিরাপদ মোড"</string>
@@ -312,12 +312,12 @@
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"শর্টকাটগুলি আনইনস্টল করে"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"অ্যাপ্লিকেশানটিকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণের শর্টকাটগুলি সরানোর অনুমতি দেয়৷"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"আউটগোয়িং কলগুলি পুনঃচালিত করুন"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"অ্যাপ্লিকেশানকে কল চলাকালীন অন্য একটি নম্বরে কল পুনঃনির্দেশ বা কলটি একসথে বন্ধ করার সাথে ডায়াল করা নম্বরটি দেখতে দেয়৷"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"অ্যাপ্লিকেশনকে কল চলাকালীন অন্য একটি নম্বরে কল পুনঃনির্দেশ বা কলটি একসথে বন্ধ করার সাথে ডায়াল করা নম্বরটি দেখতে দেয়৷"</string>
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"ফোন কলের উত্তর দিতে দিন"</string>
     <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"অ্যাপটিকে ইনকামিং ফোন কলের উত্তর দিতে দেয়।"</string>
-    <string name="permlab_receiveSms" msgid="8673471768947895082">"পাঠ্য বার্তা পান (SMS)"</string>
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"টেক্সট মেসেজ পান (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"অ্যাপ্লিকেশানটিকে এসএমএস প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
-    <string name="permlab_receiveMms" msgid="1821317344668257098">"পাঠ্য বার্তা পান (MMS)"</string>
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"টেক্সট মেসেজ পান (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"অ্যাপ্লিকেশানটিকে MMS বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"সেল সম্প্রচার বার্তা পড়ুন"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"আপনার ডিভাইস দ্বারা প্রাপ্ত সেল সম্প্রচার পড়তে অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ কয়েকটি স্থানে আপনাকে জরুরি অবস্থার জন্য সতর্ক করতে জরুরি সতর্কতাগুলি বিতরণ করা হয়৷ যখন একটি জরুরি সেল সম্প্রচার প্রাপ্ত হয় তখন ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার ডিভাইসের কার্য সম্পাদনা বা কার্যকলাপে প্রতিবন্ধকতার সৃষ্টি করতে পারে৷"</string>
@@ -325,11 +325,11 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS পাঠানো ও দেখা,আপনি কি পরিচিতি কে এগুলি করার অনুমতি দেবেন?"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে এসএমএসগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
-    <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"এই অ্যাপটি আপনার ট্যাবলেটে সংরক্ষিত সমস্ত SMS (পাঠ্য) বার্তা পড়তে পারে৷"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"এই অ্যাপটি আপনার টিভিতে সংরক্ষিত সমস্ত SMS (পাঠ্য) বার্তা পড়তে পারে৷"</string>
-    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"এই অ্যাপটি আপনার ফোনে সংরক্ষিত সমস্ত SMS (পাঠ্য) বার্তা পড়তে পারে৷"</string>
-    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"পাঠ্য বার্তা পান (WAP)"</string>
+    <string name="permlab_readSms" msgid="8745086572213270480">"আপনার টেক্সট মেসেজ পড়ুন (SMS বা MMS)"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"এই অ্যাপটি আপনার ট্যাবলেটে স্টোর করা সমস্ত SMS (টেক্সট) মেসেজ পড়তে পারে৷"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"এই অ্যাপটি আপনার টিভিতে স্টোর করা সমস্ত SMS (টেক্সট) মেসেজ পড়তে পারে৷"</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"এই অ্যাপটি আপনার ফোনে স্টোর করা সমস্ত SMS (টেক্সট) মেসেজ পড়তে পারে৷"</string>
+    <string name="permlab_receiveWapPush" msgid="5991398711936590410">"টেক্সট মেসেজ পান (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"বর্তমানে ও সাম্প্রতিককালের সক্রিয় ক্রিয়াগুলি সম্বন্ধে তথ্য পুনরুদ্ধার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এছাড়া এটি ডিভাইসটিতে কোন অ্যাপ্লিকেশানগুলি ব্যবহৃত হচ্ছে তার বিষয়ে তথ্য খুঁজে বের করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
@@ -760,7 +760,7 @@
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে প্রবেশ করুন৷"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ব্যবহারকারীনাম (ইমেল)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"পাসওয়ার্ড"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"প্রবেশ করুন"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"সাইন-ইন করুন"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"অবৈধ ব্যবহারকারী নাম অথবা পাসওয়ার্ড৷"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"আপনার ব্যবহারকারী নাম অথবা পাসওয়ার্ড ভুলে গেছেন?\n"<b>"google.com/accounts/recovery"</b>" এ যান৷"</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"পরীক্ষা করা হচ্ছে..."</string>
@@ -804,7 +804,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"ফ্যাক্টরী পরীক্ষা ব্যর্থ হয়েছে"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST ক্রিয়াটি শুধুমাত্র /system/app এ ইনস্টল থাকা প্যাকেজগুলি সমর্থন করে৷"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"এমন কোনো প্যাকেজ খুঁজে পাওয়া যায়নি যা FACTORY_TEST ক্রিয়া প্রদান করে৷"</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"পুনরায় চালু করুন"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"রিবুট করুন"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\"<xliff:g id="TITLE">%s</xliff:g>\" পৃষ্ঠা অনুসারে:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"জাভাস্ক্রিপ্ট"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"বেরিয়ে যাওয়া নিশ্চিত করুন"</string>
@@ -1112,8 +1112,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"সমস্ত নেটওয়ার্ক দেখতে ট্যাপ করুন"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"সংযুক্ত করুন"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"সমস্ত নেটওয়ার্ক"</string>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ওয়াই-ফাই নেটওয়ার্কে প্রবেশ করুন"</string>
-    <string name="network_available_sign_in" msgid="1848877297365446605">"নেটওয়ার্কে প্রবেশ করুন"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ওয়াই-ফাই নেটওয়ার্কে সাইন-ইন করুন"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"নেটওয়ার্কে সাইন-ইন করুন"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"ওয়াই-ফাই -তে কোনো ইন্টারনেট অ্যাক্সেস নেই"</string>
@@ -1263,7 +1263,7 @@
     <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলি মুছে দেওয়ার অনুরোধ জানাতে দেয়৷"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করার জন্য অনুমতি চাওয়া"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"কোনো অ্যাপের জন্য ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করতে সেটিকে অনুমতির চাওয়ার মঞ্জুরি দেয়৷"</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"জুম নিয়ন্ত্রণের জন্য দুবার আলতো চাপুন"</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"জুম নিয়ন্ত্রণের জন্য দুবার ট্যাপ করুন"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"যান"</string>
     <string name="ime_action_search" msgid="658110271822807811">"অনুসন্ধান করুন"</string>
@@ -1466,7 +1466,7 @@
     <string name="kg_login_instructions" msgid="1100551261265506448">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে প্রবেশ করুন৷"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ব্যবহারকারী নাম (ইমেল)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"পাসওয়ার্ড"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"প্রবেশ করুন"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"সাইন-ইন করুন"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"অবৈধ ব্যবহারকারী নাম অথবা পাসওয়ার্ড৷"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"আপনার ব্যবহারকারী নাম অথবা পাসওয়ার্ড ভুলে গেছেন?\n"<b>"google.com/accounts/recovery"</b>" এ যান৷"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"অ্যাকাউন্ট পরীক্ষা করা হচ্ছে..."</string>
@@ -1583,7 +1583,7 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"অজানা প্রতিকৃতি"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"অজানা পোর্ট্রেট"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"অজানা ভূদৃশ্য"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"বাতিল করা হয়েছে"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"সামগ্রী লেখায় ত্রুটি হয়েছে"</string>
@@ -1686,7 +1686,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS অনুরোধটিকে নতুন USSD অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS অনুরোধটিকে নতুন SS অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"কর্মস্থলের প্রোফাইল"</string>
-    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"প্রসারিত করুন"</string>
+    <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"বড় করুন"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"সঙ্কুচিত করুন"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"টগল সম্প্রসারণ"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB পেরিফেরাল পোর্ট"</string>

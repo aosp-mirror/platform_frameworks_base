@@ -262,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demonstração na loja"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Conexão USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Apps sendo executados em segundo plano"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está sendo executado em segundo plano"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> apps estão sendo executados em segundo plano"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Apps que estão consumindo a bateria"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está consumindo a bateria"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> apps estão consumindo a bateria"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
@@ -336,7 +336,7 @@
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"gerenciar proprietários de perfis e de dispositivos"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permitir que os apps definam os proprietários de perfis e de dispositivos."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar os apps em execução"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o app mova tarefas para o primeiro plano e o plano de fundo, sem sua intervenção."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o app mova tarefas para o primeiro e o segundo plano, sem sua intervenção."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ativar o modo carro"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que o app ative o modo Carro."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"fechar outros apps"</string>
@@ -1311,7 +1311,7 @@
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toque para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Voltar"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Avançar"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"Ignorar"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Pular"</string>
     <string name="no_matches" msgid="8129421908915840737">"Não encontrado"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Localizar na página"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
@@ -1698,7 +1698,7 @@
     <string name="close_button_text" msgid="3937902162644062866">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionado</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sem classificação"</string>

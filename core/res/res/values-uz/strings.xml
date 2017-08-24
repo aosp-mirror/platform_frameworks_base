@@ -262,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ogohlantirishlar"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo rejim"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB orqali ulanish"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Fonda ishlayotgan ilovalar"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> orqa fonda ishlayapti"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ta ilova fonda ishlamoqda"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Batareya quvvatini sarflayotgan ilovalar"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi batareya quvvatini sarflamoqda"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ta ilova batareya quvvatini sarflamoqda"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Xavfsiz usul"</string>
@@ -1209,7 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Til va sxemani belgilash uchun bosing"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Boshqa oynalar ustidan ochish"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Boshqa ilovalar ustidan ochilish"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ilovasi uchun bu funksiyani sozlamalar orqali o‘chirib qo‘yish mumkin."</string>
@@ -1605,7 +1605,7 @@
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Keyinroq urinib ko‘ring"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"To‘liq ekran ko‘rsatilmoqda"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"To‘liq ekranli rejim"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Chiqish uchun tepadan pastga torting."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Tayyor"</string>
