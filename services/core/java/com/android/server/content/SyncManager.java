@@ -3780,6 +3780,16 @@ public class SyncManager {
         if (!op.isPeriodic){
             return false;
         }
+        boolean found = false;
+        for (UserInfo user : UserManager.get(mContext).getUsers(/*excludeDying=*/ true)) {
+            if (op.target.userId == user.id) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false; // User is being removed, okay.
+        }
         switch (op.target.provider) {
             case "gmail-ls":
             case "com.android.contacts.metadata":
