@@ -354,7 +354,6 @@ public class TaskStackLayoutAlgorithm {
     TaskViewTransform mFrontOfStackTransform = new TaskViewTransform();
 
     public TaskStackLayoutAlgorithm(Context context, TaskStackLayoutAlgorithmCallbacks cb) {
-        Resources res = context.getResources();
         mContext = context;
         mCb = cb;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
@@ -519,7 +518,7 @@ public class TaskStackLayoutAlgorithm {
      * Computes the minimum and maximum scroll progress values and the progress values for each task
      * in the stack.
      */
-    void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet,
+    public void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet,
             RecentsActivityLaunchState launchState) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
