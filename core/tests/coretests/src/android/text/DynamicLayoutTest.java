@@ -186,4 +186,77 @@ public class DynamicLayoutTest {
                 ALIGN_NORMAL, 1.0f /*spacingMultiplier*/, 0f /*spacingAdd*/, false /*includepad*/);
         layout.getLineExtra(100);
     }
+
+    @Test
+    public void testFallbackLineSpacing() {
+        // All glyphs in the fonts are 1em wide.
+        final String[] testFontFiles = {
+            // ascent == 1em, descent == 2em, only supports 'a' and space
+            "ascent1em-descent2em.ttf",
+            // ascent == 3em, descent == 4em, only supports 'b'
+            "ascent3em-descent4em.ttf"
+        };
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>ascent1em-descent2em.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>ascent3em-descent4em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (FontFallbackSetup setup =
+                new FontFallbackSetup("DynamicLayout", testFontFiles, xml)) {
+            final TextPaint paint = setup.getPaintFor("sans-serif");
+            final int textSize = 100;
+            paint.setTextSize(textSize);
+            assertEquals(-textSize, paint.ascent(), 0.0f);
+            assertEquals(2 * textSize, paint.descent(), 0.0f);
+
+            final int paraWidth = 5 * textSize;
+            final String text = "aaaaa aabaa aaaaa"; // This should result in three lines.
+
+            // Old line spacing. All lines should get their ascent and descents from the first font.
+            DynamicLayout layout = DynamicLayout.Builder
+                    .obtain(text, paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(false)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+
+            // New line spacing. The second line has a 'b', so it needs more ascent and descent.
+            layout = DynamicLayout.Builder
+                    .obtain(text, paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(true)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-3 * textSize, layout.getLineAscent(1));
+            assertEquals(4 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+
+            // The default is the old line spacing, for backward compatibility.
+            layout = DynamicLayout.Builder
+                    .obtain(text, paint, paraWidth)
+                    .setIncludePad(false)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+        }
+    }
 }

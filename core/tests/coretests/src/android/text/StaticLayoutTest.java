@@ -21,33 +21,20 @@ import static android.text.Layout.Alignment.ALIGN_NORMAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Canvas;
-import android.graphics.FontFamily;
 import android.graphics.Paint.FontMetricsInt;
-import android.graphics.Typeface;
 import android.os.LocaleList;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
 import android.text.method.EditorState;
 import android.text.style.LocaleSpan;
-import android.util.ArrayMap;
 import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -813,57 +800,6 @@ public class StaticLayoutTest {
         assertEquals(31, paint.getHyphenEdit());
     }
 
-    private String getTestFontsDir() {
-        final Context targetCtx = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        final File cacheDir = new File(targetCtx.getCacheDir(), "StaticLayoutTest");
-        if (!cacheDir.isDirectory()) {
-            final boolean dirsCreated = cacheDir.mkdirs();
-            if (!dirsCreated) {
-                throw new RuntimeException("Creating test directories for fonts failed.");
-            }
-        }
-        return cacheDir.getAbsolutePath() + "/";
-    }
-
-    private TextPaint setupPaintForFallbackFonts(String[] fontFiles, String xml) {
-        final String testFontsDir = getTestFontsDir();
-        final String testFontsXml = new File(testFontsDir, "fonts.xml").getAbsolutePath();
-        final AssetManager am =
-                InstrumentationRegistry.getInstrumentation().getContext().getAssets();
-        for (String fontFile : fontFiles) {
-            final String sourceInAsset = "fonts/" + fontFile;
-            final File outInCache = new File(testFontsDir, fontFile);
-            try (InputStream is = am.open(sourceInAsset)) {
-                Files.copy(is, outInCache.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(testFontsXml)) {
-            fos.write(xml.getBytes(Charset.forName("UTF-8")));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
-        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        Typeface.buildSystemFallback(testFontsXml, testFontsDir, fontMap, fallbackMap);
-
-        final TextPaint paint = new TextPaint();
-        final Typeface testTypeface = fontMap.get("sans-serif");
-        paint.setTypeface(testTypeface);
-        return paint;
-    }
-
-    void destroyFallbackFonts(String[] fontFiles) {
-        final String testFontsDir = getTestFontsDir();
-        for (String fontFile : fontFiles) {
-            final File outInCache = new File(testFontsDir, fontFile);
-            outInCache.delete();
-        }
-    }
-
     @Test
     public void testFallbackLineSpacing() {
         // All glyphs in the fonts are 1em wide.
@@ -883,8 +819,9 @@ public class StaticLayoutTest {
                 + "  </family>"
                 + "</familyset>";
 
-        try {
-            final TextPaint paint = setupPaintForFallbackFonts(testFontFiles, xml);
+        try (FontFallbackSetup setup =
+                new FontFallbackSetup("StaticLayout", testFontFiles, xml)) {
+            final TextPaint paint = setup.getPaintFor("sans-serif");
             final int textSize = 100;
             paint.setTextSize(textSize);
             assertEquals(-textSize, paint.ascent(), 0.0f);
@@ -933,8 +870,6 @@ public class StaticLayoutTest {
             assertEquals(2 * textSize, layout.getLineDescent(1));
             assertEquals(-textSize, layout.getLineAscent(2));
             assertEquals(2 * textSize, layout.getLineDescent(2));
-        } finally {
-            destroyFallbackFonts(testFontFiles);
         }
     }
 
