@@ -126,7 +126,6 @@ private:
      */
     void renderVectorDrawableCache();
 
-    TaskManager mTaskManager;
     std::vector<sk_sp<SkImage>> mPinnedImages;
 
     /**

@@ -46,7 +46,7 @@ SkiaPipeline::SkiaPipeline(RenderThread& thread) :  mRenderThread(thread) {
 }
 
 TaskManager* SkiaPipeline::getTaskManager() {
-    return &mTaskManager;
+    return mRenderThread.cacheManager().getTaskManager();
 }
 
 void SkiaPipeline::onDestroyHardwareResources() {
