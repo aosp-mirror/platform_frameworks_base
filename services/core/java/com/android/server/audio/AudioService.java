@@ -718,7 +718,7 @@ public class AudioService extends IAudioService.Stub
                 AudioSystem.FOR_SYSTEM,
                 cameraSoundForced ?
                         AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE,
-                null,
+                new String("AudioService ctor"),
                 0);
 
         mSafeMediaVolumeState = new Integer(Settings.Global.getInt(mContentResolver,
@@ -896,13 +896,23 @@ public class AudioService extends IAudioService.Stub
             }
         }
         // Restore call state
-        AudioSystem.setPhoneState(mMode);
+        if (AudioSystem.setPhoneState(mMode) ==  AudioSystem.AUDIO_STATUS_OK) {
+            mModeLogger.log(new AudioEventLogger.StringEvent(
+                "onAudioServerDied causes setPhoneState(" + AudioSystem.modeToString(mMode) + ")"));
+        }
 
-        // Restore forced usage for communcations and record
+        // Restore forced usage for communications and record
+        mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm,
+                "onAudioServerDied"));
         AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm);
+        mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_RECORD, mForcedUseForComm,
+                "onAudioServerDied"));
         AudioSystem.setForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm);
-        AudioSystem.setForceUse(AudioSystem.FOR_SYSTEM, mCameraSoundForced ?
-                        AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE);
+        final int forSys = mCameraSoundForced ?
+                AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE;
+        mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_SYSTEM, forSys,
+                "onAudioServerDied"));
+        AudioSystem.setForceUse(AudioSystem.FOR_SYSTEM, forSys);
 
         // Restore stream volumes
         int numStreamTypes = AudioSystem.getNumStreamTypes();
@@ -929,16 +939,20 @@ public class AudioService extends IAudioService.Stub
         }
 
         synchronized (mBluetoothA2dpEnabledLock) {
-            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ?
-                            AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
+            final int forMed = mBluetoothA2dpEnabled ?
+                    AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP;
+            mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_MEDIA, forMed,
+                    "onAudioServerDied"));
+            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA, forMed);
         }
 
         synchronized (mSettingsLock) {
-            AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
-                    mDockAudioMediaEnabled ?
-                            AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
-            sendEncodedSurroundMode(mContentResolver);
+            final int forDock = mDockAudioMediaEnabled ?
+                    AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE;
+            mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_DOCK, forDock,
+                    "onAudioServerDied"));
+            AudioSystem.setForceUse(AudioSystem.FOR_DOCK, forDock);
+            sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
         }
         if (mHdmiManager != null) {
             synchronized (mHdmiManager) {
@@ -1131,7 +1145,7 @@ public class AudioService extends IAudioService.Stub
                 AudioSystem.FOR_DOCK,
                 mDockAudioMediaEnabled ?
                         AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE,
-                null,
+                new String("readDockAudioSettings"),
                 0);
     }
 
@@ -1146,15 +1160,15 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.setMasterMono(masterMono);
     }
 
-    private void sendEncodedSurroundMode(ContentResolver cr)
+    private void sendEncodedSurroundMode(ContentResolver cr, String eventSource)
     {
         int encodedSurroundMode = Settings.Global.getInt(
                 cr, Settings.Global.ENCODED_SURROUND_OUTPUT,
                 Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
-        sendEncodedSurroundMode(encodedSurroundMode);
+        sendEncodedSurroundMode(encodedSurroundMode, eventSource);
     }
 
-    private void sendEncodedSurroundMode(int encodedSurroundMode)
+    private void sendEncodedSurroundMode(int encodedSurroundMode, String eventSource)
     {
         // initialize to guaranteed bad value
         int forceSetting = AudioSystem.NUM_FORCE_CONFIG;
@@ -1179,7 +1193,7 @@ public class AudioService extends IAudioService.Stub
                     SENDMSG_QUEUE,
                     AudioSystem.FOR_ENCODED_SURROUND,
                     forceSetting,
-                    null,
+                    eventSource,
                     0);
         }
     }
@@ -1225,7 +1239,7 @@ public class AudioService extends IAudioService.Stub
 
             updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
-            sendEncodedSurroundMode(cr);
+            sendEncodedSurroundMode(cr, "readPersistedSettings");
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -2542,6 +2556,7 @@ public class AudioService extends IAudioService.Stub
                 if (status == AudioSystem.AUDIO_STATUS_OK) {
                     if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + mode); }
                     mMode = mode;
+                    mModeLogger.log(new PhoneStateEvent(caller, pid, mode));
                 } else {
                     if (hdlr != null) {
                         mSetModeDeathHandlers.remove(hdlr);
@@ -2836,11 +2851,16 @@ public class AudioService extends IAudioService.Stub
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
         }
+        // for logging only
+        final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
 
         if (on) {
             if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
                     sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
-                            AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE, null, 0);
+                            AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE,
+                            eventSource, 0);
             }
             mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
         } else if (mForcedUseForComm == AudioSystem.FORCE_SPEAKER){
@@ -2848,7 +2868,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
-                AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
+                AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource, 0);
     }
 
     /** @see AudioManager#isSpeakerphoneOn() */
@@ -2861,10 +2881,14 @@ public class AudioService extends IAudioService.Stub
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
-        setBluetoothScoOnInt(on);
+        // for logging only
+        final String eventSource = new StringBuilder("setBluetoothScoOn(").append(on)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
+        setBluetoothScoOnInt(on, eventSource);
     }
 
-    public void setBluetoothScoOnInt(boolean on) {
+    public void setBluetoothScoOnInt(boolean on, String eventSource) {
         if (on) {
             mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
         } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
@@ -2872,9 +2896,9 @@ public class AudioService extends IAudioService.Stub
         }
 
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
-                AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
+                AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource, 0);
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
-                AudioSystem.FOR_RECORD, mForcedUseForComm, null, 0);
+                AudioSystem.FOR_RECORD, mForcedUseForComm, eventSource, 0);
     }
 
     /** @see AudioManager#isBluetoothScoOn() */
@@ -2884,12 +2908,17 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
+        // for logging only
+        final String eventSource = new StringBuilder("setBluetoothA2dpOn(").append(on)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
+
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
             sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
                     AudioSystem.FOR_MEDIA,
                     mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
-                    null, 0);
+                    eventSource, 0);
         }
     }
 
@@ -3226,7 +3255,7 @@ public class AudioService extends IAudioService.Stub
             broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
         }
         AudioSystem.setParameters("A2dpSuspended=false");
-        setBluetoothScoOnInt(false);
+        setBluetoothScoOnInt(false, "resetBluetoothSco");
     }
 
     private void broadcastScoConnectionState(int state) {
@@ -4837,9 +4866,9 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        private void setForceUse(int usage, int config) {
+        private void setForceUse(int usage, int config, String eventSource) {
             synchronized (mConnectedDevices) {
-                setForceUseInt_SyncDevices(usage, config);
+                setForceUseInt_SyncDevices(usage, config, eventSource);
             }
         }
 
@@ -4905,7 +4934,7 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_SET_FORCE_USE:
                 case MSG_SET_FORCE_BT_A2DP_USE:
-                    setForceUse(msg.arg1, msg.arg2);
+                    setForceUse(msg.arg1, msg.arg2, (String) msg.obj);
                     break;
 
                 case MSG_BT_HEADSET_CNCT_FAILED:
@@ -4915,6 +4944,7 @@ public class AudioService extends IAudioService.Stub
                 case MSG_SET_WIRED_DEVICE_CONNECTION_STATE:
                     {   WiredDeviceConnectionState connectState =
                             (WiredDeviceConnectionState)msg.obj;
+                        mWiredDevLogger.log(new WiredDevConnectEvent(connectState));
                         onSetWiredDeviceConnectionState(connectState.mType, connectState.mState,
                                 connectState.mAddress, connectState.mName, connectState.mCaller);
                         mAudioEventWakeLock.release();
@@ -5062,7 +5092,7 @@ public class AudioService extends IAudioService.Stub
             // Did it change?
             if (mEncodedSurroundMode != newSurroundMode) {
                 // Send to AudioPolicyManager
-                sendEncodedSurroundMode(newSurroundMode);
+                sendEncodedSurroundMode(newSurroundMode, "SettingsObserver");
                 synchronized(mConnectedDevices) {
                     // Is HDMI connected?
                     String key = makeDeviceListKey(AudioSystem.DEVICE_OUT_HDMI, "");
@@ -5083,13 +5113,13 @@ public class AudioService extends IAudioService.Stub
     }
 
     // must be called synchronized on mConnectedDevices
-    private void makeA2dpDeviceAvailable(String address, String name) {
+    private void makeA2dpDeviceAvailable(String address, String name, String eventSource) {
         // enable A2DP before notifying A2DP connection to avoid unnecessary processing in
         // audio policy manager
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
-        setBluetoothA2dpOnInt(true);
+        setBluetoothA2dpOnInt(true, eventSource);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
         // Reset A2DP suspend state each time a new sink is connected
@@ -5218,7 +5248,8 @@ public class AudioService extends IAudioService.Stub
                         makeA2dpDeviceUnavailableNow(mDockAddress);
                     }
                 }
-                makeA2dpDeviceAvailable(address, btDevice.getName());
+                makeA2dpDeviceAvailable(address, btDevice.getName(),
+                        "onSetA2dpSinkConnectionState");
                 synchronized (mCurAudioRoutes) {
                     String name = btDevice.getAliasName();
                     if (!TextUtils.equals(mCurAudioRoutes.bluetoothName, name)) {
@@ -5505,7 +5536,7 @@ public class AudioService extends IAudioService.Stub
 
         synchronized (mConnectedDevices) {
             if ((state == 0) && ((device & DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG) != 0)) {
-                setBluetoothA2dpOnInt(true);
+                setBluetoothA2dpOnInt(true, "onSetWiredDeviceConnectionState state 0");
             }
 
             if (!handleDeviceConnection(state == 1, device, address, deviceName)) {
@@ -5514,7 +5545,7 @@ public class AudioService extends IAudioService.Stub
             }
             if (state != 0) {
                 if ((device & DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG) != 0) {
-                    setBluetoothA2dpOnInt(false);
+                    setBluetoothA2dpOnInt(false, "onSetWiredDeviceConnectionState state not 0");
                 }
                 if ((device & mSafeMediaVolumeDevices) != 0) {
                     sendMsg(mAudioHandler,
@@ -5637,6 +5668,8 @@ public class AudioService extends IAudioService.Stub
                 if (!((dockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
                       ((dockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) &&
                        (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK)))) {
+                    mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_DOCK, config,
+                            "ACTION_DOCK_EVENT intent"));
                     AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
                 }
                 mDockState = dockState;
@@ -5967,7 +6000,7 @@ public class AudioService extends IAudioService.Stub
                             AudioSystem.FOR_SYSTEM,
                             cameraSoundForced ?
                                     AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE,
-                            null,
+                            new String("handleConfigurationChanged"),
                             0);
 
                     sendMsg(mAudioHandler,
@@ -6010,21 +6043,23 @@ public class AudioService extends IAudioService.Stub
 
     // Handles request to override default use of A2DP for media.
     // Must be called synchronized on mConnectedDevices
-    public void setBluetoothA2dpOnInt(boolean on) {
+    public void setBluetoothA2dpOnInt(boolean on, String eventSource) {
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
             mAudioHandler.removeMessages(MSG_SET_FORCE_BT_A2DP_USE);
             setForceUseInt_SyncDevices(AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
+                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
+                            eventSource);
         }
     }
 
     // Must be called synchronized on mConnectedDevices
-    private void setForceUseInt_SyncDevices(int usage, int config) {
+    private void setForceUseInt_SyncDevices(int usage, int config, String eventSource) {
         if (usage == AudioSystem.FOR_MEDIA) {
             sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
                     SENDMSG_NOOP, 0, 0, null, 0);
         }
+        mForceUseLogger.log(new ForceUseEvent(usage, config, eventSource));
         AudioSystem.setForceUse(usage, config);
     }
 
@@ -6229,9 +6264,11 @@ public class AudioService extends IAudioService.Stub
                 synchronized (mHdmiTvClient) {
                     if (mHdmiSystemAudioSupported != on) {
                         mHdmiSystemAudioSupported = on;
-                        AudioSystem.setForceUse(AudioSystem.FOR_HDMI_SYSTEM_AUDIO,
-                                on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
-                                     AudioSystem.FORCE_NONE);
+                        final int config = on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
+                            AudioSystem.FORCE_NONE;
+                        mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_HDMI_SYSTEM_AUDIO,
+                                config, "setHdmiSystemAudioSupported"));
+                        AudioSystem.setForceUse(AudioSystem.FOR_HDMI_SYSTEM_AUDIO, config);
                     }
                     device = getDevicesForStream(AudioSystem.STREAM_MUSIC);
                 }
@@ -6329,6 +6366,82 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    //==========================================================================================
+    // AudioService logging and dumpsys
+    //==========================================================================================
+    final int LOG_NB_EVENTS_PHONE_STATE = 20;
+    final int LOG_NB_EVENTS_WIRED_DEV_CONNECTION = 30;
+    final int LOG_NB_EVENTS_FORCE_USE = 20;
+
+    final private static class PhoneStateEvent extends AudioEventLogger.Event {
+        final String mPackage;
+        final int mPid;
+        final int mMode;
+
+        PhoneStateEvent(String callingPackage, int pid, int mode) {
+            mPackage = callingPackage;
+            mPid = pid;
+            mMode = mode;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("setMode(").append(AudioSystem.modeToString(mMode))
+                    .append(") from package=").append(mPackage)
+                    .append(" pid=").append(mPid).toString();
+        }
+    }
+
+    final private static class WiredDevConnectEvent extends AudioEventLogger.Event {
+        final WiredDeviceConnectionState mState;
+
+        WiredDevConnectEvent(WiredDeviceConnectionState state) {
+            mState = state;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("setWiredDeviceConnectionState(")
+                    .append(" type:").append(Integer.toHexString(mState.mType))
+                    .append(" state:").append(AudioSystem.deviceStateToString(mState.mState))
+                    .append(" addr:").append(mState.mAddress)
+                    .append(" name:").append(mState.mName)
+                    .append(") from ").append(mState.mCaller).toString();
+        }
+    }
+
+    final private static class ForceUseEvent extends AudioEventLogger.Event {
+        final int mUsage;
+        final int mConfig;
+        final String mReason;
+
+        ForceUseEvent(int usage, int config, String reason) {
+            mUsage = usage;
+            mConfig = config;
+            mReason = reason;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("setForceUse(")
+                    .append(AudioSystem.forceUseUsageToString(mUsage))
+                    .append(", ").append(AudioSystem.forceUseConfigToString(mConfig))
+                    .append(") due to ").append(mReason).toString();
+        }
+    }
+
+    final private AudioEventLogger mModeLogger = new AudioEventLogger(LOG_NB_EVENTS_PHONE_STATE,
+            "phone state (logged after successfull call to AudioSystem.setPhoneState(int))");
+
+    final private AudioEventLogger mWiredDevLogger = new AudioEventLogger(
+            LOG_NB_EVENTS_WIRED_DEV_CONNECTION,
+            "wired device connection (logged before onSetWiredDeviceConnectionState() is executed)"
+            );
+
+    final private AudioEventLogger mForceUseLogger = new AudioEventLogger(
+            LOG_NB_EVENTS_FORCE_USE,
+            "force use (logged before setForceUse() is executed)");
+
     private static final String[] RINGER_MODE_NAMES = new String[] {
             "SILENT",
             "VIBRATE",
@@ -6399,6 +6512,13 @@ public class AudioService extends IAudioService.Stub
         mPlaybackMonitor.dump(pw);
 
         mRecordMonitor.dump(pw);
+
+        pw.println("\nEvent logs:");
+        mModeLogger.dump(pw);
+        pw.println("\n");
+        mWiredDevLogger.dump(pw);
+        pw.println("\n");
+        mForceUseLogger.dump(pw);
     }
 
     private static String safeMediaVolumeStateToString(Integer state) {
