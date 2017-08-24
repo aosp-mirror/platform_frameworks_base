@@ -2076,7 +2076,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.state);
         try {
             final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
-                    "makeInvisible", true /* noThrow */, true /* beforeStopping */);
+                    "makeInvisible", true /* beforeStopping */);
             // Defer telling the client it is hidden if it can enter Pip and isn't current stopped
             // or stopping. This gives it a chance to enter Pip in onPause().
             final boolean deferHidingClient = canEnterPictureInPicture
@@ -2390,7 +2390,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
             final ActivityRecord lastResumed = lastFocusedStack.mResumedActivity;
             lastResumedCanPip = lastResumed != null && lastResumed.checkEnterPictureInPictureState(
-                    "resumeTopActivity", true /* noThrow */, userLeaving /* beforeStopping */);
+                    "resumeTopActivity", userLeaving /* beforeStopping */);
         }
         // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous activity
         // to be paused, while at the same time resuming the new resume activity only if the

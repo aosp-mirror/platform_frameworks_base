@@ -762,6 +762,10 @@ public class Activity extends ContextThemeWrapper
     private boolean mDestroyed;
     private boolean mDoReportFullyDrawn = true;
     private boolean mRestoredFromBundle;
+
+    /** {@code true} if the activity lifecycle is in a state which supports picture-in-picture.
+     * This only affects the client-side exception, the actual state check still happens in AMS. */
+    private boolean mCanEnterPictureInPicture = false;
     /** true if the activity is going through a transient pause */
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
@@ -2090,6 +2094,10 @@ public class Activity extends ContextThemeWrapper
         try {
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
+            }
+            if (!mCanEnterPictureInPicture) {
+                throw new IllegalStateException("Activity must be resumed to enter"
+                        + " picture-in-picture");
             }
             return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, params);
         } catch (RemoteException e) {
@@ -6957,25 +6965,29 @@ public class Activity extends ContextThemeWrapper
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
 
-    final void performCreateCommon() {
+    final void performCreate(Bundle icicle) {
+        performCreate(icicle, null);
+    }
+
+    final void performCreate(Bundle icicle, PersistableBundle persistentState) {
+        mCanEnterPictureInPicture = true;
+        restoreHasCurrentPermissionRequest(icicle);
+        if (persistentState != null) {
+            onCreate(icicle, persistentState);
+        } else {
+            onCreate(icicle);
+        }
+        mActivityTransitionState.readState(icicle);
+
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
     }
 
-    final void performCreate(Bundle icicle) {
-        restoreHasCurrentPermissionRequest(icicle);
-        onCreate(icicle);
-        mActivityTransitionState.readState(icicle);
-        performCreateCommon();
-    }
-
-    final void performCreate(Bundle icicle, PersistableBundle persistentState) {
-        restoreHasCurrentPermissionRequest(icicle);
-        onCreate(icicle, persistentState);
-        mActivityTransitionState.readState(icicle);
-        performCreateCommon();
+    final void performNewIntent(Intent intent) {
+        mCanEnterPictureInPicture = true;
+        onNewIntent(intent);
     }
 
     final void performStart() {
@@ -7125,6 +7137,9 @@ public class Activity extends ContextThemeWrapper
     final void performStop(boolean preserveWindow) {
         mDoReportFullyDrawn = false;
         mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
+
+        // Disallow entering picture-in-picture after the activity has been stopped
+        mCanEnterPictureInPicture = false;
 
         if (!mStopped) {
             if (mWindow != null) {
