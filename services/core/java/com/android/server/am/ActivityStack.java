@@ -2580,6 +2580,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // the screen based on the new activity order.
             boolean notUpdated = true;
             if (mStackSupervisor.isFocusedStack(this)) {
+
+                // We have special rotation behavior when Keyguard is locked. Make sure all activity
+                // visibilities are set correctly as well as the transition is updated if needed to
+                // get the correct rotation behavior.
+                // TODO: Remove this once visibilities are set correctly immediately when starting
+                // an activity.
+                if (mStackSupervisor.mKeyguardController.isKeyguardLocked()) {
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */,
+                            0 /* configChanges */, false /* preserveWindows */);
+                }
                 final Configuration config = mWindowManager.updateOrientationFromAppTokens(
                         mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
                         next.mayFreezeScreenLocked(next.app) ? next.appToken : null, mDisplayId);
