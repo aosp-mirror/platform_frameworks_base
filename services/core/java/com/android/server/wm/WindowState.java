@@ -752,6 +752,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mOwnerCanAddInternalSystemWindow;
     }
 
+    @Override
+    public boolean canAcquireSleepToken() {
+        return mSession.mCanAcquireSleepToken;
+    }
+
     /**
      * Subtracts the insets calculated by intersecting {@param layoutFrame} with {@param insetFrame}
      * from {@param frame}. In other words, it applies the insets that would result if

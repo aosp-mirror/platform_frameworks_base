@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -1423,6 +1424,15 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 0x00100000;
+
+        /**
+         * If this flag is set on the window, window manager will acquire a sleep token that puts
+         * all activities to sleep as long as this window is visible. When this flag is set, the
+         * window needs to occlude all activity windows.
+         * @hide
+         */
+        @RequiresPermission(permission.DEVICE_POWER)
+        public static final int PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN = 0x00200000;
 
         /**
          * Control flags that are private to the platform.
