@@ -24,20 +24,13 @@
     <string name="data_transmitted" msgid="7988167672982199061">"அனுப்பியது:"</string>
     <string name="data_received" msgid="4062776929376067820">"பெறப்பட்டது:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> பைட்கள் / <xliff:g id="NUMBER_1">%2$s</xliff:g> தொகுப்பு"</string>
-    <!-- no translation found for always_on_disconnected_title (1906740176262776166) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message (555634519845992917) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_lockdown (4232225539869452120) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_separator (3310614409322581371) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_settings_link (6172280302829992412) -->
-    <skip />
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"எப்போதும் இயக்கத்தில் இருக்கும்படி அமைத்த VPN உடன் இணைக்க முடியவில்லை"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"எப்போதும் இணைந்திருக்கும் வகையில் <xliff:g id="VPN_APP_0">%1$s</xliff:g> அமைக்கப்பட்டது, எனினும் இப்போது இணைக்க முடியவில்லை. <xliff:g id="VPN_APP_1">%1$s</xliff:g> உடன் மீண்டும் இணையும் வரை, பொது நெட்வொர்க்கை உங்கள் மொபைல் பயன்படுத்தும்."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"எப்போதும் இணைந்திருக்கும் வகையில் <xliff:g id="VPN_APP">%1$s</xliff:g> அமைக்கப்பட்டது, எனினும் இப்போது இணைக்க முடியவில்லை. VPN உடன் மீண்டும் இணையும் வரை, உங்களுக்கு இணைய இணைப்பு இருக்காது."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN அமைப்புகளை மாற்று"</string>
     <string name="configure" msgid="4905518375574791375">"உள்ளமை"</string>
     <string name="disconnect" msgid="971412338304200056">"தொடர்பைத் துண்டி"</string>
-    <!-- no translation found for open_app (3717639178595958667) -->
-    <skip />
-    <!-- no translation found for dismiss (6192859333764711227) -->
-    <skip />
+    <string name="open_app" msgid="3717639178595958667">"பயன்பாட்டைத் திற"</string>
+    <string name="dismiss" msgid="6192859333764711227">"நிராகரி"</string>
 </resources>
