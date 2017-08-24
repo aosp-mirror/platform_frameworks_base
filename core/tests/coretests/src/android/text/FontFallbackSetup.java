@@ -77,10 +77,14 @@ public class FontFallbackSetup implements AutoCloseable {
     }
 
     @NonNull
+    public Typeface getTypefaceFor(@NonNull String fontName) {
+        return mFontMap.get(fontName);
+    }
+
+    @NonNull
     public TextPaint getPaintFor(@NonNull String fontName) {
-        final Typeface testTypeface = mFontMap.get(fontName);
         final TextPaint paint = new TextPaint();
-        paint.setTypeface(testTypeface);
+        paint.setTypeface(getTypefaceFor(fontName));
         return paint;
     }
 
