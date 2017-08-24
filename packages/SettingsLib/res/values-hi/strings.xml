@@ -93,7 +93,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"इनपुट के लिए उपयोग करें"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"युग्‍म बनाएं"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"दूसरे डिवाइस से जोड़ें"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"अभी नहीं"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"रद्द करें"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"कनेक्ट रहने पर, पेयरिंग आपको अपने संपर्कों और कॉल इतिहास की एक्सेस प्रदान करता है."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> के साथ युग्‍मित नहीं हो सका."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"गलत पिन या पासकी के कारण <xliff:g id="DEVICE_NAME">%1$s</xliff:g> के साथ युग्‍मित नहीं हो सका."</string>
@@ -166,10 +166,10 @@
     <string name="development_settings_title" msgid="215179176067683667">"डेवलपर के लिए सेटिंग और टूल"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"डेवलपर के लिए सेटिंग और टूल सक्षम करें"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"ऐप्स विकास के लिए विकल्‍प सेट करें"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"इस उपयोगकर्ता के लिए डेवलपर के लिए सेटिंग और टूल उपलब्ध नहीं हैं"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"यह उपयोगकर्ता, डेवलपर के लिए सेटिंग और टूल का इस्तेमाल नहीं कर सकता"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"टेदरिंग सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"एक्सेस पॉइंट नाम सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"एक्सेस पॉइंट नाम सेटिंग इस उपयोगकर्ता के लिए मौजूद नहीं हैं"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB डीबग करना"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"डीबग मोड जब USB कनेक्‍ट किया गया हो"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB डीबगिंग प्राधिकरणों को निरस्त करें"</string>
@@ -247,7 +247,7 @@
     <string name="wait_for_debugger" msgid="1202370874528893091">"डीबगर की प्रतीक्षा करें"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"डीबग किया गया ऐप्स  निष्पादन के पहले अनुलग्न करने के लिए डीबगर की प्रतीक्षा करता है"</string>
     <string name="telephony_monitor_switch" msgid="1764958220062121194">"टेलीफ़ोनी मॉनिटर"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"टेलीफ़ोनी मॉनिटर को जब टेलीफ़ोनी/मॉडेम कार्यक्षमता में कोई समस्या मिलती है तो वह लॉग इकट्ठा करता है और उपयोगकर्ता को एक बग दर्ज करने के लिए नोटिफ़िकेशन देता है"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"टेलीफ़ोनी मॉनिटर को जब टेलीफ़ोनी/मॉडेम के फंक्शन में कोई समस्या मिलती है, तो वह लॉग इकट्ठा करता है और उपयोगकर्ता को एक गड़बड़ी दर्ज करने के लिए सूचना देता है"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"हिंदी में लिखें"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ड्रॉइंग"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"हार्डवेयर त्वरित रेंडरिंग"</string>
@@ -256,18 +256,18 @@
     <string name="strict_mode" msgid="1938795874357830695">"सख्‍त मोड सक्षम किया गया"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"जब ऐप्स मुख्‍य थ्रेड पर लंबी कार्यवाही करते हैं तो स्‍क्रीन फ़्लैश करें"</string>
     <string name="pointer_location" msgid="6084434787496938001">"सूचक स्थान"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"वर्तमान स्‍पर्श डेटा दिखाने वाला स्‍क्रीन ओवरले"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"मौजूदा स्‍पर्श डेटा दिखाने वाला स्‍क्रीन ओवरले"</string>
     <string name="show_touches" msgid="2642976305235070316">"टैप दिखाएं"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"टैप के लिए विज़ुअल फ़ीडबैक दिखाएं"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"सतह के नई जानकारी दिखाएं"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"विंडो सतहें के नई जानकारी मिलने पर उन सभी को फ़्लैश करें"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU दृश्य की नई जानकारी दिखाएं"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"सर्फ़ेस अपडेट दिखाएं"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"अपडेट होने पर पूरे विंडो सर्फ़ेस को फ़्लैश करें"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU व्यू अपडेट दिखाएं"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU के साथ आरेखित करने पर विंडो में दृश्‍यों को फ़्लैश करें"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"हार्डवेयर लेयर की नई जानकारी"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"हार्डवेयर लेयर की नई जानकारी मिलने पर हरा फ़्लैश होता है"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"हार्डवेयर लेयर अपडेट दिखाएं"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"हार्डवेयर लेयर अपडेट होने पर उनमें हरी रोशनी डालें"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ओवरड्रॉ डीबग करें"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU दाता सेट करें"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"HW ओवरले अक्षम करें"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW ओवरले बंद करें"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"स्‍क्रीन संयोजन के लिए हमेशा GPU का उपयोग करें"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"रंग स्पेस सिम्युलेट करें"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL चिह्न सक्षम करें"</string>
@@ -289,7 +289,7 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"द्वितीयक डिस्प्ले अनुरूपित करें"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"ऐप्स"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"गतिविधियों को न रखें"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"उपयोगकर्ता के छोड़ते ही प्रत्‍येक गतिविधि समाप्त करें"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"उपयोगकर्ता के छोड़ते ही हर गतिविधि को खत्म करें"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"पृष्ठभूमि प्रक्रिया सीमा"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"सभी ANR दिखाएं"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"पृष्ठभूमि ऐप्स के लिए ऐप्स प्रतिसाद नहीं दे रहा डॉयलॉग दिखाएं"</string>
@@ -325,11 +325,11 @@
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबव्यू लागू करें"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबव्यू सेट करें"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"यह चयन अब मान्य नहीं है. पुनः प्रयास करें."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"फ़ाइल एन्क्रिप्शन में रूपांतरित करें"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"फ़ाइल आधारित सुरक्षित करने के तरीके में बदलें"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करें..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"फ़ाइल पहले से एन्क्रिप्ट की हुई है"</string>
-    <string name="title_convert_fbe" msgid="1263622876196444453">"फ़ाइल आधारित एन्क्रिप्शन में रूपांतरित कर रहा है"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"डेटा विभाजन को फ़ाइल आधारित एन्क्रिप्शन में रूपांतरित करें.\n !!चेतावनी!! इससे आपका सभी डेटा मिट जाएगा.\n यह सुविधा अल्फ़ा स्थिति में है और ठीक से कार्य नहीं कर सकती.\n जारी रखने के लिए \'वाइप करें और रूपांतरित करें…\' दबाएं."</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"फ़ाइल के आधार पर सुरक्षित करने के तरीके में बदल  कर रहा है"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"डेटा विभाजन (डेटा को अलग-अलग हिस्सों में बांटना) को फ़ाइल आधारित सुरक्षित करने के तरीके में बदलें.\n !!चेतावनी!! इससे आपका सभी डेटा मिट जाएगा.\n यह सुविधा अल्फ़ा स्थिति में है और हो सकता है ये ठीक से काम ना करे.\n जारी रखने के लिए \'वाइप करें और बदलें…\' दबाएं."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"वाइप करें और रूपांतरित करें…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"चित्र रंग मोड"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB का उपयोग करें"</string>
@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> शेष"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> पूरी तरह से चार्ज होने तक"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज किया जा रहा है"</string>
