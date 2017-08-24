@@ -599,10 +599,8 @@
       <item quantity="other">%d хвилини</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>
-    <!-- no translation found for battery_detail_charging_summary (4055327085770378335) -->
-    <skip />
-    <!-- no translation found for battery_detail_switch_title (8763441006881907058) -->
-    <skip />
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Режим економії заряду акумулятора не працює під час заряджання"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Режим економії заряду акумулятора"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Знижується продуктивність і обмежується обмін даними у фоновому режимі"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -742,8 +740,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Згорнути"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрити"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Перетягніть униз, щоб закрити"</string>
-    <!-- no translation found for pip_menu_title (4707292089961887657) -->
-    <skip />
+    <string name="pip_menu_title" msgid="4707292089961887657">"Меню"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"У додатку <xliff:g id="NAME">%s</xliff:g> є функція \"Картинка в картинці\""</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Щоб додаток <xliff:g id="NAME">%s</xliff:g> не використовував цю функцію, вимкніть її в налаштуваннях."</string>
     <string name="pip_play" msgid="1417176722760265888">"Відтворити"</string>
@@ -792,4 +789,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Додатки, які працюють у фоновому режимі"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Вимкнути мобільний трафік?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
 </resources>
