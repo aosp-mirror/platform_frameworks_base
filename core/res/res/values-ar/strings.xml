@@ -274,9 +274,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"التنبيهات"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"عرض توضيحي لبائع التجزئة"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"‏اتصال USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"التطبيقات التي تعمل في الخلفية"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"جارٍ تشغيل <xliff:g id="APP_NAME">%1$s</xliff:g> في الخلفية"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"جارٍ تشغيل <xliff:g id="NUMBER">%1$d</xliff:g> تطبيق في الخلفية"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"التطبيقات التي تستهلك البطارية"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"يستخدم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> البطارية"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"تستخدم <xliff:g id="NUMBER">%1$d</xliff:g> من التطبيقات البطارية"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"انقر للحصول على تفاصيل حول البطارية واستخدام البيانات"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>، <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>

@@ -262,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ծանուցումներ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Խանութի ցուցադրական ռեժիմ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB կապակցում"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Ֆոնային ռեժիմում աշխատող հավելվածներ"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ն աշխատում է ֆոնային ռեժիմում"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> հավելված աշխատում են ֆոնում"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Մարտկոցի լիցքը ծախսող հավելվածներ"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"«<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածը ծախսում է մարտկոցի լիցքը"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> հավելված ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Անվտանգ ռեժիմ"</string>
@@ -1209,7 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Ցույց տալ այլ հավելվածների վրա"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Ցույց տալ այլ հավելվածների վրայից"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>

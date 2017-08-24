@@ -262,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"გაფრთხილებები"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"დემო-რეჟიმი საცალო მოვაჭრეებისთვის"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB კავშირი"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"ფონურ რეჟიმში გაშვებული აპები"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> გაშვებულია ფონურ რეჟიმში"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"ფონურ რეჟიმში გაშვებულია <xliff:g id="NUMBER">%1$d</xliff:g> აპი"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ბატარეის მხარჯავი აპები"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> იყენებს ბატარეას"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"ბატარეას <xliff:g id="NUMBER">%1$d</xliff:g> აპი იყენებს"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"შეეხეთ ბატარეისა და მონაცემების მოხმარების შესახებ დეტალური ინფორმაციისთვის"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"უსაფრთხო რეჟიმი"</string>
@@ -1629,7 +1629,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"დაინსტალირებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის ფუნქციონალობას და ზღუდავს ვიბრაციას, ადგილმდებარეობის სერვისებს და ძირითად ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპების განახლება არ მოხდება მათ გახსნამდე.\n\nელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ბატარეის მოქმედების ვადის გაუმჯობესებისათვის, ბატარეის დამზოგი ამცირებს თქვენი მოწყობილობის ფუნქციონალობას და ზღუდავს ვიბრაციას, ადგილმდებარეობის სერვისებს და ძირითად ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპების განახლება არ მოხდება მათ გახსნამდე.\n\nბატარეის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>
