@@ -48,6 +48,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -69,6 +70,7 @@ public class OffloadController {
     private final INetworkManagementService mNms;
     private final ITetheringStatsProvider mStatsProvider;
     private final SharedLog mLog;
+    private final HashMap<String, LinkProperties> mDownstreams;
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
@@ -100,6 +102,7 @@ public class OffloadController {
         mNms = nms;
         mStatsProvider = new OffloadTetheringStatsProvider();
         mLog = log.forSubComponent(TAG);
+        mDownstreams = new HashMap<>();
         mExemptPrefixes = new HashSet<>();
         mLastLocalPrefixStrs = new HashSet<>();
 
@@ -131,21 +134,25 @@ public class OffloadController {
                 new OffloadHardwareInterface.ControlCallback() {
                     @Override
                     public void onStarted() {
+                        if (!started()) return;
                         mLog.log("onStarted");
                     }
 
                     @Override
                     public void onStoppedError() {
+                        if (!started()) return;
                         mLog.log("onStoppedError");
                     }
 
                     @Override
                     public void onStoppedUnsupported() {
+                        if (!started()) return;
                         mLog.log("onStoppedUnsupported");
                     }
 
                     @Override
                     public void onSupportAvailable() {
+                        if (!started()) return;
                         mLog.log("onSupportAvailable");
 
                         // [1] Poll for statistics and notify NetworkStats
@@ -153,11 +160,12 @@ public class OffloadController {
                         //     [a] push local prefixes
                         //     [b] push downstreams
                         //     [c] push upstream parameters
-                        pushUpstreamParameters();
+                        pushUpstreamParameters(null);
                     }
 
                     @Override
                     public void onStoppedLimitReached() {
+                        if (!started()) return;
                         mLog.log("onStoppedLimitReached");
 
                         // We cannot reliably determine on which interface the limit was reached,
@@ -185,6 +193,7 @@ public class OffloadController {
                     public void onNatTimeoutUpdate(int proto,
                                                    String srcAddr, int srcPort,
                                                    String dstAddr, int dstPort) {
+                        if (!started()) return;
                         mLog.log(String.format("NAT timeout update: %s (%s,%s) -> (%s,%s)",
                                 proto, srcAddr, srcPort, dstAddr, dstPort));
                     }
@@ -197,6 +206,9 @@ public class OffloadController {
     }
 
     public void stop() {
+        // Completely stops tethering offload. After this method is called, it is no longer safe to
+        // call any HAL method, no callbacks from the hardware will be delivered, and any in-flight
+        // callbacks must be ignored. Offload may be started again by calling start().
         final boolean wasStarted = started();
         updateStatsForCurrentUpstream();
         mUpstreamLinkProperties = null;
@@ -248,6 +260,11 @@ public class OffloadController {
         }
     }
 
+    private String currentUpstreamInterface() {
+        return (mUpstreamLinkProperties != null)
+                ? mUpstreamLinkProperties.getInterfaceName() : null;
+    }
+
     private void maybeUpdateStats(String iface) {
         if (TextUtils.isEmpty(iface)) {
             return;
@@ -272,9 +289,7 @@ public class OffloadController {
 
     private boolean maybeUpdateDataLimit(String iface) {
         // setDataLimit may only be called while offload is occuring on this upstream.
-        if (!started() ||
-                mUpstreamLinkProperties == null ||
-                !TextUtils.equals(iface, mUpstreamLinkProperties.getInterfaceName())) {
+        if (!started() || !TextUtils.equals(iface, currentUpstreamInterface())) {
             return true;
         }
 
@@ -287,9 +302,7 @@ public class OffloadController {
     }
 
     private void updateStatsForCurrentUpstream() {
-        if (mUpstreamLinkProperties != null) {
-            maybeUpdateStats(mUpstreamLinkProperties.getInterfaceName());
-        }
+        maybeUpdateStats(currentUpstreamInterface());
     }
 
     public void setUpstreamLinkProperties(LinkProperties lp) {
@@ -305,10 +318,7 @@ public class OffloadController {
         // onOffloadEvent() callback to tell us offload is available again and
         // then reapply all state).
         computeAndPushLocalPrefixes();
-        pushUpstreamParameters();
-
-        // Update stats after we've told the hardware to change routing so we don't miss packets.
-        maybeUpdateStats(prevUpstream);
+        pushUpstreamParameters(prevUpstream);
     }
 
     public void setLocalPrefixes(Set<IpPrefix> localPrefixes) {
@@ -319,17 +329,42 @@ public class OffloadController {
     }
 
     public void notifyDownstreamLinkProperties(LinkProperties lp) {
+        final String ifname = lp.getInterfaceName();
+        final LinkProperties oldLp = mDownstreams.put(ifname, new LinkProperties(lp));
+        if (Objects.equals(oldLp, lp)) return;
+
         if (!started()) return;
 
-        // TODO: Cache LinkProperties on a per-ifname basis and compute the
-        // deltas, calling addDownstream()/removeDownstream() accordingly.
+        final List<RouteInfo> oldRoutes = (oldLp != null) ? oldLp.getRoutes() : new ArrayList<>();
+        final List<RouteInfo> newRoutes = lp.getRoutes();
+
+        // For each old route, if not in new routes: remove.
+        for (RouteInfo oldRoute : oldRoutes) {
+            if (shouldIgnoreDownstreamRoute(oldRoute)) continue;
+            if (!newRoutes.contains(oldRoute)) {
+                mHwInterface.removeDownstreamPrefix(ifname, oldRoute.getDestination().toString());
+            }
+        }
+
+        // For each new route, if not in old routes: add.
+        for (RouteInfo newRoute : newRoutes) {
+            if (shouldIgnoreDownstreamRoute(newRoute)) continue;
+            if (!oldRoutes.contains(newRoute)) {
+                mHwInterface.addDownstreamPrefix(ifname, newRoute.getDestination().toString());
+            }
+        }
     }
 
     public void removeDownstreamInterface(String ifname) {
+        final LinkProperties lp = mDownstreams.remove(ifname);
+        if (lp == null) return;
+
         if (!started()) return;
 
-        // TODO: Check cache for LinkProperties of ifname and, if present,
-        // call removeDownstream() accordingly.
+        for (RouteInfo route : lp.getRoutes()) {
+            if (shouldIgnoreDownstreamRoute(route)) continue;
+            mHwInterface.removeDownstreamPrefix(ifname, route.getDestination().toString());
+        }
     }
 
     private boolean isOffloadDisabled() {
@@ -342,8 +377,9 @@ public class OffloadController {
         return mConfigInitialized && mControlInitialized;
     }
 
-    private boolean pushUpstreamParameters() {
+    private boolean pushUpstreamParameters(String prevUpstream) {
         if (mUpstreamLinkProperties == null) {
+            maybeUpdateStats(prevUpstream);
             return mHwInterface.setUpstreamParameters(null, null, null, null);
         }
 
@@ -382,9 +418,14 @@ public class OffloadController {
            return success;
         }
 
+        // Update stats after we've told the hardware to change routing so we don't miss packets.
+        maybeUpdateStats(prevUpstream);
+
         // Data limits can only be set once offload is running on the upstream.
         success = maybeUpdateDataLimit(iface);
         if (!success) {
+            // If we failed to set a data limit, don't use this upstream, because we don't want to
+            // blow through the data limit that we were told to apply.
             mLog.log("Setting data limit for " + iface + " failed, disabling offload.");
             stop();
         }
@@ -428,6 +469,13 @@ public class OffloadController {
         final HashSet<String> localPrefixStrs = new HashSet<>();
         for (IpPrefix pfx : prefixSet) localPrefixStrs.add(pfx.toString());
         return localPrefixStrs;
+    }
+
+    private static boolean shouldIgnoreDownstreamRoute(RouteInfo route) {
+        // Ignore any link-local routes.
+        if (!route.getDestinationLinkAddress().isGlobalPreferred()) return true;
+
+        return false;
     }
 
     public void dump(IndentingPrintWriter pw) {
