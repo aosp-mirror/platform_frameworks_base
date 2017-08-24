@@ -71,7 +71,7 @@ public final class ScanFilter implements Parcelable {
     private final byte[] mManufacturerDataMask;
 
     /** @hide */
-    public static final ScanFilter EMPTY = new ScanFilter.Builder().build() ;
+    public static final ScanFilter EMPTY = new ScanFilter.Builder().build();
 
 
     private ScanFilter(String name, String deviceAddress, ParcelUuid uuid,
@@ -145,70 +145,70 @@ public final class ScanFilter implements Parcelable {
     /**
      * A {@link android.os.Parcelable.Creator} to create {@link ScanFilter} from parcel.
      */
-    public static final Creator<ScanFilter>
-            CREATOR = new Creator<ScanFilter>() {
+    public static final Creator<ScanFilter> CREATOR =
+            new Creator<ScanFilter>() {
 
-                    @Override
-                public ScanFilter[] newArray(int size) {
-                    return new ScanFilter[size];
+        @Override
+        public ScanFilter[] newArray(int size) {
+            return new ScanFilter[size];
+        }
+
+        @Override
+        public ScanFilter createFromParcel(Parcel in) {
+            Builder builder = new Builder();
+            if (in.readInt() == 1) {
+                builder.setDeviceName(in.readString());
+            }
+            if (in.readInt() == 1) {
+                builder.setDeviceAddress(in.readString());
+            }
+            if (in.readInt() == 1) {
+                ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
+                builder.setServiceUuid(uuid);
+                if (in.readInt() == 1) {
+                    ParcelUuid uuidMask = in.readParcelable(
+                            ParcelUuid.class.getClassLoader());
+                    builder.setServiceUuid(uuid, uuidMask);
                 }
-
-                    @Override
-                public ScanFilter createFromParcel(Parcel in) {
-                    Builder builder = new Builder();
-                    if (in.readInt() == 1) {
-                        builder.setDeviceName(in.readString());
+            }
+            if (in.readInt() == 1) {
+                ParcelUuid servcieDataUuid =
+                        in.readParcelable(ParcelUuid.class.getClassLoader());
+                if (in.readInt() == 1) {
+                    int serviceDataLength = in.readInt();
+                    byte[] serviceData = new byte[serviceDataLength];
+                    in.readByteArray(serviceData);
+                    if (in.readInt() == 0) {
+                        builder.setServiceData(servcieDataUuid, serviceData);
+                    } else {
+                        int serviceDataMaskLength = in.readInt();
+                        byte[] serviceDataMask = new byte[serviceDataMaskLength];
+                        in.readByteArray(serviceDataMask);
+                        builder.setServiceData(
+                                servcieDataUuid, serviceData, serviceDataMask);
                     }
-                    if (in.readInt() == 1) {
-                        builder.setDeviceAddress(in.readString());
-                    }
-                    if (in.readInt() == 1) {
-                        ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
-                        builder.setServiceUuid(uuid);
-                        if (in.readInt() == 1) {
-                            ParcelUuid uuidMask = in.readParcelable(
-                                    ParcelUuid.class.getClassLoader());
-                            builder.setServiceUuid(uuid, uuidMask);
-                        }
-                    }
-                    if (in.readInt() == 1) {
-                        ParcelUuid servcieDataUuid =
-                                in.readParcelable(ParcelUuid.class.getClassLoader());
-                        if (in.readInt() == 1) {
-                            int serviceDataLength = in.readInt();
-                            byte[] serviceData = new byte[serviceDataLength];
-                            in.readByteArray(serviceData);
-                            if (in.readInt() == 0) {
-                                builder.setServiceData(servcieDataUuid, serviceData);
-                            } else {
-                                int serviceDataMaskLength = in.readInt();
-                                byte[] serviceDataMask = new byte[serviceDataMaskLength];
-                                in.readByteArray(serviceDataMask);
-                                builder.setServiceData(
-                                        servcieDataUuid, serviceData, serviceDataMask);
-                            }
-                        }
-                    }
-
-                    int manufacturerId = in.readInt();
-                    if (in.readInt() == 1) {
-                        int manufacturerDataLength = in.readInt();
-                        byte[] manufacturerData = new byte[manufacturerDataLength];
-                        in.readByteArray(manufacturerData);
-                        if (in.readInt() == 0) {
-                            builder.setManufacturerData(manufacturerId, manufacturerData);
-                        } else {
-                            int manufacturerDataMaskLength = in.readInt();
-                            byte[] manufacturerDataMask = new byte[manufacturerDataMaskLength];
-                            in.readByteArray(manufacturerDataMask);
-                            builder.setManufacturerData(manufacturerId, manufacturerData,
-                                    manufacturerDataMask);
-                        }
-                    }
-
-                    return builder.build();
                 }
-            };
+            }
+
+            int manufacturerId = in.readInt();
+            if (in.readInt() == 1) {
+                int manufacturerDataLength = in.readInt();
+                byte[] manufacturerData = new byte[manufacturerDataLength];
+                in.readByteArray(manufacturerData);
+                if (in.readInt() == 0) {
+                    builder.setManufacturerData(manufacturerId, manufacturerData);
+                } else {
+                    int manufacturerDataMaskLength = in.readInt();
+                    byte[] manufacturerDataMask = new byte[manufacturerDataMaskLength];
+                    in.readByteArray(manufacturerDataMask);
+                    builder.setManufacturerData(manufacturerId, manufacturerData,
+                            manufacturerDataMask);
+                }
+            }
+
+            return builder.build();
+        }
+    };
 
     /**
      * Returns the filter set the device name field of Bluetooth advertisement data.
@@ -288,7 +288,7 @@ public final class ScanFilter implements Parcelable {
         // Scan record is null but there exist filters on it.
         if (scanRecord == null
                 && (mDeviceName != null || mServiceUuid != null || mManufacturerData != null
-                        || mServiceData != null)) {
+                || mServiceData != null)) {
             return false;
         }
 
@@ -386,12 +386,12 @@ public final class ScanFilter implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mDeviceName, mDeviceAddress, mManufacturerId,
-                            Arrays.hashCode(mManufacturerData),
-                            Arrays.hashCode(mManufacturerDataMask),
-                            mServiceDataUuid,
-                            Arrays.hashCode(mServiceData),
-                            Arrays.hashCode(mServiceDataMask),
-                            mServiceUuid, mServiceUuidMask);
+                Arrays.hashCode(mManufacturerData),
+                Arrays.hashCode(mManufacturerDataMask),
+                mServiceDataUuid,
+                Arrays.hashCode(mServiceData),
+                Arrays.hashCode(mServiceDataMask),
+                mServiceUuid, mServiceUuidMask);
     }
 
     @Override
@@ -403,20 +403,21 @@ public final class ScanFilter implements Parcelable {
             return false;
         }
         ScanFilter other = (ScanFilter) obj;
-        return Objects.equals(mDeviceName, other.mDeviceName) &&
-                Objects.equals(mDeviceAddress, other.mDeviceAddress) &&
-                mManufacturerId == other.mManufacturerId &&
-                Objects.deepEquals(mManufacturerData, other.mManufacturerData) &&
-                Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask) &&
-                Objects.equals(mServiceDataUuid, other.mServiceDataUuid) &&
-                Objects.deepEquals(mServiceData, other.mServiceData) &&
-                Objects.deepEquals(mServiceDataMask, other.mServiceDataMask) &&
-                Objects.equals(mServiceUuid, other.mServiceUuid) &&
-                Objects.equals(mServiceUuidMask, other.mServiceUuidMask);
+        return Objects.equals(mDeviceName, other.mDeviceName)
+                && Objects.equals(mDeviceAddress, other.mDeviceAddress)
+                && mManufacturerId == other.mManufacturerId
+                && Objects.deepEquals(mManufacturerData, other.mManufacturerData)
+                && Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask)
+                && Objects.equals(mServiceDataUuid, other.mServiceDataUuid)
+                && Objects.deepEquals(mServiceData, other.mServiceData)
+                && Objects.deepEquals(mServiceDataMask, other.mServiceDataMask)
+                && Objects.equals(mServiceUuid, other.mServiceUuid)
+                && Objects.equals(mServiceUuidMask, other.mServiceUuidMask);
     }
 
     /**
      * Checks if the scanfilter is empty
+     *
      * @hide
      */
     public boolean isAllFieldsEmpty() {
@@ -454,8 +455,8 @@ public final class ScanFilter implements Parcelable {
          * Set filter on device address.
          *
          * @param deviceAddress The device Bluetooth address for the filter. It needs to be in the
-         *            format of "01:02:03:AB:CD:EF". The device address can be validated using
-         *            {@link BluetoothAdapter#checkBluetoothAddress}.
+         * format of "01:02:03:AB:CD:EF". The device address can be validated using {@link
+         * BluetoothAdapter#checkBluetoothAddress}.
          * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
          */
         public Builder setDeviceAddress(String deviceAddress) {
@@ -480,8 +481,8 @@ public final class ScanFilter implements Parcelable {
          * {@code serviceUuid}. Set any bit in the mask to 1 to indicate a match is needed for the
          * bit in {@code serviceUuid}, and 0 to ignore that bit.
          *
-         * @throws IllegalArgumentException If {@code serviceUuid} is {@code null} but
-         *             {@code uuidMask} is not {@code null}.
+         * @throws IllegalArgumentException If {@code serviceUuid} is {@code null} but {@code
+         * uuidMask} is not {@code null}.
          */
         public Builder setServiceUuid(ParcelUuid serviceUuid, ParcelUuid uuidMask) {
             if (mUuidMask != null && mServiceUuid == null) {
@@ -513,9 +514,9 @@ public final class ScanFilter implements Parcelable {
          * <p>
          * The {@code serviceDataMask} must have the same length of the {@code serviceData}.
          *
-         * @throws IllegalArgumentException If {@code serviceDataUuid} is null or
-         *             {@code serviceDataMask} is {@code null} while {@code serviceData} is not or
-         *             {@code serviceDataMask} and {@code serviceData} has different length.
+         * @throws IllegalArgumentException If {@code serviceDataUuid} is null or {@code
+         * serviceDataMask} is {@code null} while {@code serviceData} is not or {@code
+         * serviceDataMask} and {@code serviceData} has different length.
          */
         public Builder setServiceData(ParcelUuid serviceDataUuid,
                 byte[] serviceData, byte[] serviceDataMask) {
@@ -563,10 +564,9 @@ public final class ScanFilter implements Parcelable {
          * <p>
          * The {@code manufacturerDataMask} must have the same length of {@code manufacturerData}.
          *
-         * @throws IllegalArgumentException If the {@code manufacturerId} is invalid, or
-         *             {@code manufacturerData} is null while {@code manufacturerDataMask} is not,
-         *             or {@code manufacturerData} and {@code manufacturerDataMask} have different
-         *             length.
+         * @throws IllegalArgumentException If the {@code manufacturerId} is invalid, or {@code
+         * manufacturerData} is null while {@code manufacturerDataMask} is not, or {@code
+         * manufacturerData} and {@code manufacturerDataMask} have different length.
          */
         public Builder setManufacturerData(int manufacturerId, byte[] manufacturerData,
                 byte[] manufacturerDataMask) {
