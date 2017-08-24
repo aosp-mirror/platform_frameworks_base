@@ -25,23 +25,21 @@ public class SdpSapsRecord implements Parcelable {
     private final int mProfileVersion;
     private final String mServiceName;
 
-    public SdpSapsRecord(int rfcomm_channel_number,
-            int profile_version,
-            String service_name) {
-        this.mRfcommChannelNumber = rfcomm_channel_number;
-        this.mProfileVersion = profile_version;
-        this.mServiceName = service_name;
+    public SdpSapsRecord(int rfcommChannelNumber, int profileVersion, String serviceName) {
+        mRfcommChannelNumber = rfcommChannelNumber;
+        mProfileVersion = profileVersion;
+        mServiceName = serviceName;
     }
 
     public SdpSapsRecord(Parcel in) {
-        this.mRfcommChannelNumber = in.readInt();
-        this.mProfileVersion = in.readInt();
-        this.mServiceName = in.readString();
+        mRfcommChannelNumber = in.readInt();
+        mProfileVersion = in.readInt();
+        mServiceName = in.readString();
     }
 
     @Override
     public int describeContents() {
-         return 0;
+        return 0;
     }
 
     public int getRfcommCannelNumber() {
@@ -58,9 +56,9 @@ public class SdpSapsRecord implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mRfcommChannelNumber);
-        dest.writeInt(this.mProfileVersion);
-        dest.writeString(this.mServiceName);
+        dest.writeInt(mRfcommChannelNumber);
+        dest.writeInt(mProfileVersion);
+        dest.writeString(mServiceName);
 
     }
 
@@ -84,6 +82,7 @@ public class SdpSapsRecord implements Parcelable {
         public SdpSapsRecord createFromParcel(Parcel in) {
             return new SdpSapsRecord(in);
         }
+
         public SdpRecord[] newArray(int size) {
             return new SdpRecord[size];
         }
