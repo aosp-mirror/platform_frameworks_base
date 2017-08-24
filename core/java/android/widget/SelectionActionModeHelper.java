@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.LocaleList;
@@ -27,13 +28,13 @@ import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.view.ActionMode;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextSelection;
 import android.widget.Editor.SelectionModifierCursorController;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -45,8 +46,10 @@ import java.util.function.Supplier;
 /**
  * Helper class for starting selection action mode
  * (synchronously without the TextClassifier, asynchronously with the TextClassifier).
+ * @hide
  */
 @UiThread
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 final class SelectionActionModeHelper {
 
     /**
@@ -224,15 +227,15 @@ final class SelectionActionModeHelper {
             rectangle.bottom += textView.getPaddingTop();
         }
 
-        final RectF firstRectangle = selectionRectangles.get(0);
+        final PointF touchPoint = new PointF(
+                mEditor.getLastUpPositionX(),
+                mEditor.getLastUpPositionY());
 
-        // TODO use the original touch point instead of the hardcoded point generated here
-        final Pair<Float, Float> halfPoint = new Pair<>(
-                firstRectangle.centerX(),
-                firstRectangle.centerY());
+        final PointF animationStartPoint =
+                movePointInsideNearestRectangle(touchPoint, selectionRectangles);
 
         mSmartSelectSprite.startAnimation(
-                halfPoint,
+                animationStartPoint,
                 selectionRectangles,
                 onAnimationEndCallback);
     }
@@ -246,6 +249,39 @@ final class SelectionActionModeHelper {
         layout.getSelection(start, end, (left, top, right, bottom) ->
                 result.add(new RectF(left, top, right, bottom)));
         return result;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static PointF movePointInsideNearestRectangle(final PointF point,
+            final List<RectF> rectangles) {
+        float bestX = -1;
+        float bestY = -1;
+        double bestDistance = Double.MAX_VALUE;
+
+        for (final RectF rectangle : rectangles) {
+            final float candidateY = rectangle.centerY();
+            final float candidateX;
+
+            if (point.x > rectangle.right) {
+                candidateX = rectangle.right;
+            } else if (point.x < rectangle.left) {
+                candidateX = rectangle.left;
+            } else {
+                candidateX = point.x;
+            }
+
+            final double candidateDistance = Math.pow(point.x - candidateX, 2)
+                    + Math.pow(point.y - candidateY, 2);
+
+            if (candidateDistance < bestDistance) {
+                bestX = candidateX;
+                bestY = candidateY;
+                bestDistance = candidateDistance;
+            }
+        }
+
+        return new PointF(bestX, bestY);
     }
 
     private void invalidateActionMode(@Nullable SelectionResult result) {
