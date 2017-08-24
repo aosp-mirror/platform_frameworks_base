@@ -26,8 +26,8 @@ import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.EMPTY;
@@ -35,6 +35,8 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.STATE_OFF;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -57,6 +59,7 @@ import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -70,8 +73,8 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -178,8 +181,8 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.os.UserHandle;
-import android.os.Vibrator;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
@@ -227,6 +230,7 @@ import android.view.autofill.AutofillManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -241,8 +245,8 @@ import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
 import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
 import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.wm.AppTransition;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.wm.AppTransition;
 
 import java.io.File;
 import java.io.FileReader;
@@ -677,6 +681,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mLastShowingDream;
     boolean mDreamingLockscreen;
     boolean mDreamingSleepTokenNeeded;
+    private boolean mWindowSleepTokenNeeded;
+    private boolean mLastWindowSleepTokenNeeded;
+
+    @GuardedBy("mHandler")
+    private SleepToken mWindowSleepToken;
+
     SleepToken mDreamingSleepToken;
     SleepToken mScreenOffSleepToken;
     volatile boolean mKeyguardOccluded;
@@ -1035,6 +1045,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onBarVisibilityChanged(boolean visible) {
             mAccessibilityManager.notifyAccessibilityButtonVisibilityChanged(visible);
         }
+    };
+
+    private final Runnable mAcquireSleepTokenRunnable = () -> {
+        if (mWindowSleepToken != null) {
+            return;
+        }
+        mWindowSleepToken = mActivityManagerInternal.acquireSleepToken("WindowSleepToken",
+                DEFAULT_DISPLAY);
+    };
+
+    private final Runnable mReleaseSleepTokenRunnable = () -> {
+        if (mWindowSleepToken == null) {
+            return;
+        }
+        mWindowSleepToken.release();
+        mWindowSleepToken = null;
     };
 
     private ImmersiveModeConfirmation mImmersiveModeConfirmation;
@@ -2149,7 +2175,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // This method might be called before the policy has been fully initialized
         // or for other displays we don't care about.
         // TODO(multi-display): Define policy for secondary displays.
-        if (mContext == null || display.getDisplayId() != Display.DEFAULT_DISPLAY) {
+        if (mContext == null || display.getDisplayId() != DEFAULT_DISPLAY) {
             return;
         }
         mDisplay = display;
@@ -2245,7 +2271,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setDisplayOverscan(Display display, int left, int top, int right, int bottom) {
         // TODO(multi-display): Define policy for secondary displays.
-        if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
+        if (display.getDisplayId() == DEFAULT_DISPLAY) {
             mOverscanLeft = left;
             mOverscanTop = top;
             mOverscanRight = right;
@@ -2701,7 +2727,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
             int displayId) {
         // TODO(multi-display): Support navigation bar on secondary displays.
-        if (displayId == Display.DEFAULT_DISPLAY && mHasNavigationBar) {
+        if (displayId == DEFAULT_DISPLAY && mHasNavigationBar) {
             // For a basic navigation bar, when we are in landscape mode we place
             // the navigation bar to the side.
             if (mNavigationBarCanMove && fullWidth > fullHeight) {
@@ -2723,7 +2749,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
             int displayId) {
         // TODO(multi-display): Support navigation bar on secondary displays.
-        if (displayId == Display.DEFAULT_DISPLAY && mHasNavigationBar) {
+        if (displayId == DEFAULT_DISPLAY && mHasNavigationBar) {
             // For a basic navigation bar, when we are in portrait mode we place
             // the navigation bar to the bottom.
             if (!mNavigationBarCanMove || fullWidth < fullHeight) {
@@ -2747,7 +2773,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // we do want to exclude it since applications can't generally use that part
         // of the screen.
         // TODO(multi-display): Support status bars on secondary displays.
-        if (displayId == Display.DEFAULT_DISPLAY) {
+        if (displayId == DEFAULT_DISPLAY) {
             return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayId)
                     - mStatusBarHeight;
         }
@@ -2799,7 +2825,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean keyguardLocked = isKeyguardLocked();
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
                 && !mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID);
-        return (keyguardLocked && !allowWhenLocked && win.getDisplayId() == Display.DEFAULT_DISPLAY)
+        return (keyguardLocked && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
                 || hideDockDivider;
     }
 
@@ -2969,7 +2995,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** Obtain proper context for showing splash screen on the provided display. */
     private Context getDisplayContext(Context context, int displayId) {
-        if (displayId == Display.DEFAULT_DISPLAY) {
+        if (displayId == DEFAULT_DISPLAY) {
             // The default context fits.
             return context;
         }
@@ -5367,6 +5393,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
+        mWindowSleepTokenNeeded = false;
     }
 
     /** {@inheritDoc} */
@@ -5463,6 +5490,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
                 && stackId == DOCKED_STACK_ID) {
             mTopDockedOpaqueOrDimmingWindowState = win;
+        }
+
+        // Take note if a window wants to acquire a sleep token.
+        if (win.isVisibleLw() && (attrs.privateFlags & PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN) != 0
+                && win.canAcquireSleepToken()) {
+            mWindowSleepTokenNeeded = true;
         }
     }
 
@@ -5594,9 +5627,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mWindowManagerFuncs.notifyShowingDreamChanged();
         }
 
+        updateWindowSleepToken();
+
         // update since mAllowLockscreenWhenOn might have changed
         updateLockScreenTimeout();
         return changes;
+    }
+
+    private void updateWindowSleepToken() {
+        if (mWindowSleepTokenNeeded && !mLastWindowSleepTokenNeeded) {
+            mHandler.removeCallbacks(mReleaseSleepTokenRunnable);
+            mHandler.post(mAcquireSleepTokenRunnable);
+        } else if (!mWindowSleepTokenNeeded && mLastWindowSleepTokenNeeded) {
+            mHandler.removeCallbacks(mAcquireSleepTokenRunnable);
+            mHandler.post(mReleaseSleepTokenRunnable);
+        }
+        mLastWindowSleepTokenNeeded = mWindowSleepTokenNeeded;
     }
 
     /**
@@ -6332,7 +6378,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldDispatchInputWhenNonInteractive(KeyEvent event) {
-        final boolean displayOff = (mDisplay == null || mDisplay.getState() == Display.STATE_OFF);
+        final boolean displayOff = (mDisplay == null || mDisplay.getState() == STATE_OFF);
 
         if (displayOff && !mHasFeatureWatch) {
             return false;
@@ -7473,7 +7519,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (acquire) {
             if (mDreamingSleepToken == null) {
                 mDreamingSleepToken = mActivityManagerInternal.acquireSleepToken(
-                        "Dream", Display.DEFAULT_DISPLAY);
+                        "Dream", DEFAULT_DISPLAY);
             }
         } else {
             if (mDreamingSleepToken != null) {
@@ -7488,7 +7534,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (acquire) {
             if (mScreenOffSleepToken == null) {
                 mScreenOffSleepToken = mActivityManagerInternal.acquireSleepToken(
-                        "ScreenOff", Display.DEFAULT_DISPLAY);
+                        "ScreenOff", DEFAULT_DISPLAY);
             }
         } else {
             if (mScreenOffSleepToken != null) {
