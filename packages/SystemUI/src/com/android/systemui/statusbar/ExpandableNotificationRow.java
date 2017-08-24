@@ -172,6 +172,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
+
+    // Listener will be called when receiving a long click event.
+    // Use #setLongPressPosition to optionally assign positional data with the long press.
+    private LongPressListener mLongPressListener;
+    private boolean mLongPressPositionSet = false;
+    private int mLongPressX = 0;
+    private int mLongPressY = 0;
+
     private boolean mGroupExpansionChanging;
 
     /**
@@ -773,6 +781,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnExpandClickListener = onExpandClickListener;
     }
 
+    public void setLongPressListener(LongPressListener longPressListener) {
+        mLongPressListener = longPressListener;
+    }
+
+    public void setLongPressPosition(int x, int y) {
+        mLongPressPositionSet = true;
+        mLongPressX = x;
+        mLongPressY = y;
+    }
+
     @Override
     public void setOnClickListener(@Nullable OnClickListener l) {
         super.setOnClickListener(l);
@@ -1321,6 +1339,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mTranslateableViews.remove(mChildrenContainerStub);
             mTranslateableViews.remove(mGutsStub);
         }
+
+        setOnLongClickListener((View v) -> {
+            createMenu();
+            MenuItem menuItem = getProvider().getLongpressMenuItem(mContext);
+            if (mLongPressListener != null && menuItem != null) {
+                int x, y;
+                if (mLongPressPositionSet) {
+                    x = mLongPressX;
+                    y = mLongPressY;
+                } else {
+                    // No position assigned - use the center of the View
+                    x = getWidth() / 2;
+                    y = getHeight() / 2;
+                }
+                mLongPressPositionSet = false;
+                return mLongPressListener.onLongPress(this, x, y, menuItem);
+            }
+            return false;
+        });
     }
 
     public void resetTranslation() {
@@ -2303,5 +2340,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @VisibleForTesting
     protected void setChildrenContainer(NotificationChildrenContainer childrenContainer) {
         mChildrenContainer = childrenContainer;
+    }
+
+    /**
+     * Equivalent to View.OnLongClickListener with coordinates
+     */
+    public interface LongPressListener {
+        /**
+         * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
+         * @return whether the longpress was handled
+         */
+        boolean onLongPress(View v, int x, int y, MenuItem item);
     }
 }
