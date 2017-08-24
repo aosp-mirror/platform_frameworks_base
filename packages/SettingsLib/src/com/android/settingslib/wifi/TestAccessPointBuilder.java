@@ -24,6 +24,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.support.annotation.Keep;
+
 import com.android.settingslib.wifi.AccessPoint.Speed;
 
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class TestAccessPointBuilder {
 
     Context mContext;
     private ArrayList<ScanResult> mScanResultCache;
+    private ArrayList<TimestampedScoredNetwork> mScoredNetworkCache;
 
     @Keep
     public TestAccessPointBuilder(Context context) {
@@ -84,6 +86,9 @@ public class TestAccessPointBuilder {
         }
         if (mScanResultCache != null) {
             bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, mScanResultCache);
+        }
+        if (mScoredNetworkCache != null) {
+            bundle.putParcelableArrayList(AccessPoint.KEY_SCOREDNETWORKCACHE, mScoredNetworkCache);
         }
         bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
         bundle.putInt(AccessPoint.KEY_SPEED, mSpeed);
@@ -236,6 +241,12 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setCarrierName(String carrierName) {
         mCarrierName = carrierName;
+        return this;
+    }
+
+    public TestAccessPointBuilder setScoredNetworkCache(
+            ArrayList<TimestampedScoredNetwork> scoredNetworkCache) {
+        mScoredNetworkCache = scoredNetworkCache;
         return this;
     }
 }
