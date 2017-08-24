@@ -327,6 +327,7 @@ public class SettingsBackupTest {
                     Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
+                    Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
                     Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
