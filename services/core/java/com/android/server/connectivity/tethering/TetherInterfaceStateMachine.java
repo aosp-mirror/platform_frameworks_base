@@ -115,6 +115,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final LinkProperties mLinkProperties;
 
     private int mLastError;
+    private int mServingMode;
     private String mMyUpstreamIfaceName;  // may change over time
     private NetworkInterface mNetworkInterface;
     private byte[] mHwAddr;
@@ -142,6 +143,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mLinkProperties = new LinkProperties();
         resetLinkProperties();
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
+        mServingMode = IControlsTethering.STATE_AVAILABLE;
 
         mInitialState = new InitialState();
         mLocalHotspotState = new LocalHotspotState();
@@ -160,6 +162,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
     public int interfaceType() { return mInterfaceType; }
 
     public int lastError() { return mLastError; }
+
+    public int servingMode() { return mServingMode; }
 
     public LinkProperties linkProperties() { return new LinkProperties(mLinkProperties); }
 
@@ -448,6 +452,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     private void sendInterfaceState(int newInterfaceState) {
+        mServingMode = newInterfaceState;
         mTetherController.updateInterfaceState(
                 TetherInterfaceStateMachine.this, newInterfaceState, mLastError);
         sendLinkProperties();
