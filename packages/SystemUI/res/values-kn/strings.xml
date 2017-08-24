@@ -64,8 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
-    <!-- no translation found for usb_debugging_secondary_user_message (6067122453571699801) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಈ ಸಾಧನಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, ಪ್ರಾಥಮಿಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -260,10 +259,10 @@
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ಪರದೆಯನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋರ್ಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ಪರದೆಯು ಈಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ಪರದೆಯು ಇದೀಗ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋರ್ಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ಇಥರ್ನೆಟ್"</string>
@@ -280,7 +279,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> ಮೋಡ್"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ತಿರುಗುವಿಕೆ ಲಾಕ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋಟ್ರೇಟ್"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"ಸ್ಥಳ"</string>
@@ -457,8 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"ನೀವು ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದಾದ, <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ನೀವು ಸಂಪರ್ಕಗೊಂಡಿರುವಿರಿ."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <!-- no translation found for monitoring_description_vpn_settings (6434859242636063861) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"ವಿಶ್ವಾಸಾರ್ಹ ರುಜುವಾತುಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ನೆಟ್‌ವರ್ಕ್ ಲಾಗಿಂಗ್ ಆನ್ ಮಾಡಿದ್ದಾರೆ. ಇದು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿನ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ನಿಗಾ ಇರಿಸುತ್ತದೆ.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗೆ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
@@ -587,10 +585,8 @@
       <item quantity="other">%d ನಿಮಿಷಗಳು</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ಬ್ಯಾಟರಿ ಬಳಕೆ"</string>
-    <!-- no translation found for battery_detail_charging_summary (4055327085770378335) -->
-    <skip />
-    <!-- no translation found for battery_detail_switch_title (8763441006881907058) -->
-    <skip />
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"ಚಾರ್ಜಿಂಗ್ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಸೇವರ್‌‌ ಲಭ್ಯವಿರುವುದಿಲ್ಲ"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"ಬ್ಯಾಟರಿ ಸೇವರ್‌‌"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> ಬಟನ್"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -730,8 +726,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ಮುಚ್ಚಿ"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ವಜಾಗೊಳಿಸಲು ಕೆಳಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
-    <!-- no translation found for pip_menu_title (4707292089961887657) -->
-    <skip />
+    <string name="pip_menu_title" msgid="4707292089961887657">"ಮೆನು"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿನ ಚಿತ್ರದಲ್ಲಿದೆ"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="pip_play" msgid="1417176722760265888">"ಪ್ಲೇ"</string>
@@ -759,8 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"ಮೆನು"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ಎಚ್ಚರಿಕೆಗಳು"</string>
-    <!-- no translation found for notification_channel_battery (5786118169182888462) -->
-    <skip />
+    <string name="notification_channel_battery" msgid="5786118169182888462">"ಬ್ಯಾಟರಿ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳು"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ಸಂಗ್ರಹಣೆ"</string>
@@ -781,4 +775,6 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್ ಮಾಡಬೇಕೆ?"</string>
+    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
+    <skip />
 </resources>

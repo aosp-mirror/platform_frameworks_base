@@ -593,10 +593,8 @@
       <item quantity="other">%d minuta</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Potrošnja baterije"</string>
-    <!-- no translation found for battery_detail_charging_summary (4055327085770378335) -->
-    <skip />
-    <!-- no translation found for battery_detail_switch_title (8763441006881907058) -->
-    <skip />
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Ušteda baterije je isključena za vrijeme punjenja"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Ušteda baterije"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Ograničava rad i prijenos podataka u pozadini"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Dugme <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Tipka za početak"</string>
@@ -736,8 +734,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Umanji"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zatvori"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Povucite prema dolje da odbacite"</string>
-    <!-- no translation found for pip_menu_title (4707292089961887657) -->
-    <skip />
+    <string name="pip_menu_title" msgid="4707292089961887657">"Meni"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> je u načinu priakza Slika u slici"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Ako ne želite da <xliff:g id="NAME">%s</xliff:g> koristi ovu funkciju, dodirnite da otvorite postavke i isključite je."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reproduciraj"</string>
@@ -786,4 +783,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Želite li isključiti prijenos mobilnih podataka?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Budući da aplikacija prekriva zahtjev za dopuštenje, Postavke ne mogu potvrditi vaš odgovor."</string>
 </resources>
