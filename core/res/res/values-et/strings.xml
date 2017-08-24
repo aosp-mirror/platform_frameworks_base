@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Teatised"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Poedemo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-ühendus"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Rakendusi käitatakse taustal"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Rakendust <xliff:g id="APP_NAME">%1$s</xliff:g> käitatakse taustal"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> rakendust käitatakse taustal"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Rakendused kasutavad akutoidet"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> kasutab akutoidet"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> rakendust kasutab akutoidet"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Turvarežiim"</string>

@@ -254,9 +254,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сповіщення"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Демо-режим для роздрібної торгівлі"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"З’єднання USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Додатки, які працюють у фоновому режимі"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> працює у фоновому режимі"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Додатки, які працюють у фоновому режимі: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Додатки, що використовують заряд акумулятора"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує заряд акумулятора"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
