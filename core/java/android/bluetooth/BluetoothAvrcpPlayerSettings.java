@@ -34,22 +34,22 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
     /**
      * Equalizer setting.
      */
-    public static final int SETTING_EQUALIZER    = 0x01;
+    public static final int SETTING_EQUALIZER = 0x01;
 
     /**
      * Repeat setting.
      */
-    public static final int SETTING_REPEAT       = 0x02;
+    public static final int SETTING_REPEAT = 0x02;
 
     /**
      * Shuffle setting.
      */
-    public static final int SETTING_SHUFFLE      = 0x04;
+    public static final int SETTING_SHUFFLE = 0x04;
 
     /**
      * Scan mode setting.
      */
-    public static final int SETTING_SCAN         = 0x08;
+    public static final int SETTING_SCAN = 0x08;
 
     /**
      * Invalid state.
@@ -82,16 +82,16 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
     /**
      * All track repeat/shuffle.
      *
-     * Applies to {@link SETTING_REPEAT}, {@link SETTING_SHUFFLE} and {@link SETTING_SCAN}.
+     * Applies to {@link #SETTING_REPEAT}, {@link #SETTING_SHUFFLE} and {@link #SETTING_SCAN}.
      */
-    public static final int STATE_ALL_TRACK    = 0x03;
+    public static final int STATE_ALL_TRACK = 0x03;
 
     /**
      * Group repeat/shuffle.
      *
-     * Applies to {@link SETTING_REPEAT}, {@link SETTING_SHUFFLE} and {@link SETTING_SCAN}.
+     * Applies to {@link #SETTING_REPEAT}, {@link #SETTING_SHUFFLE} and {@link #SETTING_SCAN}.
      */
-    public static final int STATE_GROUP        = 0x04;
+    public static final int STATE_GROUP = 0x04;
 
     /**
      * List of supported settings ORed.
@@ -103,10 +103,12 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
      */
     private Map<Integer, Integer> mSettingsValue = new HashMap<Integer, Integer>();
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSettings);
         out.writeInt(mSettingsValue.size());
@@ -116,8 +118,8 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<BluetoothAvrcpPlayerSettings> CREATOR
-            = new Parcelable.Creator<BluetoothAvrcpPlayerSettings>() {
+    public static final Parcelable.Creator<BluetoothAvrcpPlayerSettings> CREATOR =
+            new Parcelable.Creator<BluetoothAvrcpPlayerSettings>() {
         public BluetoothAvrcpPlayerSettings createFromParcel(Parcel in) {
             return new BluetoothAvrcpPlayerSettings(in);
         }
@@ -157,6 +159,7 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
      * Add a setting value.
      *
      * The setting must be part of possible settings in {@link getSettings()}.
+     *
      * @param setting setting config.
      * @param value value for the setting.
      * @throws IllegalStateException if the setting is not supported.
@@ -173,6 +176,7 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
      * Get a setting value.
      *
      * The setting must be part of possible settings in {@link getSettings()}.
+     *
      * @param setting setting config.
      * @return value value for the setting.
      * @throws IllegalStateException if the setting is not supported.

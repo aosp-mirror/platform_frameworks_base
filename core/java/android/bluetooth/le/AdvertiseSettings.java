@@ -86,7 +86,7 @@ public final class AdvertiseSettings implements Parcelable {
     private AdvertiseSettings(Parcel in) {
         mAdvertiseMode = in.readInt();
         mAdvertiseTxPowerLevel = in.readInt();
-        mAdvertiseConnectable = in.readInt() != 0 ? true : false;
+        mAdvertiseConnectable = in.readInt() != 0;
         mAdvertiseTimeoutMillis = in.readInt();
     }
 
@@ -121,9 +121,9 @@ public final class AdvertiseSettings implements Parcelable {
     @Override
     public String toString() {
         return "Settings [mAdvertiseMode=" + mAdvertiseMode
-             + ", mAdvertiseTxPowerLevel=" + mAdvertiseTxPowerLevel
-             + ", mAdvertiseConnectable=" + mAdvertiseConnectable
-             + ", mAdvertiseTimeoutMillis=" + mAdvertiseTimeoutMillis + "]";
+                + ", mAdvertiseTxPowerLevel=" + mAdvertiseTxPowerLevel
+                + ", mAdvertiseConnectable=" + mAdvertiseConnectable
+                + ", mAdvertiseTimeoutMillis=" + mAdvertiseTimeoutMillis + "]";
     }
 
     @Override
@@ -141,12 +141,12 @@ public final class AdvertiseSettings implements Parcelable {
 
     public static final Parcelable.Creator<AdvertiseSettings> CREATOR =
             new Creator<AdvertiseSettings>() {
-            @Override
+                @Override
                 public AdvertiseSettings[] newArray(int size) {
                     return new AdvertiseSettings[size];
                 }
 
-            @Override
+                @Override
                 public AdvertiseSettings createFromParcel(Parcel in) {
                     return new AdvertiseSettings(in);
                 }
@@ -164,10 +164,10 @@ public final class AdvertiseSettings implements Parcelable {
         /**
          * Set advertise mode to control the advertising power and latency.
          *
-         * @param advertiseMode Bluetooth LE Advertising mode, can only be one of
-         *            {@link AdvertiseSettings#ADVERTISE_MODE_LOW_POWER},
-         *            {@link AdvertiseSettings#ADVERTISE_MODE_BALANCED}, or
-         *            {@link AdvertiseSettings#ADVERTISE_MODE_LOW_LATENCY}.
+         * @param advertiseMode Bluetooth LE Advertising mode, can only be one of {@link
+         * AdvertiseSettings#ADVERTISE_MODE_LOW_POWER},
+         * {@link AdvertiseSettings#ADVERTISE_MODE_BALANCED},
+         * or {@link AdvertiseSettings#ADVERTISE_MODE_LOW_LATENCY}.
          * @throws IllegalArgumentException If the advertiseMode is invalid.
          */
         public Builder setAdvertiseMode(int advertiseMode) {
@@ -183,10 +183,10 @@ public final class AdvertiseSettings implements Parcelable {
          * Set advertise TX power level to control the transmission power level for the advertising.
          *
          * @param txPowerLevel Transmission power of Bluetooth LE Advertising, can only be one of
-         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_ULTRA_LOW},
-         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_LOW},
-         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_MEDIUM} or
-         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_HIGH}.
+         * {@link AdvertiseSettings#ADVERTISE_TX_POWER_ULTRA_LOW}, {@link
+         * AdvertiseSettings#ADVERTISE_TX_POWER_LOW},
+         * {@link AdvertiseSettings#ADVERTISE_TX_POWER_MEDIUM}
+         * or {@link AdvertiseSettings#ADVERTISE_TX_POWER_HIGH}.
          * @throws IllegalArgumentException If the {@code txPowerLevel} is invalid.
          */
         public Builder setTxPowerLevel(int txPowerLevel) {
@@ -201,8 +201,8 @@ public final class AdvertiseSettings implements Parcelable {
         /**
          * Set whether the advertisement type should be connectable or non-connectable.
          *
-         * @param connectable Controls whether the advertisment type will be connectable (true)
-         *                    or non-connectable (false).
+         * @param connectable Controls whether the advertisment type will be connectable (true) or
+         * non-connectable (false).
          */
         public Builder setConnectable(boolean connectable) {
             mConnectable = connectable;
@@ -211,14 +211,15 @@ public final class AdvertiseSettings implements Parcelable {
 
         /**
          * Limit advertising to a given amount of time.
-         * @param timeoutMillis Advertising time limit. May not exceed 180000 milliseconds.
-         *                       A value of 0 will disable the time limit.
+         *
+         * @param timeoutMillis Advertising time limit. May not exceed 180000 milliseconds. A value
+         * of 0 will disable the time limit.
          * @throws IllegalArgumentException If the provided timeout is over 180000 ms.
          */
         public Builder setTimeout(int timeoutMillis) {
             if (timeoutMillis < 0 || timeoutMillis > LIMITED_ADVERTISING_MAX_MILLIS) {
                 throw new IllegalArgumentException("timeoutMillis invalid (must be 0-"
-                                    + LIMITED_ADVERTISING_MAX_MILLIS + " milliseconds)");
+                        + LIMITED_ADVERTISING_MAX_MILLIS + " milliseconds)");
             }
             mTimeoutMillis = timeoutMillis;
             return this;
