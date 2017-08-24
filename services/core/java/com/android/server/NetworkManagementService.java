@@ -73,6 +73,7 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
 import android.os.PowerManager;
@@ -132,10 +133,27 @@ import java.util.concurrent.CountDownLatch;
  */
 public class NetworkManagementService extends INetworkManagementService.Stub
         implements Watchdog.Monitor {
+
+    /**
+     * Helper class that encapsulates NetworkManagementService dependencies and makes them
+     * easier to mock in unit tests.
+     */
+    static class SystemServices {
+        public IBinder getService(String name) {
+            return ServiceManager.getService(name);
+        }
+        public void registerLocalService(NetworkManagementInternal nmi) {
+            LocalServices.addService(NetworkManagementInternal.class, nmi);
+        }
+        public INetd getNetd() {
+            return NetdService.get();
+        }
+    }
+
     private static final String TAG = "NetworkManagement";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String NETD_TAG = "NetdConnector";
-    private static final String NETD_SERVICE_NAME = "netd";
+    static final String NETD_SERVICE_NAME = "netd";
 
     private static final int MAX_UID_RANGES_PER_COMMAND = 10;
 
@@ -216,6 +234,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private final Handler mFgHandler;
     private final Handler mDaemonHandler;
+
+    private final SystemServices mServices;
 
     private INetd mNetdService;
 
@@ -315,8 +335,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      *
      * @param context  Binder context for this service
      */
-    private NetworkManagementService(Context context, String socket) {
+    private NetworkManagementService(
+            Context context, String socket, SystemServices services) {
         mContext = context;
+        mServices = services;
 
         // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
         mFgHandler = new Handler(FgThread.get().getLooper());
@@ -338,7 +360,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
-        LocalServices.addService(NetworkManagementInternal.class, new LocalService());
+        mServices.registerLocalService(new LocalService());
 
         synchronized (mTetheringStatsProviders) {
             mTetheringStatsProviders.put(new NetdTetheringStatsProvider(), "netd");
@@ -352,11 +374,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mDaemonHandler = null;
         mFgHandler = null;
         mThread = null;
+        mServices = null;
     }
 
-    static NetworkManagementService create(Context context, String socket)
+    static NetworkManagementService create(Context context, String socket, SystemServices services)
             throws InterruptedException {
-        final NetworkManagementService service = new NetworkManagementService(context, socket);
+        final NetworkManagementService service =
+                new NetworkManagementService(context, socket, services);
         final CountDownLatch connectedSignal = service.mConnectedSignal;
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         service.mThread.start();
@@ -370,7 +394,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        return create(context, NETD_SERVICE_NAME);
+        return create(context, NETD_SERVICE_NAME, new SystemServices());
     }
 
     public void systemReady() {
@@ -390,8 +414,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (mBatteryStats != null) {
                 return mBatteryStats;
             }
-            mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
-                    BatteryStats.SERVICE_NAME));
+            mBatteryStats =
+                    IBatteryStats.Stub.asInterface(mServices.getService(BatteryStats.SERVICE_NAME));
             return mBatteryStats;
         }
     }
@@ -589,7 +613,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private void connectNativeNetdService() {
-        mNetdService = NetdService.get();
+        mNetdService = mServices.getNetd();
     }
 
     /**
