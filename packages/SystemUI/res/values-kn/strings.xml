@@ -259,10 +259,10 @@
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ಪರದೆಯನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋರ್ಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ಪರದೆಯು ಈಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ಪರದೆಯು ಇದೀಗ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋರ್ಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ಇಥರ್ನೆಟ್"</string>
@@ -279,7 +279,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> ಮೋಡ್"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ತಿರುಗುವಿಕೆ ಲಾಕ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋಟ್ರೇಟ್"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"ಸ್ಥಳ"</string>
@@ -775,4 +775,6 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್ ಮಾಡಬೇಕೆ?"</string>
+    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
+    <skip />
 </resources>

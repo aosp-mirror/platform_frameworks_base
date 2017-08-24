@@ -777,4 +777,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Fonda ishlayotgan ilovalar"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Mobil internet o‘chirib qo‘yilsinmi?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Ilova ruxsatnoma so‘roviga xalaqit qilayotgani tufayli, “Sozlamalar” ilovasi javobingizni tekshira olmaydi."</string>
 </resources>

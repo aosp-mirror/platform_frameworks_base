@@ -789,4 +789,6 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Выключыць мабільную перадачу даных?"</string>
+    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
+    <skip />
 </resources>

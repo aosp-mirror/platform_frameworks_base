@@ -775,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"បិទទិន្នន័យ​ចល័ត?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ការកំណត់​មិនអាច​ផ្ទៀងផ្ទាត់​ការឆ្លើយតប​របស់អ្នក​បាន​ទេ ដោយសារ​កម្មវិធី​កំពុង​លាក់​សំណើ​សុំការ​អនុញ្ញាត។"</string>
 </resources>
