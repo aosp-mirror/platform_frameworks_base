@@ -746,4 +746,15 @@ public class StaticLayoutTest {
             assertEquals(numEnglishLines, numPrivateLocaleLines);
         }
     }
+
+    @Test
+    public void testGetHeight_zeroMaxLines() {
+        final String text = "a\nb";
+        final TextPaint paint = new TextPaint();
+        final StaticLayout layout = StaticLayout.Builder.obtain(text, 0, text.length(), paint,
+                Integer.MAX_VALUE).setMaxLines(0).build();
+
+        assertEquals(0, layout.getHeight(true));
+        assertEquals(2, layout.getLineCount());
+    }
 }
