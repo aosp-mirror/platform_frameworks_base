@@ -101,10 +101,12 @@ static void RunDaemon(IDiagnostics* diagnostics) {
 
     std::vector<StringPiece> args;
     args.insert(args.end(), token_iter, tokenizer.end());
-    ExecuteCommand(command, args, diagnostics);
-    std::cout << "Done" << std::endl;
+    int ret = ExecuteCommand(command, args, diagnostics);
+    if (ret != 0) {
+      std::cerr << "Error" << std::endl;
+    }
+    std::cerr << "Done" << std::endl;
   }
-
   std::cout << "Exiting daemon" << std::endl;
 }
 
