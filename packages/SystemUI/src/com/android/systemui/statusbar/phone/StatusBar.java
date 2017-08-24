@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
-import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -1169,7 +1168,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             ExtensionFragmentListener.attachExtensonToFragment(container, QS.TAG, R.id.qs_frame,
                     Dependency.get(ExtensionController.class).newExtension(QS.class)
                             .withPlugin(QS.class)
-                            .withUiMode(UI_MODE_TYPE_CAR, () -> new CarQSFragment())
+                            .withFeature(
+                                    PackageManager.FEATURE_AUTOMOTIVE, () -> new CarQSFragment())
                             .withDefault(() -> new QSFragment())
                             .build());
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
