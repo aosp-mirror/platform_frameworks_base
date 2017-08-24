@@ -1186,10 +1186,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @param beforeStopping Whether this check is for an auto-enter-pip operation, that is to say
      *         the activity has requested to enter PiP when it would otherwise be stopped.
      *
-     * @return whether this activity is currently allowed to enter PIP, throwing an exception if
-     *         the activity is not currently visible and {@param noThrow} is not set.
+     * @return whether this activity is currently allowed to enter PIP.
      */
-    boolean checkEnterPictureInPictureState(String caller, boolean noThrow, boolean beforeStopping) {
+    boolean checkEnterPictureInPictureState(String caller, boolean beforeStopping) {
         if (!supportsPictureInPicture()) {
             return false;
         }
@@ -1237,13 +1236,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     return isNotLockedOrOnKeyguard && !hasPinnedStack;
                 }
             default:
-                if (noThrow) {
-                    return false;
-                } else {
-                    throw new IllegalStateException(caller
-                            + ": Current activity is not visible (state=" + state.name() + ") "
-                            + "r=" + this);
-                }
+                return false;
         }
     }
 
