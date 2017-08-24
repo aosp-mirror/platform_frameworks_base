@@ -48,6 +48,7 @@ import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,7 @@ class PinnedStackController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "PinnedStackController" : TAG_WM;
 
+    public static final float INVALID_SNAP_FRACTION = -1f;
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final Handler mHandler = UiThread.getHandler();
@@ -101,6 +103,8 @@ class PinnedStackController {
     private float mDefaultAspectRatio;
     private Point mScreenEdgeInsets;
     private int mCurrentMinSize;
+    private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
+    private WeakReference<AppWindowToken> mLastPipActivity = null;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
@@ -112,6 +116,7 @@ class PinnedStackController {
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpAnimatingBoundsRect = new Rect();
     private final Point mTmpDisplaySize = new Point();
+
 
     /**
      * The callback object passed to listeners for them to notify the controller of state changes.
@@ -250,9 +255,35 @@ class PinnedStackController {
     }
 
     /**
+     * Saves the current snap fraction for re-entry of the current activity into PiP.
+     */
+    void saveReentrySnapFraction(final AppWindowToken token, final Rect stackBounds) {
+        mReentrySnapFraction = getSnapFraction(stackBounds);
+        mLastPipActivity = new WeakReference<>(token);
+    }
+
+    /**
+     * Resets the last saved snap fraction so that the default bounds will be returned.
+     */
+    void resetReentrySnapFraction(AppWindowToken token) {
+        if (mLastPipActivity != null && mLastPipActivity.get() == token) {
+            mReentrySnapFraction = INVALID_SNAP_FRACTION;
+            mLastPipActivity = null;
+        }
+    }
+
+    /**
      * @return the default bounds to show the PIP when there is no active PIP.
      */
-    Rect getDefaultBounds() {
+    Rect getDefaultOrLastSavedBounds() {
+        return getDefaultBounds(mReentrySnapFraction);
+    }
+
+    /**
+     * @return the default bounds to show the PIP, if a {@param snapFraction} is provided, then it
+     * will apply the default bounds to the provided snap fraction.
+     */
+    Rect getDefaultBounds(float snapFraction) {
         synchronized (mService.mWindowMap) {
             final Rect insetBounds = new Rect();
             getInsetBounds(insetBounds);
@@ -260,8 +291,14 @@ class PinnedStackController {
             final Rect defaultBounds = new Rect();
             final Size size = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
                     mDefaultMinSize, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-            Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
-                    0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
+            if (snapFraction != INVALID_SNAP_FRACTION) {
+                defaultBounds.set(0, 0, size.getWidth(), size.getHeight());
+                final Rect movementBounds = getMovementBounds(defaultBounds);
+                mSnapAlgorithm.applySnapFraction(defaultBounds, movementBounds, snapFraction);
+            } else {
+                Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
+                        0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
+            }
             return defaultBounds;
         }
     }
@@ -299,9 +336,7 @@ class PinnedStackController {
             final Rect postChangeStackBounds = mTmpRect;
 
             // Calculate the snap fraction of the current stack along the old movement bounds
-            final Rect preChangeMovementBounds = getMovementBounds(postChangeStackBounds);
-            final float snapFraction = mSnapAlgorithm.getSnapFraction(postChangeStackBounds,
-                    preChangeMovementBounds);
+            final float snapFraction = getSnapFraction(postChangeStackBounds);
             mDisplayInfo.copyFrom(displayInfo);
 
             // Calculate the stack bounds in the new orientation to the same same fraction along the
@@ -414,7 +449,7 @@ class PinnedStackController {
             try {
                 final Rect insetBounds = new Rect();
                 getInsetBounds(insetBounds);
-                final Rect normalBounds = getDefaultBounds();
+                final Rect normalBounds = getDefaultBounds(INVALID_SNAP_FRACTION);
                 if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
                     transformBoundsToAspectRatio(normalBounds, mAspectRatio,
                             false /* useCurrentMinEdgeSize */);
@@ -486,6 +521,14 @@ class PinnedStackController {
     }
 
     /**
+     * @return the default snap fraction to apply instead of the default gravity when calculating
+     *         the default stack bounds when first entering PiP.
+     */
+    private float getSnapFraction(Rect stackBounds) {
+        return mSnapAlgorithm.getSnapFraction(stackBounds, getMovementBounds(stackBounds));
+    }
+
+    /**
      * @return the pixels for a given dp value.
      */
     private int dpToPx(float dpValue, DisplayMetrics dm) {
@@ -494,7 +537,8 @@ class PinnedStackController {
 
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "PinnedStackController");
-        pw.print(prefix + "  defaultBounds="); getDefaultBounds().printShortString(pw);
+        pw.print(prefix + "  defaultBounds=");
+        getDefaultBounds(INVALID_SNAP_FRACTION).printShortString(pw);
         pw.println();
         mService.getStackBounds(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mTmpRect);
         pw.print(prefix + "  movementBounds="); getMovementBounds(mTmpRect).printShortString(pw);
@@ -516,7 +560,7 @@ class PinnedStackController {
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        getDefaultBounds().writeToProto(proto, DEFAULT_BOUNDS);
+        getDefaultBounds(INVALID_SNAP_FRACTION).writeToProto(proto, DEFAULT_BOUNDS);
         mService.getStackBounds(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mTmpRect);
         getMovementBounds(mTmpRect).writeToProto(proto, MOVEMENT_BOUNDS);
         proto.end(token);
