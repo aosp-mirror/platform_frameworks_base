@@ -65,7 +65,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     // Device supports PANU but not NAP: remove PanProfile after device disconnects from NAP
     private boolean mLocalNapRoleConnected;
 
-    private boolean mVisible;
+    private boolean mJustDiscovered;
 
     private int mMessageRejectionCount;
 
@@ -360,7 +360,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         migrateMessagePermissionChoice();
         fetchMessageRejectionCount();
 
-        mVisible = false;
         dispatchAttributesChanged();
     }
 
@@ -431,13 +430,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         dispatchAttributesChanged();
     }
 
-    public boolean isVisible() {
-        return mVisible;
-    }
-
-    public void setVisible(boolean visible) {
-        if (mVisible != visible) {
-            mVisible = visible;
+    public void setJustDiscovered(boolean justDiscovered) {
+        if (mJustDiscovered != justDiscovered) {
+            mJustDiscovered = justDiscovered;
             dispatchAttributesChanged();
         }
     }
@@ -661,8 +656,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             (getBondState() == BluetoothDevice.BOND_BONDED ? 1 : 0);
         if (comparison != 0) return comparison;
 
-        // Visible above not visible
-        comparison = (another.mVisible ? 1 : 0) - (mVisible ? 1 : 0);
+        // Just discovered above discovered in the past
+        comparison = (another.mJustDiscovered ? 1 : 0) - (mJustDiscovered ? 1 : 0);
         if (comparison != 0) return comparison;
 
         // Stronger signal above weaker signal
