@@ -414,16 +414,36 @@ TEST(ArtifactTest, Simple) {
   Artifact x86;
   x86.abi_group = {"x86"};
 
-  auto x86_result = x86.ToArtifactName("something.${abi}.apk", &diag);
+  auto x86_result = x86.ToArtifactName("something.${abi}.apk", "", &diag);
   ASSERT_TRUE(x86_result);
   EXPECT_EQ(x86_result.value(), "something.x86.apk");
 
   Artifact arm;
   arm.abi_group = {"armeabi-v7a"};
 
-  auto arm_result = arm.ToArtifactName("app.${abi}.apk", &diag);
-  ASSERT_TRUE(arm_result);
-  EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+  {
+    auto arm_result = arm.ToArtifactName("app.${abi}.apk", "", &diag);
+    ASSERT_TRUE(arm_result);
+    EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+  }
+
+  {
+    auto arm_result = arm.ToArtifactName("app.${abi}.apk", "different_name.apk", &diag);
+    ASSERT_TRUE(arm_result);
+    EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+  }
+
+  {
+    auto arm_result = arm.ToArtifactName("${basename}.${abi}.apk", "app.apk", &diag);
+    ASSERT_TRUE(arm_result);
+    EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+  }
+
+  {
+    auto arm_result = arm.ToArtifactName("app.${abi}.${ext}", "app.apk", &diag);
+    ASSERT_TRUE(arm_result);
+    EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+  }
 }
 
 TEST(ArtifactTest, Complex) {
@@ -436,10 +456,40 @@ TEST(ArtifactTest, Complex) {
   artifact.locale_group = {"en-AU"};
   artifact.android_sdk_group = {"26"};
 
-  auto result = artifact.ToArtifactName(
-      "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", &diag);
-  ASSERT_TRUE(result);
-  EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+  {
+    auto result = artifact.ToArtifactName(
+        "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", "", &diag);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+  }
+
+  {
+    auto result = artifact.ToArtifactName(
+        "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", "app.apk", &diag);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+  }
+
+  {
+    auto result = artifact.ToArtifactName(
+        "${basename}.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.apk", "app.apk", &diag);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+  }
+
+  {
+    auto result = artifact.ToArtifactName(
+        "app.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}.${ext}", "app.apk", &diag);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+  }
+
+  {
+    auto result = artifact.ToArtifactName(
+        "${basename}.${density}_${locale}_${feature}_${gl}.sdk${sdk}.${abi}", "app.apk", &diag);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+  }
 }
 
 TEST(ArtifactTest, Missing) {
@@ -447,16 +497,20 @@ TEST(ArtifactTest, Missing) {
   Artifact x86;
   x86.abi_group = {"x86"};
 
-  EXPECT_FALSE(x86.ToArtifactName("something.${density}.apk", &diag));
-  EXPECT_FALSE(x86.ToArtifactName("something.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.${density}.apk", "", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.apk", "", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.${density}.apk", "something.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.apk", "something.apk", &diag));
 }
 
 TEST(ArtifactTest, Empty) {
   StdErrDiagnostics diag;
   Artifact artifact;
 
-  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.apk", &diag));
-  EXPECT_TRUE(artifact.ToArtifactName("something.apk", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.apk", "", &diag));
+  EXPECT_TRUE(artifact.ToArtifactName("something.apk", "", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.apk", "something.apk", &diag));
+  EXPECT_TRUE(artifact.ToArtifactName("something.apk", "something.apk", &diag));
 }
 
 TEST(ArtifactTest, Repeated) {
@@ -464,8 +518,9 @@ TEST(ArtifactTest, Repeated) {
   Artifact artifact;
   artifact.screen_density_group = {"mdpi"};
 
-  ASSERT_TRUE(artifact.ToArtifactName("something.${density}.apk", &diag));
-  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.${density}.apk", &diag));
+  ASSERT_TRUE(artifact.ToArtifactName("something.${density}.apk", "", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("something.${density}.${density}.apk", "", &diag));
+  ASSERT_TRUE(artifact.ToArtifactName("something.${density}.apk", "something.apk", &diag));
 }
 
 TEST(ArtifactTest, Nesting) {
@@ -473,9 +528,9 @@ TEST(ArtifactTest, Nesting) {
   Artifact x86;
   x86.abi_group = {"x86"};
 
-  EXPECT_FALSE(x86.ToArtifactName("something.${abi${density}}.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.${abi${density}}.apk", "", &diag));
 
-  const Maybe<std::string>& name = x86.ToArtifactName("something.${abi${abi}}.apk", &diag);
+  const Maybe<std::string>& name = x86.ToArtifactName("something.${abi${abi}}.apk", "", &diag);
   ASSERT_TRUE(name);
   EXPECT_EQ(name.value(), "something.${abix86}.apk");
 }
@@ -486,12 +541,12 @@ TEST(ArtifactTest, Recursive) {
   artifact.device_feature_group = {"${gl}"};
   artifact.gl_texture_group = {"glx1"};
 
-  EXPECT_FALSE(artifact.ToArtifactName("app.${feature}.${gl}.apk", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("app.${feature}.${gl}.apk", "", &diag));
 
   artifact.device_feature_group = {"df1"};
   artifact.gl_texture_group = {"${feature}"};
   {
-    const auto& result = artifact.ToArtifactName("app.${feature}.${gl}.apk", &diag);
+    const auto& result = artifact.ToArtifactName("app.${feature}.${gl}.apk", "", &diag);
     ASSERT_TRUE(result);
     EXPECT_EQ(result.value(), "app.df1.${feature}.apk");
   }
@@ -501,7 +556,7 @@ TEST(ArtifactTest, Recursive) {
   artifact.device_feature_group = {"${gl}"};
   artifact.gl_texture_group = {"glx1"};
   {
-    const auto& result = artifact.ToArtifactName("app.${feature}.apk", &diag);
+    const auto& result = artifact.ToArtifactName("app.${feature}.apk", "", &diag);
     ASSERT_TRUE(result);
     EXPECT_EQ(result.value(), "app.glx1.apk");
   }

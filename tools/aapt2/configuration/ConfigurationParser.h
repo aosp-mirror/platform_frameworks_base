@@ -51,13 +51,11 @@ struct Artifact {
   Maybe<std::string> gl_texture_group;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> ToArtifactName(const android::StringPiece& format, IDiagnostics* diag,
-                                    const android::StringPiece& base_name = "",
-                                    const android::StringPiece& ext = "apk") const;
+  Maybe<std::string> ToArtifactName(const android::StringPiece& format,
+                                    const android::StringPiece& apk_name, IDiagnostics* diag) const;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> Name(const android::StringPiece& base_name, const android::StringPiece& ext,
-                          IDiagnostics* diag) const;
+  Maybe<std::string> Name(const android::StringPiece& apk_name, IDiagnostics* diag) const;
 };
 
 /** Enumeration of currently supported ABIs. */
@@ -139,6 +137,10 @@ struct PostProcessingConfiguration {
   Group<AndroidSdk> android_sdk_groups;
   Group<DeviceFeature> device_feature_groups;
   Group<GlTexture> gl_texture_groups;
+
+  /** Helper method that generates a list of artifact names and returns true on success. */
+  bool AllArtifactNames(const android::StringPiece& apk_name,
+                        std::vector<std::string>* artifact_names, IDiagnostics* diag) const;
 };
 
 }  // namespace configuration
