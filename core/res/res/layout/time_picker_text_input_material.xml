@@ -80,6 +80,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/input_hour"
             android:layout_alignStart="@id/input_hour"
+            android:accessibilityLiveRegion="assertive"
             android:textColor="?attr/colorError"
             android:text="@string/time_picker_input_error" />
     </RelativeLayout>

@@ -8046,7 +8046,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Activity supports picture-in-picture, now check that we can enter PiP at this
                 // point, if it is
                 if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
-                        false /* noThrow */, false /* beforeStopping */)) {
+                        false /* beforeStopping */)) {
                     return false;
                 }
 
@@ -13110,6 +13110,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (activity == null) {
                     Slog.w(TAG, "enqueueAssistContext failed: activity for token=" + activityToken
                             + " couldn't be found");
+                    return null;
+                }
+                if (activity.app == null || activity.app.thread == null) {
+                    Slog.w(TAG, "enqueueAssistContext failed: no process for " + activity);
                     return null;
                 }
             }

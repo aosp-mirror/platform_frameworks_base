@@ -48,6 +48,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -69,6 +70,7 @@ public class OffloadController {
     private final INetworkManagementService mNms;
     private final ITetheringStatsProvider mStatsProvider;
     private final SharedLog mLog;
+    private final HashMap<String, LinkProperties> mDownstreams;
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
@@ -100,6 +102,7 @@ public class OffloadController {
         mNms = nms;
         mStatsProvider = new OffloadTetheringStatsProvider();
         mLog = log.forSubComponent(TAG);
+        mDownstreams = new HashMap<>();
         mExemptPrefixes = new HashSet<>();
         mLastLocalPrefixStrs = new HashSet<>();
 
@@ -257,6 +260,11 @@ public class OffloadController {
         }
     }
 
+    private String currentUpstreamInterface() {
+        return (mUpstreamLinkProperties != null)
+                ? mUpstreamLinkProperties.getInterfaceName() : null;
+    }
+
     private void maybeUpdateStats(String iface) {
         if (TextUtils.isEmpty(iface)) {
             return;
@@ -281,9 +289,7 @@ public class OffloadController {
 
     private boolean maybeUpdateDataLimit(String iface) {
         // setDataLimit may only be called while offload is occuring on this upstream.
-        if (!started() ||
-                mUpstreamLinkProperties == null ||
-                !TextUtils.equals(iface, mUpstreamLinkProperties.getInterfaceName())) {
+        if (!started() || !TextUtils.equals(iface, currentUpstreamInterface())) {
             return true;
         }
 
@@ -296,9 +302,7 @@ public class OffloadController {
     }
 
     private void updateStatsForCurrentUpstream() {
-        if (mUpstreamLinkProperties != null) {
-            maybeUpdateStats(mUpstreamLinkProperties.getInterfaceName());
-        }
+        maybeUpdateStats(currentUpstreamInterface());
     }
 
     public void setUpstreamLinkProperties(LinkProperties lp) {
@@ -325,17 +329,42 @@ public class OffloadController {
     }
 
     public void notifyDownstreamLinkProperties(LinkProperties lp) {
+        final String ifname = lp.getInterfaceName();
+        final LinkProperties oldLp = mDownstreams.put(ifname, new LinkProperties(lp));
+        if (Objects.equals(oldLp, lp)) return;
+
         if (!started()) return;
 
-        // TODO: Cache LinkProperties on a per-ifname basis and compute the
-        // deltas, calling addDownstream()/removeDownstream() accordingly.
+        final List<RouteInfo> oldRoutes = (oldLp != null) ? oldLp.getRoutes() : new ArrayList<>();
+        final List<RouteInfo> newRoutes = lp.getRoutes();
+
+        // For each old route, if not in new routes: remove.
+        for (RouteInfo oldRoute : oldRoutes) {
+            if (shouldIgnoreDownstreamRoute(oldRoute)) continue;
+            if (!newRoutes.contains(oldRoute)) {
+                mHwInterface.removeDownstreamPrefix(ifname, oldRoute.getDestination().toString());
+            }
+        }
+
+        // For each new route, if not in old routes: add.
+        for (RouteInfo newRoute : newRoutes) {
+            if (shouldIgnoreDownstreamRoute(newRoute)) continue;
+            if (!oldRoutes.contains(newRoute)) {
+                mHwInterface.addDownstreamPrefix(ifname, newRoute.getDestination().toString());
+            }
+        }
     }
 
     public void removeDownstreamInterface(String ifname) {
+        final LinkProperties lp = mDownstreams.remove(ifname);
+        if (lp == null) return;
+
         if (!started()) return;
 
-        // TODO: Check cache for LinkProperties of ifname and, if present,
-        // call removeDownstream() accordingly.
+        for (RouteInfo route : lp.getRoutes()) {
+            if (shouldIgnoreDownstreamRoute(route)) continue;
+            mHwInterface.removeDownstreamPrefix(ifname, route.getDestination().toString());
+        }
     }
 
     private boolean isOffloadDisabled() {
@@ -440,6 +469,13 @@ public class OffloadController {
         final HashSet<String> localPrefixStrs = new HashSet<>();
         for (IpPrefix pfx : prefixSet) localPrefixStrs.add(pfx.toString());
         return localPrefixStrs;
+    }
+
+    private static boolean shouldIgnoreDownstreamRoute(RouteInfo route) {
+        // Ignore any link-local routes.
+        if (!route.getDestinationLinkAddress().isGlobalPreferred()) return true;
+
+        return false;
     }
 
     public void dump(IndentingPrintWriter pw) {

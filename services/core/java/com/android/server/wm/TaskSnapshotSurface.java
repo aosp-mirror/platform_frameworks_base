@@ -320,6 +320,10 @@ class TaskSnapshotSurface implements StartingSurface {
             mChildSurfaceControl.show();
             mChildSurfaceControl.setWindowCrop(crop);
             mChildSurfaceControl.setPosition(frame.left, frame.top);
+
+            // Scale the mismatch dimensions to fill the task bounds
+            final float scale = 1 / mSnapshot.getScale();
+            mChildSurfaceControl.setMatrix(scale, 0, 0, scale);
         } finally {
             SurfaceControl.closeTransaction();
         }
@@ -332,6 +336,11 @@ class TaskSnapshotSurface implements StartingSurface {
         mSurface.release();
     }
 
+    /**
+     * Calculates the snapshot crop in snapshot coordinate space.
+     *
+     * @return crop rect in snapshot coordinate space.
+     */
     @VisibleForTesting
     Rect calculateSnapshotCrop() {
         final Rect rect = new Rect();
@@ -340,16 +349,28 @@ class TaskSnapshotSurface implements StartingSurface {
 
         // Let's remove all system decorations except the status bar, but only if the task is at the
         // very top of the screen.
-        rect.inset(insets.left, mTaskBounds.top != 0 ? insets.top : 0, insets.right, insets.bottom);
+        rect.inset((int) (insets.left * mSnapshot.getScale()),
+                mTaskBounds.top != 0 ? (int) (insets.top * mSnapshot.getScale()) : 0,
+                (int) (insets.right * mSnapshot.getScale()),
+                (int) (insets.bottom * mSnapshot.getScale()));
         return rect;
     }
 
+    /**
+     * Calculates the snapshot frame in window coordinate space from crop.
+     *
+     * @param crop rect that is in snapshot coordinate space.
+     */
     @VisibleForTesting
     Rect calculateSnapshotFrame(Rect crop) {
         final Rect frame = new Rect(crop);
+        final float scale = mSnapshot.getScale();
+
+        // Rescale the frame from snapshot to window coordinate space
+        frame.scale(1 / scale);
 
         // By default, offset it to to top/left corner
-        frame.offsetTo(-crop.left, -crop.top);
+        frame.offsetTo((int) (-crop.left / scale), (int) (-crop.top / scale));
 
         // However, we also need to make space for the navigation bar on the left side.
         final int colorViewLeftInset = getColorViewLeftInset(mStableInsets.left,

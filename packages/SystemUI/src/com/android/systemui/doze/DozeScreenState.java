@@ -36,10 +36,21 @@ public class DozeScreenState implements DozeMachine.Part {
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         int screenState = newState.screenState();
+
+        if (newState == DozeMachine.State.FINISH) {
+            // Make sure not to apply the screen state after DozeService was destroyed.
+            mPendingScreenState = Display.STATE_UNKNOWN;
+            mHandler.removeCallbacks(mApplyPendingScreenState);
+
+            applyScreenState(screenState);
+            return;
+        }
+
         if (screenState == Display.STATE_UNKNOWN) {
             // We'll keep it in the existing state
             return;
         }
+
         boolean messagePending = mHandler.hasCallbacks(mApplyPendingScreenState);
         if (messagePending || oldState == DozeMachine.State.INITIALIZED) {
             // During initialization, we hide the navigation bar. That is however only applied after

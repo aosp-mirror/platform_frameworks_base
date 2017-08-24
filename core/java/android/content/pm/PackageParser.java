@@ -97,6 +97,7 @@ import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
+import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -2824,14 +2825,14 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
         final int version = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestUsesStaticLibrary_version, -1);
-        String certSha256 = sa.getNonResourceString(com.android.internal.R.styleable
+        String certSha256Digest = sa.getNonResourceString(com.android.internal.R.styleable
                 .AndroidManifestUsesStaticLibrary_certDigest);
         sa.recycle();
 
         // Since an APK providing a static shared lib can only provide the lib - fail if malformed
-        if (lname == null || version < 0 || certSha256 == null) {
+        if (lname == null || version < 0 || certSha256Digest == null) {
             outError[0] = "Bad uses-static-library declaration name: " + lname + " version: "
-                    + version + " certDigest" + certSha256;
+                    + version + " certDigest" + certSha256Digest;
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             XmlUtils.skipCurrentTag(parser);
             return false;
@@ -2848,16 +2849,73 @@ public class PackageParser {
         lname = lname.intern();
         // We allow ":" delimiters in the SHA declaration as this is the format
         // emitted by the certtool making it easy for developers to copy/paste.
-        certSha256 = certSha256.replace(":", "").toLowerCase();
+        certSha256Digest = certSha256Digest.replace(":", "").toLowerCase();
+
+        // Fot apps targeting O-MR1 we require explicit enumeration of all certs.
+        String[] additionalCertSha256Digests = EmptyArray.STRING;
+        if (pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.O) {
+            additionalCertSha256Digests = parseAdditionalCertificates(res, parser, outError);
+            if (additionalCertSha256Digests == null) {
+                return false;
+            }
+        } else {
+            XmlUtils.skipCurrentTag(parser);
+        }
+
+        final String[] certSha256Digests = new String[additionalCertSha256Digests.length + 1];
+        certSha256Digests[0] = certSha256Digest;
+        System.arraycopy(additionalCertSha256Digests, 0, certSha256Digests,
+                1, additionalCertSha256Digests.length);
+
         pkg.usesStaticLibraries = ArrayUtils.add(pkg.usesStaticLibraries, lname);
         pkg.usesStaticLibrariesVersions = ArrayUtils.appendInt(
                 pkg.usesStaticLibrariesVersions, version, true);
-        pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String.class,
-                pkg.usesStaticLibrariesCertDigests, certSha256, true);
-
-        XmlUtils.skipCurrentTag(parser);
+        pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
+                pkg.usesStaticLibrariesCertDigests, certSha256Digests, true);
 
         return true;
+    }
+
+    private String[] parseAdditionalCertificates(Resources resources, XmlResourceParser parser,
+            String[] outError) throws XmlPullParserException, IOException {
+        String[] certSha256Digests = EmptyArray.STRING;
+
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            final String nodeName = parser.getName();
+            if (nodeName.equals("additional-certificate")) {
+                final TypedArray sa = resources.obtainAttributes(parser, com.android.internal.
+                        R.styleable.AndroidManifestAdditionalCertificate);
+                String certSha256Digest = sa.getNonResourceString(com.android.internal.
+                        R.styleable.AndroidManifestAdditionalCertificate_certDigest);
+                sa.recycle();
+
+                if (TextUtils.isEmpty(certSha256Digest)) {
+                    outError[0] = "Bad additional-certificate declaration with empty"
+                            + " certDigest:" + certSha256Digest;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    XmlUtils.skipCurrentTag(parser);
+                    sa.recycle();
+                    return null;
+                }
+
+                // We allow ":" delimiters in the SHA declaration as this is the format
+                // emitted by the certtool making it easy for developers to copy/paste.
+                certSha256Digest = certSha256Digest.replace(":", "").toLowerCase();
+                certSha256Digests = ArrayUtils.appendElement(String.class,
+                        certSha256Digests, certSha256Digest);
+            } else {
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+
+        return certSha256Digests;
     }
 
     private boolean parseUsesPermission(Package pkg, Resources res, XmlResourceParser parser)
@@ -5826,7 +5884,7 @@ public class PackageParser {
         public ArrayList<String> usesLibraries = null;
         public ArrayList<String> usesStaticLibraries = null;
         public int[] usesStaticLibrariesVersions = null;
-        public String[] usesStaticLibrariesCertDigests = null;
+        public String[][] usesStaticLibrariesCertDigests = null;
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
@@ -6324,8 +6382,10 @@ public class PackageParser {
                 internStringArrayList(usesStaticLibraries);
                 usesStaticLibrariesVersions = new int[libCount];
                 dest.readIntArray(usesStaticLibrariesVersions);
-                usesStaticLibrariesCertDigests = new String[libCount];
-                dest.readStringArray(usesStaticLibrariesCertDigests);
+                usesStaticLibrariesCertDigests = new String[libCount][];
+                for (int i = 0; i < libCount; i++) {
+                    usesStaticLibrariesCertDigests[i] = dest.createStringArray();
+                }
             }
 
             preferredActivityFilters = new ArrayList<>();
@@ -6471,7 +6531,9 @@ public class PackageParser {
                 dest.writeInt(usesStaticLibraries.size());
                 dest.writeStringList(usesStaticLibraries);
                 dest.writeIntArray(usesStaticLibrariesVersions);
-                dest.writeStringArray(usesStaticLibrariesCertDigests);
+                for (String[] usesStaticLibrariesCertDigest : usesStaticLibrariesCertDigests) {
+                    dest.writeStringArray(usesStaticLibrariesCertDigest);
+                }
             }
 
             dest.writeParcelableList(preferredActivityFilters, flags);

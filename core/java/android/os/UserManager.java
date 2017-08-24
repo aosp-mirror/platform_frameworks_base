@@ -322,6 +322,8 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring Tethering
      * & portable hotspots. This can only be set by device owners and profile owners on the
      * primary user. The default value is <code>false</code>.
+     * <p>In Android 9.0 or higher, if tethering is enabled when this restriction is set,
+     * tethering will be automatically turned off.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -495,8 +497,11 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adjusting the master volume. If set, the master volume
-     * will be muted. This can be set by device owners and profile owners. The default value is
-     * <code>false</code>.
+     * will be muted. This can be set by device owners from API 21 and profile owners from API 24.
+     * The default value is <code>false</code>.
+     *
+     * <p>When the restriction is set by profile owners, then it only applies to relevant
+     * profiles.
      *
      * <p>This restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
