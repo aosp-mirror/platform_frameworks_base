@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Meldingen"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo voor de detailhandel"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-verbinding"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Apps uitgevoerd op achtergrond"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> is op de achtergrond actief"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> apps worden uitgevoerd op de achtergrond"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Apps die de batterij gebruiken"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruikt de batterij"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> apps gebruiken de batterij"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tik voor batterij- en datagebruik"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Veilige modus"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Verbonden met <xliff:g id="SESSION">%s</xliff:g>. Tik om het netwerk te beheren."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Always-on VPN-verbinding maken…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN-verbinding"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Verbinding met Always-on VPN verbroken"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fout met Always-on VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Netwerk- of VPN-instellingen wijzigen"</string>
     <string name="upload_file" msgid="2897957172366730416">"Bestand kiezen"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Geen bestand geselecteerd"</string>
     <string name="reset" msgid="2448168080964209908">"Resetten"</string>

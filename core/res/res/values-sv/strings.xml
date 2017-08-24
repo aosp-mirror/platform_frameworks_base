@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Varningar"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo för återförsäljare"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-anslutning"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Appar körs i bakgrunden"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> körs i bakgrunden"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> appar körs i bakgrunden"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Appar som drar batteri"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> drar batteri"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> appar drar batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tryck för information om batteri- och dataanvändning"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Säkert läge"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Ansluten till <xliff:g id="SESSION">%s</xliff:g>. Knacka lätt för att hantera nätverket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Ansluter till Always-on VPN ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Ansluten till Always-on VPN"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Frånkopplad från Always-on VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fel på Always-on VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Ändra inställningarna för nätverk eller VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Välj fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil har valts"</string>
     <string name="reset" msgid="2448168080964209908">"Återställ"</string>

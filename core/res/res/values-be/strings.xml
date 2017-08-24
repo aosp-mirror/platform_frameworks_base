@@ -254,9 +254,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Абвесткi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Дэманстрацыйны рэжым для пунктаў продажу"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Падключэнне USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Праграмы, якія працуюць у фонавым рэжыме"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> працуе ў фонавым рэжыме"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Праграмы (<xliff:g id="NUMBER">%1$d</xliff:g>) працуюць у фонавым рэжыме"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Праграмы, якія выкарыстоўваюць акумулятар"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> выкарыстоўвае акумулятар"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Наступная колькасць праграм выкарыстоўваюць акумулятар: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Бяспечны рэжым"</string>
@@ -268,7 +268,7 @@
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да вашых кантактаў"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Месцазнаходжанне"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"атрымліваць доступ да месцазнаходжання гэтай прылады"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да звестак аб месцазнаходжанні гэтай прылады"</string>
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Дазволіць праграме &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да звестак аб месцазнаходжанні гэтай прылады"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Каляндар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"атрымліваць доступ да вашага календара"</string>
     <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да вашага календара"</string>
@@ -1338,11 +1338,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Падлучаны да <xliff:g id="SESSION">%s</xliff:g>. Націсніце, каб кiраваць сеткай."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Падключэнне заўсёды ўключанага VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Заўсёды ўключаны i падключаны VPN"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Адключана ад заўсёды ўключанай VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Памылка заўсёды ўключанага VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Змяніць налады сеткі ці VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выберыце файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Файл не выбраны"</string>
     <string name="reset" msgid="2448168080964209908">"Скінуць"</string>

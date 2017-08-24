@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"通知"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"販売店デモ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 接続"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"バックグラウンドで実行中のアプリ"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」がバックグラウンドで実行中です"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリがバックグラウンドで実行中です"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"アプリが電池を消費しています"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"タップして電池やデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>に接続しました。ネットワークを管理するにはタップしてください。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPNに常時接続しています…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPNに常時接続しました"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"常時接続 VPN から切断されました"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"常時接続VPNのエラー"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"ネットワークまたは VPN の設定を変更できます"</string>
     <string name="upload_file" msgid="2897957172366730416">"ファイルを選択"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ファイルが選択されていません"</string>
     <string name="reset" msgid="2448168080964209908">"リセット"</string>

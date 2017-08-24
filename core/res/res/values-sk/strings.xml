@@ -254,9 +254,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornenia"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Predajná ukážka"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Pripojenie USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikácie sú spustené na pozadí"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je spustená na pozadí"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Niekoľko aplikácií (<xliff:g id="NUMBER">%1$d</xliff:g>) je spustených na pozadí"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikácie spotrebúvajú batériu"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> používa batériu"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Aplikácie (<xliff:g id="NUMBER">%1$d</xliff:g>) používajú batériu"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Klepnutím zobrazíte podrobnosti o batérii a spotrebe dát"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Núdzový režim"</string>
@@ -1338,11 +1338,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Pripojené k relácii <xliff:g id="SESSION">%s</xliff:g>. Po klepnutí môžete sieť spravovať."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Pripájanie k vždy zapnutej sieti VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Pripojenie k vždy zapnutej sieti VPN"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Odpojené od vždy zapnutej siete VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Chyba vždy zapnutej siete VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Zmeniť sieť alebo nastavenia VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zvoliť súbor"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie je vybratý žiadny súbor"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>

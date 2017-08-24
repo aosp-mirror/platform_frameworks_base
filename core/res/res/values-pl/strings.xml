@@ -254,9 +254,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerty"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Tryb demo dla sklepów"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Połączenie USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikacje działające w tle"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> działa w tle"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Aplikacje (<xliff:g id="NUMBER">%1$d</xliff:g>) działają w tle"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacje zużywające baterię"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Liczba aplikacji zużywających baterię: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i transmisji danych"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
@@ -1338,11 +1338,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Nawiązano połączenie: <xliff:g id="SESSION">%s</xliff:g>. Dotknij, aby zarządzać siecią."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Łączę ze stałą siecią VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Połączono ze stałą siecią VPN"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Rozłączono ze stałą siecią VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Błąd stałej sieci VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Zmień ustawienia sieciowe lub ustawienia sieci VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Wybierz plik"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie wybrano pliku"</string>
     <string name="reset" msgid="2448168080964209908">"Resetuj"</string>

@@ -246,9 +246,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Arifa"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Onyesho la duka la rejareja"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Muunganisho wa USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Programu zinatumika chinichini"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumika chinichini"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Programu <xliff:g id="NUMBER">%1$d</xliff:g> zinatumika chinichini"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Programu zinazotumia betri"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumia betri"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Programu <xliff:g id="NUMBER">%1$d</xliff:g> zinatumia betri"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Gonga ili upate maelezo kuhusu betri na matumizi ya data"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
@@ -978,7 +978,7 @@
     <string name="dial" msgid="4204975095406423102">"Simu"</string>
     <string name="map" msgid="6068210738233985748">"Ramani"</string>
     <string name="browse" msgid="6993590095938149861">"Kivinjari"</string>
-    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhafadhi inakwisha"</string>
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Hifadhi haitoshi kwa ajili ya mfumo. Hakikisha una MB 250 za nafasi ya hifadhi isiyotumika na uanzishe upya."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumiwa"</string>
@@ -1292,11 +1292,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Imeunganishwa kwa <xliff:g id="SESSION">%s</xliff:g>. Gonga ili kudhibiti mtandao"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Kila mara VPN iliyowashwa inaunganishwa…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Kila mara VPN iliyowashwa imeunganishwa"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Imeondolewa kwenye VPN iliyowashwa kila wakati"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Kila mara kuna hitilafu ya VPN iliyowashwa"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Badilisha mipangilio ya VPN au mtandao"</string>
     <string name="upload_file" msgid="2897957172366730416">"Chagua faili"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Hakuna faili iliyochaguliwa"</string>
     <string name="reset" msgid="2448168080964209908">"Weka upya"</string>

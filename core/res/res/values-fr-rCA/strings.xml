@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Démo en magasin"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexion USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Applications qui fonctionnent en arrière-plan"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> fonctionne en arrière-plan"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> applications fonctionnent en arrière-plan"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Applications qui sollicitent la pile"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> sollicite la pile"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> applications sollicitent la pile"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
@@ -1088,7 +1088,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Aucun"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Aucun(e)"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sonneries"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sons d\'alarme"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sons de notification"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Connecté à <xliff:g id="SESSION">%s</xliff:g>. Appuyez ici pour gérer le réseau."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"RPV permanent en cours de connexion…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"RPV permanent connecté"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Déconnecté du RPV permanent"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Erreur du RPV permanent"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Modifier les paramètres réseau ou RPV"</string>
     <string name="upload_file" msgid="2897957172366730416">"Choisir un fichier"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Aucun fichier sélectionné"</string>
     <string name="reset" msgid="2448168080964209908">"Réinitialiser"</string>

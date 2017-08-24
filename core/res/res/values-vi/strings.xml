@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Cảnh báo"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Giới thiệu bán lẻ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Kết nối USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Ứng dụng đang chạy trong nền"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang chạy ẩn"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang chạy trong nền"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Các ứng dụng tiêu thụ pin"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang sử dụng pin"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang sử dụng pin"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Đã kết nối với <xliff:g id="SESSION">%s</xliff:g>. Chạm để quản lý mạng."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Đang kết nối VPN luôn bật…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Đã kết nối VPN luôn bật"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Đã ngắt kết nối khỏi VPN luôn bật"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Lỗi VPN luôn bật"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Thay đổi cài đặt mạng hoặc VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Chọn tệp"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Không có tệp nào được chọn"</string>
     <string name="reset" msgid="2448168080964209908">"Đặt lại"</string>
@@ -1606,7 +1604,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Hãy thử lại sau"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Xem toàn màn hình"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt xuống từ trên cùng."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Xong"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Thanh trượt giờ hình tròn"</string>
