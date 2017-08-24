@@ -99,7 +99,7 @@
     <item msgid="79513688117503758">"ಚಿಕ್ಕದಾದ ಅಂಚು"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"ಪೋಟ್ರೇಟ್"</item>
+    <item msgid="4061931020926489228">"ಪೋರ್ಟ್ರೇಟ್"</item>
     <item msgid="3199660090246166812">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ಫೈಲ್‌ಗೆ ರೈಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
