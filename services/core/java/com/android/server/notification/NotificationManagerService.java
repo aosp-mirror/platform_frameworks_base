@@ -985,12 +985,17 @@ public class NotificationManagerService extends SystemService {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 if (userId != USER_NULL) {
                     mUserProfiles.updateCache(context);
-                    readDefaultApprovedServices(userId);
+                    if (!mUserProfiles.isManagedProfile(userId)) {
+                        readDefaultApprovedServices(userId);
+                    }
                 }
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mZenModeHelper.onUserRemoved(user);
                 mRankingHelper.onUserRemoved(user);
+                mListeners.onUserRemoved(user);
+                mConditionProviders.onUserRemoved(user);
+                mAssistants.onUserRemoved(user);
                 savePolicyFile();
             } else if (action.equals(Intent.ACTION_USER_UNLOCKED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
