@@ -104,6 +104,9 @@ public final class PlaybackActivityMonitor
             final int index = mBannedUids.indexOf(new Integer(uid));
             if (index >= 0) {
                 if (!disable) {
+                    if (DEBUG) { // hidden behind DEBUG, too noisy otherwise
+                        mEventLogger.log(new AudioEventLogger.StringEvent("unbanning uid:" + uid));
+                    }
                     mBannedUids.remove(index);
                     // nothing else to do, future playback requests from this uid are ok
                 } // no else to handle, uid already present, so disabling again is no-op
@@ -111,6 +114,9 @@ public final class PlaybackActivityMonitor
                 if (disable) {
                     for (AudioPlaybackConfiguration apc : mPlayers.values()) {
                         checkBanPlayer(apc, uid);
+                    }
+                    if (DEBUG) { // hidden behind DEBUG, too noisy otherwise
+                        mEventLogger.log(new AudioEventLogger.StringEvent("banning uid:" + uid));
                     }
                     mBannedUids.add(new Integer(uid));
                 } // no else to handle, uid already not in list, so enabling again is no-op
@@ -145,6 +151,7 @@ public final class PlaybackActivityMonitor
                 new AudioPlaybackConfiguration(pic, newPiid,
                         Binder.getCallingUid(), Binder.getCallingPid());
         apc.init();
+        mEventLogger.log(new NewPlayerEvent(apc));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
         }
@@ -156,6 +163,7 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
+                mEventLogger.log(new AudioAttrEvent(piid, attr));
                 change = apc.handleAudioAttributesEvent(attr);
             } else {
                 Log.e(TAG, "Error updating audio attributes");
@@ -175,10 +183,13 @@ public final class PlaybackActivityMonitor
             if (apc == null) {
                 return;
             }
+            mEventLogger.log(new PlayerEvent(piid, event));
             if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
                 for (Integer uidInteger: mBannedUids) {
                     if (checkBanPlayer(apc, uidInteger.intValue())) {
                         // player was banned, do not update its state
+                        mEventLogger.log(new AudioEventLogger.StringEvent(
+                                "not starting piid:" + piid + " ,is banned"));
                         return;
                     }
                 }
@@ -208,6 +219,8 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
+                mEventLogger.log(new AudioEventLogger.StringEvent(
+                        "releasing player piid:" + piid));
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
             }
@@ -250,6 +263,8 @@ public final class PlaybackActivityMonitor
                 pw.print(" " + uid);
             }
             pw.println();
+            // log
+            mEventLogger.dump(pw);
         }
     }
 
@@ -672,4 +687,65 @@ public final class PlaybackActivityMonitor
             }
         }
     }
+
+    //=================================================================
+    // For logging
+    private final static class PlayerEvent extends AudioEventLogger.Event {
+        // only keeping the player interface ID as it uniquely identifies the player in the event
+        final int mPlayerIId;
+        final int mState;
+
+        PlayerEvent(int piid, int state) {
+            mPlayerIId = piid;
+            mState = state;
+        }
+
+        @Override
+        public String eventToString() {
+            return new String("player piid:" + mPlayerIId + " state:"
+                    + AudioPlaybackConfiguration.toLogFriendlyPlayerState(mState));
+        }
+    }
+
+    private final static class NewPlayerEvent extends AudioEventLogger.Event {
+        private final int mPlayerIId;
+        private final int mPlayerType;
+        private final int mClientUid;
+        private final int mClientPid;
+        private final AudioAttributes mPlayerAttr;
+
+        NewPlayerEvent(AudioPlaybackConfiguration apc) {
+            mPlayerIId = apc.getPlayerInterfaceId();
+            mPlayerType = apc.getPlayerType();
+            mClientUid = apc.getClientUid();
+            mClientPid = apc.getClientPid();
+            mPlayerAttr = apc.getAudioAttributes();
+        }
+
+        @Override
+        public String eventToString() {
+            return new String("new player piid:" + mPlayerIId + " uid/pid:" + mClientUid + "/"
+                    + mClientPid + " type:"
+                    + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
+                    + " attr:" + mPlayerAttr);
+        }
+    }
+
+    private final static class AudioAttrEvent extends AudioEventLogger.Event {
+        private final int mPlayerIId;
+        private final AudioAttributes mPlayerAttr;
+
+        AudioAttrEvent(int piid, AudioAttributes attr) {
+            mPlayerIId = piid;
+            mPlayerAttr = attr;
+        }
+
+        @Override
+        public String eventToString() {
+            return new String("player piid:" + mPlayerIId + " new AudioAttributes:" + mPlayerAttr);
+        }
+    }
+
+    private final AudioEventLogger mEventLogger = new AudioEventLogger(100,
+            "playback activity as reported through PlayerBase");
 }
