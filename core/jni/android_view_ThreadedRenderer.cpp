@@ -47,6 +47,7 @@
 #include <FrameInfo.h>
 #include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
+#include <Properties.h>
 #include <PropertyValuesAnimatorSet.h>
 #include <RenderNode.h>
 #include <renderthread/CanvasContext.h>
@@ -930,6 +931,10 @@ static void android_view_ThreadedRenderer_disableVsync(JNIEnv*, jclass) {
     RenderProxy::disableVsync();
 }
 
+static void android_view_ThreadedRenderer_setHighContrastText(JNIEnv*, jclass, jboolean enable) {
+    Properties::enableHighContrastText = enable;
+}
+
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
 // ----------------------------------------------------------------------------
@@ -1029,6 +1034,7 @@ static const JNINativeMethod gMethods[] = {
     { "nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",
             (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode },
     { "disableVsync", "()V", (void*)android_view_ThreadedRenderer_disableVsync },
+    { "nSetHighContrastText", "(Z)V", (void*)android_view_ThreadedRenderer_setHighContrastText },
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {

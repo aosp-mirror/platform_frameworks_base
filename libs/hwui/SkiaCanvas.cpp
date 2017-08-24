@@ -85,7 +85,6 @@ void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
         mCanvasWrapper.reset();
     }
     mSaveStack.reset(nullptr);
-    mHighContrastText = false;
 }
 
 // ----------------------------------------------------------------------------
