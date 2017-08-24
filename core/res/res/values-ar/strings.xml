@@ -260,9 +260,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"التنبيهات"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"عرض توضيحي لبائع التجزئة"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"‏اتصال USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"التطبيقات التي تعمل في الخلفية"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"جارٍ تشغيل <xliff:g id="APP_NAME">%1$s</xliff:g> في الخلفية"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"جارٍ تشغيل <xliff:g id="NUMBER">%1$d</xliff:g> تطبيق في الخلفية"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"التطبيقات التي تستهلك البطارية"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"يستخدم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> البطارية"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"تستخدم <xliff:g id="NUMBER">%1$d</xliff:g> من التطبيقات البطارية"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"انقر للحصول على تفاصيل حول البطارية واستخدام البيانات"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>، <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
@@ -1382,11 +1382,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"تم الاتصال بـ <xliff:g id="SESSION">%s</xliff:g>. انقر لإدارة الشبكة."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏جارٍ الاتصال بشبكة افتراضية خاصة (VPN) دائمة التشغيل..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏تم الاتصال بشبكة افتراضية خاصة (VPN) دائمة التشغيل"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"‏تم قطع الاتصال بالشبكة الافتراضية الخاصة (VPN) التي يتم تشغيلها دائمًا"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطأ بشبكة افتراضية خاصة (VPN) دائمة التشغيل"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏تغيير إعدادات الشبكة أو الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
     <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>

@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"සිල්ලර ආදර්ශනය"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB සම්බන්ධතාවය"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"පසුබිමින් ධාවනය වන යෙදුම්"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> පසුබිමින් ධාවනය වේ"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"යෙදුම් <xliff:g id="NUMBER">%1$d</xliff:g>ක් පසුබිමින් ධාවනය වේ"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"බැටරිය භාවිත කරන යෙදුම්"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> බැටරිය භාවිත කරයි"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"යෙදුම් <xliff:g id="NUMBER">%1$d</xliff:g>ක් බැටරිය භාවිත කරයි"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"බැටරි හා දත්ත භාවිතය පිළිබඳව විස්තර සඳහා තට්ටු කරන්න"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"ආරක්‍ෂිත ආකාරය"</string>
@@ -1296,11 +1296,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> වෙත සම්බන්ධිතයි. ජාලය කළමනාකරණය කිරීමට තට්ටු කරන්න."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"සැමවිටම VPN සම්බන්ධ වෙමින්…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"නිරතුරුවම VPN සම්බන්ධ කර ඇත"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"සැම විට ක්‍රියාත්මක VPN වෙතින් විසන්ධි විය"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"සැමවිට සක්‍රිය VPN දෝෂය"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"ජාලය හෝ VPN සැකසීම් වෙනස් කරන්න"</string>
     <string name="upload_file" msgid="2897957172366730416">"ගොනුව තෝරන්න"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ගොනුවක් තෝරාගෙන නැත"</string>
     <string name="reset" msgid="2448168080964209908">"යළි පිහිටුවන්න"</string>

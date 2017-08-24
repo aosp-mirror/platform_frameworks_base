@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Underretninger"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo til udstilling i butik"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-forbindelse"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Apps, der kører i baggrunden"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører i baggrunden"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> apps kører i baggrunden"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Apps, der bruger batteri"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger batteri"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> apps bruger batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tryk for at se oplysninger om batteri- og dataforbrug"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
@@ -777,7 +777,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Brugervælger"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediekontrolelementer"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediestyring"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Omrokering af widgets er påbegyndt."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Omrokering af widgets er afsluttet."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widgetten <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> er slettet."</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Forbundet til <xliff:g id="SESSION">%s</xliff:g>. Tryk for at administrere netværket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Opretter forbindelse til konstant VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Konstant VPN er forbundet"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Forbindelsen til konstant VPN blev afbrudt"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fejl i konstant VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Skift netværks- eller VPN-indstillinger"</string>
     <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Nulstil"</string>

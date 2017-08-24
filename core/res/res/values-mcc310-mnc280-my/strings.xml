@@ -20,6 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6638755728961013003">"ဆင်းမ်သည် MM#2 ကို ထောက်ပံ့မထားပါ"</string>
-    <string name="mmcc_illegal_ms" msgid="5562215652599183258">"ဆင်းမ်သည် MM#3 ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6638755728961013003">"ဆင်းမ်ကို ထောက်ပံ့မထားပါ MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="5562215652599183258">"ဆင်းမ်ကို ခွင့်မပြုပါ MM#3"</string>
 </resources>
