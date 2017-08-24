@@ -24,20 +24,13 @@
     <string name="data_transmitted" msgid="7988167672982199061">"보냄:"</string>
     <string name="data_received" msgid="4062776929376067820">"수신됨:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g>바이트/<xliff:g id="NUMBER_1">%2$s</xliff:g>패킷"</string>
-    <!-- no translation found for always_on_disconnected_title (1906740176262776166) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message (555634519845992917) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_lockdown (4232225539869452120) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_separator (3310614409322581371) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_settings_link (6172280302829992412) -->
-    <skip />
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"연결 유지 VPN에 연결할 수 없음"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g>은(는) 항상 연결된 상태를 유지하도록 설정되어 있지만, 지금은 연결할 수 없습니다. <xliff:g id="VPN_APP_1">%1$s</xliff:g>에 다시 연결할 수 있을 때까지 휴대전화에서 공용 네트워크가 사용됩니다."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g>은(는) 항상 연결된 상태를 유지하도록 설정되어 있지만, 지금은 연결할 수 없습니다. VPN이 다시 연결될 때까지 인터넷에 연결할 수 없습니다."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN 설정 변경"</string>
     <string name="configure" msgid="4905518375574791375">"설정"</string>
     <string name="disconnect" msgid="971412338304200056">"연결 끊기"</string>
-    <!-- no translation found for open_app (3717639178595958667) -->
-    <skip />
-    <!-- no translation found for dismiss (6192859333764711227) -->
-    <skip />
+    <string name="open_app" msgid="3717639178595958667">"앱 열기"</string>
+    <string name="dismiss" msgid="6192859333764711227">"닫기"</string>
 </resources>
