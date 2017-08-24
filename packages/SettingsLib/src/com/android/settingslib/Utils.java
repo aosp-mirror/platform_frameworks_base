@@ -14,6 +14,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
@@ -95,13 +96,10 @@ public class Utils {
     /**
      * Returns a circular icon for a user.
      */
-    public static UserIconDrawable getUserIcon(Context context, UserManager um, UserInfo user) {
+    public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
-            // We use predefined values for managed profiles
-            Bitmap b = BitmapFactory.decodeResource(context.getResources(),
-                    com.android.internal.R.drawable.ic_corp_icon);
-            return new UserIconDrawable(iconSize).setIcon(b).bake();
+            return context.getDrawable(com.android.internal.R.drawable.ic_corp_icon);
         }
         if (user.iconPath != null) {
             Bitmap icon = um.getUserIcon(user.id);
