@@ -64,8 +64,8 @@
     <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"मोबाइल सेवा के बिना डिवाइस का उपयोग करने के लिए eSIM अक्षम करें."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन डालें"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"पासवर्ड डालें"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM अब काम नहीं करेगा. जारी रखने के लिए PUK कोड डालें. ज़्यादा जानकारी के लिए अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" का SIM अब काम नहीं करेगा. जारी रखने के लिए PUK कोड डालें. ज़्यादा जानकारी के लिए अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"सिम अब काम नहीं करेगा. जारी रखने के लिए PUK कोड डालें. ज़्यादा जानकारी के लिए अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" का सिम अब काम नहीं करेगा. जारी रखने के लिए PUK कोड डालें. ज़्यादा जानकारी के लिए अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"मनचाहा पिन कोड डालें"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"मनचाहे पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM कार्ड अनलॉक हो रहा है…"</string>
@@ -81,10 +81,10 @@
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, इस फ़ोन को रीसेट कर दिया जाएगा, जिससे इसका सारा डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस टैबलेट को रीसेट कर दिया जाएगा, जिससे इसका सारा डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस फ़ोन को रीसेट कर दिया जाएगा, जिससे इसका सारा डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"आपने टैबलेट का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा मिट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"आपने फ़ोन का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा मिट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"आपने टैबलेट का लॉक खोलने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"आपने फ़ोन का लॉक खोलने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
@@ -105,7 +105,7 @@
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK की कार्यवाही विफल रही!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"कोड स्वीकार किया गया!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"कोई सेवा नहीं."</string>
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"इनपुट पद्धति‍ बदलें"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"इनपुट का तरीका बदलें"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"हवाई जहाज़ मोड"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"डिवाइस फिर से चालू होने के बाद पैटर्न ज़रूरी है"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"डिवाइस फिर से चालू होने के बाद पिन ज़रूरी है"</string>

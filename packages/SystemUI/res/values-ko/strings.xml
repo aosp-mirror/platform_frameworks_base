@@ -777,4 +777,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"백그라운드에서 실행 중인 앱"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"탭하여 배터리 및 데이터 사용량 확인"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"모바일 데이터를 사용 중지하시겠습니까?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"앱이 권한 요청을 가리고 있기 때문에 설정에서 내 응답을 확인할 수 없습니다."</string>
 </resources>

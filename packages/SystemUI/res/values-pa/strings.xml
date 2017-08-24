@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ਸੂਚੀ ਵਿੱਚੋਂ ਹਟਾਓ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ਤੁਹਾਡੀਆਂ ਹਾਲੀਆ ਸਕ੍ਰੀਨਾਂ ਇੱਥੇ ਪ੍ਰਗਟ ਹੋਣਗੀਆਂ"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਸ ਰੱਦ ਕਰੋ"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਾਂ ਰੱਦ ਕਰੋ"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="one">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
       <item quantity="other">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ਕੰਪਿਊਟਰ ਦਾ RSA ਕੁੰਜੀ ਫਿੰਗਰਪ੍ਰਿੰਟ ਹੈ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ਹਮੇਸ਼ਾਂ ਇਸ ਕੰਪਿਊਟਰ ਤੋਂ ਆਗਿਆ ਦਿਓ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ਡਿਬੱਗਿੰਗ ਦੀ ਆਗਿਆ ਨਹੀਂ"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ਵਰਤਮਾਨ ਵਿੱਚ ਇਸ ਡਿਵਾਈਸ ਵਿੱਚ ਸਾਈਨ-ਇਨ ਕੀਤਾ ਵਰਤੋਂਕਾਰ USB ਡਿਬੱਗਿੰਗ ਨੂੰ ਚਾਲੂ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ। ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣ ਲਈ, ਮੁੱਖ ਵਰਤੋਂਕਾਰ ਸੰਬੰਧੀ ਖਾਤਾ ਵਰਤੋ।"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ਵਰਤਮਾਨ ਵਿੱਚ ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਸਾਈਨ-ਇਨ ਕੀਤਾ ਵਰਤੋਂਕਾਰ USB ਡਿਬੱਗਿੰਗ ਨੂੰ ਚਾਲੂ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ। ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣ ਲਈ, ਮੁੱਖ ਵਰਤੋਂਕਾਰ ਸੰਬੰਧੀ ਖਾਤਾ ਵਰਤੋ।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਜ਼ੂਮ ਕਰੋ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਸਟ੍ਰੈਚ ਕਰੋ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ਸਕ੍ਰੀਨਸ਼ੌਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
@@ -502,7 +502,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। ਥਰਥਰਾਹਟ \'ਤੇ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਵਿਖਾਏ ਗਏ ਹਨ। ਬਰਖ਼ਾਸਤ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਦਿਖਾਏ ਗਏ ਹਨ। ਖਾਰਜ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਲੁਕਾਏ ਗਏ ਹਨ"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI ਟਿਊਨਰ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
@@ -644,7 +644,7 @@
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ਡਾਟਾ ਸੇਵਰ ਬੰਦ ਹੈ"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ਚਾਲੂ"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ਬੰਦ"</string>
-    <string name="nav_bar" msgid="1993221402773877607">"ਆਵਾਗੌਣ ਪੱਟੀ"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਪੱਟੀ"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"ਖਾਕਾ"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"ਵਧੇਰੇ ਖੱਬੇ ਬਟਨ ਕਿਸਮ"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"ਵਧੇਰੇ ਸੱਜੇ ਬਟਨ ਕਿਸਮ"</string>
@@ -735,7 +735,7 @@
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"ਗਰਮ ਹੋਣ ਕਾਰਨ ਫ਼ੋਨ ਬੰਦ ਹੋ ਗਿਆ"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਸੀ, ਇਸ ਲਈ ਇਹ ਠੰਡਾ ਹੋਣ ਵਾਸਤੇ ਬੰਦ ਹੋ ਗਿਆ ਸੀ। ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ।\n\nਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਸਕਦਾ ਹੈ ਜੇ:\n	• ਤੁਸੀਂ ਸਰੋਤਾਂ ਦੀ ਵੱਧ ਵਰਤੋਂ ਵਾਲੀਆਂ ਐਪਾਂ (ਜਿਵੇਂ ਗੇਮਿੰਗ, ਵੀਡੀਓ, ਜਾਂ ਆਵਾਗੌਣ ਐਪਾਂ) ਵਰਤਦੇ ਹੋ \n	• ਵੱਡੀਆਂ ਫ਼ਾਈਲਾਂ ਡਾਊਨਲੋਡ ਜਾਂ ਅੱਪਲੋਡ ਕਰਦੇ ਹੋ\n	• ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਉੱਚ ਤਾਪਮਾਨਾਂ ਵਿੱਚ ਵਰਤਦੇ ਹੋ"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਸੀ, ਇਸ ਲਈ ਇਹ ਠੰਡਾ ਹੋਣ ਵਾਸਤੇ ਬੰਦ ਹੋ ਗਿਆ ਸੀ। ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ।\n\nਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਸਕਦਾ ਹੈ ਜੇ:\n	• ਤੁਸੀਂ ਸਰੋਤਾਂ ਦੀ ਵੱਧ ਵਰਤੋਂ ਵਾਲੀਆਂ ਐਪਾਂ (ਜਿਵੇਂ ਗੇਮਿੰਗ, ਵੀਡੀਓ, ਜਾਂ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਐਪਾਂ) ਵਰਤਦੇ ਹੋ \n	• ਵੱਡੀਆਂ ਫ਼ਾਈਲਾਂ ਡਾਊਨਲੋਡ ਜਾਂ ਅੱਪਲੋਡ ਕਰਦੇ ਹੋ\n	• ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਉੱਚ ਤਾਪਮਾਨਾਂ ਵਿੱਚ ਵਰਤਦੇ ਹੋ"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ਫ਼ੋਨ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ਫ਼ੋਨ ਦੇ ਠੰਡਾ ਹੋਣ ਦੇ ਦੌਰਾਨ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸੀਮਿਤ ਹੁੰਦੀਆਂ ਹਨ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਵੈਚਲਿਤ ਰੂਪ ਵਿੱਚ ਠੰਡਾ ਹੋਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੇਗਾ। ਤੁਸੀਂ ਹਾਲੇ ਵੀ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤ ਸਕਦੇ ਹੋ, ਪਰੰਤੂ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਇਹ ਵਧੇਰੇ ਹੌਲੀ ਚੱਲੇ।\n\nਇੱਕ ਵਾਰ ਠੰਡਾ ਹੋਣ ਤੋਂ ਬਾਅਦ ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਧਾਰਨ ਤੌਰ \'ਤੇ ਚੱਲੇਗਾ।"</string>
@@ -775,4 +775,6 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀਆਂ ਐਪਾਂ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ਮੋਬਾਈਲ ਡੈਟਾ ਬੰਦ ਕਰੀਏ?"</string>
+    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
+    <skip />
 </resources>

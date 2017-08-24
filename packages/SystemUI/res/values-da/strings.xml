@@ -255,7 +255,7 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> underretning mere i gruppen.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> underretninger mere i gruppen.</item>
     </plurals>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Underretningsindstillinger"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Indstillinger for underretninger"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Indstillinger for <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
@@ -775,4 +775,6 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps, der kører i baggrunden"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tryk for at se oplysninger om batteri- og dataforbrug"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vil du deaktivere mobildata?"</string>
+    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
+    <skip />
 </resources>

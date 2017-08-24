@@ -777,4 +777,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Applications qui fonctionnent en arrière-plan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Désactiver les données cellulaires?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Une application obscurcit une demande d\'autorisation, alors Paramètres ne peut pas vérifier votre réponse."</string>
 </resources>

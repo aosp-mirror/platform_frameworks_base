@@ -775,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Εφαρμογές που εκτελούνται στο παρασκήνιο"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Πατήστε για λεπτομέρειες σχετικά με τη χρήση μπαταρίας και δεδομένων"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Απενεργοποίηση δεδομένων κινητής τηλεφωνίας;"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Επειδή μια εφαρμογή αποκρύπτει ένα αίτημα άδειας, δεν είναι δυνατή η επαλήθευση της απάντησής σας από τις Ρυθμίσεις."</string>
 </resources>

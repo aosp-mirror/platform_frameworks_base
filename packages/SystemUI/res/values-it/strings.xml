@@ -598,7 +598,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Sinistra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Destra"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Al centro"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Scheda"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Spazio"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Invio"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
@@ -777,4 +777,6 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"App in esecuzione in background"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Disattivare i dati mobili?"</string>
+    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
+    <skip />
 </resources>

@@ -775,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"နောက်ခံတွင် ပွင့်နေသော အက်ပ်များ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ဘက်ထရီနှင့် ဒေတာအသုံးပြုမှု အသေးစိတ်ကို ကြည့်ရန် တို့ပါ"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"မိုဘိုင်းဒေတာကို ပိတ်လိုပါသလား။"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"အပလီကေးရှင်းတစ်ခုက ခွင့်ပြုချက်တောင်းခံမှုကို ပိတ်ထားသောကြောင့် ဆက်တင်များသည် သင်၏ လုပ်ဆောင်ကို တုံ့ပြန်နိုင်ခြင်းမရှိပါ။"</string>
 </resources>
