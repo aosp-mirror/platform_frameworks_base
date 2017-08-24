@@ -1978,7 +1978,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
             boolean isTop) {
         final boolean isInPinnedStack = r.getStack().getStackId() == PINNED_STACK_ID;
-        final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing();
+        final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing(
+                mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         final boolean keyguardLocked = mStackSupervisor.mKeyguardController.isKeyguardLocked();
         final boolean showWhenLocked = r.canShowWhenLocked() && !isInPinnedStack;
         final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
@@ -5210,8 +5211,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 voiceInteractor, type);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
-        final boolean isLockscreenShown =
-                mService.mStackSupervisor.mKeyguardController.isKeyguardShowing();
+        final boolean isLockscreenShown = mService.mStackSupervisor.mKeyguardController
+                .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         if (!layoutTaskInStack(task, info.windowLayout) && mBounds != null && task.isResizeable()
                 && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
