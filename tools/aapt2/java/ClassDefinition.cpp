@@ -39,6 +39,17 @@ void MethodDefinition::WriteToStream(const StringPiece& prefix, bool final,
   *out << prefix << "}";
 }
 
+ClassDefinition::Result ClassDefinition::AddMember(std::unique_ptr<ClassMember> member) {
+  Result result = Result::kAdded;
+  auto iter = members_.find(member);
+  if (iter != members_.end()) {
+    members_.erase(iter);
+    result = Result::kOverridden;
+  }
+  members_.insert(std::move(member));
+  return result;
+}
+
 bool ClassDefinition::empty() const {
   for (const std::unique_ptr<ClassMember>& member : members_) {
     if (!member->empty()) {
