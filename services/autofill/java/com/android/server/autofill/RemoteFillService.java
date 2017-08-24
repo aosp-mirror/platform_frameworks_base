@@ -562,7 +562,10 @@ final class RemoteFillService implements DeathRecipient {
         void onTimeout(RemoteFillService remoteService) {
             // NOTE: Must make these 2 calls asynchronously, because the cancellation signal is
             // handled by the service, which could block.
-            final ICancellationSignal cancellation = mCancellation;
+            final ICancellationSignal cancellation;
+            synchronized (mLock) {
+                cancellation = mCancellation;
+            }
             if (cancellation != null) {
                 remoteService.dispatchOnFillTimeout(cancellation);
             }
@@ -587,7 +590,10 @@ final class RemoteFillService implements DeathRecipient {
         public boolean cancel() {
             if (!super.cancel()) return false;
 
-            final ICancellationSignal cancellation = mCancellation;
+            final ICancellationSignal cancellation;
+            synchronized (mLock) {
+                cancellation = mCancellation;
+            }
             if (cancellation != null) {
                 try {
                     cancellation.cancel();

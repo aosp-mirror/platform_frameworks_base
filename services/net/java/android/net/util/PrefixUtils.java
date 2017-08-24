@@ -20,6 +20,8 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -66,6 +68,13 @@ public class PrefixUtils {
 
     public static IpPrefix asIpPrefix(LinkAddress addr) {
         return new IpPrefix(addr.getAddress(), addr.getPrefixLength());
+    }
+
+    public static IpPrefix ipAddressAsPrefix(InetAddress ip) {
+        final int bitLength = (ip instanceof Inet4Address)
+                ? NetworkConstants.IPV4_ADDR_BITS
+                : NetworkConstants.IPV6_ADDR_BITS;
+        return new IpPrefix(ip, bitLength);
     }
 
     private static IpPrefix pfx(String prefixStr) {

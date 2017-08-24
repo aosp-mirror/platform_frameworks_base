@@ -51,6 +51,7 @@ import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 import android.util.Log;
 
@@ -124,11 +125,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private final ConcurrentHashMap<String, ScanResult> mScanResultCache =
             new ConcurrentHashMap<String, ScanResult>(32);
 
-    /** Map of BSSIDs to speed values for individual ScanResults. */
-    private final Map<String, Integer> mScanResultScores = new HashMap<>();
+    /**
+     * Map of BSSIDs to scored networks for individual bssids.
+     *
+     * <p>This cache should not be evicted with scan results, as the values here are used to
+     * generate a fallback in the absence of scores for the visible APs.
+     */
+    private final Map<String, TimestampedScoredNetwork> mScoredNetworkCache = new HashMap<>();
+
+    /** Maximum age in millis of cached scored networks in {@link #mScoredNetworkCache}. */
+    @VisibleForTesting static final long MAX_CACHED_SCORE_AGE_MILLIS =
+            24 * DateUtils.DAY_IN_MILLIS;
 
     /** Maximum age of scan results to hold onto while actively scanning. **/
-    private static final long MAX_SCAN_RESULT_AGE_MS = 15000;
+    private static final long MAX_SCAN_RESULT_AGE_MILLIS = 15000;
 
     static final String KEY_NETWORKINFO = "key_networkinfo";
     static final String KEY_WIFIINFO = "key_wifiinfo";
@@ -138,6 +148,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     static final String KEY_SPEED = "key_speed";
     static final String KEY_PSKTYPE = "key_psktype";
     static final String KEY_SCANRESULTCACHE = "key_scanresultcache";
+    static final String KEY_SCOREDNETWORKCACHE = "key_scorednetworkcache";
     static final String KEY_CONFIG = "key_config";
     static final String KEY_FQDN = "key_fqdn";
     static final String KEY_PROVIDER_FRIENDLY_NAME = "key_provider_friendly_name";
@@ -188,7 +199,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private Object mTag;
 
-    private int mSpeed = Speed.NONE;
+    @Speed private int mSpeed = Speed.NONE;
     private boolean mIsScoredNetworkMetered = false;
 
     // used to co-relate internal vs returned accesspoint.
@@ -236,6 +247,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mScanResultCache.clear();
             for (ScanResult result : scanResultArrayList) {
                 mScanResultCache.put(result.BSSID, result);
+            }
+        }
+        if (savedState.containsKey(KEY_SCOREDNETWORKCACHE)) {
+            ArrayList<TimestampedScoredNetwork> scoredNetworkArrayList =
+                    savedState.getParcelableArrayList(KEY_SCOREDNETWORKCACHE);
+            for (TimestampedScoredNetwork timedScore : scoredNetworkArrayList) {
+                mScoredNetworkCache.put(timedScore.getScore().networkKey.wifiKey.bssid, timedScore);
             }
         }
         if (savedState.containsKey(KEY_FQDN)) {
@@ -308,8 +326,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mNetworkInfo = that.mNetworkInfo;
         this.mScanResultCache.clear();
         this.mScanResultCache.putAll(that.mScanResultCache);
-        this.mScanResultScores.clear();
-        this.mScanResultScores.putAll(that.mScanResultScores);
+        this.mScoredNetworkCache.clear();
+        this.mScoredNetworkCache.putAll(that.mScoredNetworkCache);
         this.mId = that.mId;
         this.mSpeed = that.mSpeed;
         this.mIsScoredNetworkMetered = that.mIsScoredNetworkMetered;
@@ -347,7 +365,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (isSaved() && !other.isSaved()) return -1;
         if (!isSaved() && other.isSaved()) return 1;
 
-        // Faster speeds go before slower speeds
+        // Faster speeds go before slower speeds - but only if visible change in speed label
         if (getSpeed() != other.getSpeed()) {
             return other.getSpeed() - getSpeed();
         }
@@ -425,7 +443,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     boolean update(WifiNetworkScoreCache scoreCache, boolean scoringUiEnabled) {
         boolean scoreChanged = false;
-        mScanResultScores.clear();
         if (scoringUiEnabled) {
             scoreChanged = updateScores(scoreCache);
         }
@@ -435,38 +452,99 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /**
      * Updates the AccessPoint rankingScore and speed, returning true if the data has changed.
      *
+     * <p>Any cached {@link TimestampedScoredNetwork} objects older than
+     * {@link #MAX_CACHED_SCORE_AGE_MILLIS} will be removed when this method is invoked.
+     *
+     * <p>Precondition: {@link #mRssi} is up to date before invoking this method.
+     *
      * @param scoreCache The score cache to use to retrieve scores.
+     * @return true if the set speed has changed
      */
     private boolean updateScores(WifiNetworkScoreCache scoreCache) {
-        int oldSpeed = mSpeed;
-        mSpeed = Speed.NONE;
-
+        long nowMillis = SystemClock.elapsedRealtime();
         for (ScanResult result : mScanResultCache.values()) {
             ScoredNetwork score = scoreCache.getScoredNetwork(result);
             if (score == null) {
                 continue;
             }
-
-            int speed = score.calculateBadge(result.level);
-            mScanResultScores.put(result.BSSID, speed);
-            mSpeed = Math.max(mSpeed, speed);
-        }
-
-        // set mSpeed to the connected ScanResult if the AccessPoint is the active network
-        if (isActive() && mInfo != null) {
-            NetworkKey key = new NetworkKey(new WifiKey(
-                    AccessPoint.convertToQuotedString(ssid), mInfo.getBSSID()));
-            ScoredNetwork score = scoreCache.getScoredNetwork(key);
-            if (score != null) {
-                mSpeed = score.calculateBadge(mInfo.getRssi());
+            TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
+            if (timedScore == null) {
+                mScoredNetworkCache.put(
+                        result.BSSID, new TimestampedScoredNetwork(score, nowMillis));
+            } else {
+                // Update data since the has been seen in the score cache
+                timedScore.update(score, nowMillis);
             }
         }
 
-        if(WifiTracker.sVerboseLogging) {
-            Log.i(TAG, String.format("%s: Set speed to %d", ssid, mSpeed));
+        // Remove old cached networks
+        long evictionCutoff = nowMillis - MAX_CACHED_SCORE_AGE_MILLIS;
+        Iterator<TimestampedScoredNetwork> iterator = mScoredNetworkCache.values().iterator();
+        iterator.forEachRemaining(timestampedScoredNetwork -> {
+            if (timestampedScoredNetwork.getUpdatedTimestampMillis() < evictionCutoff) {
+                iterator.remove();
+            }
+        });
+
+        return updateSpeed();
+    }
+
+    /**
+     * Updates the internal speed, returning true if the update resulted in a speed label change.
+     */
+    private boolean updateSpeed() {
+        int oldSpeed = mSpeed;
+        mSpeed = generateAverageSpeedForSsid();
+
+        // set speed to the connected ScanResult if the AccessPoint is the active network
+        if (isActive() && mInfo != null) {
+            TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(mInfo.getBSSID());
+            if (timedScore != null) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Set score using specific access point curve for connected AP: "
+                            + getSsidStr());
+                }
+                // TODO(b/63073866): Map using getLevel rather than specific rssi value so score
+                // doesn't change without a visible wifi bar change.
+                int speed = timedScore.getScore().calculateBadge(mInfo.getRssi());
+                if (speed != Speed.NONE) {
+                    mSpeed = speed;
+                }
+            }
         }
 
-        return oldSpeed != mSpeed;
+        boolean changed = oldSpeed != mSpeed;
+        if(WifiTracker.sVerboseLogging && changed) {
+            Log.i(TAG, String.format("%s: Set speed to %d", ssid, mSpeed));
+        }
+        return changed;
+    }
+
+    /** Creates a speed value for the current {@link #mRssi} by averaging all non zero badges. */
+    @Speed private int generateAverageSpeedForSsid() {
+        if (mScoredNetworkCache.isEmpty()) {
+            return Speed.NONE;
+        }
+
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, String.format("Generating fallbackspeed for %s using cache: %s",
+                    getSsidStr(), mScoredNetworkCache));
+        }
+
+        int count = 0;
+        int totalSpeed = 0;
+        for (TimestampedScoredNetwork timedScore : mScoredNetworkCache.values()) {
+            int speed = timedScore.getScore().calculateBadge(mRssi);
+            if (speed != Speed.NONE) {
+                count++;
+                totalSpeed += speed;
+            }
+        }
+        int speed = count == 0 ? Speed.NONE : totalSpeed / count;
+        if (WifiTracker.sVerboseLogging) {
+            Log.i(TAG, String.format("%s generated fallback speed is: %d", getSsidStr(), speed));
+        }
+        return roundToClosestSpeedEnum(speed);
     }
 
     /**
@@ -501,7 +579,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         for (Iterator<ScanResult> iter = mScanResultCache.values().iterator(); iter.hasNext(); ) {
             ScanResult result = iter.next();
             // result timestamp is in microseconds
-            if (nowMs - result.timestamp / 1000 > MAX_SCAN_RESULT_AGE_MS) {
+            if (nowMs - result.timestamp / 1000 > MAX_SCAN_RESULT_AGE_MILLIS) {
                 iter.remove();
             }
         }
@@ -582,8 +660,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     /** Updates {@link #mSeen} based on the scan result cache. */
     private void updateSeen() {
-        // TODO(sghuman): Set to now if connected
-
         long seen = 0;
         for (ScanResult result : mScanResultCache.values()) {
             if (result.timestamp > seen) {
@@ -942,17 +1018,23 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
         stringBuilder.append("=").append(result.frequency);
         stringBuilder.append(",").append(result.level);
-        if (hasSpeed(result)) {
+        int speed = getSpecificApSpeed(result);
+        if (speed != Speed.NONE) {
             stringBuilder.append(",")
-                    .append(getSpeedLabel(mScanResultScores.get(result.BSSID)));
+                    .append(getSpeedLabel(speed));
         }
         stringBuilder.append("}");
         return stringBuilder.toString();
     }
 
-    private boolean hasSpeed(ScanResult result) {
-        return mScanResultScores.containsKey(result.BSSID)
-                && mScanResultScores.get(result.BSSID) != Speed.NONE;
+    @Speed private int getSpecificApSpeed(ScanResult result) {
+        TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
+        if (timedScore == null) {
+            return Speed.NONE;
+        }
+        // For debugging purposes we may want to use mRssi rather than result.level as the average
+        // speed wil be determined by mRssi
+        return timedScore.getScore().calculateBadge(result.level);
     }
 
     /**
@@ -1067,6 +1149,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         evictOldScanResults();
         savedState.putParcelableArrayList(KEY_SCANRESULTCACHE,
                 new ArrayList<ScanResult>(mScanResultCache.values()));
+        savedState.putParcelableArrayList(KEY_SCOREDNETWORKCACHE,
+                new ArrayList<>(mScoredNetworkCache.values()));
         if (mNetworkInfo != null) {
             savedState.putParcelable(KEY_NETWORKINFO, mNetworkInfo);
         }
@@ -1105,8 +1189,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
             updateRssi();
             int newLevel = getLevel();
 
-            if (newLevel > 0 && newLevel != oldLevel && mAccessPointListener != null) {
-                mAccessPointListener.onLevelChanged(this);
+            if (newLevel > 0 && newLevel != oldLevel) {
+                // Only update labels on visible rssi changes
+                updateSpeed();
+                if (mAccessPointListener != null) {
+                    mAccessPointListener.onLevelChanged(this);
+                }
             }
             // This flag only comes from scans, is not easily saved in config
             if (security == SECURITY_PSK) {
@@ -1191,7 +1279,23 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     @Nullable
-    private String getSpeedLabel(int speed) {
+    @Speed
+    private int roundToClosestSpeedEnum(int speed) {
+        if (speed < Speed.SLOW) {
+            return Speed.NONE;
+        } else if (speed < (Speed.SLOW + Speed.MODERATE) / 2) {
+            return Speed.SLOW;
+        } else if (speed < (Speed.MODERATE + Speed.FAST) / 2) {
+            return Speed.MODERATE;
+        } else if (speed < (Speed.FAST + Speed.VERY_FAST) / 2) {
+            return Speed.FAST;
+        } else {
+            return Speed.VERY_FAST;
+        }
+    }
+
+    @Nullable
+    private String getSpeedLabel(@Speed int speed) {
         switch (speed) {
             case Speed.VERY_FAST:
                 return mContext.getString(R.string.speed_label_very_fast);

@@ -21,8 +21,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,8 +48,8 @@ import android.text.SpannableString;
 import android.text.style.TtsSpan;
 
 import com.android.settingslib.R;
-
 import com.android.settingslib.wifi.AccessPoint.Speed;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,16 +57,35 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AccessPointTest {
 
-    private static final String TEST_SSID = "test_ssid";
+    private static final String TEST_SSID = "\"test_ssid\"";
+    private static final int NUM_SCAN_RESULTS = 5;
+
+    private static final ArrayList<ScanResult> SCAN_RESULTS = buildScanResultCache();
+
+    private static final RssiCurve FAST_BADGE_CURVE =
+            new RssiCurve(-150, 10, new byte[]{Speed.FAST});
+    public static final String TEST_BSSID = "00:00:00:00:00:00";
+
     private Context mContext;
     @Mock private RssiCurve mockBadgeCurve;
     @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
+
+    private static ScanResult createScanResult(String ssid, String bssid, int rssi) {
+        ScanResult scanResult = new ScanResult();
+        scanResult.SSID = ssid;
+        scanResult.level = rssi;
+        scanResult.BSSID = bssid;
+        scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
+        scanResult.capabilities = "";
+        return scanResult;
+    }
 
     @Before
     public void setUp() {
@@ -400,7 +417,7 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testSpeedLabel_isDerivedFromConnectedBssid() {
+    public void testSpeedLabel_isDerivedFromConnectedBssidWhenScoreAvailable() {
         int rssi = -55;
         String bssid = "00:00:00:00:00:00";
         int networkId = 123;
@@ -411,24 +428,42 @@ public class AccessPointTest {
         info.setBSSID(bssid);
         info.setNetworkId(networkId);
 
+        ArrayList<ScanResult> scanResults = new ArrayList<>();
+        ScanResult scanResultUnconnected = createScanResult(TEST_SSID, "11:11:11:11:11:11", rssi);
+        scanResults.add(scanResultUnconnected);
+
+        ScanResult scanResultConnected = createScanResult(TEST_SSID, bssid, rssi);
+        scanResults.add(scanResultConnected);
+
         AccessPoint ap =
                 new TestAccessPointBuilder(mContext)
                         .setActive(true)
                         .setNetworkId(networkId)
                         .setSsid(TEST_SSID)
-                        .setScanResultCache(buildScanResultCache())
+                        .setScanResultCache(scanResults)
                         .setWifiInfo(info)
                         .build();
 
-        NetworkKey key = new NetworkKey(new WifiKey('"' + TEST_SSID + '"', bssid));
-        when(mockWifiNetworkScoreCache.getScoredNetwork(key))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultUnconnected))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.FAST);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) Speed.SLOW);
+
+        int connectedSpeed = Speed.VERY_FAST;
+        RssiCurve connectedBadgeCurve = mock(RssiCurve.class);
+        Bundle attr1 = new Bundle();
+        attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, connectedBadgeCurve);
+        ScoredNetwork connectedScore = new ScoredNetwork(
+                NetworkKey.createFromScanResult(scanResultConnected),
+                connectedBadgeCurve,
+                false /* meteredHint */,
+                attr1);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultConnected))
+                .thenReturn(connectedScore);
+        when(connectedBadgeCurve.lookupScore(anyInt())).thenReturn((byte) connectedSpeed);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        verify(mockWifiNetworkScoreCache, times(2)).getScoredNetwork(key);
-        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.FAST);
+        assertThat(ap.getSpeed()).isEqualTo(connectedSpeed);
     }
 
     @Test
@@ -562,11 +597,16 @@ public class AccessPointTest {
     }
 
     private ScoredNetwork buildScoredNetworkWithMockBadgeCurve() {
+        return buildScoredNetworkWithGivenBadgeCurve(mockBadgeCurve);
+
+    }
+
+    private ScoredNetwork buildScoredNetworkWithGivenBadgeCurve(RssiCurve badgeCurve) {
         Bundle attr1 = new Bundle();
-        attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, mockBadgeCurve);
+        attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, badgeCurve);
         return new ScoredNetwork(
-                new NetworkKey(new WifiKey("\"ssid\"", "00:00:00:00:00:00")),
-                mockBadgeCurve,
+                new NetworkKey(new WifiKey(TEST_SSID, TEST_BSSID)),
+                badgeCurve,
                 false /* meteredHint */,
                 attr1);
 
@@ -574,19 +614,14 @@ public class AccessPointTest {
 
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
-        ArrayList<ScanResult> scanResults = buildScanResultCache();
-        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
+        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, SCAN_RESULTS);
         return new AccessPoint(mContext, bundle);
     }
 
-    private ArrayList<ScanResult> buildScanResultCache() {
+    private static ArrayList<ScanResult> buildScanResultCache() {
         ArrayList<ScanResult> scanResults = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            ScanResult scanResult = new ScanResult();
-            scanResult.level = i;
-            scanResult.BSSID = "bssid-" + i;
-            scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
-            scanResult.capabilities = "";
+            ScanResult scanResult = createScanResult(TEST_SSID, "bssid-" + i, i);
             scanResults.add(scanResult);
         }
         return scanResults;
@@ -598,6 +633,18 @@ public class AccessPointTest {
         configuration.SSID = "ssid";
         configuration.networkId = 123;
         return configuration;
+    }
+
+    private AccessPoint createApWithFastTimestampedScoredNetworkCache(
+            long elapsedTimeMillis) {
+        TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
+                buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE),
+                elapsedTimeMillis);
+        return new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setScoredNetworkCache(
+                        new ArrayList<>(Arrays.asList(recentScore)))
+                .build();
     }
 
     /**
@@ -848,5 +895,195 @@ public class AccessPointTest {
                 .build();
 
         ap.update(null, wifiInfo, networkInfo);
+    }
+
+    @Test
+    public void testSpeedLabelAveragesAllBssidScores() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        int speed1 = Speed.MODERATE;
+        RssiCurve badgeCurve1 = mock(RssiCurve.class);
+        when(badgeCurve1.lookupScore(anyInt())).thenReturn((byte) speed1);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(0)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve1));
+        int speed2 = Speed.VERY_FAST;
+        RssiCurve badgeCurve2 = mock(RssiCurve.class);
+        when(badgeCurve2.lookupScore(anyInt())).thenReturn((byte) speed2);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
+
+        int expectedSpeed = (speed1 + speed2) / 2;
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(expectedSpeed);
+    }
+
+    @Test
+    public void testSpeedLabelAverageIgnoresNoSpeedScores() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        int speed1 = Speed.VERY_FAST;
+        RssiCurve badgeCurve1 = mock(RssiCurve.class);
+        when(badgeCurve1.lookupScore(anyInt())).thenReturn((byte) speed1);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(0)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve1));
+        int speed2 = Speed.NONE;
+        RssiCurve badgeCurve2 = mock(RssiCurve.class);
+        when(badgeCurve2.lookupScore(anyInt())).thenReturn((byte) speed2);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(speed1);
+    }
+
+    @Test
+    public void testSpeedLabelUsesFallbackScoreWhenConnectedAccessPointScoreUnavailable() {
+        int rssi = -55;
+        String bssid = "00:00:00:00:00:00";
+        int networkId = 123;
+
+        WifiInfo info = new WifiInfo();
+        info.setRssi(rssi);
+        info.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        info.setBSSID(bssid);
+        info.setNetworkId(networkId);
+
+        ArrayList<ScanResult> scanResults = new ArrayList<>();
+        ScanResult scanResultUnconnected = createScanResult(TEST_SSID, "11:11:11:11:11:11", rssi);
+        scanResults.add(scanResultUnconnected);
+
+        ScanResult scanResultConnected = createScanResult(TEST_SSID, bssid, rssi);
+        scanResults.add(scanResultConnected);
+
+        AccessPoint ap =
+                new TestAccessPointBuilder(mContext)
+                        .setActive(true)
+                        .setNetworkId(networkId)
+                        .setSsid(TEST_SSID)
+                        .setScanResultCache(scanResults)
+                        .setWifiInfo(info)
+                        .build();
+
+        int fallbackSpeed = Speed.SLOW;
+        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultUnconnected))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) fallbackSpeed);
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultConnected))
+                .thenReturn(null);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(fallbackSpeed);
+    }
+
+    @Test
+    public void testScoredNetworkCacheBundling() {
+        long timeMillis = SystemClock.elapsedRealtime();
+        AccessPoint ap = createApWithFastTimestampedScoredNetworkCache(timeMillis);
+        Bundle bundle = new Bundle();
+        ap.saveWifiState(bundle);
+
+        ArrayList<TimestampedScoredNetwork> list =
+                bundle.getParcelableArrayList(AccessPoint.KEY_SCOREDNETWORKCACHE);
+        assertThat(list).hasSize(1);
+        assertThat(list.get(0).getUpdatedTimestampMillis()).isEqualTo(timeMillis);
+
+        RssiCurve curve = list.get(0).getScore().attributes.getParcelable(
+                ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE);
+        assertThat(curve).isEqualTo(FAST_BADGE_CURVE);
+    }
+
+    @Test
+    public void testRecentNetworkScoresAreUsedForSpeedLabelGeneration() {
+        AccessPoint ap =
+                createApWithFastTimestampedScoredNetworkCache(SystemClock.elapsedRealtime());
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
+    }
+
+    @Test
+    public void testNetworkScoresAreUsedForSpeedLabelGenerationWhenWithinAgeRange() {
+        long withinRangeTimeMillis =
+                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS - 10000);
+        AccessPoint ap =
+                createApWithFastTimestampedScoredNetworkCache(withinRangeTimeMillis);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
+    }
+
+    @Test
+    public void testOldNetworkScoresAreNotUsedForSpeedLabelGeneration() {
+        long tooOldTimeMillis =
+                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS + 1);
+        AccessPoint ap =
+                createApWithFastTimestampedScoredNetworkCache(tooOldTimeMillis);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(Speed.NONE);
+    }
+
+    @Test
+    public void testUpdateScoresRefreshesScoredNetworkCacheTimestamps () {
+        long tooOldTimeMillis =
+                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS + 1);
+
+        ScoredNetwork scoredNetwork = buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE);
+        TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
+                scoredNetwork,
+                tooOldTimeMillis);
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setBssid(TEST_BSSID)
+                .setActive(true)
+                .setScoredNetworkCache(
+                        new ArrayList(Arrays.asList(recentScore)))
+                .setScanResultCache(SCAN_RESULTS)
+                .build();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(scoredNetwork);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        // Fast should still be returned since cache was updated with recent time
+        assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
+    }
+
+    @Test
+    public void testUpdateScoresRefreshesScoredNetworkCacheWithNewSpeed () {
+        long tooOldTimeMillis =
+                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS + 1);
+
+        ScoredNetwork scoredNetwork = buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE);
+        TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
+                scoredNetwork,
+                tooOldTimeMillis);
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setBssid(TEST_BSSID)
+                .setActive(true)
+                .setScoredNetworkCache(
+                        new ArrayList(Arrays.asList(recentScore)))
+                .setScanResultCache(SCAN_RESULTS)
+                .build();
+
+        int newSpeed = Speed.MODERATE;
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) newSpeed);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        // Fast should still be returned since cache was updated with recent time
+        assertThat(ap.getSpeed()).isEqualTo(newSpeed);
     }
 }

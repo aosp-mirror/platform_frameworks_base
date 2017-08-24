@@ -714,6 +714,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 && (mAudioManager.isStreamAffectedByRingerMode(mActiveStream) || mExpanded)
                 && !mZenPanel.isEditing();
 
+        TransitionManager.endTransitions(mDialogView);
         TransitionManager.beginDelayedTransition(mDialogView, getTransition());
         if (wasVisible != visible && !visible) {
             prepareForCollapse();

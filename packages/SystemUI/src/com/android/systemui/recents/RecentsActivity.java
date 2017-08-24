@@ -367,7 +367,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         });
 
         // Set the window background
-        getWindow().setBackgroundDrawable(mRecentsView.getBackgroundScrim());
+        mRecentsView.updateBackgroundScrim(getWindow(), isInMultiWindowMode());
 
         // Create the home intent runnable
         mHomeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -555,6 +555,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
+
+        // Set the window background
+        mRecentsView.updateBackgroundScrim(getWindow(), isInMultiWindowMode);
 
         reloadTaskStack(isInMultiWindowMode, true /* sendConfigChangedEvent */);
     }
