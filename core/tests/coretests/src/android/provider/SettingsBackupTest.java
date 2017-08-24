@@ -99,6 +99,7 @@ public class SettingsBackupTest {
                     Settings.Global.ALARM_MANAGER_CONSTANTS,
                     Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                     Settings.Global.ALWAYS_FINISH_ACTIVITIES,
+                    Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS,
                     Settings.Global.ANIMATOR_DURATION_SCALE,
                     Settings.Global.ANOMALY_DETECTION_CONSTANTS,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
