@@ -231,9 +231,9 @@ public final class ScanRecord {
                     case DATA_TYPE_SERVICE_DATA_128_BIT:
                         int serviceUuidLength = BluetoothUuid.UUID_BYTES_16_BIT;
                         if (fieldType == DATA_TYPE_SERVICE_DATA_32_BIT) {
-                         serviceUuidLength = BluetoothUuid.UUID_BYTES_32_BIT;
+                            serviceUuidLength = BluetoothUuid.UUID_BYTES_32_BIT;
                         } else if (fieldType == DATA_TYPE_SERVICE_DATA_128_BIT) {
-                         serviceUuidLength = BluetoothUuid.UUID_BYTES_128_BIT;
+                            serviceUuidLength = BluetoothUuid.UUID_BYTES_128_BIT;
                         }
 
                         byte[] serviceDataUuidBytes = extractBytes(scanRecord, currentPos,
@@ -247,8 +247,8 @@ public final class ScanRecord {
                     case DATA_TYPE_MANUFACTURER_SPECIFIC_DATA:
                         // The first two bytes of the manufacturer specific data are
                         // manufacturer ids in little endian.
-                        int manufacturerId = ((scanRecord[currentPos + 1] & 0xFF) << 8) +
-                                (scanRecord[currentPos] & 0xFF);
+                        int manufacturerId = ((scanRecord[currentPos + 1] & 0xFF) << 8)
+                                + (scanRecord[currentPos] & 0xFF);
                         byte[] manufacturerDataBytes = extractBytes(scanRecord, currentPos + 2,
                                 dataLength - 2);
                         manufacturerData.put(manufacturerId, manufacturerDataBytes);
@@ -276,7 +276,8 @@ public final class ScanRecord {
     @Override
     public String toString() {
         return "ScanRecord [mAdvertiseFlags=" + mAdvertiseFlags + ", mServiceUuids=" + mServiceUuids
-                + ", mManufacturerSpecificData=" + BluetoothLeUtils.toString(mManufacturerSpecificData)
+                + ", mManufacturerSpecificData=" + BluetoothLeUtils.toString(
+                mManufacturerSpecificData)
                 + ", mServiceData=" + BluetoothLeUtils.toString(mServiceData)
                 + ", mTxPowerLevel=" + mTxPowerLevel + ", mDeviceName=" + mDeviceName + "]";
     }
