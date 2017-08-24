@@ -47,6 +47,9 @@ message IncidentHeaderProto {
     Cause cause = 1;
 }
 
+// privacy field options must not be set at this level because all
+// the sections are able to be controlled and configured by section ids.
+// Instead privacy field options need to be configured in each section proto message.
 message IncidentProto {
     // Incident header
     repeated IncidentHeaderProto header = 1;

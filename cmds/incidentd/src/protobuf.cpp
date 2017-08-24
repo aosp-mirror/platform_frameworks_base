@@ -16,6 +16,7 @@
 
 #include "protobuf.h"
 
+
 uint8_t* 
 write_raw_varint(uint8_t* buf, uint32_t val)
 {
