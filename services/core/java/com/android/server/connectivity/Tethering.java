@@ -49,6 +49,7 @@ import android.net.ConnectivityManager;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -1196,6 +1197,7 @@ public class Tethering extends BaseNetworkObserver {
         // to tear itself down.
         private final ArrayList<TetherInterfaceStateMachine> mNotifyList;
         private final IPv6TetheringCoordinator mIPv6TetheringCoordinator;
+        private final OffloadWrapper mOffload;
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
 
@@ -1220,31 +1222,9 @@ public class Tethering extends BaseNetworkObserver {
 
             mNotifyList = new ArrayList<>();
             mIPv6TetheringCoordinator = new IPv6TetheringCoordinator(mNotifyList, mLog);
+            mOffload = new OffloadWrapper();
 
             setInitialState(mInitialState);
-        }
-
-        private void startOffloadController() {
-            mOffloadController.start();
-            sendOffloadExemptPrefixes();
-        }
-
-        private void sendOffloadExemptPrefixes() {
-            sendOffloadExemptPrefixes(mUpstreamNetworkMonitor.getLocalPrefixes());
-        }
-
-        private void sendOffloadExemptPrefixes(Set<IpPrefix> localPrefixes) {
-            // Add in well-known minimum set.
-            PrefixUtils.addNonForwardablePrefixes(localPrefixes);
-            // Add tragically hardcoded prefixes.
-            localPrefixes.add(PrefixUtils.DEFAULT_WIFI_P2P_PREFIX);
-
-            // Add prefixes for all downstreams, regardless of IP serving mode.
-            for (TetherInterfaceStateMachine tism : mNotifyList) {
-                localPrefixes.addAll(PrefixUtils.localPrefixesFrom(tism.linkProperties()));
-            }
-
-            mOffloadController.setLocalPrefixes(localPrefixes);
         }
 
         class InitialState extends State {
@@ -1404,7 +1384,7 @@ public class Tethering extends BaseNetworkObserver {
 
         protected void handleNewUpstreamNetworkState(NetworkState ns) {
             mIPv6TetheringCoordinator.updateUpstreamNetworkState(ns);
-            mOffloadController.setUpstreamLinkProperties((ns != null) ? ns.linkProperties : null);
+            mOffload.updateUpstreamNetworkState(ns);
         }
 
         private void handleInterfaceServingStateActive(int mode, TetherInterfaceStateMachine who) {
@@ -1414,9 +1394,12 @@ public class Tethering extends BaseNetworkObserver {
             }
 
             if (mode == IControlsTethering.STATE_TETHERED) {
+                // No need to notify OffloadController just yet as there are no
+                // "offload-able" prefixes to pass along. This will handled
+                // when the TISM informs Tethering of its LinkProperties.
                 mForwardedDownstreams.add(who);
             } else {
-                mOffloadController.removeDownstreamInterface(who.interfaceName());
+                mOffload.excludeDownstreamInterface(who.interfaceName());
                 mForwardedDownstreams.remove(who);
             }
 
@@ -1441,7 +1424,7 @@ public class Tethering extends BaseNetworkObserver {
         private void handleInterfaceServingStateInactive(TetherInterfaceStateMachine who) {
             mNotifyList.remove(who);
             mIPv6TetheringCoordinator.removeActiveDownstream(who);
-            mOffloadController.removeDownstreamInterface(who.interfaceName());
+            mOffload.excludeDownstreamInterface(who.interfaceName());
             mForwardedDownstreams.remove(who);
 
             // If this is a Wi-Fi interface, tell WifiManager of any errors.
@@ -1455,7 +1438,7 @@ public class Tethering extends BaseNetworkObserver {
 
         private void handleUpstreamNetworkMonitorCallback(int arg1, Object o) {
             if (arg1 == UpstreamNetworkMonitor.NOTIFY_LOCAL_PREFIXES) {
-                sendOffloadExemptPrefixes((Set<IpPrefix>) o);
+                mOffload.sendOffloadExemptPrefixes((Set<IpPrefix>) o);
                 return;
             }
 
@@ -1525,7 +1508,7 @@ public class Tethering extends BaseNetworkObserver {
                 // TODO: De-duplicate with updateUpstreamWanted() below.
                 if (upstreamWanted()) {
                     mUpstreamWanted = true;
-                    startOffloadController();
+                    mOffload.start();
                     chooseUpstreamType(true);
                     mTryCell = false;
                 }
@@ -1533,7 +1516,7 @@ public class Tethering extends BaseNetworkObserver {
 
             @Override
             public void exit() {
-                mOffloadController.stop();
+                mOffload.stop();
                 mUpstreamNetworkMonitor.stop();
                 mSimChange.stopListening();
                 notifyDownstreamsOfNewUpstreamIface(null);
@@ -1545,9 +1528,9 @@ public class Tethering extends BaseNetworkObserver {
                 mUpstreamWanted = upstreamWanted();
                 if (mUpstreamWanted != previousUpstreamWanted) {
                     if (mUpstreamWanted) {
-                        startOffloadController();
+                        mOffload.start();
                     } else {
-                        mOffloadController.stop();
+                        mOffload.stop();
                     }
                 }
                 return previousUpstreamWanted;
@@ -1602,12 +1585,9 @@ public class Tethering extends BaseNetworkObserver {
                     case EVENT_IFACE_UPDATE_LINKPROPERTIES: {
                         final LinkProperties newLp = (LinkProperties) message.obj;
                         if (message.arg1 == IControlsTethering.STATE_TETHERED) {
-                            mOffloadController.notifyDownstreamLinkProperties(newLp);
+                            mOffload.updateDownstreamLinkProperties(newLp);
                         } else {
-                            mOffloadController.removeDownstreamInterface(newLp.getInterfaceName());
-                            // Another interface might be in local-only hotspot mode;
-                            // resend all local prefixes to the OffloadController.
-                            sendOffloadExemptPrefixes();
+                            mOffload.excludeDownstreamInterface(newLp.getInterfaceName());
                         }
                         break;
                     }
@@ -1720,6 +1700,82 @@ public class Tethering extends BaseNetworkObserver {
                 try {
                     mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {}
+            }
+        }
+
+        // A wrapper class to handle multiple situations where several calls to
+        // the OffloadController need to happen together.
+        //
+        // TODO: This suggests that the interface between OffloadController and
+        // Tethering is in need of improvement. Refactor these calls into the
+        // OffloadController implementation.
+        class OffloadWrapper {
+            public void start() {
+                mOffloadController.start();
+                sendOffloadExemptPrefixes();
+            }
+
+            public void stop() {
+                mOffloadController.stop();
+            }
+
+            public void updateUpstreamNetworkState(NetworkState ns) {
+                mOffloadController.setUpstreamLinkProperties(
+                        (ns != null) ? ns.linkProperties : null);
+            }
+
+            public void updateDownstreamLinkProperties(LinkProperties newLp) {
+                // Update the list of offload-exempt prefixes before adding
+                // new prefixes on downstream interfaces to the offload HAL.
+                sendOffloadExemptPrefixes();
+                mOffloadController.notifyDownstreamLinkProperties(newLp);
+            }
+
+            public void excludeDownstreamInterface(String ifname) {
+                // This and other interfaces may be in local-only hotspot mode;
+                // resend all local prefixes to the OffloadController.
+                sendOffloadExemptPrefixes();
+                mOffloadController.removeDownstreamInterface(ifname);
+            }
+
+            public void sendOffloadExemptPrefixes() {
+                sendOffloadExemptPrefixes(mUpstreamNetworkMonitor.getLocalPrefixes());
+            }
+
+            public void sendOffloadExemptPrefixes(final Set<IpPrefix> localPrefixes) {
+                // Add in well-known minimum set.
+                PrefixUtils.addNonForwardablePrefixes(localPrefixes);
+                // Add tragically hardcoded prefixes.
+                localPrefixes.add(PrefixUtils.DEFAULT_WIFI_P2P_PREFIX);
+
+                // Maybe add prefixes or addresses for downstreams, depending on
+                // the IP serving mode of each.
+                for (TetherInterfaceStateMachine tism : mNotifyList) {
+                    final LinkProperties lp = tism.linkProperties();
+
+                    switch (tism.servingMode()) {
+                        case IControlsTethering.STATE_UNAVAILABLE:
+                        case IControlsTethering.STATE_AVAILABLE:
+                            // No usable LinkProperties in these states.
+                            continue;
+                        case IControlsTethering.STATE_TETHERED:
+                            // Only add IPv4 /32 and IPv6 /128 prefixes. The
+                            // directly-connected prefixes will be sent as
+                            // downstream "offload-able" prefixes.
+                            for (LinkAddress addr : lp.getAllLinkAddresses()) {
+                                final InetAddress ip = addr.getAddress();
+                                if (ip.isLinkLocalAddress()) continue;
+                                localPrefixes.add(PrefixUtils.ipAddressAsPrefix(ip));
+                            }
+                            break;
+                        case IControlsTethering.STATE_LOCAL_ONLY:
+                            // Add prefixes covering all local IPs.
+                            localPrefixes.addAll(PrefixUtils.localPrefixesFrom(lp));
+                            break;
+                    }
+                }
+
+                mOffloadController.setLocalPrefixes(localPrefixes);
             }
         }
     }

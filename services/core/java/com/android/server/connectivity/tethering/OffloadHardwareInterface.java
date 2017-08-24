@@ -236,6 +236,44 @@ public class OffloadHardwareInterface {
         return results.success;
     }
 
+    public boolean addDownstreamPrefix(String ifname, String prefix) {
+        final String logmsg = String.format("addDownstreamPrefix(%s, %s)", ifname, prefix);
+
+        final CbResults results = new CbResults();
+        try {
+            mOffloadControl.addDownstream(ifname, prefix,
+                    (boolean success, String errMsg) -> {
+                        results.success = success;
+                        results.errMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return false;
+        }
+
+        record(logmsg, results);
+        return results.success;
+    }
+
+    public boolean removeDownstreamPrefix(String ifname, String prefix) {
+        final String logmsg = String.format("removeDownstreamPrefix(%s, %s)", ifname, prefix);
+
+        final CbResults results = new CbResults();
+        try {
+            mOffloadControl.removeDownstream(ifname, prefix,
+                    (boolean success, String errMsg) -> {
+                        results.success = success;
+                        results.errMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return false;
+        }
+
+        record(logmsg, results);
+        return results.success;
+    }
+
     private void record(String msg, Throwable t) {
         mLog.e(msg + YIELDS + "exception: " + t);
     }
