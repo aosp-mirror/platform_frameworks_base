@@ -72,7 +72,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
     /** Connection canceled before completion. */
     public static final int RESULT_CANCELED = 2;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
@@ -216,8 +216,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "disconnect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.disconnect(device);
             } catch (RemoteException e) {
@@ -276,8 +275,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getConnectionState(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getConnectionState(device);
             } catch (RemoteException e) {
@@ -300,10 +298,9 @@ public final class BluetoothMapClient implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) Log.d(TAG, "setPriority(" + device + ", " + priority + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            if (priority != BluetoothProfile.PRIORITY_OFF &&
-                    priority != BluetoothProfile.PRIORITY_ON) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
                 return false;
             }
             try {
@@ -329,8 +326,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) Log.d(TAG, "getPriority(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getPriority(device);
             } catch (RemoteException e) {
@@ -347,10 +343,10 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * Send an SMS message to either the contacts primary number or the telephone number specified.
      *
-     * @param device          Bluetooth device
-     * @param contacts        Uri[] of the contacts
-     * @param message         Message to be sent
-     * @param sentIntent      intent issued when message is sent
+     * @param device Bluetooth device
+     * @param contacts Uri[] of the contacts
+     * @param message Message to be sent
+     * @param sentIntent intent issued when message is sent
      * @param deliveredIntent intent issued when message is delivered
      * @return true if the message is enqueued, false on error
      */
@@ -393,7 +389,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
             mService = IBluetoothMapClient.Stub.asInterface(service);
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.MAP_CLIENT,
-                    BluetoothMapClient.this);
+                        BluetoothMapClient.this);
             }
         }
 
