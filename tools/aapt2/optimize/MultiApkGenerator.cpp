@@ -46,7 +46,7 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
   // TODO(safarmer): Handle APK version codes for the generated APKs.
   // TODO(safarmer): Handle explicit outputs/generating an output file list for other tools.
 
-  const std::string& apk_path = apk_->GetSource().path;
+  const std::string& apk_path = file::GetFilename(apk_->GetSource().path).to_string();
   const StringPiece ext = file::GetExtension(apk_path);
   const std::string base_name = apk_path.substr(0, apk_path.rfind(ext.to_string()));
 
@@ -122,10 +122,14 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
 
     std::unique_ptr<ResourceTable> table = apk_->GetResourceTable()->Clone();
 
+
     TableSplitter splitter{{}, splits};
     splitter.SplitTable(table.get());
 
     std::string out = out_dir;
+    if (!file::mkdirs(out)) {
+      context_->GetDiagnostics()->Warn(DiagMessage() << "could not create out dir: " << out);
+    }
     file::AppendPath(&out, artifact_name.value());
 
     std::unique_ptr<IArchiveWriter> writer =
