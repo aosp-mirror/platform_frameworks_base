@@ -97,19 +97,33 @@ public class Typeface {
     public static final Typeface MONOSPACE;
 
     static Typeface[] sDefaults;
-    private static final LongSparseArray<SparseArray<Typeface>> sTypefaceCache =
+
+    /**
+     * Cache for Typeface objects for style variant. Currently max size is 3.
+     */
+    @GuardedBy("sStyledCacheLock")
+    private static final LongSparseArray<SparseArray<Typeface>> sStyledTypefaceCache =
             new LongSparseArray<>(3);
+    private static final Object sStyledCacheLock = new Object();
+
+    /**
+     * Cache for Typeface objects for weight variant. Currently max size is 3.
+     */
+    @GuardedBy("sWeightCacheLock")
+    private static final LongSparseArray<SparseArray<Typeface>> sWeightTypefaceCache =
+            new LongSparseArray<>(3);
+    private static final Object sWeightCacheLock = new Object();
 
     /**
      * Cache for Typeface objects dynamically loaded from assets. Currently max size is 16.
      */
-    @GuardedBy("sLock")
+    @GuardedBy("sDynamicCacheLock")
     private static final LruCache<String, Typeface> sDynamicTypefaceCache = new LruCache<>(16);
+    private static final Object sDynamicCacheLock = new Object();
 
     static Typeface sDefaultTypeface;
     static final Map<String, Typeface> sSystemFontMap;
     static final Map<String, FontFamily[]> sSystemFallbackMap;
-    private static final Object sLock = new Object();
 
     /**
      * @hide
@@ -121,6 +135,7 @@ public class Typeface {
     public static final int BOLD = 1;
     public static final int ITALIC = 2;
     public static final int BOLD_ITALIC = 3;
+    /** @hide */ public static final int STYLE_MASK = 0x03;
 
     private int mStyle = 0;
     private int mWeight = 0;
@@ -141,6 +156,13 @@ public class Typeface {
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
         nativeSetDefault(t.native_instance);
+    }
+
+    // TODO: Make this public API. (b/64852739)
+    /** @hide */
+    @VisibleForTesting
+    public int getWeight() {
+        return mWeight;
     }
 
     /** Returns the typeface's intrinsic style attributes */
@@ -164,7 +186,7 @@ public class Typeface {
      */
     @Nullable
     public static Typeface createFromResources(AssetManager mgr, String path, int cookie) {
-        synchronized (sDynamicTypefaceCache) {
+        synchronized (sDynamicCacheLock) {
             final String key = Builder.createAssetUid(
                     mgr, path, 0 /* ttcIndex */, null /* axes */,
                     RESOLVE_BY_FONT_TABLE /* weight */, RESOLVE_BY_FONT_TABLE /* italic */,
@@ -241,7 +263,7 @@ public class Typeface {
         FontFamily[] familyChain = { fontFamily };
         typeface = createFromFamiliesWithDefault(familyChain, DEFAULT_FAMILY,
                 RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
-        synchronized (sDynamicTypefaceCache) {
+        synchronized (sDynamicCacheLock) {
             final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */,
                     null /* axes */, RESOLVE_BY_FONT_TABLE /* weight */,
                     RESOLVE_BY_FONT_TABLE /* italic */, DEFAULT_FAMILY);
@@ -255,7 +277,7 @@ public class Typeface {
      * @hide
      */
     public static Typeface findFromCache(AssetManager mgr, String path) {
-        synchronized (sDynamicTypefaceCache) {
+        synchronized (sDynamicCacheLock) {
             final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */, null /* axes */,
                     RESOLVE_BY_FONT_TABLE /* weight */, RESOLVE_BY_FONT_TABLE /* italic */,
                     DEFAULT_FAMILY);
@@ -525,12 +547,6 @@ public class Typeface {
             return builder.toString();
         }
 
-        private static final Object sLock = new Object();
-        // TODO: Unify with Typeface.sTypefaceCache.
-        @GuardedBy("sLock")
-        private static final LongSparseArray<SparseArray<Typeface>> sTypefaceCache =
-                new LongSparseArray<>(3);
-
         private Typeface resolveFallbackTypeface() {
             if (mFallbackFamilyName == null) {
                 return null;
@@ -581,7 +597,7 @@ public class Typeface {
                 final String key = createAssetUid(
                         mAssetManager, mPath, mTtcIndex, mAxes, mWeight, mItalic,
                         mFallbackFamilyName);
-                synchronized (sLock) {
+                synchronized (sDynamicCacheLock) {
                     Typeface typeface = sDynamicTypefaceCache.get(key);
                     if (typeface != null) return typeface;
                     final FontFamily fontFamily = new FontFamily();
@@ -666,6 +682,11 @@ public class Typeface {
      * style from the same family of an existing typeface object. If family is
      * null, this selects from the default font's family.
      *
+     * <p>
+     * This method is not thread safe on API 27 or before.
+     * This method is thread safe on API 28 or after.
+     * </p>
+     *
      * @param family An existing {@link Typeface} object. In case of {@code null}, the default
      *               typeface is used instead.
      * @param style  The style (normal, bold, italic) of the typeface.
@@ -673,42 +694,47 @@ public class Typeface {
      * @return The best matching typeface.
      */
     public static Typeface create(Typeface family, int style) {
-        if (style < 0 || style > 3) {
-            style = 0;
+        if ((style & ~STYLE_MASK) != 0) {
+            style = NORMAL;
         }
-        long ni = 0;
-        if (family != null) {
-            // Return early if we're asked for the same face/style
-            if (family.mStyle == style) {
-                return family;
-            }
+        if (family == null) {
+            family = sDefaultTypeface;
+        }
 
-            ni = family.native_instance;
+        // Return early if we're asked for the same face/style
+        if (family.mStyle == style) {
+            return family;
         }
+
+        final long ni = family.native_instance;
 
         Typeface typeface;
-        SparseArray<Typeface> styles = sTypefaceCache.get(ni);
+        synchronized (sStyledCacheLock) {
+            SparseArray<Typeface> styles = sStyledTypefaceCache.get(ni);
 
-        if (styles != null) {
-            typeface = styles.get(style);
-            if (typeface != null) {
-                return typeface;
+            if (styles == null) {
+                styles = new SparseArray<Typeface>(4);
+                sStyledTypefaceCache.put(ni, styles);
+            } else {
+                typeface = styles.get(style);
+                if (typeface != null) {
+                    return typeface;
+                }
             }
-        }
 
-        typeface = new Typeface(nativeCreateFromTypeface(ni, style));
-        if (styles == null) {
-            styles = new SparseArray<Typeface>(4);
-            sTypefaceCache.put(ni, styles);
+            typeface = new Typeface(nativeCreateFromTypeface(ni, style));
+            styles.put(style, typeface);
         }
-        styles.put(style, typeface);
-
         return typeface;
     }
 
     /**
      * Creates a typeface object that best matches the specified existing typeface and the specified
      * weight and italic style
+     *
+     * <p>
+     * This method is thread safe.
+     * </p>
      *
      * @param family An existing {@link Typeface} object. In case of {@code null}, the default
      *               typeface is used instead.
@@ -728,12 +754,15 @@ public class Typeface {
 
     private static @NonNull Typeface createWeightStyle(@NonNull Typeface base,
             @IntRange(from = 1, to = 1000) int weight, boolean italic) {
-        final int key = weight << 1 | (italic ? 1 : 0);
+        final int key = (weight << 1) | (italic ? 1 : 0);
 
         Typeface typeface;
-        synchronized(sLock) {
-            SparseArray<Typeface> innerCache = sTypefaceCache.get(base.native_instance);
-            if (innerCache != null) {
+        synchronized(sWeightCacheLock) {
+            SparseArray<Typeface> innerCache = sWeightTypefaceCache.get(base.native_instance);
+            if (innerCache == null) {
+                innerCache = new SparseArray<>(4);
+                sWeightTypefaceCache.put(base.native_instance, innerCache);
+            } else {
                 typeface = innerCache.get(key);
                 if (typeface != null) {
                     return typeface;
@@ -743,11 +772,6 @@ public class Typeface {
             typeface = new Typeface(
                     nativeCreateFromTypefaceWithExactStyle(
                             base.native_instance, weight, italic));
-
-            if (innerCache == null) {
-                innerCache = new SparseArray<>(4); // [regular, bold] x [upright, italic]
-                sTypefaceCache.put(base.native_instance, innerCache);
-            }
             innerCache.put(key, typeface);
         }
         return typeface;
@@ -780,7 +804,7 @@ public class Typeface {
         if (path == null) {
             throw new NullPointerException();  // for backward compatibility
         }
-        synchronized (sLock) {
+        synchronized (sDynamicCacheLock) {
             Typeface typeface = new Builder(mgr, path).build();
             if (typeface != null) return typeface;
 
