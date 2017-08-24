@@ -55,7 +55,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
@@ -676,7 +675,7 @@ class AppErrors {
                 && (mService.mHomeProcess.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
-                if (r.isHomeActivity()) {
+                if (r.isActivityTypeHome()) {
                     Log.i(TAG, "Clearing package preferred activities from " + r.packageName);
                     try {
                         ActivityThread.getPackageManager()

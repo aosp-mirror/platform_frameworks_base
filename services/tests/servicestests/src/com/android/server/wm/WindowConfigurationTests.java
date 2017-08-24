@@ -27,8 +27,9 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayInfo;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
@@ -116,6 +117,22 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
         assertEquals(blankConfig.compareTo(config1), 1);
         assertEquals(blankWinConfig.compareTo(winConfig1), 1);
+    }
+
+    @Test
+    public void testSetActivityType() throws Exception {
+        final WindowConfiguration config = new WindowConfiguration();
+        config.setActivityType(ACTIVITY_TYPE_HOME);
+        assertEquals(ACTIVITY_TYPE_HOME, config.getActivityType());
+
+        boolean gotException = false;
+        try {
+            // Can't change activity type once set.
+            config.setActivityType(ACTIVITY_TYPE_STANDARD);
+        } catch (IllegalStateException e) {
+            gotException = true;
+        }
+        assertTrue("Can't change activity type once set.", gotException);
     }
 
     /** Ensures the configuration app bounds at the root level match the app dimensions. */

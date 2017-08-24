@@ -67,7 +67,7 @@ public class WindowTestUtils {
     public static Task createTaskInStack(WindowManagerService service, TaskStack stack,
             int userId) {
         final Task newTask = new Task(sNextTaskId++, stack, userId, service, null, EMPTY, 0, false,
-                false, new ActivityManager.TaskDescription(), null);
+                new ActivityManager.TaskDescription(), null);
         stack.addTask(newTask, POSITION_TOP);
         return newTask;
     }
@@ -175,10 +175,9 @@ public class WindowTestUtils {
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
                 Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-                boolean homeTask, TaskWindowContainerController controller) {
+                TaskWindowContainerController controller) {
             super(taskId, stack, userId, service, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, new ActivityManager.TaskDescription(),
-                    controller);
+                    supportsPictureInPicture, new ActivityManager.TaskDescription(), controller);
         }
 
         boolean shouldDeferRemoval() {
@@ -229,7 +228,7 @@ public class WindowTestUtils {
                         }
                     }, stackController, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE,
-                    false /* supportsPictureInPicture */, false /* homeTask*/, true /* toTop*/,
+                    false /* supportsPictureInPicture */, true /* toTop*/,
                     true /* showForAllUsers */, new ActivityManager.TaskDescription(),
                     stackController.mService);
         }
@@ -237,9 +236,9 @@ public class WindowTestUtils {
         @Override
         TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds,
                 Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-                boolean homeTask, ActivityManager.TaskDescription taskDescription) {
+                ActivityManager.TaskDescription taskDescription) {
             return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, this);
+                    supportsPictureInPicture, this);
         }
     }
 

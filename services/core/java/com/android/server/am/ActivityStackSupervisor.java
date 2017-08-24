@@ -33,6 +33,9 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
@@ -67,8 +70,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
@@ -689,7 +690,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (prev != null) {
-            prev.getTask().setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            prev.getTask().setTaskToReturnTo(ACTIVITY_TYPE_STANDARD);
         }
 
         mHomeStack.moveHomeStackTaskToTop();
@@ -1342,7 +1343,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 + " newIntents=" + newIntents + " andResume=" + andResume);
                 EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.userId,
                         System.identityHashCode(r), task.taskId, r.shortComponentName);
-                if (r.isHomeActivity()) {
+                if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
                     mService.mHomeProcess = task.mActivities.get(0).app;
                 }
@@ -2077,7 +2078,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
             // Caller wants the home activity moved with it.  To accomplish this,
             // we'll just indicate that this task returns to the home task.
-            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
         }
         ActivityStack currentStack = task.getStack();
         if (currentStack == null) {
@@ -2263,11 +2264,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = tasks.get(taskNdx);
-            if (task.isHomeTask()) {
+            if (task.isActivityTypeHome()) {
                 final ArrayList<ActivityRecord> activities = task.mActivities;
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
-                    if (r.isHomeActivity()
+                    if (r.isActivityTypeHome()
                             && ((userId == UserHandle.USER_ALL) || (r.userId == userId))) {
                         return r;
                     }
@@ -2400,8 +2401,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // Update the return-to to reflect where the pinned stack task was moved
                         // from so that we retain the stack that was previously visible if the
                         // pinned stack is recreated. See moveActivityToPinnedStackLocked().
-                        task.setTaskToReturnTo(isFullscreenStackVisible && onTop ?
-                                APPLICATION_ACTIVITY_TYPE : HOME_ACTIVITY_TYPE);
+                        task.setTaskToReturnTo(isFullscreenStackVisible ?
+                                ACTIVITY_TYPE_STANDARD : ACTIVITY_TYPE_HOME);
                     }
                     // Defer resume until all the tasks have been moved to the fullscreen stack
                     task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
@@ -2921,7 +2922,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // move the home stack forward if we are currently entering picture-in-picture
                 // while pausing because that changes the focused stack and may prevent the new
                 // starting activity from resuming.
-                if (moveHomeStackToFront && task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE
+                if (moveHomeStackToFront && task.returnsToHomeTask()
                         && (r.state == RESUMED || !r.supportsEnterPipOnTaskSwitch)) {
                     // Move the home stack forward if the task we just moved to the pinned stack
                     // was launched from home so home should be visible behind it.
@@ -2940,8 +2941,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // ensures that all the necessary work to migrate states in the old and new stacks
                 // is also done.
                 final TaskRecord newTask = task.getStack().createTaskRecord(
-                        getNextTaskIdForUserLocked(r.userId), r.info, r.intent, null, null, true,
-                        r.mActivityType);
+                        getNextTaskIdForUserLocked(r.userId), r.info, r.intent, null, null, true);
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
 
                 // Defer resume until below, and do not schedule PiP changes until we animate below
@@ -3013,7 +3013,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                if (!checkActivityBelongsInStack(r, stack)) {
+                if (!r.hasCompatibleActivityType(stack)) {
                     if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping stack: (mismatch activity/stack) "
                             + stack);
                     continue;
@@ -3039,21 +3039,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (DEBUG_TASKS && affinityMatch == null) Slog.d(TAG_TASKS, "No task found");
         return affinityMatch;
-    }
-
-    /**
-     * Checks that for the given activity {@param r}, its activity type matches the {@param stack}
-     * type.
-     */
-    private boolean checkActivityBelongsInStack(ActivityRecord r, ActivityStack stack) {
-        if (r.isHomeActivity()) {
-            return stack.isHomeStack();
-        } else if (r.isRecentsActivity()) {
-            return stack.isRecentsStack();
-        } else if (r.isAssistantActivity()) {
-            return stack.isAssistantStack();
-        }
-        return true;
     }
 
     ActivityRecord findActivityLocked(Intent intent, ActivityInfo info,
@@ -3438,7 +3423,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (stack == null) {
             stack = mHomeStack;
         }
-        final boolean homeInFront = stack.isHomeStack();
+        final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
             stack.moveToFront("switchUserOnHomeDisplay");
         } else {
@@ -4038,7 +4023,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY)
                 || StackId.isDynamicStack(preferredStackId);
         if (((!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID)
-                && !isSecondaryDisplayPreferred) || task.isHomeTask()) {
+                && !isSecondaryDisplayPreferred) || task.isActivityTypeHome()) {
             return;
         }
 

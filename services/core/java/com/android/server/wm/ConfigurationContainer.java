@@ -16,6 +16,13 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.activityTypeToString;
+
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 
@@ -40,6 +47,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * topmost container's override config instead of global config.
      */
     private Configuration mMergedOverrideConfiguration = new Configuration();
+
+    // TODO: Can't have ag/2592611 soon enough!
+    private final Configuration mTmpConfig = new Configuration();
 
     /**
      * Returns full configuration applied to this configuration container.
@@ -120,10 +130,56 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Sets the windowing mode for the configuration container. */
-    public void setWindowingMode(/* @WindowConfiguration.WindowingMode...triggers Jack compiler bug...*/
-            int windowingMode) {
-        mOverrideConfiguration.windowConfiguration.setWindowingMode(windowingMode);
-        onOverrideConfigurationChanged(mOverrideConfiguration);
+    public void setWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
+        mTmpConfig.setTo(getOverrideConfiguration());
+        mTmpConfig.windowConfiguration.setWindowingMode(windowingMode);
+        onOverrideConfigurationChanged(mTmpConfig);
+    }
+
+    /** Returns the activity type associated with the the configuration container. */
+    @WindowConfiguration.ActivityType
+    public int getActivityType() {
+        return mFullConfiguration.windowConfiguration.getActivityType();
+    }
+
+    /** Sets the activity type to associate with the configuration container. */
+    public void setActivityType(@WindowConfiguration.ActivityType int activityType) {
+        int currentActivityType = getActivityType();
+        if (currentActivityType == activityType) {
+            return;
+        }
+        if (currentActivityType != ACTIVITY_TYPE_UNDEFINED) {
+            throw new IllegalStateException("Can't change activity type once set: " + this
+                    + " activityType=" + activityTypeToString(activityType));
+        }
+        mTmpConfig.setTo(getOverrideConfiguration());
+        mTmpConfig.windowConfiguration.setActivityType(activityType);
+        onOverrideConfigurationChanged(mTmpConfig);
+    }
+
+    public boolean isActivityTypeHome() {
+        return getActivityType() == ACTIVITY_TYPE_HOME;
+    }
+
+    public boolean isActivityTypeRecents() {
+        return getActivityType() == ACTIVITY_TYPE_RECENTS;
+    }
+
+    public boolean isActivityTypeAssistant() {
+        return getActivityType() == ACTIVITY_TYPE_ASSISTANT;
+    }
+
+    public boolean isActivityTypeStandard() {
+        return getActivityType() == ACTIVITY_TYPE_STANDARD;
+    }
+
+    public boolean hasCompatibleActivityType(ConfigurationContainer other) {
+        @WindowConfiguration.ActivityType int thisType = getActivityType();
+        @WindowConfiguration.ActivityType int otherType = other.getActivityType();
+
+        return thisType == otherType
+                || thisType == ACTIVITY_TYPE_UNDEFINED
+                || otherType == ACTIVITY_TYPE_UNDEFINED;
     }
 
     /**

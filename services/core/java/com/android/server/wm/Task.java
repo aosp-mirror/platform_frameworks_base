@@ -97,27 +97,23 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     private boolean mDragResizing;
     private int mDragResizeMode;
 
-    private boolean mHomeTask;
-
     private TaskDescription mTaskDescription;
 
     // If set to true, the task will report that it is not in the floating
-    // state regardless of it's stack affilation. As the floating state drives
+    // state regardless of it's stack affiliation. As the floating state drives
     // production of content insets this can be used to preserve them across
     // stack moves and we in fact do so when moving from full screen to pinned.
     private boolean mPreserveNonFloatingState = false;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, TaskDescription taskDescription,
-            TaskWindowContainerController controller) {
+            TaskDescription taskDescription, TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
-        mHomeTask = homeTask;
         setController(controller);
         setBounds(bounds, overrideConfig);
         mTaskDescription = taskDescription;
@@ -368,10 +364,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     boolean cropWindowsToStackBounds() {
         return isResizeable();
-    }
-
-    boolean isHomeTask() {
-        return mHomeTask;
     }
 
     boolean resizeLocked(Rect bounds, Configuration overrideConfig, boolean forced) {
