@@ -81,6 +81,11 @@ public class FakeExtensionController implements ExtensionController {
         }
 
         @Override
+        public ExtensionBuilder<T> withFeature(String feature, Supplier<T> def) {
+            return null;
+        }
+
+        @Override
         public Extension build() {
             return new FakeExtension(mAllocation);
         }
