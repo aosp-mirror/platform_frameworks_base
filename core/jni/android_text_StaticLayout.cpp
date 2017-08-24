@@ -57,7 +57,7 @@ static JLineBreaksID gLineBreaks_fieldID;
 static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, jint length,
         jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
         jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency,
-        jboolean isJustified) {
+        jboolean isJustified, jintArray indents, jint insetsOffset) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->resize(length);
     env->GetCharArrayRegion(text, 0, length, b->buffer());
@@ -72,6 +72,18 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
     b->setStrategy(static_cast<minikin::BreakStrategy>(strategy));
     b->setHyphenationFrequency(static_cast<minikin::HyphenationFrequency>(hyphenFrequency));
     b->setJustified(isJustified);
+
+    // TODO: copy indents only once when LineBreaker is started to be used.
+    if (indents != nullptr) {
+        // If indents is not null, it is guaranteed that lineOffset is less than the size of array.
+        ScopedIntArrayRO indentArr(env, indents);
+        std::vector<float> indentVec(
+            indentArr.get() + insetsOffset, indentArr.get() + indentArr.size());
+        b->setIndents(indentVec);
+    } else {
+        b->setIndents(std::vector<float>());
+    }
+
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
@@ -164,13 +176,6 @@ static void nSetLocales(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocale
     b->setLocales(localeNames.c_str(), hyphVec);
 }
 
-static void nSetIndents(JNIEnv* env, jclass, jlong nativePtr, jintArray indents) {
-    ScopedIntArrayRO indentArr(env, indents);
-    std::vector<float> indentVec(indentArr.get(), indentArr.get() + indentArr.size());
-    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
-    b->setIndents(indentVec);
-}
-
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
 static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePaint, jint start,
         jint end, jboolean isRtl) {
@@ -211,8 +216,7 @@ static const JNINativeMethod gMethods[] = {
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
     {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
     {"nSetLocales", "(JLjava/lang/String;[J)V", (void*) nSetLocales},
-    {"nSetupParagraph", "(J[CIFIF[IIIIZ)V", (void*) nSetupParagraph},
-    {"nSetIndents", "(J[I)V", (void*) nSetIndents},
+    {"nSetupParagraph", "(J[CIFIF[IIIIZ[II)V", (void*) nSetupParagraph},
     {"nAddStyleRun", "(JJIIZ)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
