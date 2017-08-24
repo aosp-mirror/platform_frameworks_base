@@ -31,8 +31,8 @@
     <string name="template_all_pages" msgid="3322235982020148762">"সমস্ত <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> এর পরিসর"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"যেমন, ১—৫,৮,১১—১৩"</string>
-    <string name="print_preview" msgid="8010217796057763343">"প্রিন্ট পূর্বরূপ"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"পূর্বরূপ দেখার জন্য PDF ভিউয়ার ইনস্টল করুন"</string>
+    <string name="print_preview" msgid="8010217796057763343">"প্রিন্ট প্রিভিউ"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"প্রিভিউ দেখার জন্য PDF ভিউয়ার ইনস্টল করুন"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"প্রিন্ট অ্যাপ্লিকেশান ক্র্যাশ করছে"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"প্রিন্ট কার্য তৈরি করা হচ্ছে"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF হিসাবে সংরক্ষণ করুন"</string>
@@ -99,13 +99,13 @@
     <item msgid="79513688117503758">"সংক্ষিপ্ত প্রান্ত"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"প্রতিকৃতি"</item>
+    <item msgid="4061931020926489228">"পোর্ট্রেট"</item>
     <item msgid="3199660090246166812">"ভূদৃশ্য"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ফাইলে লেখা যায়নি"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"দুঃখিত, এটি কাজ করেনি৷ আবার চেষ্টা করুন৷"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"আবার চেষ্টা করুন"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"এই মূহুর্তে প্রিন্টার উপলব্ধ নয়।"</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"পূর্বরূপ প্রদর্শন করা যাবে না"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"পূর্বরূপ প্রস্তুত করছে..."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"প্রিভিউ প্রদর্শন করা যাবে না"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"প্রিভিউ প্রস্তুত করা হচ্ছে..."</string>
 </resources>
