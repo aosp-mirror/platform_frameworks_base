@@ -29,6 +29,7 @@ public interface RankingConfig {
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
+    boolean isGroupBlocked(String packageName, int uid, String groupId);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid);

@@ -1470,6 +1470,19 @@ public class NotificationManagerService extends SystemService {
         savePolicyFile();
     }
 
+    private void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
+            boolean fromApp, boolean fromListener) {
+        Preconditions.checkNotNull(group);
+        Preconditions.checkNotNull(pkg);
+        mRankingHelper.createNotificationChannelGroup(pkg, uid, group,
+                fromApp);
+        if (!fromListener) {
+            mListeners.notifyNotificationChannelGroupChanged(pkg,
+                    UserHandle.of(UserHandle.getCallingUserId()), group,
+                    NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
+        }
+    }
+
     private ArrayList<ComponentName> getSuppressors() {
         ArrayList<ComponentName> names = new ArrayList<ComponentName>();
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
@@ -1757,6 +1770,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void updateNotificationChannelGroupForPackage(String pkg, int uid,
+                NotificationChannelGroup group) throws RemoteException {
+            enforceSystemOrSystemUI("Caller not system or systemui");
+            createNotificationChannelGroup(pkg, uid, group, false, false);
+            savePolicyFile();
+        }
+
+        @Override
         public void createNotificationChannelGroups(String pkg,
                 ParceledListSlice channelGroupList) throws RemoteException {
             checkCallerIsSystemOrSameApp(pkg);
@@ -1764,12 +1785,7 @@ public class NotificationManagerService extends SystemService {
             final int groupSize = groups.size();
             for (int i = 0; i < groupSize; i++) {
                 final NotificationChannelGroup group = groups.get(i);
-                Preconditions.checkNotNull(group, "group in list is null");
-                mRankingHelper.createNotificationChannelGroup(pkg, Binder.getCallingUid(), group,
-                        true /* fromTargetApp */);
-                mListeners.notifyNotificationChannelGroupChanged(pkg,
-                        UserHandle.of(UserHandle.getCallingUserId()), group,
-                        NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
+                createNotificationChannelGroup(pkg, Binder.getCallingUid(), group, true, false);
             }
             savePolicyFile();
         }
@@ -1912,6 +1928,14 @@ public class NotificationManagerService extends SystemService {
                 String pkg, int uid, boolean includeDeleted) {
             checkCallerIsSystem();
             return mRankingHelper.getNotificationChannelGroups(pkg, uid, includeDeleted);
+        }
+
+        @Override
+        public NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(
+                String pkg, int uid, String groupId, boolean includeDeleted) {
+            enforceSystemOrSystemUI("getPopulatedNotificationChannelGroupForPackage");
+            return mRankingHelper.getNotificationChannelGroupWithChannels(
+                    pkg, uid, groupId, includeDeleted);
         }
 
         @Override
@@ -2917,6 +2941,17 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void updateNotificationChannelGroupFromPrivilegedListener(
+                INotificationListener token, String pkg, UserHandle user,
+                NotificationChannelGroup group) throws RemoteException {
+            Preconditions.checkNotNull(user);
+            verifyPrivilegedListener(token, user);
+            createNotificationChannelGroup(
+                    pkg, getUidForPackageAndUser(pkg, user), group, false, true);
+            savePolicyFile();
+        }
+
+        @Override
         public void updateNotificationChannelFromPrivilegedListener(INotificationListener token,
                 String pkg, UserHandle user, NotificationChannel channel) throws RemoteException {
             Preconditions.checkNotNull(channel);
@@ -3612,9 +3647,10 @@ public class NotificationManagerService extends SystemService {
             usageStats.registerSuspendedByAdmin(r);
             return isPackageSuspended;
         }
-
         final boolean isBlocked =
-                mRankingHelper.getImportance(pkg, callingUid) == NotificationManager.IMPORTANCE_NONE
+                mRankingHelper.isGroupBlocked(pkg, callingUid, r.getChannel().getGroup())
+                || mRankingHelper.getImportance(pkg, callingUid)
+                        == NotificationManager.IMPORTANCE_NONE
                 || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE;
         if (isBlocked) {
             Slog.e(TAG, "Suppressing notification from package by user request.");

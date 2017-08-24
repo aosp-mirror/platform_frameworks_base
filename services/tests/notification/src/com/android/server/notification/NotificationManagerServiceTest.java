@@ -429,6 +429,20 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testBlockedNotifications_blockedChannelGroup() throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.isGroupBlocked(anyString(), anyInt(), anyString())).thenReturn(true);
+
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        channel.setGroup("something");
+        NotificationRecord r = generateNotificationRecord(channel);
+        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        verify(mUsageStats, times(1)).registerBlocked(eq(r));
+    }
+
+    @Test
     public void testEnqueuedBlockedNotifications_blockedApp() throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
 

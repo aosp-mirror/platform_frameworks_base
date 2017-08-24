@@ -1516,7 +1516,7 @@ message MetricsEvent {
     // OS: N
     ACTION_ZEN_ALLOW_LIGHTS = 264;
 
-    // OPEN: Settings > Notifications > [App] > Topic Notifications
+    // OPEN: Settings > Notifications > [App] > Channel Notifications
     // CATEGORY: SETTINGS
     // OS: N
     NOTIFICATION_TOPIC_NOTIFICATION = 265;
@@ -4353,6 +4353,11 @@ message MetricsEvent {
     // OPEN: Settings > Developer Options > Experiment dashboard
     // CATEGORY: SETTINGS
     SETTINGS_FEATURE_FLAGS_DASHBOARD = 1156;
+
+    // OPEN: Settings > Notifications > [App] > Topic Notifications
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_CHANNEL_GROUP = 1157;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

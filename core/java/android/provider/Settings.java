@@ -31,6 +31,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
@@ -1311,6 +1312,18 @@ public final class Settings {
             = "android.settings.CHANNEL_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show notification settings for a single {@link NotificationChannelGroup}.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package containing the channel group to display.
+     *     Input: {@link #EXTRA_CHANNEL_GROUP_ID}, the id of the channel group to display.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHANNEL_GROUP_NOTIFICATION_SETTINGS =
+            "android.settings.CHANNEL_GROUP_NOTIFICATION_SETTINGS";
+
+    /**
      * Activity Extra: The package owner of the notification channel settings to display.
      * <p>
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
@@ -1324,6 +1337,15 @@ public final class Settings {
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
      */
     public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
+
+    /**
+     * Activity Extra: The {@link NotificationChannelGroup#getId()} of the notification channel
+     * group settings to display.
+     * <p>
+     * This must be passed as an extra field to the
+     * {@link #ACTION_CHANNEL_GROUP_NOTIFICATION_SETTINGS}.
+     */
+    public static final String EXTRA_CHANNEL_GROUP_ID = "android.provider.extra.CHANNEL_GROUP_ID";
 
     /**
      * Activity Action: Show notification redaction settings.

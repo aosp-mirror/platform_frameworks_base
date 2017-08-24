@@ -124,6 +124,13 @@ public class Notification implements Parcelable
 
     /**
      * Optional extra for {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}. If provided, will
+     * contain a {@link NotificationChannelGroup#getId() group id} that can be used to narrow down
+     * what settings should be shown in the target app.
+     */
+    public static final String EXTRA_CHANNEL_GROUP_ID = "android.intent.extra.CHANNEL_GROUP_ID";
+
+    /**
+     * Optional extra for {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}. If provided, will
      * contain the tag provided to {@link NotificationManager#notify(String, int, Notification)}
      * that can be used to narrow down what settings should be shown in the target app.
      */

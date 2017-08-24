@@ -830,24 +830,24 @@ public final class NotificationChannel implements Parcelable {
 
     @Override
     public String toString() {
-        return "NotificationChannel{" +
-                "mId='" + mId + '\'' +
-                ", mName=" + mName +
-                ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "") +
-                ", mImportance=" + mImportance +
-                ", mBypassDnd=" + mBypassDnd +
-                ", mLockscreenVisibility=" + mLockscreenVisibility +
-                ", mSound=" + mSound +
-                ", mLights=" + mLights +
-                ", mLightColor=" + mLightColor +
-                ", mVibration=" + Arrays.toString(mVibration) +
-                ", mUserLockedFields=" + mUserLockedFields +
-                ", mVibrationEnabled=" + mVibrationEnabled +
-                ", mShowBadge=" + mShowBadge +
-                ", mDeleted=" + mDeleted +
-                ", mGroup='" + mGroup + '\'' +
-                ", mAudioAttributes=" + mAudioAttributes +
-                ", mBlockableSystem=" + mBlockableSystem +
-                '}';
+        return "NotificationChannel{"
+                + "mId='" + mId + '\''
+                + ", mName=" + mName
+                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
+                + ", mImportance=" + mImportance
+                + ", mBypassDnd=" + mBypassDnd
+                + ", mLockscreenVisibility=" + mLockscreenVisibility
+                + ", mSound=" + mSound
+                + ", mLights=" + mLights
+                + ", mLightColor=" + mLightColor
+                + ", mVibration=" + Arrays.toString(mVibration)
+                + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
+                + ", mVibrationEnabled=" + mVibrationEnabled
+                + ", mShowBadge=" + mShowBadge
+                + ", mDeleted=" + mDeleted
+                + ", mGroup='" + mGroup + '\''
+                + ", mAudioAttributes=" + mAudioAttributes
+                + ", mBlockableSystem=" + mBlockableSystem
+                + '}';
     }
 }
