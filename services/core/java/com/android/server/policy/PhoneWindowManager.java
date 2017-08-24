@@ -7796,13 +7796,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private VibrationEffect getVibrationEffect(int effectId) {
         long[] pattern;
         switch (effectId) {
-            case HapticFeedbackConstants.VIRTUAL_KEY:
-                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.LONG_PRESS:
                 pattern = mLongPressVibePattern;
                 break;
-            case HapticFeedbackConstants.KEYBOARD_TAP:
-                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.CLOCK_TICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.CALENDAR_DATE:
@@ -7813,7 +7809,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+            case HapticFeedbackConstants.VIRTUAL_KEY:
+                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+            case HapticFeedbackConstants.KEYBOARD_PRESS:  // == HapticFeedbackConstants.KEYBOARD_TAP
+                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
