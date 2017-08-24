@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MtpDatabase implements AutoCloseable {
     private static final String TAG = "MtpDatabase";
 
+    private final Context mUserContext;
     private final Context mContext;
     private final String mPackageName;
     private final ContentProviderClient mMediaProvider;
@@ -159,13 +160,14 @@ public class MtpDatabase implements AutoCloseable {
         }
     };
 
-    public MtpDatabase(Context context, String volumeName, String storagePath,
+    public MtpDatabase(Context context, Context userContext, String volumeName, String storagePath,
             String[] subDirectories) {
         native_setup();
 
         mContext = context;
+        mUserContext = userContext;
         mPackageName = context.getPackageName();
-        mMediaProvider = context.getContentResolver()
+        mMediaProvider = userContext.getContentResolver()
                 .acquireContentProviderClient(MediaStore.AUTHORITY);
         mVolumeName = volumeName;
         mMediaStoragePath = storagePath;
@@ -1114,7 +1116,7 @@ public class MtpDatabase implements AutoCloseable {
 
     private void sessionEnded() {
         if (mDatabaseModified) {
-            mContext.sendBroadcast(new Intent(MediaStore.ACTION_MTP_SESSION_END));
+            mUserContext.sendBroadcast(new Intent(MediaStore.ACTION_MTP_SESSION_END));
             mDatabaseModified = false;
         }
     }
