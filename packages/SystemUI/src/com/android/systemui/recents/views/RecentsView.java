@@ -20,13 +20,17 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -37,6 +41,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewPropertyAnimator;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -117,7 +122,15 @@ public class RecentsView extends FrameLayout {
 
     private float mBusynessFactor;
     private GradientDrawable mBackgroundScrim;
-    private Animator mBackgroundScrimAnimator;
+    private ColorDrawable mMultiWindowBackgroundScrim;
+    private ValueAnimator mBackgroundScrimAnimator;
+    private Point mTmpDisplaySize = new Point();
+
+    private final AnimatorUpdateListener mUpdateBackgroundScrimAlpha = (animation) -> {
+        int alpha = (Integer) animation.getAnimatedValue();
+        mBackgroundScrim.setAlpha(alpha);
+        mMultiWindowBackgroundScrim.setAlpha(alpha);
+    };
 
     private RecentsTransitionHelper mTransitionHelper;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="touch_")
@@ -146,10 +159,7 @@ public class RecentsView extends FrameLayout {
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
         mBackgroundScrim = new GradientDrawable(context);
-        mBackgroundScrim.setCallback(this);
-
-        boolean usingDarkText = Color.luminance(
-                Utils.getColorAttr(mContext, R.attr.wallpaperTextColor)) < 0.5f;
+        mMultiWindowBackgroundScrim = new ColorDrawable();
 
         LayoutInflater inflater = LayoutInflater.from(context);
         mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
@@ -244,6 +254,7 @@ public class RecentsView extends FrameLayout {
             } else {
                 mBackgroundScrim.setAlpha(0);
             }
+            mMultiWindowBackgroundScrim.setAlpha(mBackgroundScrim.getAlpha());
         }
     }
 
@@ -300,8 +311,14 @@ public class RecentsView extends FrameLayout {
     /**
      * Returns the window background scrim.
      */
-    public Drawable getBackgroundScrim() {
-        return mBackgroundScrim;
+    public void updateBackgroundScrim(Window window, boolean isInMultiWindow) {
+        if (isInMultiWindow) {
+            mBackgroundScrim.setCallback(null);
+            window.setBackgroundDrawable(mMultiWindowBackgroundScrim);
+        } else {
+            mMultiWindowBackgroundScrim.setCallback(null);
+            window.setBackgroundDrawable(mBackgroundScrim);
+        }
     }
 
     /**
@@ -401,6 +418,9 @@ public class RecentsView extends FrameLayout {
      */
     public void setScrimColors(ColorExtractor.GradientColors scrimColors, boolean animated) {
         mBackgroundScrim.setColors(scrimColors, animated);
+        int alpha = mMultiWindowBackgroundScrim.getAlpha();
+        mMultiWindowBackgroundScrim.setColor(scrimColors.getMainColor());
+        mMultiWindowBackgroundScrim.setAlpha(alpha);
     }
 
     @Override
@@ -470,8 +490,10 @@ public class RecentsView extends FrameLayout {
 
         // Needs to know the screen size since the gradient never scales up or down
         // even when bounds change.
-        mBackgroundScrim.setScreenSize(right - left, bottom - top);
+        mContext.getDisplay().getRealSize(mTmpDisplaySize);
+        mBackgroundScrim.setScreenSize(mTmpDisplaySize.x, mTmpDisplaySize.y);
         mBackgroundScrim.setBounds(left, top, right, bottom);
+        mMultiWindowBackgroundScrim.setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
 
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Layout the stack action button such that its drawable is start-aligned with the
@@ -916,12 +938,12 @@ public class RecentsView extends FrameLayout {
         // Calculate the absolute alpha to animate from
         final int fromAlpha = mBackgroundScrim.getAlpha();
         final int toAlpha = (int) (alpha * 255);
-        mBackgroundScrimAnimator = ObjectAnimator.ofInt(mBackgroundScrim, Utilities.DRAWABLE_ALPHA,
-                fromAlpha, toAlpha);
+        mBackgroundScrimAnimator = ValueAnimator.ofInt(fromAlpha, toAlpha);
         mBackgroundScrimAnimator.setDuration(duration);
         mBackgroundScrimAnimator.setInterpolator(toAlpha > fromAlpha
                 ? Interpolators.ALPHA_IN
                 : Interpolators.ALPHA_OUT);
+        mBackgroundScrimAnimator.addUpdateListener(mUpdateBackgroundScrimAlpha);
         mBackgroundScrimAnimator.start();
     }
 
