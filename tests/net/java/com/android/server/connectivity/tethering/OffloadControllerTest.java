@@ -400,23 +400,39 @@ public class OffloadControllerTest {
         when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(ethernetStats);
         when(mHardware.getForwardedStats(eq(mobileIface))).thenReturn(mobileStats);
 
+        InOrder inOrder = inOrder(mHardware);
+
         final LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(ethernetIface);
         offload.setUpstreamLinkProperties(lp);
+        // Previous upstream was null, so no stats are fetched.
+        inOrder.verify(mHardware, never()).getForwardedStats(any());
 
         lp.setInterfaceName(mobileIface);
         offload.setUpstreamLinkProperties(lp);
+        // Expect that we fetch stats from the previous upstream.
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(ethernetIface));
 
         lp.setInterfaceName(ethernetIface);
         offload.setUpstreamLinkProperties(lp);
+        // Expect that we fetch stats from the previous upstream.
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(mobileIface));
 
+        ethernetStats = new ForwardedStats();
         ethernetStats.rxBytes = 100000;
         ethernetStats.txBytes = 100000;
+        when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(ethernetStats);
         offload.setUpstreamLinkProperties(null);
+        // Expect that we fetch stats from the previous upstream.
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(ethernetIface));
 
         ITetheringStatsProvider provider = mTetherStatsProviderCaptor.getValue();
         NetworkStats stats = provider.getTetherStats(STATS_PER_IFACE);
         NetworkStats perUidStats = provider.getTetherStats(STATS_PER_UID);
+        waitForIdle();
+        // There is no current upstream, so no stats are fetched.
+        inOrder.verify(mHardware, never()).getForwardedStats(eq(ethernetIface));
+        inOrder.verifyNoMoreInteractions();
 
         assertEquals(2, stats.size());
         assertEquals(2, perUidStats.size());
