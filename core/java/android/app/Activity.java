@@ -3203,23 +3203,14 @@ public class Activity extends ContextThemeWrapper
 
 
     /**
-     * Moves the activity from
-     * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} to
-     * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack.
+     * Moves the activity from {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing mode to
+     * {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
      *
      * @hide
      */
     @Override
     public void exitFreeformMode() throws RemoteException {
         ActivityManager.getService().exitFreeformMode(mToken);
-    }
-
-    /** Returns the current stack Id for the window.
-     * @hide
-     */
-    @Override
-    public int getWindowStackId() throws RemoteException {
-        return ActivityManager.getService().getActivityStackId(mToken);
     }
 
     /**

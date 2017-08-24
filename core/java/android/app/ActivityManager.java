@@ -699,45 +699,21 @@ public class ActivityManager {
         /** Start of ID range used by stacks that are created dynamically. */
         public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
 
+        // TODO: Figure-out a way to remove this.
         public static boolean isStaticStack(int stackId) {
             return stackId >= FIRST_STATIC_STACK_ID && stackId <= LAST_STATIC_STACK_ID;
         }
 
+        // TODO: It seems this mostly means a stack on a secondary display now. Need to see if
+        // there are other meanings. If not why not just use information from the display?
         public static boolean isDynamicStack(int stackId) {
             return stackId >= FIRST_DYNAMIC_STACK_ID;
         }
 
         /**
-         * Returns true if the activities contained in the input stack display a shadow around
-         * their border.
-         */
-        public static boolean hasWindowShadow(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if the activities contained in the input stack display a decor view.
-         */
-        public static boolean hasWindowDecor(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID;
-        }
-
-        /**
-         * Returns true if the tasks contained in the stack can be resized independently of the
-         * stack.
-         */
-        public static boolean isTaskResizeAllowed(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID;
-        }
-
-        /** Returns true if the task bounds should persist across power cycles. */
-        public static boolean persistTaskBounds(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID;
-        }
-
-        /**
          * Returns true if dynamic stacks are allowed to be visible behind the input stack.
          */
+        // TODO: Figure-out a way to remove.
         public static boolean isDynamicStacksVisibleBehindAllowed(int stackId) {
             return stackId == PINNED_STACK_ID || stackId == ASSISTANT_STACK_ID;
         }
@@ -746,6 +722,7 @@ public class ActivityManager {
          * Returns true if we try to maintain focus in the current stack when the top activity
          * finishes.
          */
+        // TODO: Figure-out a way to remove. Probably isn't needed in the new world...
         public static boolean keepFocusInStackIfPossible(int stackId) {
             return stackId == FREEFORM_WORKSPACE_STACK_ID
                     || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
@@ -754,6 +731,7 @@ public class ActivityManager {
         /**
          * Returns true if Stack size is affected by the docked stack changing size.
          */
+        // TODO: Figure-out a way to remove.
         public static boolean isResizeableByDockedStack(int stackId) {
             return isStaticStack(stackId) && stackId != DOCKED_STACK_ID
                     && stackId != PINNED_STACK_ID && stackId != ASSISTANT_STACK_ID;
@@ -763,6 +741,7 @@ public class ActivityManager {
          * Returns true if the size of tasks in the input stack are affected by the docked stack
          * changing size.
          */
+        // TODO: What is the difference between this method and the one above??
         public static boolean isTaskResizeableByDockedStack(int stackId) {
             return isStaticStack(stackId) && stackId != FREEFORM_WORKSPACE_STACK_ID
                     && stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID
@@ -785,16 +764,6 @@ public class ActivityManager {
         public static boolean replaceWindowsOnTaskMove(int sourceStackId, int targetStackId) {
             return sourceStackId == FREEFORM_WORKSPACE_STACK_ID
                     || targetStackId == FREEFORM_WORKSPACE_STACK_ID;
-        }
-
-        /**
-         * Return whether a stackId is a stack containing floating windows. Floating windows
-         * are laid out differently as they are allowed to extend past the display bounds
-         * without overscan insets.
-         */
-        public static boolean tasksAreFloating(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID
-                || stackId == PINNED_STACK_ID;
         }
 
         /**
@@ -821,31 +790,12 @@ public class ActivityManager {
         }
 
         /**
-         * Returns true if the windows in the stack can receive input keys.
-         */
-        public static boolean canReceiveKeys(int stackId) {
-            return stackId != PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if the stack can be visible above lockscreen.
-         */
-        public static boolean isAllowedOverLockscreen(int stackId) {
-            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID ||
-                    stackId == ASSISTANT_STACK_ID;
-        }
-
-        /**
          * Returns true if activities from stasks in the given {@param stackId} are allowed to
          * enter picture-in-picture.
          */
         public static boolean isAllowedToEnterPictureInPicture(int stackId) {
             return stackId != HOME_STACK_ID && stackId != ASSISTANT_STACK_ID &&
                     stackId != RECENTS_STACK_ID;
-        }
-
-        public static boolean isAlwaysOnTop(int stackId) {
-            return stackId == PINNED_STACK_ID;
         }
 
         /**
@@ -865,27 +815,12 @@ public class ActivityManager {
         }
 
         /**
-         * Returns true if any visible windows belonging to apps in this stack should be kept on
-         * screen when the app is killed due to something like the low memory killer.
-         */
-        public static boolean keepVisibleDeadAppWindowOnScreen(int stackId) {
-            return stackId != PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if the backdrop on the client side should match the frame of the window.
-         * Returns false, if the backdrop should be fullscreen.
-         */
-        public static boolean useWindowFrameForBackdrop(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
-        }
-
-        /**
          * Returns true if a window from the specified stack with {@param stackId} are normally
          * fullscreen, i. e. they can become the top opaque fullscreen window, meaning that it
          * controls system bars, lockscreen occluded/dismissing state, screen rotation animation,
          * etc.
          */
+        // TODO: What about the other side of docked stack if we move this to WindowConfiguration?
         public static boolean normallyFullscreenWindows(int stackId) {
             return stackId != PINNED_STACK_ID && stackId != FREEFORM_WORKSPACE_STACK_ID
                     && stackId != DOCKED_STACK_ID;
@@ -896,6 +831,7 @@ public class ActivityManager {
          * multi-window mode.
          * @see android.app.ActivityManager#supportsMultiWindow
          */
+        // TODO: What about the other side of docked stack if we move this to WindowConfiguration?
         public static boolean isMultiWindowStack(int stackId) {
             return stackId == PINNED_STACK_ID || stackId == FREEFORM_WORKSPACE_STACK_ID
                     || stackId == DOCKED_STACK_ID;
@@ -906,21 +842,6 @@ public class ActivityManager {
          */
         public static boolean isHomeOrRecentsStack(int stackId) {
             return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID;
-        }
-
-        /**
-         * Returns true if this stack may be scaled without resizing, and windows within may need
-         * to be configured as such.
-         */
-        public static boolean windowsAreScaleable(int stackId) {
-            return stackId == PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if windows in this stack should be given move animations by default.
-         */
-        public static boolean hasMovementAnimations(int stackId) {
-            return stackId != PINNED_STACK_ID;
         }
 
         /** Returns true if the input stack and its content can affect the device orientation. */

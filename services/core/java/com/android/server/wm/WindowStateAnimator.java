@@ -49,6 +49,7 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.LAST_CLIP_RECT;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.SURFACE;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -1145,7 +1146,7 @@ class WindowStateAnimator {
         final TaskStack stack = w.getTask().mStack;
         stack.getDimBounds(finalClipRect);
 
-        if (StackId.tasksAreFloating(stack.mStackId)) {
+        if (stack.getWindowConfiguration().tasksAreFloating()) {
             w.expandForSurfaceInsets(finalClipRect);
         }
 
@@ -1165,6 +1166,7 @@ class WindowStateAnimator {
             transform.mapRect(finalCrop);
             finalClipRect.top = (int)finalCrop.top;
             finalClipRect.left = (int)finalCrop.left;
+            // TODO: Are the assignments below a mistake?
             finalClipRect.right = (int)finalClipRect.right;
             finalClipRect.bottom = (int)finalClipRect.bottom;
         }
@@ -1324,8 +1326,8 @@ class WindowStateAnimator {
 
         // We need to do some acrobatics with surface position, because their clip region is
         // relative to the inside of the surface, but the stack bounds aren't.
-        if (StackId.hasWindowShadow(stack.mStackId)
-                && !StackId.isTaskResizeAllowed(stack.mStackId)) {
+        final WindowConfiguration winConfig = w.getWindowConfiguration();
+        if (winConfig.hasWindowShadow() && !winConfig.canResizeTask()) {
                 // The windows in this stack display drop shadows and the fill the entire stack
                 // area. Adjust the stack bounds we will use to cropping take into account the
                 // offsets we use to display the drop shadow so it doesn't get cropped.
@@ -1760,8 +1762,7 @@ class WindowStateAnimator {
      * @return Returns true if the surface was successfully shown.
      */
     private boolean showSurfaceRobustlyLocked() {
-        final Task task = mWin.getTask();
-        if (task != null && StackId.windowsAreScaleable(task.mStack.mStackId)) {
+        if (mWin.getWindowConfiguration().windowsAreScaleable()) {
             mSurfaceController.forceScaleableInTransaction(true);
         }
 

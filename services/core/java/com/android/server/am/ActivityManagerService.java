@@ -10150,7 +10150,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 //   that task to freeform
                 // - otherwise the task is not moved
                 int stackId = task.getStackId();
-                if (!StackId.isTaskResizeAllowed(stackId)) {
+                if (!task.getWindowConfiguration().canResizeTask()) {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
                 }
                 if (bounds == null && stackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -10512,17 +10512,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return stack.mDisplayId;
             }
             return DEFAULT_DISPLAY;
-        }
-    }
-
-    @Override
-    public int getActivityStackId(IBinder token) throws RemoteException {
-        synchronized (this) {
-            ActivityStack stack = ActivityRecord.getStackLocked(token);
-            if (stack == null) {
-                return INVALID_STACK_ID;
-            }
-            return stack.mStackId;
         }
     }
 

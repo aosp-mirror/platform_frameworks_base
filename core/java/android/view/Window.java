@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -611,8 +612,8 @@ public abstract class Window {
     public interface WindowControllerCallback {
         /**
          * Moves the activity from
-         * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} to
-         * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack.
+         * Moves the activity from {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing
+         * mode to {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
          */
         void exitFreeformMode() throws RemoteException;
 
@@ -621,9 +622,6 @@ public abstract class Window {
          * @see android.R.attr#supportsPictureInPicture
          */
         void enterPictureInPictureModeIfPossible();
-
-        /** Returns the current stack Id for the window. */
-        int getWindowStackId() throws RemoteException;
 
         /** Returns whether the window belongs to the task root. */
         boolean isTaskRoot();

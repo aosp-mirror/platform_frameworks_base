@@ -904,7 +904,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             int addIndex = mStacks.size();
             if (addIndex > 0) {
                 final ActivityStack topStack = mStacks.get(addIndex - 1);
-                if (StackId.isAlwaysOnTop(topStack.mStackId) && topStack != this) {
+                if (topStack.getWindowConfiguration().isAlwaysOnTop()
+                        && topStack != this) {
                     // If the top stack is always on top, we move this stack just below it.
                     addIndex--;
                 }
@@ -916,7 +917,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean isFocusable() {
-        if (StackId.canReceiveKeys(mStackId)) {
+        if (getWindowConfiguration().canReceiveKeys()) {
             return true;
         }
         // The stack isn't focusable. See if its top activity is focusable to force focus on the
@@ -1721,11 +1722,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         final int stackBehindTopId = (stackBehindTopIndex >= 0)
                 ? mStacks.get(stackBehindTopIndex).mStackId : INVALID_STACK_ID;
-        if (topStackId == DOCKED_STACK_ID || StackId.isAlwaysOnTop(topStackId)) {
+        final boolean alwaysOnTop = topStack.getWindowConfiguration().isAlwaysOnTop();
+        if (topStackId == DOCKED_STACK_ID || alwaysOnTop) {
             if (stackIndex == stackBehindTopIndex) {
                 // Stacks directly behind the docked or pinned stack are always visible.
                 return STACK_VISIBLE;
-            } else if (StackId.isAlwaysOnTop(topStackId) && stackIndex == stackBehindTopIndex - 1) {
+            } else if (alwaysOnTop && stackIndex == stackBehindTopIndex - 1) {
                 // Otherwise, this stack can also be visible if it is directly behind a docked stack
                 // or translucent assistant stack behind an always-on-top top-most stack
                 if (stackBehindTopId == DOCKED_STACK_ID) {

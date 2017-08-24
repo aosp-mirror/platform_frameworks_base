@@ -478,7 +478,6 @@ interface IActivityManager {
      * different stack.
      */
     void positionTaskInStack(int taskId, int stackId, int position);
-    int getActivityStackId(in IBinder token);
     void exitFreeformMode(in IBinder token);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);

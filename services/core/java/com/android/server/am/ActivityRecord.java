@@ -1118,19 +1118,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return mActivityType == ASSISTANT_ACTIVITY_TYPE;
     }
 
-    boolean isApplicationActivity() {
-        return mActivityType == APPLICATION_ACTIVITY_TYPE;
-    }
-
     boolean isPersistable() {
         return (info.persistableMode == PERSIST_ROOT_ONLY ||
                 info.persistableMode == PERSIST_ACROSS_REBOOTS) &&
-                (intent == null ||
-                        (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
+                (intent == null || (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
     boolean isFocusable() {
-        return StackId.canReceiveKeys(task.getStackId()) || isAlwaysFocusable();
+        return getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable();
     }
 
     boolean isResizeable() {
@@ -2315,7 +2310,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // We must base this on the parent configuration, because we set our override
         // configuration's appBounds based on the result of this method. If we used our own
         // configuration, it would be influenced by past invocations.
-        final Rect appBounds = getParent().getConfiguration().windowConfiguration.getAppBounds();
+        final Rect appBounds = getParent().getWindowConfiguration().getAppBounds();
         final int containingAppWidth = appBounds.width();
         final int containingAppHeight = appBounds.height();
         int maxActivityWidth = containingAppWidth;
