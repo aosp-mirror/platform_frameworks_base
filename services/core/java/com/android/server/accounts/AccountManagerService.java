@@ -2191,7 +2191,7 @@ public class AccountManagerService
             return false;
         } else if (!isAccountManagedByCaller(account.type, callingUid, userId)) {
             String msg = String.format(
-                    "uid %s cannot explicitly add accounts of type: %s",
+                    "uid %s cannot explicitly remove accounts of type: %s",
                     callingUid,
                     account.type);
             throw new SecurityException(msg);
