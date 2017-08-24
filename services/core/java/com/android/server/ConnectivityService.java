@@ -19,6 +19,7 @@ package com.android.server;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.getNetworkTypeName;
@@ -90,6 +91,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -779,6 +781,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // don't need to add TYPE_VPN to mNetConfigs.
             mLegacyTypeTracker.addSupportedType(TYPE_VPN);
             mNetworksDefined++;  // used only in the log() statement below.
+        }
+
+        // Do the same for Ethernet, since it's often not specified in the configs, although many
+        // devices can use it via USB host adapters.
+        if (mNetConfigs[TYPE_ETHERNET] == null && hasService(Context.ETHERNET_SERVICE)) {
+            mLegacyTypeTracker.addSupportedType(TYPE_ETHERNET);
+            mNetworksDefined++;
         }
 
         if (VDBG) log("mNetworksDefined=" + mNetworksDefined);
@@ -5544,6 +5553,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @VisibleForTesting
     public WakeupMessage makeWakeupMessage(Context c, Handler h, String s, int cmd, Object obj) {
         return new WakeupMessage(c, h, s, cmd, 0, 0, obj);
+    }
+
+    @VisibleForTesting
+    public boolean hasService(String name) {
+        return ServiceManager.checkService(name) != null;
     }
 
     private void logDefaultNetworkEvent(NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
