@@ -1466,8 +1466,8 @@
     <!-- Notification: Control panel: Label that shows how many channels this application has
         defined, describing the current notification channel as "1 out of n notification categories from this app". -->
     <plurals name="notification_num_channels_desc">
-        <item quantity="one">1 out of <xliff:g id="number">%d</xliff:g> notification category from this app</item>
-        <item quantity="other">1 out of <xliff:g id="number">%d</xliff:g> notification categories from this app</item>
+        <item quantity="one">1 out of <xliff:g id="number">%s</xliff:g> notification category from this app</item>
+        <item quantity="other">1 out of <xliff:g id="number">%s</xliff:g> notification categories from this app</item>
     </plurals>
 
     <!-- Notification: Control panel: For bundles of notifications, this label that lists the
