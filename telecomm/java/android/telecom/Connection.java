@@ -20,7 +20,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -37,14 +36,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.ArraySet;
 import android.view.Surface;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1678,6 +1676,7 @@ public abstract class Connection extends Conferenceable {
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
+    private long mConnectElapsedTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
     private int mVideoState;
     private DisconnectCause mDisconnectCause;
@@ -1819,6 +1818,22 @@ public abstract class Connection extends Conferenceable {
      */
     public final long getConnectTimeMillis() {
         return mConnectTimeMillis;
+    }
+
+    /**
+     * Retrieves the connection start time of the {@link Connection}, if specified.  A value of
+     * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
+     * start time of the conference.
+     *
+     * Based on the value of {@link SystemClock#elapsedRealtime()}, which ensures that wall-clock
+     * changes do not impact the call duration.
+     *
+     * @return The time at which the {@link Connection} was connected.
+     *
+     * @hide
+     */
+    public final long getConnectElapsedTimeMillis() {
+        return mConnectElapsedTimeMillis;
     }
 
     /**
@@ -2232,12 +2247,26 @@ public abstract class Connection extends Conferenceable {
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
      *
-     * @param connectionTimeMillis The connection time, in milliseconds.
+     * @param connectTimeMillis The connection time, in milliseconds.  Should be set using a value
+     *                          obtained from {@link System#currentTimeMillis()}.
      *
      * @hide
      */
     public final void setConnectTimeMillis(long connectTimeMillis) {
         mConnectTimeMillis = connectTimeMillis;
+    }
+
+    /**
+     * Sets the time at which a call became active on this Connection. This is set only
+     * when a conference call becomes active on this connection.
+     *
+     * @param connectElapsedTimeMillis The connection time, in milliseconds.  Stored in the format
+     *                              {@link SystemClock#elapsedRealtime()}.
+     *
+     * @hide
+     */
+    public final void setConnectElapsedTimeMillis(long connectElapsedTimeMillis) {
+        mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 
     /**
