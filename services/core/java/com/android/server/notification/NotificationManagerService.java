@@ -158,6 +158,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -5571,13 +5572,10 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
 
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (hasCompanionDevice(serviceInfo)) {
-                            notifyNotificationChannelChanged(
-                                    serviceInfo, pkg, user, channel, modificationType);
-                        }
+                BackgroundThread.getHandler().post(() -> {
+                    if (hasCompanionDevice(serviceInfo)) {
+                        notifyNotificationChannelChanged(
+                                serviceInfo, pkg, user, channel, modificationType);
                     }
                 });
             }
@@ -5594,13 +5592,10 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
 
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (hasCompanionDevice(serviceInfo)) {
-                            notifyNotificationChannelGroupChanged(
-                                    serviceInfo, pkg, user, group, modificationType);
-                        }
+                BackgroundThread.getHandler().post(() -> {
+                    if (hasCompanionDevice(serviceInfo)) {
+                        notifyNotificationChannelGroupChanged(
+                                serviceInfo, pkg, user, group, modificationType);
                     }
                 });
             }
