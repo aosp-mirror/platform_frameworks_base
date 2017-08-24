@@ -173,7 +173,7 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB డీబగ్గింగ్"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB కనెక్ట్ చేయబడినప్పుడు డీబగ్ మోడ్"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB డీబగ్ ప్రామాణీకరణలను ఉపసంహరించు"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"బగ్ నివేదిక సత్వరమార్గం"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"బగ్ నివేదిక షార్ట్‌కట్"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"బగ్ నివేదికను తీసుకోవడానికి పవర్ మెనులో బటన్‌ను చూపు"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"సక్రియంగా ఉంచు"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ఛార్జ్ చేస్తున్నప్పుడు స్క్రీన్ ఎప్పటికీ నిద్రావస్థలోకి వెళ్లదు"</string>
@@ -229,7 +229,7 @@
     <string name="adb_warning_message" msgid="7316799925425402244">"USB డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్ మరియు మీ పరికరం మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో అనువర్తనాలను ఇన్‌స్టాల్ చేయడానికి మరియు లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"మీరు గతంలో ప్రామాణీకరించిన అన్ని కంప్యూటర్‌ల నుండి USB డీబగ్గింగ్‌కు ప్రాప్యతను ఉపసంహరించాలా?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"అభివృద్ధి సెట్టింగ్‌లను అనుమతించాలా?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని అనువర్తనాలు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని యాప్‌లు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ద్వారా అనువర్తనాలను ధృవీకరించు"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలను తనిఖీ చేయి."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ లక్షణాన్ని నిలిపివేస్తుంది."</string>
@@ -259,11 +259,11 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"ప్రస్తుత స్పర్శ డేటాను చూపేలా స్క్రీన్ అతివ్యాప్తి చేయండి"</string>
     <string name="show_touches" msgid="2642976305235070316">"నొక్కినవి చూపు"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"నొక్కినవాటికి సంబంధించిన దృశ్య అభిప్రాయాన్ని చూపు"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"సర్ఫేస్ నవీకరణలను చూపండి"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"సర్ఫేస్ అప్‌డేట్‌లను చూపండి"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"పూర్తి విండో ఉపరితలాలు నవీకరించబడినప్పుడు వాటిని ఫ్లాష్ చేయండి"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU వీక్షణ నవీకరణలను చూపండి"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU వీక్షణ అప్‌డేట్‌లను చూపండి"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPUతో గీసినప్పుడు విండోల లోపల వీక్షణలను ఫ్లాష్ చేయండి"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల నవీకరణలను చూపండి"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల అప్‌డేట్‌లను చూపండి"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"హార్డ్‌వేర్ లేయర్‌లు నవీకరించబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయండి"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU Rendererని సెట్ చేయండి"</string>
@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> మిగిలి ఉంది"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"తెలియదు"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ఛార్జ్ అవుతోంది"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ఛార్జ్ అవుతోంది"</string>

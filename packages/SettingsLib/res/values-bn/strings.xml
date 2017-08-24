@@ -27,7 +27,7 @@
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP কনফিগারেশনের ব্যর্থতা"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"খারাপ নেটওয়ার্কের কারণে সংযুক্ত নয়"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"ওয়াই ফাই সংযোগের ব্যর্থতা"</string>
-    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"প্রমাণীকরণ সমস্যা"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"যাচাইকরণ সমস্যা"</string>
     <string name="wifi_cant_connect" msgid="5410016875644565884">"সংযোগ স্থাপন করা যাচ্ছে না"</string>
     <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'এ যোগ করা যায়নি"</string>
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"পাসওয়ার্ড দেখে আবার চেষ্টা করুন"</string>
@@ -247,7 +247,7 @@
     <string name="wait_for_debugger" msgid="1202370874528893091">"ডিবাগারের জন্য অপেক্ষা করুন"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"চালানোর আগে সংযুক্ত করতে জন্য ডিবাগ করা অ্যাপ্লিকেশনটি ডিবাগারের জন্য অপেক্ষা করছে"</string>
     <string name="telephony_monitor_switch" msgid="1764958220062121194">"টেলিফোনি মনিটর"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"টেলিফোনি মনিটর টেলিফোনি/মোডেমের কার্যকারিতায় কোনো সমস্যা শনাক্ত করলে সমস্যাটি লগ করবে এবং সমস্যাটি জানাতে একটি বাগ ফাইল করার জন্য ব্যবহারকারিকে বিজ্ঞপ্তি পাঠাবে"</string>
+    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"টেলিফোনি মনিটর টেলিফোনি/মোডেমের কার্যকারিতায় কোনও সমস্যা শনাক্ত করলে সমস্যাটি লগ করবে এবং সমস্যাটি জানাতে একটি বাগ ফাইল করার জন্য ব্যবহারকারিকে বিজ্ঞপ্তি পাঠাবে"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ইনপুট"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"অঙ্কন"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"হার্ডওয়্যার দ্বারা চালিত রেন্ডারিং"</string>
@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> বাকী আছে"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">^2</xliff:g> লাগবে"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"চার্জ হচ্ছে"</string>

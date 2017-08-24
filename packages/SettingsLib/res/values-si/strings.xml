@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - ඉතිරි <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> සම්පූර්ණයෙන් ආරෝපණය වන තෙක්"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ආරෝපණය වෙමින්"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ආරෝපණය වේ"</string>
@@ -364,7 +363,7 @@
     <string name="disabled" msgid="9206776641295849915">"අබල කර ඇත"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"ඉඩ දුන්"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"ඉඩ නොදෙන"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"නොදන්නා යෙදුම් ස්ථාපනය කරන්න"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"නොදන්නා යෙදුම් ස්ථාප."</string>
     <string name="home" msgid="3256884684164448244">"සැකසීම් මුල් පිටුව"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
