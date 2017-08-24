@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"소매 데모"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 연결"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"백그라운드에서 실행 중인 앱"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱이 백그라운드에서 실행 중"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g>개의 앱이 백그라운드에서 실행 중"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"배터리를 소모하는 앱"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 배터리 사용 중"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"앱 <xliff:g id="NUMBER">%1$d</xliff:g>개에서 배터리 사용 중"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"탭하여 배터리 및 데이터 사용량 확인"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
@@ -1591,7 +1591,7 @@
       <item quantity="one">1초 후에 다시 시도하세요.</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"나중에 다시 시도"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 보기"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 보기 중"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"확인"</string>
     <string name="done_label" msgid="2093726099505892398">"완료"</string>

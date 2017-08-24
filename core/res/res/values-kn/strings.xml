@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ರಿಟೇಲ್ ಡೆಮೋ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ಸಂಪರ್ಕ"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಬ್ಯಾಟರಿಯನ್ನು ಉಪಯೋಗಿಸುತ್ತಿವೆ"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಬಳಸುತ್ತಿದೆ"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಬ್ಯಾಟರಿ ಬಳಸುತ್ತಿವೆ"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"ಸುರಕ್ಷಿತ ಮೋಡ್"</string>
@@ -260,7 +260,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳ ಪ್ರವೇಶಿಸಲು"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -282,7 +282,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ನೀವು ಟೈಪ್ ಮಾಡುವ ಪಠ್ಯವನ್ನು ಗಮನಿಸುತ್ತದೆ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್‌ಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ಡಿಸ್‌ಪ್ಲೇ ವರ್ಧಕ ನಿಯಂತ್ರಿಸುತ್ತದೆ"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ಪ್ರದರ್ಶನದ ಝೂಮ್ ಮಟ್ಟ ಮತ್ತು ಸ್ಥಳ ನಿರ್ಧಾರವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ಪ್ರದರ್ಶನದ ಝೂಮ್ ಮಟ್ಟ ಮತ್ತು ಸ್ಥಾನ ನಿರ್ಧಾರವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಿ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ಟ್ಯಾಪ್ ಮಾಡಬಹುದು, ಸ್ವೈಪ್ ಮಾಡಬಹುದು, ಪಿಂಚ್ ಮಾಡಬಹುದು ಮತ್ತು ಇತರ ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಬಹುದು."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ ಸೂಚಕಗಳು"</string>
@@ -744,11 +744,11 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"ಖಾತೆ ಅನ್‌ಲಾಕ್"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"ಹಲವಾರು ಪ್ಯಾಟರ್ನ್ ಪ್ರಯತ್ನಗಳು"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"ಅನ್‍ಲಾಕ್ ಮಾಡಲು, ನಿಮ್ಮ Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ಬಳಕೆದಾರಹೆಸರು (ಇಮೇಲ್)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ಬಳಕೆದಾರರಹೆಸರು (ಇಮೇಲ್)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ಸೈನ್‌ ಇನ್‌"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ಅಮಾನ್ಯ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"ನಿಮ್ಮ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ಅಮಾನ್ಯ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"ನಿಮ್ಮ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ಅನ್‌ಲಾಕ್"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"ಧ್ವನಿ ಆನ್ ಮಾಡಿ"</string>
@@ -998,7 +998,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ಕಳುಹಿಸು"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌  ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ಮುಖಪುಟ‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
@@ -1214,10 +1214,10 @@
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ಡೇಟಾ ನಷ್ಟವನ್ನು ತಪ್ಪಿಸಲು ತೆಗೆದುಹಾಕುವುದಕ್ಕೂ ಮುನ್ನ <xliff:g id="NAME">%s</xliff:g> ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ; ಹೊಸದನ್ನು ಸೇರಿಸಿ"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ಹೊಂದಿಸು"</string>
-    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಎಜೆಕ್ಟ್"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಇಜೆಕ್ಟ್"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ಎಕ್ಸ್‌ಪ್ಲೋರ್‌‌"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ಕಾಣೆಯಾಗಿದೆ"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"ಈ ಸಾಧನವನ್ನು ಮರುಸೇರಿಸಿ"</string>
@@ -1228,14 +1228,14 @@
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ಡೇಟಾ ಸರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ಮೂಲ ಸ್ಥಳದಲ್ಲಿ ಡೇಟಾ ಉಳಿದಿದೆ"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
-    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"ಸಿದ್ಧವಾಗಿದೆ"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"ಓದಲು ಮಾತ್ರ"</string>
     <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"ಅಪಾಯಕರವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"ದೋಷಪೂರಿತವಾಗಿದೆ"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"ಬೆಂಬಲಿತವಾಗಿಲ್ಲ"</string>
-    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"ಸ್ವರೂಪಗೊಳಿಸುವಿಕೆ..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ಸೇರಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಯ ಚಟುವಟಿಕೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ."</string>
@@ -1450,11 +1450,11 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ಪಿನ್‌ ಕೋಡ್‍ಗಳು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ಹಲವಾರು ಪ್ಯಾಟರ್ನ್ ಪ್ರಯತ್ನಗಳು"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ಅನ್‍ಲಾಕ್ ಮಾಡಲು, ನಿಮ್ಮ Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"ಬಳಕೆದಾರಹೆಸರು (ಇಮೇಲ್)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"ಬಳಕೆದಾರರಹೆಸರು (ಇಮೇಲ್)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"ಅಮಾನ್ಯ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ನಿಮ್ಮ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"ಅಮಾನ್ಯ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ನಿಮ್ಮ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"ಖಾತೆಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"ನಿಮ್ಮ ಪಿನ್‌ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"ನಿಮ್ಮ ಪಾಸ್‍‍ವರ್ಡ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -1569,7 +1569,7 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ಅಪರಿಚಿತ ಪೋಟ್ರೇಟ್"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ಅಪರಿಚಿತ ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"ಅಪರಿಚಿತ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ರದ್ದುಮಾಡಲಾಗಿದೆ"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ವಿಷಯವನ್ನು ಬರೆಯುವಲ್ಲಿ ದೋಷ ಎದುರಾಗಿದೆ"</string>
@@ -1613,7 +1613,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳು"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಸ್ಥಾಪಿಸಿದ್ದಾರೆ"</string>
-    <string name="package_updated_device_owner" msgid="1847154566357862089">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಪ್‌ಡೇಟ್ ಮಾಡಿದ್ದಾರೆ"</string>
+    <string name="package_updated_device_owner" msgid="1847154566357862089">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಲ್ಪಟ್ಟಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಳಿಸಿದ್ದಾರೆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವಿಕೆಯನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ಅಪ್‌ಡೇಟ್‌ ಆಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ಡೇಟಾ ಬಳಕೆ ಕಡಿಮೆ ಮಾಡುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಡೇಟಾ ಸೇವರ್ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೇಟಾ ಕಳುಹಿಸುವುದನ್ನು ಅಥವಾ ಸ್ವೀಕರಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ. ನೀವು ಪ್ರಸ್ತುತ ಬಳಸುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು ಆದರೆ ಪದೇ ಪದೇ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಇದರರ್ಥ, ಉದಾಹರಣೆಗೆ, ನೀವು ಅವುಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡುವವರೆಗೆ ಆ ಚಿತ್ರಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುವುದಿಲ್ಲ."</string>

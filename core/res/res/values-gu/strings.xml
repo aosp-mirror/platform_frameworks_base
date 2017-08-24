@@ -127,9 +127,9 @@
     <item msgid="4397097370387921767">"%s વાઇ-ફાઇ કૉલિંગ"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"બંધ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi પસંદ કર્યું"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"વાઇ-ફાઇ પસંદ કર્યું"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"મોબાઇલને પસંદગી"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ફક્ત Wi-Fi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ફક્ત વાઇ-ફાઇ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="TIME_DELAY">{2}</xliff:g> સેકંડ પછી <xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ચેતવણીઓ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"રિટેલ ડેમો"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB કનેક્શન"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"પૃષ્ઠભૂમિમાં ચાલી રહેલ ઍપ્લિકેશનો"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> પૃષ્ઠભૂમિમાં ચાલી રહી છે"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ઍપ્લિકેશન પૃષ્ઠભૂમિમાં ચાલી રહી છે"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ઍપ બૅટરીનો વપરાશ કરી રહ્યાં છે"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> બૅટરીનો ઉપયોગ કરી રહ્યું છે"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ઍપ બૅટરીનો ઉપયોગ કરી રહ્યાં છે"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"બૅટરી અને ડેટા વપરાશ વિશેની વિગતો માટે ટૅપ કરો"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"સુરક્ષિત મોડ"</string>
@@ -326,7 +326,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"કાર મોડ સક્ષમ કરો"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"એપ્લિકેશનને કાર મોડ સક્ષમ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"અન્ય ઍપ્લિકેશનો બંધ કરો"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"એપ્લિકેશનને અન્ય ઍપ્લિકેશનોની પૃષ્ઠભૂમિ પ્રક્રિયા સમાપ્ત કરવાની મંજૂરી આપે છે. આનાથી અન્ય ઍપ્લિકેશનો ચાલવાથી બંધ થઈ શકે છે."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"એપ્લિકેશનને અન્ય ઍપ્લિકેશનોની બૅકગ્રાઉન્ડ પ્રક્રિયા સમાપ્ત કરવાની મંજૂરી આપે છે. આનાથી અન્ય ઍપ્લિકેશનો ચાલવાથી બંધ થઈ શકે છે."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"આ ઍપ્લિકેશન, અન્ય ઍપ્લિકેશનોની ટોચ પર દેખાઈ શકે છે"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"આ ઍપ્લિકેશન, અન્ય ઍપ્લિકેશોની ટોચ પર અથવા સ્ક્રીનના અન્ય ભાગોમાં દેખાઈ શકે છે. આ સામાન્ય ઍપ્લિકેશન વપરાશમાં હસ્તક્ષેપ કરી શકે છે અને અન્ય ઍપ્લિકેશનોની દેખાવાની રીતને બદલી શકે છે."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"પૃષ્ઠભૂમિમાં ચલાવો"</string>
@@ -376,11 +376,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરો"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"નિશ્ચિત સ્થાન ઍક્સેસ કરો (GPS અને નેટવર્ક-આધારિત)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"આ ઍપ્લિકેશન, GPS અથવા સેલ ટાવર્સ અને Wi-Fi નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ફોન પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે. આ બૅટરી વપરાશ વધારી શકે છે."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"આ ઍપ્લિકેશન, GPS અથવા સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ફોન પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે. આ બૅટરી વપરાશ વધારી શકે છે."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"અંદાજિત સ્થાન ઍક્સેસ કરો (નેટવર્ક-આધારિત)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને Wi-Fi નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટેબ્લેટ પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને Wi-Fi નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટીવી પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને Wi-Fi નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ફોન પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટેબ્લેટ પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટીવી પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ફોન પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"તમારી ઑડિઓ સેટિંગ્સ બદલો"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"એપ્લિકેશનને વૈશ્વિક ઑડિઓ સેટિંગ્સને સંશોધિત કરવાની મંજૂરી આપે છે, જેમ કે વોલ્યુમ અને આઉટપુટ માટે કયા સ્પીકરનો ઉપયોગ કરવો."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ઑડિઓ રેકોર્ડ કરવાની"</string>
@@ -431,18 +431,18 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"એપ્લિકેશનને નેટવર્ક કનેક્ટિવિટીની સ્થિતિ બદલવાની મંજૂરી આપે છે."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ટિથર કરેલ કનેક્ટિવિટી બદલો"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"એપ્લિકેશનને ટિથર્ડ નેટવર્ક કનેક્ટિવિટીની સ્થિતિ બદલવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi કનેક્શન્સ જુઓ"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"એપ્લિકેશનને Wi-Fi નેટવર્કિંગ વિશેની માહિતી જોવાની મંજૂરી આપે છે, જેમ કે Wi-Fi સક્ષમ છે કે કેમ અને કનેક્ટ થયેલ Wi-Fi ઉપકરણોના નામ."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi થી કનેક્ટ અને ડિસ્કનેક્ટ કરો"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"એપ્લિકેશનને Wi-Fi ઍક્સેસ બિંદુઓથી કનેક્ટ થવા અને ડિસ્કનેક્ટ થવાની અને Wi-Fi નેટવર્ક્સ માટે ઉપકરણ ગોઠવણી પર ફેરફારો કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi મલ્ટિકાસ્ટ રિસેપ્શનને મંજૂરી આપો"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"એપ્લિકેશનને ફક્ત તમારા ટેબ્લેટ પર નહીં, પણ મલ્ટિકાસ્ટ સરનામાંનો ઉપયોગ કરીને Wi-Fi નેટવર્ક પરના તમામ ઉપકરણોને મોકલાયેલ પૅકેટ્સ પ્રાપ્ત કરવાની મંજૂરી આપે છે. તે બિન-મલ્ટિકાસ્ટ મોડ કરતાં વધુ પાવર વાપરે છે."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"એપ્લિકેશનને ફક્ત તમારા ટીવી પર નહીં, પણ મલ્ટિકાસ્ટ સરનામાંનો ઉપયોગ કરીને Wi-Fi નેટવર્ક પરના તમામ ઉપકરણોને મોકલાયેલ પૅકેટ્સ પ્રાપ્ત કરવાની મંજૂરી આપે છે. તે બિન-મલ્ટિકાસ્ટ મોડ કરતાં વધુ પાવર વાપરે છે."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"એપ્લિકેશનને ફક્ત તમારા ફોન પર નહીં, પણ મલ્ટિકાસ્ટ સરનામાંનો ઉપયોગ કરીને Wi-Fi નેટવર્ક પર તમામ ઉપકરણોને મોકલાયેલ પૅકેટ્સ પ્રાપ્ત કરવાની મંજૂરી આપે છે. તે બિન-મલ્ટિકાસ્ટ મોડ કરતાં વધુ પાવર વાપરે છે."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth સેટિંગ્સ ઍક્સેસ કરો"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"એપ્લિકેશનને સ્થાનિક Bluetooth ટેબ્લેટ ગોઠવવાની અને રિમોટ ઉપકરણો શોધવા અને તેમની સાથે જોડી કરવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"એપ્લિકેશનને સ્થાનિક Bluetooth ટીવી ગોઠવવાની અને રિમોટ ઉપકરણો શોધવા અને તેમની સાથે જોડી કરવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"એપ્લિકેશનને સ્થાનિક Bluetooth ફોન ગોઠવવાની અને રિમોટ ઉપકરણો શોધવા અને તેમની સાથે જોડી કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"વાઇ-ફાઇ કનેક્શન્સ જુઓ"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"એપ્લિકેશનને વાઇ-ફાઇ નેટવર્કિંગ વિશેની માહિતી જોવાની મંજૂરી આપે છે, જેમ કે વાઇ-ફાઇ સક્ષમ છે કે કેમ અને કનેક્ટ થયેલ વાઇ-ફાઇ ઉપકરણોના નામ."</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"વાઇ-ફાઇ થી કનેક્ટ અને ડિસ્કનેક્ટ કરો"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"એપ્લિકેશનને વાઇ-ફાઇ ઍક્સેસ બિંદુઓથી કનેક્ટ થવા અને ડિસ્કનેક્ટ થવાની અને વાઇ-ફાઇ નેટવર્ક્સ માટે ઉપકરણ ગોઠવણી પર ફેરફારો કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"વાઇ-ફાઇ મલ્ટિકાસ્ટ રિસેપ્શનને મંજૂરી આપો"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"એપ્લિકેશનને ફક્ત તમારા ટેબ્લેટ પર નહીં, પણ મલ્ટિકાસ્ટ સરનામાંનો ઉપયોગ કરીને વાઇ-ફાઇ નેટવર્ક પરના તમામ ઉપકરણોને મોકલાયેલ પૅકેટ્સ પ્રાપ્ત કરવાની મંજૂરી આપે છે. તે બિન-મલ્ટિકાસ્ટ મોડ કરતાં વધુ પાવર વાપરે છે."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"એપ્લિકેશનને ફક્ત તમારા ટીવી પર નહીં, પણ મલ્ટિકાસ્ટ સરનામાંનો ઉપયોગ કરીને વાઇ-ફાઇ નેટવર્ક પરના તમામ ઉપકરણોને મોકલાયેલ પૅકેટ્સ પ્રાપ્ત કરવાની મંજૂરી આપે છે. તે બિન-મલ્ટિકાસ્ટ મોડ કરતાં વધુ પાવર વાપરે છે."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"એપ્લિકેશનને ફક્ત તમારા ફોન પર નહીં, પણ મલ્ટિકાસ્ટ સરનામાંનો ઉપયોગ કરીને વાઇ-ફાઇ નેટવર્ક પર તમામ ઉપકરણોને મોકલાયેલ પૅકેટ્સ પ્રાપ્ત કરવાની મંજૂરી આપે છે. તે બિન-મલ્ટિકાસ્ટ મોડ કરતાં વધુ પાવર વાપરે છે."</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"બ્લૂટૂથ સેટિંગ્સ ઍક્સેસ કરો"</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"એપ્લિકેશનને સ્થાનિક બ્લૂટૂથ ટેબ્લેટ ગોઠવવાની અને રિમોટ ઉપકરણો શોધવા અને તેમની સાથે જોડી કરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"એપ્લિકેશનને સ્થાનિક બ્લૂટૂથ ટીવી ગોઠવવાની અને રિમોટ ઉપકરણો શોધવા અને તેમની સાથે જોડી કરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"એપ્લિકેશનને સ્થાનિક બ્લૂટૂથ ફોન ગોઠવવાની અને રિમોટ ઉપકરણો શોધવા અને તેમની સાથે જોડી કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX થી કનેક્ટ અને ડિસ્કનેક્ટ કરો"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"એપ્લિકેશનને WiMAX સક્ષમ છે કે કેમ અને કનેક્ટ થયેલ છે તે કોઈપણ WiMAX નેટવર્ક્સ વિશેની માહિતી નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX સ્થિતિ બદલો"</string>
@@ -450,9 +450,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"ટીવીને WiMAX નેટવર્ક્સ પર કનેક્ટ કરવાની અને ટીવીને તેનાથી ડિસ્કનેક્ટ કરવાની મંજૂરી એપ્લિકેશનને આપે છે."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ફોનને WiMAX નેટવર્ક્સ પર કનેક્ટ કરવાની અને ફોનને તેનાથી ડિસ્કનેક્ટ કરવાની મંજૂરી એપ્લિકેશનને આપે છે."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"બ્લૂટૂથ ઉપકરણો સાથે જોડાણ બનાવો"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"એપ્લિકેશનને ટેબ્લેટ પર Bluetooth ની ગોઠવણી જોવાની અને જોડી કરેલ ઉપકરણો સાથે કનેક્શન્સ કરવાની અને સ્વીકારવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"એપ્લિકેશનને ટીવી પર Bluetooth ની ગોઠવણી જોવાની અને જોડી કરેલ ઉપકરણો સાથે કનેક્શન્સ કરવાની અને સ્વીકારવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"એપ્લિકેશનને ફોન પર Bluetooth ની ગોઠવણી જોવાની અને જોડી કરેલ ઉપકરણો સાથે કનેક્શન્સ કરવાની અને સ્વીકારવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"એપ્લિકેશનને ટેબ્લેટ પર બ્લૂટૂથ ની ગોઠવણી જોવાની અને જોડી કરેલ ઉપકરણો સાથે કનેક્શન્સ કરવાની અને સ્વીકારવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"એપ્લિકેશનને ટીવી પર બ્લૂટૂથ ની ગોઠવણી જોવાની અને જોડી કરેલ ઉપકરણો સાથે કનેક્શન્સ કરવાની અને સ્વીકારવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"એપ્લિકેશનને ફોન પર બ્લૂટૂથ ની ગોઠવણી જોવાની અને જોડી કરેલ ઉપકરણો સાથે કનેક્શન્સ કરવાની અને સ્વીકારવાની મંજૂરી આપે છે."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"નિઅર ફીલ્ડ કમ્યુનિકેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ઍપ્લિકેશનને નિઅર ફીલ્ડ કમ્યુનિકેશન (NFC) ટૅગ, કાર્ડ અને રીડર સાથે સંચાર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"તમારું સ્ક્રીન લૉક અક્ષમ કરો"</string>
@@ -1064,14 +1064,14 @@
     <string name="sendText" msgid="5209874571959469142">"ટેક્સ્ટ માટે ક્રિયા પસંદ કરો"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"રિંગર વૉલ્યૂમ"</string>
     <string name="volume_music" msgid="5421651157138628171">"મીડિયા વૉલ્યૂમ"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth મારફતે ચાલી રહ્યું છે"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"બ્લૂટૂથ મારફતે ચાલી રહ્યું છે"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"સાઇલેન્ટ રિંગટોન સેટ કરી"</string>
     <string name="volume_call" msgid="3941680041282788711">"ઇન-કૉલ વૉલ્યૂમ"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth ઇન-કૉલ વોલ્યુમ"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"બ્લૂટૂથ ઇન-કૉલ વોલ્યુમ"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"એલાર્મ વૉલ્યૂમ"</string>
     <string name="volume_notification" msgid="2422265656744276715">"સૂચના વૉલ્યૂમ"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"વૉલ્યૂમ"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth વૉલ્યૂમ"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"બ્લૂટૂથ વૉલ્યૂમ"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"રિંગટોન વોલ્યુમ"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"કૉલ વોલ્યુમ"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"મીડિયા વોલ્યુમ"</string>
@@ -1084,46 +1084,46 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"સૂચના ધ્વનિઓ"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"અજાણી"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi નેટવર્ક્સ ઉપલબ્ધ</item>
-      <item quantity="other">Wi-Fi નેટવર્ક્સ ઉપલબ્ધ</item>
+      <item quantity="one">વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ</item>
+      <item quantity="other">વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">ખુલ્લા Wi-Fi નેટવર્ક્સ ઉપલબ્ધ છે</item>
-      <item quantity="other">ખુલ્લા Wi-Fi નેટવર્ક્સ ઉપલબ્ધ છે</item>
+      <item quantity="one">ખુલ્લા વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ છે</item>
+      <item quantity="other">ખુલ્લા વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ છે</item>
     </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"ખુલ્લા Wi‑Fi નેટવર્ક સાથે કનેક્ટ કરો"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ખુલ્લા Wi‑Fi નેટવર્ક સાથે કનેક્ટ કરી રહ્યાં છીએ"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi નેટવર્ક સાથે કનેક્ટ કર્યુ"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi નેટવર્ક સાથે કનેક્ટ કરી શકાયું નથી"</string>
+    <string name="wifi_available_title" msgid="3817100557900599505">"ખુલ્લા વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરો"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ખુલ્લા વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરી રહ્યાં છીએ"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કર્યુ"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરી શકાયું નથી"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"બધા નેટવર્ક જોવા ટૅપ કરો"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"કનેક્ટ કરો"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"બધા નેટવર્ક"</string>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi નેટવર્ક પર સાઇન ઇન કરો"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"વાઇ-ફાઇ નેટવર્ક પર સાઇન ઇન કરો"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"નેટવર્ક પર સાઇન ઇન કરો"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ને કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"વાઇ-ફાઇ ને કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"વિકલ્પો માટે ટૅપ કરો"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> પર સ્વિચ કર્યું"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"જ્યારે <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> પાસે કોઈ ઇન્ટરનેટ ઍક્સેસ ન હોય ત્યારે ઉપકરણ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> નો ઉપયોગ કરે છે. શુલ્ક લાગુ થઈ શકે છે."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> પરથી <xliff:g id="NEW_NETWORK">%2$s</xliff:g> પર સ્વિચ કર્યું"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"મોબાઇલ ડેટા"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
-    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="75483255295529161">"વાઇ-ફાઇ"</item>
+    <item msgid="6862614801537202646">"બ્લૂટૂથ"</item>
     <item msgid="5447331121797802871">"ઇથરનેટ"</item>
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"અજાણ્યો નેટવર્ક પ્રકાર"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi સાથે કનેક્ટ કરી શકાયું નથી"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"વાઇ-ફાઇ સાથે કનેક્ટ કરી શકાયું નથી"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" નબળું ઇન્ટરનેટ કનેક્શન ધરાવે છે."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"કનેક્શનની મંજૂરી આપીએ?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s ઍપ્લિકેશન Wifi નેટવર્ક %2$s થી કનેક્ટ થવા માગે છે"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"ઍપ્લિકેશન"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct પ્રારંભ કરો. આ Wi-Fi ક્લાઇન્ટ/હોટસ્પોટને બંધ કરશે."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct પ્રારંભ કરી શકાયું નથી."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ચાલુ છે"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"વાઇ-ફાઇ ડાઇરેક્ટ"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"વાઇ-ફાઇ ડાઇરેક્ટ પ્રારંભ કરો. આ વાઇ-ફાઇ ક્લાઇન્ટ/હોટસ્પોટને બંધ કરશે."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"વાઇ-ફાઇ ડાઇરેક્ટ પ્રારંભ કરી શકાયું નથી."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"વાઇ-ફાઇ ડાઇરેક્ટ ચાલુ છે"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"સેટિંગ્સ માટે ટૅપ કરો"</string>
     <string name="accept" msgid="1645267259272829559">"સ્વીકારો"</string>
     <string name="decline" msgid="2112225451706137894">"નકારો"</string>
@@ -1133,9 +1133,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"પ્રતિ:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"આવશ્યક પિન લખો:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"પિન:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ટેબ્લેટ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> થી કનેક્ટ હોય તે વખતે Wi-Fi થી અસ્થાયી રૂપે ડિસ્કનેક્ટ કરવામાં આવશે"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"ટીવી <xliff:g id="DEVICE_NAME">%1$s</xliff:g> થી કનેક્ટ હોય તે વખતે Wi-Fi થી અસ્થાયી રૂપે ડિસ્કનેક્ટ કરવામાં આવશે"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ફોન <xliff:g id="DEVICE_NAME">%1$s</xliff:g> થી કનેક્ટ હોય તે વખતે Wi-Fi થી અસ્થાયી રૂપે ડિસ્કનેક્ટ કરવામાં આવશે"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ટેબ્લેટ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> થી કનેક્ટ હોય તે વખતે વાઇ-ફાઇ થી અસ્થાયી રૂપે ડિસ્કનેક્ટ કરવામાં આવશે"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"ટીવી <xliff:g id="DEVICE_NAME">%1$s</xliff:g> થી કનેક્ટ હોય તે વખતે વાઇ-ફાઇ થી અસ્થાયી રૂપે ડિસ્કનેક્ટ કરવામાં આવશે"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ફોન <xliff:g id="DEVICE_NAME">%1$s</xliff:g> થી કનેક્ટ હોય તે વખતે વાઇ-ફાઇ થી અસ્થાયી રૂપે ડિસ્કનેક્ટ કરવામાં આવશે"</string>
     <string name="select_character" msgid="3365550120617701745">"અક્ષર શામેલ કરો"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS સંદેશા મોકલી રહ્યું છે"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; મોટા પ્રમાણમાં SMS સંદેશા મોકલી રહ્યું છે. શું તમે સંદેશા મોકલવાનું ચાલુ રાખવા માટે આ એપ્લિકેશનને મંજૂરી આપવા માગો છો?"</string>
@@ -1373,12 +1373,12 @@
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ડેટા મર્યાદા પર પહોંચ્યાં"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ડેટા મર્યાદા સુધી પહોંચ્યાં"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"મોબાઇલ ડેટાની મર્યાદા આવી ગઈ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi ડેટા સીમા પર પહોંચ્યાં"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"વાઇ-ફાઇ ડેટા સીમા પર પહોંચ્યાં"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"બાકીના ચક્ર માટે ડેટા થોભાવ્યો"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ડેટા મર્યાદા ઓળંગાઈ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ડેટા મર્યાદા ઓળંગાઈ"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"મોબાઇલ ડેટા મર્યાદા ઓળંગાઈ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ડેટા મર્યાદા ઓળંગાઈ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"વાઇ-ફાઇ ડેટા મર્યાદા ઓળંગાઈ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"ઉલ્લેખિત મર્યાદાથી <xliff:g id="SIZE">%s</xliff:g> વધુ."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"બૅકગ્રાઉન્ડ ડેટા પ્રતિબંધિત"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"પ્રતિબંધ દૂર કરવા માટે ટૅપ કરો."</string>
@@ -1412,7 +1412,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"સ્પીકર્સ ડૉક કરો"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"સિસ્ટમ"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ઑડિઓ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"બ્લૂટૂથ ઑડિઓ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"વાયરલેસ ડિસ્પ્લે"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"કાસ્ટ કરો"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
@@ -1615,7 +1615,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટૉલ કરવામાં આવેલ છે"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય ઍપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના બૅકગ્રાઉન્ડ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય ઍપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ચાલુ કરો"</string>

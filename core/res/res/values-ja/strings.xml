@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"通知"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"販売店デモ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 接続"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"バックグラウンドで実行中のアプリ"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」がバックグラウンドで実行中です"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリがバックグラウンドで実行中です"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"アプリが電池を消費しています"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"タップして電池やデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
@@ -1421,7 +1421,7 @@
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"接続を解除"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"スキャン中..."</string>
-    <string name="media_route_status_connecting" msgid="6422571716007825440">"接続中..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"接続処理中..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"利用できます"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"利用できません"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"使用中"</string>
@@ -1592,7 +1592,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"全画面表示"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"終了するには、上部から下にスワイプします。"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"終了するには、上から下にスワイプします。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"完了"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"円形スライダー（時）"</string>
