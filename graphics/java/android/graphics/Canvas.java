@@ -200,11 +200,6 @@ public class Canvas extends BaseCanvas {
     }
 
     /** @hide */
-    public void setHighContrastText(boolean highContrastText) {
-        nSetHighContrastText(mNativeCanvasWrapper, highContrastText);
-    }
-
-    /** @hide */
     public void insertReorderBarrier() {}
 
     /** @hide */
@@ -1241,8 +1236,6 @@ public class Canvas extends BaseCanvas {
 
     @CriticalNative
     private static native boolean nIsOpaque(long canvasHandle);
-    @CriticalNative
-    private static native void nSetHighContrastText(long renderer, boolean highContrastText);
     @CriticalNative
     private static native int nGetWidth(long canvasHandle);
     @CriticalNative

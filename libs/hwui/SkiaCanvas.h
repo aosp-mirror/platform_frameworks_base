@@ -65,11 +65,6 @@ public:
     virtual int width() override;
     virtual int height() override;
 
-    virtual void setHighContrastText(bool highContrastText) override {
-        mHighContrastText = highContrastText;
-    }
-    virtual bool isHighContrastText() override { return mHighContrastText; }
-
     virtual int getSaveCount() const override;
     virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
@@ -165,8 +160,6 @@ private:
         SaveFlags::Flags saveFlags;
         size_t           clipIndex;
     };
-
-    bool mHighContrastText = false;
 
     const SaveRec* currentSaveRec() const;
     void recordPartialSave(SaveFlags::Flags flags);

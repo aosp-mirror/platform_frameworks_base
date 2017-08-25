@@ -20,6 +20,7 @@
 #include <utils/Functor.h>
 
 #include "GlFunctorLifecycleListener.h"
+#include "Properties.h"
 #include "utils/Macros.h"
 #include <androidfw/ResourceTypes.h>
 
@@ -140,8 +141,7 @@ public:
     virtual uirenderer::DisplayList* finishRecording() = 0;
     virtual void insertReorderBarrier(bool enableReorder) = 0;
 
-    virtual void setHighContrastText(bool highContrastText) = 0;
-    virtual bool isHighContrastText() = 0;
+    bool isHighContrastText() const { return uirenderer::Properties::enableHighContrastText; }
 
     virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
             uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,

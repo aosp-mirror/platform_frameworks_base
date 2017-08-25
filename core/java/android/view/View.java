@@ -18055,7 +18055,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int layerType = getLayerType();
 
             final DisplayListCanvas canvas = renderNode.start(width, height);
-            canvas.setHighContrastText(mAttachInfo.mHighContrastText);
 
             try {
                 if (layerType == LAYER_TYPE_SOFTWARE) {
@@ -25363,11 +25362,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Set to true if a view has been scrolled.
          */
         boolean mViewScrollChanged;
-
-        /**
-         * Set to true if high contrast mode enabled
-         */
-        boolean mHighContrastText;
 
         /**
          * Set to true if a pointer event is currently being handled.

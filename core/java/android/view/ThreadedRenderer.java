@@ -914,6 +914,14 @@ public final class ThreadedRenderer {
         return nCreateHardwareBitmap(node.getNativeDisplayList(), width, height);
     }
 
+    /**
+     * Sets whether or not high contrast text rendering is enabled. The setting is global
+     * but only affects content rendered after the change is made.
+     */
+    public static void setHighContrastText(boolean highContrastText) {
+        nSetHighContrastText(highContrastText);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -1063,4 +1071,5 @@ public final class ThreadedRenderer {
             int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
+    private static native void nSetHighContrastText(boolean enabled);
 }

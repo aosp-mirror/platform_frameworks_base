@@ -822,8 +822,8 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawText) {
 }
 
 OPENGL_PIPELINE_TEST(RecordingCanvas, drawTextInHighContrast) {
+    Properties::enableHighContrastText = true;
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.setHighContrastText(true);
         Paint paint;
         paint.setColor(SK_ColorWHITE);
         paint.setAntiAlias(true);
@@ -832,6 +832,7 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawTextInHighContrast) {
         std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
         canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::kBidi_Force_LTR, paint, NULL);
     });
+    Properties::enableHighContrastText = false;
 
     int count = 0;
     playbackOps(*dl, [&count](const RecordedOp& op) {
