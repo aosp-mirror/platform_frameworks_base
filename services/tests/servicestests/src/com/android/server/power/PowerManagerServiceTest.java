@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
+import android.os.SystemProperties;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.TextUtils;
@@ -44,17 +45,14 @@ public class PowerManagerServiceTest extends AndroidTestCase {
     private static final float PRECISION = 0.001f;
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final boolean BATTERY_SAVER_ENABLED = true;
-    private static final String LAST_REBOOT_REASON = "last_reboot_reason";
+    private static final String TEST_LAST_REBOOT_PROPERTY = "test.sys.boot.reason";
 
     private @Mock BatterySaverPolicy mBatterySaverPolicy;
     private PowerManagerService mService;
     private PowerSaveState mPowerSaveState;
     private DisplayPowerRequest mDisplayPowerRequest;
-    private File mTempReason;
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
@@ -68,8 +66,6 @@ public class PowerManagerServiceTest extends AndroidTestCase {
                 .thenReturn(mPowerSaveState);
         mDisplayPowerRequest = new DisplayPowerRequest();
         mService = new PowerManagerService(getContext(), mBatterySaverPolicy);
-        temporaryFolder.create();
-        mTempReason = temporaryFolder.newFile(LAST_REBOOT_REASON);
     }
 
     @SmallTest
@@ -82,14 +78,9 @@ public class PowerManagerServiceTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetLastShutdownReasonInternal() {
-        try {
-            FileWriter writer = new FileWriter(mTempReason);
-            writer.append("thermal-shutdown\n");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int reason = mService.getLastShutdownReasonInternal(mTempReason);
+        SystemProperties.set(TEST_LAST_REBOOT_PROPERTY, "shutdown,thermal");
+        int reason = mService.getLastShutdownReasonInternal(TEST_LAST_REBOOT_PROPERTY);
+        SystemProperties.set(TEST_LAST_REBOOT_PROPERTY, "");
         assertThat(reason).isEqualTo(PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN);
     }
 }
