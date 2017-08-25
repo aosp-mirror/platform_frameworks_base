@@ -105,6 +105,8 @@ public class SurfaceControl {
             long surfaceObject, long frame);
     private static native void nativeReparentChildren(long nativeObject,
             IBinder handle);
+    private static native void nativeReparentChild(long nativeObject,
+            IBinder parentHandle, IBinder childHandle);
     private static native void nativeSeverChildren(long nativeObject);
     private static native void nativeSetOverrideScalingMode(long nativeObject,
             int scalingMode);
@@ -451,6 +453,11 @@ public class SurfaceControl {
 
     public void reparentChildren(IBinder newParentHandle) {
         nativeReparentChildren(mNativeObject, newParentHandle);
+    }
+
+    /** Re-parents a specific child layer to a new parent */
+    public void reparentChild(IBinder newParentHandle, IBinder childHandle) {
+        nativeReparentChild(mNativeObject, newParentHandle, childHandle);
     }
 
     public void detachChildren() {
