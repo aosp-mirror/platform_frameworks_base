@@ -112,6 +112,14 @@ public class StatusBarController extends BarController {
                 View.STATUS_BAR_TRANSPARENT);
     }
 
+
+    public void setTopAppHidesStatusBar(boolean hidesStatusBar) {
+        StatusBarManagerInternal statusbar = getStatusBarInternal();
+        if (statusbar != null) {
+            statusbar.setTopAppHidesStatusBar(hidesStatusBar);
+        }
+    }
+
     @Override
     protected boolean skipAnimation() {
         return mWin.getAttrs().height == MATCH_PARENT;

@@ -332,6 +332,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
+        public void setTopAppHidesStatusBar(boolean hidesStatusBar) {
+            if (mBar != null) {
+                try {
+                    mBar.setTopAppHidesStatusBar(hidesStatusBar);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
         public boolean showShutdownUi(boolean isReboot, String reason) {
             if (!mContext.getResources().getBoolean(R.bool.config_showSysuiShutdown)) {
                 return false;
