@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.graphics.Point;
 import android.hardware.display.WifiDisplay;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -60,6 +61,10 @@ import libcore.util.Objects;
  *          &lt;color-mode>0&lt;/color-mode>
  *      &lt;/display>
  *  &lt;/display-states>
+ *  &lt;stable-device-values>
+ *      &lt;stable-display-height>1920&lt;stable-display-height>
+ *      &lt;stable-display-width>1080&lt;stable-display-width>
+ *  &lt;/stable-device-values>
  * &lt;/display-manager-state>
  * </code>
  *
@@ -74,6 +79,9 @@ final class PersistentDataStore {
     // Display state by unique id.
     private final HashMap<String, DisplayState> mDisplayStates =
             new HashMap<String, DisplayState>();
+
+    // Display values which should be stable across the device's lifetime.
+    private final StableDeviceValues mStableDeviceValues = new StableDeviceValues();
 
     // The atomic file used to safely read or write the file.
     private final AtomicFile mAtomicFile;
@@ -162,6 +170,7 @@ final class PersistentDataStore {
     }
 
     public boolean forgetWifiDisplay(String deviceAddress) {
+		loadIfNeeded();
         int index = findRememberedWifiDisplay(deviceAddress);
         if (index >= 0) {
             mRememberedWifiDisplays.remove(index);
@@ -203,6 +212,18 @@ final class PersistentDataStore {
         }
         return false;
     }
+
+	public Point getStableDisplaySize() {
+		loadIfNeeded();
+		return mStableDeviceValues.getDisplaySize();
+	}
+
+	public void setStableDisplaySize(Point size) {
+		loadIfNeeded();
+		if (mStableDeviceValues.setDisplaySize(size)) {
+			setDirty();
+		}
+	}
 
     private DisplayState getDisplayState(String uniqueId, boolean createIfAbsent) {
         loadIfNeeded();
@@ -290,6 +311,9 @@ final class PersistentDataStore {
             if (parser.getName().equals("display-states")) {
                 loadDisplaysFromXml(parser);
             }
+            if (parser.getName().equals("stable-device-values")) {
+                mStableDeviceValues.loadFromXml(parser);
+            }
         }
     }
 
@@ -363,6 +387,9 @@ final class PersistentDataStore {
             serializer.endTag(null, "display");
         }
         serializer.endTag(null, "display-states");
+        serializer.startTag(null, "stable-device-values");
+        mStableDeviceValues.saveToXml(serializer);
+        serializer.endTag(null, "stable-device-values");
         serializer.endTag(null, "display-manager-state");
         serializer.endDocument();
     }
@@ -382,6 +409,8 @@ final class PersistentDataStore {
             pw.println("    " + i++ + ": " + entry.getKey());
             entry.getValue().dump(pw, "      ");
         }
+        pw.println("  StableDeviceValues:");
+        mStableDeviceValues.dump(pw, "      ");
     }
 
     private static final class DisplayState {
@@ -417,8 +446,66 @@ final class PersistentDataStore {
             serializer.endTag(null, "color-mode");
         }
 
-        private void dump(final PrintWriter pw, final String prefix) {
+        public void dump(final PrintWriter pw, final String prefix) {
             pw.println(prefix + "ColorMode=" + mColorMode);
+        }
+    }
+
+    private static final class StableDeviceValues {
+        private int mWidth;
+        private int mHeight;
+
+        private Point getDisplaySize() {
+            return new Point(mWidth, mHeight);
+        }
+
+        public boolean setDisplaySize(Point r) {
+            if (mWidth != r.x || mHeight != r.y) {
+                mWidth = r.x;
+                mHeight = r.y;
+                return true;
+            }
+            return false;
+        }
+
+        public void loadFromXml(XmlPullParser parser) throws IOException, XmlPullParserException {
+            final int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                switch (parser.getName()) {
+                    case "stable-display-width":
+                        mWidth = loadIntValue(parser);
+                        break;
+                    case "stable-display-height":
+                        mHeight = loadIntValue(parser);
+                        break;
+                }
+            }
+        }
+
+        private static int loadIntValue(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+            try {
+                String value = parser.nextText();
+                return Integer.parseInt(value);
+            } catch (NumberFormatException nfe) {
+                return 0;
+            }
+        }
+
+        public void saveToXml(XmlSerializer serializer) throws IOException {
+            if (mWidth > 0 && mHeight > 0) {
+                serializer.startTag(null, "stable-display-width");
+                serializer.text(Integer.toString(mWidth));
+                serializer.endTag(null, "stable-display-width");
+                serializer.startTag(null, "stable-display-height");
+                serializer.text(Integer.toString(mHeight));
+                serializer.endTag(null, "stable-display-height");
+            }
+        }
+
+        public void dump(final PrintWriter pw, final String prefix) {
+            pw.println(prefix + "StableDisplayWidth=" + mWidth);
+            pw.println(prefix + "StableDisplayHeight=" + mHeight);
         }
     }
 }
