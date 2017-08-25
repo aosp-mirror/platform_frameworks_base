@@ -82,26 +82,32 @@ static int ExecuteCommand(const StringPiece& command, const std::vector<StringPi
 static void RunDaemon(IDiagnostics* diagnostics) {
   std::cout << "Ready" << std::endl;
 
-  // Run in daemon mode. Each line of input from stdin is treated as a command line argument
-  // invocation. This means we need to split the line into a vector of args.
-  for (std::string line; std::getline(std::cin, line);) {
-    const util::Tokenizer tokenizer = util::Tokenize(line, file::sPathSep);
-    auto token_iter = tokenizer.begin();
-    if (token_iter == tokenizer.end()) {
-      diagnostics->Error(DiagMessage() << "no command");
-      continue;
+  // Run in daemon mode. The first line of input is the command. This can be 'quit' which ends
+  // the daemon mode. Each subsequent line is a single parameter to the command. The end of a
+  // invocation is signaled by providing an empty line. At any point, an EOF signal or the
+  // command 'quit' will end the daemon mode.
+  while (true) {
+    std::vector<std::string> raw_args;
+    for (std::string line; std::getline(std::cin, line) && !line.empty();) {
+      raw_args.push_back(line);
     }
 
-    const StringPiece command(*token_iter);
-    if (command == "quit") {
+    if (!std::cin) {
       break;
     }
 
-    ++token_iter;
+    // An empty command does nothing.
+    if (raw_args.empty()) {
+      continue;
+    }
+
+    if (raw_args[0] == "quit") {
+      break;
+    }
 
     std::vector<StringPiece> args;
-    args.insert(args.end(), token_iter, tokenizer.end());
-    int ret = ExecuteCommand(command, args, diagnostics);
+    args.insert(args.end(), ++raw_args.begin(), raw_args.end());
+    int ret = ExecuteCommand(raw_args[0], args, diagnostics);
     if (ret != 0) {
       std::cerr << "Error" << std::endl;
     }
