@@ -35,7 +35,7 @@
 #include <nativehelper/ScopedUtfChars.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_media_MediaMetricsJNI.h"
 #include "android_runtime/AndroidRuntime.h"
 

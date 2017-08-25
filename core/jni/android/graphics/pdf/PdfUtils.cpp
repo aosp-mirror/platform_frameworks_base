@@ -17,7 +17,7 @@
 #include "PdfUtils.h"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include "fpdfview.h"
 

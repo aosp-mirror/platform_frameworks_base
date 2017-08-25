@@ -18,7 +18,7 @@
 #include "utils/Log.h"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <usbhost/usbhost.h>
 

@@ -19,7 +19,7 @@
 //#define LOG_NDEBUG 0
 
 #include <android/hardware/power/1.1/IPower.h>
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
 #include <nativehelper/ScopedUtfChars.h>

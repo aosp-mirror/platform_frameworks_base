@@ -16,7 +16,7 @@
 
 #define LOG_TAG "DisplayViewport-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <android_hardware_display_DisplayViewport.h>

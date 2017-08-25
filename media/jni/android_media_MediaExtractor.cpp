@@ -27,7 +27,7 @@
 #include "android_runtime/Log.h"
 #include "android_util_Binder.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android/hardware/cas/1.0/BpHwCas.h>
 #include <android/hardware/cas/1.0/BnHwCas.h>
