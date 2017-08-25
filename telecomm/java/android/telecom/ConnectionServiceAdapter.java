@@ -609,4 +609,20 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Notifies Telecom that a call's PhoneAccountHandle has changed.
+     *
+     * @param callId The unique ID of the call.
+     * @param pHandle The new PhoneAccountHandle associated with the call.
+     */
+    void onPhoneAccountChanged(String callId, PhoneAccountHandle pHandle) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Log.d(this, "onPhoneAccountChanged %s", callId);
+                adapter.onPhoneAccountChanged(callId, pHandle, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }

@@ -24,6 +24,7 @@ import android.telecom.DisconnectCause;
 import android.telecom.Logging.Session;
 import android.telecom.ParcelableConnection;
 import android.telecom.ParcelableConference;
+import android.telecom.PhoneAccountHandle;
 import android.telecom.StatusHints;
 
 import com.android.internal.telecom.IVideoProvider;
@@ -114,4 +115,7 @@ oneway interface IConnectionServiceAdapter {
     void onRttSessionRemotelyTerminated(String callId, in Session.Info sessionInfo);
 
     void onRemoteRttRequest(String callId, in Session.Info sessionInfo);
+
+    void onPhoneAccountChanged(String callId, in PhoneAccountHandle pHandle,
+    in Session.Info sessionInfo);
 }

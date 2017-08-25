@@ -72,6 +72,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_ON_RTT_INITIATION_FAILURE = 31;
     private static final int MSG_ON_RTT_REMOTELY_TERMINATED = 32;
     private static final int MSG_ON_RTT_UPGRADE_REQUEST = 33;
+    private static final int MSG_SET_PHONE_ACCOUNT_CHANGED = 34;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -318,6 +319,16 @@ final class ConnectionServiceAdapterServant {
                 case MSG_ON_RTT_UPGRADE_REQUEST:
                     mDelegate.onRemoteRttRequest((String) msg.obj, null /*Session.Info*/);
                     break;
+                case MSG_SET_PHONE_ACCOUNT_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.onPhoneAccountChanged((String) args.arg1,
+                                (PhoneAccountHandle) args.arg2, null /*Session.Info*/);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
             }
         }
     };
@@ -580,6 +591,15 @@ final class ConnectionServiceAdapterServant {
         public void onRemoteRttRequest(String connectionId, Session.Info sessionInfo)
                 throws RemoteException {
             mHandler.obtainMessage(MSG_ON_RTT_UPGRADE_REQUEST, connectionId).sendToTarget();
+        }
+
+        @Override
+        public void onPhoneAccountChanged(String callId, PhoneAccountHandle pHandle,
+                Session.Info sessionInfo) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = pHandle;
+            mHandler.obtainMessage(MSG_SET_PHONE_ACCOUNT_CHANGED, args).sendToTarget();
         }
     };
 
