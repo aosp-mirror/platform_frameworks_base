@@ -7450,7 +7450,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *       {@link ViewStructure#setAutofillOptions(CharSequence[])}.
      * </ul>
      *
-     * <p><b>NOTE:</b> the {@code left} and {@code top} values set in
+     * <p><b>Note:</b> The {@code left} and {@code top} values set in
      * {@link ViewStructure#setDimens(int, int, int, int, int, int)} must be relative to the next
      * {@link ViewGroup#isImportantForAutofill()} predecessor view included in the structure.
      *
@@ -7688,6 +7688,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link AutofillManager#notifyValueChanged(View)} must happen <b>after</b> the value was
      * changed to the autofilled value. If not, the view will not be considered autofilled.
      *
+     * <p><b>Note:</b> After this method is called, the value returned by
+     * {@link #getAutofillValue()} must be equal to the {@code value} passed to it, otherwise the
+     * view will not be highlighted as autofilled.
+     *
      * @param value value to be autofilled.
      */
     public void autofill(@SuppressWarnings("unused") AutofillValue value) {
@@ -7711,7 +7715,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <b>after</b> the value was changed to the autofilled value. If not, the child will not be
      * considered autofilled.
      *
-     * <p><b>NOTE:</b> to indicate that a virtual view was autofilled,
+     * <p><b>Note:</b> To indicate that a virtual view was autofilled,
      * <code>?android:attr/autofilledHighlight</code> should be drawn over it until the data
      * changes.
      *
@@ -7780,8 +7784,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Gets the {@link View}'s current autofill value.
      *
-     * <p>By default returns {@code null}, but views should override it to properly support the
-     * Autofill Framework.
+     * <p>By default returns {@code null}, but subclasses should override it and return an
+     * appropriate value to properly support the Autofill Framework.
      *
      * @see #onProvideAutofillStructure(ViewStructure, int)
      * @see #autofill(AutofillValue)
@@ -7833,7 +7837,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *       be {@link #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS}.
      * </ol>
      *
-     * <p><b>NOTE:</strong> setting the mode as does {@link #IMPORTANT_FOR_AUTOFILL_NO} or
+     * <p><b>Note:</b> Setting the mode as {@link #IMPORTANT_FOR_AUTOFILL_NO} or
      * {@link #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS} does not guarantee the view (and its
      * children) will be always be considered not important; for example, when the user explicitly
      * makes an autofill request, all views are considered important. See
