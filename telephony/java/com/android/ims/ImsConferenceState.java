@@ -79,6 +79,8 @@ public class ImsConferenceState implements Parcelable {
     public static final String STATUS_DISCONNECTED = "disconnected";
     public static final String STATUS_MUTED_VIA_FOCUS = "muted-via-focus";
     public static final String STATUS_CONNECT_FAIL = "connect-fail";
+    public static final String STATUS_SEND_ONLY = "sendonly";
+    public static final String STATUS_SEND_RECV = "sendrecv";
 
     /**
      * conference-info : SIP status code (integer)
@@ -156,15 +158,53 @@ public class ImsConferenceState implements Parcelable {
         } else if (status.equals(STATUS_ALERTING) ||
                 status.equals(STATUS_DIALING_OUT)) {
             return Connection.STATE_DIALING;
-        } else if (status.equals(STATUS_ON_HOLD)) {
+        } else if (status.equals(STATUS_ON_HOLD) ||
+                status.equals(STATUS_SEND_ONLY)) {
             return Connection.STATE_HOLDING;
         } else if (status.equals(STATUS_CONNECTED) ||
                 status.equals(STATUS_MUTED_VIA_FOCUS) ||
-                status.equals(STATUS_DISCONNECTING)) {
+                status.equals(STATUS_DISCONNECTING) ||
+                status.equals(STATUS_SEND_RECV)) {
             return Connection.STATE_ACTIVE;
         } else if (status.equals(STATUS_DISCONNECTED)) {
             return Connection.STATE_DISCONNECTED;
         }
         return Call.STATE_ACTIVE;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        sb.append(ImsConferenceState.class.getSimpleName());
+        sb.append(" ");
+        if (mParticipants.size() > 0) {
+            Set<Entry<String, Bundle>> entries = mParticipants.entrySet();
+
+            if (entries != null) {
+                Iterator<Entry<String, Bundle>> iterator = entries.iterator();
+                sb.append("<");
+                while (iterator.hasNext()) {
+                    Entry<String, Bundle> entry = iterator.next();
+                    sb.append(entry.getKey());
+                    sb.append(": ");
+                    Bundle participantData = entry.getValue();
+
+                    for (String key : participantData.keySet()) {
+                        sb.append(key);
+                        sb.append("=");
+                        if (ENDPOINT.equals(key) || USER.equals(key)) {
+                            sb.append(android.telecom.Log.pii(participantData.get(key)));
+                        } else {
+                            sb.append(participantData.get(key));
+                        }
+                        sb.append(", ");
+                    }
+                }
+                sb.append(">");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
