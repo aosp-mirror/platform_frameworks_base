@@ -120,7 +120,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Sets the windowing mode for the configuration container. */
-    public void setWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
+    public void setWindowingMode(/* @WindowConfiguration.WindowingMode...triggers Jack compiler bug...*/
+            int windowingMode) {
         mOverrideConfiguration.windowConfiguration.setWindowingMode(windowingMode);
         onOverrideConfigurationChanged(mOverrideConfiguration);
     }
