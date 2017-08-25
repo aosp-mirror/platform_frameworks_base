@@ -1904,10 +1904,16 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the Vulkan native API
      * will enumerate at least one {@code VkPhysicalDevice}, and the feature version will indicate
-     * what level of optional compute features are supported beyond the Vulkan 1.0 requirements.
+     * what level of optional compute features that device supports beyond the Vulkan 1.0
+     * requirements.
      * <p>
-     * Compute level 0 indicates support for the {@code VariablePointers} SPIR-V capability defined
-     * by the SPV_KHR_variable_pointers extension.
+     * Compute level 0 indicates:
+     * <ul>
+     * <li>The {@code VK_KHR_variable_pointers} extension and
+     *     {@code VkPhysicalDeviceVariablePointerFeaturesKHR::variablePointers} feature are
+           supported.</li>
+     * <li>{@code VkPhysicalDeviceLimits::maxPerStageDescriptorStorageBuffers} is at least 16.</li>
+     * </ul>
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN_HARDWARE_COMPUTE = "android.hardware.vulkan.compute";
