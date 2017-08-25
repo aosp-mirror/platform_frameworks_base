@@ -21822,32 +21822,36 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
 
-        if (callingUid == Process.SHELL_UID
-                && (pkgSetting.pkgFlags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
-            // Shell can only change whole packages between ENABLED and DISABLED_USER states
-            // unless it is a test package.
-            int oldState = pkgSetting.getEnabled(userId);
-            if (className == null
-                &&
-                (oldState == COMPONENT_ENABLED_STATE_DISABLED_USER
-                 || oldState == COMPONENT_ENABLED_STATE_DEFAULT
-                 || oldState == COMPONENT_ENABLED_STATE_ENABLED)
-                &&
-                (newState == COMPONENT_ENABLED_STATE_DISABLED_USER
-                 || newState == COMPONENT_ENABLED_STATE_DEFAULT
-                 || newState == COMPONENT_ENABLED_STATE_ENABLED)) {
-                // ok
-            } else {
-                throw new SecurityException(
-                        "Shell cannot change component state for " + packageName + "/"
-                        + className + " to " + newState);
+        synchronized (mPackages) {
+            if (callingUid == Process.SHELL_UID
+                    && (pkgSetting.pkgFlags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
+                // Shell can only change whole packages between ENABLED and DISABLED_USER states
+                // unless it is a test package.
+                int oldState = pkgSetting.getEnabled(userId);
+                if (className == null
+                        &&
+                        (oldState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                                || oldState == COMPONENT_ENABLED_STATE_DEFAULT
+                                || oldState == COMPONENT_ENABLED_STATE_ENABLED)
+                        &&
+                        (newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                                || newState == COMPONENT_ENABLED_STATE_DEFAULT
+                                || newState == COMPONENT_ENABLED_STATE_ENABLED)) {
+                    // ok
+                } else {
+                    throw new SecurityException(
+                            "Shell cannot change component state for " + packageName + "/"
+                                    + className + " to " + newState);
+                }
             }
         }
         if (className == null) {
             // We're dealing with an application/package level state change
-            if (pkgSetting.getEnabled(userId) == newState) {
-                // Nothing to do
-                return;
+            synchronized (mPackages) {
+                if (pkgSetting.getEnabled(userId) == newState) {
+                    // Nothing to do
+                    return;
+                }
             }
             // If we're enabling a system stub, there's a little more work to do.
             // Prior to enabling the package, we need to decompress the APK(s) to the
@@ -21961,41 +21965,45 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 // Don't care about who enables an app.
                 callingPackage = null;
             }
-            pkgSetting.setEnabled(newState, userId, callingPackage);
-        } else {
-            // We're dealing with a component level state change
-            // First, verify that this is a valid class name.
-            PackageParser.Package pkg = pkgSetting.pkg;
-            if (pkg == null || !pkg.hasComponentClassName(className)) {
-                if (pkg != null &&
-                        pkg.applicationInfo.targetSdkVersion >=
-                                Build.VERSION_CODES.JELLY_BEAN) {
-                    throw new IllegalArgumentException("Component class " + className
-                            + " does not exist in " + packageName);
-                } else {
-                    Slog.w(TAG, "Failed setComponentEnabledSetting: component class "
-                            + className + " does not exist in " + packageName);
-                }
+            synchronized (mPackages) {
+                pkgSetting.setEnabled(newState, userId, callingPackage);
             }
-            switch (newState) {
-            case COMPONENT_ENABLED_STATE_ENABLED:
-                if (!pkgSetting.enableComponentLPw(className, userId)) {
-                    return;
+        } else {
+            synchronized (mPackages) {
+                // We're dealing with a component level state change
+                // First, verify that this is a valid class name.
+                PackageParser.Package pkg = pkgSetting.pkg;
+                if (pkg == null || !pkg.hasComponentClassName(className)) {
+                    if (pkg != null &&
+                            pkg.applicationInfo.targetSdkVersion >=
+                                    Build.VERSION_CODES.JELLY_BEAN) {
+                        throw new IllegalArgumentException("Component class " + className
+                                + " does not exist in " + packageName);
+                    } else {
+                        Slog.w(TAG, "Failed setComponentEnabledSetting: component class "
+                                + className + " does not exist in " + packageName);
+                    }
                 }
-                break;
-            case COMPONENT_ENABLED_STATE_DISABLED:
-                if (!pkgSetting.disableComponentLPw(className, userId)) {
-                    return;
+                switch (newState) {
+                    case COMPONENT_ENABLED_STATE_ENABLED:
+                        if (!pkgSetting.enableComponentLPw(className, userId)) {
+                            return;
+                        }
+                        break;
+                    case COMPONENT_ENABLED_STATE_DISABLED:
+                        if (!pkgSetting.disableComponentLPw(className, userId)) {
+                            return;
+                        }
+                        break;
+                    case COMPONENT_ENABLED_STATE_DEFAULT:
+                        if (!pkgSetting.restoreComponentLPw(className, userId)) {
+                            return;
+                        }
+                        break;
+                    default:
+                        Slog.e(TAG, "Invalid new component state: " + newState);
+                        return;
                 }
-                break;
-            case COMPONENT_ENABLED_STATE_DEFAULT:
-                if (!pkgSetting.restoreComponentLPw(className, userId)) {
-                    return;
-                }
-                break;
-            default:
-                Slog.e(TAG, "Invalid new component state: " + newState);
-                return;
             }
         }
         synchronized (mPackages) {
