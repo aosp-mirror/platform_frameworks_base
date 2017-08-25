@@ -24,6 +24,8 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
@@ -460,22 +462,30 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
         mTmpRect2.setEmpty();
-        final Configuration overrideConfig = getOverrideConfiguration();
+        updateOverrideConfiguration();
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
-                mTmpRect2, overrideConfig);
-        onOverrideConfigurationChanged(overrideConfig);
+                mTmpRect2, getOverrideConfiguration());
         mStackSupervisor.mStacks.put(mStackId, this);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
     T createStackWindowController(int displayId, boolean onTop, Rect outBounds,
-            Configuration outOverrideConfig) {
+            Configuration overrideConfig) {
         return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds,
-                outOverrideConfig);
+                overrideConfig);
     }
 
     T getWindowContainerController() {
         return mWindowContainerController;
+    }
+
+    // TODO: Not needed once we are no longer using stack ids as the override config. can be passed
+    // in.
+    private void updateOverrideConfiguration() {
+        final int windowingMode = getWindowingModeForStackId(mStackId);
+        if (windowingMode != WINDOWING_MODE_UNDEFINED) {
+            setWindowingMode(windowingMode);
+        }
     }
 
     /** Adds the stack to specified display and calls WindowManager to do the same. */

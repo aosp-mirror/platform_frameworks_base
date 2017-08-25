@@ -1164,11 +1164,10 @@ class WindowStateAnimator {
             transform.postScale(spec.scale, spec.scale);
             transform.postTranslate(-spec.offsetX, -spec.offsetY);
             transform.mapRect(finalCrop);
-            finalClipRect.top = (int)finalCrop.top;
-            finalClipRect.left = (int)finalCrop.left;
-            // TODO: Are the assignments below a mistake?
-            finalClipRect.right = (int)finalClipRect.right;
-            finalClipRect.bottom = (int)finalClipRect.bottom;
+            finalClipRect.top = (int) finalCrop.top;
+            finalClipRect.left = (int) finalCrop.left;
+            finalClipRect.right = (int) finalCrop.right;
+            finalClipRect.bottom = (int) finalCrop.bottom;
         }
 
         return true;

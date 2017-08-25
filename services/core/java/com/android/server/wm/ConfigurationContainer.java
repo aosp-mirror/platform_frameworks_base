@@ -120,8 +120,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Sets the windowing mode for the configuration container. */
-    void setWindowingMode(/*@WindowConfiguration.WindowingMode TODO: causes build error...why?*/
-            int windowingMode) {
+    public void setWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
         mOverrideConfiguration.windowConfiguration.setWindowingMode(windowingMode);
         onOverrideConfigurationChanged(mOverrideConfiguration);
     }

@@ -16,6 +16,12 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -851,6 +857,32 @@ public class ActivityManager {
                     || stackId == FULLSCREEN_WORKSPACE_STACK_ID
                     || stackId == ASSISTANT_STACK_ID
                     || isDynamicStack(stackId);
+        }
+
+        /** Returns the windowing mode that should be used for this input stack id. */
+        // TODO: To be removed once we are not using stack id for stuff...
+        public static int getWindowingModeForStackId(int stackId) {
+            final int windowingMode;
+            switch (stackId) {
+                case FULLSCREEN_WORKSPACE_STACK_ID:
+                case HOME_STACK_ID:
+                case RECENTS_STACK_ID:
+                case ASSISTANT_STACK_ID:
+                    windowingMode = WINDOWING_MODE_FULLSCREEN;
+                    break;
+                case PINNED_STACK_ID:
+                    windowingMode = WINDOWING_MODE_PINNED;
+                    break;
+                case DOCKED_STACK_ID:
+                    windowingMode = WINDOWING_MODE_DOCKED;
+                    break;
+                case FREEFORM_WORKSPACE_STACK_ID:
+                    windowingMode = WINDOWING_MODE_FREEFORM;
+                    break;
+                default :
+                    windowingMode = WINDOWING_MODE_UNDEFINED;
+            }
+            return windowingMode;
         }
     }
 

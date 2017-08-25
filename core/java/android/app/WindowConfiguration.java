@@ -24,9 +24,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.DisplayInfo;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Class that contains windowing configuration/state for other objects that contain windows directly
  * or indirectly. E.g. Activities, Task, Displays, ...
@@ -65,7 +62,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOWING_MODE_DOCKED,
             WINDOWING_MODE_FREEFORM,
     })
-    @Retention(RetentionPolicy.SOURCE)
     public @interface WindowingMode {}
 
     /** Bit that indicates that the {@link #mAppBounds} changed. */
@@ -78,7 +74,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                     WINDOW_CONFIG_APP_BOUNDS,
                     WINDOW_CONFIG_WINDOWING_MODE,
             })
-    @Retention(RetentionPolicy.SOURCE)
     public @interface WindowConfig {}
 
     public WindowConfiguration() {
