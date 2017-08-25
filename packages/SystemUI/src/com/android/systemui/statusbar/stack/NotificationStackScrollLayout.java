@@ -40,6 +40,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -3543,6 +3544,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * See {@link AmbientState#setDimmed}.
      */
     public void setDimmed(boolean dimmed, boolean animate) {
+        dimmed &= onKeyguard();
         mAmbientState.setDimmed(dimmed);
         if (animate && mAnimationsEnabled) {
             mDimmedNeedsAnimation = true;
@@ -3552,6 +3554,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             setDimAmount(dimmed ? 1.0f : 0.0f);
         }
         requestChildrenUpdate();
+    }
+
+    @VisibleForTesting
+    boolean isDimmed() {
+        return mAmbientState.isDimmed();
     }
 
     private void setDimAmount(float dimAmount) {
