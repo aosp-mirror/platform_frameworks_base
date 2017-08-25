@@ -3059,4 +3059,10 @@
 
     <!-- Allow SystemUI to show the shutdown dialog -->
     <bool name="config_showSysuiShutdown">true</bool>
+
+    <!-- The stable device width and height in pixels. If these aren't set to a positive number
+         then the device will use the width and height of the default display the first time it's
+         booted.  -->
+    <integer name="config_stableDeviceDisplayWidth">-1</integer>
+    <integer name="config_stableDeviceDisplayHeight">-1</integer>
 </resources>

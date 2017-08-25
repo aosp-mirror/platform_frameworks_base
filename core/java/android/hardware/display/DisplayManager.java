@@ -18,8 +18,10 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.util.SparseArray;
@@ -583,6 +585,20 @@ public final class DisplayManager {
             @Nullable String uniqueId) {
         return mGlobal.createVirtualDisplay(mContext, projection,
                 name, width, height, densityDpi, surface, flags, callback, handler, uniqueId);
+    }
+
+    /**
+     * Gets the stable device display size, in pixels.
+     *
+     * This should really only be used for things like server-side filtering of available
+     * applications. Most applications don't need the level of stability guaranteed by this and
+     * should instead query either the size of the display they're currently running on or the
+     * size of the default display.
+     * @hide
+     */
+    @SystemApi
+    public Point getStableDisplaySize() {
+        return mGlobal.getStableDisplaySize();
     }
 
     /**
