@@ -5552,6 +5552,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams statusBarAttrs = mStatusBar.getAttrs();
             boolean statusBarExpanded = statusBarAttrs.height == MATCH_PARENT
                     && statusBarAttrs.width == MATCH_PARENT;
+            boolean topAppHidesStatusBar = topAppHidesStatusBar();
             if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent
                     || statusBarExpanded) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
@@ -5572,16 +5573,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             } else if (mTopFullscreenOpaqueWindowState != null) {
-                final int fl = PolicyControl.getWindowFlags(null, lp);
-                if (localLOGV) {
-                    Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
-                            + " shown position: "
-                            + mTopFullscreenOpaqueWindowState.getShownPositionLw());
-                    Slog.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
-                            + " lp.flags=0x" + Integer.toHexString(fl));
-                }
-                topIsFullscreen = (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0
-                        || (mLastSystemUiFlags & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
+                topIsFullscreen = topAppHidesStatusBar;
                 // The subtle difference between the window for mTopFullscreenOpaqueWindowState
                 // and mTopIsFullscreen is that mTopIsFullscreen is set only if the window
                 // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
@@ -5604,8 +5596,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mStatusBarController.setBarShowingLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
+                    topAppHidesStatusBar = false;
                 }
             }
+            mStatusBarController.setTopAppHidesStatusBar(topAppHidesStatusBar);
         }
 
         if (mTopIsFullscreen != topIsFullscreen) {
@@ -5643,6 +5637,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHandler.post(mReleaseSleepTokenRunnable);
         }
         mLastWindowSleepTokenNeeded = mWindowSleepTokenNeeded;
+    }
+
+    /**
+     * @return Whether the top app should hide the statusbar based on the top fullscreen opaque
+     *         window.
+     */
+    private boolean topAppHidesStatusBar() {
+        if (mTopFullscreenOpaqueWindowState == null) {
+            return false;
+        }
+        final int fl = PolicyControl.getWindowFlags(null,
+                mTopFullscreenOpaqueWindowState.getAttrs());
+        if (localLOGV) {
+            Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
+                    + " shown position: "
+                    + mTopFullscreenOpaqueWindowState.getShownPositionLw());
+            Slog.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
+                    + " lp.flags=0x" + Integer.toHexString(fl));
+        }
+        return (fl & LayoutParams.FLAG_FULLSCREEN) != 0
+                || (mLastSystemUiFlags & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
     }
 
     /**

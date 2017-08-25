@@ -112,6 +112,13 @@ oneway interface IStatusBar
      */
     void showGlobalActionsMenu();
 
+    /**
+     * Set whether the top app currently hides the statusbar.
+     *
+     * @param hidesStatusBar whether it is being hidden
+     */
+    void setTopAppHidesStatusBar(boolean hidesStatusBar);
+
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);
