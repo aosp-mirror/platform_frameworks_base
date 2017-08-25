@@ -20,6 +20,7 @@
 #include <SkSurface.h>
 #include <utils/FatVector.h>
 #include <utils/RefBase.h>
+#include <utils/Thread.h>
 #include <list>
 
 class GrRectanizer;
@@ -103,11 +104,18 @@ public:
 
     /**
      * "releaseEntry" is invoked when a VectorDrawable is deleted. Passing a non-existing "atlasKey"
-     * is causing an undefined behaviour.
+     * is causing an undefined behaviour. This is the only function in the class that can be
+     * invoked from any thread. It will marshal internally to render thread if needed.
      */
     void releaseEntry(AtlasKey atlasKey);
 
     void setStorageMode(StorageMode mode);
+
+    /**
+     * "delayedReleaseEntries" is indirectly invoked by "releaseEntry", when "releaseEntry" is
+     * invoked from a non render thread.
+     */
+    void delayedReleaseEntries();
 
 private:
     struct CacheEntry {
@@ -181,6 +189,17 @@ private:
      * consume more memory.
      */
     StorageMode mStorageMode;
+
+    /**
+     * mKeysForRelease is used by releaseEntry implementation to pass atlas keys from an arbitrary
+     * calling thread to the render thread.
+     */
+    std::vector<AtlasKey> mKeysForRelease;
+
+    /**
+     * A lock used to protect access to mKeysForRelease.
+     */
+    Mutex mReleaseKeyLock;
 
     sk_sp<SkSurface> createSurface(int width, int height, GrContext* context);
 

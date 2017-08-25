@@ -111,6 +111,14 @@ public:
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
     void dumpGraphicsMemory(int fd);
 
+    /**
+     * isCurrent provides a way to query, if the caller is running on
+     * the render thread.
+     *
+     * @return true only if isCurrent is invoked from the render thread.
+     */
+    static bool isCurrent();
+
 protected:
     virtual bool threadLoop() override;
 
