@@ -27,7 +27,7 @@ public interface NavBarButtonProvider extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NAV_BUTTON";
 
-    public static final int VERSION = 3;
+    public static final int VERSION = 2;
 
     /**
      * Returns a view in the nav bar.  If the id is set "back", "home", "recent_apps", "menu",
@@ -45,6 +45,9 @@ public interface NavBarButtonProvider extends Plugin {
         void abortCurrentGesture();
 
         void setVertical(boolean vertical);
+
+        default void setCarMode(boolean carMode) {
+        }
 
         void setDarkIntensity(float intensity);
     }
