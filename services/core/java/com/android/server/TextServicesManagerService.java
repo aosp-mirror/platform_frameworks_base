@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.textservice.ISpellCheckerService;
@@ -37,6 +36,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -330,7 +330,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         tsd.initializeTextServicesData();
         SpellCheckerInfo sci = tsd.getCurrentSpellChecker();
         if (sci == null) {
-            sci = findAvailSpellCheckerLocked(null, tsd);
+            sci = findAvailSystemSpellCheckerLocked(null, tsd);
             if (sci != null) {
                 // Set the current spell checker if there is one or more spell checkers
                 // available. In this case, "sci" is the first one in the available spell
@@ -365,7 +365,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
                                 // Package modified
                                 || isPackageModified(packageName)) {
-                    SpellCheckerInfo availSci = findAvailSpellCheckerLocked(packageName, tsd);
+                    SpellCheckerInfo availSci = findAvailSystemSpellCheckerLocked(packageName, tsd);
                     // Set the spell checker settings if different than before
                     if (availSci != null && !availSci.getId().equals(sci.getId())) {
                         setCurrentSpellCheckerLocked(availSci, tsd);
@@ -393,9 +393,16 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         spellCheckerBindGroups.clear();
     }
 
-    private SpellCheckerInfo findAvailSpellCheckerLocked(String prefPackage,
+    private SpellCheckerInfo findAvailSystemSpellCheckerLocked(String prefPackage,
             TextServicesData tsd) {
-        ArrayList<SpellCheckerInfo> spellCheckerList = tsd.mSpellCheckerList;
+        // Filter the spell checker list to remove spell checker services that are not pre-installed
+        ArrayList<SpellCheckerInfo> spellCheckerList = new ArrayList<>();
+        for (SpellCheckerInfo sci : tsd.mSpellCheckerList) {
+            if ((sci.getServiceInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                spellCheckerList.add(sci);
+            }
+        }
+
         final int spellCheckersCount = spellCheckerList.size();
         if (spellCheckersCount == 0) {
             Slog.w(TAG, "no available spell checker services found");
@@ -406,7 +413,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 final SpellCheckerInfo sci = spellCheckerList.get(i);
                 if (prefPackage.equals(sci.getPackageName())) {
                     if (DBG) {
-                        Slog.d(TAG, "findAvailSpellCheckerLocked: " + sci.getPackageName());
+                        Slog.d(TAG, "findAvailSystemSpellCheckerLocked: " + sci.getPackageName());
                     }
                     return sci;
                 }
@@ -420,7 +427,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         final ArrayList<Locale> suitableLocales =
                 InputMethodUtils.getSuitableLocalesForSpellChecker(systemLocal);
         if (DBG) {
-            Slog.w(TAG, "findAvailSpellCheckerLocked suitableLocales="
+            Slog.w(TAG, "findAvailSystemSpellCheckerLocked suitableLocales="
                     + Arrays.toString(suitableLocales.toArray(new Locale[suitableLocales.size()])));
         }
         final int localeCount = suitableLocales.size();
