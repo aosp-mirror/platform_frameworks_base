@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
+import android.annotation.Size;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
@@ -65,6 +66,7 @@ public class SurfaceControl {
     private static native void nativeSetSize(long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long nativeObject, Region region);
     private static native void nativeSetAlpha(long nativeObject, float alpha);
+    private static native void nativeSetColor(long nativeObject, float[] color);
     private static native void nativeSetMatrix(long nativeObject, float dsdx, float dtdx,
             float dtdy, float dsdy);
     private static native void nativeSetFlags(long nativeObject, int flags, int mask);
@@ -550,6 +552,15 @@ public class SurfaceControl {
     public void setAlpha(float alpha) {
         checkNotReleased();
         nativeSetAlpha(mNativeObject, alpha);
+    }
+
+    /**
+     * Sets a color for the Surface.
+     * @param color A float array with three values to represent r, g, b in range [0..1]
+     */
+    public void setColor(@Size(3) float[] color) {
+        checkNotReleased();
+        nativeSetColor(mNativeObject, color);
     }
 
     public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
