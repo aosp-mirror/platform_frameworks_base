@@ -59,6 +59,13 @@ interface IVrManager {
     boolean getVrModeState();
 
     /**
+     * Returns the current Persistent VR mode state.
+     *
+     * @return {@code true} if Persistent VR mode is enabled.
+     */
+    boolean getPersistentVrModeEnabled();
+
+    /**
      * Sets the persistent VR mode state of a device. When a device is in persistent VR mode it will
      * remain in VR mode even if the foreground does not specify VR mode being enabled. Mainly used
      * by VR viewers to indicate that a device is placed in a VR viewer.

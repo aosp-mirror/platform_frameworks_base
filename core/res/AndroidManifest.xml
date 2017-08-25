@@ -3512,6 +3512,11 @@
     <permission android:name="android.permission.ACCESS_VR_MANAGER"
             android:protectionLevel="signature" />
 
+    <!-- Required to access VR-Mode state and state change events via {android.app.VrStateCallback}
+         @hide -->
+    <permission android:name="android.permission.ACCESS_VR_STATE"
+        android:protectionLevel="signature|preinstalled" />
+
     <!-- Allows an application to whitelist tasks during lock task mode
          @hide <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.UPDATE_LOCK_TASK_PACKAGES"
