@@ -16,6 +16,11 @@
 
 package com.android.server.audio;
 
+import com.android.server.audio.AudioServiceEvents.ForceUseEvent;
+import com.android.server.audio.AudioServiceEvents.PhoneStateEvent;
+import com.android.server.audio.AudioServiceEvents.VolumeEvent;
+import com.android.server.audio.AudioServiceEvents.WiredDevConnectEvent;
+
 import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
@@ -1310,6 +1315,9 @@ public class AudioService extends IAudioService.Stub
                 + ", flags=" + flags + ", caller=" + caller
                 + ", volControlStream=" + mVolumeControlStream
                 + ", userSelect=" + mUserSelectedVolumeControlStream);
+        mVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_SUGG_VOL, suggestedStreamType,
+                direction/*val1*/, flags/*val2*/, new StringBuilder(callingPackage)
+                        .append("/").append(caller).append(" uid:").append(uid).toString()));
         final int streamType;
         if (mUserSelectedVolumeControlStream) { // implies mVolumeControlStream != -1
             streamType = mVolumeControlStream;
@@ -1359,6 +1367,8 @@ public class AudioService extends IAudioService.Stub
                     + "CHANGE_ACCESSIBILITY_VOLUME / callingPackage=" + callingPackage);
             return;
         }
+        mVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_STREAM_VOL, streamType,
+                direction/*val1*/, flags/*val2*/, callingPackage));
         adjustStreamVolume(streamType, direction, flags, callingPackage, callingPackage,
                 Binder.getCallingUid());
     }
@@ -1675,6 +1685,8 @@ public class AudioService extends IAudioService.Stub
                     + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
             return;
         }
+        mVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
+                index/*val1*/, flags/*val2*/, callingPackage));
         setStreamVolume(streamType, index, flags, callingPackage, callingPackage,
                 Binder.getCallingUid());
     }
@@ -4017,7 +4029,7 @@ public class AudioService extends IAudioService.Stub
     /*
      * A class just for packaging up a set of connection parameters.
      */
-    private class WiredDeviceConnectionState {
+    class WiredDeviceConnectionState {
         public final int mType;
         public final int mState;
         public final String mAddress;
@@ -6372,63 +6384,7 @@ public class AudioService extends IAudioService.Stub
     final int LOG_NB_EVENTS_PHONE_STATE = 20;
     final int LOG_NB_EVENTS_WIRED_DEV_CONNECTION = 30;
     final int LOG_NB_EVENTS_FORCE_USE = 20;
-
-    final private static class PhoneStateEvent extends AudioEventLogger.Event {
-        final String mPackage;
-        final int mPid;
-        final int mMode;
-
-        PhoneStateEvent(String callingPackage, int pid, int mode) {
-            mPackage = callingPackage;
-            mPid = pid;
-            mMode = mode;
-        }
-
-        @Override
-        public String eventToString() {
-            return new StringBuilder("setMode(").append(AudioSystem.modeToString(mMode))
-                    .append(") from package=").append(mPackage)
-                    .append(" pid=").append(mPid).toString();
-        }
-    }
-
-    final private static class WiredDevConnectEvent extends AudioEventLogger.Event {
-        final WiredDeviceConnectionState mState;
-
-        WiredDevConnectEvent(WiredDeviceConnectionState state) {
-            mState = state;
-        }
-
-        @Override
-        public String eventToString() {
-            return new StringBuilder("setWiredDeviceConnectionState(")
-                    .append(" type:").append(Integer.toHexString(mState.mType))
-                    .append(" state:").append(AudioSystem.deviceStateToString(mState.mState))
-                    .append(" addr:").append(mState.mAddress)
-                    .append(" name:").append(mState.mName)
-                    .append(") from ").append(mState.mCaller).toString();
-        }
-    }
-
-    final private static class ForceUseEvent extends AudioEventLogger.Event {
-        final int mUsage;
-        final int mConfig;
-        final String mReason;
-
-        ForceUseEvent(int usage, int config, String reason) {
-            mUsage = usage;
-            mConfig = config;
-            mReason = reason;
-        }
-
-        @Override
-        public String eventToString() {
-            return new StringBuilder("setForceUse(")
-                    .append(AudioSystem.forceUseUsageToString(mUsage))
-                    .append(", ").append(AudioSystem.forceUseConfigToString(mConfig))
-                    .append(") due to ").append(mReason).toString();
-        }
-    }
+    final int LOG_NB_EVENTS_VOLUME = 40;
 
     final private AudioEventLogger mModeLogger = new AudioEventLogger(LOG_NB_EVENTS_PHONE_STATE,
             "phone state (logged after successfull call to AudioSystem.setPhoneState(int))");
@@ -6441,6 +6397,9 @@ public class AudioService extends IAudioService.Stub
     final private AudioEventLogger mForceUseLogger = new AudioEventLogger(
             LOG_NB_EVENTS_FORCE_USE,
             "force use (logged before setForceUse() is executed)");
+
+    final private AudioEventLogger mVolumeLogger = new AudioEventLogger(LOG_NB_EVENTS_VOLUME,
+            "volume changes (logged when command received by AudioService)");
 
     private static final String[] RINGER_MODE_NAMES = new String[] {
             "SILENT",
@@ -6513,12 +6472,15 @@ public class AudioService extends IAudioService.Stub
 
         mRecordMonitor.dump(pw);
 
+        pw.println("\n");
         pw.println("\nEvent logs:");
         mModeLogger.dump(pw);
         pw.println("\n");
         mWiredDevLogger.dump(pw);
         pw.println("\n");
         mForceUseLogger.dump(pw);
+        pw.println("\n");
+        mVolumeLogger.dump(pw);
     }
 
     private static String safeMediaVolumeStateToString(Integer state) {
