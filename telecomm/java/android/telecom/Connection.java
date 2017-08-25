@@ -824,6 +824,8 @@ public abstract class Connection extends Conferenceable {
         public void onRttInitiationFailure(Connection c, int reason) {}
         public void onRttSessionRemotelyTerminated(Connection c) {}
         public void onRemoteRttRequest(Connection c) {}
+        /** @hide */
+        public void onPhoneAccountChanged(Connection c, PhoneAccountHandle pHandle) {}
     }
 
     /**
@@ -3058,6 +3060,18 @@ public abstract class Connection extends Conferenceable {
     protected void notifyConferenceSupportedChanged(boolean isConferenceSupported) {
         for (Listener l : mListeners) {
             l.onConferenceSupportedChanged(this, isConferenceSupported);
+        }
+    }
+
+    /**
+     * Notifies listeners when phone account is changed. For example, when the PhoneAccount is
+     * changed due to an emergency call being redialed.
+     * @param pHandle The new PhoneAccountHandle for this connection.
+     * @hide
+     */
+    public void notifyPhoneAccountChanged(PhoneAccountHandle pHandle) {
+        for (Listener l : mListeners) {
+            l.onPhoneAccountChanged(this, pHandle);
         }
     }
 
