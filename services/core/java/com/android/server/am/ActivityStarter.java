@@ -1033,10 +1033,9 @@ class ActivityStarter {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
             // still needs to be a lock task mode violation since the task gets cleared out and
             // the device would otherwise leave the locked task.
-            if (mSupervisor.isLockTaskModeViolation(reusedActivity.getTask(),
+            if (mService.mLockTaskController.isLockTaskModeViolation(reusedActivity.getTask(),
                     (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                             == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
-                mSupervisor.showLockTaskToast();
                 Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
@@ -1813,7 +1812,7 @@ class ActivityStarter {
             mStartActivity.setTaskToAffiliateWith(taskToAffiliate);
         }
 
-        if (mSupervisor.isLockTaskModeViolation(mStartActivity.getTask())) {
+        if (mService.mLockTaskController.isLockTaskModeViolation(mStartActivity.getTask())) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
@@ -1832,7 +1831,7 @@ class ActivityStarter {
     }
 
     private int setTaskFromSourceRecord() {
-        if (mSupervisor.isLockTaskModeViolation(mSourceRecord.getTask())) {
+        if (mService.mLockTaskController.isLockTaskModeViolation(mSourceRecord.getTask())) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
@@ -1926,7 +1925,7 @@ class ActivityStarter {
     private int setTaskFromInTask() {
         // The caller is asking that the new activity be started in an explicit
         // task it has provided to us.
-        if (mSupervisor.isLockTaskModeViolation(mInTask)) {
+        if (mService.mLockTaskController.isLockTaskModeViolation(mInTask)) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }

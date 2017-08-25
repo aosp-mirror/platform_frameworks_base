@@ -123,7 +123,7 @@ import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
 import static java.lang.Integer.MAX_VALUE;
 
-final class TaskRecord extends ConfigurationContainer implements TaskWindowContainerListener {
+class TaskRecord extends ConfigurationContainer implements TaskWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -471,7 +471,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     void removeWindowContainer() {
-        mService.mStackSupervisor.removeLockedTaskLocked(this);
+        mService.mLockTaskController.removeLockedTask(this);
         mWindowContainerController.removeContainer();
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
@@ -1395,7 +1395,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     /**
      * Completely remove all activities associated with an existing task.
      */
-    final void performClearTaskLocked() {
+    void performClearTaskLocked() {
         mReuseTask = true;
         performClearTaskAtIndexLocked(0, !PAUSE_IMMEDIATELY);
         mReuseTask = false;
@@ -1527,7 +1527,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 " mLockTaskAuth=" + lockTaskAuthToString());
     }
 
-    boolean isLockTaskWhitelistedLocked() {
+    private boolean isLockTaskWhitelistedLocked() {
         String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
         if (pkg == null) {
             return false;

@@ -3735,7 +3735,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 if (endTask) {
-                    mStackSupervisor.removeLockedTaskLocked(task);
+                    mService.mLockTaskController.removeLockedTask(task);
                 }
             } else if (r.state != ActivityState.PAUSING) {
                 // If the activity is PAUSING, we will complete the finish once
@@ -4589,8 +4589,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         Slog.i(TAG, "moveTaskToBack: " + tr);
 
         // If the task is locked, then show the lock task toast
-        if (mStackSupervisor.isLockedTask(tr)) {
-            mStackSupervisor.showLockTaskToast();
+        if (!mService.mLockTaskController.checkLockedTask(tr)) {
             return false;
         }
 

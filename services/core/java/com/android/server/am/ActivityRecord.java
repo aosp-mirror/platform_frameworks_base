@@ -1208,7 +1208,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         boolean isKeyguardLocked = service.isKeyguardLocked();
-        boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        boolean isCurrentAppLocked = service.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state

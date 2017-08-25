@@ -25,6 +25,7 @@ import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -174,8 +175,6 @@ import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
@@ -356,10 +355,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.android.server.job.JobSchedulerInternal;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -405,14 +400,15 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
-import java.text.SimpleDateFormat;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -430,6 +426,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -696,6 +693,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
      */
     String mDeviceOwnerName;
+
+    /**
+     * The controller for all operations related to locktask.
+     */
+    final LockTaskController mLockTaskController;
 
     final UserController mUserController;
 
@@ -2556,6 +2558,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mWindowManager = wm;
         mStackSupervisor.setWindowManager(wm);
         mActivityStarter.setWindowManager(wm);
+        mLockTaskController.setWindowManager(wm);
     }
 
     public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
@@ -2683,6 +2686,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiHandler = injector.getUiHandler(null);
         mUserController = null;
         mVrController = null;
+        mLockTaskController = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2780,6 +2784,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
         mRecentTasks = new RecentTasks(this, mStackSupervisor);
+        mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -4985,12 +4990,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps can
             // finish.
-            if (tr.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV && rootR == r &&
-                    mStackSupervisor.isLastLockedTask(tr)) {
-                Slog.i(TAG, "Not finishing task in lock task mode");
-                mStackSupervisor.showLockTaskToast();
+            if (mLockTaskController.activityBlockedFromFinish(r)) {
                 return false;
             }
+
             if (mController != null) {
                 // Find the first activity that is not finishing.
                 ActivityRecord next = r.getStack().topRunningActivityLocked(token, 0);
@@ -5116,9 +5119,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps
                 // can finish.
                 final TaskRecord task = r.getTask();
-                if (task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV &&
-                        mStackSupervisor.isLastLockedTask(task) && task.getRootActivity() == r) {
-                    mStackSupervisor.showLockTaskToast();
+                if (mLockTaskController.activityBlockedFromFinish(r)) {
                     return false;
                 }
                 return task.getStack().finishActivityAffinityLocked(r);
@@ -10407,8 +10408,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.d(TAG, "Could not find task for id: "+ taskId);
                 return;
             }
-            if (mStackSupervisor.isLockTaskModeViolation(task)) {
-                mStackSupervisor.showLockTaskToast();
+            if (mLockTaskController.isLockTaskModeViolation(task)) {
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
@@ -10844,6 +10844,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void updateLockTaskPackages(int userId, String[] packages) {
+        // TODO: move this into LockTaskController
         final int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != SYSTEM_UID) {
             enforceCallingPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
@@ -10853,15 +10854,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
                     Arrays.toString(packages));
             mLockTaskPackages.put(userId, packages);
-            mStackSupervisor.onLockTaskPackagesUpdatedLocked();
+            mLockTaskController.onLockTaskPackagesUpdated();
         }
     }
 
-
-    void startLockTaskModeLocked(TaskRecord task) {
+    private void startLockTaskModeLocked(@Nullable TaskRecord task, boolean isAppPinning) {
         if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "startLockTaskModeLocked: " + task);
-        if (task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
+        if (task == null || task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
             return;
+        }
+
+        final ActivityStack stack = mStackSupervisor.getFocusedStack();
+        if (stack == null || task != stack.topTask()) {
+            throw new IllegalArgumentException("Invalid task, not in foreground");
         }
 
         // When a task is locked, dismiss the pinned stack if it exists
@@ -10871,49 +10876,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             mStackSupervisor.removeStackLocked(PINNED_STACK_ID);
         }
 
-        // isSystemInitiated is used to distinguish between locked and pinned mode, as pinned mode
+        // isAppPinning is used to distinguish between locked and pinned mode, as pinned mode
         // is initiated by system after the pinning request was shown and locked mode is initiated
         // by an authorized app directly
         final int callingUid = Binder.getCallingUid();
-        boolean isSystemInitiated = callingUid == SYSTEM_UID;
         long ident = Binder.clearCallingIdentity();
         try {
-            if (!isSystemInitiated) {
-                task.mLockTaskUid = callingUid;
-                if (task.mLockTaskAuth == LOCK_TASK_AUTH_PINNABLE) {
-                    // startLockTask() called by app and task mode is lockTaskModeDefault.
-                    if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Mode default, asking user");
-                    StatusBarManagerInternal statusBarManager =
-                            LocalServices.getService(StatusBarManagerInternal.class);
-                    if (statusBarManager != null) {
-                        statusBarManager.showScreenPinningRequest(task.taskId);
-                    }
-                    return;
-                }
-
-                final ActivityStack stack = mStackSupervisor.getFocusedStack();
-                if (stack == null || task != stack.topTask()) {
-                    throw new IllegalArgumentException("Invalid task, not in foreground");
-                }
-            }
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, isSystemInitiated ? "Locking pinned" :
-                    "Locking fully");
-            mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
-                    ActivityManager.LOCK_TASK_MODE_PINNED :
-                    ActivityManager.LOCK_TASK_MODE_LOCKED,
-                    "startLockTask", true);
+            mLockTaskController.startLockTaskMode(task, isAppPinning, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
-    public void startLockTaskModeById(int taskId) {
-        synchronized (this) {
-            final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-            if (task != null) {
-                startLockTaskModeLocked(task);
-            }
         }
     }
 
@@ -10924,10 +10895,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (r == null) {
                 return;
             }
-            final TaskRecord task = r.getTask();
-            if (task != null) {
-                startLockTaskModeLocked(task);
-            }
+            startLockTaskModeLocked(r.getTask(), false /* not system initiated */);
         }
     }
 
@@ -10938,7 +10906,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                startLockTaskModeById(taskId);
+                startLockTaskModeLocked(mStackSupervisor.anyTaskForIdLocked(taskId),
+                        true /* system initiated */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -10947,41 +10916,28 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void stopLockTaskMode() {
-        final TaskRecord lockTask = mStackSupervisor.getLockedTaskLocked();
-        if (lockTask == null) {
-            // Our work here is done.
-            return;
-        }
+        stopLockTaskModeInternal(false /* not system initiated */);
+    }
 
+    /**
+     * This API should be called by SystemUI only when user perform certain action to dismiss
+     * lock task mode. We should only dismiss pinned lock task mode in this case.
+     */
+    @Override
+    public void stopSystemLockTaskMode() throws RemoteException {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "stopSystemLockTaskMode");
+        stopLockTaskModeInternal(true /* system initiated */);
+    }
+
+    private void stopLockTaskModeInternal(boolean isSystemRequest) {
         final int callingUid = Binder.getCallingUid();
-        final int lockTaskUid = lockTask.mLockTaskUid;
-        final int lockTaskModeState = mStackSupervisor.getLockTaskModeState();
-        if (lockTaskModeState == ActivityManager.LOCK_TASK_MODE_NONE) {
-            // Done.
-            return;
-        } else {
-            // Ensure the same caller for startLockTaskMode and stopLockTaskMode.
-            // It is possible lockTaskMode was started by the system process because
-            // android:lockTaskMode is set to a locking value in the application manifest
-            // instead of the app calling startLockTaskMode. In this case
-            // {@link TaskRecord.mLockTaskUid} will be 0, so we compare the callingUid to the
-            // {@link TaskRecord.effectiveUid} instead. Also caller with
-            // {@link MANAGE_ACTIVITY_STACKS} can stop any lock task.
-            if (checkCallingPermission(MANAGE_ACTIVITY_STACKS) != PERMISSION_GRANTED
-                    && callingUid != lockTaskUid
-                    && (lockTaskUid != 0 || callingUid != lockTask.effectiveUid)) {
-                throw new SecurityException("Invalid uid, expected " + lockTaskUid
-                        + " callingUid=" + callingUid + " effectiveUid=" + lockTask.effectiveUid);
-            }
-        }
         long ident = Binder.clearCallingIdentity();
         try {
-            Log.d(TAG, "stopLockTaskMode");
-            // Stop lock task
             synchronized (this) {
-                mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
-                        "stopLockTask", true);
+                mLockTaskController.stopLockTaskMode(isSystemRequest, callingUid);
             }
+            // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
+            // task and jumping straight into a call in the case of emergency call back.
             TelecomManager tm = (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
             if (tm != null) {
                 tm.showInCallScreen(false);
@@ -10991,28 +10947,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * This API should be called by SystemUI only when user perform certain action to dismiss
-     * lock task mode. We should only dismiss pinned lock task mode in this case.
-     */
-    @Override
-    public void stopSystemLockTaskMode() throws RemoteException {
-        if (mStackSupervisor.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_PINNED) {
-            stopLockTaskMode();
-        } else {
-            mStackSupervisor.showLockTaskToast();
-        }
-    }
-
     @Override
     public boolean isInLockTaskMode() {
-        return getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE;
+        return getLockTaskModeState() != LOCK_TASK_MODE_NONE;
     }
 
     @Override
     public int getLockTaskModeState() {
         synchronized (this) {
-            return mStackSupervisor.getLockTaskModeState();
+            return mLockTaskController.getLockTaskModeState();
         }
     }
 
@@ -11023,7 +10966,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (r == null) {
                 return;
             }
-            mStackSupervisor.showLockTaskEscapeMessageLocked(r.getTask());
+            mLockTaskController.showLockTaskToast();
         }
     }
 

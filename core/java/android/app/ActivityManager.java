@@ -4217,28 +4217,6 @@ public class ActivityManager {
     }
 
     /**
-     * @hide
-     */
-    public void startLockTaskMode(int taskId) {
-        try {
-            getService().startLockTaskModeById(taskId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void stopLockTaskMode() {
-        try {
-            getService().stopLockTaskMode();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Return whether currently in lock task mode.  When in this mode
      * no new tasks can be created or switched to.
      *
