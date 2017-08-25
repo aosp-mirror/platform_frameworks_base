@@ -156,7 +156,12 @@ public class MenuBuilder implements Menu {
      * Currently expanded menu item; must be collapsed when we clear.
      */
     private MenuItemImpl mExpandedItem;
-    
+
+    /**
+     * Whether group dividers are enabled.
+     */
+    private boolean mGroupDividerEnabled = false;
+
     /**
      * Called by menu to notify of close and selection changes.
      */
@@ -460,6 +465,15 @@ public class MenuBuilder implements Menu {
 
     public SubMenu addSubMenu(int group, int id, int categoryOrder, int title) {
         return addSubMenu(group, id, categoryOrder, mResources.getString(title));
+    }
+
+    @Override
+    public void setGroupDividerEnabled(boolean groupDividerEnabled) {
+        mGroupDividerEnabled = groupDividerEnabled;
+    }
+
+    public boolean isGroupDividerEnabled() {
+        return mGroupDividerEnabled;
     }
 
     public int addIntentOptions(int group, int id, int categoryOrder, ComponentName caller,

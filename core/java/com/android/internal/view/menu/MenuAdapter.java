@@ -81,6 +81,14 @@ public class MenuAdapter extends BaseAdapter {
             convertView = mInflater.inflate(ITEM_LAYOUT, parent, false);
         }
 
+        final int currGroupId = getItem(position).getGroupId();
+        final int prevGroupId =
+                position - 1 >= 0 ? getItem(position - 1).getGroupId() : currGroupId;
+        // Show a divider if adjacent items are in different groups.
+        ((ListMenuItemView) convertView)
+                .setGroupDividerEnabled(mAdapterMenu.isGroupDividerEnabled()
+                        && (currGroupId != prevGroupId));
+
         MenuView.ItemView itemView = (MenuView.ItemView) convertView;
         if (mForceShowIcon) {
             ((ListMenuItemView) convertView).setForceShowIcon(true);
