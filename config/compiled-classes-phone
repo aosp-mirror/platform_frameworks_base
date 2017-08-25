@@ -5243,7 +5243,6 @@ com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
 com.android.internal.app.NightDisplayController
 com.android.internal.app.NightDisplayController$Callback
-com.android.internal.app.NightDisplayController$LocalTime
 com.android.internal.app.ProcessMap
 com.android.internal.app.ResolverActivity
 com.android.internal.app.ToolbarActionBar
