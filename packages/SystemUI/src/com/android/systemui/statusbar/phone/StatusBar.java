@@ -104,7 +104,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
@@ -143,7 +142,6 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -639,6 +637,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
+    private boolean mTopHidesStatusBar;
+    private boolean mStatusBarWindowHidden;
+    private boolean mHideIconsForBouncer;
+    private boolean mIsOccluded;
+    private boolean mWereIconsJustHidden;
+    private boolean mBouncerWasShowingWhenHidden;
 
     public boolean isStartedGoingToSleep() {
         return mStartedGoingToSleep;
@@ -2825,6 +2829,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void setPanelExpanded(boolean isExpanded) {
         mPanelExpanded = isExpanded;
+        updateHideIconsForBouncer(false /* animate */);
         mStatusBarWindowManager.setPanelExpanded(isExpanded);
         mVisualStabilityManager.setPanelExpanded(isExpanded);
         if (isExpanded && getBarState() != StatusBarState.KEYGUARD) {
@@ -2888,6 +2893,40 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Nullable
     public View getAmbientIndicationContainer() {
         return mAmbientIndicationContainer;
+    }
+
+    public void setOccluded(boolean occluded) {
+        mIsOccluded = occluded;
+        updateHideIconsForBouncer(false /* animate */);
+    }
+
+    public boolean hideStatusBarIconsForBouncer() {
+        return mHideIconsForBouncer || mWereIconsJustHidden;
+    }
+
+    /**
+     * @param animate should the change of the icons be animated.
+     */
+    private void updateHideIconsForBouncer(boolean animate) {
+        boolean shouldHideIconsForBouncer = !mPanelExpanded && mTopHidesStatusBar && mIsOccluded
+                && (mBouncerShowing || mStatusBarWindowHidden);
+        if (mHideIconsForBouncer != shouldHideIconsForBouncer) {
+            mHideIconsForBouncer = shouldHideIconsForBouncer;
+            if (!shouldHideIconsForBouncer && mBouncerWasShowingWhenHidden) {
+                // We're delaying the showing, since most of the time the fullscreen app will
+                // hide the icons again and we don't want them to fade in and out immediately again.
+                mWereIconsJustHidden = true;
+                mHandler.postDelayed(() -> {
+                    mWereIconsJustHidden = false;
+                    recomputeDisableFlags(true);
+                }, 500);
+            } else {
+                recomputeDisableFlags(animate);
+            }
+        }
+        if (shouldHideIconsForBouncer) {
+            mBouncerWasShowingWhenHidden = mBouncerShowing;
+        }
     }
 
     /**
@@ -3215,6 +3254,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (!showing && mState == StatusBarState.SHADE) {
                 mStatusBarView.collapsePanel(false /* animate */, false /* delayed */,
                         1.0f /* speedUpFactor */);
+            }
+            if (mStatusBarView != null) {
+                mStatusBarWindowHidden = state == WINDOW_STATE_HIDDEN;
+                updateHideIconsForBouncer(false /* animate */);
             }
         }
     }
@@ -5162,6 +5205,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
+        updateHideIconsForBouncer(true /* animate */);
         recomputeDisableFlags(true /* animate */);
     }
 
@@ -6566,6 +6610,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         int msg = MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU;
         mHandler.removeMessages(msg);
         mHandler.obtainMessage(msg, deviceId, 0).sendToTarget();
+    }
+
+    @Override
+    public void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) {
+        mTopHidesStatusBar = topAppHidesStatusBar;
+        if (!topAppHidesStatusBar && mWereIconsJustHidden) {
+            // Immediately update the icon hidden state, since that should only apply if we're
+            // staying fullscreen.
+            mWereIconsJustHidden = false;
+            recomputeDisableFlags(true);
+        }
+        updateHideIconsForBouncer(true /* animate */);
     }
 
     protected void sendCloseSystemWindows(String reason) {

@@ -302,6 +302,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void setOccluded(boolean occluded, boolean animate) {
+        mStatusBar.setOccluded(occluded);
         if (occluded && !mOccluded && mShowing) {
             if (mStatusBar.isInLaunchTransition()) {
                 mOccluded = true;
