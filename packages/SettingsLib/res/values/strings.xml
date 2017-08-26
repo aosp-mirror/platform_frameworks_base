@@ -484,6 +484,8 @@
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
     <string name="tethering_hardware_offload">Tethering hardware acceleration</string>
+    <!-- Setting Checkbox title for showing Bluetooth devices without names -->
+    <string name="bluetooth_show_devices_without_names">Show Bluetooth devices without names</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
     <!-- Setting Checkbox title for enabling Bluetooth inband ringing -->
@@ -568,11 +570,12 @@
     <string name="verify_apps_over_usb_title">Verify apps over USB</string>
     <!-- Summary of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=NONE] -->
     <string name="verify_apps_over_usb_summary">Check apps installed via ADB/ADT for harmful behavior.</string>
+    <!-- Summary of checkbox for showing Bluetooth devices without names -->
+    <string name="bluetooth_show_devices_without_names_summary">Bluetooth devices without names (MAC addresses only) will be displayed</string>
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
     <!-- Summary of checkbox for enabling Bluetooth inband ringing -->
     <string name="bluetooth_enable_inband_ringing_summary">Allow ringtones on the phone to be played on Bluetooth headsets</string>
-
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
