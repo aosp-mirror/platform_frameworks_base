@@ -242,7 +242,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * motion.
      */
     private int mMaxScrollAfterExpand;
-    private ExpandableNotificationRow.LongPressListener mLongPressListener;
+    private SwipeHelper.LongPressListener mLongPressListener;
 
     private NotificationMenuRowPlugin mCurrMenuRow;
     private View mTranslatingParentView;
@@ -412,6 +412,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollAdapter(this);
         mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, this, getContext());
+        mSwipeHelper.setLongPressListener(mLongPressListener);
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
         initView(context);
         mFalsingManager = FalsingManager.getInstance(context);
@@ -885,7 +886,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return firstChild != null ? firstChild.getMinHeight() : mCollapsedSize;
     }
 
-    public void setLongPressListener(ExpandableNotificationRow.LongPressListener listener) {
+    public void setLongPressListener(SwipeHelper.LongPressListener listener) {
+        mSwipeHelper.setLongPressListener(listener);
         mLongPressListener = listener;
     }
 
@@ -1161,7 +1163,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (v instanceof ExpandableNotificationRow) {
             ((ExpandableNotificationRow) v).setUserLocked(userLocked);
         }
-        cancelLongPress();
+        removeLongPressCallback();
         requestDisallowInterceptTouchEvent(true);
     }
 
@@ -2567,7 +2569,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
         if (disallowIntercept) {
-            cancelLongPress();
+            mSwipeHelper.removeLongPressCallback();
         }
     }
 
@@ -3288,7 +3290,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mIsBeingDragged = isDragged;
         if (isDragged) {
             requestDisallowInterceptTouchEvent(true);
-            cancelLongPress();
+            removeLongPressCallback();
         }
     }
 
@@ -3296,7 +3298,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         if (!hasWindowFocus) {
-            cancelLongPress();
+            removeLongPressCallback();
         }
     }
 
@@ -3310,7 +3312,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void requestDisallowLongPress() {
-        cancelLongPress();
+        removeLongPressCallback();
     }
 
     @Override
@@ -3318,8 +3320,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mDisallowDismissInThisMotion = true;
     }
 
-    public void cancelLongPress() {
-        mSwipeHelper.cancelLongPress();
+    public void removeLongPressCallback() {
+        mSwipeHelper.removeLongPressCallback();
     }
 
     @Override

@@ -44,7 +44,6 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
@@ -248,12 +247,11 @@ public class CarStatusBar extends StatusBar implements
     }
 
     /**
-     * Returns the
-     * {@link com.android.systemui.statusbar.ExpandableNotificationRow.LongPressListener} that will
-     * be triggered when a notification card is long-pressed.
+     * Returns the {@link com.android.systemui.SwipeHelper.LongPressListener} that will be
+     * triggered when a notification card is long-pressed.
      */
     @Override
-    protected ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
+    protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         // For the automative use case, we do not want to the user to be able to interact with
         // a notification other than a regular click. As a result, just return null for the
         // long click listener.
