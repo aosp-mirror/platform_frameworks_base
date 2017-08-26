@@ -2095,7 +2095,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                     // Reset the flag indicating that an app can enter picture-in-picture once the
                     // activity is hidden
-                    r.supportsPictureInPictureWhilePausing = false;
+                    r.supportsEnterPipOnTaskSwitch = false;
                     break;
 
                 case INITIALIZING:
@@ -2917,11 +2917,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // supporting picture-in-picture while pausing only if the starting activity
                         // would not be considered an overlay on top of the current activity
                         // (eg. not fullscreen, or the assistant)
-                        if (focusedTopActivity != null
-                                && focusedTopActivity.getStackId() != PINNED_STACK_ID
-                                && r.getStackId() != ASSISTANT_STACK_ID
-                                && r.fullscreen) {
-                            focusedTopActivity.supportsPictureInPictureWhilePausing = true;
+                        if (canEnterPipOnTaskSwitch(focusedTopActivity,
+                                null /* toFrontTask */, r, options)) {
+                            focusedTopActivity.supportsEnterPipOnTaskSwitch = true;
                         }
                         transit = TRANSIT_TASK_OPEN;
                     }
@@ -2974,6 +2972,37 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // because there is nothing for it to animate on top of.
             ActivityOptions.abort(options);
         }
+    }
+
+    /**
+     * @return Whether the switch to another task can trigger the currently running activity to
+     * enter PiP while it is pausing (if supported). Only one of {@param toFrontTask} or
+     * {@param toFrontActivity} should be set.
+     */
+    private boolean canEnterPipOnTaskSwitch(ActivityRecord pipCandidate,
+            TaskRecord toFrontTask, ActivityRecord toFrontActivity, ActivityOptions opts) {
+        if (opts != null && opts.disallowEnterPictureInPictureWhileLaunching()) {
+            // Ensure the caller has requested not to trigger auto-enter PiP
+            return false;
+        }
+        if (pipCandidate == null || pipCandidate.getStackId() == PINNED_STACK_ID) {
+            // Ensure that we do not trigger entering PiP an activity on the pinned stack
+            return false;
+        }
+        final int targetStackId = toFrontTask != null ? toFrontTask.getStackId()
+                : toFrontActivity.getStackId();
+        if (targetStackId == ASSISTANT_STACK_ID) {
+            // Ensure the task/activity being brought forward is not the assistant
+            return false;
+        }
+        final boolean isFullscreen = toFrontTask != null
+                ? toFrontTask.containsOnlyFullscreenActivities()
+                : toFrontActivity.fullscreen;
+        if (!isFullscreen) {
+            // Ensure the task/activity being brought forward is fullscreen
+            return false;
+        }
+        return true;
     }
 
     private boolean isTaskSwitch(ActivityRecord r,
@@ -4551,9 +4580,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top
         // of the current activity (eg. not fullscreen, or the assistant)
-        if (topActivity != null && topActivity.getStackId() != PINNED_STACK_ID
-                && tr.getStackId() != ASSISTANT_STACK_ID && tr.containsOnlyFullscreenActivities()) {
-            topActivity.supportsPictureInPictureWhilePausing = true;
+        if (canEnterPipOnTaskSwitch(topActivity, tr, null /* toFrontActivity */,
+                options)) {
+            topActivity.supportsEnterPipOnTaskSwitch = true;
         }
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();

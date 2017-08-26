@@ -8063,7 +8063,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stack.setPictureInPictureActions(actions);
 
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_ENTERED,
-                            r.supportsPictureInPictureWhilePausing);
+                            r.supportsEnterPipOnTaskSwitch);
                     logPictureInPictureArgs(params);
                 };
 
