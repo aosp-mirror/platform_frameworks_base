@@ -43,7 +43,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ਵਾਈ-ਫਾਈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ਸਕ੍ਰੀਨ ਆਪਣੇ-ਆਪ ਘੁੰਮਾਓ"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ਆਟੋ"</string>
@@ -150,11 +150,11 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ਰੋਮਿੰਗ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"ਕਿਨਾਰਾ"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ਵਾਈ-ਫਾਈ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ਕੋਈ SIM ਨਹੀਂ।"</string>
-    <string name="accessibility_cell_data" msgid="5326139158682385073">"ਮੋਬਾਈਲ ਡੈਟਾ"</string>
-    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ਮੋਬਾਈਲ ਡੈਟਾ ਚਾਲੂ ਹੈ"</string>
-    <string name="accessibility_cell_data_off" msgid="443267573897409704">"ਮੋਬਾਈਲ ਡੈਟਾ ਬੰਦ ਹੈ"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"ਮੋਬਾਈਲ ਡਾਟਾ"</string>
+    <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ਮੋਬਾਈਲ ਡਾਟਾ ਚਾਲੂ"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"ਮੋਬਾਈਲ ਡਾਟਾ ਬੰਦ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ਟੈਦਰਿੰਗ।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ਏਅਰਪਲੇਨ ਮੋਡ।"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ਚਾਲੂ ਹੈ।"</string>
@@ -240,12 +240,12 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ਡੈਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ਡੈਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"ਮੋਬਾਈਲ ਡੈਟਾ ਰੋਕ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"ਮੋਬਾਈਲ ਡਾਟਾ ਰੋਕ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ਡੈਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"ਤੁਸੀਂ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸੈੱਟ ਕੀਤੀ ਗਈ ਡੈਟਾ ਸੀਮਾ \'ਤੇ ਪਹੁੰਚ ਚੁੱਕੇ ਹੋ। ਤੁਸੀਂ ਹੁਣ ਮੋਬਾਈਲ ਡੈਟੇ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਰਹੇ ਹੋ।\n\nਜੇਕਰ ਤੁਸੀਂ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਡੈਟਾ ਵਰਤੋਂ ਲਈ ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"ਤੁਸੀਂ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸੈੱਟ ਕੀਤੀ ਗਈ ਡਾਟਾ ਸੀਮਾ \'ਤੇ ਪਹੁੰਚ ਚੁੱਕੇ ਹੋ। ਤੁਸੀਂ ਹੁਣ ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਰਹੇ ਹੋ।\n\nਜੇਕਰ ਤੁਸੀਂ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਡਾਟਾ ਵਰਤੋਂ ਲਈ ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ਕੋਈ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਨਹੀਂ"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਹੈ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS ਵੱਲੋਂ ਸੈੱਟ ਕੀਤਾ ਗਿਆ ਟਿਕਾਣਾ"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾ ਬੇਨਤੀਆਂ ਸਕਿਰਿਆ"</string>
@@ -292,12 +292,12 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ਮੈਂ"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ਵਰਤੋਂਕਾਰ"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"ਵਾਈ-ਫਾਈ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ਕੋਈ ਨੈੱਟਵਰਕ ਨਹੀਂ"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ਬੰਦ"</string>
-    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ਚਾਲੂ"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ਕੋਈ Wi-Fi ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਨਹੀਂ"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ਵਾਈ-ਫਾਈ ਬੰਦ"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ਵਾਈ-ਫਾਈ ਚਾਲੂ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ਕੋਈ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ਕਾਸਟ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ਕਾਸਟਿੰਗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ਬਿਨਾਂ ਨਾਮ ਦਾ ਡੀਵਾਈਸ"</string>
@@ -316,7 +316,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ਹੌਟਸਪੌਟ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ਫਲੈਸ਼ਲਾਈਟ"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ਮੋਬਾਈਲ ਡੈਟਾ"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ਮੋਬਾਈਲ ਡਾਟਾ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ਡਾਟਾ ਵਰਤੋਂ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ਬਾਕੀ ਡੈਟਾ"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"ਸੀਮਾ ਤੋਂ ਵੱਧ"</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ਇਸ ਐਪ ਵਿੱਚ ਸੂਚਨਾ ਸ਼੍ਰੇਣੀਆਂ ਨਹੀਂ ਹਨ"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬੰਦ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">ਇਸ ਐਪ ਤੋਂ <xliff:g id="NUMBER_1">%d</xliff:g> ਸੂਚਨਾ ਸ਼੍ਰੇਣੀ ਵਿੱਚੋਂ 1</item>
-      <item quantity="other">ਇਸ ਐਪ ਤੋਂ <xliff:g id="NUMBER_1">%d</xliff:g> ਸੂਚਨਾ ਸ਼੍ਰੇਣੀਆਂ ਵਿੱਚੋਂ 1</item>
+      <item quantity="one">ਇਸ ਐਪ ਤੋਂ <xliff:g id="NUMBER_1">%s</xliff:g> ਸੂਚਨਾ ਸ਼੍ਰੇਣੀ ਵਿੱਚੋਂ 1</item>
+      <item quantity="other">ਇਸ ਐਪ ਤੋਂ <xliff:g id="NUMBER_1">%s</xliff:g> ਸੂਚਨਾ ਸ਼੍ਰੇਣੀਆਂ ਵਿੱਚੋਂ 1</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -762,8 +762,8 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"ਤਤਕਾਲ ਐਪਾਂ ਨੂੰ ਸਥਾਪਨਾ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।"</string>
     <string name="app_info" msgid="6856026610594615344">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="go_to_web" msgid="1106022723459948514">"ਵੈੱਬ \'ਤੇ ਜਾਓ"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"ਮੋਬਾਈਲ ਡੈਟਾ"</string>
-    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ਬੰਦ ਹੈ"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"ਮੋਬਾਈਲ ਡਾਟਾ"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"ਵਾਈ-ਫਾਈ ਬੰਦ ਹੈ"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ਬਲੂਟੁੱਥ ਬੰਦ ਹੈ"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਬੰਦ ਹੈ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"ਸਵੈਚਲਿਤ ਨਿਯਮ (<xliff:g id="ID_1">%s</xliff:g>) ਦੁਆਰਾ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
@@ -774,7 +774,6 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ਬਦਲੋ"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀਆਂ ਐਪਾਂ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ਮੋਬਾਈਲ ਡੈਟਾ ਬੰਦ ਕਰੀਏ?"</string>
-    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
-    <skip />
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ਮੋਬਾਈਲ ਡਾਟਾ ਬੰਦ ਕਰਨਾ ਹੈ?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ਕਿਸੇ ਐਪ ਵੱਲੋਂ ਇਜਾਜ਼ਤ ਬੇਨਤੀ ਨੂੰ ਢਕੇ ਜਾਣ ਕਾਰਨ ਸੈਟਿੰਗਾਂ ਤੁਹਾਡੇ ਜਵਾਬ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕਰ ਸਕਦੀਆਂ।"</string>
 </resources>

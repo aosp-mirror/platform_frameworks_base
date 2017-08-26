@@ -558,8 +558,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Esta aplicación no tiene categorías de notificación"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"No se pueden desactivar las notificaciones de esta aplicación"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categorías de notificación de esta aplicación</item>
-      <item quantity="one">1 de <xliff:g id="NUMBER_0">%d</xliff:g> categoría de notificación de esta aplicación</item>
+      <item quantity="other">1 de <xliff:g id="NUMBER_1">%s</xliff:g> categorías de notificación de esta aplicación</item>
+      <item quantity="one">1 de <xliff:g id="NUMBER_0">%s</xliff:g> categoría de notificación de esta aplicación</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">

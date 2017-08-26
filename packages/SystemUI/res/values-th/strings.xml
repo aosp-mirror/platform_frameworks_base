@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"แอปนี้ไม่มีหมวดหมู่การแจ้งเตือน"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"ไม่สามารถปิดการแจ้งเตือนจากแอปนี้"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_1">%d</xliff:g> หมวดหมู่จากแอปนี้</item>
-      <item quantity="one">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_0">%d</xliff:g> หมวดหมู่จากแอปนี้</item>
+      <item quantity="other">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_1">%s</xliff:g> หมวดหมู่จากแอปนี้</item>
+      <item quantity="one">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_0">%s</xliff:g> หมวดหมู่จากแอปนี้</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">

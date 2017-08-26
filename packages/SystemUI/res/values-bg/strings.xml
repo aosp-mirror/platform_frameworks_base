@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"За това приложение няма категории на известията"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Известията от това приложение не могат да бъдат изключени"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 от <xliff:g id="NUMBER_1">%d</xliff:g> категории известия от това приложение</item>
-      <item quantity="one">1 от <xliff:g id="NUMBER_0">%d</xliff:g> категория известия от това приложение</item>
+      <item quantity="other">1 от <xliff:g id="NUMBER_1">%s</xliff:g> категории известия от това приложение</item>
+      <item quantity="one">1 от <xliff:g id="NUMBER_0">%s</xliff:g> категория известия от това приложение</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"„<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>“, „<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>“"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -614,7 +614,7 @@
     <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Цифрова клавиатура – <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Системни"</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Системни настройки"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Начало"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Скорошни"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Назад"</string>
@@ -775,6 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Приложения, работещи на заден план"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Да се изключат ли мобилните данни?"</string>
-    <!-- no translation found for touch_filtered_warning (8671693809204767551) -->
-    <skip />
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"От Настройки не може да се получи потвърждение за отговора ви, защото заявката за разрешение се прикрива от приложение."</string>
 </resources>
