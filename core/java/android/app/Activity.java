@@ -7024,6 +7024,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performRestart() {
+        mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
         if (mToken != null && mParent == null) {

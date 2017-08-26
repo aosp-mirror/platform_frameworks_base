@@ -2679,7 +2679,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
-        startActivityDismissingKeyguard(intent, false, dismissShade, callback);
+        startActivityDismissingKeyguard(intent, false, dismissShade,
+                false /* disallowEnterPictureInPictureWhileLaunching */, callback);
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -3672,11 +3673,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, null /* callback */);
+        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
+                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */);
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            final boolean dismissShade, final Callback callback) {
+            final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
+            final Callback callback) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
         final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
@@ -3689,6 +3692,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 int result = ActivityManager.START_CANCELED;
                 ActivityOptions options = new ActivityOptions(getActivityOptions());
+                options.setDisallowEnterPictureInPictureWhileLaunching(
+                        disallowEnterPictureInPictureWhileLaunching);
                 if (intent == KeyguardBottomAreaView.INSECURE_CAMERA_INTENT) {
                     // Normally an activity will set it's requested rotation
                     // animation on its window. However when launching an activity
@@ -5390,8 +5395,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         vibrateForCameraGesture();
         if (!mStatusBarKeyguardViewManager.isShowing()) {
-            startActivity(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
-                    true /* dismissShade */);
+            startActivityDismissingKeyguard(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
+                    false /* onlyProvisioned */, true /* dismissShade */,
+                    true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */);
         } else {
             if (!mDeviceInteractive) {
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
