@@ -59,7 +59,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
@@ -137,7 +136,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -2992,7 +2990,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // while pausing because that changes the focused stack and may prevent the new
                 // starting activity from resuming.
                 if (moveHomeStackToFront && task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE
-                        && (r.state == RESUMED || !r.supportsPictureInPictureWhilePausing)) {
+                        && (r.state == RESUMED || !r.supportsEnterPipOnTaskSwitch)) {
                     // Move the home stack forward if the task we just moved to the pinned stack
                     // was launched from home so home should be visible behind it.
                     moveHomeStackToFront(reason);
@@ -3021,7 +3019,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the pinned stack
-            r.supportsPictureInPictureWhilePausing = false;
+            r.supportsEnterPipOnTaskSwitch = false;
         } finally {
             mWindowManager.continueSurfaceLayout();
         }
