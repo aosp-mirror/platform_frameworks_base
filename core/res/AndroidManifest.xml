@@ -3144,6 +3144,11 @@
     <permission android:name="android.permission.READ_SEARCH_INDEXABLES"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Internal permission to allows an application to bind to suggestion service.
+        @hide -->
+    <permission android:name="android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows applications to set a live wallpaper.
          @hide XXX Change to signature once the picker is moved to its
          own apk as Ghod Intended. -->
