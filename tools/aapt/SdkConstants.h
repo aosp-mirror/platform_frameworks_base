@@ -42,7 +42,7 @@ enum {
     SDK_NOUGAT = 24,
     SDK_NOUGAT_MR1 = 25,
     SDK_O = 26,
-    SDK_O_MR1 = 10000, // STOPSHIP Replace with the real version.
+    SDK_O_MR1 = 27,
 };
 
 #endif // H_AAPT_SDK_CONSTANTS
