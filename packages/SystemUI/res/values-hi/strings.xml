@@ -82,7 +82,7 @@
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac के लिए Android File Transfer ऐप्स इंस्टॉल करें"</string>
     <string name="accessibility_back" msgid="567011538994429120">"वापस जाएं"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
-    <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"मेन्यू"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"एक्सेस-योग्यता"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"खास जानकारी"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"सर्च करें"</string>
@@ -165,8 +165,8 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"सूचनाएं."</string>
-    <string name="accessibility_overflow_action" msgid="5681882033274783311">"सभी नोटिफ़िकेशन देखें"</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"नोटिफ़िकेशन साफ़ करें"</string>
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"पूरी सूचनाएं देखें"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ़ करें"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS सक्षम."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करना."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"टेलीटाइपराइटर सक्षम."</string>
@@ -181,8 +181,8 @@
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन की जानकारी खोलें."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ हो रहा है."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
-    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"नोटिफ़िकेशन खारिज की गई."</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"नोटिफ़िकेशन शेड."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना खारिज की गई."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"त्वरित सेटिंग."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"सेटिंग"</string>
@@ -217,7 +217,7 @@
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"स्‍थान रिपोर्टिंग को बंद किया गया."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"स्‍थान रिपोर्टिंग को चालू किया गया."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> के लिए अलार्म सेट किया गया."</string>
-    <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"फलक बंद करें."</string>
+    <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"पैनल बंद करें."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"अधिक समय."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"कम समय."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"फ़्लैशलाइट बंद है."</string>
@@ -252,10 +252,10 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
-      <item quantity="one">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और नोटिफ़िकेशन हैं.</item>
-      <item quantity="other">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और नोटिफ़िकेशन हैं.</item>
+      <item quantity="one">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
+      <item quantity="other">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
     </plurals>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"नोटिफ़िकेशन सेटिंग"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"सूचना सेटिंग"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिंग"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्क्रीन लैंडस्केप दिशा में लॉक है."</string>
@@ -391,7 +391,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"निकालें"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथि, आपका पुन: स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"पुन: प्रारंभ करें"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"हां, जारी रखें"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"अतिथि उपयोगकर्ता"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"ऐप और डेटा हटाने के लिए, अतिथि उपयोगकर्ता को निकालें"</string>
@@ -410,8 +410,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर प्रदर्शित प्रत्येक सामग्री को कैप्चर करना प्रारंभ कर देगी."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ करें"</string>
-    <string name="media_projection_action_text" msgid="8470872969457985954">"अब प्रारंभ करें"</string>
-    <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं है"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं मिली"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्क को मॉनिटर किया जा सकता है"</string>
@@ -441,9 +441,9 @@
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"नीतियां देखें"</string>
     <string name="monitoring_description_named_management" msgid="5281789135578986303">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> आपके डिवाइस का प्रबंधन करता है.\n\nआपका एडमिन सेटिंग, कॉर्पोरेट पहुंच, ऐप्लिकेशन, आपके डिवाइस से जुड़े डेटा और आपके डिवाइस की स्थान की जानकारी की निगरानी कर सकता है और उन्हें प्रबंधित कर सकता है.\n\nअधिक जानकारी के लिए, अपने एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_management" msgid="4573721970278370790">"आपका संगठन आपके डिवाइस का प्रबंधन करता है.\n\nआपका एडमिन सेटिंग, कॉर्पोरेट पहुंच, ऐप्लिकेशन, आपके डिवाइस से जुड़े डेटा और आपके डिवाइस की स्थान (लोकेशन) की जानकारी की निगरानी कर सकता है और उन्हें प्रबंधित कर सकता है.\n\nअधिक जानकारी के लिए, अपने एडमिन से संपर्क करें."</string>
-    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपके संगठन ने इस डिवाइस पर एक प्रमाणपत्र प्राधिकरण इंस्टॉल किया है. आपके सुरक्षित नेटवर्क की निगरानी या उसमें बदलाव किया जा सकता है."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपके संगठन ने आपकी कार्य प्रोफ़ाइल में एक प्रमाणपत्र प्राधिकरण इंस्टॉल किया है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
-    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"इस डिवाइस पर एक प्रमाणपत्र प्राधिकरण इंस्टॉल किया गया है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"आपके संगठन ने इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क पर ट्रेफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"आपके संगठन ने आपकी कार्य प्रोफ़ाइल में एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
+    <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"आपके व्यवस्थापक ने नेटवर्क लॉगिंग चालू किया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है."</string>
     <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
     <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"आप <xliff:g id="VPN_APP_0">%1$s</xliff:g> और <xliff:g id="VPN_APP_1">%2$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
@@ -493,7 +493,7 @@
     <string name="stream_ring" msgid="8213049469184048338">"घंटी बजाएं"</string>
     <string name="stream_music" msgid="9086982948697544342">"मीडिया"</string>
     <string name="stream_alarm" msgid="5209444229227197703">"अलार्म"</string>
-    <string name="stream_notification" msgid="2563720670905665031">"नोटिफ़िकेशन"</string>
+    <string name="stream_notification" msgid="2563720670905665031">"सूचना"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ब्लूटूथ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"दोहरी बहु टोन आवृत्ति"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"एक्सेस-योग्यता"</string>
@@ -542,38 +542,38 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटूथ चालू करें?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"अपने कीबोर्ड को अपने टैबलेट से कनेक्ट करने के लिए, आपको पहले ब्लूटूथ चालू करना होगा."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"चालू करें"</string>
-    <string name="show_silently" msgid="6841966539811264192">"नोटिफ़िकेशन मौन रूप से दिखाएं"</string>
+    <string name="show_silently" msgid="6841966539811264192">"सूचना बिना आवाज़ के दिखाएं"</string>
     <string name="block" msgid="2734508760962682611">"सभी सूचनाएं रोकें"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"मौन ना करें"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"मौन या अवरुद्ध ना करें"</string>
-    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"पावर नोटिफ़िकेशन नियंत्रण"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"पावर सूचना नियंत्रण"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर नोटिफ़िकेशन नियंत्रण के ज़रिये, आप किसी ऐप के नोटिफ़िकेशन को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- नोटिफ़िकेशन सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>"लेवल 4"</b>\n"- पूरे स्क्रीन को ढंकें\n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n\n"<b>"लेवल 2"</b>\n"- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें\n- कभी भी आवाज़ या कंपन (वाइब्रेशन) ना करें\n\n"<b>"लेवल 1"</b>\n"- पूरे स्क्रीन को ढंकने से रोकें\n- कभी भी ना देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) ना करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- नोटिफ़िकेशन सूची के नीचे दिखाएं \n\n"<b>"लेवल "</b>\n"- ऐप्लिकेशन के सभी नोटिफ़िकेशन रोक दें"</string>
-    <string name="notification_header_default_channel" msgid="7506845022070889909">"नोटिफ़िकेशन"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"अब आपको ये नोटिफ़िकेशन नहीं मिलेंगे"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"नोटिफ़िकेशन की <xliff:g id="NUMBER">%d</xliff:g> श्रेणियां"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"इस ऐप्लिकेशन में नोटिफ़िकेशन श्रेणियां नहीं हैं"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"इस ऐप्लिकेशन के नोटिफ़िकेशन बंद नहीं किए जा सकते"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"अब आपको ये सूचनाएं नहीं मिलेंगी"</string>
+    <string name="notification_num_channels" msgid="2048144408999179471">"सूचना की <xliff:g id="NUMBER">%d</xliff:g> श्रेणियां"</string>
+    <string name="notification_default_channel_desc" msgid="2506053815870808359">"इस ऐप्लिकेशन में सूचना श्रेणियां नहीं हैं"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"इस ऐप की सूचनाएं बंद नहीं की जा सकती"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">इस ऐप्लिकेशन की <xliff:g id="NUMBER_1">%d</xliff:g> नोटिफ़िकेशन श्रेणियों में से 1 श्रेणी</item>
-      <item quantity="other">इस ऐप्लिकेशन की <xliff:g id="NUMBER_1">%d</xliff:g> नोटिफ़िकेशन श्रेणियों में से 1 श्रेणी</item>
+      <item quantity="one">इस ऐप की <xliff:g id="NUMBER_1">%s</xliff:g> सूचना श्रेणियों में से 1 श्रेणी</item>
+      <item quantity="other">इस ऐप की <xliff:g id="NUMBER_1">%s</xliff:g> सूचना श्रेणियों में से 1 श्रेणी</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
       <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> और <xliff:g id="NUMBER_5">%3$d</xliff:g> अन्य</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> और <xliff:g id="NUMBER_5">%3$d</xliff:g> अन्य</item>
     </plurals>
-    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए नोटिफ़िकेशन नियंत्रण चालू हैं"</string>
-    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए नोटिफ़िकेशन नियंत्रण बंद हैं"</string>
-    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"इस चैनल से नोटिफ़िकेशन की अनुमति दें"</string>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण चालू हैं"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण बंद हैं"</string>
+    <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"इस चैनल से सूचना की पाने की मंज़ूरी दें"</string>
     <string name="notification_all_categories" msgid="5407190218055113282">"सभी श्रेणियां"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"और सेटिंग"</string>
     <string name="notification_app_settings" msgid="3743278649182392015">"अपनी पसंद के मुताबिक बनाएं: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
     <string name="notification_done" msgid="5279426047273930175">"हो गया"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="notification_menu_gear_description" msgid="2204480013726775108">"नोटिफ़िकेशन नियंत्रण"</string>
-    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"नोटिफ़िकेशन की याद दिलाने के विकल्प"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रण"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना को स्नूज़ (थोड़ी देर के लिए चुप करना) करने के विकल्प"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"पहले जैसा करें"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> के लिए याद दिलाया गया"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -706,7 +706,7 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> निकाल दिया गया है"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को <xliff:g id="POSITION">%2$d</xliff:g> स्थिति में ले जाया गया"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"त्वरित सेटिंग संपादक."</string>
-    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> नोटिफ़िकेशन: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"हो सकता है कि ऐप्लिकेशन विभाजित स्क्रीन के साथ काम ना करे."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
@@ -751,7 +751,7 @@
     <string name="tuner_minus" msgid="4806116839519226809">"घटाने का चिह्न"</string>
     <string name="tuner_left" msgid="8404287986475034806">"बायां"</string>
     <string name="tuner_right" msgid="6222734772467850156">"दायां"</string>
-    <string name="tuner_menu" msgid="191640047241552081">"मेनू"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"मेन्यू"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ऐप"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचनाएं"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"बैटरी"</string>
