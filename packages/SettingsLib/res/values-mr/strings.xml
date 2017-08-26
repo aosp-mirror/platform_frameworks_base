@@ -164,7 +164,7 @@
     <string name="category_personal" msgid="1299663247844969448">"वैयक्तिक"</string>
     <string name="category_work" msgid="8699184680584175622">"कार्य"</string>
     <string name="development_settings_title" msgid="215179176067683667">"डेव्हलपर पर्याय"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"डेव्हलपर पर्याय सक्षम करा"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"डेव्हलपर पर्याय सुरू करा"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"अॅप विकासासाठी पर्याय सेट करा"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"या वापरकर्त्यासाठी डेव्हलपर पर्याय उपलब्ध नाहीत"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"या वापरकर्त्यासाठी VPN सेटिंग्ज उपलब्ध नाहीत"</string>
@@ -173,8 +173,8 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB डीबग करणे"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB कनेक्ट केलेले असताना डीबग मोड"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB डीबग करणारी प्रमाणीकरणे रीव्होक करा"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"दोष अहवाल शॉर्टकट"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"दोष अहवाल घेण्यासाठी पॉवर मेनूमध्ये एक बटण दर्शवा"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"बग रीपोर्ट शॉर्टकट"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"बग रीपोर्ट घेण्यासाठी पॉवर मेनूमध्ये एक बटण दर्शवा"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"सक्रिय रहा"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"चार्ज होत असताना स्क्रीन कधीही निष्क्रिय होणार नाही"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ब्लूटूथ HCI स्नूप लॉग सक्षम करा"</string>
@@ -380,7 +380,7 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"सानुकूल करा (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"मदत आणि अभिप्राय"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेनू"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोडमध्ये फॅक्टरी रीसेट करण्यासाठी संकेतशब्द प्रविष्ट करा"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोडमध्ये फॅक्टरी रीसेट करण्यासाठी पासवर्ड एंटर करा"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"पुढील"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"संकेतशब्द आवश्यक"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"सक्रिय इनपुट पद्धती"</string>
