@@ -76,16 +76,17 @@ public class DeviceInfoUtils {
 
     public static String formatKernelVersion(String rawKernelVersion) {
         // Example (see tests for more):
-        // Linux version 3.0.31-g6fb96c9 (android-build@xxx.xxx.xxx.xxx.com) \
-        //     (gcc version 4.6.x-xxx 20120106 (prerelease) (GCC) ) #1 SMP PREEMPT \
-        //     Thu Jun 28 11:02:39 PDT 2012
-
+        // Linux version 4.9.29-g958411d (android-build@xyz) (Android clang version 3.8.256229 \
+        //       (based on LLVM 3.8.256229)) #1 SMP PREEMPT Wed Jun 7 00:06:03 CST 2017
+        // Linux version 4.9.29-geb63318482a7 (android-build@xyz) (gcc version 4.9.x 20150123 \
+        //       (prerelease) (GCC) ) #1 SMP PREEMPT Thu Jun 1 03:41:57 UTC 2017
         final String PROC_VERSION_REGEX =
                 "Linux version (\\S+) " + /* group 1: "3.0.31-g6fb96c9" */
-                "\\((\\S+)\\)" +          /* group 2: "x@y.com" (kernel builder) */
-                ".*(#\\d+)" +             /* group 3: "#1" */
-                /* group 4: "Thu Jun 28 11:02:39 PDT 2012" */
-                ".*((?:Sun|Mon|Tue|Wed|Thu|Fri|Sat).+)";
+                "\\((\\S+?)\\) " +        /* group 2: "(x@y.com) " */
+                "\\((.+?)\\) " +          /* group 3:  kernel toolchain version information */
+                "(#\\d+) " +              /* group 4: "#1" */
+                "(?:.*?)?" +              /* ignore: optional SMP, PREEMPT, and any CONFIG_FLAGS */
+                "((Sun|Mon|Tue|Wed|Thu|Fri|Sat).+)"; /* group 5: "Thu Jun 28 11:02:39 PDT 2012" */
 
         Matcher m = Pattern.compile(PROC_VERSION_REGEX).matcher(rawKernelVersion);
         if (!m.matches()) {
@@ -96,9 +97,9 @@ public class DeviceInfoUtils {
                     + " groups");
             return "Unavailable";
         }
-        return m.group(1) + "\n" +                 // 3.0.31-g6fb96c9
-                m.group(2) + " " + m.group(3) + "\n" + // x@y.com #1
-                m.group(4);                            // Thu Jun 28 11:02:39 PDT 2012
+        return m.group(1) + " ("+ m.group(3) + ")\n" +   // 3.0.31-g6fb96c9 (toolchain version)
+                m.group(2) + " " + m.group(4) + "\n" +   // x@y.com #1
+                m.group(5);                              // Thu Jun 28 11:02:39 PDT 2012
     }
 
     /**
