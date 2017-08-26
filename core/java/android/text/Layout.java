@@ -1242,7 +1242,7 @@ public abstract class Layout {
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
         paint.setHyphenEdit(getHyphen(line));
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
+        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops);
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
@@ -1270,7 +1270,7 @@ public abstract class Layout {
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
         paint.setHyphenEdit(getHyphen(line));
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
+        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops);
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
