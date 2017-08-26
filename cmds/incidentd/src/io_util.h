@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef SECTION_LIST_H
-#define SECTION_LIST_H
+#ifndef IO_UTIL_H
+#define IO_UTIL_H
 
-#include "Privacy.h"
-#include "Section.h"
+#include <stdint.h>
+#include <utils/Errors.h>
 
-/**
- * This is the mapping of section IDs to the commands that are run to get those commands.
- * The section IDs are guaranteed in ascending order
- */
-extern const Section* SECTION_LIST[];
+using namespace android;
 
-/**
- * This is the mapping of section IDs to each section's privacy policy.
- * The section IDs are guaranteed in ascending order
- */
-extern const Privacy* PRIVACY_POLICY_LIST[];
+status_t write_all(int fd, uint8_t const* buf, size_t size);
 
-#endif // SECTION_LIST_H
+class Fpipe {
+public:
+    Fpipe();
+    ~Fpipe();
 
+    bool init();
+    bool close();
+    int readFd() const;
+    int writeFd() const;
+
+private:
+    int mFds[2];
+};
+
+#endif // IO_UTIL_H

@@ -18,6 +18,24 @@
 #define PROTOBUF_H
 
 #include <stdint.h>
+#include <vector>
+
+using namespace std;
+
+const uint8_t WIRE_TYPE_VARINT = 0;
+const uint8_t WIRE_TYPE_FIXED64 = 1;
+const uint8_t WIRE_TYPE_LENGTH_DELIMITED = 2;
+const uint8_t WIRE_TYPE_FIXED32 = 5;
+
+/**
+ * Read the wire type from varint, it is the smallest 3 bits.
+ */
+uint8_t read_wire_type(uint32_t varint);
+
+/**
+ * read field id from varint, it is varint >> 3;
+ */
+uint32_t read_field_id(uint32_t varint);
 
 /**
  * Write a varint into the buffer. Return the next position to write at.
@@ -31,6 +49,16 @@ uint8_t* write_raw_varint(uint8_t* buf, uint32_t val);
  * to write at. There must be 20 bytes in the buffer.
  */
 uint8_t* write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_t size);
+
+/**
+ * Write a varint into a vector. Return the size of the varint.
+ */
+size_t write_raw_varint(vector<uint8_t> &buf, uint32_t val);
+
+/**
+ * Write a protobuf header. Return the size of the header.
+ */
+size_t write_header(vector<uint8_t> &buf, uint32_t fieldId, uint8_t wireType);
 
 enum {
     // IncidentProto.header

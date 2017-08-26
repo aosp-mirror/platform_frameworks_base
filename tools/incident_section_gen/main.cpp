@@ -135,27 +135,24 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
                 if (generatePrivacyFlags(field->message_type(), field_name, msgNames) &&
                     isDefaultDest(field)) break;
 
-                printf("static Privacy %s = { %d, %d, %d, NULL, %s_LIST };\n", field_name, field->number(),
-                        (int) field->type(), p.dest(), field_name);
+                printf("Privacy %s(%d, %s_LIST);\n", field_name, field->number(), field_name);
                 hasDefaultFlags[i] = false;
                 break;
             case FieldDescriptor::TYPE_STRING:
                 if (isDefaultDest(field) && p.patterns_size() == 0) break;
 
-                printf("static const char* %s_patterns[] = {\n", field_name);
+                printf("const char* %s_patterns[] = {\n", field_name);
                 for (int i=0; i<p.patterns_size(); i++) {
                     // the generated string need to escape backslash as well, need to dup it here
                     printf("    \"%s\",\n", replaceAll(p.patterns(i), '\\', "\\\\").c_str());
                 }
                 printf("    NULL };\n");
-                printf("static Privacy %s = { %d, %d, %d, %s_patterns };\n", field_name, field->number(),
-                        (int) field->type(), p.dest(), field_name);
+                printf("Privacy %s(%d, %d, %s_patterns);\n", field_name, field->number(), p.dest(), field_name);
                 hasDefaultFlags[i] = false;
                 break;
             default:
                 if (isDefaultDest(field)) break;
-                printf("static Privacy %s = { %d, %d, %d };\n", field_name, field->number(),
-                        (int) field->type(), p.dest());
+                printf("Privacy %s(%d, %d, %d);\n", field_name, field->number(), (int) field->type(), p.dest());
                 hasDefaultFlags[i] = false;
         }
         // add the field name to message map, true means it has default flags
@@ -211,20 +208,6 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
         }
     }
     printf("    NULL };\n");
-    emptyline();
-
-    // generates DESTINATION enum values
-    EnumDescriptor const* destination = Destination_descriptor();
-    for (int i=0; i<destination->value_count(); i++) {
-        EnumValueDescriptor const* val = destination->value(i);
-        printf("const uint8_t %s = %d;\n", val->name().c_str(), val->number());
-    }
-    emptyline();
-    printf("const uint8_t DEST_DEFAULT_VALUE = %d;\n", PrivacyFlags::default_instance().dest());
-    emptyline();
-    // populates string type and message type values
-    printf("const uint8_t TYPE_STRING = %d;\n", (int) FieldDescriptor::TYPE_STRING);
-    printf("const uint8_t TYPE_MESSAGE = %d;\n", (int) FieldDescriptor::TYPE_MESSAGE);
     emptyline();
 
     // generates PRIVACY_POLICY

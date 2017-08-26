@@ -36,6 +36,17 @@ public:
 };
 
 /**
+ * No op parser returns what it reads
+ */
+class NoopParser : public TextParserBase {
+public:
+    NoopParser() : TextParserBase(String8("NoopParser")) {};
+    ~NoopParser() {};
+
+    virtual status_t Parse(const int in, const int out) const;
+};
+
+/**
  * This parser is used for testing only, results in timeout.
  */
 class TimeoutParser : public TextParserBase {
