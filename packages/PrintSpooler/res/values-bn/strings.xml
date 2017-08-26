@@ -35,7 +35,7 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"প্রিভিউ দেখার জন্য PDF ভিউয়ার ইনস্টল করুন"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"প্রিন্ট অ্যাপ্লিকেশান ক্র্যাশ করছে"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"প্রিন্ট কার্য তৈরি করা হচ্ছে"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF হিসাবে সংরক্ষণ করুন"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF হিসেবে সংরক্ষণ করুন"</string>
     <string name="all_printers" msgid="5018829726861876202">"সমস্ত মুদ্রক…"</string>
     <string name="print_dialog" msgid="32628687461331979">"প্রিন্ট ডায়লগ"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -44,7 +44,7 @@
     <string name="expand_handle" msgid="7282974448109280522">"প্রসারিত করার হ্যান্ডেল"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"সঙ্কুচিত করার হ্যান্ডেল"</string>
     <string name="print_button" msgid="645164566271246268">"প্রিন্ট করুন"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"PDF হিসাবে সংরক্ষণ করুন"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF হিসেবে সংরক্ষণ করুন"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"প্রিন্ট বিকল্প প্রসারিত হয়েছে"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"প্রিন্ট বিকল্প সংকুচিত হয়েছে"</string>
     <string name="search" msgid="5421724265322228497">"অনুসন্ধান করুন"</string>
