@@ -80,12 +80,12 @@
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ਤੁਹਾਡੇ ਟਿਕਾਣੇ \'ਤੇ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਵੱਲੋਂ ਉਪਲਬਧ ਨਹੀਂ ਕਰਵਾਈ ਗਈ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ਸਿਗਨਲ ਪ੍ਰਾਪਤੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਨੈੱਟਵਰਕ ਅਤੇ ਇੰਟਰਨੈੱਟ &gt; ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ &gt; ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਦੀ ਕਿਸਮ \'ਤੇ ਜਾਓ ਅਤੇ ਚੁਣੀ ਗਈ ਕਿਸਮ ਨੂੰ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi ਕਾਲਿੰਗ ਕਿਰਿਆਸ਼ੀਲ ਹੈ"</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਕਿਰਿਆਸ਼ੀਲ ਹੈ"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ ਲਈ ਕਿਸੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ਕਾਲ ਫਾਰਵਰਡਿੰਗ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਬੈਕ ਮੋਡ"</string>
-    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ਮੋਬਾਈਲ ਡੈਟੇ ਦੀ ਅਵਸਥਾ"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਸਥਿਤੀ"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ਵੌਇਸਮੇਲ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
@@ -117,7 +117,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ਸੇਵਾ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"ਵਾਈ-ਫਾਈ ਤੋਂ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਸੁਨੇਹੇ ਭੇਜਣ ਦੇ ਲਈ, ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੇ ਕੈਰੀਅਰ ਨੂੰ ਇਸ ਸੇਵਾ ਦੀ ਸਥਾਪਨਾ ਕਰਨ ਲਈ ਕਹੋ। ਫਿਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚੋਂ ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਨੂੰ ਦੁਬਾਰਾ ਚਾਲੂ ਕਰੋ। (ਗੜਬੜੀ ਕੋਡ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"ਵਾਈ-ਫਾਈ ਤੋਂ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਸੁਨੇਹੇ ਭੇਜਣ ਲਈ, ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੇ ਕੈਰੀਅਰ ਨੂੰ ਇਸ ਸੇਵਾ ਦੀ ਸਥਾਪਨਾ ਕਰਨ ਲਈ ਕਹੋ। ਫਿਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚੋਂ ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਨੂੰ ਦੁਬਾਰਾ ਚਾਲੂ ਕਰੋ। (ਗੜਬੜੀ ਕੋਡ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7472393097168811593">"ਆਪਣੇ ਕੈਰੀਅਰ ਨਾਲ ਪੰਜੀਕਰਨ ਕਰੋ (ਗੜਬੜ ਕੋਡ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
@@ -127,9 +127,9 @@
     <item msgid="4397097370387921767">"%s ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ਬੰਦ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ਤਰਜੀਹੀ Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ਤਰਜੀਹੀ ਵਾਈ-ਫਾਈ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ਮੋਬਾਈਲ ਨੂੰ ਤਰਜੀਹ ਹੈ"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ਕੇਵਲ Wi-Fi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ਸਿਰਫ਼ ਵਾਈ-ਫਾਈ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> ਸਕਿੰਟਾਂ ਬਾਅਦ"</string>
@@ -385,11 +385,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ਐਪ ਨੂੰ ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ GPS ਜਾਂ ਹੋਰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤਾਂ ਦੇ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ਸਟੀਕ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (GPS ਅਤੇ ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"ਇਹ ਐਪ GPS ਜਾਂ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ। ਇਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਖਪਤ ਵਧ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"ਇਹ ਐਪ GPS ਜਾਂ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ। ਇਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਖਪਤ ਵਧ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ਅੰਦਾਜ਼ਨ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ਆਪਣੀਆਂ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ਔਪ ਨੂੰ ਗਲੋਬਲ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਵੌਲਿਊਮ ਅਤੇ ਆਊਟਪੁਟ ਲਈ ਕਿਹੜਾ ਸਪੀਕਰ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
@@ -440,14 +440,14 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ਐਪ ਨੂੰ ਨੈੱਟਵਰਕ ਕਨੈਕਟੀਵਿਟੀ ਦੀ ਸਥਿਤੀ ਬਦਲਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ਟੀਥਰ ਕੀਤੀ ਕਨੈਕਟੀਵਿਟੀ ਬਦਲੋ"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"ਐਪ ਨੂੰ ਟੀਥਰ ਕੀਤੀ ਨੈੱਟਵਰਕ ਕਨੈਕਟੀਵਿਟੀ ਦੀ ਸਥਿਤੀ ਬਦਲਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi ਕਨੈਕਸ਼ਨ ਦੇਖੋ"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ਐਪ ਨੂੰ Wi-Fi ਨੈਟਵਰਕਿੰਗ ਬਾਰੇ ਜਾਣਕਾਰੀ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜਿਵੇਂ Wi-Fi ਸਮਰਥਿਤ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਕਨੈਕਟ ਕੀਤੀਆਂ Wi-Fi ਡਿਵਾਈਸਾਂ ਦਾ ਨਾਮ।"</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi ਤੋਂ ਕਨੈਕਟ ਅਤੇ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ਐਪ ਨੂੰ ਵਾਈ-ਫਾਈ ਪਹੁੰਚ ਬਿੰਦੂਆਂ ਤੇ ਕਨੈਕਟ ਅਤੇ ਇਹਨਾਂ ਤੋਂ ਡਿਸਕਨੈਕਟ ਕਰਨ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈਟਵਰਕਾਂ ਲਈ ਡੀਵਾਈਸ ਸੰਰੂਪਣ ਵਿੱਚ ਬਦਲਾਵ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi ਮਲਟੀਕਾਸਟ ਰਿਸੈਪਸ਼ਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ Wi-Fi ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੀਆਂ ਡਿਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਕੇਵਲ ਤੁਹਾਡੀ ਟੈਬਲੇਟ ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ Wi-Fi ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੀਆਂ ਡਿਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਕੇਵਲ ਤੁਹਾਡਾ TV ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ, ਵਰਤਦੇ ਹੋਏ ਇੱਕ Wi-Fi ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੀਆਂ ਡਿਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਕੇਵਲ ਤੁਹਾਡਾ ਫੋਨ ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"ਵਾਈ-ਫਾਈ ਕਨੈਕਸ਼ਨ ਦੇਖੋ"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ਐਪ ਨੂੰ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਿੰਗ ਬਾਰੇ ਜਾਣਕਾਰੀ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜਿਵੇਂ ਵਾਈ-ਫਾਈ ਸਮਰਥਿਤ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਕਨੈਕਟ ਕੀਤੇ ਵਾਈ-ਫਾਈ ਡੀਵਾਈਸਾਂ ਦਾ ਨਾਮ।"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"ਵਾਈ-ਫਾਈ ਤੋਂ ਕਨੈਕਟ ਅਤੇ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ਐਪ ਨੂੰ ਵਾਈ-ਫਾਈ ਪਹੁੰਚ ਬਿੰਦੂਆਂ ਤੇ ਕਨੈਕਟ ਅਤੇ ਇਹਨਾਂ ਤੋਂ ਡਿਸਕਨੈਕਟ ਕਰਨ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ ਲਈ ਡੀਵਾਈਸ ਸੰਰੂਪਣ ਵਿੱਚ ਬਦਲਾਵ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ਵਾਈ-ਫਾਈ ਮਲਟੀਕਾਸਟ ਰਿਸੈਪਸ਼ਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੇ ਡੀਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਿਰਫ਼ ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੇ ਡੀਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਿਰਫ਼ ਤੁਹਾਡਾ ਟੀਵੀ ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ਐਪ ਨੂੰ ਮਲਟੀਕਾਸਟ ਪਤੇ, ਵਰਤਦੇ ਹੋਏ ਇੱਕ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੇ ਸਾਰੇ ਡੀਵਾਈਸਾਂ ਤੇ ਭੇਜੇ ਗਏ ਪੈਕੇਟ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਿਰਫ਼ ਤੁਹਾਡਾ ਫ਼ੋਨ ਨਹੀਂ। ਇਹ ਗ਼ੈਰ-ਮਲਟੀਕਾਸਟ ਮੋਡ ਦੇ ਮੁਕਾਬਲੇ ਵੱਧ ਪਾਵਰ ਵਰਤਦਾ ਹੈ।"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ਸੈਟਿੰਗਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ਐਪ ਨੂੰ ਸਥਾਨਕ Bluetooth ਟੈਬਲੇਟ ਨੂੰ ਕੌਂਫਿਗਰ ਕਰਨ ਅਤੇ ਰਿਮੋਟ ਡਿਵਾਈਸਾਂ ਨੂੰ ਖੋਜਣ ਅਤੇ ਉਹਨਾਂ ਨਾਲ ਪੇਅਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ਐਪ ਨੂੰ ਸਥਾਨਕ Bluetooth TV ਨੂੰ ਕੌਂਫਿਗਰ ਕਰਨ ਅਤੇ ਰਿਮੋਟ ਡਿਵਾਈਸਾਂ ਨੂੰ ਖੋਜਣ ਅਤੇ ਉਹਨਾਂ ਨਾਲ ਪੇਅਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
@@ -705,7 +705,7 @@
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"ਐਮਰਜੈਂਸੀ ਨੰਬਰ"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"ਕੋਈ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"ਸਕ੍ਰੀਨ ਲੌਕ ਕੀਤੀ।"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਮੀਨੂ ਦਬਾਓ ਜਾਂ ਐਮਰਜੈਂਸੀ ਕਾਲ ਕਰੋ।"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਮੀਨੂ ਦਬਾਓ ਜਾਂ ਸੰਕਟਕਾਲੀਨ ਕਾਲ ਕਰੋ।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਮੀਨੂ ਦਬਾਓ।"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਪੈਟਰਨ ਡ੍ਰਾ ਕਰੋ"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"ਸੰਕਟਕਾਲ"</string>
@@ -827,17 +827,17 @@
     <string name="autofill_area" msgid="3547409050889952423">"ਖੇਤਰ"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"ਅਮੀਰਾਤ"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"ਆਪਣੇ ਵੈੱਬ ਬੁੱਕਮਾਰਕ ਅਤੇ ਇਤਿਹਾਸ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ਐਪ ਨੂੰ ਸਾਰੇ URL ਜਿਨ੍ਹਾਂ ਤੇ ਬ੍ਰਾਊਜ਼ਰ ਨੇ ਵਿਜਿਟ ਕੀਤਾ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਸਾਰੇ ਬੁੱਕਮਾਰਕਾਂ ਦਾ ਇਤਿਹਾਸ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ਐਪ ਨੂੰ ਸਾਰੇ URL ਜਿਨ੍ਹਾਂ \'ਤੇ ਬ੍ਰਾਊਜ਼ਰ ਨੇ ਵਿਜਿਟ ਕੀਤਾ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਸਾਰੇ ਬੁੱਕਮਾਰਕਾਂ ਦਾ ਇਤਿਹਾਸ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਨੋਟ: ਇਹ ਇਜਾਜ਼ਤ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ਵੈੱਬ ਬੁੱਕਮਾਰਕ ਅਤੇ ਇਤਿਹਾਸ ਲਿਖੋ"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ TV ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਸਾਫ਼ ਕਰਨ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਇਜਾਜ਼ਤ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ TV \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਸਾਫ਼ ਕਰਨ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਇਜਾਜ਼ਤ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਸਾਫ਼ ਕਰਨ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਇਜਾਜ਼ਤ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ਇੱਕ ਅਲਾਰਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ਐਪ ਨੂੰ ਇੱਕ ਇੰਸਟੌਲ ਕੀਤੀ ਅਲਾਰਮ ਘੜੀ ਐਪ ਵਿੱਚ ਇੱਕ ਅਲਾਰਮ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਕੁਝ ਅਲਾਰਮ ਘੜੀ ਐਪਲ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਲਾਗੂ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ।"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ਵੌਇਸਮੇਲ ਜੋੜੋ"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਵੌਇਸਮੇਲ ਇਨਬੌਕਸ ਵਿੱਚ ਸੁਨੇਹੇ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ਬ੍ਰਾਊਜ਼ਰ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦੀਆਂ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਖ਼ਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਆਰਬਿਟਰੇਰੀ ਵੈੱਬ ਸਾਈਟਾਂ ਨੂੰ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦੇਣ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦੀਆਂ ਜਿਓਲੋਕੇਸ਼ਨ ਇਜਾਜ਼ਤਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਆਰਬਿਟਰੇਰੀ ਵੈੱਬ ਸਾਈਟਾਂ ਨੂੰ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦੇਣ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="save_password_message" msgid="767344687139195790">"ਕੀ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ ਕਿ ਬ੍ਰਾਊਜ਼ਰ ਇਹ ਪਾਸਵਰਡ ਯਾਦ ਰੱਖੇ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ਅਜੇ ਨਹੀਂ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"ਯਾਦ ਰੱਖੋ"</string>
@@ -1094,46 +1094,46 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"ਸੂਚਨਾ ਧੁਨੀਆਂ"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"ਅਗਿਆਤ"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi ਨੈੱਟਵਰਕਸ ਉਪਲਬਧ</item>
-      <item quantity="other">Wi-Fi ਨੈੱਟਵਰਕਸ ਉਪਲਬਧ</item>
+      <item quantity="one">ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਉਪਲਬਧ</item>
+      <item quantity="other">ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਉਪਲਬਧ</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">ਉਪਲਬਧ Wi-Fi ਨੈੱਟਵਰਕ ਖੋਲ੍ਹੋ</item>
-      <item quantity="other">ਉਪਲਬਧ Wi-Fi ਨੈੱਟਵਰਕ ਖੋਲ੍ਹੋ</item>
+      <item quantity="one">ਉਪਲਬਧ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਖੋਲ੍ਹੋ</item>
+      <item quantity="other">ਉਪਲਬਧ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਖੋਲ੍ਹੋ</item>
     </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"ਖੁੱਲ੍ਹੇ Wi‑Fi ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੋਵੋ"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ਖੁੱਲ੍ਹੇ Wi‑Fi ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
+    <string name="wifi_available_title" msgid="3817100557900599505">"ਖੁੱਲ੍ਹੇ ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੋਵੋ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ਖੁੱਲ੍ਹੇ ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ਸਾਰੇ ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ਸਾਰੇ ਨੈੱਟਵਰਕ"</string>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ਨੈੱਟਵਰਕ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਵਿੱਚ ਸਾਈਨ-ਇਨ ਕਰੋ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ਨੈੱਟਵਰਕ ਤੇ ਸਾਈਨ ਇਨ ਕਰੋ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ਦੀ ਕੋਈ ਇੰਟਰਨੈਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"ਵਾਈ-ਫਾਈ ਦੀ ਕੋਈ ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="3979506840912951943">"ਮੋਬਾਈਲ ਡੈਟਾ"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="3979506840912951943">"ਮੋਬਾਈਲ ਡਾਟਾ"</item>
+    <item msgid="75483255295529161">"ਵਾਈ-ਫਾਈ"</item>
     <item msgid="6862614801537202646">"ਬਲੂਟੁੱਥ"</item>
     <item msgid="5447331121797802871">"ਈਥਰਨੈੱਟ"</item>
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ਇੱਕ ਅਗਿਆਤ ਨੈੱਟਵਰਕ ਕਿਸਮ"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ਵਾਈ-ਫਾਈ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਹੋ ਸਕਿਆ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ਇਸਦਾ ਇੱਕ ਖ਼ਰਾਬ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਹੈ।"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ਕੀ ਕਨੈਕਸ਼ਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"ਐਪਲੀਕੇਸ਼ਨ %1$s Wifi ਨੈੱਟਵਰਕ %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨਾ ਚਾਹੁੰਦਾ ਹੈ"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"ਐਪਲੀਕੇਸ਼ਨ %1$s ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ %2$s ਨਾਲ ਕਨੈਕਟ ਕਰਨਾ ਚਾਹੁੰਦੀ ਹੈ"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ਡਾਇਰੈਕਟ"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi ਡਾਇਰੈਕਟ ਚਾਲੂ ਕਰੋ। ਇਹ Wi-Fi ਕਲਾਈਂਟ/ਹੌਟਸਪੌਟ ਨੂੰ ਬੰਦ ਕਰ ਦੇਵੇਗਾ।"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi ਡਾਇਰੈਕਟ ਚਾਲੂ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi ਡਾਇਰੈਕਟ ਚਾਲੂ ਹੈ।"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ਵਾਈ-ਫਾਈ ਡਾਇਰੈਕਟ"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ਵਾਈ-ਫਾਈ ਡਾਇਰੈਕਟ ਚਾਲੂ ਕਰੋ। ਇਹ ਵਾਈ-ਫਾਈ ਕਲਾਈਂਟ/ਹੌਟਸਪੌਟ ਨੂੰ ਬੰਦ ਕਰ ਦੇਵੇਗਾ।"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ਵਾਈ-ਫਾਈ ਡਾਇਰੈਕਟ ਚਾਲੂ ਨਹੀਂ ਹੋ ਸਕਿਆ।"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"ਵਾਈ-ਫਾਈ ਡਾਇਰੈਕਟ ਚਾਲੂ ਹੈ।"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"ਸੈਟਿੰਗਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="accept" msgid="1645267259272829559">"ਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="decline" msgid="2112225451706137894">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
@@ -1143,15 +1143,15 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ਵੱਲ:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ਲੋੜੀਂਦਾ ਪਿੰਨ ਟਾਈਪ ਕਰੋ:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ਪਿੰਨ:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ਟੈਬਲੇਟ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ Wi-Fi ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗੀ"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ Wi-Fi ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ਫੋਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ Wi-Fi ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ਟੈਬਲੈੱਟ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"TV <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ਫ਼ੋਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਵਾਈ-ਫਾਈ ਤੋਂ ਅਸਥਾਈ ਤੌਰ ਤੇ ਡਿਸਕਨੈਕਟ ਹੋ ਜਾਏਗਾ"</string>
     <string name="select_character" msgid="3365550120617701745">"ਅੱਖਰ ਦਾਖਲ ਕਰੋ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS ਸੁਨੇਹੇ ਭੇਜ ਰਿਹਾ ਹੈ"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਵੱਡੀ ਸੰਖਿਆ ਵਿੱਚ SMS ਸੁਨੇਹੇ ਭੇਜ ਰਿਹਾ ਹੈ। ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸੁਨੇਹੇ ਭੇਜਣਾ ਜਾਰੀ ਰੱਖਣ ਦੀ ਆਗਿਆ ਦੇਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"ਆਗਿਆ ਦਿਓ"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
-    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਇਹ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ਨੂੰ ਇੱਕ ਸੁਨੇਹਾ ਭੇਜਣਾ ਚਾਹੁੰਦਾ ਹੈ।"</string>
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਇਹ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ਨੂੰ ਇੱਕ ਸੁਨੇਹਾ ਭੇਜਣਾ ਚਾਹੁੰਦੀ ਹੈ।"</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"ਇਸ ਨਾਲ "<b>"ਤੁਹਾਡੇ ਮੋਬਾਈਲ ਖਾਤੇ ਤੇ ਖ਼ਰਚੇ"</b>" ਪੈ ਸਕਦੇ ਹਨ।"</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ਇਸ ਨਾਲ ਤੁਹਾਡੇ ਮੋਬਾਈਲ ਖਾਤੇ ਤੇ ਖ਼ਰਚੇ ਪੈਣਗੇ।"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ਭੇਜੋ"</string>
@@ -1384,13 +1384,13 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ਵਰਤੋਂ ਅਤੇ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋਈ"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"ਮੋਬਾਈਲ ਡੈਟਾ ਸੀਮਾ ਸਮਾਪਤ ਹੋਈ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"ਮੋਬਾਈਲ ਡਾਟਾ ਸੀਮਾ ਸਮਾਪਤ ਹੋਈ"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ਵਾਈ-ਫਾਈ ਡਾਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"ਬਾਕੀ ਸਾਇਕਲ ਲਈ ਡੈਟਾ ਰੁਕ ਗਿਆ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ਡੈਟਾ ਸੀਮਾ ਵਧ ਗਈ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ਡੈਟਾ ਸੀਮਾ ਵਧੀ"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"ਮੋਬਾਈਲ ਡੈਟਾ ਦੀ ਸੀਮਾ ਵਧ ਗਈ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ਡੈਟਾ ਸੀਮਾ ਵਧ ਗਈ"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"ਮੋਬਾਈਲ ਡਾਟਾ ਦੀ ਸੀਮਾ ਵਧ ਗਈ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"ਵਾਈ-ਫਾਈ ਡਾਟਾ ਸੀਮਾ ਵਧ ਗਈ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ਤੋਂ ਵੱਧ ਨਿਰਦਿਸ਼ਟ ਸੀਮਾ।"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"ਪਿਛੋਕੜ ਡੈਟਾ ਪ੍ਰਤਿਬੰਧਿਤ"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"ਪਾਬੰੰਦੀ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>

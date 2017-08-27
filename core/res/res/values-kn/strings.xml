@@ -304,7 +304,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ವಿಸ್ತರಿಸಲು ಅಥವಾ ಸಂಕುಚಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ಬಳಕೆದಾರರ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಹೋಮ್‌ಸ್ಕ್ರೀನ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಅಸ್ಥಾಪಿಸಿ"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ಬಳಕೆದಾರರ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಹೋಮ್‌ಸ್ಕ್ರೀನ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ಹೊರಹೋಗುವ ಕರೆಗಳ ಮಾರ್ಗ ಬದಲಿಸಿ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ಬೇರೊಂದು ಸಂಖ್ಯೆಗೆ ಕರೆಯನ್ನು ಮರುನಿರ್ದೇಶಿಸಲು ಆಯ್ಕೆಯ ಜೊತೆಗೆ ಹೊರ ಹೋಗುವ ಕರೆಯ ಸಮಯದಲ್ಲಿ ಡಯಲ್‌ ಮಾಡಿದ ಸಂಖ್ಯೆಯನ್ನು ನೋಡಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
