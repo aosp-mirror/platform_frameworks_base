@@ -166,12 +166,6 @@ public class SuggestionParserTest {
         final List<Tile> suggestions = sl.getSuggestions();
 
         assertThat(suggestions).hasSize(3);
-
-        final List<Tile> category1Suggestions = sl.getSuggestionForCategory("category1");
-        final List<Tile> category3Suggestions = sl.getSuggestionForCategory("category3");
-
-        assertThat(category1Suggestions).hasSize(2);
-        assertThat(category3Suggestions).hasSize(1);
     }
 
     @Test
@@ -181,7 +175,6 @@ public class SuggestionParserTest {
         final List<Tile> suggestions = sl.getSuggestions();
 
         assertThat(suggestions).hasSize(1);
-        assertThat(sl.getSuggestionForCategory("category2")).hasSize(1);
     }
 
     @Test
