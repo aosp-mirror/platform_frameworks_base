@@ -193,6 +193,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏السماح دائمًا بعمليات فحص Wi-Fi للتجوال"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"تسريع الأجهزة للتوصيل"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"تمكين الرنين ضمن النطاق الأساسي"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
@@ -232,6 +234,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"هذه الإعدادات مخصصة لاستخدام التطوير فقط. قد يتسبب هذا في حدوث أعطال أو خلل في أداء الجهاز والتطبيقات المثبتة عليه."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"لتعطيل ميزة مستوى الصوت المطلق للبلوتوث في حالة حدوث مشكلات متعلقة بمستوى الصوت مع الأجهزة البعيدة مثل مستوى صوت عالٍ بشكل غير مقبول أو نقص إمكانية التحكم في الصوت."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"السماح بتشغيل نغمات الرنين على الهاتف من خلال سماعات الرأس البلوتوث"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"تطبيق طرفي محلي"</string>

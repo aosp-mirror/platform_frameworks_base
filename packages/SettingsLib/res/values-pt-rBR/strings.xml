@@ -193,6 +193,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Sempre permitir verif. de roaming de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dados móveis sempre ativos"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleração de hardware de tethering"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desativar volume absoluto"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ativar o toque em banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versão do Bluetooth AVRCP"</string>
@@ -232,6 +234,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Essas configurações são destinadas apenas para o uso de desenvolvedores. Elas podem causar a desativação ou mau funcionamento do dispositivo e dos apps contidos nele."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificar apps por USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificar comportamento nocivo em apps instalados via ADB/ADT."</string>
+    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desativa o recurso Bluetooth de volume absoluto em caso de problemas com o volume em dispositivos remotos, como volume excessivamente alto ou falta de controle."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permitir que os toques no smartphone sejam reproduzidos em fones de ouvido Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>

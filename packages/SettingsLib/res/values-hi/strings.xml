@@ -193,6 +193,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"हमेशा वाई-फ़ाई रोम स्कैन करने दें"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा हमेशा सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"हार्डवेयर त्‍वरण को टेदर करना"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"पूर्ण वॉल्यूम अक्षम करें"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"इन-बैंड रिंग करना सक्षम करें"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लूटूथ AVRCP वर्शन"</string>
@@ -232,6 +234,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ये सेटिंग केवल विकास संबंधी उपयोग के प्रयोजन से हैं. वे आपके डिवाइस और उस पर स्‍थित ऐप्स  को खराब कर सकती हैं या उनके दुर्व्यवहार का कारण हो सकती हैं."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB पर ऐप की पुष्टि करें"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"नुकसानदेह व्यवहार के लिए ADB/ADT के द्वारा इंस्टॉल किए गए ऐप्स  जांचें."</string>
+    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूरस्थ डिवाइस के साथ वॉल्यूम की समस्याओं जैसे अस्वीकार्य तेज़ वॉल्यूम या नियंत्रण की कमी की स्थिति में ब्लूटूथ पूर्ण वॉल्यूम सुविधा को अक्षम करता है."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"फ़ोन की रिंगटोन को ब्लूटूथ हेडसेट पर बजने दें"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
