@@ -31,7 +31,7 @@
     <string name="template_all_pages" msgid="3322235982020148762">"सभी <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"पेज संख्या <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"उदाहरण 1—5,8,11—13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"प्रिंट पूर्वावलोकन"</string>
+    <string name="print_preview" msgid="8010217796057763343">"प्रिंट की झलक"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"झलक के लिए पीडीएफ़ व्यूअर इंस्टॉल करें"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"प्रिंटिंग ऐप्लिकेशन क्रैश हो गया"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"प्रिंट कार्य जनरेट हो रहा है"</string>
@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. पुन: प्रयास करें."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"फिर से प्रयास करें"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"यह प्रिंटर इस समय उपलब्ध नहीं है."</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"पूर्वावलोकन प्रदर्शित नहीं किया जा सकता"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"पूर्वावलोकन तैयार हो रहा है..."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"झलक नहीं दिखाई जा सकती"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"झलक तैयार हो रही है..."</string>
 </resources>
