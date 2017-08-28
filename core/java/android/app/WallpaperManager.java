@@ -1603,11 +1603,12 @@ public class WallpaperManager {
     /**
      * Clear the wallpaper for a specific user.  The caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission to clear another user's
-     * wallpaper.
+     * wallpaper, and must hold the SET_WALLPAPER permission in all
+     * circumstances.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public void clearWallpaper(@SetWallpaperFlags int which, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
