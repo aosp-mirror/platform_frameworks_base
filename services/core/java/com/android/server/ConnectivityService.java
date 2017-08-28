@@ -52,10 +52,10 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
+import android.net.MatchAllNetworkSpecifier;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
-import android.net.MatchAllNetworkSpecifier;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -139,8 +139,8 @@ import com.android.server.connectivity.NetworkNotificationManager.NotificationTy
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.Tethering;
-import com.android.server.connectivity.tethering.TetheringDependencies;
 import com.android.server.connectivity.Vpn;
+import com.android.server.connectivity.tethering.TetheringDependencies;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -2281,7 +2281,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
-            updateClat(null, nai.linkProperties, nai);
+            maybeStopClat(nai);
             synchronized (mNetworkForNetId) {
                 // Remove the NetworkAgent, but don't mark the netId as
                 // available until we've told netd to delete it below.
@@ -4374,7 +4374,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId);
 
-        updateClat(newLp, oldLp, networkAgent);
+        // Start or stop clat accordingly to network state.
+        updateClat(networkAgent);
         if (isDefaultNetwork(networkAgent)) {
             handleApplyDefaultProxy(newLp.getHttpProxy());
         } else {
@@ -4389,16 +4390,30 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mKeepaliveTracker.handleCheckKeepalivesStillValid(networkAgent);
     }
 
-    private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo nai) {
-        final boolean wasRunningClat = nai.clatd != null && nai.clatd.isStarted();
-        final boolean shouldRunClat = Nat464Xlat.requiresClat(nai);
-
-        if (!wasRunningClat && shouldRunClat) {
-            nai.clatd = new Nat464Xlat(mContext, mNetd, mTrackerHandler, nai);
-            nai.clatd.start();
-        } else if (wasRunningClat && !shouldRunClat) {
-            nai.clatd.stop();
+    private void updateClat(NetworkAgentInfo nai) {
+        if (Nat464Xlat.requiresClat(nai)) {
+            maybeStartClat(nai);
+        } else {
+            maybeStopClat(nai);
         }
+    }
+
+    /** Ensure clat has started for this network. */
+    private void maybeStartClat(NetworkAgentInfo nai) {
+        if (nai.clatd != null && nai.clatd.isStarted()) {
+            return;
+        }
+        nai.clatd = new Nat464Xlat(mNetd, mTrackerHandler, nai);
+        nai.clatd.start();
+    }
+
+    /** Ensure clat has stopped for this network. */
+    private void maybeStopClat(NetworkAgentInfo nai) {
+        if (nai.clatd == null) {
+            return;
+        }
+        nai.clatd.stop();
+        nai.clatd = null;
     }
 
     private void wakeupModifyInterface(String iface, NetworkCapabilities caps, boolean add) {
