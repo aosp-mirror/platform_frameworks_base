@@ -89,6 +89,9 @@ public class TaskStackViewScroller {
         mContext = context;
         mCb = cb;
         mScroller = new OverScroller(context);
+        if (Recents.getConfiguration().isLowRamDevice) {
+            mScroller.setFriction(0.06f);
+        }
         mLayoutAlgorithm = layoutAlgorithm;
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
     }
@@ -195,7 +198,6 @@ public class TaskStackViewScroller {
         return Float.compare(getScrollAmountOutOfBounds(mStackScrollP), 0f) != 0;
     }
 
-
     /**
      * Scrolls the closest task and snaps into place. Only used in recents for low ram devices.
      * @param velocity of scroll
@@ -208,19 +210,30 @@ public class TaskStackViewScroller {
                 || stackScroll > mLayoutAlgorithm.mMaxScrollP) {
             return;
         }
-
         TaskStackLowRamLayoutAlgorithm algorithm = mLayoutAlgorithm.mTaskStackLowRamLayoutAlgorithm;
-        float newScrollP = algorithm.getClosestTaskP(stackScroll,
-                mLayoutAlgorithm.mNumStackTasks, velocity);
-        float flingThreshold = ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity();
 
+        float flingThreshold = ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity();
         if (Math.abs(velocity) > flingThreshold) {
+            int minY = algorithm.percentageToScroll(mLayoutAlgorithm.mMinScrollP);
+            int maxY = algorithm.percentageToScroll(mLayoutAlgorithm.mMaxScrollP);
+
+            // Calculate the fling and snap to closest task from final y position, computeScroll()
+            // never runs when cancelled with animateScroll() and the overscroll is not calculated
+            // here
+            fling(0 /* downScrollP */, 0 /* downY */, algorithm.percentageToScroll(stackScroll),
+                    -velocity, minY, maxY, 0 /* overscroll */);
+            float pos = algorithm.scrollToPercentage(mScroller.getFinalY());
+
+            float newScrollP = algorithm.getClosestTaskP(pos, mLayoutAlgorithm.mNumStackTasks,
+                    velocity);
             ValueAnimator animator = ObjectAnimator.ofFloat(stackScroll, newScrollP);
             mFlingAnimationUtils.apply(animator, algorithm.percentageToScroll(stackScroll),
                     algorithm.percentageToScroll(newScrollP), velocity);
             animateScroll(newScrollP, (int) animator.getDuration(), animator.getInterpolator(),
                     null /* postRunnable */);
         } else {
+            float newScrollP = algorithm.getClosestTaskP(stackScroll,
+                    mLayoutAlgorithm.mNumStackTasks, velocity);
             animateScroll(newScrollP, 300, Interpolators.ACCELERATE_DECELERATE,
                     null /* postRunnable */);
         }
