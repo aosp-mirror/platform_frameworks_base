@@ -3903,6 +3903,16 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_SETUP_WIZARD = "android.intent.category.SETUP_WIZARD";
     /**
+     * This is the home activity, that is the activity that serves as the launcher app
+     * from there the user can start other apps. Often components with lower/higher
+     * priority intent filters handle the home intent, for example SetupWizard, to
+     * setup the device and we need to be able to distinguish the home app from these
+     * setup helpers.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_LAUNCHER_APP = "android.intent.category.LAUNCHER_APP";
+    /**
      * This activity is a preference panel.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)

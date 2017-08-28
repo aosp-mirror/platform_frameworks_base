@@ -623,14 +623,25 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(musicPackage, STORAGE_PERMISSIONS, userId);
             }
 
+            // Home
+            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+            homeIntent.addCategory(Intent.CATEGORY_HOME);
+            homeIntent.addCategory(Intent.CATEGORY_LAUNCHER_APP);
+            PackageParser.Package homePackage = getDefaultSystemHandlerActivityPackageLPr(
+                    homeIntent, userId);
+            if (homePackage != null
+                    && doesPackageSupportRuntimePermissions(homePackage)) {
+                grantRuntimePermissionsLPw(homePackage, LOCATION_PERMISSIONS, false, userId);
+            }
+
             // Watches
             if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
                 // Home application on watches
-                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                homeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
+                Intent wearHomeIntent = new Intent(Intent.ACTION_MAIN);
+                wearHomeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
 
                 PackageParser.Package wearHomePackage = getDefaultSystemHandlerActivityPackageLPr(
-                        homeIntent, userId);
+                        wearHomeIntent, userId);
 
                 if (wearHomePackage != null
                         && doesPackageSupportRuntimePermissions(wearHomePackage)) {
