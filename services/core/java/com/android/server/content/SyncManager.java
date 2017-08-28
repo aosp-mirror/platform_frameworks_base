@@ -99,6 +99,7 @@ import com.android.server.backup.AccountSyncSettingsBackupHelper;
 import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
+import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -403,12 +404,21 @@ public class SyncManager {
         return (networkInfo != null) && networkInfo.isConnected();
     }
 
+    private String getJobStats() {
+        JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+        return "JobStats: "
+                + ((js == null) ? "(JobSchedulerInternal==null)"
+                : js.getPersistStats().toString());
+    }
+
     private BroadcastReceiver mShutdownIntentReceiver =
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     Log.w(TAG, "Writing sync state before shutdown...");
                     getSyncStorageEngine().writeAllState();
+
+                    mLogger.log(getJobStats());
                     mLogger.log("Shutting down.");
                 }
             };
@@ -504,13 +514,11 @@ public class SyncManager {
                     }
                 }
             }
-            final int totalJobs = (mJobSchedulerInternal == null)
-                    ? -1 : mJobSchedulerInternal.countJobs();
             final String summary = "Loaded persisted syncs: "
                     + numPersistedPeriodicSyncs + " periodic syncs, "
                     + numPersistedOneshotSyncs + " oneshot syncs, "
                     + (pendingJobs.size()) + " total system server jobs, "
-                    + totalJobs + " total jobs.";
+                    + getJobStats();
             Slog.i(TAG, summary);
             mLogger.log(summary);
 
@@ -720,7 +728,7 @@ public class SyncManager {
         // the account (they run before) which is the genie is out of the bottle.
         whiteListExistingSyncAdaptersIfNeeded();
 
-        mLogger.log("Sync manager initialized.");
+        mLogger.log("Sync manager initialized: " + Build.FINGERPRINT);
     }
 
     public void onStartUser(int userHandle) {
@@ -3779,6 +3787,16 @@ public class SyncManager {
         // STOPSHIP Remove the google specific string.
         if (!op.isPeriodic){
             return false;
+        }
+        boolean found = false;
+        for (UserInfo user : UserManager.get(mContext).getUsers(/*excludeDying=*/ true)) {
+            if (op.target.userId == user.id) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false; // User is being removed, okay.
         }
         switch (op.target.provider) {
             case "gmail-ls":

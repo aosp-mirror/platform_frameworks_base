@@ -32,6 +32,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.MathUtils;
@@ -108,6 +109,7 @@ public class NotificationPanelView extends PanelView implements
                     return object.mDarkAmount;
                 }
             };
+    private final PowerManager mPowerManager;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -242,6 +244,7 @@ public class NotificationPanelView extends PanelView implements
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
+        mPowerManager = context.getSystemService(PowerManager.class);
     }
 
     public void setStatusBar(StatusBar bar) {
@@ -1974,6 +1977,11 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void startUnlockHintAnimation() {
+        if (mPowerManager.isPowerSaveMode()) {
+            onUnlockHintStarted();
+            onUnlockHintFinished();
+            return;
+        }
         super.startUnlockHintAnimation();
         startHighlightIconAnimation(getCenterIcon());
     }

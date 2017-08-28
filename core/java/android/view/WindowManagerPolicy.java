@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.Manifest.permission;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -485,11 +486,17 @@ public interface WindowManagerPolicy {
 
         /**
          * Returns true if the window owner can add internal system windows.
-         * That is, they have {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}.
+         * That is, they have {@link permission#INTERNAL_SYSTEM_WINDOW}.
          */
         default boolean canAddInternalSystemWindow() {
             return false;
         }
+
+        /**
+         * Returns true if the window owner has the permission to acquire a sleep token when it's
+         * visible. That is, they have the permission {@link permission#DEVICE_POWER}.
+         */
+        boolean canAcquireSleepToken();
     }
 
     /**
@@ -774,7 +781,7 @@ public interface WindowManagerPolicy {
      * @param type The type of window being assigned.
      * @param canAddInternalSystemWindow If the owner window associated with the type we are
      *        evaluating can add internal system windows. I.e they have
-     *        {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
+     *        {@link permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
      *        types {@link android.view.WindowManager.LayoutParams#isSystemAlertWindowType(int)}
      *        can be assigned layers greater than the layer for
      *        {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} Else, their

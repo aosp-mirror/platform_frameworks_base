@@ -48,8 +48,9 @@
                 android:layout_height="wrap_content" />
             <include layout="@layout/notification_template_progress"
                 android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:layout_marginTop="4dp"/>
+                android:layout_height="@dimen/notification_progress_bar_height"
+                android:layout_marginTop="@dimen/notification_progress_margin_top"
+                android:layout_marginBottom="2dp"/>
             <TextView android:id="@+id/inbox_text0"
                 android:textAppearance="@style/TextAppearance.Material.Notification"
                 android:layout_width="match_parent"

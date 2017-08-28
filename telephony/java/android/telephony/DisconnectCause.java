@@ -258,6 +258,16 @@ public class DisconnectCause {
      */
     public static final int IMS_ACCESS_BLOCKED = 60;
 
+    /**
+     * The call has ended (mid-call) because the device's battery is too low.
+     */
+    public static final int LOW_BATTERY = 61;
+
+    /**
+     * A call was not dialed because the device's battery is too low.
+     */
+    public static final int DIAL_LOW_BATTERY = 62;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -392,6 +402,10 @@ public class DisconnectCause {
             return "WIFI_LOST";
         case IMS_ACCESS_BLOCKED:
             return "IMS_ACCESS_BLOCKED";
+        case LOW_BATTERY:
+            return "LOW_BATTERY";
+        case DIAL_LOW_BATTERY:
+            return "DIAL_LOW_BATTERY";
         default:
             return "INVALID: " + cause;
         }

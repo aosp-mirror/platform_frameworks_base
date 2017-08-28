@@ -246,9 +246,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Arifa"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Onyesho la duka la rejareja"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Muunganisho wa USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Programu zinatumika chinichini"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumika chinichini"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Programu <xliff:g id="NUMBER">%1$d</xliff:g> zinatumika chinichini"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Programu zinazotumia betri"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumia betri"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Programu <xliff:g id="NUMBER">%1$d</xliff:g> zinatumia betri"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Gonga ili upate maelezo kuhusu betri na matumizi ya data"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
@@ -968,7 +968,7 @@
     <string name="dial" msgid="4204975095406423102">"Simu"</string>
     <string name="map" msgid="6068210738233985748">"Ramani"</string>
     <string name="browse" msgid="6993590095938149861">"Kivinjari"</string>
-    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhafadhi inakwisha"</string>
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Hifadhi haitoshi kwa ajili ya mfumo. Hakikisha una MB 250 za nafasi ya hifadhi isiyotumika na uanzishe upya."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumiwa"</string>

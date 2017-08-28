@@ -74,10 +74,9 @@ int conntrackSocket(unsigned groups) {
 hidl_handle handleFromFileDescriptor(base::unique_fd fd) {
     hidl_handle h;
 
-    NATIVE_HANDLE_DECLARE_STORAGE(storage, 0, 0);
     static constexpr int kNumFds = 1;
     static constexpr int kNumInts = 0;
-    native_handle_t *nh = native_handle_init(storage, kNumFds, kNumInts);
+    native_handle_t *nh = native_handle_create(kNumFds, kNumInts);
     nh->data[0] = fd.release();
 
     static constexpr bool kTakeOwnership = true;

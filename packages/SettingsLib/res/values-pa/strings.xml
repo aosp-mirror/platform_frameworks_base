@@ -144,7 +144,7 @@
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="tts_status_checking" msgid="5339150797940483592">"ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> ਲਈ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ਇੰਜਨ ਸੈਟਿੰਗਾਂ ਲੌਂਚ ਕਰੋ"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ਇੰਜਨ ਸੈਟਿੰਗਾਂ ਲਾਂਚ ਕਰੋ"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ਤਰਜੀਹੀ ਇੰਜਣ"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ਸਧਾਰਨ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ਬੋਲਣ ਦੀ ਪਿੱਚ ਨੂੰ ਦੁਬਾਰਾ ਮੁੜ-ਸੈੱਟ ਕਰੋ"</string>
@@ -223,7 +223,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ਗੁਣ ਛਾਣਬੀਣ ਦੇਖੋ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾ ਮੋਬਾਈਲ ਡੇਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ Wi‑Fi ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾ ਮੋਬਾਈਲ ਡਾਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ ਵਾਈ-ਫਾਈ ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ਉਪਲਬਧ ਹੋਣ \'ਤੇ ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਸ਼ਨ ਵਰਤੋ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ਡੀਬਗਿੰਗ ਕੇਵਲ ਵਿਕਾਸ ਮੰਤਵਾਂ ਲਈ ਹੁੰਦੀ ਹੈ। ਇਸਨੂੰ ਆਪਣੇ ਕੰਪਿਊਟਰ ਅਤੇ ਆਪਣੇ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਡਾਟਾ ਕਾਪੀ ਕਰਨ ਲਈ ਵਰਤੋ, ਸੂਚਨਾ ਦੇ ਬਿਨਾਂ ਆਪਣੇ ਡੀਵਾਈਸ ਤੇ ਐਪਾਂ ਸਥਾਪਤ ਕਰੋ ਅਤੇ ਲੌਗ ਡਾਟਾ ਪੜ੍ਹੋ।"</string>
@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"ਪੂਰੀ ਤਰ੍ਹਾਂ ਚਾਰਜ ਹੋਣ ਤੱਕ <xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ਅਗਿਆਤ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>

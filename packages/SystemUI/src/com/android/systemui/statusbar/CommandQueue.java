@@ -81,6 +81,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SHOW_GLOBAL_ACTIONS           = 34 << MSG_SHIFT;
     private static final int MSG_TOGGLE_PANEL                  = 35 << MSG_SHIFT;
     private static final int MSG_SHOW_SHUTDOWN_UI              = 36 << MSG_SHIFT;
+    private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR  = 37 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -132,6 +133,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void startAssist(Bundle args) { }
         default void onCameraLaunchGestureDetected(int source) { }
         default void showPictureInPictureMenu() { }
+        default void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) { }
 
         default void addQsTile(ComponentName tile) { }
         default void remQsTile(ComponentName tile) { }
@@ -441,6 +443,13 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
+    public void setTopAppHidesStatusBar(boolean hidesStatusBar) {
+        mHandler.removeMessages(MSG_SET_TOP_APP_HIDES_STATUS_BAR);
+        mHandler.obtainMessage(MSG_SET_TOP_APP_HIDES_STATUS_BAR, hidesStatusBar ? 1 : 0, 0)
+                .sendToTarget();
+    }
+
+    @Override
     public void showShutdownUi(boolean isReboot, String reason) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_SHUTDOWN_UI);
@@ -638,6 +647,11 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SHOW_SHUTDOWN_UI:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).handleShowShutdownUi(msg.arg1 != 0, (String) msg.obj);
+                    }
+                    break;
+                case MSG_SET_TOP_APP_HIDES_STATUS_BAR:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setTopAppHidesStatusBar(msg.arg1 != 0);
                     }
                     break;
             }

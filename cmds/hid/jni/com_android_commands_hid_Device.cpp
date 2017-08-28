@@ -101,16 +101,15 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
 
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
-    ev.type = UHID_CREATE2;
-    strncpy((char*)ev.u.create2.name, name, UHID_MAX_NAME_LENGTH);
-    memcpy(&ev.u.create2.rd_data, descriptor.get(),
-            descriptorSize * sizeof(ev.u.create2.rd_data[0]));
-    ev.u.create2.rd_size = descriptorSize;
-    ev.u.create2.bus = BUS_BLUETOOTH;
-    ev.u.create2.vendor = vid;
-    ev.u.create2.product = pid;
-    ev.u.create2.version = 0;
-    ev.u.create2.country = 0;
+    ev.type = UHID_CREATE;
+    strncpy((char*)ev.u.create.name, name, UHID_MAX_NAME_LENGTH);
+    ev.u.create.rd_data = descriptor.get();
+    ev.u.create.rd_size = descriptorSize;
+    ev.u.create.bus = BUS_BLUETOOTH;
+    ev.u.create.vendor = vid;
+    ev.u.create.product = pid;
+    ev.u.create.version = 0;
+    ev.u.create.country = 0;
 
     errno = 0;
     ssize_t ret = TEMP_FAILURE_RETRY(::write(fd, &ev, sizeof(ev)));
@@ -159,9 +158,9 @@ Device::~Device() {
 void Device::sendReport(uint8_t* report, size_t reportSize) {
     struct uhid_event ev;
     memset(&ev, 0, sizeof(ev));
-    ev.type = UHID_INPUT2;
-    ev.u.input2.size = reportSize;
-    memcpy(&ev.u.input2.data, report, reportSize);
+    ev.type = UHID_INPUT;
+    ev.u.input.size = reportSize;
+    memcpy(&ev.u.input.data, report, reportSize);
     ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
         LOGE("Failed to send hid event: %s", strerror(errno));
