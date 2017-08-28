@@ -321,7 +321,8 @@ public class AppWindowContainerController
         }
     }
 
-    public void setVisibility(boolean visible, boolean deferHidingClient) {
+    public void setVisibility(boolean visible, boolean visibleIgnoringKeyguard,
+            boolean deferHidingClient) {
         synchronized(mWindowMap) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: "
@@ -360,13 +361,16 @@ public class AppWindowContainerController
             wtoken.hiddenRequested = !visible;
             wtoken.mDeferHidingClient = deferHidingClient;
 
+            if (!visibleIgnoringKeyguard) {
+                mService.mUnknownAppVisibilityController.appRemovedOrHidden(wtoken);
+            }
+
             if (!visible) {
                 // If the app is dead while it was visible, we kept its dead window on screen.
                 // Now that the app is going invisible, we can remove it. It will be restarted
                 // if made visible again.
                 wtoken.removeDeadWindows();
                 wtoken.setVisibleBeforeClientHidden();
-                mService.mUnknownAppVisibilityController.appRemovedOrHidden(wtoken);
             } else {
                 if (!mService.mAppTransition.isTransitionSet()
                         && mService.mAppTransition.isReady()) {
