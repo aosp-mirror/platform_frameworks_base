@@ -1408,6 +1408,12 @@ public class DatabaseUtils {
         } else if (prefixSql.equals("END")) {
             return STATEMENT_COMMIT;
         } else if (prefixSql.equals("ROL")) {
+            boolean isRollbackToSavepoint = sql.toUpperCase(Locale.ROOT).contains(" TO ");
+            if (isRollbackToSavepoint) {
+                Log.w(TAG, "Statement '" + sql
+                        + "' may not work on API levels 16-27, use ';" + sql + "' instead");
+                return STATEMENT_OTHER;
+            }
             return STATEMENT_ABORT;
         } else if (prefixSql.equals("BEG")) {
             return STATEMENT_BEGIN;

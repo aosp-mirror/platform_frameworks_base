@@ -1221,4 +1221,19 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
                 InstrumentationRegistry.getInstrumentation()).executeShellCommand(cmd);
     }
 
+    @SmallTest
+    public void testSavepointRollbacks() {
+        try (SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(":memory:", null)) {
+            db.execSQL("drop table if exists data");
+            db.execSQL("create table if not exists data (id INTEGER PRIMARY KEY, val TEXT)");
+            db.execSQL("begin deferred transaction");
+            db.execSQL("insert into data (val) values('row 1')");
+            db.execSQL("savepoint foo");
+            db.execSQL("insert into data (val) values('row 2')");
+            db.execSQL("rollback to foo");
+            db.execSQL("commit transaction");
+            long rowCount = DatabaseUtils.longForQuery(db, "select count(*) from data", null);
+            assertEquals(1, rowCount);
+        }
+    }
 }
