@@ -803,12 +803,14 @@ public class LockPatternUtils {
                         + "of length " + MIN_LOCK_PASSWORD_SIZE);
             }
 
-            final int computedQuality = PasswordMetrics.computeForPassword(password).quality;
-            setLong(PASSWORD_TYPE_KEY, Math.max(requestedQuality, computedQuality), userHandle);
+            setLong(PASSWORD_TYPE_KEY,
+                    computePasswordQuality(CREDENTIAL_TYPE_PASSWORD, password, requestedQuality),
+                    userHandle);
             getLockSettings().setLockCredential(password, CREDENTIAL_TYPE_PASSWORD, savedPassword,
                     requestedQuality, userHandle);
 
-            updateEncryptionPasswordIfNeeded(password, computedQuality, userHandle);
+            updateEncryptionPasswordIfNeeded(password,
+                    PasswordMetrics.computeForPassword(password).quality, userHandle);
             updatePasswordHistory(password, userHandle);
         } catch (RemoteException re) {
             // Cant do much
@@ -895,6 +897,24 @@ public class LockPatternUtils {
     public int getKeyguardStoredPasswordQuality(int userHandle) {
         return (int) getLong(PASSWORD_TYPE_KEY,
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
+    }
+
+    /**
+     * Returns the password quality of the given credential, promoting it to a higher level
+     * if DevicePolicyManager has a stronger quality requirement. This value will be written
+     * to PASSWORD_TYPE_KEY.
+     */
+    private int computePasswordQuality(int type, String credential, int requestedQuality) {
+        final int quality;
+        if (type == CREDENTIAL_TYPE_PASSWORD) {
+            int computedQuality = PasswordMetrics.computeForPassword(credential).quality;
+            quality = Math.max(requestedQuality, computedQuality);
+        } else if (type == CREDENTIAL_TYPE_PATTERN)  {
+            quality = DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+        } else /* if (type == CREDENTIAL_TYPE_NONE) */ {
+            quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+        }
+        return quality;
     }
 
     /**
@@ -1505,25 +1525,34 @@ public class LockPatternUtils {
         }
     }
 
-    public boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
-            byte[] token, int userId) {
+    /**
+     * Change a user's lock credential with a pre-configured escrow token.
+     *
+     * @param credential The new credential to be set
+     * @param type Credential type: password / pattern / none.
+     * @param requestedQuality the requested password quality by DevicePolicyManager.
+     *        See {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * @param tokenHandle Handle of the escrow token
+     * @param token Escrow token
+     * @param userId The user who's lock credential to be changed
+     * @return {@code true} if the operation is successful.
+     */
+    public boolean setLockCredentialWithToken(String credential, int type, int requestedQuality,
+            long tokenHandle, byte[] token, int userId) {
         try {
             if (type != CREDENTIAL_TYPE_NONE) {
                 if (TextUtils.isEmpty(credential) || credential.length() < MIN_LOCK_PASSWORD_SIZE) {
                     throw new IllegalArgumentException("password must not be null and at least "
                             + "of length " + MIN_LOCK_PASSWORD_SIZE);
                 }
-
-                final int computedQuality = PasswordMetrics.computeForPassword(credential).quality;
-                int quality = Math.max(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC,
-                        computedQuality);
+                final int quality = computePasswordQuality(type, credential, requestedQuality);
                 if (!getLockSettings().setLockCredentialWithToken(credential, type, tokenHandle,
                         token, quality, userId)) {
                     return false;
                 }
                 setLong(PASSWORD_TYPE_KEY, quality, userId);
 
-                updateEncryptionPasswordIfNeeded(credential, computedQuality, userId);
+                updateEncryptionPasswordIfNeeded(credential, quality, userId);
                 updatePasswordHistory(credential, userId);
             } else {
                 if (!TextUtils.isEmpty(credential)) {
