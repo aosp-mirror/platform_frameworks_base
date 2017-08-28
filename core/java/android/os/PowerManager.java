@@ -581,6 +581,16 @@ public final class PowerManager {
 
     /**
      * The value to pass as the 'reason' argument to reboot() to reboot into
+     * bootloader mode if you need to get to the choppa (cit)
+     * <p>
+     * Requires {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     * @hide
+     */
+    public static final String REBOOT_BOOTLOADER = "bootloader";
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to reboot into
      * recovery mode for applying system updates.
      * <p>
      * Requires the {@link android.Manifest.permission#RECOVERY}

@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.view.View;
+import android.os.PowerManager;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -127,7 +128,13 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         bar.getIndeterminateDrawable().setTint(color);
         TextView message = d.findViewById(R.id.text1);
         message.setTextColor(color);
-        if (isReboot) message.setText(R.string.reboot_to_reset_message);
+        if (reason != null && PowerManager.REBOOT_BOOTLOADER.equals(reason)) {
+            message.setText(com.android.internal.R.string.reboot_to_bootloader_message);
+        } else if (reason != null && PowerManager.REBOOT_RECOVERY.equals(reason)) {
+            message.setText(com.android.internal.R.string.reboot_to_recovery_message);
+        } else if (isReboot) {
+            message.setText(R.string.reboot_message);
+        }
 
         GradientColors colors = Dependency.get(SysuiColorExtractor.class).getNeutralColors();
         background.setColor(colors.getMainColor(), false);

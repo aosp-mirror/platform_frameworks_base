@@ -96,4 +96,12 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
         } catch (RemoteException e) {
         }
     }
+
+    @Override
+    public void advancedReboot(String mode) {
+        try {
+            mBarService.advancedReboot(mode);
+        } catch (RemoteException e) {
+        }
+    }
 }
