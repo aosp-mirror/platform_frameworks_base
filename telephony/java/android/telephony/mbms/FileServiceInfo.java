@@ -59,7 +59,7 @@ public final class FileServiceInfo extends ServiceInfo implements Parcelable {
     FileServiceInfo(Parcel in) {
         super(in);
         files = new ArrayList<FileInfo>();
-        in.readList(files, null);
+        in.readList(files, FileInfo.class.getClassLoader());
     }
 
     @Override

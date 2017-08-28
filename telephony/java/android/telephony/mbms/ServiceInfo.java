@@ -124,7 +124,7 @@ public class ServiceInfo {
     /**
      * The class name for this service - used to categorize and filter
      */
-    public String getClassName() {
+    public String getServiceClassName() {
         return className;
     }
 
