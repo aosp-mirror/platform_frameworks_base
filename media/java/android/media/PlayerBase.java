@@ -276,6 +276,7 @@ public abstract class PlayerBase {
         // volume used by the player
         try {
             if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio) {
+                getService().playerHasOpPlayAudio(mPlayerIId, mHasAppOpsPlayAudio);
                 if (mHasAppOpsPlayAudio) {
                     if (DEBUG_APP_OPS) {
                         Log.v(TAG, "updateAppOpsPlayAudio: unmuting player, vol=" + mLeftVolume
