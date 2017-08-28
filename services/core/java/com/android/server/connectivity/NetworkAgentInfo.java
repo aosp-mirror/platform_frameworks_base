@@ -562,13 +562,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
                 "everCaptivePortalDetected{" + everCaptivePortalDetected + "} " +
                 "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} " +
+                "clat{" + clatd + "} " +
                 "}";
     }
 
     public String name() {
         return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
-                networkInfo.getSubtypeName() + ") - " +
-                (network == null ? "null" : network.toString()) + "]";
+                networkInfo.getSubtypeName() + ") - " + Objects.toString(network) + "]";
     }
 
     // Enables sorting in descending order of score.
