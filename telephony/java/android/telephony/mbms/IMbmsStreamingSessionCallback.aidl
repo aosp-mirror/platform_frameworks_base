@@ -24,11 +24,11 @@ import java.util.List;
  * The interface the clients top-level streaming listener will satisfy.
  * @hide
  */
-oneway interface IMbmsStreamingManagerCallback
+oneway interface IMbmsStreamingSessionCallback
 {
-    void error(int errorCode, String message);
+    void onError(int errorCode, String message);
 
-    void streamingServicesUpdated(in List<StreamingServiceInfo> services);
+    void onStreamingServicesUpdated(in List<StreamingServiceInfo> services);
 
-    void middlewareReady();
+    void onMiddlewareReady();
 }
