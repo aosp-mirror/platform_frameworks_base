@@ -1592,7 +1592,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void notifyUnknownVisibilityLaunched() {
-        mWindowContainerController.notifyUnknownVisibilityLaunched();
+
+        // No display activities never add a window, so there is no point in waiting them for
+        // relayout.
+        if (!noDisplay) {
+            mWindowContainerController.notifyUnknownVisibilityLaunched();
+        }
     }
 
     /**
