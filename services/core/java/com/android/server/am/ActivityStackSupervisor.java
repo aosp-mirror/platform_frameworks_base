@@ -20,7 +20,6 @@ import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
@@ -3266,7 +3265,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final ActivityStack stack = task.getStack();
 
         r.mLaunchTaskBehind = false;
-        task.setLastThumbnailLocked(r.screenshotActivityLocked());
         mRecentTasks.addLocked(task);
         mService.mTaskChangeNotificationController.notifyTaskStackChanged();
         r.setVisibility(false);

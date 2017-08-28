@@ -445,13 +445,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<>();
 
     /**
-     * List of window tokens that have finished drawing their own windows and
-     * no longer need to show any saved surfaces. Windows that's still showing
-     * saved surfaces will be cleaned up after next animation pass.
-     */
-    final ArrayList<AppWindowToken> mFinishedEarlyAnim = new ArrayList<>();
-
-    /**
      * List of app window tokens that are waiting for replacing windows. If the
      * replacement doesn't come in time the stale windows needs to be disposed of.
      */
@@ -2078,17 +2071,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 winAnimator.mEnterAnimationPending = false;
                 winAnimator.mEnteringAnimation = false;
-                final boolean usingSavedSurfaceBeforeVisible =
-                        oldVisibility != View.VISIBLE && win.isAnimatingWithSavedSurface();
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                    if (winAnimator.hasSurface() && !win.mAnimatingExit
-                            && usingSavedSurfaceBeforeVisible) {
-                        Slog.d(TAG, "Ignoring layout to invisible when using saved surface " + win);
-                    }
-                }
 
-                if (winAnimator.hasSurface() && !win.mAnimatingExit
-                        && !usingSavedSurfaceBeforeVisible) {
+                if (winAnimator.hasSurface() && !win.mAnimatingExit) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Relayout invis " + win
                             + ": mAnimatingExit=" + win.mAnimatingExit);
                     // If we are not currently running the exit animation, we
@@ -5372,14 +5356,6 @@ public class WindowManagerService extends IWindowManager.Stub
             w.mWinAnimator.destroyPreservedSurfaceLocked();
         }
         mDestroyPreservedSurface.clear();
-    }
-
-    void stopUsingSavedSurfaceLocked() {
-        for (int i = mFinishedEarlyAnim.size() - 1; i >= 0 ; i--) {
-            final AppWindowToken wtoken = mFinishedEarlyAnim.get(i);
-            wtoken.stopUsingSavedSurfaceLocked();
-        }
-        mFinishedEarlyAnim.clear();
     }
 
     // -------------------------------------------------------------

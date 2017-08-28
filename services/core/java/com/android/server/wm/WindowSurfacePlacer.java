@@ -2,7 +2,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManagerInternal.APP_TRANSITION_SAVED_SURFACE;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
@@ -445,13 +444,6 @@ class WindowSurfacePlacer {
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mClosingApps.valueAt(i);
 
-            // If we still have some windows animating with saved surfaces that's
-            // either invisible or already removed, mark them exiting so that they
-            // are disposed of after the exit animation. These are not supposed to
-            // be shown, or are delayed removal until app is actually drawn (in which
-            // case the window will be removed after the animation).
-            wtoken.markSavedSurfaceExiting();
-
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             appAnimator.clearThumbnail();
@@ -539,8 +531,6 @@ class WindowSurfacePlacer {
                         + wtoken.startingMoved + " isRelaunching()="
                         + wtoken.isRelaunching());
 
-                final boolean drawnBeforeRestoring = wtoken.allDrawn;
-                wtoken.restoreSavedSurfaceForInterestingWindows();
 
                 final boolean allDrawn = wtoken.allDrawn && !wtoken.isRelaunching();
                 if (!allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
@@ -549,8 +539,7 @@ class WindowSurfacePlacer {
                 final TaskStack stack = wtoken.getStack();
                 final int stackId = stack != null ? stack.mStackId : INVALID_STACK_ID;
                 if (allDrawn) {
-                    outReasons.put(stackId, drawnBeforeRestoring ? APP_TRANSITION_WINDOWS_DRAWN
-                            : APP_TRANSITION_SAVED_SURFACE);
+                    outReasons.put(stackId,  APP_TRANSITION_WINDOWS_DRAWN);
                 } else {
                     outReasons.put(stackId, wtoken.startingData instanceof SplashScreenStartingData
                             ? APP_TRANSITION_SPLASH_SCREEN

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
@@ -347,7 +346,7 @@ class WindowStateAnimator {
             mAnimation.cancel();
             mAnimation = null;
             mLocalAnimating = false;
-            mWin.destroyOrSaveSurfaceUnchecked();
+            mWin.destroySurfaceUnchecked();
         }
     }
 
@@ -507,7 +506,7 @@ class WindowStateAnimator {
                     + drawStateToString());
         }
 
-        boolean layoutNeeded = mWin.clearAnimatingWithSavedSurface();
+        boolean layoutNeeded = false;
 
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
@@ -626,11 +625,6 @@ class WindowStateAnimator {
 
     WindowSurfaceController createSurfaceLocked(int windowType, int ownerUid) {
         final WindowState w = mWin;
-        if (w.restoreSavedSurface()) {
-            if (DEBUG_ANIM) Slog.i(TAG,
-                    "createSurface: " + this + ": called when we had a saved surface");
-            return mSurfaceController;
-        }
 
         if (mSurfaceController != null) {
             return mSurfaceController;
@@ -789,8 +783,7 @@ class WindowStateAnimator {
     }
 
     boolean hasSurface() {
-        return !mWin.hasSavedSurface()
-                && mSurfaceController != null && mSurfaceController.hasSurface();
+        return mSurfaceController != null && mSurfaceController.hasSurface();
     }
 
     void destroySurfaceLocked() {
@@ -800,8 +793,6 @@ class WindowStateAnimator {
                 wtoken.startingDisplayed = false;
             }
         }
-
-        mWin.clearHasSavedSurface();
 
         if (mSurfaceController == null) {
             return;

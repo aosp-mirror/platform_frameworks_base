@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
-
 import static com.android.server.wm.TaskSnapshotPersister.DISABLE_FULL_SIZED_BITMAPS;
 import static com.android.server.wm.TaskSnapshotPersister.REDUCED_SCALE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -225,7 +223,7 @@ class TaskSnapshotController {
     }
 
     private boolean shouldDisableSnapshots() {
-        return !ENABLE_TASK_SNAPSHOTS || mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
+        return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
     private Rect minRect(Rect rect1, Rect rect2) {

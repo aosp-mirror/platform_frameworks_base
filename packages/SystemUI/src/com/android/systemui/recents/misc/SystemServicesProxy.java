@@ -47,7 +47,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
@@ -59,7 +58,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -95,9 +93,7 @@ import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -717,21 +713,7 @@ public class SystemServicesProxy {
             return thumbnailData;
         }
 
-        ThumbnailData thumbnailData = getThumbnail(taskId, reduced);
-        if (thumbnailData.thumbnail != null && !ActivityManager.ENABLE_TASK_SNAPSHOTS) {
-            thumbnailData.thumbnail.setHasAlpha(false);
-            // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
-            // left pixel, then assume the whole thumbnail is transparent. Generally, proper
-            // screenshots are always composed onto a bitmap that has no alpha.
-            if (Color.alpha(thumbnailData.thumbnail.getPixel(0, 0)) == 0) {
-                mBgProtectionCanvas.setBitmap(thumbnailData.thumbnail);
-                mBgProtectionCanvas.drawRect(0, 0, thumbnailData.thumbnail.getWidth(),
-                        thumbnailData.thumbnail.getHeight(), mBgProtectionPaint);
-                mBgProtectionCanvas.setBitmap(null);
-                Log.e(TAG, "Invalid screenshot detected from getTaskThumbnail()");
-            }
-        }
-        return thumbnailData;
+        return getThumbnail(taskId, reduced);
     }
 
     /**
@@ -742,43 +724,17 @@ public class SystemServicesProxy {
             return new ThumbnailData();
         }
 
-        final ThumbnailData thumbnailData;
-        if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
-            ActivityManager.TaskSnapshot snapshot = null;
-            try {
-                snapshot = ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to retrieve snapshot", e);
-            }
-            if (snapshot != null) {
-                thumbnailData = ThumbnailData.createFromTaskSnapshot(snapshot);
-            } else {
-                return new ThumbnailData();
-            }
-        } else {
-            ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
-            if (taskThumbnail == null) {
-                return new ThumbnailData();
-            }
-
-            Bitmap thumbnail = taskThumbnail.mainThumbnail;
-            ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
-            if (thumbnail == null && descriptor != null) {
-                thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor(),
-                        null, sBitmapOptions);
-            }
-            if (descriptor != null) {
-                try {
-                    descriptor.close();
-                } catch (IOException e) {
-                }
-            }
-            thumbnailData = new ThumbnailData();
-            thumbnailData.thumbnail = thumbnail;
-            thumbnailData.orientation = taskThumbnail.thumbnailInfo.screenOrientation;
-            thumbnailData.insets.setEmpty();
+        ActivityManager.TaskSnapshot snapshot = null;
+        try {
+            snapshot = ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to retrieve snapshot", e);
         }
-        return thumbnailData;
+        if (snapshot != null) {
+            return ThumbnailData.createFromTaskSnapshot(snapshot);
+        } else {
+            return new ThumbnailData();
+        }
     }
 
     /**

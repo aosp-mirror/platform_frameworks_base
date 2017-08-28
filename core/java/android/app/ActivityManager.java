@@ -141,16 +141,6 @@ public class ActivityManager {
     private static final int FIRST_START_NON_FATAL_ERROR_CODE = 100;
     private static final int LAST_START_NON_FATAL_ERROR_CODE = 199;
 
-    /**
-     * System property to enable task snapshots.
-     * @hide
-     */
-    public final static boolean ENABLE_TASK_SNAPSHOTS;
-
-    static {
-        ENABLE_TASK_SNAPSHOTS = SystemProperties.getBoolean("persist.enable_task_snapshots", true);
-    }
-
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
         final Context mContext;
@@ -2101,165 +2091,6 @@ public class ActivityManager {
     }
 
     /**
-     * Metadata related to the {@link TaskThumbnail}.
-     *
-     * @hide
-     */
-    public static class TaskThumbnailInfo implements Parcelable {
-        /** @hide */
-        public static final String ATTR_TASK_THUMBNAILINFO_PREFIX = "task_thumbnailinfo_";
-        private static final String ATTR_TASK_WIDTH =
-                ATTR_TASK_THUMBNAILINFO_PREFIX + "task_width";
-        private static final String ATTR_TASK_HEIGHT =
-                ATTR_TASK_THUMBNAILINFO_PREFIX + "task_height";
-        private static final String ATTR_SCREEN_ORIENTATION =
-                ATTR_TASK_THUMBNAILINFO_PREFIX + "screen_orientation";
-
-        public int taskWidth;
-        public int taskHeight;
-        public int screenOrientation = Configuration.ORIENTATION_UNDEFINED;
-
-        public TaskThumbnailInfo() {
-            // Do nothing
-        }
-
-        private TaskThumbnailInfo(Parcel source) {
-            readFromParcel(source);
-        }
-
-        /**
-         * Resets this info state to the initial state.
-         * @hide
-         */
-        public void reset() {
-            taskWidth = 0;
-            taskHeight = 0;
-            screenOrientation = Configuration.ORIENTATION_UNDEFINED;
-        }
-
-        /**
-         * Copies from another ThumbnailInfo.
-         */
-        public void copyFrom(TaskThumbnailInfo o) {
-            taskWidth = o.taskWidth;
-            taskHeight = o.taskHeight;
-            screenOrientation = o.screenOrientation;
-        }
-
-        /** @hide */
-        public void saveToXml(XmlSerializer out) throws IOException {
-            out.attribute(null, ATTR_TASK_WIDTH, Integer.toString(taskWidth));
-            out.attribute(null, ATTR_TASK_HEIGHT, Integer.toString(taskHeight));
-            out.attribute(null, ATTR_SCREEN_ORIENTATION, Integer.toString(screenOrientation));
-        }
-
-        /** @hide */
-        public void restoreFromXml(String attrName, String attrValue) {
-            if (ATTR_TASK_WIDTH.equals(attrName)) {
-                taskWidth = Integer.parseInt(attrValue);
-            } else if (ATTR_TASK_HEIGHT.equals(attrName)) {
-                taskHeight = Integer.parseInt(attrValue);
-            } else if (ATTR_SCREEN_ORIENTATION.equals(attrName)) {
-                screenOrientation = Integer.parseInt(attrValue);
-            }
-        }
-
-        public int describeContents() {
-            return 0;
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(taskWidth);
-            dest.writeInt(taskHeight);
-            dest.writeInt(screenOrientation);
-        }
-
-        public void readFromParcel(Parcel source) {
-            taskWidth = source.readInt();
-            taskHeight = source.readInt();
-            screenOrientation = source.readInt();
-        }
-
-        public static final Creator<TaskThumbnailInfo> CREATOR = new Creator<TaskThumbnailInfo>() {
-            public TaskThumbnailInfo createFromParcel(Parcel source) {
-                return new TaskThumbnailInfo(source);
-            }
-            public TaskThumbnailInfo[] newArray(int size) {
-                return new TaskThumbnailInfo[size];
-            }
-        };
-    }
-
-    /** @hide */
-    public static class TaskThumbnail implements Parcelable {
-        public Bitmap mainThumbnail;
-        public ParcelFileDescriptor thumbnailFileDescriptor;
-        public TaskThumbnailInfo thumbnailInfo;
-
-        public TaskThumbnail() {
-        }
-
-        private TaskThumbnail(Parcel source) {
-            readFromParcel(source);
-        }
-
-        public int describeContents() {
-            if (thumbnailFileDescriptor != null) {
-                return thumbnailFileDescriptor.describeContents();
-            }
-            return 0;
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            if (mainThumbnail != null) {
-                dest.writeInt(1);
-                mainThumbnail.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
-            }
-            if (thumbnailFileDescriptor != null) {
-                dest.writeInt(1);
-                thumbnailFileDescriptor.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
-            }
-            if (thumbnailInfo != null) {
-                dest.writeInt(1);
-                thumbnailInfo.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
-            }
-        }
-
-        public void readFromParcel(Parcel source) {
-            if (source.readInt() != 0) {
-                mainThumbnail = Bitmap.CREATOR.createFromParcel(source);
-            } else {
-                mainThumbnail = null;
-            }
-            if (source.readInt() != 0) {
-                thumbnailFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(source);
-            } else {
-                thumbnailFileDescriptor = null;
-            }
-            if (source.readInt() != 0) {
-                thumbnailInfo = TaskThumbnailInfo.CREATOR.createFromParcel(source);
-            } else {
-                thumbnailInfo = null;
-            }
-        }
-
-        public static final Creator<TaskThumbnail> CREATOR = new Creator<TaskThumbnail>() {
-            public TaskThumbnail createFromParcel(Parcel source) {
-                return new TaskThumbnail(source);
-            }
-            public TaskThumbnail[] newArray(int size) {
-                return new TaskThumbnail[size];
-            }
-        };
-    }
-
-    /**
      * Represents a task snapshot.
      * @hide
      */
@@ -2353,15 +2184,6 @@ public class ActivityManager {
                 return new TaskSnapshot[size];
             }
         };
-    }
-
-    /** @hide */
-    public TaskThumbnail getTaskThumbnail(int id) throws SecurityException {
-        try {
-            return getService().getTaskThumbnail(id);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /** @hide */

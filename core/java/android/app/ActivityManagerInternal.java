@@ -40,12 +40,6 @@ import java.util.List;
 public abstract class ActivityManagerInternal {
 
     /**
-     * Type for {@link #notifyAppTransitionStarting}: The transition was started because we had
-     * the surface saved.
-     */
-    public static final int APP_TRANSITION_SAVED_SURFACE = 0;
-
-    /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we drew
      * the splash screen.
      */
