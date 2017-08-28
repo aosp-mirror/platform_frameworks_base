@@ -40,7 +40,10 @@
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:orientation="vertical">
             <include layout="@layout/notification_template_part_line1"/>
-            <include layout="@layout/notification_template_progress"/>
+            <include layout="@layout/notification_template_progress"
+                     android:layout_width="match_parent"
+                     android:layout_height="@dimen/notification_progress_bar_height"
+                     android:layout_marginTop="@dimen/notification_progress_margin_top"/>
             <include layout="@layout/notification_template_text"/>
         </LinearLayout>
         <ImageView

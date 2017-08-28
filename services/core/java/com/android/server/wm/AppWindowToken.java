@@ -514,7 +514,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean windowsAreFocusable() {
-        return StackId.canReceiveKeys(getTask().mStack.mStackId) || mAlwaysFocusable;
+        return getWindowConfiguration().canReceiveKeys() || mAlwaysFocusable;
     }
 
     AppWindowContainerController getController() {

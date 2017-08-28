@@ -558,9 +558,9 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Paziņojumu kategorijas šajā lietotnē nav pieejamas."</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Paziņojumus no šīs lietotnes nevar izslēgt"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="zero">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
-      <item quantity="one">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijas.</item>
-      <item quantity="other">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
+      <item quantity="zero">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
+      <item quantity="one">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijas.</item>
+      <item quantity="other">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -781,4 +781,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Lietotnes, kas darbojas fonā"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Pieskarieties, lai skatītu detalizētu informāciju par akumulatora un datu lietojumu"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vai izslēgt mobilos datus?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Lietotne Iestatījumi nevar verificēt jūsu atbildi, jo cita lietotne aizsedz atļaujas pieprasījumu."</string>
 </resources>

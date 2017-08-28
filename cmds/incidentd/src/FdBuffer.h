@@ -21,7 +21,6 @@
 
 #include <utils/Errors.h>
 
-#include <set>
 #include <vector>
 
 using namespace android;
@@ -74,7 +73,8 @@ public:
     size_t size();
 
     /**
-     * Write the data that we recorded to the fd given.
+     * [Deprecated] Write the data that we recorded to the fd given.
+     * TODO: remove it once the iterator api is working
      */
     status_t write(ReportRequestSet* requests);
 
@@ -82,6 +82,37 @@ public:
      * How long the read took in milliseconds.
      */
     int64_t durationMs() { return mFinishTime - mStartTime; }
+
+    /**
+     * Read data stored in FdBuffer
+     */
+    class iterator;
+    friend class iterator;
+    class iterator : public std::iterator<std::random_access_iterator_tag, uint8_t> {
+    private:
+        FdBuffer& mFdBuffer;
+        size_t mIndex;
+        size_t mOffset;
+    public:
+        explicit iterator(FdBuffer& buffer, ssize_t index, ssize_t offset)
+                : mFdBuffer(buffer), mIndex(index), mOffset(offset) {}
+        iterator& operator=(iterator& other) { return other; }
+        iterator& operator+(size_t offset); // this is implemented in .cpp
+        iterator& operator+=(size_t offset) { return *this + offset; }
+        iterator& operator++() { return *this + 1; }
+        iterator operator++(int) { return *this + 1; }
+        bool operator==(iterator other) const {
+            return mIndex == other.mIndex && mOffset == other.mOffset;
+        }
+        bool operator!=(iterator other) const { return !(*this == other); }
+        reference operator*() const { return mFdBuffer.mBuffers[mIndex][mOffset]; }
+
+        // random access could make the iterator out of bound
+        size_t bytesRead();
+        bool outOfBound() { return bytesRead() > mFdBuffer.size(); };
+    };
+    iterator begin() { return iterator(*this, 0, 0); }
+    iterator end();
 
 private:
     vector<uint8_t*> mBuffers;

@@ -7749,11 +7749,11 @@ public final class ViewRootImpl implements ViewParent,
 
     final class HighContrastTextManager implements HighTextContrastChangeListener {
         HighContrastTextManager() {
-            mAttachInfo.mHighContrastText = mAccessibilityManager.isHighTextContrastEnabled();
+            ThreadedRenderer.setHighContrastText(mAccessibilityManager.isHighTextContrastEnabled());
         }
         @Override
         public void onHighTextContrastStateChanged(boolean enabled) {
-            mAttachInfo.mHighContrastText = enabled;
+            ThreadedRenderer.setHighContrastText(enabled);
 
             // Destroy Displaylists so they can be recreated with high contrast recordings
             destroyHardwareResources();

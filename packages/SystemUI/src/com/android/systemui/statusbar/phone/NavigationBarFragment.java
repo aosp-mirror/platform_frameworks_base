@@ -504,7 +504,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 // If we recently long-pressed the other button then they were
                 // long-pressed 'together'
                 if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
-                    activityManager.stopLockTaskMode();
+                    activityManager.stopSystemLockTaskMode();
                     // When exiting refresh disabled flags.
                     mNavigationBarView.setDisabledFlags(mDisabledFlags1, true);
                     return true;
@@ -522,7 +522,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 } else if (touchExplorationEnabled && inLockTaskMode) {
                     // When in accessibility mode a long press that is recents (not back)
                     // should stop lock task.
-                    activityManager.stopLockTaskMode();
+                    activityManager.stopSystemLockTaskMode();
                     // When exiting refresh disabled flags.
                     mNavigationBarView.setDisabledFlags(mDisabledFlags1, true);
                     return true;

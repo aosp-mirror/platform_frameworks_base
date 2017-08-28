@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"الرٹس"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ریٹیل ڈیمو"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"‏USB کنکشن"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"ایپس پس منظر میں چل رہی ہیں"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> پس منظر میں چل رہی ہے"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ایپس پس منظر میں چل رہی ہیں"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ایپس بیٹری خرچ کر رہی ہیں"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> بیٹری کا استعمال کر رہی ہے"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ایپس بیٹری کا استعمال کر رہی ہیں"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>، <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"حفاظتی وضع"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> سے منسلک ہے۔ نیٹ ورک کا نظم کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏ہمیشہ آن VPN مربوط ہو رہا ہے…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏ہمیشہ آن VPN مربوط ہوگیا"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"‏ہمیشہ آن VPN سے غیر منسلک ہو گيا"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏ہمیشہ آن VPN کی خرابی"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏نیٹ ورک یا VPN کی ترتیبات تبدیل کریں"</string>
     <string name="upload_file" msgid="2897957172366730416">"فائل منتخب کریں"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"کوئی فائل منتخب نہیں کی گئی"</string>
     <string name="reset" msgid="2448168080964209908">"دوبارہ ترتیب دیں"</string>

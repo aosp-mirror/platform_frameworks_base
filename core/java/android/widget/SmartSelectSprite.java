@@ -30,11 +30,11 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.Shape;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewOverlay;
@@ -82,16 +82,16 @@ final class SmartSelectSprite {
 
         private final float[] mLineCoordinates;
 
-        private PolygonShape(final List<Pair<Float, Float>> points) {
+        private PolygonShape(final List<PointF> points) {
             mLineCoordinates = new float[points.size() * POINTS_PER_LINE];
 
             int index = 0;
-            Pair<Float, Float> currentPoint = points.get(0);
-            for (final Pair<Float, Float> nextPoint : points) {
-                mLineCoordinates[index] = currentPoint.first;
-                mLineCoordinates[index + 1] = currentPoint.second;
-                mLineCoordinates[index + 2] = nextPoint.first;
-                mLineCoordinates[index + 3] = nextPoint.second;
+            PointF currentPoint = points.get(0);
+            for (final PointF nextPoint : points) {
+                mLineCoordinates[index] = currentPoint.x;
+                mLineCoordinates[index + 1] = currentPoint.y;
+                mLineCoordinates[index + 2] = nextPoint.x;
+                mLineCoordinates[index + 3] = nextPoint.y;
 
                 index += POINTS_PER_LINE;
                 currentPoint = nextPoint;
@@ -342,9 +342,9 @@ final class SmartSelectSprite {
             final List<RectF> rectangles,
             final int color) {
         final List<Drawable> drawables = new LinkedList<>();
-        final Set<List<Pair<Float, Float>>> mergedPaths = calculateMergedPolygonPoints(rectangles);
+        final Set<List<PointF>> mergedPaths = calculateMergedPolygonPoints(rectangles);
 
-        for (List<Pair<Float, Float>> path : mergedPaths) {
+        for (List<PointF> path : mergedPaths) {
             // Add the starting point to the end of the polygon so that it ends up closed.
             path.add(path.get(0));
 
@@ -361,7 +361,7 @@ final class SmartSelectSprite {
         return drawables;
     }
 
-    private static Set<List<Pair<Float, Float>>> calculateMergedPolygonPoints(
+    private static Set<List<PointF>> calculateMergedPolygonPoints(
             List<RectF> rectangles) {
         final Set<List<RectF>> partitions = new HashSet<>();
         final LinkedList<RectF> listOfRects = new LinkedList<>(rectangles);
@@ -389,20 +389,20 @@ final class SmartSelectSprite {
             partitions.add(partition);
         }
 
-        final Set<List<Pair<Float, Float>>> result = new HashSet<>();
+        final Set<List<PointF>> result = new HashSet<>();
         for (List<RectF> partition : partitions) {
-            final List<Pair<Float, Float>> points = new LinkedList<>();
+            final List<PointF> points = new LinkedList<>();
 
             final Stack<RectF> rects = new Stack<>();
             for (RectF rect : partition) {
-                points.add(new Pair<>(rect.right, rect.top));
-                points.add(new Pair<>(rect.right, rect.bottom));
+                points.add(new PointF(rect.right, rect.top));
+                points.add(new PointF(rect.right, rect.bottom));
                 rects.add(rect);
             }
             while (!rects.isEmpty()) {
                 final RectF rect = rects.pop();
-                points.add(new Pair<>(rect.left, rect.bottom));
-                points.add(new Pair<>(rect.left, rect.top));
+                points.add(new PointF(rect.left, rect.bottom));
+                points.add(new PointF(rect.left, rect.top));
             }
 
             result.add(points);
@@ -426,7 +426,7 @@ final class SmartSelectSprite {
      * @see #cancelAnimation()
      */
     public void startAnimation(
-            final Pair<Float, Float> start,
+            final PointF start,
             final List<RectF> destinationRectangles,
             final Runnable onAnimationEnd) throws IllegalArgumentException {
         cancelAnimation();
@@ -439,7 +439,7 @@ final class SmartSelectSprite {
 
         final RectF centerRectangle = destinationRectangles
                 .stream()
-                .filter((r) -> r.contains(start.first, start.second))
+                .filter((r) -> contains(r, start))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Center point is not inside any of the rectangles!"));
@@ -452,7 +452,7 @@ final class SmartSelectSprite {
             startingOffset += rectangle.width();
         }
 
-        startingOffset += start.first - centerRectangle.left;
+        startingOffset += start.x - centerRectangle.left;
 
         final float centerRectangleHalfHeight = centerRectangle.height() / 2;
         final float startingOffsetLeft = startingOffset - centerRectangleHalfHeight;
@@ -630,6 +630,21 @@ final class SmartSelectSprite {
         final int result = array.getColor(0, DEFAULT_STROKE_COLOR);
         array.recycle();
         return result;
+    }
+
+    /**
+     * A variant of {@link RectF#contains(float, float)} that also allows the point to reside on
+     * the right boundary of the rectangle.
+     *
+     * @param rectangle the rectangle inside which the point should be to be considered "contained"
+     * @param point     the point which will be tested
+     * @return whether the point is inside the rectangle (or on it's right boundary)
+     */
+    private static boolean contains(final RectF rectangle, final PointF point) {
+        final float x = point.x;
+        final float y = point.y;
+        return x >= rectangle.left && x <= rectangle.right && y >= rectangle.top
+                && y <= rectangle.bottom;
     }
 
     private void addToOverlay(final Drawable drawable) {

@@ -93,11 +93,6 @@ public:
     virtual int width() override { return mState.getWidth(); }
     virtual int height() override { return mState.getHeight(); }
 
-    virtual void setHighContrastText(bool highContrastText) override {
-        mHighContrastText = highContrastText;
-    }
-    virtual bool isHighContrastText() override { return mHighContrastText; }
-
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas state operations
 // ----------------------------------------------------------------------------
@@ -311,7 +306,6 @@ private:
     DeferredBarrierType mDeferredBarrierType = DeferredBarrierType::None;
     const ClipBase* mDeferredBarrierClip = nullptr;
     DisplayList* mDisplayList = nullptr;
-    bool mHighContrastText = false;
     sk_sp<SkDrawFilter> mDrawFilter;
 }; // class RecordingCanvas
 

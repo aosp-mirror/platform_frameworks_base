@@ -5820,10 +5820,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // If the screen is currently frozen or off, then keep
         // it frozen/off until this window draws at its new
         // orientation.
-        // TODO (multidisplay): Support screen freezing on secondary displays.
-        final DisplayContent dc = mRoot.getDisplayContent(DEFAULT_DISPLAY);
-        if ((dc == null || !dc.okToDisplay())
-                && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
+        if (!w.mToken.okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Changing surface while display frozen: " + w);
             w.setOrientationChanging(true);
             w.mLastFreezeDuration = 0;

@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_PROPERTIES_H
 #define ANDROID_HWUI_PROPERTIES_H
 
+#include <cutils/compiler.h>
 #include <cutils/properties.h>
 
 /**
@@ -236,6 +237,8 @@ public:
     static ProfileType getProfileType();
     static RenderPipelineType getRenderPipelineType();
     static bool isSkiaEnabled();
+
+    ANDROID_API static bool enableHighContrastText;
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;

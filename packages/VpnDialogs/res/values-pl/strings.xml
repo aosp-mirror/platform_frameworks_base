@@ -24,20 +24,13 @@
     <string name="data_transmitted" msgid="7988167672982199061">"Wysłano:"</string>
     <string name="data_received" msgid="4062776929376067820">"Odebrano:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"Bajty: <xliff:g id="NUMBER_0">%1$s</xliff:g> / pakiety: <xliff:g id="NUMBER_1">%2$s</xliff:g>"</string>
-    <!-- no translation found for always_on_disconnected_title (1906740176262776166) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message (555634519845992917) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_lockdown (4232225539869452120) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_separator (3310614409322581371) -->
-    <skip />
-    <!-- no translation found for always_on_disconnected_message_settings_link (6172280302829992412) -->
-    <skip />
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Nie można połączyć się ze stałą siecią VPN"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"Aplikacja <xliff:g id="VPN_APP_0">%1$s</xliff:g> jest skonfigurowana tak, by była cały czas połączona, ale teraz nie może się połączyć. Telefon będzie korzystał z sieci publicznej, aż zdoła się ponownie połączyć z aplikacją <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Aplikacja <xliff:g id="VPN_APP">%1$s</xliff:g> jest skonfigurowana tak, by była cały czas połączona, ale teraz nie może się połączyć. Połączenie nie będzie dostępne, aż urządzenie zdoła ponownie połączyć się z siecią VPN."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Zmień ustawienia sieci VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Konfiguruj"</string>
     <string name="disconnect" msgid="971412338304200056">"Rozłącz"</string>
-    <!-- no translation found for open_app (3717639178595958667) -->
-    <skip />
-    <!-- no translation found for dismiss (6192859333764711227) -->
-    <skip />
+    <string name="open_app" msgid="3717639178595958667">"Otwórz aplikację"</string>
+    <string name="dismiss" msgid="6192859333764711227">"Zamknij"</string>
 </resources>

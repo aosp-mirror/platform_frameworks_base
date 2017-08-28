@@ -116,13 +116,13 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ربط"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"الربط ونقطة الاتصال المحمولة"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"كل تطبيقات العمل"</string>
-    <string name="user_guest" msgid="8475274842845401871">"مدعو"</string>
+    <string name="user_guest" msgid="8475274842845401871">"ضيف"</string>
     <string name="unknown" msgid="1592123443519355854">"غير معروف"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"المستخدم: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"تم تعيين بعض الإعدادات الافتراضية"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"لم يتم تعيين إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8186971894801348327">"إعدادات تحويل النص إلى كلام"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"إخراج تحويل النص إلى كلام"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"تحويل النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"معدل سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"سرعة نطق الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"درجة الصوت"</string>
@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - يتبقى <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> حتى يكتمل الشحن"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"جارٍ الشحن"</string>

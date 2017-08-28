@@ -650,6 +650,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mListenerChanged = false;
     // True if internationalized input should be used for numbers and date and time.
     private final boolean mUseInternationalizedInput;
+    // True if fallback fonts that end up getting used should be allowed to affect line spacing.
+    /* package */ final boolean mUseFallbackLineSpacing;
 
     @ViewDebug.ExportedProperty(category = "text")
     private int mGravity = Gravity.TOP | Gravity.START;
@@ -1252,8 +1254,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean numberPasswordInputType = variation
                 == (EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
 
-        mUseInternationalizedInput =
-                context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.O;
+        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+        mUseInternationalizedInput = targetSdkVersion >= VERSION_CODES.O;
+        // TODO: replace CUR_DEVELOPMENT with P once P is added to android.os.Build.VERSION_CODES.
+        // STOPSHIP if the above TODO is not done.
+        mUseFallbackLineSpacing = targetSdkVersion >= VERSION_CODES.CUR_DEVELOPMENT;
 
         if (inputMethod != null) {
             Class<?> c;
@@ -7914,6 +7919,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setTextDirection(mTextDir)
                         .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
+                        .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
                         .setBreakStrategy(mBreakStrategy)
                         .setHyphenationFrequency(mHyphenationFrequency)
                         .setJustificationMode(mJustificationMode)
@@ -7956,10 +7962,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean useSaved) {
         Layout result = null;
         if (mText instanceof Spannable) {
-            result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
-                    alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
-                    mBreakStrategy, mHyphenationFrequency, mJustificationMode,
-                    getKeyListener() == null ? effectiveEllipsize : null, ellipsisWidth);
+            final DynamicLayout.Builder builder = DynamicLayout.Builder.obtain(mText, mTextPaint,
+                    wantWidth)
+                    .setDisplayText(mTransformed)
+                    .setAlignment(alignment)
+                    .setTextDirection(mTextDir)
+                    .setLineSpacing(mSpacingAdd, mSpacingMult)
+                    .setIncludePad(mIncludePad)
+                    .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
+                    .setBreakStrategy(mBreakStrategy)
+                    .setHyphenationFrequency(mHyphenationFrequency)
+                    .setJustificationMode(mJustificationMode)
+                    .setEllipsize(getKeyListener() == null ? effectiveEllipsize : null)
+                    .setEllipsizedWidth(ellipsisWidth);
+            result = builder.build();
         } else {
             if (boring == UNKNOWN_BORING) {
                 boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
@@ -8006,6 +8022,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setTextDirection(mTextDir)
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
+                    .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
                     .setBreakStrategy(mBreakStrategy)
                     .setHyphenationFrequency(mHyphenationFrequency)
                     .setJustificationMode(mJustificationMode)
@@ -8365,6 +8382,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         layoutBuilder.setAlignment(getLayoutAlignment())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
                 .setIncludePad(getIncludeFontPadding())
+                .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
                 .setBreakStrategy(getBreakStrategy())
                 .setHyphenationFrequency(getHyphenationFrequency())
                 .setJustificationMode(getJustificationMode())

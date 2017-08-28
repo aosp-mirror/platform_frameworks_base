@@ -248,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ਪ੍ਰਚੂਨ ਸਟੋਰਾਂ ਲਈ ਡੈਮੋ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ਕਨੈਕਸ਼ਨ"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀਆਂ ਐਪਾਂ"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀ ਹੈ"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ਐਪਾਂ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀਆਂ ਹਨ"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ਬੈਟਰੀ ਦੀ ਖਪਤ ਕਰਨ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ਐਪਾਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"ਸੁਰੱਖਿਅਤ ਮੋਡ"</string>
@@ -300,8 +300,8 @@
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਣ ਜਾਂ ਸਿਸਟਮ ਆਈਕਨਾਂ ਨੂੰ ਜੋੜਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ਸਥਿਤੀ ਪੱਟੀ ਬਣਨ ਦਿਓ"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ਸਥਿਤੀ ਬਾਰ ਦਾ ਵਿਸਤਾਰ/ਨਸ਼ਟ ਕਰੋ"</string>
-    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਜਾਂ ਨਸ਼ਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ਸਥਿਤੀ ਪੱਟੀ ਦਾ ਵਿਸਤਾਰ/ਸੰਖਿਪਤ ਕਰੋ"</string>
+    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਜਾਂ ਨਸ਼ਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"ਸ਼ਾਰਟਕੱਟ ਇੰਸਟੌਲ ਕਰੋ"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ਸ਼ਾਰਟਕੱਟ ਅਣਇੰਸਟੌਲ ਕਰੋ"</string>
@@ -477,7 +477,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ਉਂਗਲ ਕਾਫ਼ੀ ਹੌਲੀ ਮੂਵ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਸਕਦਾ। ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਮੌਜੂਦਾ ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਟਾਓ।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋ ਗਿਆ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ਫਿੰਗਰ"</string>
@@ -826,18 +826,18 @@
     <string name="autofill_parish" msgid="8202206105468820057">"ਪੈਰਿਸ਼"</string>
     <string name="autofill_area" msgid="3547409050889952423">"ਖੇਤਰ"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"ਅਮੀਰਾਤ"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"ਆਪਣੇ ਵੈਬ ਬੁੱਕਮਾਰਕਸ ਅਤੇ ਇਤਿਹਾਸ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ਐਪ ਨੂੰ ਸਾਰੇ URL ਜਿਨ੍ਹਾਂ ਤੇ ਬ੍ਰਾਊਜ਼ਰ ਨੇ ਵਿਜਿਟ ਕੀਤਾ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਸਾਰੇ ਬੁੱਕਮਾਰਕਾਂ, ਦਾ ਇਤਿਹਾਸ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ਵੈਬ ਬੁੱਕਮਾਰਕਸ ਅਤੇ ਇਤਿਹਾਸ ਲਿਖੋ"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੀ ਟੈਬਲੇਟ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡੈਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਤਾਵਂ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ TV ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡੈਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਤਾਵਂ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਫੋਨ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡੈਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਤਾਵਂ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"ਆਪਣੇ ਵੈੱਬ ਬੁੱਕਮਾਰਕ ਅਤੇ ਇਤਿਹਾਸ ਪੜ੍ਹੋ"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ਐਪ ਨੂੰ ਸਾਰੇ URL ਜਿਨ੍ਹਾਂ ਤੇ ਬ੍ਰਾਊਜ਼ਰ ਨੇ ਵਿਜਿਟ ਕੀਤਾ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਸਾਰੇ ਬੁੱਕਮਾਰਕਾਂ ਦਾ ਇਤਿਹਾਸ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ਵੈੱਬ ਬੁੱਕਮਾਰਕ ਅਤੇ ਇਤਿਹਾਸ ਲਿਖੋ"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ TV ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੇ ਸਟੋਰ ਕੀਤੇ ਬੁੱਕਮਾਰਕਾਂ ਨੂੰ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਡਾਟਾ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ। ਨੋਟ: ਇਹ ਅਨੁਮਤੀ ਤੀਜੀ-ਪਾਰਟੀ ਬ੍ਰਾਊਜ਼ਰਾਂ ਜਾਂ ਵੈੱਬ ਬ੍ਰਾਊਜ਼ਿੰਗ ਸਮਰੱਥਾ ਵਾਲੀਆਂ ਹੋਰਾਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵੱਲੋਂ ਲਾਗੂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ਇੱਕ ਅਲਾਰਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ਐਪ ਨੂੰ ਇੱਕ ਇੰਸਟੌਲ ਕੀਤੀ ਅਲਾਰਮ ਘੜੀ ਐਪ ਵਿੱਚ ਇੱਕ ਅਲਾਰਮ ਸੈਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਕੁਝ ਅਲਾਰਮ ਘੜੀ ਐਪਲ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਲਾਗੂ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ।"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ਵੌਇਸਮੇਲ ਜੋੜੋ"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਵੌਇਸਮੇਲ ਇਨਬੌਕਸ ਵਿੱਚ ਸੁਨੇਹੇ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ਬ੍ਰਾਊਜ਼ਰ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦੀਆਂ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਖ਼ਰਾਬ ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਆਰਬਿਟਰੇਰੀ ਵੈਬ ਸਾਈਟਾਂ ਨੂੰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦੇਣ ਲਈ ਕਰ ਸਕਦੇ ਹਨ।"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦੀਆਂ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਖ਼ਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਆਰਬਿਟਰੇਰੀ ਵੈੱਬ ਸਾਈਟਾਂ ਨੂੰ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦੇਣ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="save_password_message" msgid="767344687139195790">"ਕੀ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ ਕਿ ਬ੍ਰਾਊਜ਼ਰ ਇਹ ਪਾਸਵਰਡ ਯਾਦ ਰੱਖੇ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ਅਜੇ ਨਹੀਂ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"ਯਾਦ ਰੱਖੋ"</string>
@@ -948,8 +948,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ਸਾਲ ਵਿੱਚ</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"ਵੀਡੀਓ ਸਮੱਸਿਆ"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ਇਹ ਵੀਡੀਓ ਇਸ ਡੀਵਾਈਸ ਤੇ ਸਟ੍ਰੀਮਿੰਗ ਲਈ ਪ੍ਰਮਾਣਿਕ ਨਹੀਂ ਹੈ।"</string>
-    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ਇਹ ਵੀਡੀਓ ਪਲੇ ਨਹੀਂ ਕਰ ਸਕਦਾ।"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ਇਹ ਵੀਡੀਓ ਇਸ ਡੀਵਾਈਸ ਤੇ ਸਟ੍ਰੀਮਿੰਗ ਲਈ ਵੈਧ ਨਹੀਂ ਹੈ।"</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ਇਹ ਵੀਡੀਓ ਪਲੇ ਨਹੀਂ ਕਰ ਸਕਦੇ।"</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"ਠੀਕ"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"ਦੁਪਹਿਰ"</string>
@@ -1161,7 +1161,7 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ਹਮੇਸ਼ਾਂ ਆਗਿਆ ਦਿਓ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ਕਦੇ ਵੀ ਆਗਿਆ ਨਾ ਦਿਓ"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM ਕਾਰਡ ਹਟਾਇਆ ਗਿਆ"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਅਣਉਪਲਬਧ ਹੋਵੇਗਾ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇੱਕ ਪ੍ਰਮਾਣਿਕ SIM ਕਾਰਡ ਪਾ ਕੇ ਰੀਸਟਾਰਟ ਨਹੀਂ ਕਰਦੇ।"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਅਣਉਪਲਬਧ ਹੋਵੇਗਾ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇੱਕ ਪ੍ਰਮਾਣਿਕ ਸਿਮ ਕਾਰਡ ਪਾ ਕੇ ਰੀਸਟਾਰਟ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="sim_done_button" msgid="827949989369963775">"ਹੋ ਗਿਆ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ਕਾਰਡ ਜੋੜਿਆ ਗਿਆ"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਲਈ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
@@ -1294,11 +1294,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ। ਨੈੱਟਵਰਕ ਦੇ ਪ੍ਰਬੰਧਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (735805531187559719) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਤੋਂ ਡਿਸਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਅਸ਼ੁੱਧੀ"</string>
-    <!-- no translation found for vpn_lockdown_config (8151951501116759194) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"ਨੈੱਟਵਰਕ ਜਾਂ VPN ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ਫਾਈਲ ਚੁਣੋ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ਕੋਈ ਫਾਈਲ ਨਹੀਂ ਚੁਣੀ ਗਈ"</string>
     <string name="reset" msgid="2448168080964209908">"ਰੀਸੈੱਟ ਕਰੋ"</string>
@@ -1323,7 +1321,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ਕਾਰਡ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="share" msgid="1778686618230011964">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="find" msgid="4808270900322985960">"ਲੱਭੋ"</string>
-    <string name="websearch" msgid="4337157977400211589">"ਵੈਬ ਖੋਜ"</string>
+    <string name="websearch" msgid="4337157977400211589">"ਵੈੱਬ ਖੋਜ"</string>
     <string name="find_next" msgid="5742124618942193978">"ਅਗਲਾ ਲੱਭੋ"</string>
     <string name="find_previous" msgid="2196723669388360506">"ਪਿਛਲਾ ਲੱਭੋ"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> ਵੱਲੋਂ ਟਿਕਾਣਾ ਬੇਨਤੀ"</string>
@@ -1365,7 +1363,7 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"ਸ਼ਿਫ਼ਟ"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"ਦਾਖਲ ਕਰੋ"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ਇੱਕ ਐਪ ਚੁਣੋ"</string>
-    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨੂੰ ਲੌਂਚ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨੂੰ ਲਾਂਚ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"ਹੈਂਡਲ ਸਲਾਈਡ ਕਰ ਰਿਹਾ ਹੈ। ਸਪੱਰਸ਼ ਕਰੋ &amp; ਹੋਲਡ ਕਰੋ।"</string>
@@ -1414,7 +1412,7 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ਗਤੀਵਿਧੀ ਚੁਣੋ"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="sending" msgid="3245653681008218030">"ਭੇਜ ਰਿਹਾ ਹੈ..."</string>
-    <string name="launchBrowserDefault" msgid="2057951947297614725">"ਕੀ ਬ੍ਰਾਊਜ਼ਰ ਲੌਂਚ ਕਰਨਾ ਹੈ?"</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"ਕੀ ਬ੍ਰਾਊਜ਼ਰ ਲਾਂਚ ਕਰਨਾ ਹੈ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ਕੀ ਕਾਲ ਸਵੀਕਾਰ ਕਰਨੀ ਹੈ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ਹਮੇਸ਼ਾਂ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ਕੇਵਲ ਇੱਕ ਵਾਰ"</string>

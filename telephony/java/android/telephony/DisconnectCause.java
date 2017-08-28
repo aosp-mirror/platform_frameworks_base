@@ -227,13 +227,6 @@ public class DisconnectCause {
     public static final int DATA_LIMIT_REACHED = 55;
 
     /**
-     * The emergency call was terminated because it was dialed on the wrong SIM slot.
-     * The call needs to be redialed the other slot.
-     * {@hide}
-     */
-    public static final int DIALED_ON_WRONG_SLOT = 56;
-
-    /**
      * The call being placed was detected as a call forwarding number and was being dialed while
      * roaming on a carrier that does not allow this.
      */
@@ -258,6 +251,28 @@ public class DisconnectCause {
      */
     public static final int IMS_ACCESS_BLOCKED = 60;
 
+    /**
+     * The call has ended (mid-call) because the device's battery is too low.
+     */
+    public static final int LOW_BATTERY = 61;
+
+    /**
+     * A call was not dialed because the device's battery is too low.
+     */
+    public static final int DIAL_LOW_BATTERY = 62;
+
+    /**
+     * Emergency call failed with a temporary fail cause and can be redialed on this slot.
+     * {@hide}
+     */
+    public static final int EMERGENCY_TEMP_FAILURE = 63;
+
+    /**
+     * Emergency call failed with a permanent fail cause and should not be redialed on this
+     * slot. 
+     * {@hide}
+     */
+    public static final int EMERGENCY_PERM_FAILURE = 64;
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -382,8 +397,6 @@ public class DisconnectCause {
             return "DATA_DISABLED";
         case DATA_LIMIT_REACHED:
             return "DATA_LIMIT_REACHED";
-        case DIALED_ON_WRONG_SLOT:
-            return "DIALED_ON_WRONG_SLOT";
         case DIALED_CALL_FORWARDING_WHILE_ROAMING:
             return "DIALED_CALL_FORWARDING_WHILE_ROAMING";
         case IMEI_NOT_ACCEPTED:
@@ -392,6 +405,14 @@ public class DisconnectCause {
             return "WIFI_LOST";
         case IMS_ACCESS_BLOCKED:
             return "IMS_ACCESS_BLOCKED";
+        case LOW_BATTERY:
+            return "LOW_BATTERY";
+        case DIAL_LOW_BATTERY:
+            return "DIAL_LOW_BATTERY";
+        case EMERGENCY_TEMP_FAILURE:
+            return "EMERGENCY_TEMP_FAILURE";
+        case EMERGENCY_PERM_FAILURE:
+            return "EMERGENCY_PERM_FAILURE";
         default:
             return "INVALID: " + cause;
         }

@@ -68,10 +68,10 @@
     <item msgid="1913619118958233129">"avrcp15"</item>
     <item msgid="7142710449249088270">"avrcp16"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (5254942598247222737) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (2091430979086738145) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (7848030269621918608) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (298198075927343893) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"පද්ධති තේරීම භාවිත කරන්න (පෙරනිමි)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>

@@ -300,9 +300,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
-    boolean supportsPictureInPictureWhilePausing;  // This flag is set by the system to indicate
-        // that the activity can enter picture in picture while pausing (ie. only when another
-        // task is brought to front or started)
+    boolean supportsEnterPipOnTaskSwitch;  // This flag is set by the system to indicate that the
+        // activity can enter picture in picture while pausing (only when switching to another task)
     PictureInPictureParams pictureInPictureArgs = new PictureInPictureParams.Builder().build();
         // The PiP params used when deferring the entering of picture-in-picture.
     int launchCount;        // count of launches since last state
@@ -547,8 +546,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     + " mLastReportedPictureInPictureMode=" + mLastReportedPictureInPictureMode);
             if (info.supportsPictureInPicture()) {
                 pw.println(prefix + "supportsPictureInPicture=" + info.supportsPictureInPicture());
-                pw.println(prefix + "supportsPictureInPictureWhilePausing: "
-                        + supportsPictureInPictureWhilePausing);
+                pw.println(prefix + "supportsEnterPipOnTaskSwitch: "
+                        + supportsEnterPipOnTaskSwitch);
             }
             if (info.maxAspectRatio != 0) {
                 pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
@@ -1118,19 +1117,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return mActivityType == ASSISTANT_ACTIVITY_TYPE;
     }
 
-    boolean isApplicationActivity() {
-        return mActivityType == APPLICATION_ACTIVITY_TYPE;
-    }
-
     boolean isPersistable() {
         return (info.persistableMode == PERSIST_ROOT_ONLY ||
                 info.persistableMode == PERSIST_ACROSS_REBOOTS) &&
-                (intent == null ||
-                        (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
+                (intent == null || (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
     boolean isFocusable() {
-        return StackId.canReceiveKeys(task.getStackId()) || isAlwaysFocusable();
+        return getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable();
     }
 
     boolean isResizeable() {
@@ -1213,7 +1207,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         boolean isKeyguardLocked = service.isKeyguardLocked();
-        boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        boolean isCurrentAppLocked = service.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
@@ -1229,19 +1223,19 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 // When visible, allow entering PiP if the app is not locked.  If it is over the
                 // keyguard, then we will prompt to unlock in the caller before entering PiP.
                 return !isCurrentAppLocked &&
-                        (supportsPictureInPictureWhilePausing || !beforeStopping);
+                        (supportsEnterPipOnTaskSwitch || !beforeStopping);
             case PAUSING:
             case PAUSED:
                 // When pausing, then only allow enter PiP as in the resume state, and in addition,
                 // require that there is not an existing PiP activity and that the current system
                 // state supports entering PiP
                 return isNotLockedOrOnKeyguard && !hasPinnedStack
-                        && supportsPictureInPictureWhilePausing;
+                        && supportsEnterPipOnTaskSwitch;
             case STOPPING:
                 // When stopping in a valid state, then only allow enter PiP as in the pause state.
                 // Otherwise, fall through to throw an exception if the caller is trying to enter
                 // PiP in an invalid stopping state.
-                if (supportsPictureInPictureWhilePausing) {
+                if (supportsEnterPipOnTaskSwitch) {
                     return isNotLockedOrOnKeyguard && !hasPinnedStack;
                 }
             default:
@@ -2315,7 +2309,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // We must base this on the parent configuration, because we set our override
         // configuration's appBounds based on the result of this method. If we used our own
         // configuration, it would be influenced by past invocations.
-        final Rect appBounds = getParent().getConfiguration().windowConfiguration.getAppBounds();
+        final Rect appBounds = getParent().getWindowConfiguration().getAppBounds();
         final int containingAppWidth = appBounds.width();
         final int containingAppHeight = appBounds.height();
         int maxActivityWidth = containingAppWidth;

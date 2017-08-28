@@ -68,10 +68,10 @@
     <item msgid="1913619118958233129">"avrcp15"</item>
     <item msgid="7142710449249088270">"avrcp16"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (5254942598247222737) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (2091430979086738145) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (7848030269621918608) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (298198075927343893) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -222,7 +222,7 @@
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"માનક સીમા"</item>
-    <item msgid="4071574792028999443">"કોઈ પૃષ્ઠભૂમિ પ્રક્રિયાઓ નથી"</item>
+    <item msgid="4071574792028999443">"કોઈ બૅકગ્રાઉન્ડ પ્રક્રિયાઓ નથી"</item>
     <item msgid="4810006996171705398">"સૌથી વધુ 1 પ્રક્રિયા"</item>
     <item msgid="8586370216857360863">"સૌથી વધુ 2 પ્રક્રિયા"</item>
     <item msgid="836593137872605381">"વધુમાં વધુ 3 પ્રક્રિયાઓ"</item>

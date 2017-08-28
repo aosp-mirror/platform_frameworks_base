@@ -306,7 +306,7 @@ import com.android.internal.os.SomeArgs;
  * <pre class="prettyprint">
  * private static String getCanonicalDomain(String domain) {
  *   InternetDomainName idn = InternetDomainName.from(domain);
- *   while (!idn.isTopPrivateDomain() && idn != null) {
+ *   while (idn != null && !idn.isTopPrivateDomain()) {
  *     idn = idn.parent();
  *   }
  *   return idn == null ? null : idn.toString();
@@ -314,8 +314,9 @@ import com.android.internal.os.SomeArgs;
  * </pre>
  *
  * <p>If the association between the web domain and app package cannot be verified through the steps
- * above, the service can still autofill the app, but it should warn the user about the potential
- * data leakage first, and askfor the user to confirm. For example, the service could:
+ * above, but the service thinks that it is appropriate to fill persisted credentials that are
+ * stored for the web domain, the service should warn the user about the potential data
+ * leakage first, and ask for the user to confirm. For example, the service could:
  *
  * <ol>
  *   <li>Create a dataset that requires
@@ -324,7 +325,7 @@ import com.android.internal.os.SomeArgs;
  *   <li>Include the web domain in the custom presentation for the
  *       {@link Dataset.Builder#setValue(AutofillId, AutofillValue, android.widget.RemoteViews)
  *       dataset value}.
- *   <li>When the user select that dataset, show a disclaimer dialog explaining that the app is
+ *   <li>When the user selects that dataset, show a disclaimer dialog explaining that the app is
  *       requesting credentials for a web domain, but the service could not verify if the app owns
  *       that domain. If the user agrees, then the service can unlock the dataset.
  *   <li>Similarly, when adding a {@link SaveInfo} object for the request, the service should
@@ -333,7 +334,7 @@ import com.android.internal.os.SomeArgs;
  *
  * <p>This same procedure could also be used when the autofillable data is contained inside an
  * {@code IFRAME}, in which case the WebView generates a new autofill context when a node inside
- * the {@code IFRAME} is focused, which the root node containing the {@code IFRAME}'s {@code src}
+ * the {@code IFRAME} is focused, with the root node containing the {@code IFRAME}'s {@code src}
  * attribute on {@link android.app.assist.AssistStructure.ViewNode#getWebDomain()}. A typical and
  * legitimate use case for this scenario is a financial app that allows the user
  * to login on different bank accounts. For example, a financial app {@code my_financial_app} could

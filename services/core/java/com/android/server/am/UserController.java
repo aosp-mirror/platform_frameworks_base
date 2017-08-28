@@ -171,8 +171,6 @@ class UserController {
     @GuardedBy("mLock")
     private volatile ArraySet<String> mCurWaitingUserSwitchCallbacks;
 
-    private volatile UserManagerService mUserManager;
-
     private final LockPatternUtils mLockPatternUtils;
 
     UserController(ActivityManagerService service) {
@@ -831,8 +829,9 @@ class UserController {
                 }
 
                 if (foreground) {
-                    mInjector.getActivityStackSupervisor().setLockTaskModeLocked(
-                            null, ActivityManager.LOCK_TASK_MODE_NONE, "startUser", false);
+                    // TODO: I don't think this does what the caller think it does. Seems to only
+                    // remove one locked task and won't work if multiple locked tasks are present.
+                    mInjector.getLockTaskController().clearLockTaskMode("startUser");
                 }
 
                 final UserInfo userInfo = getUserInfo(userId);
@@ -1776,6 +1775,10 @@ class UserController {
 
         ActivityStackSupervisor getActivityStackSupervisor() {
             return mService.mStackSupervisor;
+        }
+
+        LockTaskController getLockTaskController() {
+            return mService.mLockTaskController;
         }
     }
 }

@@ -51,6 +51,7 @@ int Properties::overrideSpotShadowStrength = -1;
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
 RenderPipelineType Properties::sRenderPipelineType = RenderPipelineType::NotInitialized;
+bool Properties::enableHighContrastText = false;
 
 bool Properties::waitForGpuCompletion = false;
 bool Properties::forceDrawFrame = false;

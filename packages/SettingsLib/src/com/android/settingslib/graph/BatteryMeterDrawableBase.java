@@ -50,6 +50,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     protected final Paint mTextPaint;
     protected final Paint mBoltPaint;
     protected final Paint mPlusPaint;
+    protected float mButtonHeightFraction;
 
     private int mLevel = -1;
     private boolean mCharging;
@@ -66,7 +67,6 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final int mIntrinsicWidth;
     private final int mIntrinsicHeight;
 
-    private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
     private float mTextHeight, mWarningTextHeight;
@@ -298,7 +298,7 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         float drawFrac = (float) level / 100f;
         final int height = mHeight;
-        final int width = (int) (ASPECT_RATIO * mHeight);
+        final int width = (int) (getAspectRatio() * mHeight);
         final int px = (mWidth - width) / 2;
         final int buttonHeight = Math.round(height * mButtonHeightFraction);
 
@@ -329,7 +329,7 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         // define the battery shape
         mShapePath.reset();
-        final float radius = RADIUS_RATIO * (mFrame.height() + buttonHeight);
+        final float radius = getRadiusRatio() * (mFrame.height() + buttonHeight);
         mShapePath.setFillType(FillType.WINDING);
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
@@ -468,5 +468,13 @@ public class BatteryMeterDrawableBase extends Drawable {
 
     public int getCriticalLevel() {
         return mCriticalLevel;
+    }
+
+    protected float getAspectRatio() {
+        return ASPECT_RATIO;
+    }
+
+    protected float getRadiusRatio() {
+        return RADIUS_RATIO;
     }
 }

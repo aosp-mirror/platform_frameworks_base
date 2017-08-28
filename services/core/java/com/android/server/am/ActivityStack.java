@@ -24,6 +24,8 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
@@ -460,22 +462,30 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
         mTmpRect2.setEmpty();
-        final Configuration overrideConfig = getOverrideConfiguration();
+        updateOverrideConfiguration();
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
-                mTmpRect2, overrideConfig);
-        onOverrideConfigurationChanged(overrideConfig);
+                mTmpRect2, getOverrideConfiguration());
         mStackSupervisor.mStacks.put(mStackId, this);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
     T createStackWindowController(int displayId, boolean onTop, Rect outBounds,
-            Configuration outOverrideConfig) {
+            Configuration overrideConfig) {
         return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds,
-                outOverrideConfig);
+                overrideConfig);
     }
 
     T getWindowContainerController() {
         return mWindowContainerController;
+    }
+
+    // TODO: Not needed once we are no longer using stack ids as the override config. can be passed
+    // in.
+    private void updateOverrideConfiguration() {
+        final int windowingMode = getWindowingModeForStackId(mStackId);
+        if (windowingMode != WINDOWING_MODE_UNDEFINED) {
+            setWindowingMode(windowingMode);
+        }
     }
 
     /** Adds the stack to specified display and calls WindowManager to do the same. */
@@ -904,7 +914,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             int addIndex = mStacks.size();
             if (addIndex > 0) {
                 final ActivityStack topStack = mStacks.get(addIndex - 1);
-                if (StackId.isAlwaysOnTop(topStack.mStackId) && topStack != this) {
+                if (topStack.getWindowConfiguration().isAlwaysOnTop()
+                        && topStack != this) {
                     // If the top stack is always on top, we move this stack just below it.
                     addIndex--;
                 }
@@ -916,7 +927,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean isFocusable() {
-        if (StackId.canReceiveKeys(mStackId)) {
+        if (getWindowConfiguration().canReceiveKeys()) {
             return true;
         }
         // The stack isn't focusable. See if its top activity is focusable to force focus on the
@@ -1721,11 +1732,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         final int stackBehindTopId = (stackBehindTopIndex >= 0)
                 ? mStacks.get(stackBehindTopIndex).mStackId : INVALID_STACK_ID;
-        if (topStackId == DOCKED_STACK_ID || StackId.isAlwaysOnTop(topStackId)) {
+        final boolean alwaysOnTop = topStack.getWindowConfiguration().isAlwaysOnTop();
+        if (topStackId == DOCKED_STACK_ID || alwaysOnTop) {
             if (stackIndex == stackBehindTopIndex) {
                 // Stacks directly behind the docked or pinned stack are always visible.
                 return STACK_VISIBLE;
-            } else if (StackId.isAlwaysOnTop(topStackId) && stackIndex == stackBehindTopIndex - 1) {
+            } else if (alwaysOnTop && stackIndex == stackBehindTopIndex - 1) {
                 // Otherwise, this stack can also be visible if it is directly behind a docked stack
                 // or translucent assistant stack behind an always-on-top top-most stack
                 if (stackBehindTopId == DOCKED_STACK_ID) {
@@ -2100,7 +2112,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                     // Reset the flag indicating that an app can enter picture-in-picture once the
                     // activity is hidden
-                    r.supportsPictureInPictureWhilePausing = false;
+                    r.supportsEnterPipOnTaskSwitch = false;
                     break;
 
                 case INITIALIZING:
@@ -2922,11 +2934,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // supporting picture-in-picture while pausing only if the starting activity
                         // would not be considered an overlay on top of the current activity
                         // (eg. not fullscreen, or the assistant)
-                        if (focusedTopActivity != null
-                                && focusedTopActivity.getStackId() != PINNED_STACK_ID
-                                && r.getStackId() != ASSISTANT_STACK_ID
-                                && r.fullscreen) {
-                            focusedTopActivity.supportsPictureInPictureWhilePausing = true;
+                        if (canEnterPipOnTaskSwitch(focusedTopActivity,
+                                null /* toFrontTask */, r, options)) {
+                            focusedTopActivity.supportsEnterPipOnTaskSwitch = true;
                         }
                         transit = TRANSIT_TASK_OPEN;
                     }
@@ -2979,6 +2989,37 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // because there is nothing for it to animate on top of.
             ActivityOptions.abort(options);
         }
+    }
+
+    /**
+     * @return Whether the switch to another task can trigger the currently running activity to
+     * enter PiP while it is pausing (if supported). Only one of {@param toFrontTask} or
+     * {@param toFrontActivity} should be set.
+     */
+    private boolean canEnterPipOnTaskSwitch(ActivityRecord pipCandidate,
+            TaskRecord toFrontTask, ActivityRecord toFrontActivity, ActivityOptions opts) {
+        if (opts != null && opts.disallowEnterPictureInPictureWhileLaunching()) {
+            // Ensure the caller has requested not to trigger auto-enter PiP
+            return false;
+        }
+        if (pipCandidate == null || pipCandidate.getStackId() == PINNED_STACK_ID) {
+            // Ensure that we do not trigger entering PiP an activity on the pinned stack
+            return false;
+        }
+        final int targetStackId = toFrontTask != null ? toFrontTask.getStackId()
+                : toFrontActivity.getStackId();
+        if (targetStackId == ASSISTANT_STACK_ID) {
+            // Ensure the task/activity being brought forward is not the assistant
+            return false;
+        }
+        final boolean isFullscreen = toFrontTask != null
+                ? toFrontTask.containsOnlyFullscreenActivities()
+                : toFrontActivity.fullscreen;
+        if (!isFullscreen) {
+            // Ensure the task/activity being brought forward is fullscreen
+            return false;
+        }
+        return true;
     }
 
     private boolean isTaskSwitch(ActivityRecord r,
@@ -3733,7 +3774,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 if (endTask) {
-                    mStackSupervisor.removeLockedTaskLocked(task);
+                    mService.mLockTaskController.removeLockedTask(task);
                 }
             } else if (r.state != ActivityState.PAUSING) {
                 // If the activity is PAUSING, we will complete the finish once
@@ -4556,9 +4597,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top
         // of the current activity (eg. not fullscreen, or the assistant)
-        if (topActivity != null && topActivity.getStackId() != PINNED_STACK_ID
-                && tr.getStackId() != ASSISTANT_STACK_ID && tr.containsOnlyFullscreenActivities()) {
-            topActivity.supportsPictureInPictureWhilePausing = true;
+        if (canEnterPipOnTaskSwitch(topActivity, tr, null /* toFrontActivity */,
+                options)) {
+            topActivity.supportsEnterPipOnTaskSwitch = true;
         }
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -4587,8 +4628,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         Slog.i(TAG, "moveTaskToBack: " + tr);
 
         // If the task is locked, then show the lock task toast
-        if (mStackSupervisor.isLockedTask(tr)) {
-            mStackSupervisor.showLockTaskToast();
+        if (!mService.mLockTaskController.checkLockedTask(tr)) {
             return false;
         }
 

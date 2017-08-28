@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Апликацијава нема катерии известувања"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Известувањата од апликацијава не може да се исклучат"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 од <xliff:g id="NUMBER_1">%d</xliff:g> категорија известувања од апликацијава</item>
-      <item quantity="other">1 од <xliff:g id="NUMBER_1">%d</xliff:g> категории известувања од апликацијава</item>
+      <item quantity="one">1 од <xliff:g id="NUMBER_1">%s</xliff:g> категорија известувања од апликацијава</item>
+      <item quantity="other">1 од <xliff:g id="NUMBER_1">%s</xliff:g> категории известувања од апликацијава</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -596,8 +596,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Стрелка налево"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Стрелка надесно"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Центар"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Картичка"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Празно место"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Внеси"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Бришење наназад"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Пушти/Паузирај"</string>
@@ -775,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Апликациите се извршуваат во заднина"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Да се исклучи мобилниот интернет?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Бидејќи апликацијата го прикрива барањето за дозвола, „Поставките“ не може да го потврдат вашиот одговор."</string>
 </resources>

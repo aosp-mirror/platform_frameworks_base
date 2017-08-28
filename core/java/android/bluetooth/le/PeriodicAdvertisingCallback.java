@@ -22,8 +22,8 @@ import android.bluetooth.BluetoothDevice;
  * Bluetooth LE periodic advertising callbacks, used to deliver periodic
  * advertising operation status.
  *
- * @see PeriodicAdvertisingManager#createSync
  * @hide
+ * @see PeriodicAdvertisingManager#createSync
  */
 public abstract class PeriodicAdvertisingCallback {
 
@@ -40,7 +40,7 @@ public abstract class PeriodicAdvertisingCallback {
     public static final int SYNC_NO_RESPONSE = 1;
 
     /**
-     *  Sync failed to be established because controller can't support more syncs.
+     * Sync failed to be established because controller can't support more syncs.
      */
     public static final int SYNC_NO_RESOURCES = 2;
 
@@ -51,28 +51,31 @@ public abstract class PeriodicAdvertisingCallback {
      * @param syncHandle handle used to identify this synchronization.
      * @param device remote device.
      * @param advertisingSid synchronized advertising set id.
-     * @param skip  The number of periodic advertising packets that can be skipped
-     * after a successful receive in force. @see PeriodicAdvertisingManager#createSync
-     * @param timeout Synchronization timeout for the periodic advertising in force. One
-     * unit is 10ms. @see PeriodicAdvertisingManager#createSync
+     * @param skip The number of periodic advertising packets that can be skipped after a successful
+     * receive in force. @see PeriodicAdvertisingManager#createSync
+     * @param timeout Synchronization timeout for the periodic advertising in force. One unit is
+     * 10ms. @see PeriodicAdvertisingManager#createSync
      * @param timeout
      * @param status operation status.
      */
     public void onSyncEstablished(int syncHandle, BluetoothDevice device,
-                                  int advertisingSid, int skip, int timeout,
-                                  int status) {}
+            int advertisingSid, int skip, int timeout,
+            int status) {
+    }
 
     /**
      * Callback when periodic advertising report is received.
      *
      * @param report periodic advertising report.
      */
-    public void onPeriodicAdvertisingReport(PeriodicAdvertisingReport report) {}
+    public void onPeriodicAdvertisingReport(PeriodicAdvertisingReport report) {
+    }
 
     /**
      * Callback when periodic advertising synchronization was lost.
      *
      * @param syncHandle handle used to identify this synchronization.
      */
-    public void onSyncLost(int syncHandle) {}
+    public void onSyncLost(int syncHandle) {
+    }
 }

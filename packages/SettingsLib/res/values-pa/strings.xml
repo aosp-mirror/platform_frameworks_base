@@ -135,7 +135,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਦਾ ਇੱਕ ਛੋਟਾ ਪ੍ਰਦਰਸ਼ਨ ਪਲੇ ਕਰੋ"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"ਵੌਇਸ ਡੈਟਾ ਇੰਸਟੌਲ ਕਰੋ"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਲਈ ਲੁੜੀਂਦਾ ਵੌਇਸ ਡੈਟਾ ਇੰਸਟੌਲ ਕਰੋ"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ਇਹ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਇੰਜਣ ਉਹ ਸਾਰਾ ਟੈਕਸਟ ਇਕੱਤਰ ਕਰਨ ਵਿੱਚ ਸਮਰੱਥ ਹੋ ਸਕਦਾ ਹੈ, ਜੋ ਬੋਲਿਆ ਜਾਏਗਾ, ਨਿੱਜੀ ਡੈਟਾ ਸਮੇਤ ਜਿਵੇਂ ਪਾਸਵਰਡ ਅਤੇ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ। ਇਹ <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ਇੰਜਣ ਤੋਂ ਆਉਂਦਾ ਹੈ। ਕੀ ਇਸ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਇੰਜਣ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ਇਹ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਇੰਜਣ ਉਹ ਸਾਰੀ ਲਿਖਤ ਇਕੱਤਰ ਕਰਨ ਵਿੱਚ ਸਮਰੱਥ ਹੋ ਸਕਦਾ ਹੈ, ਜੋ ਬੋਲੀ ਜਾਏ, ਨਿੱਜੀ ਡਾਟਾ ਸਮੇਤ ਜਿਵੇਂ ਪਾਸਵਰਡ ਅਤੇ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ। ਇਹ <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ਇੰਜਣ ਤੋਂ ਆਉਂਦਾ ਹੈ। ਕੀ ਇਸ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਇੰਜਣ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"ਇਸ ਭਾਸ਼ਾ ਲਈ ਟੈਕਸਟ-ਟੂ-ਸਪੀਚ ਆਊਟਪੁਟ ਲਈ ਇੱਕ ਚਾਲੂ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨ ਦੀ ਲੋੜ ਹੈ।"</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"ਇਹ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਦਾ ਇੱਕ ਉਦਾਹਰਨ ਹੈ"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਭਾਸ਼ਾ ਸਥਿਤੀ"</string>
@@ -144,7 +144,7 @@
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="tts_status_checking" msgid="5339150797940483592">"ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> ਲਈ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ਇੰਜਨ ਸੈਟਿੰਗਾਂ ਲੌਂਚ ਕਰੋ"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ਇੰਜਨ ਸੈਟਿੰਗਾਂ ਲਾਂਚ ਕਰੋ"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ਤਰਜੀਹੀ ਇੰਜਣ"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"ਸਧਾਰਨ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ਬੋਲਣ ਦੀ ਪਿੱਚ ਨੂੰ ਦੁਬਾਰਾ ਮੁੜ-ਸੈੱਟ ਕਰੋ"</string>
@@ -174,7 +174,7 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"ਡੀਬਗ ਮੋਡ ਜਦੋਂ USB ਕਨੈਕਟ ਕੀਤੀ ਜਾਏ"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ਡੀਬਗਿੰਗ ਅਧਿਕਾਰ ਰੱਦ ਕਰੋ"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ਬਗ ਰਿਪੋਰਟ ਸ਼ਾਰਟਕੱਟ"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ਇੱਕ ਬਗ ਰਿਪੋਰਟ ਲੈਣ ਲਈ ਪਾਵਰ ਮੀਨੂ ਵਿੱਚ ਇੱਕ ਬਟਨ ਦਿਖਾਓ"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ਇੱਕ ਬੱਗ ਰਿਪੋਰਟ ਲੈਣ ਲਈ ਪਾਵਰ ਮੀਨੂ ਵਿੱਚ ਇੱਕ ਬਟਨ ਦਿਖਾਓ"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ਸਕਿਰਿਆ ਰੱਖੋ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ਸਕ੍ਰੀਨ ਚਾਰਜਿੰਗ ਦੇ ਸਮੇਂ ਕਦੇ ਵੀ ਸਲੀਪ ਨਹੀਂ ਹੋਵੇਗੀ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI ਸਨੂਪ ਲੌਗ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ"</string>
@@ -188,10 +188,10 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"ਮੌਕ ਸਥਾਨ ਐਪ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈੱਟਵਰਕਿੰਗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ਵਾਇਰਲੈਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ਵਰਬੋਸ ਲੌਗਿੰਗ ਸਮਰੱਥ ਬਣਾਓ"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ਆਕਰਮਣਸ਼ੀਲ Wi‑Fi ਤੋਂ ਮੋਬਾਈਲ ਹੈਂਡਓਵਰ"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ Wi‑Fi Roam Scans ਦੀ ਆਗਿਆ ਦਿਓ"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡੈਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"ਵਾਈ‑ਫਾਈ ਵਰਬੋਸ ਲੌਗਿੰਗ ਸਮਰੱਥ ਬਣਾਓ"</string>
+    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ਆਕਰਮਣਸ਼ੀਲ ਵਾਈ‑ਫਾਈ ਤੋਂ ਮੋਬਾਈਲ ਹੈਂਡਓਵਰ"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ ਵਾਈ‑ਫਾਈ ਰੋਮ ਸਕੈਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ਇਨ-ਬੈਂਡ ਘੰਟੀ ਵੱਜਣ ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
@@ -209,9 +209,9 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ਬਲੂਟੁੱਥ ਔਡੀਓ LDAC ਕੋਡੇਕ ਚੁਣੋ:\nਪਲੇਬੈਕ ਗੁਣਵੱਤਾ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ਸਟ੍ਰੀਮਿੰਗ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਦਿਖਾਓ"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, Wi‑Fi Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ਜਦੋਂ ਯੋਗ ਬਣਾਇਆ ਹੋਵੇ, ਤਾਂ Wi‑Fi ਸਿਗਨਲ ਘੱਟ ਹੋਣ \'ਤੇ Wi‑Fi ਡੈਟਾ ਕਨੈਕਸ਼ਨ ਮੋਬਾਈਲ ਨੂੰ ਹੈਂਡ ਓਵਰ ਕਰਨ ਵਿੱਚ ਵੱਧ ਆਕਰਮਣਸ਼ੀਲ ਹੋਵੇਗਾ।"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ਇੰਟਰਫੇਸ ਤੇ ਮੌਜੂਦ ਡੈਟਾ ਟ੍ਰੈਫਿਕ ਦੀ ਮਾਤਰਾ ਦੇ ਆਧਾਰ ਤੇ Wi‑Fi ਰੋਮ ਸਕੈਨ ਦੀ ਆਗਿਆ ਦਿਓ/ਅਸਵੀਕਾਰ ਕਰੋ"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ਜਦੋਂ ਚਾਲੂ ਕੀਤਾ ਹੋਵੇ, ਤਾਂ ਵਾਈ‑ਫਾਈ ਸਿਗਨਲ ਘੱਟ ਹੋਣ \'ਤੇ ਵਾਈ‑ਫਾਈ ਡਾਟਾ ਕਨੈਕਸ਼ਨ ਮੋਬਾਈਲ ਨੂੰ ਹੈਂਡਓਵਰ ਕਰਨ ਵਿੱਚ ਵੱਧ ਆਕਰਮਣਸ਼ੀਲ ਹੋਵੇਗਾ।"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ਇੰਟਰਫੇਸ ਤੇ ਮੌਜੂਦ ਡਾਟਾ ਟ੍ਰੈਫਿਕ ਦੀ ਮਾਤਰਾ ਦੇ ਆਧਾਰ ਤੇ ਵਾਈ‑ਫਾਈ ਰੋਮ ਸਕੈਨ ਦੀ ਆਗਿਆ ਦਿਓ/ਨਾ ਦਿਓ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ਲੌਗਰ ਬਫਰ ਆਕਾਰ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ ਲੌਗਰ ਆਕਾਰ ਚੁਣੋ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ਕੀ ਲੌਗਰ ਪ੍ਰਸਿੱਸਟੈਂਟ ਸਟੋਰੇਜ ਨੂੰ ਸਾਫ਼ ਕਰਨਾ ਹੈ?"</string>
@@ -223,7 +223,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ਗੁਣ ਛਾਣਬੀਣ ਦੇਖੋ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾ ਮੋਬਾਈਲ ਡੇਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ Wi‑Fi ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾਂ ਮੋਬਾਈਲ ਡਾਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ, ਭਾਵੇਂ ਵਾਈ‑ਫਾਈ ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ਉਪਲਬਧ ਹੋਣ \'ਤੇ ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਸ਼ਨ ਵਰਤੋ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ਡੀਬਗਿੰਗ ਕੇਵਲ ਵਿਕਾਸ ਮੰਤਵਾਂ ਲਈ ਹੁੰਦੀ ਹੈ। ਇਸਨੂੰ ਆਪਣੇ ਕੰਪਿਊਟਰ ਅਤੇ ਆਪਣੇ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਡਾਟਾ ਕਾਪੀ ਕਰਨ ਲਈ ਵਰਤੋ, ਸੂਚਨਾ ਦੇ ਬਿਨਾਂ ਆਪਣੇ ਡੀਵਾਈਸ ਤੇ ਐਪਾਂ ਸਥਾਪਤ ਕਰੋ ਅਤੇ ਲੌਗ ਡਾਟਾ ਪੜ੍ਹੋ।"</string>
@@ -250,7 +250,7 @@
     <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"ਟੈਲੀਫ਼ੋਨੀ ਮੋਨੀਟਰ ਟੈਲੀਫ਼ੋਨੀ/ਮੌਡਮ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਵਿੱਚ ਕਿਸੇ ਸਮੱਸਿਆ ਦਾ ਪਤਾ ਲੱਗਣ \'ਤੇ ਲੌਗਾਂ ਨੂੰ ਇਕੱਤਰ ਕਰੇਗਾ ਅਤੇ ਵਰਤੋਂਕਾਰ ਨੂੰ ਇੱਕ ਬੱਗ ਦਾਇਰ ਕਰਨ ਲਈ ਸੂਚਨਾ ਦੇਵੇਗਾ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ਇਨਪੁਟ"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ਡਰਾਇੰਗ"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ਹਾਰਡਵੇਅਰ ਤੇਜ਼ ਕੀਤਾ ਪ੍ਰਗਟਾਅ"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
     <string name="media_category" msgid="4388305075496848353">"ਮੀਡੀਆ"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"ਨਿਰੀਖਣ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="strict_mode" msgid="1938795874357830695">"ਸਟ੍ਰਿਕਟ ਮੋਡ ਸਮਰਥਿਤ"</string>
@@ -263,8 +263,8 @@
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ਸਮੁੱਚੀ ਵਿੰਡੋ ਸਰਫੇਸਾਂ ਫਲੈਸ਼ ਕਰੋ ਜਦੋਂ ਉਹ ਅਪਡੇਟ ਹੁੰਦੀਆਂ ਹਨ"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ਦ੍ਰਿਸ਼ ਅਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"ਜਦੋਂ GPU ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਜਾਏ ਤਾਂ ਵਿੰਡੋਜ ਦੇ ਅੰਦਰ ਦ੍ਰਿਸ਼ ਫਲੈਸ਼ ਕਰੋ"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਸ ਅਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਾਂ ਨੂੰ ਹਰੀਆਂ ਫਲੈਸ਼ ਕਰੋ ਜਦੋਂ ਉਹ ਅਪਡੇਟ ਹੁੰਦੀਆਂ ਹਨ"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਾਂ ਦੇ ਅੱਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਾਂ ਹਰੀਆਂ ਫਲੈਸ਼ ਕਰੋ ਜਦੋਂ ਉਹ ਅੱਪਡੇਟ ਹੁੰਦੀਆਂ ਹਨ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ਓਵਰਡ੍ਰਾ ਡੀਬਗ ਕਰੋ"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU ਰੈਂਡਰਰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW ਓਵਰਲੇਜ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
@@ -351,7 +351,6 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"ਪੂਰੀ ਤਰ੍ਹਾਂ ਚਾਰਜ ਹੋਣ ਤੱਕ <xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ਅਗਿਆਤ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
@@ -387,6 +386,6 @@
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"ਸਰਗਰਮ ਇਨਪੁਟ ਵਿਧੀਆਂ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"ਸਿਸਟਮ ਭਾਸ਼ਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ਲਈ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹਣ ਵਿੱਚ ਅਸਫਲ"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"ਇਹ ਇਨਪੁਟ ਵਿਧੀ ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤਾ ਜਾਣ ਵਾਲਾ ਸਾਰਾ ਟੈਕਸਟ ਇਕੱਤਰ ਕਰਨ ਵਿੱਚ ਸਮਰੱਥ ਹੋ ਸਕਦਾ ਹੈ, ਨਿੱਜੀ ਡੈਟਾ ਸਮੇਤ ਜਿਵੇਂ ਪਾਸਵਰਡ ਅਤੇ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ। ਇਹ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>ਐਪ ਤੋਂ ਆਉਂਦਾ ਹੈ। ਕੀ ਇਹ ਸਪੈੱਲ ਚੈਕਰ ਵਰਤਣਾ ਹੈ?"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"ਇਹ ਇਨਪੁੱਟ ਵਿਧੀ ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੇ ਜਾਣ ਵਾਲੀ ਸਾਰੀ ਲਿਖਤ ਇਕੱਤਰ ਕਰਨ ਵਿੱਚ ਸਮਰੱਥ ਹੋ ਸਕਦੀ ਹੈ, ਨਿੱਜੀ ਡਾਟਾ ਸਮੇਤ ਜਿਵੇਂ ਪਾਸਵਰਡ ਅਤੇ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ। ਇਹ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>ਐਪ ਤੋਂ ਆਉਂਦਾ ਹੈ। ਕੀ ਇਸ ਇਨਪੁੱਟ ਵਿਧੀ ਨੂੰ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ਨੋਟ ਕਰੋ: ਰੀਬੂਟ ਤੋਂ ਬਾਅਦ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਆਪਣਾ ਫ਼ੋਨ ਅਨਲੌਕ ਨਹੀਂ ਕਰਦੇ ਤਦ ਤੱਕ ਇਹ ਐਪ ਚਾਲੂ ਨਹੀਂ ਹੋ ਸਕਦੀ"</string>
 </resources>

@@ -1018,7 +1018,7 @@ public class UsbDeviceManager {
                             Slog.v(TAG, "Current user switched to " + msg.arg1
                                     + "; resetting USB host stack for MTP or PTP");
                             // avoid leaking sensitive data from previous user
-                            setEnabledFunctions(mCurrentFunctions, true, false);
+                            setEnabledFunctions(null, true, false);
                         }
                         mCurrentUser = msg.arg1;
                     }

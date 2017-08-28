@@ -77,11 +77,6 @@ static jint getHeight(jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->height());
 }
 
-static void setHighContrastText(jlong canvasHandle, jboolean highContrastText) {
-    Canvas* canvas = get_canvas(canvasHandle);
-    canvas->setHighContrastText(highContrastText);
-}
-
 static jint save(jlong canvasHandle, jint flagsHandle) {
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->save(flags));
@@ -588,7 +583,6 @@ static const JNINativeMethod gMethods[] = {
     {"nIsOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
     {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
     {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
-    {"nSetHighContrastText","(JZ)V", (void*) CanvasJNI::setHighContrastText},
     {"nSave","(JI)I", (void*) CanvasJNI::save},
     {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
     {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},

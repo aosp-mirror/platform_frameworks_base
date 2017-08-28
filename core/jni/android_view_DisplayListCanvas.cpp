@@ -33,6 +33,7 @@
 #include <CanvasProperty.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
+#include <minikin/Layout.h>
 #include <renderthread/RenderProxy.h>
 
 #include "core_jni_helpers.h"
@@ -94,6 +95,7 @@ static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
     android::uirenderer::renderthread::RenderProxy::dumpGraphicsMemory(fd);
+    minikin::Layout::dumpMinikinStats(fd);
 }
 
 

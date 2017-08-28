@@ -119,6 +119,16 @@ public abstract class Layout {
      */
     public static final int JUSTIFICATION_MODE_INTER_WORD = 1;
 
+    /*
+     * Line spacing multiplier for default line spacing.
+     */
+    public static final float DEFAULT_LINESPACING_MULTIPLIER = 1.0f;
+
+    /*
+     * Line spacing addition for default line spacing.
+     */
+    public static final float DEFAULT_LINESPACING_ADDITION = 0.0f;
+
     /**
      * Return how wide a layout must be in order to display the specified text with one line per
      * paragraph.
@@ -1232,7 +1242,7 @@ public abstract class Layout {
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
         paint.setHyphenEdit(getHyphen(line));
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
+        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops);
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
@@ -1260,7 +1270,7 @@ public abstract class Layout {
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
         paint.setHyphenEdit(getHyphen(line));
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
+        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops);
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }

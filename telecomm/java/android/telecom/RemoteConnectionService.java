@@ -208,6 +208,11 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void onPhoneAccountChanged(String callId, PhoneAccountHandle pHandle,
+                Session.Info sessionInfo) {
+        }
+
+        @Override
         public void addConferenceCall(
                 final String callId, ParcelableConference parcel, Session.Info sessionInfo) {
             RemoteConference conference = new RemoteConference(callId,

@@ -74,6 +74,7 @@
   <java-symbol type="id" name="fillInIntent" />
   <java-symbol type="id" name="find" />
   <java-symbol type="id" name="fullscreenArea" />
+  <java-symbol type="id" name="group_divider" />
   <java-symbol type="id" name="hard_keyboard_section" />
   <java-symbol type="id" name="hard_keyboard_switch" />
   <java-symbol type="id" name="headers" />
@@ -3075,4 +3076,7 @@
   <java-symbol type="layout" name="shutdown_dialog" />
   <java-symbol type="dimen" name="chooser_service_spacing" />
   <java-symbol type="bool" name="config_showSysuiShutdown" />
+
+  <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
+  <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
 </resources>

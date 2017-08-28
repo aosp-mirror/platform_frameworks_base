@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -200,11 +201,16 @@ public final class Display {
      * Display flag: Indicates that the display can show its content when non-secure keyguard is
      * shown.
      * <p>
-     * This flag identifies secondary displays that won't show keyguard if it can be dismissed
-     * without entering credentials. Display content will be shown even if other displays are
-     * locked.
+     * This flag identifies secondary displays that will continue showing content if keyguard can be
+     * dismissed without entering credentials.
+     * </p><p>
+     * An example of usage is a virtual display which content is displayed on external hardware
+     * display that is not visible to the system directly.
      * </p>
      *
+     * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD
+     * @see WindowManagerPolicy#isKeyguardSecure(int)
+     * @see WindowManagerPolicy#isKeyguardTrustedLw()
      * @see #getFlags
      * @hide
      */

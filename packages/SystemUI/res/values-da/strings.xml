@@ -255,7 +255,7 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> underretning mere i gruppen.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> underretninger mere i gruppen.</item>
     </plurals>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Underretningsindstillinger"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Indstillinger for underretninger"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Indstillinger for <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Denne app har ingen underretningskategorier"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Underretninger fra denne app kan ikke deaktiveres"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 ud af <xliff:g id="NUMBER_1">%d</xliff:g> underretningskategori fra denne app</item>
-      <item quantity="other">1 ud af <xliff:g id="NUMBER_1">%d</xliff:g> underretningskategorier fra denne app</item>
+      <item quantity="one">1 ud af <xliff:g id="NUMBER_1">%s</xliff:g> underretningskategori fra denne app</item>
+      <item quantity="other">1 ud af <xliff:g id="NUMBER_1">%s</xliff:g> underretningskategorier fra denne app</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -775,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps, der kører i baggrunden"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tryk for at se oplysninger om batteri- og dataforbrug"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vil du deaktivere mobildata?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Indstillinger kan ikke bekræfte dit svar, da en app dækker for en anmodning om tilladelse."</string>
 </resources>

@@ -244,7 +244,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         // Update task bounds if needed.
         updateDisplayInfo(getDisplayContent());
 
-        if (StackId.windowsAreScaleable(mStack.mStackId)) {
+        if (getWindowConfiguration().windowsAreScaleable()) {
             // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
             // while a resize is pending.
             forceWindowsScaleable(true /* force */);
@@ -572,7 +572,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         //   from its stack. The stack will take care of task rotation for the other case.
         mTmpRect2.set(mBounds);
 
-        if (!StackId.isTaskResizeAllowed(mStack.mStackId)) {
+        if (!getWindowConfiguration().canResizeTask()) {
             setBounds(mTmpRect2, getOverrideConfiguration());
             return;
         }
@@ -620,7 +620,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      * we will have a jump at the end.
      */
     boolean isFloating() {
-        return StackId.tasksAreFloating(mStack.mStackId)
+        return getWindowConfiguration().tasksAreFloating()
                 && !mStack.isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
     }
 
@@ -709,7 +709,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @Override
     boolean fillsParent() {
-        return mFillsParent || !StackId.isTaskResizeAllowed(mStack.mStackId);
+        return mFillsParent || !getWindowConfiguration().canResizeTask();
     }
 
     @Override

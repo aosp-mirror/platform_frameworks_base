@@ -118,11 +118,12 @@ public final class AdvertiseData implements Parcelable {
             return false;
         }
         AdvertiseData other = (AdvertiseData) obj;
-        return Objects.equals(mServiceUuids, other.mServiceUuids) &&
-                BluetoothLeUtils.equals(mManufacturerSpecificData, other.mManufacturerSpecificData) &&
-                BluetoothLeUtils.equals(mServiceData, other.mServiceData) &&
-                        mIncludeDeviceName == other.mIncludeDeviceName &&
-                        mIncludeTxPowerLevel == other.mIncludeTxPowerLevel;
+        return Objects.equals(mServiceUuids, other.mServiceUuids)
+                && BluetoothLeUtils.equals(mManufacturerSpecificData,
+                    other.mManufacturerSpecificData)
+                && BluetoothLeUtils.equals(mServiceData, other.mServiceData)
+                && mIncludeDeviceName == other.mIncludeDeviceName
+                && mIncludeTxPowerLevel == other.mIncludeTxPowerLevel;
     }
 
     @Override
@@ -160,12 +161,12 @@ public final class AdvertiseData implements Parcelable {
 
     public static final Parcelable.Creator<AdvertiseData> CREATOR =
             new Creator<AdvertiseData>() {
-            @Override
+                @Override
                 public AdvertiseData[] newArray(int size) {
                     return new AdvertiseData[size];
                 }
 
-            @Override
+                @Override
                 public AdvertiseData createFromParcel(Parcel in) {
                     Builder builder = new Builder();
                     ArrayList<ParcelUuid> uuids = in.createTypedArrayList(ParcelUuid.CREATOR);
@@ -222,7 +223,7 @@ public final class AdvertiseData implements Parcelable {
          * @param serviceDataUuid 16-bit UUID of the service the data is associated with
          * @param serviceData Service data
          * @throws IllegalArgumentException If the {@code serviceDataUuid} or {@code serviceData} is
-         *             empty.
+         * empty.
          */
         public Builder addServiceData(ParcelUuid serviceDataUuid, byte[] serviceData) {
             if (serviceDataUuid == null || serviceData == null) {
@@ -242,8 +243,8 @@ public final class AdvertiseData implements Parcelable {
          *
          * @param manufacturerId Manufacturer ID assigned by Bluetooth SIG.
          * @param manufacturerSpecificData Manufacturer specific data
-         * @throws IllegalArgumentException If the {@code manufacturerId} is negative or
-         *             {@code manufacturerSpecificData} is null.
+         * @throws IllegalArgumentException If the {@code manufacturerId} is negative or {@code
+         * manufacturerSpecificData} is null.
          */
         public Builder addManufacturerData(int manufacturerId, byte[] manufacturerSpecificData) {
             if (manufacturerId < 0) {

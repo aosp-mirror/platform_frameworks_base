@@ -22,9 +22,6 @@
 #include <private/android_filesystem_config.h>
 #include <binder/IServiceManager.h>
 #include <mutex>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <wait.h>
 #include <unistd.h>
 
@@ -37,7 +34,7 @@ const char* INCIDENT_HELPER = "/system/bin/incident_helper";
 static pid_t
 forkAndExecuteIncidentHelper(const int id, const char* name, Fpipe& p2cPipe, Fpipe& c2pPipe)
 {
-    const char* ihArgs[] { INCIDENT_HELPER, "-s", to_string(id).c_str(), NULL };
+    const char* ihArgs[] { INCIDENT_HELPER, "-s", String8::format("%d", id).string(), NULL };
 
     // fork used in multithreaded environment, avoid adding unnecessary code in child process
     pid_t pid = fork();

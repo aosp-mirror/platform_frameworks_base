@@ -30,6 +30,7 @@ import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.MediumTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.FontFallbackSetup;
 import android.text.GetChars;
 import android.text.Layout;
 import android.text.Selection;
@@ -248,5 +249,57 @@ public class TextViewTest {
             builder.append('a');
         }
         return builder.toString();
+    }
+
+    @Test
+    public void testFallbackLineSpacing() {
+        // All glyphs in the fonts are 1em wide.
+        final String[] testFontFiles = {
+            // ascent == 1em, descent == 2em, only supports 'a' and space
+            "ascent1em-descent2em.ttf",
+            // ascent == 3em, descent == 4em, only supports 'b'
+            "ascent3em-descent4em.ttf"
+        };
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>ascent1em-descent2em.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>ascent3em-descent4em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (FontFallbackSetup setup =
+                new FontFallbackSetup("DynamicLayout", testFontFiles, xml)) {
+            mTextView = new TextView(mActivity);
+            mTextView.setTypeface(setup.getTypefaceFor("sans-serif"));
+            mTextView.setTextSize(100);
+            mTextView.setText("aaaaa aabaa aaaaa"); // This should result in three lines.
+            mTextView.setPadding(0, 0, 0, 0);
+            mTextView.setIncludeFontPadding(false);
+
+            final int em = (int) Math.ceil(mTextView.getPaint().measureText("a"));
+            final int width = 5 * em;
+            final int height = 30 * em; // tall enough to not affect our other measurements
+            mTextView.measure(
+                    View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
+            mTextView.layout(0, 0, width, height);
+
+            final Layout layout = mTextView.getLayout();
+            assertNotNull(layout);
+            assertEquals(3, layout.getLineCount());
+
+            assertEquals(-em, layout.getLineAscent(0));
+            assertEquals(2 * em, layout.getLineDescent(0));
+
+            // The second line has a 'b', so it needs more ascent and descent.
+            assertEquals(-3 * em, layout.getLineAscent(1));
+            assertEquals(4 * em, layout.getLineDescent(1));
+
+            assertEquals(-em, layout.getLineAscent(2));
+            assertEquals(2 * em, layout.getLineDescent(2));
+        }
     }
 }

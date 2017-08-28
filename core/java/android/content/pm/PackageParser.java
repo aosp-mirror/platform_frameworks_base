@@ -159,8 +159,6 @@ public class PackageParser {
     private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
             SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
 
-    private static final int MAX_PACKAGES_PER_APK = 5;
-
     public static final int APK_SIGNING_UNKNOWN = 0;
     public static final int APK_SIGNING_V1 = 1;
     public static final int APK_SIGNING_V2 = 2;
@@ -1943,14 +1941,6 @@ public class PackageParser {
      */
     private boolean parseBaseApkChild(Package parentPkg, Resources res, XmlResourceParser parser,
             int flags, String[] outError) throws XmlPullParserException, IOException {
-        // Let ppl not abuse this mechanism by limiting the packages per APK
-        if (parentPkg.childPackages != null && parentPkg.childPackages.size() + 2
-                > MAX_PACKAGES_PER_APK) {
-            outError[0] = "Maximum number of packages per APK is: " + MAX_PACKAGES_PER_APK;
-            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-            return false;
-        }
-
         // Make sure we have a valid child package name
         String childPackageName = parser.getAttributeValue(null, "package");
         if (validateName(childPackageName, true, false) != null) {

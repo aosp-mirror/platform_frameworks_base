@@ -171,7 +171,6 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(200, 200);
-        canvas->setHighContrastText(false);
         canvas->translate(0, 0); // mScrollX, mScrollY
 
         // Clip to padding

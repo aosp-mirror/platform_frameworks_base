@@ -752,6 +752,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mOwnerCanAddInternalSystemWindow;
     }
 
+    @Override
+    public boolean canAcquireSleepToken() {
+        return mSession.mCanAcquireSleepToken;
+    }
+
     /**
      * Subtracts the insets calculated by intersecting {@param layoutFrame} with {@param insetFrame}
      * from {@param frame}. In other words, it applies the insets that would result if
@@ -1732,7 +1737,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
-                && (task == null || getTask().mStack.hasMovementAnimations())
+                && getWindowConfiguration().hasMovementAnimations()
                 && !mWinAnimator.mLastHidden) {
             mWinAnimator.setMoveAnimation(left, top);
         }
@@ -2417,7 +2422,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * because we want to preserve its location on screen to be re-activated later when the user
      * interacts with it.
      */
-    boolean shouldKeepVisibleDeadAppWindow() {
+    private boolean shouldKeepVisibleDeadAppWindow() {
         if (!isWinVisibleLw() || mAppToken == null || mAppToken.isClientHidden()) {
             // Not a visible app window or the app isn't dead.
             return false;
@@ -2435,8 +2440,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final TaskStack stack = getStack();
-        return stack != null && StackId.keepVisibleDeadAppWindowOnScreen(stack.mStackId);
+        return getWindowConfiguration().keepVisibleDeadAppWindowOnScreen();
     }
 
     /** @return true if this window desires key events. */
@@ -3204,7 +3208,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // one or more frame to wrong offset. So here we send fullscreen backdrop if either
         // isDragResizing() or isDragResizeChanged() is true.
         boolean resizing = isDragResizing() || isDragResizeChanged();
-        if (StackId.useWindowFrameForBackdrop(getStackId()) || !resizing) {
+        if (getWindowConfiguration().useWindowFrameForBackdrop() || !resizing) {
             return frame;
         }
         final DisplayInfo displayInfo = getDisplayInfo();

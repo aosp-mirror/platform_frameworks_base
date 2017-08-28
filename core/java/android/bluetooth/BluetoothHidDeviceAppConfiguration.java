@@ -49,19 +49,19 @@ public final class BluetoothHidDeviceAppConfiguration implements Parcelable {
     }
 
     public static final Parcelable.Creator<BluetoothHidDeviceAppConfiguration> CREATOR =
-        new Parcelable.Creator<BluetoothHidDeviceAppConfiguration>() {
+            new Parcelable.Creator<BluetoothHidDeviceAppConfiguration>() {
 
-        @Override
-        public BluetoothHidDeviceAppConfiguration createFromParcel(Parcel in) {
-            long hash = in.readLong();
-            return new BluetoothHidDeviceAppConfiguration(hash);
-        }
+                @Override
+                public BluetoothHidDeviceAppConfiguration createFromParcel(Parcel in) {
+                    long hash = in.readLong();
+                    return new BluetoothHidDeviceAppConfiguration(hash);
+                }
 
-        @Override
-        public BluetoothHidDeviceAppConfiguration[] newArray(int size) {
-            return new BluetoothHidDeviceAppConfiguration[size];
-        }
-    };
+                @Override
+                public BluetoothHidDeviceAppConfiguration[] newArray(int size) {
+                    return new BluetoothHidDeviceAppConfiguration[size];
+                }
+            };
 
     @Override
     public void writeToParcel(Parcel out, int flags) {

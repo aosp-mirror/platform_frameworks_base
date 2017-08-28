@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
@@ -38,6 +39,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
+import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
 
 import java.io.ByteArrayOutputStream;
@@ -88,6 +90,8 @@ public final class JobStore {
     /** Handler backed by IoThread for writing to disk. */
     private final Handler mIoHandler = IoThread.getHandler();
     private static JobStore sSingleton;
+
+    private JobStorePersistStats mPersistInfo = new JobStorePersistStats();
 
     /** Used by the {@link JobSchedulerService} to instantiate the JobStore. */
     static JobStore initAndGet(JobSchedulerService jobManagerService) {
@@ -197,6 +201,10 @@ public final class JobStore {
 
     public int size() {
         return mJobSet.size();
+    }
+
+    public JobStorePersistStats getPersistStats() {
+        return mPersistInfo;
     }
 
     public int countJobsForUid(int uid) {
@@ -336,6 +344,9 @@ public final class JobStore {
         }
 
         private void writeJobsMapImpl(List<JobStatus> jobList) {
+            int numJobs = 0;
+            int numSystemJobs = 0;
+            int numSyncJobs = 0;
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 XmlSerializer out = new FastXmlSerializer();
@@ -356,6 +367,14 @@ public final class JobStore {
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getJob().getExtras(), out);
                     out.endTag(null, "job");
+
+                    numJobs++;
+                    if (jobStatus.getUid() == Process.SYSTEM_UID) {
+                        numSystemJobs++;
+                        if (isSyncJob(jobStatus)) {
+                            numSyncJobs++;
+                        }
+                    }
                 }
                 out.endTag(null, "job-info");
                 out.endDocument();
@@ -373,6 +392,10 @@ public final class JobStore {
                 if (DEBUG) {
                     Slog.d(TAG, "Error persisting bundle.", e);
                 }
+            } finally {
+                mPersistInfo.countAllJobsSaved = numJobs;
+                mPersistInfo.countSystemServerJobsSaved = numSystemJobs;
+                mPersistInfo.countSystemSyncManagerJobsSaved = numSyncJobs;
             }
         }
 
@@ -525,6 +548,11 @@ public final class JobStore {
         return Pair.create(earliest, latest);
     }
 
+    private static boolean isSyncJob(JobStatus status) {
+        return com.android.server.content.SyncJobService.class.getName()
+                .equals(status.getServiceComponent().getClassName());
+    }
+
     /**
      * Runnable that reads list of persisted job from xml. This is run once at start up, so doesn't
      * need to go through {@link JobStore#add(com.android.server.job.controllers.JobStatus)}.
@@ -545,6 +573,8 @@ public final class JobStore {
         @Override
         public void run() {
             int numJobs = 0;
+            int numSystemJobs = 0;
+            int numSyncJobs = 0;
             try {
                 List<JobStatus> jobs;
                 FileInputStream fis = mJobsFile.openRead();
@@ -558,7 +588,14 @@ public final class JobStore {
                             js.prepareLocked(am);
                             js.enqueueTime = now;
                             this.jobSet.add(js);
+
                             numJobs++;
+                            if (js.getUid() == Process.SYSTEM_UID) {
+                                numSystemJobs++;
+                                if (isSyncJob(js)) {
+                                    numSyncJobs++;
+                                }
+                            }
                         }
                     }
                 }
@@ -569,6 +606,12 @@ public final class JobStore {
                 }
             } catch (XmlPullParserException | IOException e) {
                 Slog.wtf(TAG, "Error jobstore xml.", e);
+            } finally {
+                if (mPersistInfo.countAllJobsLoaded < 0) { // Only set them once.
+                    mPersistInfo.countAllJobsLoaded = numJobs;
+                    mPersistInfo.countSystemServerJobsLoaded = numSystemJobs;
+                    mPersistInfo.countSystemSyncManagerJobsLoaded = numSyncJobs;
+                }
             }
             Slog.i(TAG, "Read " + numJobs + " jobs");
         }

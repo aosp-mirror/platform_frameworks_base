@@ -79,8 +79,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private static final int EVENT_DB_CORRUPT = 75004;
 
-    // TODO b/63398887 STOPSHIP.
-    // Temporarily enabled for testing across a broader set of dogfood devices.
     private static final boolean DEBUG_CLOSE_IDLE_CONNECTIONS = SystemProperties
             .getBoolean("persist.debug.sqlite.close_idle_connections", true);
 

@@ -49,6 +49,7 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.LAST_CLIP_RECT;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.SURFACE;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -1145,7 +1146,7 @@ class WindowStateAnimator {
         final TaskStack stack = w.getTask().mStack;
         stack.getDimBounds(finalClipRect);
 
-        if (StackId.tasksAreFloating(stack.mStackId)) {
+        if (stack.getWindowConfiguration().tasksAreFloating()) {
             w.expandForSurfaceInsets(finalClipRect);
         }
 
@@ -1163,10 +1164,10 @@ class WindowStateAnimator {
             transform.postScale(spec.scale, spec.scale);
             transform.postTranslate(-spec.offsetX, -spec.offsetY);
             transform.mapRect(finalCrop);
-            finalClipRect.top = (int)finalCrop.top;
-            finalClipRect.left = (int)finalCrop.left;
-            finalClipRect.right = (int)finalClipRect.right;
-            finalClipRect.bottom = (int)finalClipRect.bottom;
+            finalClipRect.top = (int) finalCrop.top;
+            finalClipRect.left = (int) finalCrop.left;
+            finalClipRect.right = (int) finalCrop.right;
+            finalClipRect.bottom = (int) finalCrop.bottom;
         }
 
         return true;
@@ -1324,8 +1325,8 @@ class WindowStateAnimator {
 
         // We need to do some acrobatics with surface position, because their clip region is
         // relative to the inside of the surface, but the stack bounds aren't.
-        if (StackId.hasWindowShadow(stack.mStackId)
-                && !StackId.isTaskResizeAllowed(stack.mStackId)) {
+        final WindowConfiguration winConfig = w.getWindowConfiguration();
+        if (winConfig.hasWindowShadow() && !winConfig.canResizeTask()) {
                 // The windows in this stack display drop shadows and the fill the entire stack
                 // area. Adjust the stack bounds we will use to cropping take into account the
                 // offsets we use to display the drop shadow so it doesn't get cropped.
@@ -1649,14 +1650,17 @@ class WindowStateAnimator {
                 // hidden while the screen is turning off.
                 // TODO(b/63773439): These cases should be eliminated, though we probably still
                 // want to process mTurnOnScreen in this way for clarity.
-                if (mWin.mTurnOnScreen && mWin.mAppToken.canTurnScreenOn()) {
+                if (mWin.mTurnOnScreen &&
+                        (mWin.mAppToken == null || mWin.mAppToken.canTurnScreenOn())) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG, "Show surface turning screen on: " + mWin);
                     mWin.mTurnOnScreen = false;
 
                     // The window should only turn the screen on once per resume, but
                     // prepareSurfaceLocked can be called multiple times. Set canTurnScreenOn to
                     // false so the window doesn't turn the screen on again during this resume.
-                    mWin.mAppToken.setCanTurnScreenOn(false);
+                    if (mWin.mAppToken != null) {
+                        mWin.mAppToken.setCanTurnScreenOn(false);
+                    }
                     mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
                 }
             }
@@ -1760,8 +1764,7 @@ class WindowStateAnimator {
      * @return Returns true if the surface was successfully shown.
      */
     private boolean showSurfaceRobustlyLocked() {
-        final Task task = mWin.getTask();
-        if (task != null && StackId.windowsAreScaleable(task.mStack.mStackId)) {
+        if (mWin.getWindowConfiguration().windowsAreScaleable()) {
             mSurfaceController.forceScaleableInTransaction(true);
         }
 

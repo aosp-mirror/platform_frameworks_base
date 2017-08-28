@@ -499,6 +499,10 @@ sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
     return nullptr;
 }
 
+bool RenderThread::isCurrent() {
+    return gettid() == getInstance().getTid();
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */

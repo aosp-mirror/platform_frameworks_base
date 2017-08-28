@@ -391,7 +391,6 @@ interface IActivityManager {
     // Start of L transactions
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
     boolean startUserInBackground(int userid);
-    void startLockTaskModeById(int taskId);
     void startLockTaskModeByToken(in IBinder token);
     void stopLockTaskMode();
     boolean isInLockTaskMode();
@@ -478,7 +477,6 @@ interface IActivityManager {
      * different stack.
      */
     void positionTaskInStack(int taskId, int stackId, int position);
-    int getActivityStackId(in IBinder token);
     void exitFreeformMode(in IBinder token);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
