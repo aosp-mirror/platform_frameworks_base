@@ -198,7 +198,7 @@ class ScreenRotationAnimation {
         pw.print(prefix); pw.print("mEnterTransformation=");
                 mEnterTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFrameTransformation=");
-                mEnterTransformation.printShortString(pw); pw.println();
+                mFrameTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFrameInitialMatrix=");
                 mFrameInitialMatrix.printShortString(pw);
                 pw.println();
