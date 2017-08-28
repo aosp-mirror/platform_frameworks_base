@@ -36,6 +36,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Property;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
@@ -174,6 +175,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
+
+    // Listener will be called when receiving a long click event.
+    // Use #setLongPressPosition to optionally assign positional data with the long press.
+    private LongPressListener mLongPressListener;
+
     private boolean mGroupExpansionChanging;
 
     /**
@@ -788,6 +794,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnExpandClickListener = onExpandClickListener;
     }
 
+    public void setLongPressListener(LongPressListener longPressListener) {
+        mLongPressListener = longPressListener;
+    }
+
     @Override
     public void setOnClickListener(@Nullable OnClickListener l) {
         super.setOnClickListener(l);
@@ -1336,6 +1346,47 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mTranslateableViews.remove(mChildrenContainerStub);
             mTranslateableViews.remove(mGutsStub);
         }
+    }
+
+    private void doLongClickCallback() {
+        doLongClickCallback(getWidth() / 2, getHeight() / 2);
+    }
+
+    public void doLongClickCallback(int x, int y) {
+        createMenu();
+        MenuItem menuItem = getProvider().getLongpressMenuItem(mContext);
+        if (mLongPressListener != null && menuItem != null) {
+            mLongPressListener.onLongPress(this, x, y, menuItem);
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (KeyEvent.isConfirmKey(keyCode)) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (KeyEvent.isConfirmKey(keyCode)) {
+            if (!event.isCanceled()) {
+                performClick();
+            }
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (KeyEvent.isConfirmKey(keyCode)) {
+            doLongClickCallback();
+            return true;
+        }
+        return false;
     }
 
     public void resetTranslation() {
@@ -2205,6 +2256,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
         if (canViewBeDismissed()) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
         }
@@ -2243,6 +2295,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
             case AccessibilityNodeInfo.ACTION_EXPAND:
                 mExpandClickListener.onClick(this);
+                return true;
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK:
+                doLongClickCallback();
                 return true;
         }
         return false;
@@ -2331,5 +2386,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @VisibleForTesting
     protected void setChildrenContainer(NotificationChildrenContainer childrenContainer) {
         mChildrenContainer = childrenContainer;
+    }
+
+    /**
+     * Equivalent to View.OnLongClickListener with coordinates
+     */
+    public interface LongPressListener {
+        /**
+         * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
+         * @return whether the longpress was handled
+         */
+        boolean onLongPress(View v, int x, int y, MenuItem item);
     }
 }
