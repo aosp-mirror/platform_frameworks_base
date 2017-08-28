@@ -91,6 +91,7 @@ public class ManagedServicesTest extends NotificationTestCase {
     private ArrayMap<Integer, String> mExpectedSecondaryPackages;
     private ArrayMap<Integer, String> mExpectedSecondaryComponentNames;
 
+    // type : user : list of approved
     private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedPrimary = new ArrayMap<>();
     private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedSecondary = new ArrayMap<>();
 
@@ -578,6 +579,32 @@ public class ManagedServicesTest extends NotificationTestCase {
         assertEquals(0, service.getAllowedComponents(10).size());
     }
 
+    @Test
+    public void testOnUserRemoved() throws Exception {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+            loadXml(service);
+
+            ArrayMap<Integer, String> verifyMap = mExpectedPrimary.get(service.mApprovalLevel);
+            String user0 = verifyMap.remove(0);
+            verifyMap = mExpectedSecondary.get(service.mApprovalLevel);
+            user0 = user0 + ":" + verifyMap.remove(0);
+
+            service.onUserRemoved(0);
+
+            for (String verifyValue : user0.split(":")) {
+                if (!TextUtils.isEmpty(verifyValue)) {
+                    assertFalse("service type " + service.mApprovalLevel + ":" + verifyValue
+                            + " is still allowed",
+                            service.isPackageOrComponentAllowed(verifyValue, 0));
+                }
+            }
+
+            verifyExpectedApprovedEntries(service);
+        }
+    }
+
     private void loadXml(ManagedServices service) throws Exception {
         final StringBuffer xml = new StringBuffer();
         xml.append("<" + service.getConfig().xmlTag + ">\n");
@@ -657,7 +684,8 @@ public class ManagedServicesTest extends NotificationTestCase {
             for (String packageOrComponent : verifyMap.get(userId).split(":")) {
                 if (!TextUtils.isEmpty(packageOrComponent)) {
                     if (service.mApprovalLevel == APPROVAL_BY_PACKAGE) {
-                        assertTrue(packageOrComponent, service.isComponentEnabledForPackage(packageOrComponent));
+                        assertTrue(packageOrComponent,
+                                service.isComponentEnabledForPackage(packageOrComponent));
                         for (int i = 1; i <= 3; i ++) {
                             ComponentName componentName = ComponentName.unflattenFromString(
                                     packageOrComponent +"/C" + i);
