@@ -83,7 +83,7 @@ public class UserPackage {
      * supported by the current framework version.
      */
     public static boolean hasCorrectTargetSdkVersion(PackageInfo packageInfo) {
-        return packageInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O;
+        return packageInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O_MR1;
     }
 
     public UserInfo getUserInfo() {
