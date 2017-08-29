@@ -352,15 +352,6 @@ public class StaticLayout extends Layout {
         public Builder setIndents(@Nullable int[] leftIndents, @Nullable int[] rightIndents) {
             mLeftIndents = leftIndents;
             mRightIndents = rightIndents;
-            int leftLen = leftIndents == null ? 0 : leftIndents.length;
-            int rightLen = rightIndents == null ? 0 : rightIndents.length;
-            int[] indents = new int[Math.max(leftLen, rightLen)];
-            for (int i = 0; i < indents.length; i++) {
-                int leftMargin = i < leftLen ? leftIndents[i] : 0;
-                int rightMargin = i < rightLen ? rightIndents[i] : 0;
-                indents[i] = leftMargin + rightMargin;
-            }
-            nSetIndents(mNativePtr, indents);
             return this;
         }
 
@@ -485,8 +476,8 @@ public class StaticLayout extends Layout {
         private int mMaxLines;
         private int mBreakStrategy;
         private int mHyphenationFrequency;
-        private int[] mLeftIndents;
-        private int[] mRightIndents;
+        @Nullable private int[] mLeftIndents;
+        @Nullable private int[] mRightIndents;
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
 
@@ -689,6 +680,22 @@ public class StaticLayout extends Layout {
         if (source instanceof Spanned)
             spanned = (Spanned) source;
 
+        final int[] indents;
+        if (mLeftIndents != null || mRightIndents != null) {
+            final int leftLen = mLeftIndents == null ? 0 : mLeftIndents.length;
+            final int rightLen = mRightIndents == null ? 0 : mRightIndents.length;
+            final int indentsLen = Math.max(leftLen, rightLen);
+            indents = new int[indentsLen];
+            for (int i = 0; i < leftLen; i++) {
+                indents[i] = mLeftIndents[i];
+            }
+            for (int i = 0; i < rightLen; i++) {
+                indents[i] += mRightIndents[i];
+            }
+        } else {
+            indents = null;
+        }
+
         int paraEnd;
         for (int paraStart = bufStart; paraStart <= bufEnd; paraStart = paraEnd) {
             paraEnd = TextUtils.indexOf(source, CHAR_NEW_LINE, paraStart, bufEnd);
@@ -773,24 +780,9 @@ public class StaticLayout extends Layout {
                     firstWidth, firstWidthLineCount, restWidth,
                     variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency,
                     // TODO: Support more justification mode, e.g. letter spacing, stretching.
-                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE);
-            if (mLeftIndents != null || mRightIndents != null) {
-                // TODO(performance): it would be better to do this once per layout rather
-                // than once per paragraph, but that would require a change to the native
-                // interface.
-                int leftLen = mLeftIndents == null ? 0 : mLeftIndents.length;
-                int rightLen = mRightIndents == null ? 0 : mRightIndents.length;
-                int indentsLen = Math.max(1, Math.max(leftLen, rightLen) - mLineCount);
-                int[] indents = new int[indentsLen];
-                for (int i = 0; i < indentsLen; i++) {
-                    int leftMargin = mLeftIndents == null ? 0 :
-                            mLeftIndents[Math.min(i + mLineCount, leftLen - 1)];
-                    int rightMargin = mRightIndents == null ? 0 :
-                            mRightIndents[Math.min(i + mLineCount, rightLen - 1)];
-                    indents[i] = leftMargin + rightMargin;
-                }
-                nSetIndents(b.mNativePtr, indents);
-            }
+                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
+                    (indents != null && indents.length > mLineCount) ? indents : null,
+                    mLineCount);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -1507,13 +1499,14 @@ public class StaticLayout extends Layout {
     private static native void nSetLocales(long nativePtr, String locales,
             long[] nativeHyphenators);
 
-    private static native void nSetIndents(long nativePtr, int[] indents);
-
     // Set up paragraph text and settings; done as one big method to minimize jni crossings
-    private static native void nSetupParagraph(long nativePtr, char[] text, int length,
-            float firstWidth, int firstWidthLineCount, float restWidth,
-            int[] variableTabStops, int defaultTabStop, int breakStrategy, int hyphenationFrequency,
-            boolean isJustified);
+    private static native void nSetupParagraph(
+            @NonNull long nativePtr, @NonNull char[] text, @IntRange(from = 0) int length,
+            @FloatRange(from = 0.0f) float firstWidth, @IntRange(from = 0) int firstWidthLineCount,
+            @FloatRange(from = 0.0f) float restWidth, @Nullable int[] variableTabStops,
+            int defaultTabStop, @BreakStrategy int breakStrategy,
+            @HyphenationFrequency int hyphenationFrequency, boolean isJustified,
+            @Nullable int[] indents, @IntRange(from = 0) int intentsOffset);
 
     private static native float nAddStyleRun(long nativePtr, long nativePaint, int start, int end,
             boolean isRtl);
@@ -1597,6 +1590,6 @@ public class StaticLayout extends Layout {
         // breaks, widths, and flags should all have the same length
     }
 
-    private int[] mLeftIndents;
-    private int[] mRightIndents;
+    @Nullable private int[] mLeftIndents;
+    @Nullable private int[] mRightIndents;
 }
