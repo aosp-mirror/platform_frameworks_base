@@ -50,6 +50,7 @@ import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -119,6 +120,8 @@ public class ResolverActivity extends Activity {
 
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
+
+    IconDrawableFactory mIconFactory;
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
@@ -330,6 +333,7 @@ public class ResolverActivity extends Activity {
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
+        mIconFactory = IconDrawableFactory.newInstance(this, true);
     }
 
     /**
@@ -468,20 +472,20 @@ public class ResolverActivity extends Activity {
             if (ri.resolvePackageName != null && ri.icon != 0) {
                 dr = getIcon(mPm.getResourcesForApplication(ri.resolvePackageName), ri.icon);
                 if (dr != null) {
-                    return dr;
+                    return mIconFactory.getShadowedIcon(dr);
                 }
             }
             final int iconRes = ri.getIconResource();
             if (iconRes != 0) {
                 dr = getIcon(mPm.getResourcesForApplication(ri.activityInfo.packageName), iconRes);
                 if (dr != null) {
-                    return dr;
+                    return mIconFactory.getShadowedIcon(dr);
                 }
             }
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Couldn't find resources for package", e);
         }
-        return ri.loadIcon(mPm);
+        return mIconFactory.getBadgedIcon(ri.activityInfo.applicationInfo);
     }
 
     @Override
