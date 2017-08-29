@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
@@ -116,5 +117,22 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         for (TaskRecord task : tasks) {
             assertTrue(stackTasks.contains(task));
         }
+    }
+
+    /**
+     * Ensures that an activity is removed from the stopping activities list once it is resumed.
+     */
+    @Test
+    public void testStoppingActivityRemovedWhenResumed() throws Exception {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord firstTask = createTask(service, testActivityComponent,
+            FULLSCREEN_WORKSPACE_STACK_ID);
+        final ActivityRecord firstActivity = createActivity(service, testActivityComponent,
+            firstTask);
+        service.mStackSupervisor.mStoppingActivities.add(firstActivity);
+
+        firstActivity.completeResumeLocked();
+
+        assertFalse(service.mStackSupervisor.mStoppingActivities.contains(firstActivity));
     }
 }
