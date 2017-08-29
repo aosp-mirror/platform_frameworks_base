@@ -193,6 +193,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi Roam სკანირების მუდამ დაშვება"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"მობილური ინტერნეტის ყოველთვის გააქტიურება"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ტეტერინგის აპარატურული აჩქარება"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ხმის აბსოლუტური სიძლიერის გათიშვა"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ზოლსშიდა დარეკვის ჩართვა"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth-ის AVRCP-ის ვერსია"</string>
@@ -232,6 +234,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ამ პარამეტრების გამოყენება დასაშვებია მხოლოდ დეველოპერული მიზნებით. მათმა გამოყენებამ შეიძლება გამოიწვიოს თქვენი მოწყობილობის და მისი აპლიკაციების დაზიანება ან გაუმართავი მუშაობა."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"აპლიკაციების USB-ს საშუალებით შემოწმება"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"შეამოწმეთ, რამდენად უსაფრთხოა ADB/ADT-ის საშუალებით ინსტალირებული აპლიკაციები."</string>
+    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"გათიშავს Bluetooth-ის ხმის აბსოლუტური სიძლიერის ფუნქციას დისტანციურ მოწყობილობებზე ხმასთან დაკავშირებული ისეთი პრობლემების არსებობის შემთხვევაში, როგორიცაა ხმის დაუშვებლად მაღალი სიძლიერე ან კონტროლის შეუძლებლობა."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ტელეფონის ზარების Bluetooth-ყურსაცვამებზე დაკვრის დაშვება"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ადგილობრივი ტერმინალი"</string>
