@@ -145,6 +145,10 @@ public class ActivityTestsBase {
         protected ActivityStackSupervisor createStackSupervisor() {
             return new TestActivityStackSupervisor(this, mHandlerThread.getLooper());
         }
+
+        @Override
+        void updateUsageStats(ActivityRecord component, boolean resumed) {
+        }
     }
 
     /**
