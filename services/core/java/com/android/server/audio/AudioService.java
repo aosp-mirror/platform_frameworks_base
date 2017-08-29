@@ -6973,6 +6973,10 @@ public class AudioService extends IAudioService.Stub
         mPlaybackMonitor.playerEvent(piid, event, Binder.getCallingUid());
     }
 
+    public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio) {
+        mPlaybackMonitor.playerHasOpPlayAudio(piid, hasOpPlayAudio, Binder.getCallingUid());
+    }
+
     public void releasePlayer(int piid) {
         mPlaybackMonitor.releasePlayer(piid, Binder.getCallingUid());
     }

@@ -214,6 +214,11 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio, int binderUid) {
+        // no check on UID yet because this is only for logging at the moment
+        mEventLogger.log(new PlayerOpPlayAudioEvent(piid, hasOpPlayAudio, binderUid));
+    }
+
     public void releasePlayer(int piid, int binderUid) {
         if (DEBUG) { Log.v(TAG, "releasePlayer() for piid=" + piid); }
         synchronized(mPlayerLock) {
@@ -702,8 +707,28 @@ public final class PlaybackActivityMonitor
 
         @Override
         public String eventToString() {
-            return new String("player piid:" + mPlayerIId + " state:"
-                    + AudioPlaybackConfiguration.toLogFriendlyPlayerState(mState));
+            return new StringBuilder("player piid:").append(mPlayerIId).append(" state:")
+                    .append(AudioPlaybackConfiguration.toLogFriendlyPlayerState(mState)).toString();
+        }
+    }
+
+    private final static class PlayerOpPlayAudioEvent extends AudioEventLogger.Event {
+        // only keeping the player interface ID as it uniquely identifies the player in the event
+        final int mPlayerIId;
+        final boolean mHasOp;
+        final int mUid;
+
+        PlayerOpPlayAudioEvent(int piid, boolean hasOp, int uid) {
+            mPlayerIId = piid;
+            mHasOp = hasOp;
+            mUid = uid;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("player piid:").append(mPlayerIId)
+                    .append(" has OP_PLAY_AUDIO:").append(mHasOp)
+                    .append(" in uid:").append(mUid).toString();
         }
     }
 
