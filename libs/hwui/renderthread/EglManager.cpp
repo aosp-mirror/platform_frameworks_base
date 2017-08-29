@@ -138,7 +138,7 @@ void EglManager::initialize() {
         LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
         GrContextOptions options;
-        options.fGpuPathRenderers &= ~GrContextOptions::GpuPathRenderers::kDistanceField;
+        options.fDisableDistanceFieldPaths = true;
         mRenderThread.cacheManager().configureContext(&options);
         mRenderThread.setGrContext(GrContext::Create(GrBackend::kOpenGL_GrBackend,
                 (GrBackendContext)glInterface.get(), options));
