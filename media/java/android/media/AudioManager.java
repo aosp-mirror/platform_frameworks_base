@@ -397,6 +397,19 @@ public class AudioManager {
      */
     public static final int ADJUST_TOGGLE_MUTE = 101;
 
+    /** @hide */
+    public static final String adjustToString(int adj) {
+        switch (adj) {
+            case ADJUST_RAISE: return "ADJUST_RAISE";
+            case ADJUST_LOWER: return "ADJUST_LOWER";
+            case ADJUST_SAME: return "ADJUST_SAME";
+            case ADJUST_MUTE: return "ADJUST_MUTE";
+            case ADJUST_UNMUTE: return "ADJUST_UNMUTE";
+            case ADJUST_TOGGLE_MUTE: return "ADJUST_TOGGLE_MUTE";
+            default: return new StringBuilder("unknown adjust mode ").append(adj).toString();
+        }
+    }
+
     // Flags should be powers of 2!
 
     /**
