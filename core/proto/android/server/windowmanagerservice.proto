@@ -91,6 +91,8 @@ message DisplayProto {
   repeated WindowTokenProto ime_windows = 7;
   int32 dpi = 8;
   .android.view.DisplayInfoProto display_info = 9;
+  int32 rotation = 10;
+  ScreenRotationAnimationProto screen_rotation_animation = 11;
 }
 
 
@@ -170,4 +172,10 @@ message WindowStateAnimatorProto {
 message WindowSurfaceControllerProto {
   bool shown = 1;
   int32 layer = 2;
+}
+
+/* represents ScreenRotationAnimation */
+message ScreenRotationAnimationProto {
+  bool started = 1;
+  bool animation_running = 2;
 }
