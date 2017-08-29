@@ -60,12 +60,7 @@ static jint nativeRemovePage(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
 
     FPDFPage_Delete(document, pageIndex);
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
-
-    int pageCount = FPDF_GetPageCount(document);
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
-
-    return pageCount;
+    return FPDF_GetPageCount(document);
 }
 
 struct PdfToFdWriter : FPDF_FILEWRITE {
@@ -110,7 +105,6 @@ static void nativeWrite(JNIEnv* env, jclass thiz, jlong documentPtr, jint fd) {
         jniThrowExceptionFmt(env, "java/io/IOException",
                 "cannot write to fd. Error: %d", errno);
     }
-    HANDLE_PDFIUM_ERROR_STATE(env)
 }
 
 static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex,
@@ -123,7 +117,6 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
                 "cannot open page");
         return;
     }
-    HANDLE_PDFIUM_ERROR_STATE(env);
 
     double width = 0;
     double height = 0;
@@ -132,11 +125,6 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
     if (!result) {
         jniThrowException(env, "java/lang/IllegalStateException",
                     "cannot get page size");
-        return;
-    }
-    bool isExceptionPending = forwardPdfiumError(env);
-    if (isExceptionPending) {
-        FPDF_ClosePage(page);
         return;
     }
 
@@ -170,14 +158,8 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
     FS_RECTF clip = {(float) clipLeft, (float) clipTop, (float) clipRight, (float) clipBottom};
 
     FPDFPage_TransFormWithClip(page, &transform, &clip);
-    isExceptionPending = forwardPdfiumError(env);
-    if (isExceptionPending) {
-        FPDF_ClosePage(page);
-        return;
-    }
 
     FPDF_ClosePage(page);
-    HANDLE_PDFIUM_ERROR_STATE(env);
 }
 
 static void nativeGetPageSize(JNIEnv* env, jclass thiz, jlong documentPtr,
@@ -190,7 +172,6 @@ static void nativeGetPageSize(JNIEnv* env, jclass thiz, jlong documentPtr,
                 "cannot open page");
         return;
     }
-    HANDLE_PDFIUM_ERROR_STATE(env);
 
     double width = 0;
     double height = 0;
@@ -201,17 +182,11 @@ static void nativeGetPageSize(JNIEnv* env, jclass thiz, jlong documentPtr,
                     "cannot get page size");
         return;
     }
-    bool isExceptionPending = forwardPdfiumError(env);
-    if (isExceptionPending) {
-        FPDF_ClosePage(page);
-        return;
-    }
 
     env->SetIntField(outSize, gPointClassInfo.x, width);
     env->SetIntField(outSize, gPointClassInfo.y, height);
 
     FPDF_ClosePage(page);
-    HANDLE_PDFIUM_ERROR_STATE(env);
 }
 
 static bool nativeGetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex,
@@ -224,7 +199,6 @@ static bool nativeGetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
                 "cannot open page");
         return false;
     }
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, false);
 
     float left;
     float top;
@@ -234,14 +208,8 @@ static bool nativeGetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
     const FPDF_BOOL success = (pageBox == PAGE_BOX_MEDIA)
         ? FPDFPage_GetMediaBox(page, &left, &top, &right, &bottom)
         : FPDFPage_GetCropBox(page, &left, &top, &right, &bottom);
-    bool isExceptionPending = forwardPdfiumError(env);
-    if (isExceptionPending) {
-        FPDF_ClosePage(page);
-        return false;
-    }
 
     FPDF_ClosePage(page);
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, false);
 
     if (!success) {
         return false;
@@ -279,7 +247,6 @@ static void nativeSetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
                 "cannot open page");
         return;
     }
-    HANDLE_PDFIUM_ERROR_STATE(env);
 
     const int left = env->GetIntField(box, gRectClassInfo.left);
     const int top = env->GetIntField(box, gRectClassInfo.top);
@@ -291,14 +258,8 @@ static void nativeSetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
     } else {
         FPDFPage_SetCropBox(page, left, top, right, bottom);
     }
-    bool isExceptionPending = forwardPdfiumError(env);
-    if (isExceptionPending) {
-        FPDF_ClosePage(page);
-        return;
-    }
 
     FPDF_ClosePage(page);
-    HANDLE_PDFIUM_ERROR_STATE(env);
 }
 
 static void nativeSetPageMediaBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex,
