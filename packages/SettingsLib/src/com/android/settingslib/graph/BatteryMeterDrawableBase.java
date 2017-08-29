@@ -90,7 +90,6 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final RectF mPlusFrame = new RectF();
 
     private final Path mShapePath = new Path();
-    private final Path mClipPath = new Path();
     private final Path mTextPath = new Path();
 
     public BatteryMeterDrawableBase(Context context, int frameColor) {
@@ -429,10 +428,10 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         // draw the battery shape, clipped to charging level
         mFrame.top = levelTop;
-        mClipPath.reset();
-        mClipPath.addRect(mFrame, Path.Direction.CCW);
-        mShapePath.op(mClipPath, Path.Op.INTERSECT);
+        c.save();
+        c.clipRect(mFrame);
         c.drawPath(mShapePath, mBatteryPaint);
+        c.restore();
 
         if (!mCharging && !mPowerSaveEnabled) {
             if (level <= mCriticalLevel) {
