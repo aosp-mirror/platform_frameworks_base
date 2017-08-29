@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<resources xmlns:lib="http://schemas.android.com/apk/res/android.appcompat">
+<resources>
     <style name="App">
         <item name="android:background">@color/primary</item>
         <item name="android:colorPrimary">@color/primary</item>

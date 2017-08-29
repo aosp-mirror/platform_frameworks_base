@@ -24,7 +24,7 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -32,27 +32,23 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
                          const TableMergerOptions& options)
     : context_(context), master_table_(out_table), options_(options) {
   // Create the desired package that all tables will be merged into.
-  master_package_ = master_table_->CreatePackage(
-      context_->GetCompilationPackage(), context_->GetPackageId());
+  master_package_ =
+      master_table_->CreatePackage(context_->GetCompilationPackage(), context_->GetPackageId());
   CHECK(master_package_ != nullptr) << "package name or ID already taken";
 }
 
-bool TableMerger::Merge(const Source& src, ResourceTable* table,
-                        io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, false /* overlay */, true /* allow new */);
+bool TableMerger::Merge(const Source& src, ResourceTable* table, io::IFileCollection* collection) {
+  return MergeImpl(src, table, collection, false /*overlay*/, true /*allow_new*/);
 }
 
 bool TableMerger::MergeOverlay(const Source& src, ResourceTable* table,
                                io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, true /* overlay */, options_.auto_add_overlay);
+  return MergeImpl(src, table, collection, true /*overlay*/, options_.auto_add_overlay);
 }
 
-/**
- * This will merge packages with the same package name (or no package name).
- */
+// This will merge packages with the same package name (or no package name).
 bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
-                            io::IFileCollection* collection, bool overlay,
-                            bool allow_new) {
+                            io::IFileCollection* collection, bool overlay, bool allow_new) {
   bool error = false;
   for (auto& package : table->packages) {
     // Only merge an empty package or the package we're building.
@@ -62,9 +58,8 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
     if (package->name.empty() || context_->GetCompilationPackage() == package->name) {
       FileMergeCallback callback;
       if (collection) {
-        callback = [&](const ResourceNameRef& name,
-                       const ConfigDescription& config, FileReference* new_file,
-                       FileReference* old_file) -> bool {
+        callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
+                       FileReference* new_file, FileReference* old_file) -> bool {
           // The old file's path points inside the APK, so we can use it as is.
           io::IFile* f = collection->FindFile(*old_file->path);
           if (!f) {
@@ -78,45 +73,38 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
         };
       }
 
-      // Merge here. Once the entries are merged and mangled, any references to
-      // them are still valid. This is because un-mangled references are
-      // mangled, then looked up at resolution time.
-      // Also, when linking, we convert references with no package name to use
-      // the compilation package name.
-      error |= !DoMerge(src, table, package.get(), false /* mangle */, overlay,
-                        allow_new, callback);
+      // Merge here. Once the entries are merged and mangled, any references to them are still
+      // valid. This is because un-mangled references are mangled, then looked up at resolution
+      // time. Also, when linking, we convert references with no package name to use the compilation
+      // package name.
+      error |=
+          !DoMerge(src, table, package.get(), false /* mangle */, overlay, allow_new, callback);
     }
   }
   return !error;
 }
 
-/**
- * This will merge and mangle resources from a static library.
- */
-bool TableMerger::MergeAndMangle(const Source& src,
-                                 const StringPiece& package_name,
-                                 ResourceTable* table,
-                                 io::IFileCollection* collection) {
+// This will merge and mangle resources from a static library.
+bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_name,
+                                 ResourceTable* table, io::IFileCollection* collection) {
   bool error = false;
   for (auto& package : table->packages) {
     // Warn of packages with an unrelated ID.
     if (package_name != package->name) {
-      context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring package "
-                                                        << package->name);
+      context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring package " << package->name);
       continue;
     }
 
     bool mangle = package_name != context_->GetCompilationPackage();
     merged_packages_.insert(package->name);
 
-    auto callback = [&](
-        const ResourceNameRef& name, const ConfigDescription& config,
-        FileReference* new_file, FileReference* old_file) -> bool {
+    auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
+                        FileReference* new_file, FileReference* old_file) -> bool {
       // The old file's path points inside the APK, so we can use it as is.
       io::IFile* f = collection->FindFile(*old_file->path);
       if (!f) {
-        context_->GetDiagnostics()->Error(
-            DiagMessage(src) << "file '" << *old_file->path << "' not found");
+        context_->GetDiagnostics()->Error(DiagMessage(src)
+                                          << "file '" << *old_file->path << "' not found");
         return false;
       }
 
@@ -124,21 +112,18 @@ bool TableMerger::MergeAndMangle(const Source& src,
       return true;
     };
 
-    error |= !DoMerge(src, table, package.get(), mangle, false /* overlay */,
-                      true /* allow new */, callback);
+    error |= !DoMerge(src, table, package.get(), mangle, false /*overlay*/, true /*allow_new*/,
+                      callback);
   }
   return !error;
 }
 
-static bool MergeType(IAaptContext* context, const Source& src,
-                      ResourceTableType* dst_type,
+static bool MergeType(IAaptContext* context, const Source& src, ResourceTableType* dst_type,
                       ResourceTableType* src_type) {
   if (dst_type->symbol_status.state < src_type->symbol_status.state) {
-    // The incoming type's visibility is stronger, so we should override
-    // the visibility.
+    // The incoming type's visibility is stronger, so we should override the visibility.
     if (src_type->symbol_status.state == SymbolState::kPublic) {
-      // Only copy the ID if the source is public, or else the ID is
-      // meaningless.
+      // Only copy the ID if the source is public, or else the ID is meaningless.
       dst_type->id = src_type->id;
     }
     dst_type->symbol_status = std::move(src_type->symbol_status);
@@ -155,14 +140,12 @@ static bool MergeType(IAaptContext* context, const Source& src,
   return true;
 }
 
-static bool MergeEntry(IAaptContext* context, const Source& src,
-                       ResourceEntry* dst_entry, ResourceEntry* src_entry) {
+static bool MergeEntry(IAaptContext* context, const Source& src, ResourceEntry* dst_entry,
+                       ResourceEntry* src_entry) {
   if (dst_entry->symbol_status.state < src_entry->symbol_status.state) {
-    // The incoming type's visibility is stronger, so we should override
-    // the visibility.
+    // The incoming type's visibility is stronger, so we should override the visibility.
     if (src_entry->symbol_status.state == SymbolState::kPublic) {
-      // Only copy the ID if the source is public, or else the ID is
-      // meaningless.
+      // Only copy the ID if the source is public, or else the ID is meaningless.
       dst_entry->id = src_entry->id;
     }
     dst_entry->symbol_status = std::move(src_entry->symbol_status);
@@ -171,9 +154,8 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
              dst_entry->id && src_entry->id &&
              dst_entry->id.value() != src_entry->id.value()) {
     // Both entries are public and have different IDs.
-    context->GetDiagnostics()->Error(
-        DiagMessage(src) << "cannot merge entry '" << src_entry->name
-                         << "': conflicting public IDs");
+    context->GetDiagnostics()->Error(DiagMessage(src) << "cannot merge entry '" << src_entry->name
+                                                      << "': conflicting public IDs");
     return false;
   }
   return true;
@@ -181,12 +163,10 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
 
 // Modified CollisionResolver which will merge Styleables and Styles. Used with overlays.
 //
-// Styleables are not actual resources, but they are treated as such during the
-// compilation phase.
+// Styleables are not actual resources, but they are treated as such during the compilation phase.
 //
-// Styleables and Styles don't simply overlay each other, their definitions merge
-// and accumulate. If both values are Styleables/Styles, we just merge them into the
-// existing value.
+// Styleables and Styles don't simply overlay each other, their definitions merge and accumulate.
+// If both values are Styleables/Styles, we just merge them into the existing value.
 static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Value* incoming,
                                                             StringPool* pool) {
   if (Styleable* existing_styleable = ValueCast<Styleable>(existing)) {

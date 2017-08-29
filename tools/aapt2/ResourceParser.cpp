@@ -605,7 +605,7 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
   if (processed_item) {
     // Fix up the reference.
     if (Reference* ref = ValueCast<Reference>(processed_item.get())) {
-      TransformReferenceFromNamespace(parser, "", ref);
+      ResolvePackage(parser, ref);
     }
     return processed_item;
   }
@@ -1074,15 +1074,13 @@ bool ResourceParser::ParseStyleItem(xml::XmlPullParser* parser, Style* style) {
     return false;
   }
 
-  Maybe<Reference> maybe_key =
-      ResourceUtils::ParseXmlAttributeName(maybe_name.value());
+  Maybe<Reference> maybe_key = ResourceUtils::ParseXmlAttributeName(maybe_name.value());
   if (!maybe_key) {
-    diag_->Error(DiagMessage(source) << "invalid attribute name '"
-                                     << maybe_name.value() << "'");
+    diag_->Error(DiagMessage(source) << "invalid attribute name '" << maybe_name.value() << "'");
     return false;
   }
 
-  TransformReferenceFromNamespace(parser, "", &maybe_key.value());
+  ResolvePackage(parser, &maybe_key.value());
   maybe_key.value().SetSource(source);
 
   std::unique_ptr<Item> value = ParseXml(parser, 0, kAllowRawString);
@@ -1091,8 +1089,7 @@ bool ResourceParser::ParseStyleItem(xml::XmlPullParser* parser, Style* style) {
     return false;
   }
 
-  style->entries.push_back(
-      Style::Entry{std::move(maybe_key.value()), std::move(value)});
+  style->entries.push_back(Style::Entry{std::move(maybe_key.value()), std::move(value)});
   return true;
 }
 
@@ -1104,21 +1101,18 @@ bool ResourceParser::ParseStyle(const ResourceType type, xml::XmlPullParser* par
 
   Maybe<StringPiece> maybe_parent = xml::FindAttribute(parser, "parent");
   if (maybe_parent) {
-    // If the parent is empty, we don't have a parent, but we also don't infer
-    // either.
+    // If the parent is empty, we don't have a parent, but we also don't infer either.
     if (!maybe_parent.value().empty()) {
       std::string err_str;
-      style->parent = ResourceUtils::ParseStyleParentReference(
-          maybe_parent.value(), &err_str);
+      style->parent = ResourceUtils::ParseStyleParentReference(maybe_parent.value(), &err_str);
       if (!style->parent) {
         diag_->Error(DiagMessage(out_resource->source) << err_str);
         return false;
       }
 
-      // Transform the namespace prefix to the actual package name, and mark the
-      // reference as
+      // Transform the namespace prefix to the actual package name, and mark the reference as
       // private if appropriate.
-      TransformReferenceFromNamespace(parser, "", &style->parent.value());
+      ResolvePackage(parser, &style->parent.value());
     }
 
   } else {
@@ -1127,8 +1121,7 @@ bool ResourceParser::ParseStyle(const ResourceType type, xml::XmlPullParser* par
     size_t pos = style_name.find_last_of(u'.');
     if (pos != std::string::npos) {
       style->parent_inferred = true;
-      style->parent = Reference(
-          ResourceName({}, ResourceType::kStyle, style_name.substr(0, pos)));
+      style->parent = Reference(ResourceName({}, ResourceType::kStyle, style_name.substr(0, pos)));
     }
   }
 
@@ -1373,7 +1366,7 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       }
 
       Reference& child_ref = maybe_ref.value();
-      xml::TransformReferenceFromNamespace(parser, "", &child_ref);
+      xml::ResolvePackage(parser, &child_ref);
 
       // Create the ParsedResource that will add the attribute to the table.
       ParsedResource child_resource;

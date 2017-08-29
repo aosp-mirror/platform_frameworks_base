@@ -18,12 +18,12 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
-LOCAL_PACKAGE_NAME := AaptTestAppOne
+LOCAL_PACKAGE_NAME := AaptTestStaticLib_App
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_ASSET_DIR := $(LOCAL_PATH)/assets $(LOCAL_PATH)/assets2
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    AaptTestStaticLibOne \
-    AaptTestStaticLibTwo
+    AaptTestStaticLib_LibOne \
+    AaptTestStaticLib_LibTwo
 LOCAL_AAPT_FLAGS := --no-version-vectors --no-version-transitions
 include $(BUILD_PACKAGE)

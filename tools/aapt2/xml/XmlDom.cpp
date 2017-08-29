@@ -274,6 +274,8 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
     switch (code) {
       case ResXMLParser::START_NAMESPACE: {
         NamespaceDecl decl;
+        decl.line_number = tree.getLineNumber();
+
         size_t len;
         const char16_t* str16 = tree.getNamespacePrefix(&len);
         if (str16) {
@@ -288,6 +290,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
         if (pending_element == nullptr) {
           pending_element = util::make_unique<Element>();
         }
+        pending_element->namespace_decls.push_back(std::move(decl));
         break;
       }
 
@@ -297,8 +300,8 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
           el = std::move(pending_element);
         } else {
           el = util::make_unique<Element>();
-          ;
         }
+        el->line_number = tree.getLineNumber();
 
         size_t len;
         const char16_t* str16 = tree.getElementNamespace(&len);
@@ -479,10 +482,9 @@ void PackageAwareVisitor::AfterVisitElement(Element* el) {
   package_decls_.pop_back();
 }
 
-Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
-    const StringPiece& alias, const StringPiece& local_package) const {
+Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(const StringPiece& alias) const {
   if (alias.empty()) {
-    return ExtractedPackage{local_package.to_string(), false /* private */};
+    return ExtractedPackage{{}, false /*private*/};
   }
 
   const auto rend = package_decls_.rend();
@@ -493,7 +495,7 @@ Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
       const PackageDecl& decl = *iter2;
       if (alias == decl.prefix) {
         if (decl.package.package.empty()) {
-          return ExtractedPackage{local_package.to_string(), decl.package.private_namespace};
+          return ExtractedPackage{{}, decl.package.private_namespace};
         }
         return decl.package;
       }

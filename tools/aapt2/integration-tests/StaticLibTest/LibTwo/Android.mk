@@ -18,10 +18,10 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
-LOCAL_MODULE := AaptTestStaticLibTwo
+LOCAL_MODULE := AaptTestStaticLib_LibTwo
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
-LOCAL_SHARED_ANDROID_LIBRARIES := AaptTestStaticLibOne
+LOCAL_SHARED_ANDROID_LIBRARIES := AaptTestStaticLib_LibOne
 include $(BUILD_STATIC_JAVA_LIBRARY)
 

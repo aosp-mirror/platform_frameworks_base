@@ -69,10 +69,10 @@ class Visitor : public xml::PackageAwareVisitor {
     // Use an empty string for the compilation package because we don't want to default to
     // the local package if the user specified name="style" or something. This should just
     // be the default namespace.
-    Maybe<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package, {});
+    Maybe<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package);
     if (!maybe_pkg) {
-      context_->GetDiagnostics()->Error(DiagMessage(src) << "invalid namespace prefix '"
-                                                         << name.package << "'");
+      context_->GetDiagnostics()->Error(DiagMessage(src)
+                                        << "invalid namespace prefix '" << name.package << "'");
       error_ = true;
       return;
     }
