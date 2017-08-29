@@ -30,6 +30,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
@@ -463,6 +464,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
                 xtraDownloadRequest();
             }
+            sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
         }
     };
 
@@ -473,11 +480,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
      */
     private final ConnectivityManager.NetworkCallback mSuplConnectivityCallback =
             new ConnectivityManager.NetworkCallback() {
-        @Override
-        public void onAvailable(Network network) {
-            sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
-        }
-
         @Override
         public void onLost(Network network) {
             releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
@@ -832,11 +834,21 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private void handleUpdateNetworkState(Network network) {
         // retrieve NetworkInfo for this UID
         NetworkInfo info = mConnMgr.getNetworkInfo(network);
-        if (info == null) {
-            return;
+
+        boolean networkAvailable = false;
+        boolean isConnected = false;
+        int type = ConnectivityManager.TYPE_NONE;
+        boolean isRoaming = false;
+        String apnName = null;
+
+        if (info != null) {
+            networkAvailable = info.isAvailable() && TelephonyManager.getDefault().getDataEnabled();
+            isConnected = info.isConnected();
+            type = info.getType();
+            isRoaming = info.isRoaming();
+            apnName = info.getExtraInfo();
         }
 
-        boolean isConnected = info.isConnected();
         if (DEBUG) {
             String message = String.format(
                     "UpdateNetworkState, state=%s, connected=%s, info=%s, capabilities=%S",
@@ -848,8 +860,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
 
         if (native_is_agps_ril_supported()) {
-            boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
-            boolean networkAvailable = info.isAvailable() && dataEnabled;
             String defaultApn = getSelectedApn();
             if (defaultApn == null) {
                 defaultApn = "dummy-apn";
@@ -857,10 +867,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
             native_update_network_state(
                     isConnected,
-                    info.getType(),
-                    info.isRoaming(),
+                    type,
+                    isRoaming,
                     networkAvailable,
-                    info.getExtraInfo(),
+                    apnName,
                     defaultApn);
         } else if (DEBUG) {
             Log.d(TAG, "Skipped network state update because GPS HAL AGPS-RIL is not  supported");
@@ -868,7 +878,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
             if (isConnected) {
-                String apnName = info.getExtraInfo();
                 if (apnName == null) {
                     // assign a dummy value in the case of C2K as otherwise we will have a runtime
                     // exception in the following call to native_agps_data_conn_open
@@ -2242,6 +2251,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
             NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
             networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
             networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            // On watches, Bluetooth is the most important network type.
+            boolean isWatch =
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+            if (isWatch) {
+                networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_BLUETOOTH);
+            }
             NetworkRequest networkRequest = networkRequestBuilder.build();
             mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
 
