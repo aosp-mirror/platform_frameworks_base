@@ -365,6 +365,17 @@ public:
         return mSkiaLayer.get();
     }
 
+    /**
+     * Returns the path that represents the outline of RenderNode intersected with
+     * the provided rect.  This call will internally cache the resulting path in
+     * order to potentially return that path for subsequent calls to this method.
+     * By reusing the same path we get better performance on the GPU backends since
+     * those resources are cached in the hardware based on the path's genID.
+     *
+     * The returned path is only guaranteed to be valid until this function is called
+     * again or the RenderNode's outline is mutated.
+     */
+    const SkPath* getClippedOutline(const SkRect& clipRect) const;
 private:
     /**
      * If this RenderNode has been used in a previous frame then the SkiaDisplayList
@@ -380,6 +391,16 @@ private:
      * when it has been set to draw as a LayerType::RenderLayer.
      */
     std::unique_ptr<skiapipeline::SkiaLayer> mSkiaLayer;
+
+    struct ClippedOutlineCache {
+        // keys
+        uint32_t outlineID = 0;
+        SkRect clipRect;
+
+        // value
+        SkPath clippedOutline;
+    };
+    mutable ClippedOutlineCache mClippedOutlineCache;
 }; // class RenderNode
 
 class MarkAndSweepRemoved : public TreeObserver {

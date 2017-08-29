@@ -163,28 +163,22 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     hwuiMatrix.copyTo(shadowMatrix);
     canvas->concat(shadowMatrix);
 
-    const SkPath* casterOutlinePath = casterProperties.getOutline().getPath();
-    // holds temporary SkPath to store the result of intersections
-    SkPath tmpPath;
-    const SkPath* casterPath = casterOutlinePath;
+    // default the shadow-casting path to the outline of the caster
+    const SkPath* casterPath = casterProperties.getOutline().getPath();
 
-    // TODO: In to following course of code that calculates the final shape, is there an optimal
-    //       of doing the Op calculations?
+    // intersect the shadow-casting path with the clipBounds, if present
+    if (clippedToBounds && !casterClipRect.contains(casterPath->getBounds())) {
+        casterPath = caster->getRenderNode()->getClippedOutline(casterClipRect);
+    }
+
     // intersect the shadow-casting path with the reveal, if present
+    SkPath tmpPath; // holds temporary SkPath to store the result of intersections
     if (revealClipPath) {
         Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, &tmpPath);
         tmpPath.setIsVolatile(true);
         casterPath = &tmpPath;
     }
 
-    // intersect the shadow-casting path with the clipBounds, if present
-    if (clippedToBounds) {
-        SkPath clipBoundsPath;
-        clipBoundsPath.addRect(casterClipRect);
-        Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, &tmpPath);
-        tmpPath.setIsVolatile(true);
-        casterPath = &tmpPath;
-    }
     const Vector3 lightPos = SkiaPipeline::getLightCenter();
     SkPoint3 skiaLightPos = SkPoint3::Make(lightPos.x, lightPos.y, lightPos.z);
     SkPoint3 zParams;
