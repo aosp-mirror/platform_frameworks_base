@@ -455,6 +455,11 @@ abstract public class ManagedServices {
         }
     }
 
+    public void onUserRemoved(int user) {
+        mApproved.remove(user);
+        rebindServices(true);
+    }
+
     public void onUserSwitched(int user) {
         if (DEBUG) Slog.d(TAG, "onUserSwitched u=" + user);
         if (Arrays.equals(mLastSeenProfileIds, mUserProfiles.getCurrentProfileIds())) {

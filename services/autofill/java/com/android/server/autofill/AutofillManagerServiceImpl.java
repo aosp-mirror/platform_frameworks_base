@@ -41,7 +41,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
@@ -52,10 +51,12 @@ import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
@@ -233,26 +234,6 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    /**
-     * Used by {@link AutofillManagerServiceShellCommand} to request save for the current top app.
-     */
-    void requestSaveForUserLocked(IBinder activityToken) {
-        if (!isEnabled()) {
-            return;
-        }
-
-        final int numSessions = mSessions.size();
-        for (int i = 0; i < numSessions; i++) {
-            final Session session = mSessions.valueAt(i);
-            if (session.getActivityTokenLocked().equals(activityToken)) {
-                session.callSaveLocked();
-                return;
-            }
-        }
-
-        Slog.w(TAG, "requestSaveForUserLocked(): no session for " + activityToken);
-    }
-
     boolean addClientLocked(IAutoFillManagerClient client) {
         if (mClients == null) {
             mClients = new RemoteCallbackList<>();
@@ -290,6 +271,7 @@ final class AutofillManagerServiceImpl {
         if (!isEnabled()) {
             return 0;
         }
+        if (sVerbose) Slog.v(TAG, "startSession(): token=" + activityToken + ", flags=" + flags);
 
         // Occasionally clean up abandoned sessions
         pruneAbandonedSessionsLocked();
@@ -461,6 +443,25 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    void onPendingSaveUi(int operation, @NonNull IBinder token) {
+        if (sVerbose) Slog.v(TAG, "onPendingSaveUi(" + operation + "): " + token);
+        synchronized (mLock) {
+            final int sessionCount = mSessions.size();
+            for (int i = sessionCount - 1; i >= 0; i--) {
+                final Session session = mSessions.valueAt(i);
+                if (session.isSaveUiPendingForToken(token)) {
+                    session.onPendingSaveUi(operation, token);
+                    return;
+                }
+            }
+        }
+        if (sDebug) {
+            Slog.d(TAG, "No pending Save UI for token " + token + " and operation "
+                    + DebugUtils.flagsToString(AutofillManager.class, "PENDING_UI_OPERATION_",
+                            operation));
+        }
+    }
+
     void destroyLocked() {
         if (sVerbose) Slog.v(TAG, "destroyLocked()");
 
@@ -622,8 +623,12 @@ final class AutofillManagerServiceImpl {
     }
 
     void destroySessionsLocked() {
+        if (mSessions.size() == 0) {
+            mUi.destroyAll(AutofillManager.NO_SESSION, null, null);
+            return;
+        }
         while (mSessions.size() > 0) {
-            mSessions.valueAt(0).removeSelfLocked();
+            mSessions.valueAt(0).forceRemoveSelfLocked();
         }
     }
 

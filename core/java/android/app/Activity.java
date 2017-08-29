@@ -1863,8 +1863,18 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
-        if (isFinishing() && mAutoFillResetNeeded) {
-            getAutofillManager().commit();
+
+        if (isFinishing()) {
+            if (mAutoFillResetNeeded) {
+                getAutofillManager().commit();
+            } else if (mIntent != null
+                    && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
+                // Activity was launched when user tapped a link in the Autofill Save UI - since
+                // user launched another activity, the Save UI should not be restored when this
+                // activity is finished.
+                getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
+                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+            }
         }
     }
 
@@ -5491,6 +5501,13 @@ public class Activity extends ContextThemeWrapper
         } else {
             mParent.finishFromChild(this);
         }
+
+        // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
+        // be restored now.
+        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
+            getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
+                    mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+        }
     }
 
     /**
@@ -6225,6 +6242,11 @@ public class Activity extends ContextThemeWrapper
         }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
+
+        final AutofillManager afm = getAutofillManager();
+        if (afm != null) {
+            afm.dump(prefix, writer);
+        }
     }
 
     /**

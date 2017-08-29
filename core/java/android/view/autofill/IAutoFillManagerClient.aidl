@@ -72,7 +72,12 @@ oneway interface IAutoFillManagerClient {
     void notifyNoFillUi(int sessionId, in AutofillId id);
 
     /**
-     * Starts the provided intent sender
+     * Starts the provided intent sender.
      */
-    void startIntentSender(in IntentSender intentSender);
+    void startIntentSender(in IntentSender intentSender, in Intent intent);
+
+   /**
+     * Sets the state of the Autofill Save UI for a given session.
+     */
+   void setSaveUiState(int sessionId, boolean shown);
 }

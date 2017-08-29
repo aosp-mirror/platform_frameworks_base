@@ -25,12 +25,15 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 import static com.android.server.wm.WindowSurfaceController.SurfaceTrace;
+import static com.android.server.wm.proto.ScreenRotationAnimationProto.ANIMATION_RUNNING;
+import static com.android.server.wm.proto.ScreenRotationAnimationProto.STARTED;
 
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -198,7 +201,7 @@ class ScreenRotationAnimation {
         pw.print(prefix); pw.print("mEnterTransformation=");
                 mEnterTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFrameTransformation=");
-                mEnterTransformation.printShortString(pw); pw.println();
+                mFrameTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFrameInitialMatrix=");
                 mFrameInitialMatrix.printShortString(pw);
                 pw.println();
@@ -214,6 +217,13 @@ class ScreenRotationAnimation {
             pw.print(" mOriginalDisplayRect="); pw.print(mOriginalDisplayRect.toShortString());
             pw.print(" mCurrentDisplayRect="); pw.println(mCurrentDisplayRect.toShortString());
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(STARTED, mStarted);
+        proto.write(ANIMATION_RUNNING, mAnimRunning);
+        proto.end(token);
     }
 
     public ScreenRotationAnimation(Context context, DisplayContent displayContent,
