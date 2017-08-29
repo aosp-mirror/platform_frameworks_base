@@ -108,6 +108,8 @@ import static com.android.server.wm.proto.DisplayProto.DPI;
 import static com.android.server.wm.proto.DisplayProto.ID;
 import static com.android.server.wm.proto.DisplayProto.IME_WINDOWS;
 import static com.android.server.wm.proto.DisplayProto.PINNED_STACK_CONTROLLER;
+import static com.android.server.wm.proto.DisplayProto.ROTATION;
+import static com.android.server.wm.proto.DisplayProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.proto.DisplayProto.STACKS;
 
 import android.annotation.NonNull;
@@ -2139,6 +2141,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.writeToProto(proto, DISPLAY_INFO);
+        proto.write(ROTATION, mRotation);
+        final ScreenRotationAnimation screenRotationAnimation =
+                mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+        if (screenRotationAnimation != null) {
+            screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
+        }
         proto.end(token);
     }
 
