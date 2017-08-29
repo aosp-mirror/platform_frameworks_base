@@ -73,6 +73,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -188,17 +191,12 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = new OnClickHandler();
 
-    private static final Object[] sMethodsLock = new Object[0];
-    private static final ArrayMap<Class<? extends View>, ArrayMap<MutablePair<String, Class<?>>, Method>> sMethods =
-            new ArrayMap<Class<? extends View>, ArrayMap<MutablePair<String, Class<?>>, Method>>();
-    private static final ArrayMap<Method, Method> sAsyncMethods = new ArrayMap<>();
+    private static final ArrayMap<MethodKey, MethodArgs> sMethods = new ArrayMap<>();
 
-    private static final ThreadLocal<Object[]> sInvokeArgsTls = new ThreadLocal<Object[]>() {
-        @Override
-        protected Object[] initialValue() {
-            return new Object[1];
-        }
-    };
+    /**
+     * This key is used to perform lookups in sMethods without causing allocations.
+     */
+    private static final MethodKey sLookupKey = new MethodKey();
 
     /**
      * @hide
@@ -255,37 +253,47 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Handle with care!
+     * Stores information related to reflection method lookup.
      */
-    static class MutablePair<F, S> {
-        F first;
-        S second;
-
-        MutablePair(F first, S second) {
-            this.first = first;
-            this.second = second;
-        }
+    static class MethodKey {
+        public Class targetClass;
+        public Class paramClass;
+        public String methodName;
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof MutablePair)) {
+            if (!(o instanceof MethodKey)) {
                 return false;
             }
-            MutablePair<?, ?> p = (MutablePair<?, ?>) o;
-            return Objects.equal(p.first, first) && Objects.equal(p.second, second);
+            MethodKey p = (MethodKey) o;
+            return Objects.equal(p.targetClass, targetClass)
+                    && Objects.equal(p.paramClass, paramClass)
+                    && Objects.equal(p.methodName, methodName);
         }
 
         @Override
         public int hashCode() {
-            return (first == null ? 0 : first.hashCode()) ^ (second == null ? 0 : second.hashCode());
+            return Objects.hashCode(targetClass) ^ Objects.hashCode(paramClass)
+                    ^ Objects.hashCode(methodName);
+        }
+
+        public void set(Class targetClass, Class paramClass, String methodName) {
+            this.targetClass = targetClass;
+            this.paramClass = paramClass;
+            this.methodName = methodName;
         }
     }
 
+
     /**
-     * This pair is used to perform lookups in sMethods without causing allocations.
+     * Stores information related to reflection method lookup result.
      */
-    private final MutablePair<String, Class<?>> mPair =
-            new MutablePair<String, Class<?>>(null, null);
+    static class MethodArgs {
+        public MethodHandle syncMethod;
+        public MethodHandle asyncMethod;
+        public String asyncMethodName;
+    }
+
 
     /**
      * This annotation indicates that a subclass of View is allowed to be used
@@ -306,6 +314,12 @@ public class RemoteViews implements Parcelable, Filter {
         }
         public ActionException(String message) {
             super(message);
+        }
+        /**
+         * @hide
+         */
+        public ActionException(Throwable t) {
+            super(t);
         }
     }
 
@@ -943,85 +957,72 @@ public class RemoteViews implements Parcelable, Filter {
         return rect;
     }
 
-    private Method getMethod(View view, String methodName, Class<?> paramType) {
-        Method method;
+    private MethodHandle getMethod(View view, String methodName, Class<?> paramType,
+            boolean async) {
+        MethodArgs result;
         Class<? extends View> klass = view.getClass();
 
-        synchronized (sMethodsLock) {
-            ArrayMap<MutablePair<String, Class<?>>, Method> methods = sMethods.get(klass);
-            if (methods == null) {
-                methods = new ArrayMap<MutablePair<String, Class<?>>, Method>();
-                sMethods.put(klass, methods);
-            }
+        synchronized (sMethods) {
+            // The key is defined by the view class, param class and method name.
+            sLookupKey.set(klass, paramType, methodName);
+            result = sMethods.get(sLookupKey);
 
-            mPair.first = methodName;
-            mPair.second = paramType;
-
-            method = methods.get(mPair);
-            if (method == null) {
+            if (result == null) {
+                Method method;
                 try {
                     if (paramType == null) {
                         method = klass.getMethod(methodName);
                     } else {
                         method = klass.getMethod(methodName, paramType);
                     }
-                } catch (NoSuchMethodException ex) {
+                    if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
+                        throw new ActionException("view: " + klass.getName()
+                                + " can't use method with RemoteViews: "
+                                + methodName + getParameters(paramType));
+                    }
+
+                    result = new MethodArgs();
+                    result.syncMethod = MethodHandles.publicLookup().unreflect(method);
+                    result.asyncMethodName =
+                            method.getAnnotation(RemotableViewMethod.class).asyncImpl();
+                } catch (NoSuchMethodException | IllegalAccessException ex) {
                     throw new ActionException("view: " + klass.getName() + " doesn't have method: "
                             + methodName + getParameters(paramType));
                 }
 
-                if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
-                    throw new ActionException("view: " + klass.getName()
-                            + " can't use method with RemoteViews: "
-                            + methodName + getParameters(paramType));
-                }
-
-                methods.put(new MutablePair<String, Class<?>>(methodName, paramType), method);
-            }
-        }
-
-        return method;
-    }
-
-    /**
-     * @return the async implementation of the provided method.
-     */
-    private Method getAsyncMethod(Method method) {
-        synchronized (sAsyncMethods) {
-            int valueIndex = sAsyncMethods.indexOfKey(method);
-            if (valueIndex >= 0) {
-                return sAsyncMethods.valueAt(valueIndex);
+                MethodKey key = new MethodKey();
+                key.set(klass, paramType, methodName);
+                sMethods.put(key, result);
             }
 
-            RemotableViewMethod annotation = method.getAnnotation(RemotableViewMethod.class);
-            Method asyncMethod = null;
-            if (!annotation.asyncImpl().isEmpty()) {
+            if (!async) {
+                return result.syncMethod;
+            }
+            // Check this so see if async method is implemented or not.
+            if (result.asyncMethodName.isEmpty()) {
+                return null;
+            }
+            // Async method is lazily loaded. If it is not yet loaded, load now.
+            if (result.asyncMethod == null) {
+                MethodType asyncType = result.syncMethod.type()
+                        .dropParameterTypes(0, 1).changeReturnType(Runnable.class);
                 try {
-                    asyncMethod = method.getDeclaringClass()
-                            .getMethod(annotation.asyncImpl(), method.getParameterTypes());
-                    if (!asyncMethod.getReturnType().equals(Runnable.class)) {
-                        throw new ActionException("Async implementation for " + method.getName() +
-                            " does not return a Runnable");
-                    }
-                } catch (NoSuchMethodException ex) {
-                    throw new ActionException("Async implementation declared but not defined for " +
-                            method.getName());
+                    result.asyncMethod = MethodHandles.publicLookup().findVirtual(
+                            klass, result.asyncMethodName, asyncType);
+                } catch (NoSuchMethodException | IllegalAccessException ex) {
+                    throw new ActionException("Async implementation declared as "
+                            + result.asyncMethodName + " but not defined for " + methodName
+                            + ": public Runnable " + result.asyncMethodName + " ("
+                            + TextUtils.join(",", asyncType.parameterArray()) + ")");
                 }
             }
-            sAsyncMethods.put(method, asyncMethod);
-            return asyncMethod;
+            return result.asyncMethod;
         }
     }
 
     private static String getParameters(Class<?> paramType) {
         if (paramType == null) return "()";
         return "(" + paramType + ")";
-    }
-
-    private static Object[] wrapArg(Object value) {
-        Object[] args = sInvokeArgsTls.get();
-        args[0] = value;
-        return args;
     }
 
     /**
@@ -1140,10 +1141,8 @@ public class RemoteViews implements Parcelable, Filter {
             if (view == null) return;
 
             try {
-                getMethod(view, this.methodName, null).invoke(view);
-            } catch (ActionException e) {
-                throw e;
-            } catch (Exception ex) {
+                getMethod(view, this.methodName, null, false /* async */).invoke(view);
+            } catch (Throwable ex) {
                 throw new ActionException(ex);
             }
         }
@@ -1516,12 +1515,9 @@ public class RemoteViews implements Parcelable, Filter {
             if (param == null) {
                 throw new ActionException("bad type: " + this.type);
             }
-
             try {
-                getMethod(view, this.methodName, param).invoke(view, wrapArg(this.value));
-            } catch (ActionException e) {
-                throw e;
-            } catch (Exception ex) {
+                getMethod(view, this.methodName, param, false /* async */).invoke(view, this.value);
+            } catch (Throwable ex) {
                 throw new ActionException(ex);
             }
         }
@@ -1537,11 +1533,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             try {
-                Method method = getMethod(view, this.methodName, param);
-                Method asyncMethod = getAsyncMethod(method);
+                MethodHandle method = getMethod(view, this.methodName, param, true /* async */);
 
-                if (asyncMethod != null) {
-                    Runnable endAction = (Runnable) asyncMethod.invoke(view, wrapArg(this.value));
+                if (method != null) {
+                    Runnable endAction = (Runnable) method.invoke(view, this.value);
                     if (endAction == null) {
                         return ACTION_NOOP;
                     } else {
@@ -1555,9 +1550,7 @@ public class RemoteViews implements Parcelable, Filter {
                         return new RunnableAction(endAction);
                     }
                 }
-            } catch (ActionException e) {
-                throw e;
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 throw new ActionException(ex);
             }
 
@@ -2672,7 +2665,7 @@ public class RemoteViews implements Parcelable, Filter {
      * given {@link RemoteViews}.
      *
      * @param viewId The id of the parent {@link ViewGroup} to add the child into.
-     * @param nestedView {@link RemoveViews} of the child to add.
+     * @param nestedView {@link RemoteViews} of the child to add.
      * @param index The position at which to add the child.
      *
      * @hide
