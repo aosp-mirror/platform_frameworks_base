@@ -30,12 +30,14 @@ import android.content.IntentSender;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -44,6 +46,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -154,8 +157,15 @@ public final class AutofillManager {
     public static final String EXTRA_CLIENT_STATE =
             "android.view.autofill.extra.CLIENT_STATE";
 
-    static final String SESSION_ID_TAG = "android:sessionId";
-    static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
+
+    /** @hide */
+    public static final String EXTRA_RESTORE_SESSION_TOKEN =
+            "android.view.autofill.extra.RESTORE_SESSION_TOKEN";
+
+    private static final String SESSION_ID_TAG = "android:sessionId";
+    private static final String STATE_TAG = "android:state";
+    private static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
+
 
     /** @hide */ public static final int ACTION_START_SESSION = 1;
     /** @hide */ public static final int ACTION_VIEW_ENTERED =  2;
@@ -173,6 +183,44 @@ public final class AutofillManager {
     private static final int AUTHENTICATION_ID_DATASET_ID_SHIFT = 16;
     /** @hide The index for an undefined data set */
     public static final int AUTHENTICATION_ID_DATASET_ID_UNDEFINED = 0xFFFF;
+
+    /**
+     * Used on {@link #onPendingSaveUi(int, IBinder)} to cancel the pending UI.
+     *
+     * @hide
+     */
+    public static final int PENDING_UI_OPERATION_CANCEL = 1;
+
+    /**
+     * Used on {@link #onPendingSaveUi(int, IBinder)} to restore the pending UI.
+     *
+     * @hide
+     */
+    public static final int PENDING_UI_OPERATION_RESTORE = 2;
+
+    /**
+     * Initial state of the autofill context, set when there is no session (i.e., when
+     * {@link #mSessionId} is {@link #NO_SESSION}).
+     *
+     * @hide
+     */
+    public static final int STATE_UNKNOWN = 1;
+
+    /**
+     * State where the autofill context hasn't been {@link #commit() finished} nor
+     * {@link #cancel() canceled} yet.
+     *
+     * @hide
+     */
+    public static final int STATE_ACTIVE = 2;
+
+    /**
+     * State where the autofill context has been {@link #commit() finished} but the server still has
+     * a session because the Save UI hasn't been dismissed yet.
+     *
+     * @hide
+     */
+    public static final int STATE_SHOWING_SAVE_UI = 4;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -231,6 +279,9 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private int mSessionId = NO_SESSION;
+
+    @GuardedBy("mLock")
+    private int mState = STATE_UNKNOWN;
 
     @GuardedBy("mLock")
     private boolean mEnabled;
@@ -344,12 +395,13 @@ public final class AutofillManager {
         synchronized (mLock) {
             mLastAutofilledData = savedInstanceState.getParcelable(LAST_AUTOFILLED_DATA_TAG);
 
-            if (mSessionId != NO_SESSION) {
+            if (isActiveLocked()) {
                 Log.w(TAG, "New session was started before onCreate()");
                 return;
             }
 
             mSessionId = savedInstanceState.getInt(SESSION_ID_TAG, NO_SESSION);
+            mState = savedInstanceState.getInt(STATE_TAG, STATE_UNKNOWN);
 
             if (mSessionId != NO_SESSION) {
                 ensureServiceClientAddedIfNeededLocked();
@@ -363,6 +415,7 @@ public final class AutofillManager {
                         if (!sessionWasRestored) {
                             Log.w(TAG, "Session " + mSessionId + " could not be restored");
                             mSessionId = NO_SESSION;
+                            mState = STATE_UNKNOWN;
                         } else {
                             if (sDebug) {
                                 Log.d(TAG, "session " + mSessionId + " was restored");
@@ -387,7 +440,7 @@ public final class AutofillManager {
      */
     public void onVisibleForAutofill() {
         synchronized (mLock) {
-            if (mEnabled && mSessionId != NO_SESSION && mTrackedViews != null) {
+            if (mEnabled && isActiveLocked() && mTrackedViews != null) {
                 mTrackedViews.onVisibleForAutofillLocked();
             }
         }
@@ -408,7 +461,9 @@ public final class AutofillManager {
             if (mSessionId != NO_SESSION) {
                 outState.putInt(SESSION_ID_TAG, mSessionId);
             }
-
+            if (mState != STATE_UNKNOWN) {
+                outState.putInt(STATE_TAG, mState);
+            }
             if (mLastAutofilledData != null) {
                 outState.putParcelable(LAST_AUTOFILLED_DATA_TAG, mLastAutofilledData);
             }
@@ -514,7 +569,7 @@ public final class AutofillManager {
                 final AutofillId id = getAutofillId(view);
                 final AutofillValue value = view.getAutofillValue();
 
-                if (mSessionId == NO_SESSION) {
+                if (!isActiveLocked()) {
                     // Starts new session.
                     startSessionLocked(id, null, value, flags);
                 } else {
@@ -541,7 +596,7 @@ public final class AutofillManager {
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
 
-            if (mEnabled && mSessionId != NO_SESSION) {
+            if (mEnabled && isActiveLocked()) {
                 final AutofillId id = getAutofillId(view);
 
                 // Update focus on existing session.
@@ -582,7 +637,7 @@ public final class AutofillManager {
     private void notifyViewVisibilityChangedInternal(@NonNull View view, int virtualId,
             boolean isVisible, boolean virtual) {
         synchronized (mLock) {
-            if (mEnabled && mSessionId != NO_SESSION) {
+            if (mEnabled && isActiveLocked()) {
                 final AutofillId id = virtual ? getAutofillId(view, virtualId)
                         : view.getAutofillId();
                 if (!isVisible && mFillableIds != null) {
@@ -636,7 +691,7 @@ public final class AutofillManager {
             } else {
                 final AutofillId id = getAutofillId(view, virtualId);
 
-                if (mSessionId == NO_SESSION) {
+                if (!isActiveLocked()) {
                     // Starts new session.
                     startSessionLocked(id, bounds, null, flags);
                 } else {
@@ -665,7 +720,7 @@ public final class AutofillManager {
         synchronized (mLock) {
             ensureServiceClientAddedIfNeededLocked();
 
-            if (mEnabled && mSessionId != NO_SESSION) {
+            if (mEnabled && isActiveLocked()) {
                 final AutofillId id = getAutofillId(view, virtualId);
 
                 // Update focus on existing session.
@@ -709,7 +764,7 @@ public final class AutofillManager {
                 }
             }
 
-            if (!mEnabled || mSessionId == NO_SESSION) {
+            if (!mEnabled || !isActiveLocked()) {
                 return;
             }
 
@@ -737,7 +792,7 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            if (!mEnabled || mSessionId == NO_SESSION) {
+            if (!mEnabled || !isActiveLocked()) {
                 return;
             }
 
@@ -762,7 +817,7 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            if (!mEnabled && mSessionId == NO_SESSION) {
+            if (!mEnabled && !isActiveLocked()) {
                 return;
             }
 
@@ -786,7 +841,7 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            if (!mEnabled && mSessionId == NO_SESSION) {
+            if (!mEnabled && !isActiveLocked()) {
                 return;
             }
 
@@ -868,7 +923,7 @@ public final class AutofillManager {
         if (sDebug) Log.d(TAG, "onAuthenticationResult(): d=" + data);
 
         synchronized (mLock) {
-            if (mSessionId == NO_SESSION || data == null) {
+            if (!isActiveLocked() || data == null) {
                 return;
             }
             final Parcelable result = data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT);
@@ -895,13 +950,19 @@ public final class AutofillManager {
             @NonNull AutofillValue value, int flags) {
         if (sVerbose) {
             Log.v(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
-                    + ", flags=" + flags);
+                    + ", flags=" + flags + ", state=" + mState);
         }
-
+        if (mState != STATE_UNKNOWN) {
+            if (sDebug) Log.d(TAG, "not starting session for " + id + " on state " + mState);
+            return;
+        }
         try {
             mSessionId = mService.startSession(mContext.getActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
                     mCallback != null, flags, mContext.getOpPackageName());
+            if (mSessionId != NO_SESSION) {
+                mState = STATE_ACTIVE;
+            }
             final AutofillClient client = getClientLocked();
             if (client != null) {
                 client.autofillCallbackResetableStateAvailable();
@@ -912,7 +973,9 @@ public final class AutofillManager {
     }
 
     private void finishSessionLocked() {
-        if (sVerbose) Log.v(TAG, "finishSessionLocked()");
+        if (sVerbose) Log.v(TAG, "finishSessionLocked(): " + mState);
+
+        if (!isActiveLocked()) return;
 
         try {
             mService.finishSession(mSessionId, mContext.getUserId());
@@ -920,12 +983,13 @@ public final class AutofillManager {
             throw e.rethrowFromSystemServer();
         }
 
-        mTrackedViews = null;
-        mSessionId = NO_SESSION;
+        resetSessionLocked();
     }
 
     private void cancelSessionLocked() {
-        if (sVerbose) Log.v(TAG, "cancelSessionLocked()");
+        if (sVerbose) Log.v(TAG, "cancelSessionLocked(): " + mState);
+
+        if (!isActiveLocked()) return;
 
         try {
             mService.cancelSession(mSessionId, mContext.getUserId());
@@ -938,7 +1002,9 @@ public final class AutofillManager {
 
     private void resetSessionLocked() {
         mSessionId = NO_SESSION;
+        mState = STATE_UNKNOWN;
         mTrackedViews = null;
+        mFillableIds = null;
     }
 
     private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int action,
@@ -947,7 +1013,6 @@ public final class AutofillManager {
             Log.v(TAG, "updateSessionLocked(): id=" + id + ", bounds=" + bounds
                     + ", value=" + value + ", action=" + action + ", flags=" + flags);
         }
-
         boolean restartIfNecessary = (flags & FLAG_MANUAL_REQUEST) != 0;
 
         try {
@@ -958,6 +1023,7 @@ public final class AutofillManager {
                 if (newId != mSessionId) {
                     if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
                     mSessionId = newId;
+                    mState = (mSessionId == NO_SESSION) ? STATE_UNKNOWN : STATE_ACTIVE;
                     final AutofillClient client = getClientLocked();
                     if (client != null) {
                         client.autofillCallbackResetableStateAvailable();
@@ -1219,6 +1285,27 @@ public final class AutofillManager {
         }
     }
 
+    private void setSaveUiState(int sessionId, boolean shown) {
+        if (sDebug) Log.d(TAG, "setSaveUiState(" + sessionId + "): " + shown);
+        synchronized (mLock) {
+            if (mSessionId != NO_SESSION) {
+                // Race condition: app triggered a new session after the previous session was
+                // finished but before server called setSaveUiState() - need to cancel the new
+                // session to avoid further inconsistent behavior.
+                Log.w(TAG, "setSaveUiState(" + sessionId + ", " + shown
+                        + ") called on existing session " + mSessionId + "; cancelling it");
+                cancelSessionLocked();
+            }
+            if (shown) {
+                mSessionId = sessionId;
+                mState = STATE_SHOWING_SAVE_UI;
+            } else {
+                mSessionId = NO_SESSION;
+                mState = STATE_UNKNOWN;
+            }
+        }
+    }
+
     private void requestHideFillUi(AutofillId id) {
         final View anchor = findView(id);
         if (sVerbose) Log.v(TAG, "requestHideFillUi(" + id + "): anchor = " + anchor);
@@ -1327,6 +1414,46 @@ public final class AutofillManager {
     /** @hide */
     public boolean hasAutofillFeature() {
         return mService != null;
+    }
+
+    /** @hide */
+    public void onPendingSaveUi(int operation, IBinder token) {
+        if (sVerbose) Log.v(TAG, "onPendingSaveUi(" + operation + "): " + token);
+
+        synchronized (mLock) {
+            try {
+                mService.onPendingSaveUi(operation, token);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /** @hide */
+    public void dump(String outerPrefix, PrintWriter pw) {
+        pw.print(outerPrefix); pw.println("AutofillManager:");
+        final String pfx = outerPrefix + "  ";
+        pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
+        pw.print(pfx); pw.print("state: "); pw.println(
+                DebugUtils.flagsToString(AutofillManager.class, "STATE_", mState));
+        pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
+        pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
+        pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
+        pw.print(pfx); pw.print("last autofilled data: "); pw.println(mLastAutofilledData);
+        pw.print(pfx); pw.print("tracked views: ");
+        if (mTrackedViews == null) {
+            pw.println("null");
+        } else {
+            final String pfx2 = pfx + "  ";
+            pw.println();
+            pw.print(pfx2); pw.print("visible:"); pw.println(mTrackedViews.mVisibleTrackedIds);
+            pw.print(pfx2); pw.print("invisible:"); pw.println(mTrackedViews.mInvisibleTrackedIds);
+        }
+        pw.print(pfx); pw.print("fillable ids: "); pw.println(mFillableIds);
+    }
+
+    private boolean isActiveLocked() {
+        return mState == STATE_ACTIVE;
     }
 
     private void post(Runnable runnable) {
@@ -1668,12 +1795,12 @@ public final class AutofillManager {
         }
 
         @Override
-        public void startIntentSender(IntentSender intentSender) {
+        public void startIntentSender(IntentSender intentSender, Intent intent) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> {
                     try {
-                        afm.mContext.startIntentSender(intentSender, null, 0, 0, 0);
+                        afm.mContext.startIntentSender(intentSender, intent, 0, 0, 0);
                     } catch (IntentSender.SendIntentException e) {
                         Log.e(TAG, "startIntentSender() failed for intent:" + intentSender, e);
                     }
@@ -1689,6 +1816,14 @@ public final class AutofillManager {
                 afm.post(() ->
                         afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible, fillableIds)
                 );
+            }
+        }
+
+        @Override
+        public void setSaveUiState(int sessionId, boolean shown) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() ->afm.setSaveUiState(sessionId, shown));
             }
         }
     }
