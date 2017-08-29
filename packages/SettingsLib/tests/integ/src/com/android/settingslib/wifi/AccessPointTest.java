@@ -45,6 +45,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.SpannableString;
+import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 
 import com.android.settingslib.R;
@@ -72,6 +73,8 @@ public class AccessPointTest {
     private static final RssiCurve FAST_BADGE_CURVE =
             new RssiCurve(-150, 10, new byte[]{Speed.FAST});
     public static final String TEST_BSSID = "00:00:00:00:00:00";
+    private static final long MAX_SCORE_CACHE_AGE_MILLIS =
+            20 * DateUtils.MINUTE_IN_MILLIS;;
 
     private Context mContext;
     @Mock private RssiCurve mockBadgeCurve;
@@ -335,7 +338,8 @@ public class AccessPointTest {
                                 null /* NetworkKey */,
                                 null /* rssiCurve */,
                                 true /* metered */));
-        ap.update(mockWifiNetworkScoreCache, false /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, false /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.isMetered()).isTrue();
     }
@@ -364,7 +368,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.VERY_FAST);
         assertThat(ap.getSpeedLabel())
@@ -379,7 +384,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.FAST);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.FAST);
         assertThat(ap.getSpeedLabel())
@@ -394,7 +400,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.MODERATE);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.MODERATE);
         assertThat(ap.getSpeedLabel())
@@ -409,7 +416,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.SLOW);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.SLOW);
         assertThat(ap.getSpeedLabel())
@@ -424,7 +432,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSummary()).isEqualTo(mContext.getString(R.string.speed_label_very_fast));
     }
@@ -442,7 +451,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
         String summary = ap.verboseScanResultSummary(scanResults.get(0), null);
 
         assertThat(summary.contains(mContext.getString(R.string.speed_label_very_fast))).isTrue();
@@ -457,7 +467,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         String expectedString = mContext.getString(R.string.speed_label_very_fast) + " / "
                 + mContext.getString(R.string.wifi_remembered);
@@ -864,7 +875,8 @@ public class AccessPointTest {
 
         int expectedSpeed = (speed1 + speed2) / 2;
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(expectedSpeed);
     }
@@ -884,7 +896,8 @@ public class AccessPointTest {
         when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
                 .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(
+        mockWifiNetworkScoreCache, true /* scoringUiEnabled */, MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(speed1);
     }
@@ -925,7 +938,8 @@ public class AccessPointTest {
         when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultConnected))
                 .thenReturn(null);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(fallbackSpeed);
     }
@@ -952,7 +966,8 @@ public class AccessPointTest {
         AccessPoint ap =
                 createApWithFastTimestampedScoredNetworkCache(SystemClock.elapsedRealtime());
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
     }
@@ -960,11 +975,12 @@ public class AccessPointTest {
     @Test
     public void testNetworkScoresAreUsedForSpeedLabelGenerationWhenWithinAgeRange() {
         long withinRangeTimeMillis =
-                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS - 10000);
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS - 10000);
         AccessPoint ap =
                 createApWithFastTimestampedScoredNetworkCache(withinRangeTimeMillis);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
     }
@@ -972,11 +988,12 @@ public class AccessPointTest {
     @Test
     public void testOldNetworkScoresAreNotUsedForSpeedLabelGeneration() {
         long tooOldTimeMillis =
-                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS + 1);
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS + 1);
         AccessPoint ap =
                 createApWithFastTimestampedScoredNetworkCache(tooOldTimeMillis);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(Speed.NONE);
     }
@@ -984,7 +1001,7 @@ public class AccessPointTest {
     @Test
     public void testUpdateScoresRefreshesScoredNetworkCacheTimestamps () {
         long tooOldTimeMillis =
-                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS + 1);
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS + 1);
 
         ScoredNetwork scoredNetwork = buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE);
         TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
@@ -1002,7 +1019,8 @@ public class AccessPointTest {
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(scoredNetwork);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         // Fast should still be returned since cache was updated with recent time
         assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
@@ -1011,7 +1029,7 @@ public class AccessPointTest {
     @Test
     public void testUpdateScoresRefreshesScoredNetworkCacheWithNewSpeed () {
         long tooOldTimeMillis =
-                SystemClock.elapsedRealtime() - (AccessPoint.MAX_CACHED_SCORE_AGE_MILLIS + 1);
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS + 1);
 
         ScoredNetwork scoredNetwork = buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE);
         TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
@@ -1031,7 +1049,8 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
         when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) newSpeed);
 
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         // Fast should still be returned since cache was updated with recent time
         assertThat(ap.getSpeed()).isEqualTo(newSpeed);

@@ -51,7 +51,6 @@ import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 import android.util.Log;
 
@@ -133,10 +132,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * generate a fallback in the absence of scores for the visible APs.
      */
     private final Map<String, TimestampedScoredNetwork> mScoredNetworkCache = new HashMap<>();
-
-    /** Maximum age in millis of cached scored networks in {@link #mScoredNetworkCache}. */
-    @VisibleForTesting static final long MAX_CACHED_SCORE_AGE_MILLIS =
-            24 * DateUtils.DAY_IN_MILLIS;
 
     /** Maximum age of scan results to hold onto while actively scanning. **/
     private static final long MAX_SCAN_RESULT_AGE_MILLIS = 15000;
@@ -436,13 +431,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * Updates the AccessPoint rankingScore, metering, and speed, returning true if the data has
      * changed.
      *
-     * @param scoreCache The score cache to use to retrieve scores.
-     * @param scoringUiEnabled Whether to show scoring and badging UI.
+     * @param scoreCache The score cache to use to retrieve scores
+     * @param scoringUiEnabled Whether to show scoring and badging UI
+     * @param maxScoreCacheAgeMillis the maximum age in milliseconds of scores to consider when
+     *         generating speed labels
      */
-    boolean update(WifiNetworkScoreCache scoreCache, boolean scoringUiEnabled) {
+    boolean update(
+            WifiNetworkScoreCache scoreCache,
+            boolean scoringUiEnabled,
+            long maxScoreCacheAgeMillis) {
         boolean scoreChanged = false;
         if (scoringUiEnabled) {
-            scoreChanged = updateScores(scoreCache);
+            scoreChanged = updateScores(scoreCache, maxScoreCacheAgeMillis);
         }
         return updateMetered(scoreCache) || scoreChanged;
     }
@@ -450,15 +450,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /**
      * Updates the AccessPoint rankingScore and speed, returning true if the data has changed.
      *
-     * <p>Any cached {@link TimestampedScoredNetwork} objects older than
-     * {@link #MAX_CACHED_SCORE_AGE_MILLIS} will be removed when this method is invoked.
+     * <p>Any cached {@link TimestampedScoredNetwork} objects older than the given max age in millis
+     * will be removed when this method is invoked.
      *
      * <p>Precondition: {@link #mRssi} is up to date before invoking this method.
      *
-     * @param scoreCache The score cache to use to retrieve scores.
+     * @param scoreCache The score cache to use to retrieve scores
+     * @param maxScoreCacheAgeMillis the maximum age in milliseconds of scores to consider when
+     *         generating speed labels
+     *
      * @return true if the set speed has changed
      */
-    private boolean updateScores(WifiNetworkScoreCache scoreCache) {
+    private boolean updateScores(WifiNetworkScoreCache scoreCache, long maxScoreCacheAgeMillis) {
         long nowMillis = SystemClock.elapsedRealtime();
         for (ScanResult result : mScanResultCache.values()) {
             ScoredNetwork score = scoreCache.getScoredNetwork(result);
@@ -476,7 +479,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
 
         // Remove old cached networks
-        long evictionCutoff = nowMillis - MAX_CACHED_SCORE_AGE_MILLIS;
+        long evictionCutoff = nowMillis - maxScoreCacheAgeMillis;
         Iterator<TimestampedScoredNetwork> iterator = mScoredNetworkCache.values().iterator();
         iterator.forEachRemaining(timestampedScoredNetwork -> {
             if (timestampedScoredNetwork.getUpdatedTimestampMillis() < evictionCutoff) {
