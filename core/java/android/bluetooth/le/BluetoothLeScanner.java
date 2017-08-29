@@ -345,6 +345,7 @@ public final class BluetoothLeScanner {
         private List<List<ResultStorageDescriptor>> mResultStorages;
 
         // mLeHandle 0: not registered
+        // -2: registration failed because app is scanning to frequently
         // -1: scan stopped or registration failed
         // > 0: registered and scan started
         private int mScannerId;
@@ -365,7 +366,7 @@ public final class BluetoothLeScanner {
         public void startRegistration() {
             synchronized (this) {
                 // Scan stopped.
-                if (mScannerId == -1) return;
+                if (mScannerId == -1 || mScannerId == -2) return;
                 try {
                     mBluetoothGatt.registerScanner(this, mWorkSource);
                     wait(REGISTRATION_CALLBACK_TIMEOUT_MILLIS);
@@ -379,6 +380,10 @@ public final class BluetoothLeScanner {
                     // Registration timed out or got exception, reset scannerId to -1 so no
                     // subsequent operations can proceed.
                     if (mScannerId == 0) mScannerId = -1;
+
+                    // If scanning too frequently, don't report anything to the app.
+                    if (mScannerId == -2) return;
+
                     postCallbackError(mScanCallback,
                             ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED);
                 }
@@ -438,6 +443,9 @@ public final class BluetoothLeScanner {
                         Log.e(TAG, "fail to start le scan: " + e);
                         mScannerId = -1;
                     }
+                } else if (status == ScanCallback.SCAN_FAILED_SCANNING_TOO_FREQUENTLY) {
+                    // applicaiton was scanning too frequently
+                    mScannerId = -2;
                 } else {
                     // registration failed
                     mScannerId = -1;
