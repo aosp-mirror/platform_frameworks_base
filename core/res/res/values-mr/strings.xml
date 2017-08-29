@@ -554,7 +554,7 @@
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"व्यत्यय आणू नका अॅक्सेस करा"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"व्यत्यय आणू नका कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी अॅपला अनुमती देते."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"संकेतशब्द नियम सेट करा"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक संकेतशब्द आणि पिन मध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या संकेतशब्दांच्या संख्येचे परीक्षण करा आणि टीव्ही लॉक करा किंवा अनेक चुकीचे संकेतशब्द टाइप केले असल्यास टीव्हीचा सर्व डेटा मिटवा."</string>
