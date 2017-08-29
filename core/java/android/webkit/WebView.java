@@ -1656,14 +1656,13 @@ public class WebView extends AbsoluteLayout
      * Each rule should take one of these:
      * <table>
      * <tr><th> Rule </th> <th> Example </th> <th> Matches Subdomain</th> </tr>
-     * <tr><th> HOSTNAME </th> <th>  example.com  </th> <th> Yes </th> </tr>
-     * <tr><th>.HOSTNAME</th> <th> .example.com </th> <th> No </th> </tr>
-     * <tr><th> IPV4_LITERAL </th> <th> 192.168.1.1 </th> <th> No </th></tr>
-     * <tr><th> IPV6_LITERAL_WITH_BRACKETS</th><th>[10:20:30:40:50:60:70:80]</th><th>No</th></tr>
+     * <tr><td> HOSTNAME </td> <td> example.com </td> <td> Yes </td> </tr>
+     * <tr><td> .HOSTNAME </td> <td> .example.com </td> <td> No </td> </tr>
+     * <tr><td> IPV4_LITERAL </td> <td> 192.168.1.1 </td> <td> No </td></tr>
+     * <tr><td> IPV6_LITERAL_WITH_BRACKETS </td><td>[10:20:30:40:50:60:70:80]</td><td>No</td></tr>
      * </table>
      * <p>
      * All other rules, including wildcards, are invalid.
-     * <p>
      *
      * @param urls the list of URLs
      * @param callback will be called with true if URLs are successfully added to the whitelist.
