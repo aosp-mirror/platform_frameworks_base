@@ -3235,6 +3235,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     boolean reportResumedActivityLocked(ActivityRecord r) {
+        // A resumed activity cannot be stopping. remove from list
+        mStoppingActivities.remove(r);
+
         final ActivityStack stack = r.getStack();
         if (isFocusedStack(stack)) {
             mService.updateUsageStats(r, true);
