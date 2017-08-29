@@ -148,7 +148,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"পছন্দের ইঞ্জিন"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"সাধারণ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ভাষ্য়ের শব্দ মাত্রাকে আবার সেট করুন"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ডিফল্ট হিসাবে যে মাত্রায় পাঠ্য উচ্চারিত হয়, সেই শব্দ মাত্রাকে আবার সেট করুন৷"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ডিফল্ট হিসেবে যে মাত্রায় পাঠ্য উচ্চারিত হয়, সেই শব্দ মাত্রাকে আবার সেট করুন৷"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"অত্যন্ত ধীরে"</item>
     <item msgid="4795095314303559268">"ধীর"</item>
@@ -193,6 +193,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা ওয়াই ফাই রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ইন-ব্যান্ড রিং করা সক্ষম করুন"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ব্লুটুথ AVRCP সংস্করণ"</string>
@@ -232,6 +234,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"এইসব সেটিংস কেবলমাত্র উন্নত করার উদ্দেশ্য। সেগুলি কারণে আপনার ডিভাইস ভেঙ্গে এবং অ্যাপ্লিকেশানগুলি ভালো ভাবে কাজ করা নাও কারতে পারে।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB এর অ্যাপ্লিকেশনগুলি যাচাই করুন"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
+    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ফোনের রিংটোন ব্লুটুথ হেডসেটে শোনা সক্ষম করুন"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"স্থানীয় টার্মিনাল"</string>
