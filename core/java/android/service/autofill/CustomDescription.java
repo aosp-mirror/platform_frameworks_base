@@ -19,6 +19,8 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -129,6 +131,18 @@ public final class CustomDescription implements Parcelable {
 
         /**
          * Default constructor.
+         *
+         * <p><b>Note:</b> If any child view of presentation triggers a
+         * {@link RemoteViews#setOnClickPendingIntent(int, android.app.PendingIntent) pending intent
+         * on click}, such {@link PendingIntent} must follow the restrictions below, otherwise
+         * it might not be triggered or the Save affordance might not be shown when its activity
+         * is finished:
+         * <ul>
+         *   <li>It cannot be created with the {@link PendingIntent#FLAG_IMMUTABLE} flag.
+         *   <li>It must be a PendingIntent for an {@link Activity}.
+         *   <li>The activity must call {@link Activity#finish()} when done.
+         *   <li>The activity should not launch other activities.
+         * </ul>
          *
          * @param parentPresentation template presentation with (optional) children views.
          */

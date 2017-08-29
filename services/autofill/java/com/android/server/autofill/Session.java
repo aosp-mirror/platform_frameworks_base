@@ -77,6 +77,7 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.autofill.ui.PendingUi;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -164,10 +165,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private boolean mDestroyed;
 
-    /** Whether the session is currently saving */
+    /** Whether the session is currently saving. */
     @GuardedBy("mLock")
     private boolean mIsSaving;
 
+    /**
+     * Helper used to handle state of Save UI when it must be hiding to show a custom description
+     * link and later recovered.
+     */
+    @GuardedBy("mLock")
+    private PendingUi mPendingSaveUi;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -701,7 +708,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHandlerCaller.getHandler().post(() -> {
             try {
                 synchronized (mLock) {
-                    mClient.startIntentSender(intentSender);
+                    mClient.startIntentSender(intentSender, null);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error launching auth intent", e);
@@ -964,8 +971,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
                 mService.setSaveShown(id);
+                final IAutoFillManagerClient client = getClient();
+                mPendingSaveUi = new PendingUi(mActivityToken);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo,
-                        valueFinder, mPackageName, this);
+                        valueFinder, mPackageName, this, mPendingSaveUi, id, client);
+                if (client != null) {
+                    try {
+                        client.setSaveUiState(id, true);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error notifying client to set save UI state to shown: " + e);
+                    }
+                }
                 mIsSaving = true;
                 return false;
             }
@@ -1246,7 +1262,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewId != viewState.id) {
-                    hideFillUiIfOwnedByMe();
+                    mUi.hideFillUi(this);
                     mCurrentViewId = viewState.id;
                 }
 
@@ -1256,7 +1272,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             case ACTION_VIEW_EXITED:
                 if (mCurrentViewId == viewState.id) {
                     if (sVerbose) Slog.d(TAG, "Exiting view " + id);
-                    hideFillUiIfOwnedByMe();
+                    mUi.hideFillUi(this);
                     mCurrentViewId = null;
                 }
                 break;
@@ -1396,7 +1412,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void processResponseLocked(@NonNull FillResponse newResponse, int flags) {
         // Make sure we are hiding the UI which will be shown
         // only if handling the current response requires it.
-        hideAllUiIfOwnedByMe();
+        mUi.hideAll(this);
 
         final int requestId = newResponse.getRequestId();
         if (sVerbose) {
@@ -1583,6 +1599,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
         pw.print(prefix); pw.print("mIsSaving: "); pw.println(mIsSaving);
+        pw.print(prefix); pw.print("mPendingSaveUi: "); pw.println(mPendingSaveUi);
         for (Map.Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
             pw.print(prefix); pw.print("State for id "); pw.println(entry.getKey());
             entry.getValue().dump(prefix2, pw);
@@ -1644,7 +1661,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 if (!ids.isEmpty()) {
                     if (waitingDatasetAuth) {
-                        hideFillUiIfOwnedByMe();
+                        mUi.hideFillUi(this);
                     }
                     if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
 
@@ -1664,43 +1681,89 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    /**
+     * Cleans up this session.
+     *
+     * <p>Typically called in 2 scenarios:
+     *
+     * <ul>
+     *   <li>When the session naturally finishes (i.e., from {@link #removeSelfLocked()}.
+     *   <li>When the service hosting the session is finished (for example, because the user
+     *       disabled it).
+     * </ul>
+     */
     RemoteFillService destroyLocked() {
         if (mDestroyed) {
             return null;
         }
-        hideAllUiIfOwnedByMe();
+        mUi.destroyAll(id, getClient(), this);
         mUi.clearCallback(this);
         mDestroyed = true;
         mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_FINISHED, mPackageName);
         return mRemoteFillService;
     }
 
-    private void hideAllUiIfOwnedByMe() {
-        mUi.hideAll(this);
+    /**
+     * Cleans up this session and remove it from the service always, even if it does have a pending
+     * Save UI.
+     */
+    void forceRemoveSelfLocked() {
+        if (sVerbose) Slog.v(TAG, "forceRemoveSelfLocked(): " + mPendingSaveUi);
+
+        mPendingSaveUi = null;
+        removeSelfLocked();
+        mUi.destroyAll(id, getClient(), this);
     }
 
-    private void hideFillUiIfOwnedByMe() {
-        mUi.hideFillUi(this);
-    }
-
+    /**
+     * Thread-safe version of {@link #removeSelfLocked()}.
+     */
     private void removeSelf() {
         synchronized (mLock) {
             removeSelfLocked();
         }
     }
 
+    /**
+     * Cleans up this session and remove it from the service, but but only if it does not have a
+     * pending Save UI.
+     */
     void removeSelfLocked() {
-        if (sVerbose) Slog.v(TAG, "removeSelfLocked()");
+        if (sVerbose) Slog.v(TAG, "removeSelfLocked(): " + mPendingSaveUi);
         if (mDestroyed) {
             Slog.w(TAG, "Call to Session#removeSelfLocked() rejected - session: "
                     + id + " destroyed");
             return;
         }
+        if (isSaveUiPending()) {
+            Slog.i(TAG, "removeSelfLocked() ignored, waiting for pending save ui");
+            return;
+        }
+
         final RemoteFillService remoteFillService = destroyLocked();
         mService.removeSessionLocked(id);
         if (remoteFillService != null) {
             remoteFillService.destroy();
         }
+    }
+
+    void onPendingSaveUi(int operation, @NonNull IBinder token) {
+        getUiForShowing().onPendingSaveUi(operation, token);
+    }
+
+    /**
+     * Checks whether this session is hiding the Save UI to handle a custom description link for
+     * a specific {@code token} created by {@link PendingUi#PendingUi(IBinder)}.
+     */
+    boolean isSaveUiPendingForToken(@NonNull IBinder token) {
+        return isSaveUiPending() && token.equals(mPendingSaveUi.getToken());
+    }
+
+    /**
+     * Checks whether this session is hiding the Save UI to handle a custom description link.
+     */
+    private boolean isSaveUiPending() {
+        return mPendingSaveUi != null && mPendingSaveUi.getState() == PendingUi.STATE_PENDING;
     }
 
     private int getLastResponseIndexLocked() {
