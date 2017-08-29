@@ -36,6 +36,8 @@ import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCRE
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
@@ -2279,15 +2281,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return null;
     }
 
-    /**
-     * Returns if a stack should be treated as if it's docked. Returns true if the stack is
-     * the docked stack itself, or if it's side-by-side to the docked stack.
-     */
-    boolean isStackDockedInEffect(int stackId) {
-        return stackId == DOCKED_STACK_ID ||
-                (StackId.isResizeableByDockedStack(stackId) && getStack(DOCKED_STACK_ID) != null);
-    }
-
     void resizeStackLocked(int stackId, Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds,
             boolean preserveWindows, boolean allowResizeInDockedMode, boolean deferResume) {
         if (stackId == DOCKED_STACK_ID) {
@@ -2301,9 +2294,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
+        final boolean splitScreenActive = getStack(DOCKED_STACK_ID) != null;
         if (!allowResizeInDockedMode
-                && !stack.getWindowConfiguration().tasksAreFloating()
-                && getStack(DOCKED_STACK_ID) != null) {
+                && !stack.getWindowConfiguration().tasksAreFloating() && splitScreenActive) {
             // If the docked stack exists, don't resize non-floating stacks independently of the
             // size computed from the docked stack size (otherwise they will be out of sync)
             return;
@@ -2312,6 +2305,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stackId);
         mWindowManager.deferSurfaceLayout();
         try {
+            if (stack.supportSplitScreenWindowingMode()) {
+                if (bounds == null && stack.inSplitScreenWindowingMode()) {
+                    // null bounds = fullscreen windowing mode...at least for now.
+                    stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                } else if (splitScreenActive) {
+                    // If we are in split-screen mode and this stack support split-screen, then
+                    // it should be split-screen secondary mode. i.e. adjacent to the docked stack.
+                    stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                }
+            }
             stack.resize(bounds, tempTaskBounds, tempTaskInsetBounds);
             if (!deferResume) {
                 stack.ensureVisibleActivitiesConfigurationLocked(
@@ -2323,14 +2326,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void deferUpdateBounds(int stackId) {
+    private void deferUpdateBounds(int stackId) {
         final ActivityStack stack = getStack(stackId);
         if (stack != null) {
             stack.deferUpdateBounds();
         }
     }
 
-    void continueUpdateBounds(int stackId) {
+    private void continueUpdateBounds(int stackId) {
         final ActivityStack stack = getStack(stackId);
         if (stack != null) {
             stack.continueUpdateBounds();
@@ -2365,13 +2368,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // which is dismissing the docked stack, so resize all other stacks to
                 // fullscreen here already so we don't end up with resize trashing.
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (StackId.isResizeableByDockedStack(i)) {
-                        ActivityStack otherStack = getStack(i);
-                        if (otherStack != null) {
-                            resizeStackLocked(i, null, null, null, PRESERVE_WINDOWS,
-                                    true /* allowResizeInDockedMode */, DEFER_RESUME);
-                        }
+                    final ActivityStack otherStack = getStack(i);
+                    if (otherStack == null) {
+                        continue;
                     }
+                    if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
+                        continue;
+                    }
+                    resizeStackLocked(i, null, null, null, PRESERVE_WINDOWS,
+                            true /* allowResizeInDockedMode */, DEFER_RESUME);
                 }
 
                 // Also disable docked stack resizing since we have manually adjusted the
@@ -2485,18 +2490,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // screen controls and is also the same for all stacks.
                 final Rect otherTaskRect = new Rect();
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    final ActivityStack current = getStack(i);
-                    if (current != null && StackId.isResizeableByDockedStack(i)) {
-                        current.getStackDockedModeBounds(
-                                tempOtherTaskBounds /* currentTempTaskBounds */,
-                                tempRect /* outStackBounds */,
-                                otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
-
-                        resizeStackLocked(i, !tempRect.isEmpty() ? tempRect : null,
-                                !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
-                                tempOtherTaskInsetBounds, preserveWindows,
-                                true /* allowResizeInDockedMode */, deferResume);
+                    if (i == DOCKED_STACK_ID) {
+                        continue;
                     }
+                    final ActivityStack current = getStack(i);
+                    if (current == null || !current.supportSplitScreenWindowingMode()) {
+                        continue;
+                    }
+                    // Need to set windowing mode here before we try to get the dock bounds.
+                    current.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                    current.getStackDockedModeBounds(
+                            tempOtherTaskBounds /* currentTempTaskBounds */,
+                            tempRect /* outStackBounds */,
+                            otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
+
+                    resizeStackLocked(i, !tempRect.isEmpty() ? tempRect : null,
+                            !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
+                            tempOtherTaskInsetBounds, preserveWindows,
+                            true /* allowResizeInDockedMode */, deferResume);
                 }
             }
             if (!deferResume) {
@@ -4023,7 +4034,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final boolean isSecondaryDisplayPreferred =
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY)
                 || StackId.isDynamicStack(preferredStackId);
-        if (((!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID)
+        final ActivityStack actualStack = getStack(actualStackId);
+        final boolean inSplitScreenMode = actualStack != null
+                && actualStack.inSplitScreenWindowingMode();
+        if (((!inSplitScreenMode && preferredStackId != DOCKED_STACK_ID)
                 && !isSecondaryDisplayPreferred) || task.isActivityTypeHome()) {
             return;
         }

@@ -482,7 +482,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // TODO: Not needed once we are no longer using stack ids as the override config. can be passed
     // in.
     private void updateOverrideConfiguration() {
-        final int windowingMode = getWindowingModeForStackId(mStackId);
+        final int windowingMode = getWindowingModeForStackId(
+                mStackId, mStackSupervisor.getStack(DOCKED_STACK_ID) != null);
         if (windowingMode != WINDOWING_MODE_UNDEFINED) {
             setWindowingMode(windowingMode);
         }

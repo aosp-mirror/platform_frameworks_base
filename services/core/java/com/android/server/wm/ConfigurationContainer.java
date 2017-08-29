@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.activityTypeToString;
 
 import android.app.WindowConfiguration;
@@ -143,6 +145,33 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         mTmpConfig.setTo(getOverrideConfiguration());
         mTmpConfig.windowConfiguration.setWindowingMode(windowingMode);
         onOverrideConfigurationChanged(mTmpConfig);
+    }
+
+    /** Returns true if this container is currently in split-screen windowing mode. */
+    public boolean inSplitScreenWindowingMode() {
+        @WindowConfiguration.WindowingMode int windowingMode =
+                mFullConfiguration.windowConfiguration.getWindowingMode();
+
+        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+    }
+
+    /** Returns true if this container is currently in split-screen secondary windowing mode. */
+    public boolean inSplitScreenSecondaryWindowingMode() {
+        @WindowConfiguration.WindowingMode int windowingMode =
+                mFullConfiguration.windowConfiguration.getWindowingMode();
+
+        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+    }
+
+    /**
+     * Returns true if this container can be put in either
+     * {@link WindowConfiguration#WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} or
+     * {@link WindowConfiguration##WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} windowing modes based on
+     * its current state.
+     */
+    public boolean supportSplitScreenWindowingMode() {
+        return mFullConfiguration.windowConfiguration.supportSplitScreenWindowingMode();
     }
 
     /** Returns the activity type associated with the the configuration container. */
