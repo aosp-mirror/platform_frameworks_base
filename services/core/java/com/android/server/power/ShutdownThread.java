@@ -51,6 +51,7 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.storage.IStorageManager;
 import android.os.storage.IStorageShutdownObserver;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.WindowManager;
@@ -62,7 +63,9 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public final class ShutdownThread extends Thread {
     // constants
@@ -109,6 +112,23 @@ public final class ShutdownThread extends Thread {
 
     private static final TimingsTraceLog SHUTDOWN_TIMINGS_LOG = new TimingsTraceLog(
             "ShutdownTiming", Trace.TRACE_TAG_SYSTEM_SERVER);
+
+    // Metrics that will be reported to tron after reboot
+    private static final ArrayMap<String, Long> TRON_METRICS = new ArrayMap<>();
+
+    // File to use for save metrics
+    private static final String METRICS_FILE_BASENAME = "/data/system/shutdown-metrics";
+
+    // Metrics names to be persisted in shutdown-metrics file
+    private static String METRIC_SYSTEM_SERVER = "shutdown_system_server";
+    private static String METRIC_SEND_BROADCAST = "shutdown_send_shutdown_broadcast";
+    private static String METRIC_AM = "shutdown_activity_manager";
+    private static String METRIC_PM = "shutdown_package_manager";
+    private static String METRIC_RADIOS = "shutdown_radios";
+    private static String METRIC_BT = "shutdown_bt";
+    private static String METRIC_RADIO = "shutdown_radio";
+    private static String METRIC_NFC = "shutdown_nfc";
+    private static String METRIC_SM = "shutdown_storage_manager";
 
     private final Object mActionDoneSync = new Object();
     private boolean mActionDone;
@@ -349,6 +369,7 @@ public final class ShutdownThread extends Thread {
 
     private static void beginShutdownSequence(Context context) {
         SHUTDOWN_TIMINGS_LOG.traceBegin("SystemServerShutdown");
+        metricStarted(METRIC_SYSTEM_SERVER);
         synchronized (sIsStartedGuard) {
             if (sIsStarted) {
                 Log.d(TAG, "Shutdown sequence already running, returning.");
@@ -430,6 +451,7 @@ public final class ShutdownThread extends Thread {
             SystemProperties.set(REBOOT_SAFEMODE_PROPERTY, "1");
         }
 
+        metricStarted(METRIC_SEND_BROADCAST);
         SHUTDOWN_TIMINGS_LOG.traceBegin("SendShutdownBroadcast");
         Log.i(TAG, "Sending shutdown broadcast...");
 
@@ -463,9 +485,11 @@ public final class ShutdownThread extends Thread {
             sInstance.setRebootProgress(BROADCAST_STOP_PERCENT, null);
         }
         SHUTDOWN_TIMINGS_LOG.traceEnd(); // SendShutdownBroadcast
+        metricEnded(METRIC_SEND_BROADCAST);
 
         Log.i(TAG, "Shutting down activity manager...");
         SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownActivityManager");
+        metricStarted(METRIC_AM);
 
         final IActivityManager am =
                 IActivityManager.Stub.asInterface(ServiceManager.checkService("activity"));
@@ -478,10 +502,12 @@ public final class ShutdownThread extends Thread {
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(ACTIVITY_MANAGER_STOP_PERCENT, null);
         }
-        SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownActivityManager
+        SHUTDOWN_TIMINGS_LOG.traceEnd();// ShutdownActivityManager
+        metricEnded(METRIC_AM);
 
         Log.i(TAG, "Shutting down package manager...");
         SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownPackageManager");
+        metricStarted(METRIC_PM);
 
         final PackageManagerService pm = (PackageManagerService)
             ServiceManager.getService("package");
@@ -492,14 +518,17 @@ public final class ShutdownThread extends Thread {
             sInstance.setRebootProgress(PACKAGE_MANAGER_STOP_PERCENT, null);
         }
         SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownPackageManager
+        metricEnded(METRIC_PM);
 
         // Shutdown radios.
         SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownRadios");
+        metricStarted(METRIC_RADIOS);
         shutdownRadios(MAX_RADIO_WAIT_TIME);
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(RADIO_STOP_PERCENT, null);
         }
         SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownRadios
+        metricEnded(METRIC_RADIOS);
 
         // Shutdown StorageManagerService to ensure media is in a safe state
         IStorageShutdownObserver observer = new IStorageShutdownObserver.Stub() {
@@ -511,6 +540,7 @@ public final class ShutdownThread extends Thread {
 
         Log.i(TAG, "Shutting down StorageManagerService");
         SHUTDOWN_TIMINGS_LOG.traceBegin("ShutdownStorageManager");
+        metricStarted(METRIC_SM);
 
         // Set initial variables and time out time.
         mActionDone = false;
@@ -546,6 +576,7 @@ public final class ShutdownThread extends Thread {
             }
         }
         SHUTDOWN_TIMINGS_LOG.traceEnd(); // ShutdownStorageManager
+        metricEnded(METRIC_SM);
 
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(MOUNT_SERVICE_STOP_PERCENT, null);
@@ -556,6 +587,14 @@ public final class ShutdownThread extends Thread {
         }
 
         rebootOrShutdown(mContext, mReboot, mReason);
+    }
+
+    private static void metricStarted(String metricKey) {
+        TRON_METRICS.put(metricKey, -1 * SystemClock.elapsedRealtime());
+    }
+
+    private static void metricEnded(String metricKey) {
+        TRON_METRICS.put(metricKey, SystemClock.elapsedRealtime() + TRON_METRICS.get(metricKey));
     }
 
     private void setRebootProgress(final int progress, final CharSequence message) {
@@ -590,12 +629,12 @@ public final class ShutdownThread extends Thread {
                 final IBluetoothManager bluetooth =
                         IBluetoothManager.Stub.asInterface(ServiceManager.checkService(
                                 BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE));
-                final long nfcShutdownStarted = SystemClock.elapsedRealtime();
                 try {
                     nfcOff = nfc == null ||
                              nfc.getState() == NfcAdapter.STATE_OFF;
                     if (!nfcOff) {
                         Log.w(TAG, "Turning off NFC...");
+                        metricStarted(METRIC_NFC);
                         nfc.disable(false); // Don't persist new state
                     }
                 } catch (RemoteException ex) {
@@ -603,12 +642,12 @@ public final class ShutdownThread extends Thread {
                     nfcOff = true;
                 }
 
-                final long btShutdownStarted = SystemClock.elapsedRealtime();
                 try {
                     bluetoothReadyForShutdown = bluetooth == null ||
                             bluetooth.getState() == BluetoothAdapter.STATE_OFF;
                     if (!bluetoothReadyForShutdown) {
                         Log.w(TAG, "Disabling Bluetooth...");
+                        metricStarted(METRIC_BT);
                         bluetooth.disable(mContext.getPackageName(), false);  // disable but don't persist new state
                     }
                 } catch (RemoteException ex) {
@@ -616,11 +655,11 @@ public final class ShutdownThread extends Thread {
                     bluetoothReadyForShutdown = true;
                 }
 
-                final long radioShutdownStarted = SystemClock.elapsedRealtime();
                 try {
                     radioOff = phone == null || !phone.needMobileRadioShutdown();
                     if (!radioOff) {
                         Log.w(TAG, "Turning off cellular radios...");
+                        metricStarted(METRIC_RADIO);
                         phone.shutdownMobileRadios();
                     }
                 } catch (RemoteException ex) {
@@ -653,8 +692,9 @@ public final class ShutdownThread extends Thread {
                         }
                         if (bluetoothReadyForShutdown) {
                             Log.i(TAG, "Bluetooth turned off.");
-                            SHUTDOWN_TIMINGS_LOG.logDuration("ShutdownBt",
-                                    SystemClock.elapsedRealtime() - btShutdownStarted);
+                            metricEnded(METRIC_BT);
+                            SHUTDOWN_TIMINGS_LOG
+                                    .logDuration("ShutdownBt", TRON_METRICS.get(METRIC_BT));
                         }
                     }
                     if (!radioOff) {
@@ -666,8 +706,9 @@ public final class ShutdownThread extends Thread {
                         }
                         if (radioOff) {
                             Log.i(TAG, "Radio turned off.");
-                            SHUTDOWN_TIMINGS_LOG.logDuration("ShutdownRadio",
-                                    SystemClock.elapsedRealtime() - radioShutdownStarted);
+                            metricEnded(METRIC_RADIO);
+                            SHUTDOWN_TIMINGS_LOG
+                                    .logDuration("ShutdownRadio", TRON_METRICS.get(METRIC_RADIO));
                         }
                     }
                     if (!nfcOff) {
@@ -679,8 +720,9 @@ public final class ShutdownThread extends Thread {
                         }
                         if (nfcOff) {
                             Log.i(TAG, "NFC turned off.");
-                            SHUTDOWN_TIMINGS_LOG.logDuration("ShutdownNfc",
-                                    SystemClock.elapsedRealtime() - nfcShutdownStarted);
+                            metricEnded(METRIC_NFC);
+                            SHUTDOWN_TIMINGS_LOG
+                                    .logDuration("ShutdownNfc", TRON_METRICS.get(METRIC_NFC));
                         }
                     }
 
@@ -708,7 +750,7 @@ public final class ShutdownThread extends Thread {
 
     /**
      * Do not call this directly. Use {@link #reboot(Context, String, boolean)}
-     * or {@link #shutdown(Context, boolean)} instead.
+     * or {@link #shutdown(Context, String, boolean)} instead.
      *
      * @param context Context used to vibrate or null without vibration
      * @param reboot true to reboot or false to shutdown
@@ -716,6 +758,8 @@ public final class ShutdownThread extends Thread {
      */
     public static void rebootOrShutdown(final Context context, boolean reboot, String reason) {
         SHUTDOWN_TIMINGS_LOG.traceEnd(); // SystemServerShutdown
+        metricEnded(METRIC_SYSTEM_SERVER);
+        saveMetrics(reboot);
         if (reboot) {
             Log.i(TAG, "Rebooting, reason: " + reason);
             PowerManagerService.lowLevelReboot(reason);
@@ -740,6 +784,33 @@ public final class ShutdownThread extends Thread {
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
         PowerManagerService.lowLevelShutdown(reason);
+    }
+
+    private static void saveMetrics(boolean reboot) {
+        StringBuilder metricValue = new StringBuilder();
+        metricValue.append("reboot:");
+        metricValue.append(reboot ? "y" : "n");
+        final int metricsSize = TRON_METRICS.size();
+        for (int i = 0; i < metricsSize; i++) {
+            final String name = TRON_METRICS.keyAt(i);
+            final long value = TRON_METRICS.valueAt(i);
+            if (value < 0) {
+                Log.e(TAG, "metricEnded wasn't called for " + name);
+                continue;
+            }
+            metricValue.append(',').append(name).append(':').append(value);
+        }
+        File tmp = new File(METRICS_FILE_BASENAME + ".tmp");
+        boolean saved = false;
+        try (FileOutputStream fos = new FileOutputStream(tmp)) {
+            fos.write(metricValue.toString().getBytes(StandardCharsets.UTF_8));
+            saved = true;
+        } catch (IOException e) {
+            Log.e(TAG,"Cannot save shutdown metrics", e);
+        }
+        if (saved) {
+            tmp.renameTo(new File(METRICS_FILE_BASENAME + ".txt"));
+        }
     }
 
     private void uncrypt() {
