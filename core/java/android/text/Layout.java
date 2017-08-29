@@ -1915,8 +1915,7 @@ public abstract class Layout {
         return margin;
     }
 
-    /* package */
-    static float measurePara(TextPaint paint, CharSequence text, int start, int end,
+    private static float measurePara(TextPaint paint, CharSequence text, int start, int end,
             TextDirectionHeuristic textDir) {
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
