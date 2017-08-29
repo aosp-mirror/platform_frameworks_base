@@ -655,6 +655,21 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public void onPendingSaveUi(int operation, IBinder token) {
+            Preconditions.checkNotNull(token, "token");
+            Preconditions.checkArgument(operation == AutofillManager.PENDING_UI_OPERATION_CANCEL
+                    || operation == AutofillManager.PENDING_UI_OPERATION_RESTORE,
+                    "invalid operation: %d", operation);
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(
+                        UserHandle.getCallingUserId());
+                if (service != null) {
+                    service.onPendingSaveUi(operation, token);
+                }
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
