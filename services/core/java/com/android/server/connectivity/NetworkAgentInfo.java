@@ -27,7 +27,9 @@ import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.os.Handler;
+import android.os.INetworkManagementService;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -247,9 +249,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
-    private final ConnectivityService mConnService;
+    public final ConnectivityService connService;
     private final Context mContext;
-    private final Handler mHandler;
+    final Handler handler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
@@ -261,10 +263,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
-        mConnService = connService;
+        this.connService = connService;
         mContext = context;
-        mHandler = handler;
-        networkMonitor = mConnService.createNetworkMonitor(context, handler, this, defaultRequest);
+        this.handler = handler;
+        networkMonitor = connService.createNetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
     }
 
@@ -430,7 +432,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private boolean ignoreWifiUnvalidationPenalty() {
         boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        boolean avoidBadWifi = mConnService.avoidBadWifi() || avoidUnvalidated;
+        boolean avoidBadWifi = connService.avoidBadWifi() || avoidUnvalidated;
         return isWifi && !avoidBadWifi && everValidated;
     }
 
@@ -514,8 +516,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         if (newExpiry > 0) {
-            mLingerMessage = mConnService.makeWakeupMessage(
-                    mContext, mHandler,
+            mLingerMessage = connService.makeWakeupMessage(
+                    mContext, handler,
                     "NETWORK_LINGER_COMPLETE." + network.netId,
                     EVENT_NETWORK_LINGER_COMPLETE, this);
             mLingerMessage.schedule(newExpiry);
@@ -551,6 +553,32 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
+    public void updateClat(INetworkManagementService netd) {
+        if (Nat464Xlat.requiresClat(this)) {
+            maybeStartClat(netd);
+        } else {
+            maybeStopClat();
+        }
+    }
+
+    /** Ensure clat has started for this network. */
+    public void maybeStartClat(INetworkManagementService netd) {
+        if (clatd != null && clatd.isStarted()) {
+            return;
+        }
+        clatd = new Nat464Xlat(netd, this);
+        clatd.start();
+    }
+
+    /** Ensure clat has stopped for this network. */
+    public void maybeStopClat() {
+        if (clatd == null) {
+            return;
+        }
+        clatd.stop();
+        clatd = null;
+    }
+
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  " +
                 "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  " +
@@ -562,13 +590,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
                 "everCaptivePortalDetected{" + everCaptivePortalDetected + "} " +
                 "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} " +
+                "clat{" + clatd + "} " +
                 "}";
     }
 
     public String name() {
         return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
-                networkInfo.getSubtypeName() + ") - " +
-                (network == null ? "null" : network.toString()) + "]";
+                networkInfo.getSubtypeName() + ") - " + Objects.toString(network) + "]";
     }
 
     // Enables sorting in descending order of score.
