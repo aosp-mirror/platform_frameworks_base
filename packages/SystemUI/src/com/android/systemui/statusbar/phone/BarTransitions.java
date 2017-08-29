@@ -75,6 +75,10 @@ public class BarTransitions {
         return mMode;
     }
 
+    public void setAutoDim(boolean autoDim) {
+        // Default is don't care.
+    }
+
     /**
      * @param alwaysOpaque if {@code true}, the bar's background will always be opaque, regardless
      *         of what mode it is currently set to.
