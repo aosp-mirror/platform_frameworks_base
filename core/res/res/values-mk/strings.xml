@@ -1764,7 +1764,7 @@
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зачувај"</string>
-    <string name="autofill_save_no" msgid="2625132258725581787">"Не, благодарам"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"Не, фала"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"лозинка"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картичка"</string>

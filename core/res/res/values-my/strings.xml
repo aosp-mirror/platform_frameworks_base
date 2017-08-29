@@ -580,7 +580,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့အား ပိတ်ထားပါ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"ပင်မစာမျက်နှာ"</item>
+    <item msgid="8901098336658710359">"အိမ်"</item>
     <item msgid="869923650527136615">"မိုဘိုင်း"</item>
     <item msgid="7897544654242874543">"အလုပ်"</item>
     <item msgid="1103601433382158155">"အလုပ်ဖက်စ်"</item>
@@ -590,19 +590,19 @@
     <item msgid="9192514806975898961">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"ပင်မစာမျက်နှာ"</item>
+    <item msgid="8073994352956129127">"အိမ်"</item>
     <item msgid="7084237356602625604">"အလုပ်"</item>
     <item msgid="1112044410659011023">"တခြား"</item>
     <item msgid="2374913952870110618">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"ပင်မစာမျက်နှာ"</item>
+    <item msgid="6880257626740047286">"အိမ်"</item>
     <item msgid="5629153956045109251">"အလုပ်"</item>
     <item msgid="4966604264500343469">"တခြား"</item>
     <item msgid="4932682847595299369">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"ပင်မစာမျက်နှာ"</item>
+    <item msgid="1738585194601476694">"အိမ်"</item>
     <item msgid="1359644565647383708">"အလုပ်"</item>
     <item msgid="7868549401053615677">"တခြား"</item>
     <item msgid="3145118944639869809">"မိမိစိတ်ကြိုက်"</item>
@@ -645,7 +645,7 @@
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"မိမိစိတ်ကြိုက်"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"မွေးနေ့"</string>
-    <string name="eventTypeAnniversary" msgid="3876779744518284000">"အထိမ်းအမှတ်"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"နှစ်ပတ်လည်နေ့"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"တခြား"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"မိမိစိတ်ကြိုက်"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"အိမ်"</string>
@@ -653,11 +653,11 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"တခြား"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"မိုဘိုင်း"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"မိမိစိတ်ကြိုက်"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"ပင်မစာမျက်နှာ"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"အိမ်"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"အလုပ်"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"တခြား"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"မိမိစိတ်ကြိုက်"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"ပင်မစာမျက်နှာ"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"အိမ်"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"အလုပ်"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"တခြား"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"မိမိစိတ်ကြိုက်"</string>
@@ -689,7 +689,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"ညီအမ"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"အိမ်ထောင်ဖက်"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"မိမိစိတ်ကြိုက်"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"ပင်မစာမျက်နှာ"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"အိမ်"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"အလုပ်"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"တခြား"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"ဤအဆက်အသွယ်အား ကြည့်ရှုရန်  အပလီကေးရှင်းမတွေ့ပါ"</string>
@@ -755,7 +755,7 @@
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"သော့ဖွင့်ရန် Google အကောင့်ဖြင့် ဝင်ပါ"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"သုံးစွဲသူ အမှတ် (အီးမေးလ်)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"စကားဝှက်"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ဝင်ရန်"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"လက်မှတ်ထိုးဝင်ရန်"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"အသုံးပြုသူအမည် သို့မဟုတ် လျို့ဝှက် နံပါတ် မှားယွင်းနေသည်"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"သုံးစွဲသူ အမည် သို့ စကားဝှင်ကို မေ့နေပါသလား။ \n"<b>"google.com/accounts/recovery"</b>" ကို သွားရောက်ပါ။"</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"စစ်ဆေးနေပါသည်…"</string>
@@ -978,7 +978,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"စာတို လုပ်ဆောင်ချက်"</string>
     <string name="email" msgid="4560673117055050403">"အီးမေးလ်"</string>
     <string name="dial" msgid="4204975095406423102">"ဖုန်း"</string>
-    <string name="map" msgid="6068210738233985748">"မြေပုံများ"</string>
+    <string name="map" msgid="6068210738233985748">"Maps"</string>
     <string name="browse" msgid="6993590095938149861">"ဘရောင်ဇာ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
@@ -1464,7 +1464,7 @@
     <string name="kg_login_instructions" msgid="1100551261265506448">"သော့ဖွင့်ရန် သင့်ရဲ့ Google အကောင့်ဖြင့် ဝင်ပါ"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"သုံးစွဲသူအမည် (အီးမေးလ်)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"စကားဝှက်"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"ဝင်ပါ"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"လက်မှတ်ထိုးဝင်ရန်"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"အသုံးပြုသူ အမည် သို့  စကားဝှက်မမှန်ကန်ပါ"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"သင် သုံးစွဲသူ အမည် သို့ စကားဝှက်အားမေ့နေပါသလား။\n"<b>"google.com/accounts/recovery"</b>" သို့ သွားရောက်ပါ"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"အကောင့်ကို စစ်ဆေးနေစဉ်..."</string>
