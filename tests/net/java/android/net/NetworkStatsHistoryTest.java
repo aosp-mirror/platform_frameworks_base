@@ -485,6 +485,21 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertTrue(stats.intersects(Long.MIN_VALUE, TEST_START + 1));
     }
 
+    public void testSetValues() throws Exception {
+        stats = new NetworkStatsHistory(HOUR_IN_MILLIS);
+        stats.recordData(TEST_START, TEST_START + 1,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+
+        assertEquals(1024L + 2048L, stats.getTotalBytes());
+
+        final NetworkStatsHistory.Entry entry = stats.getValues(0, null);
+        entry.rxBytes /= 2;
+        entry.txBytes *= 2;
+        stats.setValues(0, entry);
+
+        assertEquals(512L + 4096L, stats.getTotalBytes());
+    }
+
     private static void assertIndexBeforeAfter(
             NetworkStatsHistory stats, int before, int after, long time) {
         assertEquals("unexpected before", before, stats.getIndexBefore(time));
