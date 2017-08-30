@@ -5303,7 +5303,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void appTransitionFinished() {
-        touchAutoDim();
         EventBus.getDefault().send(new AppTransitionFinishedEvent());
     }
 
