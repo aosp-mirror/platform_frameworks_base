@@ -30,9 +30,9 @@ public class TestJobActivity extends Activity {
     public static final String EXTRA_JOB_ID_KEY =
             "com.android.servicestests.apps.jobtestapp.extra.JOB_ID";
     public static final String ACTION_START_JOB =
-            "com.android.servicestests.apps.jobtestapp.extra.START_JOB";
+            "com.android.servicestests.apps.jobtestapp.action.START_JOB";
     public static final String ACTION_CANCEL_JOBS =
-            "com.android.servicestests.apps.jobtestapp.extra.CANCEL_JOBS";
+            "com.android.servicestests.apps.jobtestapp.action.CANCEL_JOBS";
     public static final int JOB_INITIAL_BACKOFF = 10_000;
     public static final int JOB_MINIMUM_LATENCY = 5_000;
 
