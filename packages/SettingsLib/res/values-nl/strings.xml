@@ -193,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Altijd roamingscans voor wifi toestaan"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiele data altijd actief"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwareversnelling voor tethering"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth-apparaten zonder namen weergeven"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Absoluut volume uitschakelen"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"In-band bellen inschakelen"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth-AVRCP-versie"</string>
@@ -232,6 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Apps verifiëren via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Apps die zijn geïnstalleerd via ADB/ADT, controleren op schadelijk gedrag"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-apparaten zonder namen (alleen MAC-adressen) worden weergegeven"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Hiermee wordt de functie voor absoluut volume van Bluetooth uitgeschakeld in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Toestaan dat beltonen worden afgespeeld op Bluetooth-headsets"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokale terminal"</string>

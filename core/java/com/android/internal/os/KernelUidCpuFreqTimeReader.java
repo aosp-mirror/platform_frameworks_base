@@ -42,6 +42,7 @@ import java.io.IOException;
  * delta.
  */
 public class KernelUidCpuFreqTimeReader {
+    private static final boolean DEBUG = false;
     private static final String TAG = "KernelUidCpuFreqTimeReader";
     private static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
 
@@ -130,14 +131,18 @@ public class KernelUidCpuFreqTimeReader {
             // If there is malformed data for any uid, then we just log about it and ignore
             // the data for that uid.
             if (deltaUidTimeMs[i] < 0 || totalTimeMs < 0) {
-                final StringBuilder sb = new StringBuilder("Malformed cpu freq data for UID=")
-                        .append(uid).append("\n");
-                sb.append("data=").append("(").append(uidTimeMs[i]).append(",")
-                        .append(totalTimeMs).append(")").append("\n");
-                sb.append("times=").append("(");
-                TimeUtils.formatDuration(mLastTimeReadMs, sb); sb.append(",");
-                TimeUtils.formatDuration(mNowTimeMs, sb); sb.append(")");
-                Slog.e(TAG, sb.toString());
+                if (DEBUG) {
+                    final StringBuilder sb = new StringBuilder("Malformed cpu freq data for UID=")
+                            .append(uid).append("\n");
+                    sb.append("data=").append("(").append(uidTimeMs[i]).append(",")
+                            .append(totalTimeMs).append(")").append("\n");
+                    sb.append("times=").append("(");
+                    TimeUtils.formatDuration(mLastTimeReadMs, sb);
+                    sb.append(",");
+                    TimeUtils.formatDuration(mNowTimeMs, sb);
+                    sb.append(")");
+                    Slog.e(TAG, sb.toString());
+                }
                 return;
             }
             curUidTimeMs[i] = totalTimeMs;

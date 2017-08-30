@@ -193,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permet sempre cerca de Wi-Fi en ininerància"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dades mòbils sempre actives"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Acceleració per maquinari per compartir la xarxa"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostra els dispositius Bluetooth sense el nom"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactiva el volum absolut"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activa el so al mateix canal"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versió AVRCP de Bluetooth"</string>
@@ -232,6 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aquesta configuració només està prevista per a usos de desenvolupament. Pot fer que el dispositiu i que les aplicacions s\'interrompin o tinguin un comportament inadequat."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar possibles comportaments perillosos"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Es mostraran els dispositius Bluetooth sense el nom (només l\'adreça MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desactiva la funció de volum absolut de Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permet que els sons de trucada del telèfon es reprodueixin en auriculars amb Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>

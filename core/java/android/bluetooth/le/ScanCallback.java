@@ -50,6 +50,12 @@ public abstract class ScanCallback {
      */
     public static final int SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES = 5;
 
+    /**
+     * Fails to start scan as application tries to scan too frequently.
+     * @hide
+     */
+    public static final int SCAN_FAILED_SCANNING_TOO_FREQUENTLY = 6;
+
     static final int NO_ERROR = 0;
 
     /**
