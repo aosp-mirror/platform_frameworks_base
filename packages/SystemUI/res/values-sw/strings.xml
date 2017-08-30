@@ -77,7 +77,7 @@
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezaji cha maudhui (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nyuma"</string>
@@ -284,7 +284,7 @@
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mbinu ya uingizaji"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Kutambua Eneo"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Kitambua eneo kimezimwa"</string>
-    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha midia"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha faili"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Simu za Dharura Pekee"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Mipangilio"</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Programu hii haina aina za arifa"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Arifa kutoka kwenye programu hii haziwezi kuzimwa"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Aina 1 ya arifa kati ya <xliff:g id="NUMBER_1">%d</xliff:g> kutoka kwenye kifaa hiki</item>
-      <item quantity="one">Aina 1 ya arifa kati ya <xliff:g id="NUMBER_0">%d</xliff:g> kutoka kwenye kifaa hiki</item>
+      <item quantity="other">Aina 1 ya arifa kati ya <xliff:g id="NUMBER_1">%s</xliff:g> kutoka kwenye kifaa hiki</item>
+      <item quantity="one">Aina 1 ya arifa kati ya <xliff:g id="NUMBER_0">%s</xliff:g> kutoka kwenye kifaa hiki</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -596,8 +596,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Kushoto"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Kulia"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Katikati"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Sogeza"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Nafasi"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Nafasinyuma"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Cheza/Sitisha"</string>

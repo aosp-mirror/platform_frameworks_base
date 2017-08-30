@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Deze app heeft geen meldingscategorieën"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Meldingen van deze app kunnen niet worden uitgeschakeld"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 van <xliff:g id="NUMBER_1">%d</xliff:g> meldingscategorieën van deze app</item>
-      <item quantity="one">1 van <xliff:g id="NUMBER_0">%d</xliff:g> meldingscategorie van deze app</item>
+      <item quantity="other">1 van <xliff:g id="NUMBER_1">%s</xliff:g> meldingscategorieën van deze app</item>
+      <item quantity="one">1 van <xliff:g id="NUMBER_0">%s</xliff:g> meldingscategorie van deze app</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
