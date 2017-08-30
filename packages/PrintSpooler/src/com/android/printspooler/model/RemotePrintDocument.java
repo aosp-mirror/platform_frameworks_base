@@ -136,7 +136,12 @@ public final class RemotePrintDocument {
                     mState = STATE_CANCELED;
                     notifyUpdateCanceled();
                 }
-                runPendingCommand();
+                if (mNextCommand != null) {
+                    runPendingCommand();
+                } else {
+                    // The update was not performed, hence the spec is stale
+                    mUpdateSpec.reset();
+                }
             }
         }
     };
