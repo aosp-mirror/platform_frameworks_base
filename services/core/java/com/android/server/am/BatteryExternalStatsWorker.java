@@ -38,6 +38,7 @@ import com.android.internal.os.BatteryStatsImpl;
 
 import libcore.util.EmptyArray;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -116,6 +117,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     public synchronized Future<?> scheduleWrite() {
+        if (mExecutorService.isShutdown()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
+        }
+
         scheduleSyncLocked("write", UPDATE_ALL);
         // Since we use a single threaded executor, we can assume the next scheduled task's
         // Future finishes after the sync.
@@ -127,7 +132,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
      * within the task, never wait on the resulting Future. This will result in a deadlock.
      */
     public synchronized void scheduleRunnable(Runnable runnable) {
-        mExecutorService.submit(runnable);
+        if (!mExecutorService.isShutdown()) {
+            mExecutorService.submit(runnable);
+        }
     }
 
     public void shutdown() {
@@ -135,6 +142,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     private Future<?> scheduleSyncLocked(String reason, int flags) {
+        if (mExecutorService.isShutdown()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
+        }
+
         if (mCurrentFuture == null) {
             mUpdateFlags = flags;
             mCurrentReason = reason;
