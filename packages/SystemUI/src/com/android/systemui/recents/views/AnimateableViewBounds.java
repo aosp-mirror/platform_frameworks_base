@@ -51,7 +51,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
      * Resets the right and bottom clip for this view.
      */
     public void reset() {
-        mClipRect.set(-1, -1, -1, -1);
+        mClipRect.set(0, 0, 0, 0);
         updateClipBounds();
     }
 
