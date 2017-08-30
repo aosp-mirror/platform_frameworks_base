@@ -3865,7 +3865,10 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%1$d</xliff:g> seconds.</string>
+    <plurals name="kg_too_many_failed_attempts_countdown">
+        <item quantity="one">Try again in 1 second.</item>
+        <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
+    </plurals>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
