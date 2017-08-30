@@ -967,8 +967,6 @@ bool ConfigDescription::ConflictsWith(const ConfigDescription& o) const {
                o.screenLayout & MASK_LAYOUTDIR) ||
          !pred(screenLayout & MASK_SCREENLONG,
                o.screenLayout & MASK_SCREENLONG) ||
-         !pred(screenLayout & MASK_UI_MODE_TYPE,
-               o.screenLayout & MASK_UI_MODE_TYPE) ||
          !pred(uiMode & MASK_UI_MODE_TYPE, o.uiMode & MASK_UI_MODE_TYPE) ||
          !pred(uiMode & MASK_UI_MODE_NIGHT, o.uiMode & MASK_UI_MODE_NIGHT) ||
          !pred(screenLayout2 & MASK_SCREENROUND,
