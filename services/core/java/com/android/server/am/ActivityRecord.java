@@ -16,13 +16,10 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
@@ -48,11 +45,12 @@ import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
 import static android.content.pm.ActivityInfo.FLAG_MULTIPROCESS;
+import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
@@ -65,7 +63,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.res.Configuration.EMPTY;
@@ -79,13 +76,10 @@ import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SCREENSHOTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_THUMBNAILS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SAVED_STATE;
@@ -96,7 +90,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_THUMBNAIL
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.TAKE_FULLSCREEN_SCREENSHOTS;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
@@ -318,8 +311,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     static final int STARTING_WINDOW_REMOVED = 2;
     int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
     boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
-
-    boolean mUpdateTaskThumbnailWhenHidden;
 
     TaskDescription taskDescription; // the recents information for this activity
     boolean mLaunchTaskBehind; // this activity is actively being launched with
@@ -1496,70 +1487,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    void updateThumbnailLocked(Bitmap newThumbnail, CharSequence description) {
-        if (newThumbnail != null) {
-            if (DEBUG_THUMBNAILS) Slog.i(TAG_THUMBNAILS,
-                    "Setting thumbnail of " + this + " to " + newThumbnail);
-            boolean thumbnailUpdated = task.setLastThumbnailLocked(newThumbnail);
-            if (thumbnailUpdated && isPersistable()) {
-                service.notifyTaskPersisterLocked(task, false);
-            }
-        }
+    private void updateTaskDescription(CharSequence description) {
         task.lastDescription = description;
-    }
-
-    final Bitmap screenshotActivityLocked() {
-        if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "screenshotActivityLocked: " + this);
-
-        if (ENABLE_TASK_SNAPSHOTS) {
-            // No need to screenshot if snapshots are enabled.
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS,
-                    "\tSnapshots are enabled, abort taking screenshot");
-            return null;
-        }
-
-        if (noDisplay) {
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tNo display");
-            return null;
-        }
-
-        final ActivityStack stack = getStack();
-        if (stack.isHomeOrRecentsStack()) {
-            // This is an optimization -- since we never show Home or Recents within Recents itself,
-            // we can just go ahead and skip taking the screenshot if this is the home stack.
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, stack.getStackId() == HOME_STACK_ID ?
-                        "\tHome stack" : "\tRecents stack");
-            return null;
-        }
-
-        int w = service.mThumbnailWidth;
-        int h = service.mThumbnailHeight;
-
-        if (w <= 0) {
-            Slog.e(TAG, "\tInvalid thumbnail dimensions: " + w + "x" + h);
-            return null;
-        }
-
-        if (stack.mStackId == DOCKED_STACK_ID && mStackSupervisor.mIsDockMinimized) {
-            // When the docked stack is minimized its app windows are cropped significantly so any
-            // screenshot taken will not display the apps contain. So, we avoid taking a screenshot
-            // in that case.
-            if (DEBUG_SCREENSHOTS) Slog.e(TAG, "\tIn minimized docked stack");
-            return null;
-        }
-
-        float scale = 0;
-        if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tTaking screenshot");
-
-        // When this flag is set, we currently take the fullscreen screenshot of the activity but
-        // scaled to half the size. This gives us a "good-enough" fullscreen thumbnail to use within
-        // SystemUI while keeping memory usage low.
-        if (TAKE_FULLSCREEN_SCREENSHOTS) {
-            w = h = -1;
-            scale = service.mFullscreenThumbnailScale;
-        }
-
-        return mWindowContainerController.screenshotApplications(getDisplayId(), w, h, scale);
     }
 
     void setDeferHidingClient(boolean deferHidingClient) {
@@ -1583,10 +1512,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void setVisible(boolean newVisible) {
         visible = newVisible;
         mDeferHidingClient = !visible && mDeferHidingClient;
-        if (!visible && mUpdateTaskThumbnailWhenHidden) {
-            updateThumbnailLocked(screenshotActivityLocked(), null /* description */);
-            mUpdateTaskThumbnailWhenHidden = false;
-        }
         setVisibility(visible);
         mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
@@ -1752,7 +1677,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             icicle = newIcicle;
             haveState = true;
             launchCount = 0;
-            updateThumbnailLocked(null /* newThumbnail */, description);
+            updateTaskDescription(description);
         }
         if (!stopped) {
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to STOPPED: " + this + " (stop complete)");

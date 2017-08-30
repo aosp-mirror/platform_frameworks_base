@@ -1084,10 +1084,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         forAllWindows(w -> {
-            // Discard surface after orientation change, these can't be reused.
-            if (w.mAppToken != null) {
-                w.mAppToken.destroySavedSurfaces();
-            }
             if (w.mHasSurface && !rotateSeamlessly) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Set mOrientationChanging of " + w);
                 w.setOrientationChanging(true);
@@ -2354,8 +2350,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } else if (w.mAppToken != null && w.mAppToken.isClientHidden()) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
                         + w + " surface=" + wsa.mSurfaceController
-                        + " token=" + w.mAppToken
-                        + " saved=" + w.hasSavedSurface());
+                        + " token=" + w.mAppToken);
                 if (SHOW_TRANSACTIONS) logSurface(w, "LEAK DESTROY", false);
                 wsa.destroySurface();
                 mTmpWindow = w;

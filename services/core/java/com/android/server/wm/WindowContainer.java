@@ -363,13 +363,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    void setVisibleBeforeClientHidden() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.setVisibleBeforeClientHidden();
-        }
-    }
-
     /**
      * Returns true if the container or one of its children as some content it can display or wants
      * to display (e.g. app views or saved surface).

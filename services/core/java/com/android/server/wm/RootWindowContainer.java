@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Debug;
@@ -671,10 +670,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 // Don't remove this window until rotation has completed.
                 continue;
             }
-            // Discard the saved surface if window size is changed, it can't be reused.
-            if (win.mAppToken != null) {
-                win.mAppToken.destroySavedSurfaces();
-            }
             win.reportResized();
             mService.mResizingWindows.remove(i);
         }
@@ -704,7 +699,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
-                win.destroyOrSaveSurfaceUnchecked();
+                win.destroySurfaceUnchecked();
             } while (i > 0);
             mService.mDestroySurface.clear();
         }

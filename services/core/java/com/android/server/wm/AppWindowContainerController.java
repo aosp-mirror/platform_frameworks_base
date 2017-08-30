@@ -365,7 +365,6 @@ public class AppWindowContainerController
                 // Now that the app is going invisible, we can remove it. It will be restarted
                 // if made visible again.
                 wtoken.removeDeadWindows();
-                wtoken.setVisibleBeforeClientHidden();
                 mService.mUnknownAppVisibilityController.appRemovedOrHidden(wtoken);
             } else {
                 if (!mService.mAppTransition.isTransitionSet()
@@ -726,35 +725,6 @@ public class AppWindowContainerController
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + mToken + ": hidden="
                     + mContainer.hidden + " freezing=" + mContainer.mAppAnimator.freezingScreen);
             mContainer.stopFreezingScreen(true, force);
-        }
-    }
-
-    /**
-     * Takes a snapshot of the screen. In landscape mode this grabs the whole screen.
-     * In portrait mode, it grabs the full screenshot.
-     *
-     * @param displayId the Display to take a screenshot of.
-     * @param width the width of the target bitmap
-     * @param height the height of the target bitmap
-     * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
-     */
-    public Bitmap screenshotApplications(int displayId, int width, int height, float frameScale) {
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotApplications");
-            final DisplayContent dc;
-            synchronized(mWindowMap) {
-                dc = mRoot.getDisplayContentOrCreate(displayId);
-                if (dc == null) {
-                    if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot of " + mToken
-                            + ": returning null. No Display for displayId=" + displayId);
-                    return null;
-                }
-            }
-            return dc.screenshotApplications(mToken.asBinder(), width, height,
-                    false /* includeFullDisplay */, frameScale, Bitmap.Config.RGB_565,
-                    false /* wallpaperOnly */, false /* includeDecor */);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
