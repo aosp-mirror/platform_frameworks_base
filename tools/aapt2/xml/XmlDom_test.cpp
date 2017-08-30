@@ -86,19 +86,14 @@ class TestVisitor : public PackageAwareVisitor {
 
   void Visit(Element* el) override {
     if (el->name == "View1") {
-      EXPECT_THAT(TransformPackageAlias("one", "local"),
-                  Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
     } else if (el->name == "View2") {
-      EXPECT_THAT(TransformPackageAlias("one", "local"),
-                  Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two", "local"),
-                  Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
     } else if (el->name == "View3") {
-      EXPECT_THAT(TransformPackageAlias("one", "local"),
-                  Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two", "local"),
-                  Eq(make_value(ExtractedPackage{"com.two", false})));
-      EXPECT_THAT(TransformPackageAlias("three", "local"),
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("three"),
                   Eq(make_value(ExtractedPackage{"com.three", false})));
     }
   }
@@ -112,7 +107,6 @@ TEST(XmlDomTest, PackageAwareXmlVisitor) {
         </View2>
       </View1>)");
 
-  Debug::DumpXml(doc.get());
   TestVisitor visitor;
   doc->root->Accept(&visitor);
 }

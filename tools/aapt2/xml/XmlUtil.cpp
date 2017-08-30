@@ -62,19 +62,15 @@ Maybe<ExtractedPackage> ExtractPackageFromNamespace(
   return {};
 }
 
-void TransformReferenceFromNamespace(IPackageDeclStack* decl_stack,
-                                     const StringPiece& local_package,
-                                     Reference* in_ref) {
+void ResolvePackage(const IPackageDeclStack* decl_stack, Reference* in_ref) {
   if (in_ref->name) {
     if (Maybe<ExtractedPackage> transformed_package =
-            decl_stack->TransformPackageAlias(in_ref->name.value().package,
-                                              local_package)) {
+            decl_stack->TransformPackageAlias(in_ref->name.value().package)) {
       ExtractedPackage& extracted_package = transformed_package.value();
       in_ref->name.value().package = std::move(extracted_package.package);
 
       // If the reference was already private (with a * prefix) and the
-      // namespace is public,
-      // we keep the reference private.
+      // namespace is public, we keep the reference private.
       in_ref->private_reference |= extracted_package.private_namespace;
     }
   }

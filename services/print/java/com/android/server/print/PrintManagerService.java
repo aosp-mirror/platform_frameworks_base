@@ -63,6 +63,7 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -645,7 +646,6 @@ public final class PrintManagerService extends SystemService {
 
             int opti = 0;
             boolean dumpAsProto = false;
-            int user = UserHandle.USER_ALL;
             while (opti < args.length) {
                 String opt = args[opti];
                 if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
@@ -659,48 +659,47 @@ public final class PrintManagerService extends SystemService {
                 }
             }
 
+            ArrayList<UserState> userStatesToDump = new ArrayList<>();
             synchronized (mLock) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    if (dumpAsProto) {
-                        dumpLocked(new ProtoOutputStream(fd), UserHandle.of(user));
-                    } else {
-                        dumpLocked(fd, pw, UserHandle.of(user));
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+                int numUserStates = mUserStates.size();
+                for (int i = 0; i < numUserStates; i++) {
+                    userStatesToDump.add(mUserStates.valueAt(i));
                 }
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (dumpAsProto) {
+                    dump(new ProtoOutputStream(fd), userStatesToDump);
+                } else {
+                    dump(fd, pw, userStatesToDump);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
-        private void dumpLocked(@NonNull ProtoOutputStream proto, @NonNull UserHandle user) {
-            final int userStateCount = mUserStates.size();
+        private void dump(@NonNull ProtoOutputStream proto,
+                @NonNull ArrayList<UserState> userStatesToDump) {
+            final int userStateCount = userStatesToDump.size();
             for (int i = 0; i < userStateCount; i++) {
-                UserState userState = mUserStates.valueAt(i);
-
-                if (user.equals(UserHandle.ALL) || mUserStates.keyAt(i) == user.getIdentifier()) {
-                    long token = proto.start(PrintServiceDumpProto.USER_STATES);
-                    userState.dump(proto);
-                    proto.end(token);
-                }
+                long token = proto.start(PrintServiceDumpProto.USER_STATES);
+                userStatesToDump.get(i).dump(proto);
+                proto.end(token);
             }
 
             proto.flush();
         }
 
-        private void dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
-                @NonNull UserHandle user) {
+        private void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+                @NonNull ArrayList<UserState> userStatesToDump) {
             pw = Preconditions.checkNotNull(pw);
 
             pw.println("PRINT MANAGER STATE (dumpsys print)");
-            final int userStateCount = mUserStates.size();
+            final int userStateCount = userStatesToDump.size();
             for (int i = 0; i < userStateCount; i++) {
-                UserState userState = mUserStates.valueAt(i);
-
-                if (user.equals(UserHandle.ALL) || mUserStates.keyAt(i) == user.getIdentifier()) {
-                    userState.dump(fd, pw, "");
-                    pw.println();
-                }
+                userStatesToDump.get(i).dump(fd, pw, "");
+                pw.println();
             }
         }
 

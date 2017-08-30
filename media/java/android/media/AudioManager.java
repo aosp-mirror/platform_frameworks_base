@@ -397,6 +397,19 @@ public class AudioManager {
      */
     public static final int ADJUST_TOGGLE_MUTE = 101;
 
+    /** @hide */
+    public static final String adjustToString(int adj) {
+        switch (adj) {
+            case ADJUST_RAISE: return "ADJUST_RAISE";
+            case ADJUST_LOWER: return "ADJUST_LOWER";
+            case ADJUST_SAME: return "ADJUST_SAME";
+            case ADJUST_MUTE: return "ADJUST_MUTE";
+            case ADJUST_UNMUTE: return "ADJUST_UNMUTE";
+            case ADJUST_TOGGLE_MUTE: return "ADJUST_TOGGLE_MUTE";
+            default: return new StringBuilder("unknown adjust mode ").append(adj).toString();
+        }
+    }
+
     // Flags should be powers of 2!
 
     /**
@@ -1235,7 +1248,7 @@ public class AudioManager {
     //====================================================================
     // Bluetooth SCO control
     /**
-     * Sticky broadcast intent action indicating that the bluetoooth SCO audio
+     * Sticky broadcast intent action indicating that the Bluetooth SCO audio
      * connection state has changed. The intent contains on extra {@link #EXTRA_SCO_AUDIO_STATE}
      * indicating the new state which is either {@link #SCO_AUDIO_STATE_DISCONNECTED}
      * or {@link #SCO_AUDIO_STATE_CONNECTED}
@@ -1249,7 +1262,7 @@ public class AudioManager {
             "android.media.SCO_AUDIO_STATE_CHANGED";
 
      /**
-     * Sticky broadcast intent action indicating that the bluetoooth SCO audio
+     * Sticky broadcast intent action indicating that the Bluetooth SCO audio
      * connection state has been updated.
      * <p>This intent has two extras:
      * <ul>

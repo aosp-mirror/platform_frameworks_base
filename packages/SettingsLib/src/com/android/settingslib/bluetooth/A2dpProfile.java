@@ -233,8 +233,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
 
     public String getHighQualityAudioOptionLabel(BluetoothDevice device) {
         int unknownCodecId = R.string.bluetooth_profile_a2dp_high_quality_unknown_codec;
-        if (!supportsHighQualityAudio(device) ||
-                getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED) {
+        if (!supportsHighQualityAudio(device)
+                || getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED) {
             return mContext.getString(unknownCodecId);
         }
         // We want to get the highest priority codec, since that's the one that will be used with
@@ -248,11 +248,36 @@ public class A2dpProfile implements LocalBluetoothProfile {
                         return b.getCodecPriority() - a.getCodecPriority();
                     });
         }
-        if (selectable == null || selectable.length < 1 || selectable[0].isMandatoryCodec()) {
+
+        final BluetoothCodecConfig codecConfig = (selectable == null || selectable.length < 1)
+                ? null : selectable[0];
+        final int codecType = (codecConfig == null || codecConfig.isMandatoryCodec())
+                ? BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID : codecConfig.getCodecType();
+
+        int index = -1;
+        switch (codecType) {
+           case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
+               index = 1;
+               break;
+           case BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC:
+               index = 2;
+               break;
+           case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX:
+               index = 3;
+               break;
+           case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD:
+               index = 4;
+               break;
+           case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
+               index = 5;
+               break;
+           }
+
+        if (index < 0) {
             return mContext.getString(unknownCodecId);
         }
         return mContext.getString(R.string.bluetooth_profile_a2dp_high_quality,
-                selectable[0].getCodecName());
+                mContext.getResources().getStringArray(R.array.bluetooth_a2dp_codec_titles)[index]);
     }
 
     public String toString() {

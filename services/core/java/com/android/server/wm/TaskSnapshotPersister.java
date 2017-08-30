@@ -333,7 +333,6 @@ class TaskSnapshotPersister {
         }
 
         boolean writeBuffer() {
-            final File file = getBitmapFile(mTaskId, mUserId);
             final Bitmap bitmap = Bitmap.createHardwareBitmap(mSnapshot.getSnapshot());
             if (bitmap == null) {
                 Slog.e(TAG, "Invalid task snapshot hw bitmap");
@@ -361,6 +360,7 @@ class TaskSnapshotPersister {
                 return true;
             }
 
+            final File file = getBitmapFile(mTaskId, mUserId);
             try {
                 FileOutputStream fos = new FileOutputStream(file);
                 swBitmap.compress(JPEG, QUALITY, fos);

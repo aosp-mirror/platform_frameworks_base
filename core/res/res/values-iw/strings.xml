@@ -855,8 +855,8 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"רווח"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"מחק"</string>
-    <string name="search_go" msgid="8298016669822141719">"חפש"</string>
-    <string name="search_hint" msgid="1733947260773056054">"חפש…"</string>
+    <string name="search_go" msgid="8298016669822141719">"חיפוש"</string>
+    <string name="search_hint" msgid="1733947260773056054">"חיפוש…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"חיפוש"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"שאילתת חיפוש"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"נקה שאילתה"</string>
@@ -1243,7 +1243,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"שתף"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"לא, אין מצב"</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
-    <string name="show_ime" msgid="2506087537466597099">"תישאר במסך בזמן שהמקלדת הפיזית פעילה"</string>
+    <string name="show_ime" msgid="2506087537466597099">"להשאיר במסך בזמן שהמקלדת הפיזית פעילה"</string>
     <string name="hardware" msgid="194658061510127999">"הצג מקלדת וירטואלית"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"הגדרת מקלדת פיזית"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"הקש כדי לבחור שפה ופריסה"</string>
@@ -1306,7 +1306,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"הקש פעמיים לבקרת מרחק מתצוגה"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"‏לא ניתן להוסיף widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"התחל"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"חפש"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"חיפוש"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"שלח"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"הבא"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"סיום"</string>
@@ -1545,7 +1545,7 @@
     <string name="error_message_title" msgid="4510373083082500195">"שגיאה"</string>
     <string name="error_message_change_not_allowed" msgid="1238035947357923497">"מנהל המערכת שלך אינו מתיר שינוי זה"</string>
     <string name="app_not_found" msgid="3429141853498927379">"לא נמצאה אפליקציה שתומכת בפעולה זו"</string>
-    <string name="revoke" msgid="5404479185228271586">"בטל"</string>
+    <string name="revoke" msgid="5404479185228271586">"ביטול"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
     <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>

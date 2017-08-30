@@ -185,8 +185,7 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
   using Visitor::Visit;
 
-  Maybe<ExtractedPackage> TransformPackageAlias(
-      const android::StringPiece& alias, const android::StringPiece& local_package) const override;
+  Maybe<ExtractedPackage> TransformPackageAlias(const android::StringPiece& alias) const override;
 
  protected:
   PackageAwareVisitor() = default;
