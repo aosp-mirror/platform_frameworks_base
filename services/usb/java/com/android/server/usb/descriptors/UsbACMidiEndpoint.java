@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Midi Endpoint.
  * see midi10.pdf section 6.2.2
  */
-public class UsbACMidiEndpoint extends UsbACEndpoint {
-    private static final String TAG = "ACMidiEndpoint";
+public final class UsbACMidiEndpoint extends UsbACEndpoint {
+    private static final String TAG = "UsbACMidiEndpoint";
 
     private byte mNumJacks;
     private byte[] mJackIds;
@@ -48,5 +50,16 @@ public class UsbACMidiEndpoint extends UsbACEndpoint {
             mJackIds[jack] = stream.getByte();
         }
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.writeHeader(3, "AC Midi Endpoint: " + ReportCanvas.getHexString(getType())
+                + " Length: " + getLength());
+        canvas.openList();
+        canvas.writeListItem("" + getNumJacks() + " Jacks.");
+        canvas.closeList();
     }
 }
