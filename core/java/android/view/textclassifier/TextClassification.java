@@ -48,6 +48,7 @@ public final class TextClassification {
     @NonNull private final EntityConfidence<String> mEntityConfidence;
     @NonNull private final List<String> mEntities;
     private int mLogType;
+    @NonNull private final String mVersionInfo;
 
     private TextClassification(
             @Nullable String text,
@@ -56,7 +57,8 @@ public final class TextClassification {
             @Nullable Intent intent,
             @Nullable OnClickListener onClickListener,
             @NonNull EntityConfidence<String> entityConfidence,
-            int logType) {
+            int logType,
+            @NonNull String versionInfo) {
         mText = text;
         mIcon = icon;
         mLabel = label;
@@ -65,6 +67,7 @@ public final class TextClassification {
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
         mEntities = mEntityConfidence.getEntities();
         mLogType = logType;
+        mVersionInfo = versionInfo;
     }
 
     /**
@@ -145,6 +148,15 @@ public final class TextClassification {
         return mLogType;
     }
 
+    /**
+     * Returns information about the classifier model used to generate this TextClassification.
+     * @hide
+     */
+    @NonNull
+    public String getVersionInfo() {
+        return mVersionInfo;
+    }
+
     @Override
     public String toString() {
         return String.format("TextClassification {"
@@ -179,6 +191,7 @@ public final class TextClassification {
         @NonNull private final EntityConfidence<String> mEntityConfidence =
                 new EntityConfidence<>();
         private int mLogType;
+        @NonNull private String mVersionInfo = "";
 
         /**
          * Sets the classified text.
@@ -244,11 +257,21 @@ public final class TextClassification {
         }
 
         /**
+         * Sets information about the classifier model used to generate this TextClassification.
+         * @hide
+         */
+        Builder setVersionInfo(@NonNull String versionInfo) {
+            mVersionInfo = Preconditions.checkNotNull(mVersionInfo);
+            return this;
+        }
+
+        /**
          * Builds and returns a {@link TextClassification} object.
          */
         public TextClassification build() {
             return new TextClassification(
-                    mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence, mLogType);
+                    mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence,
+                    mLogType, mVersionInfo);
         }
     }
 }

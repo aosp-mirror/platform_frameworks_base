@@ -70,7 +70,7 @@ import java.util.regex.Pattern;
  */
 final class TextClassifierImpl implements TextClassifier {
 
-    private static final String LOG_TAG = "TextClassifierImpl";
+    private static final String LOG_TAG = DEFAULT_LOG_TAG;
     private static final String MODEL_DIR = "/etc/textclassifier/";
     private static final String MODEL_FILE_REGEX = "textclassifier\\.smartselection\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
@@ -85,6 +85,8 @@ final class TextClassifierImpl implements TextClassifier {
     private Map<Locale, String> mModelFilePaths;
     @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
     private Locale mLocale;
+    @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
+    private int mVersion;
     @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
     private SmartSelection mSmartSelection;
 
@@ -108,8 +110,7 @@ final class TextClassifierImpl implements TextClassifier {
                 if (start <= end
                         && start >= 0 && end <= string.length()
                         && start <= selectionStartIndex && end >= selectionEndIndex) {
-                    final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end)
-                            .setLogSource(LOG_TAG);
+                    final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
                     final SmartSelection.ClassificationResult[] results =
                             smartSelection.classifyText(
                                     string, start, end,
@@ -118,7 +119,10 @@ final class TextClassifierImpl implements TextClassifier {
                     for (int i = 0; i < size; i++) {
                         tsBuilder.setEntityType(results[i].mCollection, results[i].mScore);
                     }
-                    return tsBuilder.build();
+                    return tsBuilder
+                            .setLogSource(LOG_TAG)
+                            .setVersionInfo(getVersionInfo())
+                            .build();
                 } else {
                     // We can not trust the result. Log the issue and ignore the result.
                     Log.d(LOG_TAG, "Got bad indices for input text. Ignoring result.");
@@ -202,6 +206,16 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    @NonNull
+    private String getVersionInfo() {
+        synchronized (mSmartSelectionLock) {
+            if (mLocale != null) {
+                return String.format("%s_v%d", mLocale.toLanguageTag(), mVersion);
+            }
+            return "";
+        }
+    }
+
     @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
     private ParcelFileDescriptor getFdLocked(Locale locale) throws FileNotFoundException {
         ParcelFileDescriptor updateFd;
@@ -256,9 +270,11 @@ final class TextClassifierImpl implements TextClassifier {
         final int factoryVersion = SmartSelection.getVersion(factoryFd.getFd());
         if (updateVersion > factoryVersion) {
             closeAndLogError(factoryFd);
+            mVersion = updateVersion;
             return updateFd;
         } else {
             closeAndLogError(updateFd);
+            mVersion = factoryVersion;
             return factoryFd;
         }
     }
@@ -374,7 +390,7 @@ final class TextClassifierImpl implements TextClassifier {
                 builder.setLabel(label != null ? label.toString() : null);
             }
         }
-        return builder.build();
+        return builder.setVersionInfo(getVersionInfo()).build();
     }
 
     private static int getHintFlags(CharSequence text, int start, int end) {
