@@ -45,6 +45,8 @@
 #include <unistd.h>
 
 #include "android-base/logging.h"
+#include <android-base/file.h>
+#include <android-base/stringprintf.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sched_policy.h>
@@ -65,6 +67,8 @@
 namespace {
 
 using android::String8;
+using android::base::StringPrintf;
+using android::base::WriteStringToFile;
 
 static pid_t gSystemServerPid = 0;
 
@@ -769,6 +773,11 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       if (waitpid(pid, &status, WNOHANG) == pid) {
           ALOGE("System server process %d has died. Restarting Zygote!", pid);
           RuntimeAbort(env, __LINE__, "System server process has died. Restarting Zygote!");
+      }
+
+      // Assign system_server to the correct memory cgroup.
+      if (!WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
+        ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
       }
   }
   return pid;
