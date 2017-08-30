@@ -1072,7 +1072,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Sauti ya Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Sauti ya toni mlio"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Sauti ya simu"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya midia"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya faili"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Sauti ya arifa"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Mlio chaguo-msingi"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Chaguo-msingi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
