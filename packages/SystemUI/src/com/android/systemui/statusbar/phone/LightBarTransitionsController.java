@@ -127,6 +127,11 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
     }
 
     public void setIconsDark(boolean dark, boolean animate) {
+        if (!BarTransitions.HIGH_END) {
+            setIconTintInternal(0.0f);
+            mNextDarkIntensity = 0.0f;
+            return;
+        }
         if (!animate) {
             setIconTintInternal(dark ? 1.0f : 0.0f);
             mNextDarkIntensity = dark ? 1.0f : 0.0f;
