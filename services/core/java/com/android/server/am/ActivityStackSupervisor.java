@@ -4596,9 +4596,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         }
                         mLockTaskNotify.show(false);
                         try {
-                            boolean shouldLockKeyguard = Settings.Secure.getInt(
+                            boolean shouldLockKeyguard = Settings.Secure.getIntForUser(
                                     mService.mContext.getContentResolver(),
-                                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
+                                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
+                                    UserHandle.USER_CURRENT) != 0;
                             if (mLockTaskModeState == LOCK_TASK_MODE_PINNED && shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
                                 mWindowManager.dismissKeyguard(null /* callback */);
