@@ -9433,6 +9433,15 @@ public class PackageManagerService extends IPackageManager.Stub
         // throw an exception if we have an update to a system application, but, it's not more
         // recent than the package we've already scanned
         if (isUpdatedSystemPkg && !isUpdatedPkgBetter) {
+            // Set CPU Abis to application info.
+            if ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0) {
+                final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, updatedPkg);
+                derivePackageAbi(pkg, scanFile, cpuAbiOverride, false, mAppLib32InstallDir);
+            } else {
+                pkg.applicationInfo.primaryCpuAbi = updatedPkg.primaryCpuAbiString;
+                pkg.applicationInfo.secondaryCpuAbi = updatedPkg.secondaryCpuAbiString;
+            }
+
             throw new PackageManagerException(Log.WARN, "Package " + ps.name + " at "
                     + scanFile + " ignored: updated version " + ps.versionCode
                     + " better than this " + pkg.mVersionCode);
