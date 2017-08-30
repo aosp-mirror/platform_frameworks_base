@@ -128,6 +128,13 @@ public class FingerprintManager {
     public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
 
     /**
+     * The user canceled the operation. Upon receiving this, applications should use alternate
+     * authentication (e.g. a password). The application should also provide the means to return
+     * to fingerprint authentication, such as a "use fingerprint" button.
+     */
+    public static final int FINGERPRINT_ERROR_USER_CANCELED = 10;
+
+    /**
      * @hide
      */
     public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
