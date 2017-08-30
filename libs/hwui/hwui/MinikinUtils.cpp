@@ -68,7 +68,8 @@ float MinikinUtils::measureText(const Paint* paint, int bidiFlags, const Typefac
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
     const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinStyle,
-            minikinPaint, resolvedTypeface->fFontCollection, advances, nullptr /* extent */);
+            minikinPaint, resolvedTypeface->fFontCollection, advances, nullptr /* extent */,
+            nullptr /* overhangs */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
