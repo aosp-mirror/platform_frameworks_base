@@ -862,7 +862,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Prošli mjesec"</string>
     <string name="older" msgid="5211975022815554840">"Starije"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"datuma <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"u <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"godine <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"dan"</string>
@@ -1727,7 +1727,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Ovo je značajno zbog osoba koje su uključene."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Da li dozvoljavate aplikaciji <xliff:g id="APP">%1$s</xliff:g> da kreira novog korisnika s računom <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Da li dozvoljavate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (Korisnik sa ovim nalogom već postoji)?"</string>
-    <string name="language_selection_title" msgid="2680677278159281088">"Dodaj jezik"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Dodajte jezik"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Izbor regije"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Upišite ime jezika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predloženo"</string>
