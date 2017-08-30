@@ -17,12 +17,12 @@ package com.android.server.usb.descriptors;
 
 /**
  * @hide
- * A holder for any unrecognized descriptor encountered in the descriptor stream.
+ * A holder class for as yet unparsed audio-class interfaces.
  */
-public final class UsbUnknown extends UsbDescriptor {
-    static final String TAG = "UsbUnknown";
+public final class UsbACInterfaceUnparsed extends UsbACInterface {
+    private static final String TAG = "UsbACInterfaceUnparsed";
 
-    public UsbUnknown(int length, byte type) {
-        super(length, type);
+    public UsbACInterfaceUnparsed(int length, byte type, byte subtype, byte subClass) {
+        super(length, type, subtype, subClass);
     }
 }

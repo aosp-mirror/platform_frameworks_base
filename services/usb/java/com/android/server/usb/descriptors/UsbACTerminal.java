@@ -15,10 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /**
  * @hide
  */
 public abstract class UsbACTerminal extends UsbACInterface {
+    private static final String TAG = "UsbACTerminal";
+
     // Note that these fields are the same for both the
     // audio class-specific Output Terminal Interface.(audio10.pdf section 4.3.2.2)
     // and audio class-specific Input Terminal interface.(audio10.pdf section 4.3.2.1)
@@ -46,9 +51,21 @@ public abstract class UsbACTerminal extends UsbACInterface {
     @Override
     public int parseRawDescriptors(ByteStream stream) {
         mTerminalID = stream.getByte();
-        mTerminalType = stream.unpackUsbWord();
+        mTerminalType = stream.unpackUsbShort();
         mAssocTerminal = stream.getByte();
 
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        int terminalType = getTerminalType();
+        canvas.writeListItem("Type: " + ReportCanvas.getHexString(terminalType) + ": "
+                + UsbStrings.getTerminalName(terminalType));
+        canvas.writeListItem("ID: " + ReportCanvas.getHexString(getTerminalID()));
+        canvas.closeList();
     }
 }

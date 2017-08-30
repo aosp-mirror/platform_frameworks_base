@@ -16,6 +16,7 @@
 package com.android.server.usb.descriptors.report;
 
 import com.android.server.usb.descriptors.UsbACInterface;
+import com.android.server.usb.descriptors.UsbASFormat;
 import com.android.server.usb.descriptors.UsbDescriptor;
 import com.android.server.usb.descriptors.UsbTerminalTypes;
 
@@ -25,7 +26,7 @@ import java.util.HashMap;
  * @hide
  * A class to provide human-readable strings for various USB constants.
  */
-public class UsbStrings {
+public final class UsbStrings {
     private static final String TAG = "UsbStrings";
 
     private static HashMap<Byte, String> sDescriptorNames;
@@ -35,6 +36,7 @@ public class UsbStrings {
     private static HashMap<Byte, String> sAudioSubclassNames;
     private static HashMap<Integer, String> sAudioEncodingNames;
     private static HashMap<Integer, String> sTerminalNames;
+    private static HashMap<Integer, String> sFormatNames;
 
     private static void initDescriptorNames() {
         sDescriptorNames = new HashMap<Byte, String>();
@@ -70,6 +72,11 @@ public class UsbStrings {
         sACControlInterfaceNames.put(UsbACInterface.ACI_FEATURE_UNIT, "Feature Unit");
         sACControlInterfaceNames.put(UsbACInterface.ACI_PROCESSING_UNIT, "Processing Unit");
         sACControlInterfaceNames.put(UsbACInterface.ACI_EXTENSION_UNIT, "Extension Unit");
+        sACControlInterfaceNames.put(UsbACInterface.ACI_CLOCK_SOURCE, "Clock Source");
+        sACControlInterfaceNames.put(UsbACInterface.ACI_CLOCK_SELECTOR, "Clock Selector");
+        sACControlInterfaceNames.put(UsbACInterface.ACI_CLOCK_MULTIPLIER, "Clock Multiplier");
+        sACControlInterfaceNames.put(UsbACInterface.ACI_SAMPLE_RATE_CONVERTER,
+                "Sample Rate Converter");
     }
 
     private static void initACStreamingInterfaceNames() {
@@ -213,6 +220,29 @@ public class UsbStrings {
                 ? name
                 : "Unknown Terminal Type 0x" + Integer.toHexString(terminalType);
     }
+
+    private static void initFormatNames() {
+        sFormatNames = new HashMap<Integer, String>();
+
+        sFormatNames.put((int) UsbASFormat.FORMAT_TYPE_I, "FORMAT_TYPE_I");
+        sFormatNames.put((int) UsbASFormat.FORMAT_TYPE_II, "FORMAT_TYPE_II");
+        sFormatNames.put((int) UsbASFormat.FORMAT_TYPE_III, "FORMAT_TYPE_III");
+        sFormatNames.put((int) UsbASFormat.FORMAT_TYPE_IV, "FORMAT_TYPE_IV");
+        sFormatNames.put((int) UsbASFormat.EXT_FORMAT_TYPE_I, "EXT_FORMAT_TYPE_I");
+        sFormatNames.put((int) UsbASFormat.EXT_FORMAT_TYPE_II, "EXT_FORMAT_TYPE_II");
+        sFormatNames.put((int) UsbASFormat.EXT_FORMAT_TYPE_III, "EXT_FORMAT_TYPE_III");
+    }
+
+    /**
+     * Retrieves the name for the specified format (encoding) type ID.
+     */
+    public static String getFormatName(int format) {
+        String name = sFormatNames.get(format);
+        return name != null
+                ? name
+                : "Unknown Format Type 0x" + Integer.toHexString(format);
+    }
+
     /**
      * Initializes string tables.
      */
@@ -224,10 +254,11 @@ public class UsbStrings {
         initAudioSubclassNames();
         initAudioEncodingNames();
         initTerminalNames();
+        initFormatNames();
     }
 
     /**
-     * Initializes string tables.
+     * Deinitializes string tables.
      */
     public static void releaseUsbStrings() {
         sDescriptorNames = null;
@@ -308,5 +339,12 @@ public class UsbStrings {
                 ? name
                 : "Unknown Format (encoding) ID [0x" + Integer.toHexString(formatID) + ":"
                     + formatID + "]";
+    }
+
+    /**
+     * Retrieves the name for the specified USB audio interface subclass ID.
+     */
+    public static String getACInterfaceSubclassName(byte subClassID) {
+        return subClassID == UsbDescriptor.AUDIO_AUDIOCONTROL ? "AC Control" : "AC Streaming";
     }
 }

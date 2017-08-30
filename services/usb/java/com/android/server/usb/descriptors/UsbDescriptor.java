@@ -19,6 +19,10 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDeviceConnection;
 import android.util.Log;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.Reporting;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /*
  * Some notes about UsbDescriptor and its subclasses.
  *
@@ -33,8 +37,10 @@ import android.util.Log;
  * @hide
  * Common superclass for all USB Descriptors.
  */
-public abstract class UsbDescriptor {
-    private static final String TAG = "Descriptor";
+public abstract class UsbDescriptor implements Reporting {
+    private static final String TAG = "UsbDescriptor";
+
+    protected int mHierarchyLevel;
 
     protected final int mLength;    // 0:1 bLength Number Size of the Descriptor in Bytes (18 bytes)
                                     // we store this as an int because Java bytes are SIGNED.
@@ -50,10 +56,14 @@ public abstract class UsbDescriptor {
     public static final int STATUS_PARSED_OK        = 1;
     public static final int STATUS_PARSED_UNDERRUN  = 2;
     public static final int STATUS_PARSED_OVERRUN   = 3;
+    public static final int STATUS_PARSE_EXCEPTION  = 4;
+
     private int mStatus = STATUS_UNPARSED;
 
     private static String[] sStatusStrings = {
             "UNPARSED", "PARSED - OK", "PARSED - UNDERRUN", "PARSED - OVERRUN"};
+
+    private int mOverUnderRunCount;
 
     // Descriptor Type IDs
     public static final byte DESCRIPTORTYPE_DEVICE = 0x01;            // 1
@@ -147,6 +157,10 @@ public abstract class UsbDescriptor {
         mStatus = status;
     }
 
+    public int getOverUnderRunCount() {
+        return mOverUnderRunCount;
+    }
+
     public String getStatusString() {
         return sStatusStrings[mStatus];
     }
@@ -165,14 +179,16 @@ public abstract class UsbDescriptor {
             // Too cold...
             stream.advance(mLength - bytesRead);
             mStatus = STATUS_PARSED_UNDERRUN;
+            mOverUnderRunCount = mLength - bytesRead;
             Log.w(TAG, "UNDERRUN t:0x" + Integer.toHexString(mType)
-                    + " r:" + bytesRead + " < l:" + mLength);
+                    + " r: " + bytesRead + " < l: " + mLength);
         } else if (bytesRead > mLength) {
             // Too hot...
             stream.reverse(bytesRead - mLength);
             mStatus = STATUS_PARSED_OVERRUN;
+            mOverUnderRunCount = bytesRead - mLength;
             Log.w(TAG, "OVERRRUN t:0x" + Integer.toHexString(mType)
-                    + " r:" + bytesRead + " > l:" + mLength);
+                    + " r: " + bytesRead + " > l: " + mLength);
         } else {
             // Just right!
             mStatus = STATUS_PARSED_OK;
@@ -219,5 +235,44 @@ public abstract class UsbDescriptor {
             }
         }
         return usbStr;
+    }
+
+    private void reportParseStatus(ReportCanvas canvas) {
+        int status = getStatus();
+        switch (status) {
+            case UsbDescriptor.STATUS_PARSED_OK:
+                break;  // no need to report
+
+            case UsbDescriptor.STATUS_UNPARSED:
+            case UsbDescriptor.STATUS_PARSED_UNDERRUN:
+            case UsbDescriptor.STATUS_PARSED_OVERRUN:
+                canvas.writeParagraph("status: " + getStatusString()
+                        + " [" + getOverUnderRunCount() + "]", true);
+                break;
+        }
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        String descTypeStr = UsbStrings.getDescriptorName(getType());
+        String text = descTypeStr + ": " + ReportCanvas.getHexString(getType())
+                + " Len: " + getLength();
+        if (mHierarchyLevel != 0) {
+            canvas.writeHeader(mHierarchyLevel, text);
+        } else {
+            canvas.writeParagraph(text, false);
+        }
+
+        if (getStatus() != STATUS_PARSED_OK) {
+            reportParseStatus(canvas);
+        }
+    }
+
+    @Override
+    public void shortReport(ReportCanvas canvas) {
+        String descTypeStr = UsbStrings.getDescriptorName(getType());
+        String text = descTypeStr + ": " + ReportCanvas.getHexString(getType())
+                + " Len: " + getLength();
+        canvas.writeParagraph(text, false);
     }
 }
