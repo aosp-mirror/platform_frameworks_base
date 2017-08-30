@@ -32,7 +32,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -164,8 +163,7 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
-            layoutParams.privateFlags = PRIVATE_FLAG_TASK_SNAPSHOT
-                    | (windowPrivateFlags & PRIVATE_FLAG_INHERITS);
+            layoutParams.privateFlags = windowPrivateFlags & PRIVATE_FLAG_INHERITS;
             layoutParams.token = token.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
