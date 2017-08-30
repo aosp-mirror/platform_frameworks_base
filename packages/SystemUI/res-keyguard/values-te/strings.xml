@@ -49,7 +49,7 @@
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"పిన్ ప్రాంతం"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM పిన్ ప్రాంతం"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK ప్రాంతం"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"తదుపరి అలారం <xliff:g id="ALARM">%1$s</xliff:g>కి సెట్ చేయబడింది"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"తర్వాత అలారం <xliff:g id="ALARM">%1$s</xliff:g>కి సెట్ చేయబడింది"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"తొలగించు"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIMని నిలిపివేయండి"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
