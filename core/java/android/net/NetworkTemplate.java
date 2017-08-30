@@ -326,6 +326,10 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    public boolean matchesSubscriberId(String subscriberId) {
+        return ArrayUtils.contains(mMatchSubscriberIds, subscriberId);
+    }
+
     /**
      * Check if mobile network with matching IMSI.
      */
