@@ -280,14 +280,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                                 Slog.v(TAG, "Crop done; invoking completion callback");
                             }
                             wallpaper.imageWallpaperPending = false;
-                            if (wallpaper.setComplete != null) {
-                                try {
-                                    wallpaper.setComplete.onWallpaperChanged();
-                                } catch (RemoteException e) {
-                                    // if this fails we don't really care; the setting app may just
-                                    // have crashed and that sort of thing is a fact of life.
-                                }
-                            }
                             if (sysWallpaperChanged) {
                                 // If this was the system wallpaper, rebind...
                                 bindWallpaperComponentLocked(mImageWallpaper, true,
@@ -311,6 +303,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                             }
 
                             saveSettingsLocked(wallpaper.userId);
+
+                            // Publish completion *after* we've persisted the changes
+                            if (wallpaper.setComplete != null) {
+                                try {
+                                    wallpaper.setComplete.onWallpaperChanged();
+                                } catch (RemoteException e) {
+                                    // if this fails we don't really care; the setting app may just
+                                    // have crashed and that sort of thing is a fact of life.
+                                }
+                            }
                         }
                     }
                 }
