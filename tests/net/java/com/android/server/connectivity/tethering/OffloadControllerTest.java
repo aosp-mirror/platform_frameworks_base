@@ -68,6 +68,7 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -144,8 +145,8 @@ public class OffloadControllerTest {
         return offload;
     }
 
-    // TODO: Restore when FakeSettingsProvider.clearSettingsProvider() is available.
-    // @Test
+    @Test
+    @Ignore("Restore when FakeSettingsProvider.clearSettingsProvider() is available.")
     public void testNoSettingsValueDefaultDisabledDoesNotStart() throws Exception {
         setupFunctioningHardwareInterface();
         when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(1);
@@ -165,8 +166,8 @@ public class OffloadControllerTest {
         inOrder.verifyNoMoreInteractions();
     }
 
-    // TODO: Restore when FakeSettingsProvider.clearSettingsProvider() is available.
-    // @Test
+    @Test
+    @Ignore("Restore when FakeSettingsProvider.clearSettingsProvider() is available.")
     public void testNoSettingsValueDefaultEnabledDoesStart() throws Exception {
         setupFunctioningHardwareInterface();
         when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(0);
