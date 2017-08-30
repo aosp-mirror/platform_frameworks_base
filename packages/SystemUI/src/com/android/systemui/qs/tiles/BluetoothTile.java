@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.settingslib.graph.BluetoothDeviceLayerDrawable.createLayerDrawable;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -32,8 +34,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.R.drawable;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -127,6 +131,15 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             if (connected) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connected);
                 state.label = mController.getLastDeviceName();
+                CachedBluetoothDevice lastDevice = mController.getLastDevice();
+                if (lastDevice != null) {
+                    int batteryLevel = lastDevice.getBatteryLevel();
+                    if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                        BluetoothDeviceLayerDrawable drawable = createLayerDrawable(mContext,
+                                R.drawable.ic_qs_bluetooth_connected, batteryLevel);
+                        state.icon = new DrawableIcon(drawable);
+                    }
+                }
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_bluetooth_name, state.label);
             } else if (state.isTransient) {
@@ -278,6 +291,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         item.icon = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                            item.iconDrawable = createLayerDrawable(mContext, item.icon,
+                                    batteryLevel);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,
                                     Utils.formatPercentage(batteryLevel));
