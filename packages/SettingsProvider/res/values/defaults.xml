@@ -190,4 +190,7 @@
 
     <!-- default setting for Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA -->
     <bool name="def_restrict_background_data">false</bool>
+
+    <!-- Default for Settings.Secure.BACKUP_MANAGER_CONSTANTS -->
+    <string name="def_backup_manager_constants"></string>
 </resources>

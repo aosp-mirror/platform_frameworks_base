@@ -7124,6 +7124,31 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKDOWN_IN_POWER_MENU = "lockdown_in_power_menu";
+
+        /**
+         * Backup manager behavioral parameters.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "key_value_backup_interval_milliseconds=14400000,key_value_backup_require_charging=true"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * key_value_backup_interval_milliseconds  (long)
+         * key_value_backup_fuzz_milliseconds      (long)
+         * key_value_backup_require_charging       (boolean)
+         * key_value_backup_required_network_type  (int)
+         * full_backup_interval_milliseconds       (long)
+         * full_backup_require_charging            (boolean)
+         * full_backup_required_network_type       (int)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         */
+        public static final String BACKUP_MANAGER_CONSTANTS = "backup_manager_constants";
+
         /**
          * This are the settings to be backed up.
          *

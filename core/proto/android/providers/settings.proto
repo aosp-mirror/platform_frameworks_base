@@ -506,6 +506,7 @@ message SecureSettingsProto {
     SettingProto instant_apps_enabled = 166;
     SettingProto device_paired = 167;
     SettingProto notification_badging = 168;
+    SettingProto backup_manager_constants = 169;
 }
 
 message SystemSettingsProto {
