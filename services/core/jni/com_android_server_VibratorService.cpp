@@ -153,9 +153,9 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jint strength
     if (status == Status::OK) {
         return lengthMs;
     } else if (status != Status::UNSUPPORTED_OPERATION) {
-        // Don't warn on UNSUPPORTED_OPERATION, that's a normal even and just means the motor
-        // doesn't have a pre-defined waveform to perform for it, so we should just fall back
-        // to the framework waveforms.
+        // Don't warn on UNSUPPORTED_OPERATION, that's a normal event and just means the motor
+        // doesn't have a pre-defined waveform to perform for it, so we should just give the
+        // opportunity to fall back to the framework waveforms.
         ALOGE("Failed to perform haptic effect: effect=%" PRId64 ", strength=%" PRId32
                 ", error=%" PRIu32 ").", static_cast<int64_t>(effect),
                 static_cast<int32_t>(strength), static_cast<uint32_t>(status));
