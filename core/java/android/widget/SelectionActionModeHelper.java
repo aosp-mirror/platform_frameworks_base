@@ -235,17 +235,6 @@ final class SelectionActionModeHelper {
         final List<RectF> selectionRectangles =
                 convertSelectionToRectangles(layout, result.mStart, result.mEnd);
 
-        /*
-         * Do not run the Smart Select animation when there are multiple lines involved, as this
-         * behavior is currently broken.
-         *
-         * TODO fix Smart Select Animation when the selection spans multiple lines
-         */
-        if (selectionRectangles.size() != 1) {
-            onAnimationEndCallback.run();
-            return;
-        }
-
         final PointF touchPoint = new PointF(
                 mEditor.getLastUpPositionX(),
                 mEditor.getLastUpPositionY());
