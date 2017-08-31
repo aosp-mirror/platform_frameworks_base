@@ -378,4 +378,9 @@ public abstract class PackageManagerInternal {
      * associated with an instant app. It may be kept after the instant app has been uninstalled.
      */
     public abstract boolean hasInstantApplicationMetadata(String packageName, int userId);
+
+    /**
+     * Updates a package last used time.
+     */
+    public abstract void notifyPackageUse(String packageName, int reason);
 }
