@@ -556,7 +556,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
         @Override
         public int getMovementFlags(RecyclerView recyclerView, ViewHolder viewHolder) {
-            if (viewHolder.getItemViewType() == TYPE_EDIT) {
+            if (viewHolder.getItemViewType() == TYPE_EDIT || viewHolder.getItemViewType() == TYPE_DIVIDER) {
                 return makeMovementFlags(0, 0);
             }
             int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.RIGHT
