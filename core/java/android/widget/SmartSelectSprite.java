@@ -44,11 +44,8 @@ import android.view.animation.Interpolator;
 import java.lang.annotation.Retention;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.Stack;
 
 /**
  * A utility class for creating and animating the Smart Select animation.
@@ -59,7 +56,6 @@ final class SmartSelectSprite {
     private static final int EXPAND_DURATION = 300;
     private static final int CORNER_DURATION = 150;
     private static final float STROKE_WIDTH_DP = 1.5F;
-    private static final int POINTS_PER_LINE = 4;
 
     // GBLUE700
     @ColorInt
@@ -73,40 +69,13 @@ final class SmartSelectSprite {
     private Animator mActiveAnimator = null;
     @ColorInt
     private final int mStrokeColor;
-    private Set<Drawable> mExistingAnimationDrawables = new HashSet<>();
 
     static final Comparator<RectF> RECTANGLE_COMPARATOR = Comparator
             .<RectF>comparingDouble(e -> e.bottom)
             .thenComparingDouble(e -> e.left);
 
-    /**
-     * Represents a set of points connected by lines.
-     */
-    private static final class PolygonShape extends Shape {
-
-        private final float[] mLineCoordinates;
-
-        private PolygonShape(final List<PointF> points) {
-            mLineCoordinates = new float[points.size() * POINTS_PER_LINE];
-
-            int index = 0;
-            PointF currentPoint = points.get(0);
-            for (final PointF nextPoint : points) {
-                mLineCoordinates[index] = currentPoint.x;
-                mLineCoordinates[index + 1] = currentPoint.y;
-                mLineCoordinates[index + 2] = nextPoint.x;
-                mLineCoordinates[index + 3] = nextPoint.y;
-
-                index += POINTS_PER_LINE;
-                currentPoint = nextPoint;
-            }
-        }
-
-        @Override
-        public void draw(Canvas canvas, Paint paint) {
-            canvas.drawLines(mLineCoordinates, paint);
-        }
-    }
+    private Drawable mExistingDrawable = null;
+    private RectangleList mExistingRectangleList = null;
 
     /**
      * A rounded rectangle with a configurable corner radius and the ability to expand outside of
@@ -262,16 +231,27 @@ final class SmartSelectSprite {
      */
     private static final class RectangleList extends Shape {
 
+        @Retention(SOURCE)
+        @IntDef({DisplayType.RECTANGLES, DisplayType.POLYGON})
+        private @interface DisplayType {
+            int RECTANGLES = 0;
+            int POLYGON = 1;
+        }
+
         private static final String PROPERTY_RIGHT_BOUNDARY = "rightBoundary";
         private static final String PROPERTY_LEFT_BOUNDARY = "leftBoundary";
 
         private final List<RoundedRectangleShape> mRectangles;
         private final List<RoundedRectangleShape> mReversedRectangles;
 
-        private RectangleList(List<RoundedRectangleShape> rectangles) {
+        private final Path mOutlinePolygonPath;
+        private @DisplayType int mDisplayType = DisplayType.RECTANGLES;
+
+        private RectangleList(final List<RoundedRectangleShape> rectangles) {
             mRectangles = new LinkedList<>(rectangles);
             mReversedRectangles = new LinkedList<>(rectangles);
             Collections.reverse(mReversedRectangles);
+            mOutlinePolygonPath = generateOutlinePolygonPath(rectangles);
         }
 
         private void setLeftBoundary(final float leftBoundary) {
@@ -307,6 +287,10 @@ final class SmartSelectSprite {
             }
         }
 
+        void setDisplayType(@DisplayType int displayType) {
+            mDisplayType = displayType;
+        }
+
         private int getTotalWidth() {
             int sum = 0;
             for (RoundedRectangleShape rectangle : mRectangles) {
@@ -317,9 +301,32 @@ final class SmartSelectSprite {
 
         @Override
         public void draw(Canvas canvas, Paint paint) {
+            if (mDisplayType == DisplayType.POLYGON) {
+                drawPolygon(canvas, paint);
+            } else {
+                drawRectangles(canvas, paint);
+            }
+        }
+
+        private void drawRectangles(final Canvas canvas, final Paint paint) {
             for (RoundedRectangleShape rectangle : mRectangles) {
                 rectangle.draw(canvas, paint);
             }
+        }
+
+        private void drawPolygon(final Canvas canvas, final Paint paint) {
+            canvas.drawPath(mOutlinePolygonPath, paint);
+        }
+
+        private static Path generateOutlinePolygonPath(
+                final List<RoundedRectangleShape> rectangles) {
+            final Path path = new Path();
+            for (final RoundedRectangleShape shape : rectangles) {
+                final Path rectanglePath = new Path();
+                rectanglePath.addRect(shape.mBoundingRectangle, Path.Direction.CW);
+                path.op(rectanglePath, Path.Op.UNION);
+            }
+            return path;
         }
 
     }
@@ -335,84 +342,6 @@ final class SmartSelectSprite {
         mStrokeWidth = dpToPixel(context, STROKE_WIDTH_DP);
         mStrokeColor = getStrokeColor(context);
         mView = view;
-    }
-
-    private static boolean intersectsOrTouches(RectF a, RectF b) {
-        return a.left <= b.right && b.left <= a.right && a.top <= b.bottom && b.top <= a.bottom;
-    }
-
-    private List<Drawable> mergeRectanglesToPolygonShape(
-            final List<RectF> rectangles,
-            final int color) {
-        final List<Drawable> drawables = new LinkedList<>();
-        final Set<List<PointF>> mergedPaths = calculateMergedPolygonPoints(rectangles);
-
-        for (List<PointF> path : mergedPaths) {
-            // Add the starting point to the end of the polygon so that it ends up closed.
-            path.add(path.get(0));
-
-            final PolygonShape shape = new PolygonShape(path);
-            final ShapeDrawable drawable = new ShapeDrawable(shape);
-
-            drawable.getPaint().setColor(color);
-            drawable.getPaint().setStyle(Paint.Style.STROKE);
-            drawable.getPaint().setStrokeWidth(mStrokeWidth);
-
-            drawables.add(drawable);
-        }
-
-        return drawables;
-    }
-
-    private static Set<List<PointF>> calculateMergedPolygonPoints(
-            List<RectF> rectangles) {
-        final Set<List<RectF>> partitions = new HashSet<>();
-        final LinkedList<RectF> listOfRects = new LinkedList<>(rectangles);
-
-        while (!listOfRects.isEmpty()) {
-            final RectF candidate = listOfRects.removeFirst();
-            final List<RectF> partition = new LinkedList<>();
-            partition.add(candidate);
-
-            final LinkedList<RectF> otherCandidates = new LinkedList<>();
-            otherCandidates.addAll(listOfRects);
-
-            while (!otherCandidates.isEmpty()) {
-                final RectF otherCandidate = otherCandidates.removeFirst();
-                for (RectF partitionElement : partition) {
-                    if (intersectsOrTouches(partitionElement, otherCandidate)) {
-                        partition.add(otherCandidate);
-                        listOfRects.remove(otherCandidate);
-                        break;
-                    }
-                }
-            }
-
-            partition.sort(Comparator.comparing(o -> o.top));
-            partitions.add(partition);
-        }
-
-        final Set<List<PointF>> result = new HashSet<>();
-        for (List<RectF> partition : partitions) {
-            final List<PointF> points = new LinkedList<>();
-
-            final Stack<RectF> rects = new Stack<>();
-            for (RectF rect : partition) {
-                points.add(new PointF(rect.right, rect.top));
-                points.add(new PointF(rect.right, rect.bottom));
-                rects.add(rect);
-            }
-            while (!rects.isEmpty()) {
-                final RectF rect = rects.pop();
-                points.add(new PointF(rect.left, rect.bottom));
-                points.add(new PointF(rect.left, rect.top));
-            }
-
-            result.add(points);
-        }
-
-        return result;
-
     }
 
     /**
@@ -490,17 +419,17 @@ final class SmartSelectSprite {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(mStrokeWidth);
 
-        addToOverlay(shapeDrawable);
+        mExistingRectangleList = rectangleList;
+        mExistingDrawable = shapeDrawable;
+        mView.getOverlay().add(shapeDrawable);
 
-        mActiveAnimator = createAnimator(mStrokeColor, destinationRectangles, rectangleList,
-                startingOffsetLeft, startingOffsetRight, cornerAnimators, updateListener,
+        mActiveAnimator = createAnimator(rectangleList, startingOffsetLeft, startingOffsetRight,
+                cornerAnimators, updateListener,
                 onAnimationEnd);
         mActiveAnimator.start();
     }
 
     private Animator createAnimator(
-            final @ColorInt int color,
-            final List<RectF> destinationRectangles,
             final RectangleList rectangleList,
             final float startingOffsetLeft,
             final float startingOffsetRight,
@@ -537,15 +466,12 @@ final class SmartSelectSprite {
         final AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playSequentially(boundaryAnimator, cornerAnimator);
 
-        setUpAnimatorListener(animatorSet, destinationRectangles, color, onAnimationEnd);
+        setUpAnimatorListener(animatorSet, onAnimationEnd);
 
         return animatorSet;
     }
 
-    private void setUpAnimatorListener(final Animator animator,
-            final List<RectF> destinationRectangles,
-            final @ColorInt int color,
-            final Runnable onAnimationEnd) {
+    private void setUpAnimatorListener(final Animator animator, final Runnable onAnimationEnd) {
         animator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
@@ -553,15 +479,8 @@ final class SmartSelectSprite {
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                removeExistingDrawables();
-
-                final List<Drawable> polygonShapes = mergeRectanglesToPolygonShape(
-                        destinationRectangles,
-                        color);
-
-                for (Drawable drawable : polygonShapes) {
-                    addToOverlay(drawable);
-                }
+                mExistingRectangleList.setDisplayType(RectangleList.DisplayType.POLYGON);
+                mExistingDrawable.invalidateSelf();
 
                 onAnimationEnd.run();
             }
@@ -661,17 +580,12 @@ final class SmartSelectSprite {
                 && y <= rectangle.bottom;
     }
 
-    private void addToOverlay(final Drawable drawable) {
-        mView.getOverlay().add(drawable);
-        mExistingAnimationDrawables.add(drawable);
-    }
-
     private void removeExistingDrawables() {
         final ViewOverlay overlay = mView.getOverlay();
-        for (Drawable drawable : mExistingAnimationDrawables) {
-            overlay.remove(drawable);
-        }
-        mExistingAnimationDrawables.clear();
+        overlay.remove(mExistingDrawable);
+
+        mExistingDrawable = null;
+        mExistingRectangleList = null;
     }
 
     /**
