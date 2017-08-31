@@ -961,7 +961,7 @@ public class ResourcesManager {
 
     // TODO(adamlesinski): Make this accept more than just overlay directories.
     final void applyNewResourceDirsLocked(@NonNull final String baseCodePath,
-            @NonNull final String[] newResourceDirs) {
+            @Nullable final String[] newResourceDirs) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                     "ResourcesManager#applyNewResourceDirsLocked");
