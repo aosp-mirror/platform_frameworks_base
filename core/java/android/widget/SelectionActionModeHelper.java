@@ -248,6 +248,9 @@ final class SelectionActionModeHelper {
         // with the Smart Select animation
         layout.getSelection(start, end, (left, top, right, bottom) ->
                 result.add(new RectF(left, top, right, bottom)));
+
+        result.sort(SmartSelectSprite.RECTANGLE_COMPARATOR);
+
         return result;
     }
 

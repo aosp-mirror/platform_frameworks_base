@@ -75,6 +75,10 @@ final class SmartSelectSprite {
     private final int mStrokeColor;
     private Set<Drawable> mExistingAnimationDrawables = new HashSet<>();
 
+    static final Comparator<RectF> RECTANGLE_COMPARATOR = Comparator
+            .<RectF>comparingDouble(e -> e.bottom)
+            .thenComparingDouble(e -> e.left);
+
     /**
      * Represents a set of points connected by lines.
      */
@@ -266,13 +270,6 @@ final class SmartSelectSprite {
 
         private RectangleList(List<RoundedRectangleShape> rectangles) {
             mRectangles = new LinkedList<>(rectangles);
-            mRectangles.sort((o1, o2) -> {
-                if (o1.mBoundingRectangle.top == o2.mBoundingRectangle.top) {
-                    return Float.compare(o1.mBoundingRectangle.left, o2.mBoundingRectangle.left);
-                } else {
-                    return Float.compare(o1.mBoundingRectangle.top, o2.mBoundingRectangle.top);
-                }
-            });
             mReversedRectangles = new LinkedList<>(rectangles);
             Collections.reverse(mReversedRectangles);
         }
@@ -424,7 +421,9 @@ final class SmartSelectSprite {
      * @param start                 The point from which the animation will start. Must be inside
      *                              destinationRectangles.
      * @param destinationRectangles The rectangles which the animation will fill out by its
-     *                              "selection" and finally join them into a single polygon.
+     *                              "selection" and finally join them into a single polygon. In
+     *                              order to get the correct visual behavior, these rectangles
+     *                              should be sorted according to {@link #RECTANGLE_COMPARATOR}.
      * @param onAnimationEnd        The callback which will be invoked once the whole animation
      *                              completes.
      * @throws IllegalArgumentException if the given start point is not in any of the
@@ -591,8 +590,7 @@ final class SmartSelectSprite {
     }
 
     private static @RoundedRectangleShape.ExpansionDirection int[] generateDirections(
-            final RectF centerRectangle,
-            final List<RectF> rectangles) throws IllegalArgumentException {
+            final RectF centerRectangle, final List<RectF> rectangles) {
         final @RoundedRectangleShape.ExpansionDirection int[] result = new int[rectangles.size()];
 
         final int centerRectangleIndex = rectangles.indexOf(centerRectangle);
@@ -600,7 +598,17 @@ final class SmartSelectSprite {
         for (int i = 0; i < centerRectangleIndex - 1; ++i) {
             result[i] = RoundedRectangleShape.ExpansionDirection.LEFT;
         }
-        result[centerRectangleIndex] = RoundedRectangleShape.ExpansionDirection.CENTER;
+
+        if (rectangles.size() == 1) {
+            result[centerRectangleIndex] = RoundedRectangleShape.ExpansionDirection.CENTER;
+        } else if (centerRectangleIndex == 0) {
+            result[centerRectangleIndex] = RoundedRectangleShape.ExpansionDirection.LEFT;
+        } else if (centerRectangleIndex == rectangles.size() - 1) {
+            result[centerRectangleIndex] = RoundedRectangleShape.ExpansionDirection.RIGHT;
+        } else {
+            result[centerRectangleIndex] = RoundedRectangleShape.ExpansionDirection.CENTER;
+        }
+
         for (int i = centerRectangleIndex + 1; i < result.length; ++i) {
             result[i] = RoundedRectangleShape.ExpansionDirection.RIGHT;
         }
