@@ -293,6 +293,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["instrumentation"]["meta-data"] = meta_data_action;
 
   manifest_action["original-package"];
+  manifest_action["overlay"];
   manifest_action["protected-broadcast"];
   manifest_action["uses-permission"];
   manifest_action["uses-permission-sdk-23"];
