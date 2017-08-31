@@ -156,6 +156,12 @@ final class SmartSelectSprite {
             mExpansionDirection = expansionDirection;
             mRectangleBorderType = rectangleBorderType;
             mStrokeWidth = strokeWidth;
+
+            if (boundingRectangle.height() > boundingRectangle.width()) {
+                setRoundPercentage(0.0f);
+            } else {
+                setRoundPercentage(1.0f);
+            }
         }
 
         /*
@@ -218,6 +224,10 @@ final class SmartSelectSprite {
         public void setRoundPercentage(
                 @FloatRange(from = 0.0, to = 1.0) final float newPercentage) {
             mRoundPercentage = newPercentage;
+        }
+
+        public float getRoundPercentage() {
+            return mRoundPercentage;
         }
 
         private void setLeftBoundary(final float leftBoundary) {
@@ -577,7 +587,7 @@ final class SmartSelectSprite {
         final ObjectAnimator animator = ObjectAnimator.ofFloat(
                 shape,
                 RoundedRectangleShape.PROPERTY_ROUND_PERCENTAGE,
-                1.0F, 0.0F);
+                shape.getRoundPercentage(), 0.0F);
         animator.setDuration(CORNER_DURATION);
         animator.addUpdateListener(listener);
         animator.setInterpolator(mCornerInterpolator);
