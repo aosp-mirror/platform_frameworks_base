@@ -23,6 +23,6 @@
     <option name="test-tag" value="SystemUITests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.systemui.tests" />
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
+        <option name="runner" value="android.testing.TestableInstrumentation" />
     </test>
 </configuration>
