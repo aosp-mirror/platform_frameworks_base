@@ -27,9 +27,7 @@ import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.os.Handler;
-import android.os.INetworkManagementService;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -249,9 +247,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
-    public final ConnectivityService connService;
+    private final ConnectivityService mConnService;
     private final Context mContext;
-    final Handler handler;
+    private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
@@ -263,10 +261,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
-        this.connService = connService;
+        mConnService = connService;
         mContext = context;
-        this.handler = handler;
-        networkMonitor = connService.createNetworkMonitor(context, handler, this, defaultRequest);
+        mHandler = handler;
+        networkMonitor = mConnService.createNetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
     }
 
@@ -432,7 +430,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private boolean ignoreWifiUnvalidationPenalty() {
         boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        boolean avoidBadWifi = connService.avoidBadWifi() || avoidUnvalidated;
+        boolean avoidBadWifi = mConnService.avoidBadWifi() || avoidUnvalidated;
         return isWifi && !avoidBadWifi && everValidated;
     }
 
@@ -516,8 +514,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         if (newExpiry > 0) {
-            mLingerMessage = connService.makeWakeupMessage(
-                    mContext, handler,
+            mLingerMessage = mConnService.makeWakeupMessage(
+                    mContext, mHandler,
                     "NETWORK_LINGER_COMPLETE." + network.netId,
                     EVENT_NETWORK_LINGER_COMPLETE, this);
             mLingerMessage.schedule(newExpiry);
@@ -551,32 +549,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     public void dumpLingerTimers(PrintWriter pw) {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
-    }
-
-    public void updateClat(INetworkManagementService netd) {
-        if (Nat464Xlat.requiresClat(this)) {
-            maybeStartClat(netd);
-        } else {
-            maybeStopClat();
-        }
-    }
-
-    /** Ensure clat has started for this network. */
-    public void maybeStartClat(INetworkManagementService netd) {
-        if (clatd != null && clatd.isStarted()) {
-            return;
-        }
-        clatd = new Nat464Xlat(netd, this);
-        clatd.start();
-    }
-
-    /** Ensure clat has stopped for this network. */
-    public void maybeStopClat() {
-        if (clatd == null) {
-            return;
-        }
-        clatd.stop();
-        clatd = null;
     }
 
     public String toString() {
