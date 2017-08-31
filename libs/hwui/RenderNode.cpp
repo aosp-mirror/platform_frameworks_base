@@ -32,6 +32,7 @@
 #include "protos/hwui.pb.h"
 #include "protos/ProtoHelpers.h"
 
+#include <SkPathOps.h>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -553,6 +554,24 @@ void RenderNode::computeOrderingImpl(
             child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
         }
     }
+}
+
+const SkPath* RenderNode::getClippedOutline(const SkRect& clipRect) const {
+    const SkPath* outlinePath = properties().getOutline().getPath();
+    const uint32_t outlineID = outlinePath->getGenerationID();
+
+    if (outlineID != mClippedOutlineCache.outlineID || clipRect != mClippedOutlineCache.clipRect) {
+        // update the cache keys
+        mClippedOutlineCache.outlineID = outlineID;
+        mClippedOutlineCache.clipRect = clipRect;
+
+        // update the cache value by recomputing a new path
+        SkPath clipPath;
+        clipPath.addRect(clipRect);
+        Op(*outlinePath, clipPath, kIntersect_SkPathOp, &mClippedOutlineCache.clippedOutline);
+
+    }
+    return &mClippedOutlineCache.clippedOutline;
 }
 
 } /* namespace uirenderer */
