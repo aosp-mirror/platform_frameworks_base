@@ -28,6 +28,7 @@ import static android.app.StatusBarManager.DISABLE_RECENT;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.content.Context.STATUS_BAR_SERVICE;
 import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.USER_CURRENT;
 import static android.provider.Settings.Secure.LOCK_TO_APP_EXIT_LOCKED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -320,9 +321,10 @@ public class LockTaskController {
             }
             getLockTaskNotify().show(false);
             try {
-                boolean shouldLockKeyguard = Settings.Secure.getInt(
+                boolean shouldLockKeyguard = Settings.Secure.getIntForUser(
                         mContext.getContentResolver(),
-                        LOCK_TO_APP_EXIT_LOCKED) != 0;
+                        LOCK_TO_APP_EXIT_LOCKED,
+                        USER_CURRENT) != 0;
                 if (mLockTaskModeState == LOCK_TASK_MODE_PINNED && shouldLockKeyguard) {
                     mWindowManager.lockNow(null);
                     mWindowManager.dismissKeyguard(null /* callback */);

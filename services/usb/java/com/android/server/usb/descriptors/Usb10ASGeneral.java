@@ -15,13 +15,16 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /**
  * @hide
  * An audio class-specific General interface.
  * see audio10.pdf section 4.5.2
  */
-public class UsbASGeneral extends UsbACInterface {
-    private static final String TAG = "ACGeneral";
+public final class Usb10ASGeneral extends UsbACInterface {
+    private static final String TAG = "Usb10ASGeneral";
 
     // audio10.pdf - section 4.5.2
     private byte mTerminalLink; // 3:1 The Terminal ID of the Terminal to which the endpoint
@@ -31,7 +34,7 @@ public class UsbASGeneral extends UsbACInterface {
     private int mFormatTag;     // 5:2 The Audio Data Format that has to be used to communicate
                                 // with this interface.
 
-    public UsbASGeneral(int length, byte type, byte subtype, byte subclass) {
+    public Usb10ASGeneral(int length, byte type, byte subtype, byte subclass) {
         super(length, type, subtype, subclass);
     }
 
@@ -51,8 +54,20 @@ public class UsbASGeneral extends UsbACInterface {
     public int parseRawDescriptors(ByteStream stream) {
         mTerminalLink = stream.getByte();
         mDelay = stream.getByte();
-        mFormatTag = stream.unpackUsbWord();
+        mFormatTag = stream.unpackUsbShort();
 
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        canvas.writeListItem("Delay: " + mDelay);
+        canvas.writeListItem("Terminal Link: " + mTerminalLink);
+        canvas.writeListItem("Format: " + UsbStrings.getAudioFormatName(mFormatTag) + " - "
+                + ReportCanvas.getHexString(mFormatTag));
+        canvas.closeList();
     }
 }

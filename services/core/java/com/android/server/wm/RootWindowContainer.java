@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Debug;
@@ -32,6 +31,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -665,19 +665,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     defaultDisplay.pendingLayoutChanges);
         }
 
-        for (i = mService.mResizingWindows.size() - 1; i >= 0; i--) {
-            WindowState win = mService.mResizingWindows.get(i);
-            if (win.mAppFreezing) {
-                // Don't remove this window until rotation has completed.
-                continue;
-            }
-            // Discard the saved surface if window size is changed, it can't be reused.
-            if (win.mAppToken != null) {
-                win.mAppToken.destroySavedSurfaces();
-            }
-            win.reportResized();
-            mService.mResizingWindows.remove(i);
-        }
+        final ArraySet<DisplayContent> touchExcludeRegionUpdateDisplays = handleResizingWindows();
 
         if (DEBUG_ORIENTATION && mService.mDisplayFrozen) Slog.v(TAG,
                 "With display frozen, orientationChangeComplete=" + mOrientationChangeComplete);
@@ -704,7 +692,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
-                win.destroyOrSaveSurfaceUnchecked();
+                win.destroySurfaceUnchecked();
             } while (i > 0);
             mService.mDestroySurface.clear();
         }
@@ -819,6 +807,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
         mService.setFocusTaskRegionLocked(null);
+        if (touchExcludeRegionUpdateDisplays != null) {
+            final DisplayContent focusedDc = mService.mFocusedApp != null
+                    ? mService.mFocusedApp.getDisplayContent() : null;
+            for (DisplayContent dc : touchExcludeRegionUpdateDisplays) {
+                // The focused DisplayContent was recalcuated in setFocusTaskRegionLocked
+                if (focusedDc != dc) {
+                    dc.setTouchExcludeRegion(null /* focusedTask */);
+                }
+            }
+        }
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
@@ -867,6 +865,33 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         // Give the display manager a chance to adjust properties like display rotation if it needs
         // to.
         mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
+    }
+
+    /**
+     * Handles resizing windows during surface placement.
+     *
+     * @return A set of any DisplayContent whose touch exclude region needs to be recalculated due
+     *         to a tap-exclude window resizing, or null if no such DisplayContents were found.
+     */
+    private ArraySet<DisplayContent> handleResizingWindows() {
+        ArraySet<DisplayContent> touchExcludeRegionUpdateSet = null;
+        for (int i = mService.mResizingWindows.size() - 1; i >= 0; i--) {
+            WindowState win = mService.mResizingWindows.get(i);
+            if (win.mAppFreezing) {
+                // Don't remove this window until rotation has completed.
+                continue;
+            }
+            win.reportResized();
+            mService.mResizingWindows.remove(i);
+            if (WindowManagerService.excludeWindowTypeFromTapOutTask(win.mAttrs.type)) {
+                final DisplayContent dc = win.getDisplayContent();
+                if (touchExcludeRegionUpdateSet == null) {
+                    touchExcludeRegionUpdateSet = new ArraySet<>();
+                }
+                touchExcludeRegionUpdateSet.add(dc);
+            }
+        }
+        return touchExcludeRegionUpdateSet;
     }
 
     /**

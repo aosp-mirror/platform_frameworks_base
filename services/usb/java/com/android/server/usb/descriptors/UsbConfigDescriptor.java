@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An USB Config Descriptor.
  * see usb11.pdf section 9.6.2
  */
-public class UsbConfigDescriptor extends UsbDescriptor {
-    private static final String TAG = "Config";
+public final class UsbConfigDescriptor extends UsbDescriptor {
+    private static final String TAG = "UsbConfigDescriptor";
 
     private int mTotalLength;   // 2:2 Total length in bytes of data returned
     private byte mNumInterfaces; // 4:1 Number of Interfaces
@@ -35,6 +37,7 @@ public class UsbConfigDescriptor extends UsbDescriptor {
 
     UsbConfigDescriptor(int length, byte type) {
         super(length, type);
+        mHierarchyLevel = 2;
     }
 
     public int getTotalLength() {
@@ -63,7 +66,7 @@ public class UsbConfigDescriptor extends UsbDescriptor {
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mTotalLength = stream.unpackUsbWord();
+        mTotalLength = stream.unpackUsbShort();
         mNumInterfaces = stream.getByte();
         mConfigValue = stream.getByte();
         mConfigIndex = stream.getByte();
@@ -71,5 +74,16 @@ public class UsbConfigDescriptor extends UsbDescriptor {
         mMaxPower = stream.getByte();
 
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        canvas.writeListItem("Config # " + getConfigValue());
+        canvas.writeListItem(getNumInterfaces() + " Interfaces.");
+        canvas.writeListItem("Attributes: " + ReportCanvas.getHexString(getAttribs()));
+        canvas.closeList();
     }
 }

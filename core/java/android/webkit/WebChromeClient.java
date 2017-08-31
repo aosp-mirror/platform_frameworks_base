@@ -414,7 +414,7 @@ public class WebChromeClient {
      * @param webView The WebView instance that is initiating the request.
      * @param filePathCallback Invoke this callback to supply the list of paths to files to upload,
      *                         or NULL to cancel. Must only be called if the
-     *                         <code>showFileChooser</code> implementations returns true.
+     *                         {@link #onShowFileChooser} implementation returns true.
      * @param fileChooserParams Describes the mode of file chooser to be opened, and options to be
      *                          used with it.
      * @return true if filePathCallback will be invoked, false to use default handling.
@@ -517,7 +517,7 @@ public class WebChromeClient {
      * @param capture The value of the 'capture' attribute of the input tag
      *         associated with this file picker.
      *
-     * @deprecated Use {@link #showFileChooser} instead.
+     * @deprecated Use {@link #onShowFileChooser} instead.
      * @hide This method was not published in any SDK version.
      */
     @SystemApi

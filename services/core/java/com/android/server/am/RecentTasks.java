@@ -193,10 +193,6 @@ class RecentTasks extends ArrayList<TaskRecord> {
         return mTaskPersister.getTaskDescriptionIcon(path);
     }
 
-    Bitmap getImageFromWriteQueue(String path) {
-        return mTaskPersister.getImageFromWriteQueue(path);
-    }
-
     void saveImage(Bitmap image, String path) {
         mTaskPersister.saveImage(image, path);
     }
@@ -651,9 +647,6 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 if (task.userId != tr.userId) {
                     continue;
                 }
-                if (i > MAX_RECENT_BITMAPS) {
-                    tr.freeLastThumbnail();
-                }
                 final Intent trIntent = tr.intent;
                 final boolean sameAffinity =
                         task.affinity != null && task.affinity.equals(tr.affinity);
@@ -706,7 +699,6 @@ class RecentTasks extends ArrayList<TaskRecord> {
             // Either task and tr are the same or, their affinities match or their intents match
             // and neither of them is a document, or they are documents using the same activity
             // and their maxRecents has been reached.
-            tr.disposeThumbnail();
             remove(i);
             if (task != tr) {
                 tr.removedFromRecents();

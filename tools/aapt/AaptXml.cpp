@@ -99,24 +99,40 @@ String8 getResolvedAttribute(const ResTable& resTable, const ResXMLTree& tree,
     if (idx < 0) {
         return String8();
     }
+
     Res_value value;
-    if (tree.getAttributeValue(idx, &value) != NO_ERROR) {
-        if (value.dataType == Res_value::TYPE_STRING) {
-            size_t len;
-            const char16_t* str = tree.getAttributeStringValue(idx, &len);
-            return str ? String8(str, len) : String8();
+    if (tree.getAttributeValue(idx, &value) == BAD_TYPE) {
+        if (outError != NULL) {
+            *outError = "attribute value is corrupt";
         }
-        resTable.resolveReference(&value, 0);
-        if (value.dataType != Res_value::TYPE_STRING) {
-            if (outError != NULL) {
-                *outError = "attribute is not a string value";
-            }
-            return String8();
-        }
+        return String8();
     }
+
+    // Check if the string is inline in the XML.
+    if (value.dataType == Res_value::TYPE_STRING) {
+        size_t len;
+        const char16_t* str = tree.getAttributeStringValue(idx, &len);
+        return str ? String8(str, len) : String8();
+    }
+
+    // Resolve the reference if there is one.
+    ssize_t block = resTable.resolveReference(&value, 0);
+    if (block < 0) {
+        if (outError != NULL) {
+            *outError = "attribute value reference does not exist";
+        }
+        return String8();
+    }
+
+    if (value.dataType != Res_value::TYPE_STRING) {
+        if (outError != NULL) {
+            *outError = "attribute is not a string value";
+        }
+        return String8();
+    }
+
     size_t len;
-    const Res_value* value2 = &value;
-    const char16_t* str = resTable.valueToString(value2, 0, NULL, &len);
+    const char16_t* str = resTable.valueToString(&value, static_cast<size_t>(block), NULL, &len);
     return str ? String8(str, len) : String8();
 }
 

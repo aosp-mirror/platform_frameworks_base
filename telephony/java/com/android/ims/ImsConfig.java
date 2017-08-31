@@ -524,6 +524,7 @@ public class ImsConfig {
     * Defines IMS feature value.
     */
     public static class FeatureValueConstants {
+        public static final int ERROR = -1;
         public static final int OFF = 0;
         public static final int ON = 1;
     }

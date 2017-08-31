@@ -117,7 +117,7 @@ public class ActivityTestsBase {
         intent.setComponent(component);
 
         final TaskRecord task = new TaskRecord(service, 0, aInfo, intent /*intent*/,
-                null /*_taskDescription*/, new ActivityManager.TaskThumbnailInfo());
+                null /*_taskDescription*/);
         final ActivityStack stack = service.mStackSupervisor.getStack(stackId,
                 true /*createStaticStackIfNeeded*/, true /*onTop*/);
         service.mStackSupervisor.setFocusStackUnchecked("test", stack);

@@ -19,8 +19,8 @@ package com.android.server.usb.descriptors;
  * @hide
  * A holder for any unrecognized descriptor encountered in the descriptor stream.
  */
-public class UsbUnknown extends UsbDescriptor {
-    static final String TAG = "Unknown";
+public final class UsbUnknown extends UsbDescriptor {
+    static final String TAG = "UsbUnknown";
 
     public UsbUnknown(int length, byte type) {
         super(length, type);

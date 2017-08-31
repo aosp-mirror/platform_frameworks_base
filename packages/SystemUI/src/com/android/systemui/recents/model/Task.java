@@ -17,11 +17,9 @@
 package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskThumbnail;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -34,7 +32,6 @@ import com.android.systemui.recents.misc.Utilities;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
-
 
 /**
  * A task represents the top most task in the system's task stack.

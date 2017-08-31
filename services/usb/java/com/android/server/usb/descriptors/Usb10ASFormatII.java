@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Format II interface.
  * see Frmts10.pdf section 2.3
  */
-public class UsbASFormatII extends UsbASFormat {
-    private static final String TAG = "ASFormatII";
+public final class Usb10ASFormatII extends UsbASFormat {
+    private static final String TAG = "Usb10ASFormatII";
 
     private int mMaxBitRate; // 4:2 Indicates the maximum number of bits per second this
                             // interface can handle. Expressed in kbits/s.
@@ -36,7 +38,7 @@ public class UsbASFormatII extends UsbASFormat {
                                 // the min & max rates. otherwise mSamFreqType rates.
                                 // All 3-byte values. All rates in Hz
 
-    public UsbASFormatII(int length, byte type, byte subtype, byte formatType, byte subclass) {
+    public Usb10ASFormatII(int length, byte type, byte subtype, byte formatType, byte subclass) {
         super(length, type, subtype, formatType, subclass);
     }
 
@@ -58,8 +60,8 @@ public class UsbASFormatII extends UsbASFormat {
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mMaxBitRate = stream.unpackUsbWord();
-        mSamplesPerFrame = stream.unpackUsbWord();
+        mMaxBitRate = stream.unpackUsbShort();
+        mSamplesPerFrame = stream.unpackUsbShort();
         mSamFreqType = stream.getByte();
         int numFreqs = mSamFreqType == 0 ? 2 : mSamFreqType;
         mSampleRates = new int[numFreqs];
@@ -69,4 +71,29 @@ public class UsbASFormatII extends UsbASFormat {
 
         return mLength;
     }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        canvas.writeListItem("Max Bit Rate: " + getMaxBitRate());
+        canvas.writeListItem("Samples Per Frame: " + getMaxBitRate());
+        byte sampleFreqType = getSamFreqType();
+        int[] sampleRates = getSampleRates();
+        canvas.writeListItem("Sample Freq Type: " + sampleFreqType);
+        canvas.openList();
+        if (sampleFreqType == 0) {
+            canvas.writeListItem("min: " + sampleRates[0]);
+            canvas.writeListItem("max: " + sampleRates[1]);
+        } else {
+            for (int index = 0; index < sampleFreqType; index++) {
+                canvas.writeListItem("" + sampleRates[index]);
+            }
+        }
+        canvas.closeList();
+
+        canvas.closeList();
+    }
+
 }

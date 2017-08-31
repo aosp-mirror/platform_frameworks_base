@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 import android.util.MutableInt;
 
@@ -43,17 +45,12 @@ public class SystemProperties {
 
     public static final int PROP_VALUE_MAX = 91;
 
+    @GuardedBy("sChangeCallbacks")
     private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
 
     @GuardedBy("sRoReads")
-    private static final HashMap<String, MutableInt> sRoReads;
-    static {
-        if (TRACK_KEY_ACCESS) {
-            sRoReads = new HashMap<>();
-        } else {
-            sRoReads = null;
-        }
-    }
+    private static final HashMap<String, MutableInt> sRoReads =
+            TRACK_KEY_ACCESS ? new HashMap<>() : null;
 
     private static void onKeyAccess(String key) {
         if (!TRACK_KEY_ACCESS) return;
@@ -85,77 +82,102 @@ public class SystemProperties {
     private static native void native_report_sysprop_change();
 
     /**
-     * Get the value for the given key.
-     * @return an empty string if the key isn't found
+     * Get the String value for the given {@code key}.
+     *
+     * <b>WARNING:</b> Do not use this method if the value may not be a valid UTF string! This
+     * method will crash in native code.
+     *
+     * @param key the key to lookup
+     * @return an empty string if the {@code key} isn't found
      */
-    public static String get(String key) {
+    @NonNull
+    public static String get(@NonNull String key) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
     }
 
     /**
-     * Get the value for the given key.
-     * @return if the key isn't found, return def if it isn't null, or an empty string otherwise
+     * Get the String value for the given {@code key}.
+     *
+     * <b>WARNING:</b> Do not use this method if the value may not be a valid UTF string! This
+     * method will crash in native code.
+     *
+     * @param key the key to lookup
+     * @param def the default value in case the property is not set or empty
+     * @return if the {@code key} isn't found, return {@code def} if it isn't null, or an empty
+     * string otherwise
      */
-    public static String get(String key, String def) {
+    @NonNull
+    public static String get(@NonNull String key, @Nullable String def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key, def);
     }
 
     /**
-     * Get the value for the given key, and return as an integer.
+     * Get the value for the given {@code key}, and return as an integer.
+     *
      * @param key the key to lookup
      * @param def a default value to return
      * @return the key parsed as an integer, or def if the key isn't found or
      *         cannot be parsed
      */
-    public static int getInt(String key, int def) {
+    public static int getInt(@NonNull String key, int def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_int(key, def);
     }
 
     /**
-     * Get the value for the given key, and return as a long.
+     * Get the value for the given {@code key}, and return as a long.
+     *
      * @param key the key to lookup
      * @param def a default value to return
      * @return the key parsed as a long, or def if the key isn't found or
      *         cannot be parsed
      */
-    public static long getLong(String key, long def) {
+    public static long getLong(@NonNull String key, long def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_long(key, def);
     }
 
     /**
-     * Get the value for the given key, returned as a boolean.
+     * Get the value for the given {@code key}, returned as a boolean.
      * Values 'n', 'no', '0', 'false' or 'off' are considered false.
      * Values 'y', 'yes', '1', 'true' or 'on' are considered true.
      * (case sensitive).
      * If the key does not exist, or has any other value, then the default
      * result is returned.
+     *
      * @param key the key to lookup
      * @param def a default value to return
      * @return the key parsed as a boolean, or def if the key isn't found or is
      *         not able to be parsed as a boolean.
      */
-    public static boolean getBoolean(String key, boolean def) {
+    public static boolean getBoolean(@NonNull String key, boolean def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);
     }
 
     /**
-     * Set the value for the given key.
-     * @throws IllegalArgumentException if the value exceeds 92 characters
+     * Set the value for the given {@code key} to {@code val}.
+     *
+     * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
      */
-    public static void set(String key, String val) {
+    public static void set(@NonNull String key, @Nullable String val) {
         if (val != null && val.length() > PROP_VALUE_MAX) {
-            throw newValueTooLargeException(key, val);
+            throw new IllegalArgumentException("value of system property '" + key
+                    + "' is longer than " + PROP_VALUE_MAX + " characters: " + val);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         native_set(key, val);
     }
 
-    public static void addChangeCallback(Runnable callback) {
+    /**
+     * Add a callback that will be run whenever any system property changes.
+     *
+     * @param callback The {@link Runnable} that should be executed when a system property
+     * changes.
+     */
+    public static void addChangeCallback(@NonNull Runnable callback) {
         synchronized (sChangeCallbacks) {
             if (sChangeCallbacks.size() == 0) {
                 native_add_change_callback();
@@ -164,7 +186,8 @@ public class SystemProperties {
         }
     }
 
-    static void callChangeCallbacks() {
+    @SuppressWarnings("unused")  // Called from native code.
+    private static void callChangeCallbacks() {
         synchronized (sChangeCallbacks) {
             //Log.i("foo", "Calling " + sChangeCallbacks.size() + " change callbacks!");
             if (sChangeCallbacks.size() == 0) {
@@ -175,11 +198,6 @@ public class SystemProperties {
                 callbacks.get(i).run();
             }
         }
-    }
-
-    private static IllegalArgumentException newValueTooLargeException(String key, String value) {
-        return new IllegalArgumentException("value of system property '" + key + "' is longer than "
-                + PROP_VALUE_MAX + " characters: " + value);
     }
 
     /*

@@ -332,8 +332,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
-                mSecurityMessageDisplay.formatMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
+                mSecurityMessageDisplay.setMessage(mContext.getResources().getQuantityString(
+                                R.plurals.kg_too_many_failed_attempts_countdown,
+                                secondsRemaining, secondsRemaining));
             }
 
             @Override

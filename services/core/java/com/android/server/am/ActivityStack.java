@@ -1341,11 +1341,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
-        if (mService.mHasRecents
-                && (next == null || next.noDisplay || next.getTask() != prev.getTask()
-                || uiSleeping)) {
-            prev.mUpdateTaskThumbnailWhenHidden = true;
-        }
+
         stopFullyDrawnTraceIfNeeded();
 
         mService.updateCpuStats();
@@ -1839,14 +1835,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
                     if (r.finishing) {
-                        // Normally the screenshot will be taken in makeInvisible(). When an activity
-                        // is finishing, we no longer change its visibility, but we still need to take
-                        // the screenshots if startPausingLocked decided it should be taken.
-                        if (r.mUpdateTaskThumbnailWhenHidden) {
-                            r.updateThumbnailLocked(r.screenshotActivityLocked(),
-                                    null /* description */);
-                            r.mUpdateTaskThumbnailWhenHidden = false;
-                        }
                         continue;
                     }
                     final boolean isTop = r == top;

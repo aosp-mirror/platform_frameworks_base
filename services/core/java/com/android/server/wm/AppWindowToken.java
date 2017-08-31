@@ -78,8 +78,6 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
-import static android.os.Build.VERSION_CODES.O;
-
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
 
@@ -125,14 +123,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     // Set to true when this app creates a surface while in the middle of an animation. In that
     // case do not clear allDrawn until the animation completes.
     boolean deferClearAllDrawn;
-
-    /**
-     * These are to track the app's real drawing status if there were no saved surfaces.
-     * @see #updateDrawnWindowStates
-     */
-    boolean allDrawnExcludingSaved;
-    private int mNumInterestingWindowsExcludingSaved;
-    private int mNumDrawnWindowsExcludingSaved;
 
     // Is this window's surface needed?  This is almost like hidden, except
     // it will sometimes be true a little earlier: when the token has
@@ -690,107 +680,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    /**
-     * Checks whether we should save surfaces for this app.
-     *
-     * @return true if the surfaces should be saved, false otherwise.
-     */
-    boolean shouldSaveSurface() {
-        // We want to save surface if the app's windows are "allDrawn".
-        // (If we started entering animation early with saved surfaces, allDrawn
-        // should have been restored to true. So we'll save again in that case
-        // even if app didn't actually finish drawing.)
-        return allDrawn;
-    }
-
-    private boolean canRestoreSurfaces() {
-        for (int i = mChildren.size() -1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            if (w.canRestoreSurface()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void clearWasVisibleBeforeClientHidden() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.clearWasVisibleBeforeClientHidden();
-        }
-    }
-
-    /**
-     * Whether the app has some window that is invisible in layout, but
-     * animating with saved surface.
-     */
-    boolean isAnimatingInvisibleWithSavedSurface() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            if (w.isAnimatingInvisibleWithSavedSurface()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Hide all window surfaces that's still invisible in layout but animating
-     * with a saved surface, and mark them destroying.
-     */
-    void stopUsingSavedSurfaceLocked() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.stopUsingSavedSurface();
-        }
-        destroySurfaces();
-    }
-
-    void markSavedSurfaceExiting() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.markSavedSurfaceExiting();
-        }
-    }
-
-    void restoreSavedSurfaceForInterestingWindows() {
-        if (!canRestoreSurfaces()) {
-            clearWasVisibleBeforeClientHidden();
-            return;
-        }
-
-        // Check if all interesting windows are drawn and we can mark allDrawn=true.
-        int interestingNotDrawn = -1;
-
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            interestingNotDrawn = w.restoreSavedSurfaceForInterestingWindow();
-        }
-
-        if (!allDrawn) {
-            allDrawn = (interestingNotDrawn == 0);
-            if (allDrawn) {
-                mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
-            }
-        }
-        clearWasVisibleBeforeClientHidden();
-
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
-                "restoreSavedSurfaceForInterestingWindows: " + this + " allDrawn=" + allDrawn
-                + " interestingNotDrawn=" + interestingNotDrawn);
-    }
-
-    void destroySavedSurfaces() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
-            win.destroySavedSurface();
-        }
-    }
-
     void clearAllDrawn() {
         allDrawn = false;
         deferClearAllDrawn = false;
-        allDrawnExcludingSaved = false;
     }
 
     Task getTask() {
@@ -1388,8 +1280,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private boolean allDrawnStatesConsidered() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState child = mChildren.get(i);
-            if (child.mightAffectAllDrawn(false /*visibleOnly*/ )
-                    && !child.getDrawnStateEvaluated()) {
+            if (child.mightAffectAllDrawn() && !child.getDrawnStateEvaluated()) {
                 return false;
             }
         }
@@ -1429,23 +1320,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 }
             }
         }
-
-        if (!allDrawnExcludingSaved) {
-            int numInteresting = mNumInterestingWindowsExcludingSaved;
-            if (numInteresting > 0 && mNumDrawnWindowsExcludingSaved >= numInteresting) {
-                if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawnExcludingSaved: " + this
-                        + " interesting=" + numInteresting
-                        + " drawn=" + mNumDrawnWindowsExcludingSaved);
-                allDrawnExcludingSaved = true;
-                if (mDisplayContent != null) {
-                    mDisplayContent.setLayoutNeeded();
-                }
-                if (isAnimatingInvisibleWithSavedSurface()
-                        && !mService.mFinishedEarlyAnim.contains(this)) {
-                    mService.mFinishedEarlyAnim.add(this);
-                }
-            }
-        }
     }
 
     /**
@@ -1462,15 +1336,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     + " allDrawn=" + allDrawn + " freezingScreen=" + mAppAnimator.freezingScreen);
         }
 
-        if (allDrawn && allDrawnExcludingSaved && !mAppAnimator.freezingScreen) {
+        if (allDrawn && !mAppAnimator.freezingScreen) {
             return false;
         }
 
         if (mLastTransactionSequence != mService.mTransactionSequence) {
             mLastTransactionSequence = mService.mTransactionSequence;
             mNumInterestingWindows = mNumDrawnWindows = 0;
-            mNumInterestingWindowsExcludingSaved = 0;
-            mNumDrawnWindowsExcludingSaved = 0;
             startingDisplayed = false;
         }
 
@@ -1478,7 +1350,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         boolean isInterestingAndDrawn = false;
 
-        if (!allDrawn && w.mightAffectAllDrawn(false /* visibleOnly */)) {
+        if (!allDrawn && w.mightAffectAllDrawn()) {
             if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
                         + ", isAnimationSet=" + winAnimator.isAnimationSet());
@@ -1510,23 +1382,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     getController().reportStartingWindowDrawn();
                 }
                 startingDisplayed = true;
-            }
-        }
-
-        if (!allDrawnExcludingSaved && w.mightAffectAllDrawn(true /* visibleOnly */)) {
-            if (w != startingWindow && w.isInteresting()) {
-                mNumInterestingWindowsExcludingSaved++;
-                if (w.isDrawnLw() && !w.isAnimatingWithSavedSurface()) {
-                    mNumDrawnWindowsExcludingSaved++;
-
-                    if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
-                            "tokenMayBeDrawnExcludingSaved: " + this + " w=" + w
-                            + " numInteresting=" + mNumInterestingWindowsExcludingSaved
-                            + " freezingScreen=" + mAppAnimator.freezingScreen
-                            + " mAppFreezing=" + w.mAppFreezing);
-
-                    isInterestingAndDrawn = true;
-                }
             }
         }
 

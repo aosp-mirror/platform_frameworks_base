@@ -16,12 +16,10 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.isLowRamDeviceStatic;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
@@ -38,7 +36,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
-import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
@@ -138,8 +135,8 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.util.MergedConfiguration;
 import android.util.DisplayMetrics;
+import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -181,9 +178,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
-
-    private static final boolean DEBUG_DISABLE_SAVING_SURFACES = false ||
-            ENABLE_TASK_SNAPSHOTS;
 
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
@@ -521,15 +515,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
 
-    // Whether the window has a saved surface from last pause, which can be
-    // used to start an entering animation earlier.
-    private boolean mSurfaceSaved = false;
-
-    // Whether we're performing an entering animation with a saved surface. This flag is
-    // true during the time we're showing a window with a previously saved surface. It's
-    // cleared when surface is destroyed, saved, or re-drawn by the app.
-    private boolean mAnimatingWithSavedSurface;
-
     // Whether the window was visible when we set the app to invisible last time. WM uses
     // this as a hint to restore the surface (if available) for early animation next time
     // the app is brought visible.
@@ -584,8 +569,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * and false until the transaction to resize is sent.
      */
     boolean mSeamlesslyRotated = false;
-
-    private static final Region sEmptyRegion = new Region();
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -1370,10 +1353,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean hasContentToDisplay() {
-        // If we're animating with a saved surface, we're already visible.
-        // Return true so that the alpha doesn't get cleared.
-        if (!mAppFreezing && isDrawnLw()
-                && (mViewVisibility == View.VISIBLE || isAnimatingWithSavedSurface()
+        if (!mAppFreezing && isDrawnLw() && (mViewVisibility == View.VISIBLE
                 || (mWinAnimator.isAnimationSet() && !mService.mAppTransition.isTransitionSet()))) {
             return true;
         }
@@ -1461,19 +1441,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Whether this window's drawn state might affect the drawn states of the app token.
      *
-     * @param visibleOnly Whether we should consider only the windows that's currently
-     *                    visible in layout. If true, windows that has not relayout to VISIBLE
-     *                    would always return false.
-     *
      * @return true if the window should be considered while evaluating allDrawn flags.
      */
-    boolean mightAffectAllDrawn(boolean visibleOnly) {
-        final boolean isViewVisible = (mAppToken == null || !mAppToken.isClientHidden())
-                && (mViewVisibility == View.VISIBLE) && !mWindowRemovalAllowed;
-        return (isOnScreen() && (!visibleOnly || isViewVisible)
-                || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION
-                || mWinAnimator.mAttrType == TYPE_DRAWN_APPLICATION)
-                && !mAnimatingExit && !mDestroying;
+    boolean mightAffectAllDrawn() {
+        final boolean isAppType = mWinAnimator.mAttrType == TYPE_BASE_APPLICATION
+                || mWinAnimator.mAttrType == TYPE_DRAWN_APPLICATION;
+        return (isOnScreen() || isAppType) && !mAnimatingExit && !mDestroying;
     }
 
     /**
@@ -1667,10 +1640,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void onResize() {
-        // Some windows won't go through the resizing process, if they don't have a surface, so
-        // destroy all saved surfaces here.
-        destroySavedSurface();
-
         final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
         if (mHasSurface && !resizingWindows.contains(this)) {
             if (DEBUG_RESIZE) Slog.d(TAG, "onResize: Resizing " + this);
@@ -1919,19 +1888,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 return;
             }
 
-            if (isAnimatingWithSavedSurface() && !mAppToken.allDrawnExcludingSaved) {
-                // We started enter animation early with a saved surface, now the app asks to remove
-                // this window. If we remove it now and the app is not yet drawn, we'll show a
-                // flicker. Delay the removal now until it's really drawn.
-                if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM,
-                        "removeWindowLocked: delay removal of " + this + " due to early animation");
-                // Do not set mAnimatingExit to true here, it will cause the surface to be hidden
-                // immediately after the enter animation is done. If the app is not yet drawn then
-                // it will show up as a flicker.
-                setupWindowForRemoveOnExit();
-                Binder.restoreCallingIdentity(origId);
-                return;
-            }
             // If we are not currently running the exit animation, we need to see about starting one
             wasVisible = isWinVisibleLw();
 
@@ -2634,58 +2590,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mAnimatingExit || (mService.mClosingApps.contains(mAppToken));
     }
 
-    boolean isAnimatingWithSavedSurface() {
-        return mAnimatingWithSavedSurface;
-    }
-
     @Override
     boolean isAnimating() {
         if (mWinAnimator.isAnimationSet() || mAnimatingExit) {
             return true;
         }
         return super.isAnimating();
-    }
-
-    boolean isAnimatingInvisibleWithSavedSurface() {
-        if (mAnimatingWithSavedSurface
-                && (mViewVisibility != View.VISIBLE || mWindowRemovalAllowed)) {
-            return true;
-        }
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            if (c.isAnimatingInvisibleWithSavedSurface()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void stopUsingSavedSurface() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.stopUsingSavedSurface();
-        }
-
-        if (!isAnimatingInvisibleWithSavedSurface()) {
-            return;
-        }
-
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG, "stopUsingSavedSurface: " + this);
-        clearAnimatingWithSavedSurface();
-        mDestroying = true;
-        mWinAnimator.hide("stopUsingSavedSurface");
-        getDisplayContent().mWallpaperController.hideWallpapers(this);
-    }
-
-    void markSavedSurfaceExiting() {
-        if (isAnimatingInvisibleWithSavedSurface()) {
-            mAnimatingExit = true;
-            mWinAnimator.mAnimating = true;
-        }
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.markSavedSurfaceExiting();
-        }
     }
 
     void addWinAnimatorToList(ArrayList<WindowStateAnimator> animators) {
@@ -2726,25 +2636,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public void setVisibleBeforeClientHidden() {
-        mWasVisibleBeforeClientHidden |=
-                (mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface);
-
-        super.setVisibleBeforeClientHidden();
-    }
-
-    public void clearWasVisibleBeforeClientHidden() {
-        mWasVisibleBeforeClientHidden = false;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.clearWasVisibleBeforeClientHidden();
-        }
-    }
-
-    public boolean wasVisibleBeforeClientHidden() {
-        return mWasVisibleBeforeClientHidden;
-    }
-
     void onStartFreezingScreen() {
         mAppFreezing = true;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
@@ -2777,48 +2668,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return true;
     }
 
-    private boolean shouldSaveSurface() {
-        if (mWinAnimator.mSurfaceController == null) {
-            // Don't bother if the surface controller is gone for any reason.
-            return false;
-        }
-
-        if (!mWasVisibleBeforeClientHidden) {
-            return false;
-        }
-
-        if ((mAttrs.flags & FLAG_SECURE) != 0) {
-            // We don't save secure surfaces since their content shouldn't be shown while the app
-            // isn't on screen and content might leak through during the transition animation with
-            // saved surface.
-            return false;
-        }
-
-        if (isLowRamDeviceStatic()) {
-            // Don't save surfaces on Svelte devices.
-            return false;
-        }
-
-        final Task task = getTask();
-        final AppWindowToken taskTop = task.getTopVisibleAppToken();
-        if (taskTop != null && taskTop != mAppToken) {
-            // Don't save if the window is not the topmost window.
-            return false;
-        }
-
-        if (mResizedWhileGone) {
-            // Somebody resized our window while we were gone for layout, which means that the
-            // client got an old size, so we have an outdated surface here.
-            return false;
-        }
-
-        if (DEBUG_DISABLE_SAVING_SURFACES) {
-            return false;
-        }
-
-        return mAppToken.shouldSaveSurface();
-    }
-
     boolean destroySurface(boolean cleanupOnResume, boolean appStopped) {
         boolean destroyedSomething = false;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
@@ -2840,7 +2689,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
                     + " win.mRemoveOnExit=" + mRemoveOnExit);
             if (!cleanupOnResume || mRemoveOnExit) {
-                destroyOrSaveSurfaceUnchecked();
+                destroySurfaceUnchecked();
             }
             if (mRemoveOnExit) {
                 removeImmediately();
@@ -2858,154 +2707,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Destroy or save the application surface without checking
     // various indicators of whether the client has released the surface.
     // This is in general unsafe, and most callers should use {@link #destroySurface}
-    void destroyOrSaveSurfaceUnchecked() {
-        mSurfaceSaved = shouldSaveSurface();
-        if (mSurfaceSaved) {
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                Slog.v(TAG, "Saving surface: " + this);
-            }
-            // Previous user of the surface may have set a transparent region signaling a portion
-            // doesn't need to be composited, so reset to default empty state.
-            mSession.setTransparentRegion(mClient, sEmptyRegion);
+    void destroySurfaceUnchecked() {
+        mWinAnimator.destroySurfaceLocked();
 
-            mWinAnimator.hide("saved surface");
-            mWinAnimator.mDrawState = WindowStateAnimator.NO_SURFACE;
-            setHasSurface(false);
-            // The client should have disconnected at this point, but if it doesn't,
-            // we need to make sure it's disconnected. Otherwise when we reuse the surface
-            // the client can't reconnect to the buffer queue, and rendering will fail.
-            if (mWinAnimator.mSurfaceController != null) {
-                mWinAnimator.mSurfaceController.disconnectInTransaction();
-            }
-            mAnimatingWithSavedSurface = false;
-        } else {
-            mWinAnimator.destroySurfaceLocked();
-        }
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
-    }
-
-    void destroySavedSurface() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.destroySavedSurface();
-        }
-
-        if (mSurfaceSaved) {
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "Destroying saved surface: " + this);
-            mWinAnimator.destroySurfaceLocked();
-            mSurfaceSaved = false;
-        }
-        mWasVisibleBeforeClientHidden = false;
-    }
-
-    /** Returns -1 if there are no interesting windows or number of interesting windows not drawn.*/
-    int restoreSavedSurfaceForInterestingWindow() {
-        int interestingNotDrawn = -1;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            final int childInterestingNotDrawn = c.restoreSavedSurfaceForInterestingWindow();
-            if (childInterestingNotDrawn != -1) {
-                if (interestingNotDrawn == -1) {
-                    interestingNotDrawn = childInterestingNotDrawn;
-                } else {
-                    interestingNotDrawn += childInterestingNotDrawn;
-                }
-            }
-        }
-
-        if (mAttrs.type == TYPE_APPLICATION_STARTING
-                || mAppDied || !wasVisibleBeforeClientHidden()
-                || (mAppToken.mAppAnimator.freezingScreen && mAppFreezing)) {
-            // Window isn't interesting...
-            return interestingNotDrawn;
-        }
-
-        restoreSavedSurface();
-
-        if (!isDrawnLw()) {
-            if (interestingNotDrawn == -1) {
-                interestingNotDrawn = 1;
-            } else {
-                interestingNotDrawn++;
-            }
-        }
-        return interestingNotDrawn;
-    }
-
-    /** Returns true if the saved surface was restored. */
-    boolean restoreSavedSurface() {
-        if (!mSurfaceSaved) {
-            return false;
-        }
-
-        // Sometimes we save surfaces due to layout invisible directly after rotation occurs.
-        // However this means the surface was never laid out in the new orientation.
-        // We can only restore to the last rotation we were laid out as visible in.
-        if (mLastVisibleLayoutRotation != getDisplayContent().getRotation()) {
-            destroySavedSurface();
-            return false;
-        }
-        mSurfaceSaved = false;
-
-        if (mWinAnimator.mSurfaceController != null) {
-            setHasSurface(true);
-            mWinAnimator.mDrawState = READY_TO_SHOW;
-            mAnimatingWithSavedSurface = true;
-
-            requestUpdateWallpaperIfNeeded();
-
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                Slog.v(TAG, "Restoring saved surface: " + this);
-            }
-        } else {
-            // mSurfaceController shouldn't be null if mSurfaceSaved was still true at
-            // this point. Even if we destroyed the saved surface because of rotation
-            // or resize, mSurfaceSaved flag should have been cleared. So this is a wtf.
-            Slog.wtf(TAG, "Failed to restore saved surface: surface gone! " + this);
-        }
-
-        return true;
-    }
-
-    boolean canRestoreSurface() {
-        if (mWasVisibleBeforeClientHidden && mSurfaceSaved) {
-            return true;
-        }
-
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            if (c.canRestoreSurface()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    boolean hasSavedSurface() {
-        return mSurfaceSaved;
-    }
-
-    void clearHasSavedSurface() {
-        mSurfaceSaved = false;
-        mAnimatingWithSavedSurface = false;
-        if (mWasVisibleBeforeClientHidden) {
-            mAppToken.destroySavedSurfaces();
-        }
-    }
-
-    boolean clearAnimatingWithSavedSurface() {
-        if (mAnimatingWithSavedSurface) {
-            // App has drawn something to its windows, we're no longer animating with
-            // the saved surfaces.
-            if (DEBUG_ANIM) Slog.d(TAG,
-                    "clearAnimatingWithSavedSurface(): win=" + this);
-            mAnimatingWithSavedSurface = false;
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -3487,12 +3194,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (mAppToken != null) {
                 pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
                 pw.print(prefix); pw.print(" isAnimatingWithSavedSurface()=");
-                pw.print(isAnimatingWithSavedSurface());
                 pw.print(" mAppDied=");pw.print(mAppDied);
                 pw.print(prefix); pw.print("drawnStateEvaluated=");
                         pw.print(getDrawnStateEvaluated());
                 pw.print(prefix); pw.print("mightAffectAllDrawn=");
-                        pw.println(mightAffectAllDrawn(false /*visibleOnly*/));
+                        pw.println(mightAffectAllDrawn());
             }
             pw.print(prefix); pw.print("mViewVisibility=0x");
             pw.print(Integer.toHexString(mViewVisibility));
@@ -3543,7 +3249,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
                 pw.print(" mShownPosition="); mShownPosition.printShortString(pw);
                 pw.print(" isReadyForDisplay()="); pw.print(isReadyForDisplay());
-                pw.print(" hasSavedSurface()="); pw.print(hasSavedSurface());
                 pw.print(" mWindowRemovalAllowed="); pw.println(mWindowRemovalAllowed);
         if (dumpAll) {
             pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
@@ -4601,11 +4306,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
         result |= freeformResizing ? RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
         result |= dockedResizing ? RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
-        if (isAnimatingWithSavedSurface()) {
-            // If we're animating with a saved surface now, request client to report draw.
-            // We still need to know when the real thing is drawn.
-            result |= RELAYOUT_RES_FIRST_TIME;
-        }
         return result;
     }
 

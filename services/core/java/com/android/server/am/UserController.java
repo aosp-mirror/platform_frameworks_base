@@ -36,6 +36,7 @@ import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MS
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_UNLOCK_MSG;
+import static com.android.server.am.ActivityManagerService.USER_SWITCH_CALLBACKS_TIMEOUT_MSG;
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
 import static com.android.server.am.UserState.STATE_BOOTING;
 import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
@@ -115,7 +116,12 @@ class UserController {
 
     // Amount of time we wait for observers to handle a user switch before
     // giving up on them and unfreezing the screen.
-    static final int USER_SWITCH_TIMEOUT = 3 * 1000;
+    static final int USER_SWITCH_TIMEOUT_MS = 3 * 1000;
+
+    // If a callback wasn't called within USER_SWITCH_CALLBACKS_TIMEOUT_MS after
+    // USER_SWITCH_TIMEOUT_MS, an error is reported. Usually it indicates a problem in the observer
+    // when it never calls back.
+    private static final int USER_SWITCH_CALLBACKS_TIMEOUT_MS = 5 * 1000;
 
     private final Object mLock;
     private final Injector mInjector;
@@ -170,6 +176,12 @@ class UserController {
      */
     @GuardedBy("mLock")
     private volatile ArraySet<String> mCurWaitingUserSwitchCallbacks;
+
+    /**
+     * Callbacks that are still active after {@link #USER_SWITCH_TIMEOUT_MS}
+     */
+    @GuardedBy("mLock")
+    private ArraySet<String> mTimeoutUserSwitchCallbacks;
 
     private final LockPatternUtils mLockPatternUtils;
 
@@ -924,7 +936,7 @@ class UserController {
                     mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
                             oldUserId, userId, uss));
                     mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
-                            oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
+                            oldUserId, userId, uss), USER_SWITCH_TIMEOUT_MS);
                 }
 
                 if (needStart) {
@@ -1130,8 +1142,23 @@ class UserController {
 
     void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
         synchronized (mLock) {
-            Slog.wtf(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
+            Slog.e(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
+            mTimeoutUserSwitchCallbacks = mCurWaitingUserSwitchCallbacks;
+            mHandler.removeMessages(USER_SWITCH_CALLBACKS_TIMEOUT_MSG);
             sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
+            // Report observers that never called back (USER_SWITCH_CALLBACKS_TIMEOUT)
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_CALLBACKS_TIMEOUT_MSG,
+                    oldUserId, newUserId), USER_SWITCH_CALLBACKS_TIMEOUT_MS);
+        }
+    }
+
+    void timeoutUserSwitchCallbacks(int oldUserId, int newUserId) {
+        synchronized (mLock) {
+            if (mTimeoutUserSwitchCallbacks != null && !mTimeoutUserSwitchCallbacks.isEmpty()) {
+                Slog.wtf(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId
+                        + ". Observers that didn't respond: " + mTimeoutUserSwitchCallbacks);
+                mTimeoutUserSwitchCallbacks = null;
+            }
         }
     }
 
@@ -1158,18 +1185,16 @@ class UserController {
                         public void sendResult(Bundle data) throws RemoteException {
                             synchronized (mLock) {
                                 long delay = SystemClock.elapsedRealtime() - dispatchStartedTime;
-                                if (delay > USER_SWITCH_TIMEOUT) {
-                                    Slog.wtf(TAG, "User switch timeout: observer "  + name
+                                if (delay > USER_SWITCH_TIMEOUT_MS) {
+                                    Slog.e(TAG, "User switch timeout: observer "  + name
                                             + " sent result after " + delay + " ms");
                                 }
-                                // Early return if this session is no longer valid
-                                if (curWaitingUserSwitchCallbacks
-                                        != mCurWaitingUserSwitchCallbacks) {
-                                    return;
-                                }
                                 curWaitingUserSwitchCallbacks.remove(name);
-                                // Continue switching if all callbacks have been notified
-                                if (waitingCallbacksCount.decrementAndGet() == 0) {
+                                // Continue switching if all callbacks have been notified and
+                                // user switching session is still valid
+                                if (waitingCallbacksCount.decrementAndGet() == 0
+                                        && (curWaitingUserSwitchCallbacks
+                                        == mCurWaitingUserSwitchCallbacks)) {
                                     sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
                                 }
                             }

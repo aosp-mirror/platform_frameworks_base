@@ -16,61 +16,6 @@
 
 package com.android.server.am;
 
-import android.annotation.IntDef;
-import android.annotation.Nullable;
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
-import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManager.TaskSnapshot;
-import android.app.ActivityManager.TaskThumbnail;
-import android.app.ActivityManager.TaskThumbnailInfo;
-import android.app.ActivityOptions;
-import android.app.AppGlobals;
-import android.app.IActivityManager;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.os.Debug;
-import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.os.Trace;
-import android.os.UserHandle;
-import android.provider.Settings;
-import android.service.voice.IVoiceInteractionSession;
-import android.util.DisplayMetrics;
-import android.util.Slog;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.util.XmlUtils;
-
-import com.android.server.wm.AppWindowContainerController;
-import com.android.server.wm.ConfigurationContainer;
-import com.android.server.wm.StackWindowController;
-import com.android.server.wm.TaskWindowContainerController;
-import com.android.server.wm.TaskWindowContainerListener;
-import com.android.server.wm.WindowManagerService;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.Objects;
-
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
@@ -97,10 +42,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
-import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
@@ -120,8 +63,55 @@ import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-
 import static java.lang.Integer.MAX_VALUE;
+
+import android.annotation.IntDef;
+import android.annotation.Nullable;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
+import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityManager.TaskSnapshot;
+import android.app.ActivityOptions;
+import android.app.AppGlobals;
+import android.app.IActivityManager;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.os.Debug;
+import android.os.RemoteException;
+import android.os.Trace;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.service.voice.IVoiceInteractionSession;
+import android.util.DisplayMetrics;
+import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.util.XmlUtils;
+import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.ConfigurationContainer;
+import com.android.server.wm.StackWindowController;
+import com.android.server.wm.TaskWindowContainerController;
+import com.android.server.wm.TaskWindowContainerListener;
+import com.android.server.wm.WindowManagerService;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Objects;
 
 class TaskRecord extends ConfigurationContainer implements TaskWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
@@ -282,10 +272,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     // do not want to delete the stack when the task goes empty.
     private boolean mReuseTask = false;
 
-    private Bitmap mLastThumbnail; // Last thumbnail captured for this item.
-    private final File mLastThumbnailFile; // File containing last thumbnail.
     private final String mFilename;
-    private TaskThumbnailInfo mLastThumbnailInfo;
     CharSequence lastDescription; // Last description captured for this item.
 
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
@@ -334,8 +321,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
-        mLastThumbnailFile = new File(TaskPersister.getUserImagesDir(userId), mFilename);
-        mLastThumbnailInfo = new TaskThumbnailInfo();
         taskId = _taskId;
         mAffiliatedTaskId = _taskId;
         voiceSession = _voiceSession;
@@ -352,13 +337,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            TaskDescription _taskDescription, TaskThumbnailInfo thumbnailInfo) {
+            TaskDescription _taskDescription) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
-        mLastThumbnailFile = new File(TaskPersister.getUserImagesDir(userId), mFilename);
-        mLastThumbnailInfo = thumbnailInfo;
         taskId = _taskId;
         mAffiliatedTaskId = _taskId;
         voiceSession = null;
@@ -389,16 +372,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             int _effectiveUid, String _lastDescription, ArrayList<ActivityRecord> activities,
             long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
-            TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
-            int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            int resizeMode, boolean supportsPictureInPicture, boolean privileged,
-            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth,
-            int minHeight) {
+            int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
+            int callingUid, String callingPackage, int resizeMode, boolean supportsPictureInPicture,
+            boolean privileged, boolean _realActivitySuspended, boolean userSetupComplete,
+            int minWidth, int minHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
-        mLastThumbnailFile = new File(TaskPersister.getUserImagesDir(_userId), mFilename);
-        mLastThumbnailInfo = lastThumbnailInfo;
         taskId = _taskId;
         intent = _intent;
         affinityIntent = _affinityIntent;
@@ -991,7 +971,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void removedFromRecents() {
-        disposeThumbnail();
         closeRecentsChain();
         if (inRecents) {
             inRecents = false;
@@ -1023,89 +1002,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         taskToAffiliateWith.setNextAffiliate(this);
         setPrevAffiliate(taskToAffiliateWith);
         setNextAffiliate(null);
-    }
-
-    /**
-     * Sets the last thumbnail with the current task bounds and the system orientation.
-     * @return whether the thumbnail was set
-     */
-    boolean setLastThumbnailLocked(Bitmap thumbnail) {
-        int taskWidth = 0;
-        int taskHeight = 0;
-        if (mBounds != null) {
-            // Non-fullscreen tasks
-            taskWidth = mBounds.width();
-            taskHeight = mBounds.height();
-        } else if (mStack != null) {
-            // Fullscreen tasks
-            final Point displaySize = new Point();
-            mStack.getDisplaySize(displaySize);
-            taskWidth = displaySize.x;
-            taskHeight = displaySize.y;
-        } else {
-            Slog.e(TAG, "setLastThumbnailLocked() called on Task without stack");
-        }
-        // We need to provide the current orientation of the display on which this task resides,
-        // not the orientation of the task.
-        final int orientation = getStack().getDisplay().getConfiguration().orientation;
-        return setLastThumbnailLocked(thumbnail, taskWidth, taskHeight, orientation);
-    }
-
-    /**
-     * Sets the last thumbnail with the current task bounds.
-     * @return whether the thumbnail was set
-     */
-    private boolean setLastThumbnailLocked(Bitmap thumbnail, int taskWidth, int taskHeight,
-            int screenOrientation) {
-        if (mLastThumbnail != thumbnail) {
-            mLastThumbnail = thumbnail;
-            mLastThumbnailInfo.taskWidth = taskWidth;
-            mLastThumbnailInfo.taskHeight = taskHeight;
-            mLastThumbnailInfo.screenOrientation = screenOrientation;
-            if (thumbnail == null) {
-                if (mLastThumbnailFile != null) {
-                    mLastThumbnailFile.delete();
-                }
-            } else {
-                mService.mRecentTasks.saveImage(thumbnail, mLastThumbnailFile.getAbsolutePath());
-            }
-            return true;
-        }
-        return false;
-    }
-
-    void getLastThumbnail(TaskThumbnail thumbs) {
-        thumbs.mainThumbnail = mLastThumbnail;
-        thumbs.thumbnailInfo = mLastThumbnailInfo;
-        thumbs.thumbnailFileDescriptor = null;
-        if (mLastThumbnail == null) {
-            thumbs.mainThumbnail = mService.mRecentTasks.getImageFromWriteQueue(
-                    mLastThumbnailFile.getAbsolutePath());
-        }
-        // Only load the thumbnail file if we don't have a thumbnail
-        if (thumbs.mainThumbnail == null && mLastThumbnailFile.exists()) {
-            try {
-                thumbs.thumbnailFileDescriptor = ParcelFileDescriptor.open(mLastThumbnailFile,
-                        ParcelFileDescriptor.MODE_READ_ONLY);
-            } catch (IOException e) {
-            }
-        }
-    }
-
-    /**
-     * Removes in-memory thumbnail data when the max number of in-memory task thumbnails is reached.
-     */
-    void freeLastThumbnail() {
-        mLastThumbnail = null;
-    }
-
-    /**
-     * Removes all associated thumbnail data when a task is removed or pruned from recents.
-     */
-    void disposeThumbnail() {
-        mLastThumbnailInfo.reset();
-        mLastThumbnail = null;
-        lastDescription = null;
     }
 
     /** Returns the intent for the root activity for this task */
@@ -1468,19 +1364,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return null;
     }
 
-    TaskThumbnail getTaskThumbnailLocked() {
-        if (mStack != null) {
-            final ActivityRecord resumedActivity = mStack.mResumedActivity;
-            if (resumedActivity != null && resumedActivity.getTask() == this) {
-                final Bitmap thumbnail = resumedActivity.screenshotActivityLocked();
-                setLastThumbnailLocked(thumbnail);
-            }
-        }
-        final TaskThumbnail taskThumbnail = new TaskThumbnail();
-        getLastThumbnail(taskThumbnail);
-        return taskThumbnail;
-    }
-
     void removeTaskActivitiesLocked(boolean pauseImmediately) {
         // Just remove the entire task.
         performClearTaskAtIndexLocked(0, pauseImmediately);
@@ -1770,7 +1653,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         if (lastTaskDescription != null) {
             lastTaskDescription.saveToXml(out);
         }
-        mLastThumbnailInfo.saveToXml(out);
         out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
         out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
@@ -1842,7 +1724,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         int taskId = INVALID_TASK_ID;
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
-        TaskThumbnailInfo thumbnailInfo = new TaskThumbnailInfo();
         int taskAffiliation = INVALID_TASK_ID;
         int taskAffiliationColor = 0;
         int prevTaskId = INVALID_TASK_ID;
@@ -1899,8 +1780,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 lastTimeOnTop = Long.parseLong(attrValue);
             } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
                 neverRelinquishIdentity = Boolean.parseBoolean(attrValue);
-            } else if (attrName.startsWith(TaskThumbnailInfo.ATTR_TASK_THUMBNAILINFO_PREFIX)) {
-                thumbnailInfo.restoreFromXml(attrName, attrValue);
             } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                 taskDescription.restoreFromXml(attrName, attrValue);
             } else if (ATTR_TASK_AFFILIATION.equals(attrName)) {
@@ -2006,10 +1885,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
-                taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
-                taskAffiliationColor, callingUid, callingPackage, resizeMode,
-                supportsPictureInPicture, privileged, realActivitySuspended, userSetupComplete,
-                minWidth, minHeight);
+                taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
+                callingUid, callingPackage, resizeMode, supportsPictureInPicture, privileged,
+                realActivitySuspended, userSetupComplete, minWidth, minHeight);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
@@ -2353,8 +2231,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                     pw.print(" inRecents="); pw.print(inRecents);
                     pw.print(" isAvailable="); pw.println(isAvailable);
         }
-        pw.print(prefix); pw.print("lastThumbnail="); pw.print(mLastThumbnail);
-                pw.print(" lastThumbnailFile="); pw.println(mLastThumbnailFile);
         if (lastDescription != null) {
             pw.print(prefix); pw.print("lastDescription="); pw.println(lastDescription);
         }

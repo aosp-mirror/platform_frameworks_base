@@ -690,6 +690,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                 }
                 break;
                 case MotionEvent.ACTION_UP: {
+                    mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
                     if (!mMagnificationController.magnificationRegionContains(
                             event.getX(), event.getY())) {
                         transitionToDelegatingState(!mShortcutTriggered);
@@ -703,7 +704,6 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                     if (mLastDownEvent == null) {
                         return;
                     }
-                    mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
                     if (!GestureUtils.isTap(mLastDownEvent, event, mTapTimeSlop,
                             mTapDistanceSlop, 0)) {
                         transitionToDelegatingState(true);

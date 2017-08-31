@@ -110,6 +110,27 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testPhotosFilterAcceptsFilter() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_IMAGE;
+
+        assertThat(ApplicationsState.FILTER_PHOTOS.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testPhotosFilterRejectsNotPhotos() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_VIDEO;
+
+        assertThat(ApplicationsState.FILTER_PHOTOS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testPhotosFilterRejectsDefaultCategory() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_UNDEFINED;
+
+        assertThat(ApplicationsState.FILTER_PHOTOS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
     public void testDownloadAndLauncherAndInstantAcceptsCorrectApps() {
         // should include instant apps
         mEntry.isHomeApp = false;

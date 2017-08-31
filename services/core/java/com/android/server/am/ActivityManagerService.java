@@ -197,7 +197,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
-import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityOptions;
@@ -1685,6 +1684,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
+    static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 70;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -2141,6 +2141,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             case USER_SWITCH_TIMEOUT_MSG: {
                 mUserController.timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                break;
+            }
+            case USER_SWITCH_CALLBACKS_TIMEOUT_MSG: {
+                mUserController.timeoutUserSwitchCallbacks(msg.arg1, msg.arg2);
                 break;
             }
             case IMMERSIVE_MODE_LOCK_MSG: {
@@ -9991,20 +9995,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public ActivityManager.TaskThumbnail getTaskThumbnail(int id) {
-        synchronized (this) {
-            enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
-                    "getTaskThumbnail()");
-            final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
-                    id, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
-            if (tr != null) {
-                return tr.getTaskThumbnailLocked();
-            }
-        }
-        return null;
-    }
-
-    @Override
     public ActivityManager.TaskDescription getTaskDescription(int id) {
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
@@ -10071,7 +10061,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 TaskRecord task = new TaskRecord(this,
                         mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
-                        ainfo, intent, description, new TaskThumbnailInfo());
+                        ainfo, intent, description);
 
                 int trimIdx = mRecentTasks.trimForTaskLocked(task, false);
                 if (trimIdx >= 0) {
@@ -10090,8 +10080,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mRecentTasks.add(task);
                 r.getStack().addTask(task, false, "addAppTask");
 
-                task.setLastThumbnailLocked(thumbnail);
-                task.freeLastThumbnail();
+                // TODO: Send the thumbnail to WM to store it.
+
                 return task.taskId;
             }
         } finally {
