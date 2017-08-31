@@ -37,6 +37,7 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorPrimary"
+        android:textDirection="locale"
         android:singleLine="true" />
 
     <com.android.systemui.BatteryMeterView android:id="@+id/battery"
