@@ -33,6 +33,7 @@ import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLE
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -191,8 +192,6 @@ import com.android.server.SystemConfig;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
-
-import com.google.android.collect.Lists;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -371,8 +370,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Defined network policies. */
     final ArrayMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = new ArrayMap<>();
-    /** Currently active network rules for ifaces. */
-    final ArrayMap<NetworkPolicy, String[]> mNetworkRules = new ArrayMap<>();
 
     /** Map from subId to subscription plans. */
     final SparseArray<SubscriptionPlan[]> mSubscriptionPlans = new SparseArray<>();
@@ -972,7 +969,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Receiver that watches for {@link WifiConfiguration} to be loaded so that
-     * we can perform upgrade logic.
+     * we can perform upgrade logic. After initial upgrade logic, it updates
+     * {@link #mMeteredIfaces} based on configuration changes.
      */
     final private BroadcastReceiver mWifiReceiver = new BroadcastReceiver() {
         @Override
@@ -980,10 +978,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     upgradeWifiMeteredOverrideAL();
+                    updateNetworkRulesNL();
                 }
             }
-            // Only need to perform upgrade logic once
-            mContext.unregisterReceiver(this);
         }
     };
 
@@ -1490,6 +1487,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
+     * Collect all ifaces from a {@link NetworkState} into the given set.
+     */
+    private static void collectIfaces(ArraySet<String> ifaces, NetworkState state) {
+        final String baseIface = state.linkProperties.getInterfaceName();
+        if (baseIface != null) {
+            ifaces.add(baseIface);
+        }
+        for (LinkProperties stackedLink : state.linkProperties.getStackedLinks()) {
+            final String stackedIface = stackedLink.getInterfaceName();
+            if (stackedIface != null) {
+                ifaces.add(stackedIface);
+            }
+        }
+    }
+
+    /**
      * Examine all connected {@link NetworkState}, looking for
      * {@link NetworkPolicy} that need to be enforced. When matches found, set
      * remaining quota based on usage cycle and historical stats.
@@ -1507,60 +1520,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
-        final ArrayList<Pair<String, NetworkIdentity>> connIdents = new ArrayList<>(states.length);
-        final ArraySet<String> connIfaces = new ArraySet<String>(states.length);
+        final ArrayMap<NetworkState, NetworkIdentity> identified = new ArrayMap<>();
         for (NetworkState state : states) {
             if (state.networkInfo != null && state.networkInfo.isConnected()) {
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
-
-                final String baseIface = state.linkProperties.getInterfaceName();
-                if (baseIface != null) {
-                    connIdents.add(Pair.create(baseIface, ident));
-                }
-
-                // Stacked interfaces are considered to have same identity as
-                // their parent network.
-                final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
-                for (LinkProperties stackedLink : stackedLinks) {
-                    final String stackedIface = stackedLink.getInterfaceName();
-                    if (stackedIface != null) {
-                        connIdents.add(Pair.create(stackedIface, ident));
-                    }
-                }
+                identified.put(state, ident);
             }
         }
 
-        // Apply policies against all connected interfaces found above
-        mNetworkRules.clear();
-        final ArrayList<String> ifaceList = Lists.newArrayList();
-        for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
-            final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
-
-            ifaceList.clear();
-            for (int j = connIdents.size() - 1; j >= 0; j--) {
-                final Pair<String, NetworkIdentity> ident = connIdents.get(j);
-                if (policy.template.matches(ident.second)) {
-                    ifaceList.add(ident.first);
-                }
-            }
-
-            if (ifaceList.size() > 0) {
-                final String[] ifaces = ifaceList.toArray(new String[ifaceList.size()]);
-                mNetworkRules.put(policy, ifaces);
-            }
-        }
-
+        final ArraySet<String> newMeteredIfaces = new ArraySet<>();
         long lowestRule = Long.MAX_VALUE;
-        final ArraySet<String> newMeteredIfaces = new ArraySet<String>(states.length);
 
-        // apply each policy that we found ifaces for; compute remaining data
-        // based on current cycle and historical stats, and push to kernel.
-        for (int i = mNetworkRules.size()-1; i >= 0; i--) {
-            final NetworkPolicy policy = mNetworkRules.keyAt(i);
-            final String[] ifaces = mNetworkRules.valueAt(i);
+        // For every well-defined policy, compute remaining data based on
+        // current cycle and historical stats, and push to kernel.
+        final ArraySet<String> matchingIfaces = new ArraySet<>();
+        for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
+           final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
+
+            // Collect all ifaces that match this policy
+            matchingIfaces.clear();
+            for (int j = identified.size() - 1; j >= 0; j--) {
+                if (policy.template.matches(identified.valueAt(j))) {
+                    collectIfaces(matchingIfaces, identified.keyAt(j));
+                }
+            }
 
             if (LOGD) {
-                Slog.d(TAG, "applying policy " + policy + " to ifaces " + Arrays.toString(ifaces));
+                Slog.d(TAG, "Applying " + policy + " to ifaces " + matchingIfaces);
             }
 
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
@@ -1590,16 +1576,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     quotaBytes = Long.MAX_VALUE;
                 }
 
-                if (ifaces.length > 1) {
+                if (matchingIfaces.size() > 1) {
                     // TODO: switch to shared quota once NMS supports
                     Slog.w(TAG, "shared quota unsupported; generating rule for each iface");
                 }
 
-                for (String iface : ifaces) {
-                    // long quotaBytes split up into two ints to fit in message
-                    mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA,
-                            (int) (quotaBytes >> 32), (int) (quotaBytes & 0xFFFFFFFF), iface)
-                            .sendToTarget();
+                for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
+                    final String iface = matchingIfaces.valueAt(j);
+                    setInterfaceQuotaAsync(iface, quotaBytes);
                     newMeteredIfaces.add(iface);
                 }
             }
@@ -1613,29 +1597,36 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        for (int i = connIfaces.size()-1; i >= 0; i--) {
-            String iface = connIfaces.valueAt(i);
-            // long quotaBytes split up into two ints to fit in message
-            mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA,
-                    (int) (Long.MAX_VALUE >> 32), (int) (Long.MAX_VALUE & 0xFFFFFFFF), iface)
-                    .sendToTarget();
-            newMeteredIfaces.add(iface);
+        // One final pass to catch any metered ifaces that don't have explicitly
+        // defined policies; typically Wi-Fi networks.
+        for (NetworkState state : states) {
+            if (state.networkInfo != null && state.networkInfo.isConnected()
+                    && !state.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+                matchingIfaces.clear();
+                collectIfaces(matchingIfaces, state);
+                for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
+                    final String iface = matchingIfaces.valueAt(j);
+                    if (!newMeteredIfaces.contains(iface)) {
+                        setInterfaceQuotaAsync(iface, Long.MAX_VALUE);
+                        newMeteredIfaces.add(iface);
+                    }
+                }
+            }
         }
 
-        mHandler.obtainMessage(MSG_ADVISE_PERSIST_THRESHOLD, lowestRule).sendToTarget();
-
-        // remove quota on any trailing interfaces
+        // Remove quota from any interfaces that are no longer metered.
         for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
             final String iface = mMeteredIfaces.valueAt(i);
             if (!newMeteredIfaces.contains(iface)) {
-                mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTA, iface)
-                        .sendToTarget();
+                removeInterfaceQuotaAsync(iface);
             }
         }
         mMeteredIfaces = newMeteredIfaces;
 
         final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
         mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
+
+        mHandler.obtainMessage(MSG_ADVISE_PERSIST_THRESHOLD, lowestRule).sendToTarget();
     }
 
     /**
@@ -4021,6 +4012,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void setInterfaceQuotaAsync(String iface, long quotaBytes) {
+        // long quotaBytes split up into two ints to fit in message
+        mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA, (int) (quotaBytes >> 32),
+                (int) (quotaBytes & 0xFFFFFFFF), iface).sendToTarget();
+    }
+
     private void setInterfaceQuota(String iface, long quotaBytes) {
         try {
             mNetworkManager.setInterfaceQuota(iface, quotaBytes);
@@ -4029,6 +4026,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
+    }
+
+    private void removeInterfaceQuotaAsync(String iface) {
+        mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTA, iface).sendToTarget();
     }
 
     private void removeInterfaceQuota(String iface) {
