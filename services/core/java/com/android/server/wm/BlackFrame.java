@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.graphics.PixelFormat.OPAQUE;
 import static android.view.SurfaceControl.FX_SURFACE_DIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -51,14 +50,8 @@ public class BlackFrame {
             int w = r-l;
             int h = b-t;
 
-            if (DEBUG_SURFACE_TRACE) {
-                surface = new WindowSurfaceController.SurfaceTrace(session, "BlackSurface("
-                        + l + ", " + t + ")",
-                        w, h, OPAQUE, FX_SURFACE_DIM | SurfaceControl.HIDDEN);
-            } else {
-                surface = new SurfaceControl(session, "BlackSurface",
-                        w, h, OPAQUE, FX_SURFACE_DIM | SurfaceControl.HIDDEN);
-            }
+            surface = new SurfaceControl(session, "BlackSurface",
+                    w, h, OPAQUE, FX_SURFACE_DIM | SurfaceControl.HIDDEN);
 
             surface.setAlpha(1);
             surface.setLayerStack(layerStack);

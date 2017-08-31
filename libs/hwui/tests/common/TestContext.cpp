@@ -81,10 +81,10 @@ void TestContext::createWindowSurface() {
     mSurfaceControl = mSurfaceComposerClient->createSurface(String8("HwuiTest"),
             gDisplay.w, gDisplay.h, PIXEL_FORMAT_RGBX_8888);
 
-    SurfaceComposerClient::openGlobalTransaction();
-    mSurfaceControl->setLayer(0x7FFFFFF);
-    mSurfaceControl->show();
-    SurfaceComposerClient::closeGlobalTransaction();
+    SurfaceComposerClient::Transaction t;
+    t.setLayer(mSurfaceControl, 0x7FFFFFF)
+            .show(mSurfaceControl)
+            .apply();
     mSurface = mSurfaceControl->getSurface();
 }
 

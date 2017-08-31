@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DIM_LAYER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -105,16 +104,10 @@ public class DimLayer {
     private void constructSurface(WindowManagerService service) {
         service.openSurfaceTransaction();
         try {
-            if (DEBUG_SURFACE_TRACE) {
-                mDimSurface = new WindowSurfaceController.SurfaceTrace(service.mFxSession,
-                    "DimSurface",
+            mDimSurface = new SurfaceControl(service.mFxSession, mName,
                     16, 16, PixelFormat.OPAQUE,
                     SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
-            } else {
-                mDimSurface = new SurfaceControl(service.mFxSession, mName,
-                    16, 16, PixelFormat.OPAQUE,
-                    SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
-            }
+
             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                     "  DIM " + mDimSurface + ": CREATE");
             mDimSurface.setLayerStack(mDisplayId);

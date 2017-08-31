@@ -6898,11 +6898,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     dumpSessionsLocked(pw, true);
                 }
                 return;
-            } else if ("surfaces".equals(cmd)) {
-                synchronized(mWindowMap) {
-                    WindowSurfaceController.SurfaceTrace.dumpAllSurfaces(pw, null);
-                }
-                return;
             } else if ("displays".equals(cmd) || "d".equals(cmd)) {
                 synchronized(mWindowMap) {
                     mRoot.dumpDisplayContents(pw);
@@ -6967,10 +6962,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            WindowSurfaceController.SurfaceTrace.dumpAllSurfaces(pw, dumpAll ?
-                    "-------------------------------------------------------------------------------"
-                    : null);
-            pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
