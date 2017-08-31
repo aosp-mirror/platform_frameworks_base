@@ -37,10 +37,10 @@ public final class UsbDescriptorsACInterfaceNode extends UsbDescriptorsTreeNode 
 
     @Override
     public void report(ReportCanvas canvas) {
-        canvas.openListItem();
-        canvas.writeParagraph("AC Interface type:0x"
-                + Integer.toHexString(mACInterface.getSubtype()), false);
+        canvas.writeListItem("AC Interface type: 0x"
+                + Integer.toHexString(mACInterface.getSubtype()));
+        canvas.openList();
         mACInterface.report(canvas);
-        canvas.closeListItem();
+        canvas.closeList();
     }
 }

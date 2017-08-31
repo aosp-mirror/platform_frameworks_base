@@ -130,8 +130,8 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         String subClasStr = UsbStrings.getClassName(devSubClass);
         canvas.writeListItem("Class " + devClass + ": " + classStr + " Subclass"
                 + devSubClass + ": " + subClasStr);
-        canvas.writeListItem("Vendor ID: " + getVendorID()
-                + " Product ID: " + getProductID()
+        canvas.writeListItem("Vendor ID: " + ReportCanvas.getHexString(getVendorID())
+                + " Product ID: " + ReportCanvas.getHexString(getProductID())
                 + " Product Release: " + ReportCanvas.getBCDString(getDeviceRelease()));
 
         byte mfgIndex = getMfgIndex();
