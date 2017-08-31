@@ -47,7 +47,6 @@ import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -80,9 +79,9 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
-import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.trust.TrustManager;
@@ -93,6 +92,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -11145,5 +11145,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return new StringParceledListSlice(
                     new ArrayList<>(getUserData(userId).mOwnerInstalledCaCerts));
         }
+    }
+
+    @Override
+    public boolean clearApplicationUserData(ComponentName admin, String packageName,
+            IPackageDataObserver callback) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+        final int userId = UserHandle.getCallingUserId();
+
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            return ActivityManager.getService().clearApplicationUserData(packageName, callback,
+                    userId);
+        } catch(RemoteException re) {
+            // Same process, should not happen.
+        } catch (SecurityException se) {
+            // This can happen e.g. for device admin packages, do not throw out the exception,
+            // because callers have no means to know beforehand for which packages this might
+            // happen.
+            Slog.w(LOG_TAG, "Not allowed to clear application user data for package " + packageName,
+                    se);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+
+        if (callback != null) {
+            try {
+                // If there was a throw above, we send back that removal failed
+                callback.onRemoveCompleted(packageName, false);
+            } catch (RemoteException re) {
+                // Caller is no longer available, ignore
+            }
+        }
+        return false;
     }
 }

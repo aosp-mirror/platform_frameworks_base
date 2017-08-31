@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
@@ -47,6 +48,7 @@ import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -8108,5 +8110,52 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by the device owner or profile owner to clear application user data of a given
+     * package. The behaviour of this is equivalent to the target application calling
+     * {@link android.app.ActivityManager#clearApplicationUserData()}.
+     *
+     * <p><strong>Note:</strong> an application can store data outside of its application data, e.g.
+     * external storage or user dictionary. This data will not be wiped by calling this API.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package which will have its user data wiped.
+     * @param listener A callback object that will inform the caller when the clearing is done.
+     * @param handler The handler indicating the thread on which the listener should be invoked.
+     * @throws SecurityException if the caller is not the device owner/profile owner.
+     * @return whether the clearing succeeded.
+     */
+    public boolean clearApplicationUserData(@NonNull ComponentName admin,
+            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
+            @NonNull Handler handler) {
+        throwIfParentInstance("clearAppData");
+        try {
+            return mService.clearApplicationUserData(admin, packageName,
+                    new IPackageDataObserver.Stub() {
+                        public void onRemoveCompleted(String pkg, boolean succeeded) {
+                            handler.post(() ->
+                                    listener.onApplicationUserDataCleared(pkg, succeeded));
+                        }
+                    });
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback used in {@link #clearApplicationUserData}
+     * to indicate that the clearing of an application's user data is done.
+     */
+    public interface OnClearApplicationUserDataListener {
+        /**
+         * Method invoked when clearing the application user data has completed.
+         *
+         * @param packageName The name of the package which had its user data cleared.
+         * @param succeeded Whether the clearing succeeded. Clearing fails for device administrator
+         *                  apps and protected system packages.
+         */
+        void onApplicationUserDataCleared(String packageName, boolean succeeded);
     }
 }

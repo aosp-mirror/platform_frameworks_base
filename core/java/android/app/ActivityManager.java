@@ -2698,7 +2698,8 @@ public class ActivityManager {
      * the user choosing to clear the app's data from within the device settings UI.  It
      * erases all dynamic data associated with the app -- its private data and data in its
      * private area on external storage -- but does not remove the installed application
-     * itself, nor any OBB files.
+     * itself, nor any OBB files. It also revokes all runtime permissions that the app has acquired,
+     * clears all notifications and removes all Uri grants related to this application.
      *
      * @return {@code true} if the application successfully requested that the application's
      *     data be erased; {@code false} otherwise.
