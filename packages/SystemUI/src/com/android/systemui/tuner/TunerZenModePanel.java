@@ -22,9 +22,11 @@ import android.provider.Settings.Global;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -65,6 +67,11 @@ public class TunerZenModePanel extends LinearLayout implements OnClickListener {
         mDone = mButtons.findViewById(android.R.id.button1);
         mDone.setOnClickListener(this);
         ((TextView) mDone).setText(R.string.quick_settings_done);
+        // Hide the resizing space because it causes issues in the volume panel.
+        ViewGroup detail_header = findViewById(R.id.tuner_zen_switch);
+        detail_header.getChildAt(0).setVisibility(View.GONE);
+        // No background so it can blend with volume panel.
+        findViewById(R.id.edit_container).setBackground(null);
     }
 
     @Override
