@@ -79,8 +79,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private static final int EVENT_DB_CORRUPT = 75004;
 
+    // By default idle connections are not closed
     private static final boolean DEBUG_CLOSE_IDLE_CONNECTIONS = SystemProperties
-            .getBoolean("persist.debug.sqlite.close_idle_connections", true);
+            .getBoolean("persist.debug.sqlite.close_idle_connections", false);
 
     // Stores reference to all databases opened in the current process.
     // (The referent Object is not used at this time.)
