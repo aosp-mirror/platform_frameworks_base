@@ -728,6 +728,9 @@ public class VibratorService extends IVibratorService.Stub
                     return timeout;
                 }
             }
+            if (!prebaked.shouldFallback()) {
+                return 0;
+            }
             final int id = prebaked.getId();
             if (id < 0 || id >= mFallbackEffects.length || mFallbackEffects[id] == null) {
                 Slog.w(TAG, "Failed to play prebaked effect, no fallback");
