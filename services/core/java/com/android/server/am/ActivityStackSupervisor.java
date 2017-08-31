@@ -3646,25 +3646,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                StringBuilder stackHeader = new StringBuilder(128);
-                stackHeader.append("  Stack #");
-                stackHeader.append(stack.mStackId);
-                stackHeader.append(":");
-                stackHeader.append("\n");
-                stackHeader.append("  mFullscreen=" + stack.mFullscreen);
-                stackHeader.append("\n");
-                stackHeader.append("  isSleeping=" + stack.shouldSleepActivities());
-                stackHeader.append("\n");
-                stackHeader.append("  mBounds=" + stack.mBounds);
+                pw.println();
+                pw.println("  Stack #" + stack.mStackId + ":");
+                pw.println("  mFullscreen=" + stack.mFullscreen);
+                pw.println("  isSleeping=" + stack.shouldSleepActivities());
+                pw.println("  mBounds=" + stack.mBounds);
 
-                final boolean printedStackHeader = stack.dumpActivitiesLocked(fd, pw, dumpAll,
-                        dumpClient, dumpPackage, needSep, stackHeader.toString());
-                printed |= printedStackHeader;
-                if (!printedStackHeader) {
-                    // Ensure we always dump the stack header even if there are no activities
-                    pw.println();
-                    pw.println(stackHeader);
-                }
+                printed |= stack.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
+                        needSep);
 
                 printed |= dumpHistoryList(fd, pw, stack.mLRUActivities, "    ", "Run", false,
                         !dumpAll, false, dumpPackage, true,
@@ -3712,8 +3701,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     static boolean dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
-            String dumpPackage, boolean needNL, String header1, String header2) {
-        TaskRecord lastTask = null;
+            String dumpPackage, boolean needNL, String header, TaskRecord lastTask) {
         String innerPrefix = null;
         String[] args = null;
         boolean printed = false;
@@ -3732,13 +3720,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 pw.println("");
                 needNL = false;
             }
-            if (header1 != null) {
-                pw.println(header1);
-                header1 = null;
-            }
-            if (header2 != null) {
-                pw.println(header2);
-                header2 = null;
+            if (header != null) {
+                pw.println(header);
+                header = null;
             }
             if (lastTask != r.getTask()) {
                 lastTask = r.getTask();

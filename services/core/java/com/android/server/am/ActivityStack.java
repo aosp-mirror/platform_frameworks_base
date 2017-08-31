@@ -5074,24 +5074,29 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
-            boolean dumpClient, String dumpPackage, boolean needSep, String header) {
-        boolean printed = false;
+            boolean dumpClient, String dumpPackage, boolean needSep) {
+
+        if (mTaskHistory.isEmpty()) {
+            return false;
+        }
+        final String prefix = "    ";
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            printed |= ActivityStackSupervisor.dumpHistoryList(fd, pw,
-                    mTaskHistory.get(taskNdx).mActivities, "    ", "Hist", true, !dumpAll,
-                    dumpClient, dumpPackage, needSep, header,
-                    "    Task id #" + task.taskId + "\n" +
-                    "    mFullscreen=" + task.mFullscreen + "\n" +
-                    "    mBounds=" + task.mBounds + "\n" +
-                    "    mMinWidth=" + task.mMinWidth + "\n" +
-                    "    mMinHeight=" + task.mMinHeight + "\n" +
-                    "    mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
-            if (printed) {
-                header = null;
+            if (needSep) {
+                pw.println("");
             }
+            pw.println(prefix + "Task id #" + task.taskId);
+            pw.println(prefix + "mFullscreen=" + task.mFullscreen);
+            pw.println(prefix + "mBounds=" + task.mBounds);
+            pw.println(prefix + "mMinWidth=" + task.mMinWidth);
+            pw.println(prefix + "mMinHeight=" + task.mMinHeight);
+            pw.println(prefix + "mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
+            pw.println(prefix + "* " + task);
+            task.dump(pw, prefix + "  ");
+            ActivityStackSupervisor.dumpHistoryList(fd, pw, mTaskHistory.get(taskNdx).mActivities,
+                    prefix, "Hist", true, !dumpAll, dumpClient, dumpPackage, false, null, task);
         }
-        return printed;
+        return true;
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
