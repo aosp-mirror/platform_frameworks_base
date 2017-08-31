@@ -199,7 +199,6 @@ void SkiaPipeline::renderVectorDrawableCache() {
         for (auto vd : mVectorDrawables) {
             vd->updateCache(atlas, grContext);
         }
-        grContext->flush();
         mVectorDrawables.clear();
     }
 }
