@@ -270,6 +270,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IRecoverySystemProgressListener.aidl \
 	core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/ISchedulingPolicyService.aidl \
+	core/java/android/os/IStatsCompanionService.aidl \
 	core/java/android/os/IStatsManager.aidl \
 	core/java/android/os/IThermalEventListener.aidl \
 	core/java/android/os/IThermalService.aidl \
