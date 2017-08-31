@@ -93,4 +93,9 @@ public class FakeBluetoothController extends BaseLeakChecker<Callback> implement
     public int getBondState(CachedBluetoothDevice device) {
         return 0;
     }
+
+    @Override
+    public CachedBluetoothDevice getLastDevice() {
+        return null;
+    }
 }
