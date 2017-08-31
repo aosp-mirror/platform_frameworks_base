@@ -121,6 +121,11 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     @Override
+    public CachedBluetoothDevice getLastDevice() {
+        return mLastDevice;
+    }
+
+    @Override
     public int getMaxConnectionState(CachedBluetoothDevice device) {
         return getCachedState(device).mMaxConnectionState;
     }
