@@ -36,6 +36,9 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
+import android.util.Log.TerribleFailure;
+import android.util.Log.TerribleFailureHandler;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -71,10 +74,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private boolean mListening;
     private boolean mHasOneShot;
     private Looper mLooper;
+    private boolean mWtfsSet;
 
     public PluginManagerImpl(Context context) {
         this(context, new PluginInstanceManagerFactory(),
-                Build.IS_DEBUGGABLE, Thread.getDefaultUncaughtExceptionHandler());
+                Build.IS_DEBUGGABLE, Thread.getUncaughtExceptionPreHandler());
     }
 
     @VisibleForTesting
@@ -88,7 +92,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
-        Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
+        Thread.setUncaughtExceptionPreHandler(uncaughtExceptionHandler);
         if (isDebuggable) {
             new Handler(mLooper).post(() -> {
                 // Plugin dependencies that don't have another good home can go here, but
@@ -290,6 +294,15 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         return false;
     }
 
+    public void handleWtfs() {
+        if (!mWtfsSet) {
+            mWtfsSet = true;
+            Log.setWtfHandler((tag, what, system) -> {
+                throw new CrashWhilePluginActiveException(what);
+            });
+        }
+    }
+
     @VisibleForTesting
     public static class PluginInstanceManagerFactory {
         public <T extends Plugin> PluginInstanceManager createPluginInstanceManager(Context context,
@@ -339,8 +352,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 // disable all the plugins, so we can be sure that SysUI is running as
                 // best as possible.
                 for (PluginInstanceManager manager : mPluginMap.values()) {
-                    manager.disableAll();
+                    disabledAny |= manager.disableAll();
                 }
+            }
+            if (disabledAny) {
+                throwable = new CrashWhilePluginActiveException(throwable);
             }
 
             // Run the normal exception handler so we can crash and cleanup our state.
@@ -356,6 +372,12 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 }
             }
             return disabledAny | checkStack(throwable.getCause());
+        }
+    }
+
+    private class CrashWhilePluginActiveException extends RuntimeException {
+        public CrashWhilePluginActiveException(Throwable throwable) {
+            super(throwable);
         }
     }
 }
