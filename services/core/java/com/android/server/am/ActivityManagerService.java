@@ -21864,7 +21864,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int changes = 0;
 
         if (app.curAdj != app.setAdj) {
-            ProcessList.setOomAdj(app.pid, app.info.uid, app.curAdj);
+            ProcessList.setOomAdj(app.pid, app.uid, app.curAdj);
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Set " + app.pid + " " + app.processName + " adj " + app.curAdj + ": "
                     + app.adjType);
