@@ -450,7 +450,7 @@ public class AppWindowAnimator {
         return isAnimating;
     }
 
-    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+    void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
         pw.print(prefix); pw.print("mAnimator="); pw.println(mAnimator);
         pw.print(prefix); pw.print("freezingScreen="); pw.print(freezingScreen);

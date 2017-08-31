@@ -368,10 +368,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             boolean runningAppAnimation = false;
 
+            if (mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
+                mAppAnimator.setNullAnimation();
+            }
             if (transit != AppTransition.TRANSIT_UNSET) {
-                if (mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
-                    mAppAnimator.setNullAnimation();
-                }
                 if (mService.applyAnimationLocked(this, lp, transit, visible, isVoiceInteraction)) {
                     delayed = runningAppAnimation = true;
                 }
@@ -1758,6 +1758,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (mRemovingFromDisplay) {
             pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
+        }
+        if (mAppAnimator.isAnimating()) {
+            mAppAnimator.dump(pw, prefix + "  ");
         }
     }
 
