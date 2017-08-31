@@ -4410,31 +4410,29 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
-        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.mBounds, false /* immediate */);
+        scheduleUpdatePictureInPictureModeIfNeeded(task, stack.mBounds);
     }
 
-    void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, Rect targetStackBounds,
-            boolean immediate) {
-
-        if (immediate) {
-            mHandler.removeMessages(REPORT_PIP_MODE_CHANGED_MSG);
-            for (int i = task.mActivities.size() - 1; i >= 0; i--) {
-                final ActivityRecord r = task.mActivities.get(i);
-                if (r.app != null && r.app.thread != null) {
-                    r.updatePictureInPictureMode(targetStackBounds);
-                }
+    void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, Rect targetStackBounds) {
+        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.mActivities.get(i);
+            if (r.app != null && r.app.thread != null) {
+                mPipModeChangedActivities.add(r);
             }
-        } else {
-            for (int i = task.mActivities.size() - 1; i >= 0; i--) {
-                final ActivityRecord r = task.mActivities.get(i);
-                if (r.app != null && r.app.thread != null) {
-                    mPipModeChangedActivities.add(r);
-                }
-            }
-            mPipModeChangedTargetStackBounds = targetStackBounds;
+        }
+        mPipModeChangedTargetStackBounds = targetStackBounds;
 
-            if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
-                mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
+        if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
+            mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
+        }
+    }
+
+    void updatePictureInPictureMode(TaskRecord task, Rect targetStackBounds, boolean forceUpdate) {
+        mHandler.removeMessages(REPORT_PIP_MODE_CHANGED_MSG);
+        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.mActivities.get(i);
+            if (r.app != null && r.app.thread != null) {
+                r.updatePictureInPictureMode(targetStackBounds, forceUpdate);
             }
         }
     }
@@ -4496,7 +4494,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     synchronized (mService) {
                         for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mPipModeChangedActivities.remove(i);
-                            r.updatePictureInPictureMode(mPipModeChangedTargetStackBounds);
+                            r.updatePictureInPictureMode(mPipModeChangedTargetStackBounds,
+                                    false /* forceUpdate */);
                         }
                     }
                 } break;

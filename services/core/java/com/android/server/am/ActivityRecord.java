@@ -659,14 +659,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    void updatePictureInPictureMode(Rect targetStackBounds) {
+    void updatePictureInPictureMode(Rect targetStackBounds, boolean forceUpdate) {
         if (task == null || task.getStack() == null || app == null || app.thread == null) {
             return;
         }
 
         final boolean inPictureInPictureMode = (task.getStackId() == PINNED_STACK_ID) &&
                 (targetStackBounds != null);
-        if (inPictureInPictureMode != mLastReportedPictureInPictureMode) {
+        if (inPictureInPictureMode != mLastReportedPictureInPictureMode || forceUpdate) {
             // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
             // update that here in order
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
@@ -681,8 +681,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
             app.thread.schedulePictureInPictureModeChanged(appToken,
-                    mLastReportedPictureInPictureMode,
-                    overrideConfig);
+                    mLastReportedPictureInPictureMode, overrideConfig);
         } catch (Exception e) {
             // If process died, no one cares.
         }
