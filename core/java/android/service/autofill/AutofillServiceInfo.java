@@ -29,10 +29,11 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
@@ -89,9 +90,7 @@ public final class AutofillServiceInfo {
     @Nullable
     private static TypedArray getMetaDataArray(PackageManager pm, ServiceInfo si) {
         // Check for permissions.
-        // TODO(b/37563972): remove support to BIND_AUTOFILL once clients use BIND_AUTOFILL_SERVICE
-        if (!Manifest.permission.BIND_AUTOFILL_SERVICE.equals(si.permission)
-                && !Manifest.permission.BIND_AUTOFILL.equals(si.permission)) {
+        if (!Manifest.permission.BIND_AUTOFILL_SERVICE.equals(si.permission)) {
             Log.w(TAG, "AutofillService from '" + si.packageName + "' does not require permission "
                     + Manifest.permission.BIND_AUTOFILL_SERVICE);
             throw new SecurityException("Service does not require permission "
