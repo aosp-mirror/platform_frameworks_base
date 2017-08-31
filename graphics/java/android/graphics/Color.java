@@ -73,7 +73,7 @@ import java.util.function.DoubleUnaryOperator;
  * <h4>Encoding</h4>
  * <p>The four components of a color int are encoded in the following way:</p>
  * <pre class="prettyprint">
- * int color = (A & 0xff) << 24 | (R & 0xff) << 16 | (G & 0xff) << 16 | (B & 0xff);
+ * int color = (A & 0xff) << 24 | (R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff);
  * </pre>
  *
  * <p>Because of this encoding, color ints can easily be described as an integer
