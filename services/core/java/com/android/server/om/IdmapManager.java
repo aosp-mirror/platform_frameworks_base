@@ -92,26 +92,10 @@ class IdmapManager {
         return new File(getIdmapPath(overlayPackage.applicationInfo.getBaseCodePath())).isFile();
     }
 
-    boolean isDangerous(@NonNull final PackageInfo overlayPackage, final int userId) {
-        // unused userId: see comment in OverlayManagerServiceImpl.removeIdmapIfPossible
-        return isDangerous(getIdmapPath(overlayPackage.applicationInfo.getBaseCodePath()));
-    }
-
     private String getIdmapPath(@NonNull final String baseCodePath) {
         final StringBuilder sb = new StringBuilder("/data/resource-cache/");
         sb.append(baseCodePath.substring(1).replace('/', '@'));
         sb.append("@idmap");
         return sb.toString();
-    }
-
-    private boolean isDangerous(@NonNull final String idmapPath) {
-        try (DataInputStream dis = new DataInputStream(new FileInputStream(idmapPath))) {
-            final int magic = dis.readInt();
-            final int version = dis.readInt();
-            final int dangerous = dis.readInt();
-            return dangerous != 0;
-        } catch (IOException e) {
-            return true;
-        }
     }
 }
