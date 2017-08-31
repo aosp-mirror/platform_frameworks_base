@@ -780,9 +780,7 @@ public class StaticLayout extends Layout {
                     firstWidth, firstWidthLineCount, restWidth,
                     variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency,
                     // TODO: Support more justification mode, e.g. letter spacing, stretching.
-                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
-                    (indents != null && indents.length > mLineCount) ? indents : null,
-                    mLineCount);
+                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE, indents, mLineCount);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -1506,7 +1504,7 @@ public class StaticLayout extends Layout {
             @FloatRange(from = 0.0f) float restWidth, @Nullable int[] variableTabStops,
             int defaultTabStop, @BreakStrategy int breakStrategy,
             @HyphenationFrequency int hyphenationFrequency, boolean isJustified,
-            @Nullable int[] indents, @IntRange(from = 0) int intentsOffset);
+            @Nullable int[] indents, @IntRange(from = 0) int indentsOffset);
 
     private static native float nAddStyleRun(long nativePtr, long nativePaint, int start, int end,
             boolean isRtl);

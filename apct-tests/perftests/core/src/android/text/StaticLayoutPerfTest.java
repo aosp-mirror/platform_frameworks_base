@@ -88,4 +88,15 @@ public class StaticLayoutPerfTest {
                     .build();
         }
     }
+
+    @Test
+    public void testCreateRandom_breakBalanced() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            final CharSequence text = generateRandomParagraph(9);
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .build();
+        }
+    }
 }
