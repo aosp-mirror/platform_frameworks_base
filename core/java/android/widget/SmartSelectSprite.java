@@ -195,10 +195,7 @@ final class SmartSelectSprite {
 
             canvas.save();
             mClipRect.set(mBoundingRectangle);
-            mClipRect.top -= mStrokeWidth;
-            mClipRect.bottom += mStrokeWidth;
-            mClipRect.left -= mStrokeWidth;
-            mClipRect.right += mStrokeWidth;
+            mClipRect.inset(-mStrokeWidth, -mStrokeWidth);
             canvas.clipRect(mClipRect);
             canvas.drawRoundRect(mDrawRect, adjustedCornerRadius, adjustedCornerRadius, paint);
             canvas.restore();
