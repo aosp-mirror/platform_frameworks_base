@@ -110,7 +110,7 @@ final class SmartSelectSprite {
      */
     private static final class RoundedRectangleShape extends Shape {
 
-        private static final String PROPERTY_ROUND_PERCENTAGE = "roundPercentage";
+        private static final String PROPERTY_ROUND_RATIO = "roundRatio";
 
         @Retention(SOURCE)
         @IntDef({ExpansionDirection.LEFT, ExpansionDirection.CENTER, ExpansionDirection.RIGHT})
@@ -134,7 +134,7 @@ final class SmartSelectSprite {
 
         private final float mStrokeWidth;
         private final RectF mBoundingRectangle;
-        private float mRoundPercentage = 1.0f;
+        private float mRoundRatio = 1.0f;
         private final @ExpansionDirection int mExpansionDirection;
         private final @RectangleBorderType int mRectangleBorderType;
 
@@ -158,9 +158,9 @@ final class SmartSelectSprite {
             mStrokeWidth = strokeWidth;
 
             if (boundingRectangle.height() > boundingRectangle.width()) {
-                setRoundPercentage(0.0f);
+                setRoundRatio(0.0f);
             } else {
-                setRoundPercentage(1.0f);
+                setRoundRatio(1.0f);
             }
         }
 
@@ -218,13 +218,12 @@ final class SmartSelectSprite {
             canvas.restore();
         }
 
-        public void setRoundPercentage(
-                @FloatRange(from = 0.0, to = 1.0) final float newPercentage) {
-            mRoundPercentage = newPercentage;
+        public void setRoundRatio(@FloatRange(from = 0.0, to = 1.0) final float roundRatio) {
+            mRoundRatio = roundRatio;
         }
 
-        public float getRoundPercentage() {
-            return mRoundPercentage;
+        public float getRoundRatio() {
+            return mRoundRatio;
         }
 
         private void setLeftBoundary(final float leftBoundary) {
@@ -240,7 +239,7 @@ final class SmartSelectSprite {
         }
 
         private float getAdjustedCornerRadius() {
-            return (getCornerRadius() * mRoundPercentage);
+            return (getCornerRadius() * mRoundRatio);
         }
 
         private float getBoundingWidth() {
@@ -583,8 +582,8 @@ final class SmartSelectSprite {
             final ValueAnimator.AnimatorUpdateListener listener) {
         final ObjectAnimator animator = ObjectAnimator.ofFloat(
                 shape,
-                RoundedRectangleShape.PROPERTY_ROUND_PERCENTAGE,
-                shape.getRoundPercentage(), 0.0F);
+                RoundedRectangleShape.PROPERTY_ROUND_RATIO,
+                shape.getRoundRatio(), 0.0F);
         animator.setDuration(CORNER_DURATION);
         animator.addUpdateListener(listener);
         animator.setInterpolator(mCornerInterpolator);
