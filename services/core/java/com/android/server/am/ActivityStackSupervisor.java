@@ -1268,6 +1268,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             r.app = app;
 
+            if (mKeyguardController.isKeyguardLocked()) {
+                r.notifyUnknownVisibilityLaunched();
+            }
+
             // Have the window manager re-evaluate the orientation of the screen based on the new
             // activity order.  Note that as a result of this, it can call back into the activity
             // manager with a new orientation.  We don't care about that, because the activity is
@@ -1294,9 +1298,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.setVisibility(true);
             }
 
-            if (mKeyguardController.isKeyguardLocked()) {
-                r.notifyUnknownVisibilityLaunched();
-            }
             final int applicationInfoUid =
                     (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
             if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {

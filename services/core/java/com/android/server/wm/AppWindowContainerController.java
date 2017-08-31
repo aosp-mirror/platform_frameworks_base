@@ -365,7 +365,6 @@ public class AppWindowContainerController
                 // Now that the app is going invisible, we can remove it. It will be restarted
                 // if made visible again.
                 wtoken.removeDeadWindows();
-                mService.mUnknownAppVisibilityController.appRemovedOrHidden(wtoken);
             } else {
                 if (!mService.mAppTransition.isTransitionSet()
                         && mService.mAppTransition.isReady()) {
