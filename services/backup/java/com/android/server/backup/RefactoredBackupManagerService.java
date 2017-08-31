@@ -2762,7 +2762,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public ComponentName[] listAllTransportComponents() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
-        return mTransportManager.getAllTransportCompenents();
+        return mTransportManager.getAllTransportComponents();
     }
 
     @Override
