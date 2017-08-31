@@ -2126,8 +2126,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            pw.println(subPrefix + "deferred=" + mDeferredRemoval
+            pw.print(subPrefix + "deferred=" + mDeferredRemoval
                     + " mLayoutNeeded=" + mLayoutNeeded);
+            pw.println(" mTouchExcludeRegion=" + mTouchExcludeRegion);
 
         pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
