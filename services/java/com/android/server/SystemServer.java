@@ -1331,11 +1331,13 @@ public final class SystemServer {
                     traceEnd();
                 }
 
-                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
-                    traceBeginAndSlog("StartVoiceRecognitionManager");
-                    mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
-                    traceEnd();
-                }
+                // We need to always start this service, regardless of whether the
+                // FEATURE_VOICE_RECOGNIZERS feature is set, because it needs to take care
+                // of initializing various settings.  It will internally modify its behavior
+                // based on that feature.
+                traceBeginAndSlog("StartVoiceRecognitionManager");
+                mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
+                traceEnd();
 
                 if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
                     traceBeginAndSlog("StartGestureLauncher");
