@@ -337,11 +337,13 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 final ResolverTarget rhsTarget = mTargetsDict.get(new ComponentName(
                         rhs.activityInfo.packageName, rhs.activityInfo.name));
 
-                final int selectProbabilityDiff = Float.compare(
+                if (lhsTarget != null && rhsTarget != null) {
+                    final int selectProbabilityDiff = Float.compare(
                         rhsTarget.getSelectProbability(), lhsTarget.getSelectProbability());
 
-                if (selectProbabilityDiff != 0) {
-                    return selectProbabilityDiff > 0 ? 1 : -1;
+                    if (selectProbabilityDiff != 0) {
+                        return selectProbabilityDiff > 0 ? 1 : -1;
+                    }
                 }
             }
         }
