@@ -118,6 +118,8 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
                 return;
             }
 
+            ATRACE_FORMAT("drawLayer [%s] %.1f x %.1f", layerNode->getName(), bounds.width(), bounds.height());
+
             layerNode->getSkiaLayer()->hasRenderedSinceRepaint = false;
             layerCanvas->clear(SK_ColorTRANSPARENT);
 
@@ -143,7 +145,6 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node,
         }
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
-        // TODO: Handle wide color gamut requests
         node->setLayerSurface(
                 SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
                         info, 0, &props));
@@ -194,6 +195,7 @@ void SkiaPipeline::renderVectorDrawableCache() {
         sp<VectorDrawableAtlas> atlas = mRenderThread.cacheManager().acquireVectorDrawableAtlas();
         auto grContext = mRenderThread.getGrContext();
         atlas->prepareForDraw(grContext);
+        ATRACE_NAME("Update VectorDrawables");
         for (auto vd : mVectorDrawables) {
             vd->updateCache(atlas, grContext);
         }
