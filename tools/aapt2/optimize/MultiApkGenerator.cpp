@@ -44,11 +44,11 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
                                     const PostProcessingConfiguration& config,
                                     const TableFlattenerOptions& table_flattener_options) {
   // TODO(safarmer): Handle APK version codes for the generated APKs.
-  // TODO(safarmer): Handle explicit outputs/generating an output file list for other tools.
+  IDiagnostics* diag = context_->GetDiagnostics();
 
-  const std::string& apk_path = file::GetFilename(apk_->GetSource().path).to_string();
-  const StringPiece ext = file::GetExtension(apk_path);
-  const std::string base_name = apk_path.substr(0, apk_path.rfind(ext.to_string()));
+  const std::string& apk_name = file::GetFilename(apk_->GetSource().path).to_string();
+  const StringPiece ext = file::GetExtension(apk_name);
+  const std::string base_name = apk_name.substr(0, apk_name.rfind(ext.to_string()));
 
   // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
   for (const Artifact& artifact : config.artifacts) {
@@ -57,20 +57,17 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
     AxisConfigFilter axis_filter;
 
     if (!artifact.name && !config.artifact_format) {
-      context_->GetDiagnostics()->Error(
+      diag->Error(
           DiagMessage() << "Artifact does not have a name and no global name template defined");
       return false;
     }
 
     Maybe<std::string> artifact_name =
-        (artifact.name)
-            ? artifact.Name(base_name, ext.substr(1), context_->GetDiagnostics())
-            : artifact.ToArtifactName(config.artifact_format.value(), context_->GetDiagnostics(),
-                                      base_name, ext.substr(1));
+        (artifact.name) ? artifact.Name(apk_name, diag)
+                        : artifact.ToArtifactName(config.artifact_format.value(), apk_name, diag);
 
     if (!artifact_name) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "Could not determine split APK artifact name");
+      diag->Error(DiagMessage() << "Could not determine split APK artifact name");
       return false;
     }
 
@@ -80,8 +77,7 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
       auto group = config.abi_groups.find(group_name);
       // TODO: Remove validation when configuration parser ensures referential integrity.
       if (group == config.abi_groups.end()) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced ABI group '"
-                                                        << group_name << "'");
+        diag->Error(DiagMessage() << "could not find referenced ABI group '" << group_name << "'");
         return false;
       }
       filters.AddFilter(AbiFilter::FromAbiList(group->second));
@@ -93,8 +89,7 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
       auto group = config.screen_density_groups.find(group_name);
       // TODO: Remove validation when configuration parser ensures referential integrity.
       if (group == config.screen_density_groups.end()) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
-                                                        << group_name << "'");
+        diag->Error(DiagMessage() << "could not find referenced group '" << group_name << "'");
         return false;
       }
 
@@ -109,8 +104,7 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
       auto group = config.locale_groups.find(group_name);
       // TODO: Remove validation when configuration parser ensures referential integrity.
       if (group == config.locale_groups.end()) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
-                                                        << group_name << "'");
+        diag->Error(DiagMessage() << "could not find referenced group '" << group_name << "'");
         return false;
       }
 
@@ -132,11 +126,10 @@ bool MultiApkGenerator::FromBaseApk(const std::string& out_dir,
     }
     file::AppendPath(&out, artifact_name.value());
 
-    std::unique_ptr<IArchiveWriter> writer =
-        CreateZipFileArchiveWriter(context_->GetDiagnostics(), out);
+    std::unique_ptr<IArchiveWriter> writer = CreateZipFileArchiveWriter(diag, out);
 
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "Writing output: " << out);
+      diag->Note(DiagMessage() << "Writing output: " << out);
     }
 
     if (!apk_->WriteToArchive(context_, table.get(), table_flattener_options, &filters,
