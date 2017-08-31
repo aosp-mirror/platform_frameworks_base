@@ -306,7 +306,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensaxes de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite á aplicación recibir e procesar mensaxes MMS. Isto significa que a aplicación pode supervisar ou eliminar mensaxes enviadas ao teu dispositivo sen mostrarchas."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensaxes de difusión móbil"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil entréganse nalgunhas situacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de emerxencia."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil envíanse nalgunhas localizacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de emerxencia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds subscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite á aplicación obter detalles acerca dos feeds sincronizados actualmente."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e consultar mensaxes de SMS"</string>
@@ -373,7 +373,7 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados na túa tableta. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados na túa televisión. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados no teu teléfono. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionais do provedor de situación"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionais do provedor de localización"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite á aplicación acceder a comandos adicionais de fornecedor de localizacións. É posible que isto provoque que a aplicación interfira co funcionamento do GPS ou doutras fontes da localización."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"acceder á localización precisa (baseada no GPS e na rede)"</string>
     <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Esta aplicación pode obter a túa localización a partir do GPS ou de fontes de localización de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles no teu teléfono. Ten en conta que con esta acción pode aumentar o consumo de batería."</string>
@@ -571,7 +571,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desactivar algunhas funcións de bloqueo da pantalla"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impide o uso dalgunhas funcións de bloqueo da pantalla."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Particular"</item>
+    <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móbil"</item>
     <item msgid="7897544654242874543">"Traballo"</item>
     <item msgid="1103601433382158155">"Fax do traballo"</item>
@@ -581,7 +581,7 @@
     <item msgid="9192514806975898961">"Personalizado"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Particular"</item>
+    <item msgid="8073994352956129127">"Casa"</item>
     <item msgid="7084237356602625604">"Traballo"</item>
     <item msgid="1112044410659011023">"Outros"</item>
     <item msgid="2374913952870110618">"Personalizado"</item>
@@ -593,7 +593,7 @@
     <item msgid="4932682847595299369">"Personalizado"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Particular"</item>
+    <item msgid="1738585194601476694">"Casa"</item>
     <item msgid="1359644565647383708">"Traballo"</item>
     <item msgid="7868549401053615677">"Outros"</item>
     <item msgid="3145118944639869809">"Personalizado"</item>
@@ -614,7 +614,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizado"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Particular"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Casa"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Móbil"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Traballo"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax do traballo"</string>
@@ -639,16 +639,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversario"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Outros"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Particular"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Traballo"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Outro"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Móbil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizado"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Particular"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Casa"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Traballo"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Outro"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Personalizado"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Particular"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Casa"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Traballo"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Outro"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizado"</string>
@@ -671,16 +671,16 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Parella de feito"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Pai"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amigo/a"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Xestor"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Xefe/a"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Nai"</string>
-    <string name="relationTypeParent" msgid="4755635567562925226">"Pai ou nai"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Socio"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"Pai/nai"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Socio/a"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Recomendado por"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Parente"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Irmá"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Cónxuxe"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizado"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Particular"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Casa"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Traballo"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Outro"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Non se atopou ningunha aplicación para ver este contacto."</string>
@@ -1256,7 +1256,7 @@
     <string name="ime_action_send" msgid="2316166556349314424">"Enviar"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Seguinte"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Feito"</string>
-    <string name="ime_action_previous" msgid="1443550039250105948">"Ant"</string>
+    <string name="ime_action_previous" msgid="1443550039250105948">"Ant."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Executar"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Marcar número\nutilizando o <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Crear contacto\na partir de <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1713,7 +1713,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toca para ver os ficheiros"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fixar"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Soltar"</string>
-    <string name="app_info" msgid="6856026610594615344">"Información de aplicacións"</string>
+    <string name="app_info" msgid="6856026610594615344">"Info. da aplicación"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Iniciando demostración…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Restablecendo dispositivo…"</string>
@@ -1735,7 +1735,7 @@
     <string name="time_picker_header_text" msgid="143536825321922567">"Definir hora"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Introduce unha hora válida"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Escribe a hora"</string>
-    <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia ao modo de entrada de texto para introducir a hora."</string>
+    <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia ao modo de introdución de texto para introducir a hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Cambiar ao modo de reloxo para introducir a hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcións de autocompletar"</string>
     <string name="autofill_save_accessibility_title" msgid="7244365268417107822">"Garda a información no servizo Autocompletar"</string>

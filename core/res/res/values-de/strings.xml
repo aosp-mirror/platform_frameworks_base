@@ -1088,7 +1088,7 @@
       <item quantity="one">WLAN verfügbar</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Verfügbare WLANe öffnen</item>
+      <item quantity="other">Verfügbare WLANs öffnen</item>
       <item quantity="one">Verfügbares WLAN öffnen</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Mit offenem WLAN verbinden"</string>

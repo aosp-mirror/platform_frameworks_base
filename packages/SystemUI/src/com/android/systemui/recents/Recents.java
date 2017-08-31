@@ -565,6 +565,13 @@ public class Recents extends SystemUI
         mImpl.showPrevAffiliatedTask();
     }
 
+    @Override
+    public void appTransitionFinished() {
+        // Fallback, reset the flag once an app transition ends
+        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(
+                false /* waitingForTransitionStart */));
+    }
+
     /**
      * Updates on configuration change.
      */

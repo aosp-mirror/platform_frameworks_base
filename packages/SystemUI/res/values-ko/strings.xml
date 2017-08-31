@@ -558,8 +558,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"이 앱에는 알림 카테고리가 없습니다."</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"이 앱의 알림을 사용 중지할 수 없습니다."</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">이 앱에서 <xliff:g id="NUMBER_1">%d</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
-      <item quantity="one">이 앱에서 <xliff:g id="NUMBER_0">%d</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
+      <item quantity="other">이 앱에서 <xliff:g id="NUMBER_1">%s</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
+      <item quantity="one">이 앱에서 <xliff:g id="NUMBER_0">%s</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">

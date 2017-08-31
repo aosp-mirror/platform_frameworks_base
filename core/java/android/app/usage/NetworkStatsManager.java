@@ -24,15 +24,14 @@ import android.app.usage.NetworkStats.Bucket;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
+import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
 import android.net.NetworkTemplate;
-import android.net.INetworkStatsService;
 import android.os.Binder;
-import android.os.Build;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -79,7 +78,7 @@ import android.util.Log;
  * In addition to tethering usage, usage by removed users and apps, and usage by the system
  * is also included in the results for callers with one of these higher levels of access.
  * <p />
- * <b>NOTE:</b> Prior to API level {@value Build.VERSION_CODES#N}, all calls to these APIs required
+ * <b>NOTE:</b> Prior to API level {@value android.os.Build.VERSION_CODES#N}, all calls to these APIs required
  * the above permission, even to access an app's own data usage, and carrier-privileged apps were
  * not included.
  */
@@ -96,6 +95,13 @@ public class NetworkStatsManager {
     private final Context mContext;
     private final INetworkStatsService mService;
 
+    /** @hide */
+    public static final int FLAG_POLL_ON_OPEN = 1 << 0;
+    /** @hide */
+    public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 1;
+
+    private int mFlags;
+
     /**
      * {@hide}
      */
@@ -103,6 +109,25 @@ public class NetworkStatsManager {
         mContext = context;
         mService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE));
+        setPollOnOpen(true);
+    }
+
+    /** @hide */
+    public void setPollOnOpen(boolean pollOnOpen) {
+        if (pollOnOpen) {
+            mFlags |= FLAG_POLL_ON_OPEN;
+        } else {
+            mFlags &= ~FLAG_POLL_ON_OPEN;
+        }
+    }
+
+    /** @hide */
+    public void setAugmentWithSubscriptionPlan(boolean augmentWithSubscriptionPlan) {
+        if (augmentWithSubscriptionPlan) {
+            mFlags |= FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN;
+        } else {
+            mFlags &= ~FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN;
+        }
     }
 
     /**
@@ -136,7 +161,7 @@ public class NetworkStatsManager {
         }
 
         Bucket bucket = null;
-        NetworkStats stats = new NetworkStats(mContext, template, startTime, endTime);
+        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
         bucket = stats.getDeviceSummaryForNetwork();
 
         stats.close();
@@ -174,7 +199,7 @@ public class NetworkStatsManager {
         }
 
         NetworkStats stats;
-        stats = new NetworkStats(mContext, template, startTime, endTime);
+        stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
         stats.startSummaryEnumeration();
 
         stats.close();
@@ -211,7 +236,7 @@ public class NetworkStatsManager {
         }
 
         NetworkStats result;
-        result = new NetworkStats(mContext, template, startTime, endTime);
+        result = new NetworkStats(mContext, template, mFlags, startTime, endTime);
         result.startSummaryEnumeration();
 
         return result;
@@ -260,7 +285,7 @@ public class NetworkStatsManager {
 
         NetworkStats result;
         try {
-            result = new NetworkStats(mContext, template, startTime, endTime);
+            result = new NetworkStats(mContext, template, mFlags, startTime, endTime);
             result.startHistoryEnumeration(uid, tag);
         } catch (RemoteException e) {
             Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag, e);
@@ -305,7 +330,7 @@ public class NetworkStatsManager {
         }
 
         NetworkStats result;
-        result = new NetworkStats(mContext, template, startTime, endTime);
+        result = new NetworkStats(mContext, template, mFlags, startTime, endTime);
         result.startUserUidEnumeration();
         return result;
     }

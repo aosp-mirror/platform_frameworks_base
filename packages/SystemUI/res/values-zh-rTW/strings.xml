@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"這個應用程式沒有通知類別"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"無法關閉這個應用程式發出的通知"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">在 <xliff:g id="NUMBER_1">%d</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
-      <item quantity="one">在 <xliff:g id="NUMBER_0">%d</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
+      <item quantity="other">在 <xliff:g id="NUMBER_1">%s</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
+      <item quantity="one">在 <xliff:g id="NUMBER_0">%s</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">

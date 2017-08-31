@@ -29,7 +29,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ভয়েসমেল"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"সংযোগ সমস্যা বা অবৈধ MMI কোড৷"</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"নির্দিষ্ট নম্বরে ডায়ালযোগ্য হিসাবে প্রক্রিয়াটি সীমিত করা হয়েছে৷"</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"নির্দিষ্ট নম্বরে ডায়ালযোগ্য হিসেবে প্রক্রিয়াটি সীমিত করা হয়েছে৷"</string>
     <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"আপনি রোমিংয়ে থাকাকালীন আপনার ফোন থেকে \'কল ফরওয়ার্ড করার সেটিংস\' পরিবর্তন করা যাবে না৷"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"পরিষেবা সক্ষম করা ছিল৷"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"এর জন্য পরিষেবার সক্ষম করা ছিল:"</string>
@@ -142,7 +142,7 @@
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL খুঁজে পাওয়া যায়নি৷"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"এই সাইট যাচাইকরণ স্কীমটি সমর্থিত নয়৷"</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"যাচাইকরণ করা যায়নি৷"</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"প্রক্সী সার্ভারের মাধ্যমে যাচাইকরণ ব্যর্থ হয়েছে৷"</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"প্রক্সী সার্ভারের মাধ্যমে প্রমাণীকরণ ব্যর্থ হয়েছে৷"</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি৷"</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"সার্ভারের সাথে যোগাযোগ করা যায়নি৷ পরে আবার চেষ্টা করুন৷"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"সার্ভারের সাথে সংযোগের সময় শেষ হয়েছে৷"</string>
@@ -307,7 +307,7 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"অ্যাপ্লিকেশানটিকে MMS বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"সেল সম্প্রচার বার্তা পড়ুন"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"আপনার ডিভাইস দ্বারা প্রাপ্ত সেল সম্প্রচার পড়তে অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ কয়েকটি স্থানে আপনাকে জরুরি অবস্থার জন্য সতর্ক করতে জরুরি সতর্কতাগুলি বিতরণ করা হয়৷ যখন একটি জরুরি সেল সম্প্রচার প্রাপ্ত হয় তখন ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার ডিভাইসের কার্য সম্পাদনা বা কার্যকলাপে প্রতিবন্ধকতার সৃষ্টি করতে পারে৷"</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসাবে নেওয়া ফিডগুলি পড়ে"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসেবে নেওয়া ফিডগুলি পড়ে"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS পাঠানো ও দেখা,আপনি কি পরিচিতি কে এগুলি করার অনুমতি দেবেন?"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে এসএমএসগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্কের উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার অবস্থান সনাক্ত করতে পারে৷ এই অবস্থান পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার টিভিতে উপলব্ধ করে রাখতে হবে৷"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্ক উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার অবস্থান সনাক্ত করতে পারে৷ এই অবস্থান পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ফোনে উপলব্ধ করে রাখতে হবে৷"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"আপনার অডিও সেটিংস পরিবর্তন করে"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ভলিউম এবং যেখানে স্পিকার আউটপুট সামগ্রী হিসাবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ভলিউম এবং যেখানে স্পিকার আউটপুট সামগ্রী হিসেবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিও রেকর্ড"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"এই অ্যাপটি মাইক্রোফোন ব্যবহার করে যে কোনো সময় অডিও রেকর্ড করতে পারে৷"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"সিম এ আদেশগুলি পাঠান"</string>
@@ -561,7 +561,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"সতর্কীকরণ ছাড়াই এই টিভিতে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"সতর্কীকরণ ছাড়াই এই ফোনে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ডিভাইসের বৈশ্বিক প্রক্সী সেট করে"</string>
-    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"নীতিযখন নীতি সক্ষম করা হয় তখন ডিভাইসের বৈশ্বিক প্রক্সী ব্যবহার করা হবে সেই হিসাবে সেট করে৷ শুধুমাত্র ডিভাইসের মালিক বৈশ্বিক প্রক্সী সেট করতে পারেন৷"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"নীতিযখন নীতি সক্ষম করা হয় তখন ডিভাইসের বৈশ্বিক প্রক্সী ব্যবহার করা হবে সেই হিসেবে সেট করে৷ শুধুমাত্র ডিভাইসের মালিক বৈশ্বিক প্রক্সী সেট করতে পারেন৷"</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"স্ক্রিন লক করার জন্য পাসওয়ার্ডের মেয়াদ শেষ হওয়ার সময় সেট করে"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"স্ক্রিন লক করার পাসওয়ার্ড কত ঘন ঘন পরিবর্তন করা আবশ্যক তা পরিবর্তন করুন৷"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"সঞ্চয়স্থানের এনক্রিপশান সেট করে"</string>
@@ -953,7 +953,7 @@
     <string name="cut" msgid="3092569408438626261">"কাটুন"</string>
     <string name="copy" msgid="2681946229533511987">"অনুলিপি"</string>
     <string name="paste" msgid="5629880836805036433">"আটকান"</string>
-    <string name="paste_as_plain_text" msgid="5427792741908010675">"প্লেইন টেক্সট হিসাবে আটকান"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"প্লেইন টেক্সট হিসেবে আটকান"</string>
     <string name="replace" msgid="5781686059063148930">"প্রতিস্থাপন করুন..."</string>
     <string name="delete" msgid="6098684844021697789">"মুছুন"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL কপি করুন"</string>
@@ -999,7 +999,7 @@
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ব্যবহার করে পাঠান"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"পাঠান"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"একটি হোম অ্যাপ্লিকেশন নির্বাচন করুন"</string>
-    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"হোম হিসাবে %1$s ব্যবহার করুন"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"হোম হিসেবে %1$s ব্যবহার করুন"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ছবি তুলুন"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"এই দিয়ে ছবি তুলুন"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s দিয়ে ছবি তুলুন"</string>

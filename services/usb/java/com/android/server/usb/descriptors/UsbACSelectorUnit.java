@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+// import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Selector Unit Interface.
  * see audio10.pdf section 4.3.2.4
  */
-public class UsbACSelectorUnit extends UsbACInterface {
-    private static final String TAG = "ACSelectorUnit";
+public final class UsbACSelectorUnit extends UsbACInterface {
+    private static final String TAG = "UsbACSelectorUnit";
 
     private byte mUnitID;   // 3:1 Constant uniquely identifying the Unit within the audio function.
                             // This value is used in all requests to address this Unit.
@@ -62,4 +64,11 @@ public class UsbACSelectorUnit extends UsbACInterface {
 
         return mLength;
     }
+
+//    @Override
+//    public void report(ReportCanvas canvas) {
+//        super.report(canvas);
+//
+//        //TODO
+//    }
 }

@@ -211,9 +211,9 @@ public class MbmsDownloadManager {
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
     private AtomicReference<IMbmsDownloadService> mService = new AtomicReference<>(null);
-    private final IMbmsDownloadManagerCallback mCallback;
+    private final MbmsDownloadManagerCallback mCallback;
 
-    private MbmsDownloadManager(Context context, IMbmsDownloadManagerCallback callback, int subId) {
+    private MbmsDownloadManager(Context context, MbmsDownloadManagerCallback callback, int subId) {
         mContext = context;
         mCallback = callback;
         mSubscriptionId = subId;
@@ -221,12 +221,12 @@ public class MbmsDownloadManager {
 
     /**
      * Create a new MbmsDownloadManager using the system default data subscription ID.
-     * See {@link #create(Context, IMbmsDownloadManagerCallback, int)}
+     * See {@link #create(Context, MbmsDownloadManagerCallback, int)}
      *
      * @hide
      */
     public static MbmsDownloadManager create(Context context,
-            IMbmsDownloadManagerCallback listener)
+            MbmsDownloadManagerCallback listener)
             throws MbmsException {
         return create(context, listener, SubscriptionManager.getDefaultSubscriptionId());
     }
@@ -247,7 +247,7 @@ public class MbmsDownloadManager {
      * @hide
      */
     public static MbmsDownloadManager create(Context context,
-            IMbmsDownloadManagerCallback listener, int subscriptionId)
+            MbmsDownloadManagerCallback listener, int subscriptionId)
             throws MbmsException {
         MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, subscriptionId);
         mdm.bindAndInitialize();
@@ -261,10 +261,21 @@ public class MbmsDownloadManager {
                     public void onServiceConnected(ComponentName name, IBinder service) {
                         IMbmsDownloadService downloadService =
                                 IMbmsDownloadService.Stub.asInterface(service);
+                        int result;
                         try {
-                            downloadService.initialize(mSubscriptionId, mCallback);
+                            result = downloadService.initialize(mSubscriptionId, mCallback);
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
+                            return;
+                        } catch (RuntimeException e) {
+                            Log.e(LOG_TAG, "Runtime exception during initialization");
+                            mCallback.error(
+                                    MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    e.toString());
+                            return;
+                        }
+                        if (result != MbmsException.SUCCESS) {
+                            mCallback.error(result, "Error returned during initialization");
                             return;
                         }
                         mService.set(downloadService);

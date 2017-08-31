@@ -50,8 +50,13 @@ public class StreamingService {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({REASON_BY_USER_REQUEST, REASON_END_OF_SESSION, REASON_FREQUENCY_CONFLICT,
             REASON_OUT_OF_MEMORY, REASON_NOT_CONNECTED_TO_HOMECARRIER_LTE,
-            REASON_LEFT_MBMS_BROADCAST_AREA})
+            REASON_LEFT_MBMS_BROADCAST_AREA, REASON_NONE})
     public @interface StreamingStateChangeReason {}
+
+    /**
+     * Indicates that the middleware does not have a reason to provide for the state change.
+     */
+    public static final int REASON_NONE = 0;
 
     /**
      * State changed due to a call to {@link #stopStreaming()} or
@@ -167,7 +172,7 @@ public class StreamingService {
      *
      * This may throw a {@link MbmsException} with the error code
      * {@link MbmsException#ERROR_MIDDLEWARE_LOST}
-     * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     * May also throw an {@link IllegalStateException}
      */
     public void dispose() throws MbmsException {
         if (mService == null) {
@@ -179,6 +184,8 @@ public class StreamingService {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("StreamingService state inconsistent with middleware");
         } finally {
             mService = null;
         }

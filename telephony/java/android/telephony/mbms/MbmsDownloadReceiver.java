@@ -356,7 +356,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 intent.getParcelableExtra(MbmsDownloadManager.EXTRA_SERVICE_INFO);
         File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
                 serviceInfo.getServiceId());
-        List<Uri> filesInUse =
+        final List<Uri> filesInUse =
                 intent.getParcelableArrayListExtra(MbmsDownloadManager.EXTRA_TEMP_FILES_IN_USE);
         File[] filesToDelete = tempFileDir.listFiles(new FileFilter() {
             @Override
