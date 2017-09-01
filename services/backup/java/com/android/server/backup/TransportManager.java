@@ -455,7 +455,7 @@ public class TransportManager {
         }
     }
 
-    interface TransportBoundListener {
+    public interface TransportBoundListener {
         /** Should return true if this is a valid transport. */
         boolean onTransportBound(IBackupTransport binder);
     }

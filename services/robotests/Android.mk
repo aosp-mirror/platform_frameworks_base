@@ -73,4 +73,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_TEST_PACKAGE := FrameworksServicesLib
 
+LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))backup/java
+
 include prebuilts/misc/common/robolectric/run_robotests.mk
