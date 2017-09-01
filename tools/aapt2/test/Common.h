@@ -47,7 +47,7 @@ inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
 
 inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
   ConfigDescription config;
-  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration";
+  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
   return config;
 }
 

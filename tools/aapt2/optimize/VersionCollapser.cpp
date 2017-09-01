@@ -63,11 +63,9 @@ FilterIterator<Iterator, Pred> make_filter_iterator(Iterator begin,
 }
 
 /**
- * Every Configuration with an SDK version specified that is less than minSdk
- * will be removed.
- * The exception is when there is no exact matching resource for the minSdk. The
- * next smallest
- * one will be kept.
+ * Every Configuration with an SDK version specified that is less than minSdk will be removed. The
+ * exception is when there is no exact matching resource for the minSdk. The next smallest one will
+ * be kept.
  */
 static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
   // First look for all sdks less than minSdk.
@@ -80,11 +78,9 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
 
     const ConfigDescription& config = (*iter)->config;
     if (config.sdkVersion <= min_sdk) {
-      // This is the first configuration we've found with a smaller or equal SDK
-      // level
-      // to the minimum. We MUST keep this one, but remove all others we find,
-      // which get
-      // overridden by this one.
+      // This is the first configuration we've found with a smaller or equal SDK level to the
+      // minimum. We MUST keep this one, but remove all others we find, which get overridden by this
+      // one.
 
       ConfigDescription config_without_sdk = config.CopyWithoutSdkVersion();
       auto pred = [&](const std::unique_ptr<ResourceConfigValue>& val) -> bool {
@@ -115,11 +111,9 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
                          -> bool { return val == nullptr; }),
       entry->values.end());
 
-  // Strip the version qualifiers for every resource with version <= minSdk.
-  // This will ensure
-  // that the resource entries are all packed together in the same ResTable_type
-  // struct
-  // and take up less space in the resources.arsc table.
+  // Strip the version qualifiers for every resource with version <= minSdk. This will ensure that
+  // the resource entries are all packed together in the same ResTable_type struct and take up less
+  // space in the resources.arsc table.
   bool modified = false;
   for (std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
     if (config_value->config.sdkVersion != 0 &&
@@ -137,8 +131,8 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
   }
 
   if (modified) {
-    // We've modified the keys (ConfigDescription) by changing the sdkVersion to
-    // 0. We MUST re-sort to ensure ordering guarantees hold.
+    // We've modified the keys (ConfigDescription) by changing the sdkVersion to 0. We MUST re-sort
+    // to ensure ordering guarantees hold.
     std::sort(entry->values.begin(), entry->values.end(),
               [](const std::unique_ptr<ResourceConfigValue>& a,
                  const std::unique_ptr<ResourceConfigValue>& b) -> bool {

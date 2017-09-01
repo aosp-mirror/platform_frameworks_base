@@ -161,6 +161,8 @@ class PostProcessingConfigurationBuilder {
                                                      const std::vector<std::string>& locales);
   PostProcessingConfigurationBuilder& SetDensityGroup(const std::string& name,
                                                       const std::vector<std::string>& densities);
+  PostProcessingConfigurationBuilder& SetAndroidSdk(const std::string& name,
+                                                    const configuration::AndroidSdk& sdk);
   PostProcessingConfigurationBuilder& AddArtifact(const configuration::Artifact& artifact);
   configuration::PostProcessingConfiguration Build();
 
@@ -176,6 +178,7 @@ class ArtifactBuilder {
   ArtifactBuilder& SetAbiGroup(const std::string& name);
   ArtifactBuilder& SetDensityGroup(const std::string& name);
   ArtifactBuilder& SetLocaleGroup(const std::string& name);
+  ArtifactBuilder& SetAndroidSdk(const std::string& name);
   configuration::Artifact Build();
 
  private:

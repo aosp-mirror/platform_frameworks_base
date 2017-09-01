@@ -488,8 +488,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
     return false;
   }
 
-  auto& group = config->android_sdk_groups[label];
   bool valid = true;
+  bool found = false;
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "android-sdk") {
@@ -520,7 +520,11 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
         }
       }
 
-      group.push_back(entry);
+      config->android_sdk_groups[label] = entry;
+      if (found) {
+        valid = false;
+      }
+      found = true;
     }
   }
 

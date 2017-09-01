@@ -23,6 +23,9 @@
 #include "test/Common.h"
 #include "util/Util.h"
 
+using ::aapt::configuration::Abi;
+using ::aapt::configuration::AndroidSdk;
+using ::aapt::configuration::Artifact;
 using ::aapt::io::StringInputStream;
 using ::android::StringPiece;
 
@@ -213,7 +216,7 @@ std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* contex
 }
 
 PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetAbiGroup(
-    const std::string& name, const std::vector<configuration::Abi>& abis) {
+    const std::string& name, const std::vector<Abi>& abis) {
   config_.abi_groups[name] = abis;
   return *this;
 }
@@ -236,8 +239,14 @@ PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetDensi
   return *this;
 }
 
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetAndroidSdk(
+    const std::string& name, const AndroidSdk& sdk) {
+  config_.android_sdk_groups[name] = sdk;
+  return *this;
+}
+
 PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddArtifact(
-    const configuration::Artifact& artifact) {
+    const Artifact& artifact) {
   config_.artifacts.push_back(artifact);
   return *this;
 }
@@ -263,6 +272,11 @@ ArtifactBuilder& ArtifactBuilder::SetDensityGroup(const std::string& name) {
 
 ArtifactBuilder& ArtifactBuilder::SetLocaleGroup(const std::string& name) {
   artifact_.locale_group = {name};
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetAndroidSdk(const std::string& name) {
+  artifact_.android_sdk_group = {name};
   return *this;
 }
 

@@ -194,8 +194,10 @@ class OptimizeCommand {
 
     if (options_.configuration && options_.output_dir) {
       MultiApkGenerator generator{apk.get(), context_};
-      if (!generator.FromBaseApk(options_.output_dir.value(), options_.configuration.value(),
-                                 options_.table_flattener_options)) {
+      MultiApkGeneratorOptions generator_options = {options_.output_dir.value(),
+                                                    options_.configuration.value(),
+                                                    options_.table_flattener_options};
+      if (!generator.FromBaseApk(generator_options)) {
         return 1;
       }
     }
