@@ -312,6 +312,9 @@ message WifiLog {
 
   // Counts the number of AllSingleScanLister.onResult calls with a partial (channels) scan result
   optional int32 partial_all_single_scan_listener_results = 75;
+
+  // Pno scan metrics
+  optional PnoScanMetrics pno_scan_metrics = 76;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -926,4 +929,24 @@ message NumConnectableNetworksBucket {
 
   // Number of scan results with num_connectable_networks
   optional int32 count = 2 [default = 0];
+}
+
+// Pno scan metrics
+// Here "Pno Scan" refers to the session of offloaded scans, these metrics count the result of a
+// single session, and not the individual scans within that session.
+message PnoScanMetrics {
+  // Total number of attempts to offload pno scans
+  optional int32 num_pno_scan_attempts = 1;
+
+  // Total number of pno scans failed
+  optional int32 num_pno_scan_failed = 2;
+
+  // Number of pno scans started successfully over offload
+  optional int32 num_pno_scan_started_over_offload = 3;
+
+  // Number of pno scans failed over offload
+  optional int32 num_pno_scan_failed_over_offload = 4;
+
+  // Total number of pno scans that found any network
+  optional int32 num_pno_found_network_events = 5;
 }
