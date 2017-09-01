@@ -18,12 +18,13 @@
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/car_qs_background_primary"
+    android:background="@color/car_qs_background_primary"
     android:orientation="vertical"
-    android:elevation="4dp">
+    android:elevation="4dp"
+    android:theme="@android:style/Theme">
 
-    <include layout="@layout/car_status_bar_header" />
-    <include layout="@layout/car_qs_footer" />
+    <include layout="@layout/car_status_bar_header"/>
+    <include layout="@layout/car_qs_footer"/>
 
     <com.android.systemui.statusbar.car.UserGridView
         android:id="@+id/user_grid"
