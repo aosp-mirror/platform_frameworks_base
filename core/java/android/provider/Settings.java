@@ -10763,6 +10763,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ANIMATOR_DURATION_SCALE);
             INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES);
             INSTANT_APP_SETTINGS.add(WTF_IS_FATAL);
+            INSTANT_APP_SETTINGS.add(SEND_ACTION_APP_ERROR);
         }
 
         /**
