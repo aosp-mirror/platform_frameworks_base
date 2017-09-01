@@ -200,7 +200,7 @@ public class CarrierConfigManager {
     /** Display carrier settings menu if true */
     public static final String KEY_CARRIER_SETTINGS_ENABLE_BOOL = "carrier_settings_enable_bool";
 
-    /** Does not display additional call seting for IMS phone based on GSM Phone */
+    /** Does not display additional call setting for IMS phone based on GSM Phone */
     public static final String KEY_ADDITIONAL_CALL_SETTING_BOOL = "additional_call_setting_bool";
 
     /** Show APN Settings for some CDMA carriers */
