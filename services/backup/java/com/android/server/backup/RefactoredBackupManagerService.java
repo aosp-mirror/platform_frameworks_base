@@ -2808,7 +2808,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         Slog.v(TAG, "selectBackupTransportAsync() called with transport " +
                 transport.flattenToShortString());
 
-        mTransportManager.ensureTransportReady(transport, new SelectBackupTransportCallback() {
+        mTransportManager.ensureTransportReady(transport, new TransportManager.TransportReadyCallback() {
             @Override
             public void onSuccess(String transportName) {
                 mTransportManager.selectTransport(transportName);
