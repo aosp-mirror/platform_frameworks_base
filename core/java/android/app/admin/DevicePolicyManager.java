@@ -5983,6 +5983,26 @@ public class DevicePolicyManager {
     public static final int MAKE_USER_DEMO = 0x0004;
 
     /**
+     * Flag used by {@link #createAndManageUser} to specificy that the newly created user should be
+     * started in the background as part of the user creation.
+     */
+    // TODO: Investigate solutions for the case where reboot happens before setup is completed.
+    public static final int START_USER_IN_BACKGROUND = 0x0008;
+
+    /**
+     * @hide
+     */
+    @IntDef(
+            flag = true,
+            prefix = {"SKIP_", "MAKE_USER_", "START_"},
+            value = {SKIP_SETUP_WIZARD, MAKE_USER_EPHEMERAL, MAKE_USER_DEMO,
+                    START_USER_IN_BACKGROUND}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CreateAndManageUserFlags {}
+
+
+    /**
      * Called by a device owner to create a user with the specified name and a given component of
      * the calling package as profile owner. The UserHandle returned by this method should not be
      * persisted as user handles are recycled as users are removed and created. If you need to
@@ -6013,7 +6033,7 @@ public class DevicePolicyManager {
     public @Nullable UserHandle createAndManageUser(@NonNull ComponentName admin,
             @NonNull String name,
             @NonNull ComponentName profileOwner, @Nullable PersistableBundle adminExtras,
-            int flags) {
+            @CreateAndManageUserFlags int flags) {
         throwIfParentInstance("createAndManageUser");
         try {
             return mService.createAndManageUser(admin, name, profileOwner, adminExtras, flags);

@@ -43,6 +43,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.START_USER_IN_BACKGROUND;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -8158,7 +8159,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (user == null) {
             return null;
         }
-        // Set admin.
         final long id = mInjector.binderClearCallingIdentity();
         try {
             final String adminPkg = admin.getPackageName();
@@ -8171,30 +8171,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
                 }
             } catch (RemoteException e) {
-                Slog.e(LOG_TAG, "Failed to make remote calls for createAndManageUser, "
-                        + "removing created user", e);
-                mUserManager.removeUser(user.getIdentifier());
-                return null;
+                // Does not happen, same process
             }
 
+            // Set admin.
             setActiveAdmin(profileOwner, true, userHandle);
-            // User is not started yet, the broadcast by setActiveAdmin will not be received.
-            // So we store adminExtras for broadcasting when the user starts for first time.
-            synchronized(this) {
+            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
+            setProfileOwner(profileOwner, ownerName, userHandle);
+
+            synchronized (this) {
                 DevicePolicyData policyData = getUserData(userHandle);
                 policyData.mInitBundle = adminExtras;
                 policyData.mAdminBroadcastPending = true;
                 saveSettingsLocked(userHandle);
             }
-            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
-            setProfileOwner(profileOwner, ownerName, userHandle);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.USER_SETUP_COMPLETE, 1, userHandle);
             }
 
+            if ((flags & START_USER_IN_BACKGROUND) != 0) {
+                try {
+                    mInjector.getIActivityManager().startUserInBackground(user.getIdentifier());
+                } catch (RemoteException re) {
+                    // Does not happen, same process
+                }
+            }
+
             return user;
+        } catch (Throwable re) {
+            mUserManager.removeUser(user.getIdentifier());
+            return null;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
