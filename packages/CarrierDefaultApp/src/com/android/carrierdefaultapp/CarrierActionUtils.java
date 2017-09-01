@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.carrierdefaultapp.R;
@@ -199,13 +200,19 @@ public class CarrierActionUtils {
                                          PendingIntent pendingIntent) {
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
         final Resources resources = context.getResources();
+        String spn = telephonyMgr.getSimOperatorName();
+        if (TextUtils.isEmpty(spn)) {
+            // There is no consistent way to get the current carrier name as MNOs didn't
+            // bother to set EF_SPN. in the long term, we should display a generic wording if
+            // spn from subscription is not set.
+            spn = telephonyMgr.getNetworkOperatorName();
+        }
         final Bundle extras = Bundle.forPair(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 resources.getString(R.string.android_system_label));
         createNotificationChannels(context);
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentTitle(resources.getString(titleId))
-                .setContentText(String.format(resources.getString(textId),
-                        telephonyMgr.getNetworkOperatorName()))
+                .setContentText(String.format(resources.getString(textId), spn))
                 .setSmallIcon(R.drawable.ic_sim_card)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
