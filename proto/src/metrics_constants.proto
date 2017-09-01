@@ -4287,6 +4287,11 @@ message MetricsEvent {
     // OS: O MR
     APPLICATIONS_STORAGE_PHOTOS = 1092;
 
+    // ACTION: Logged when user tries to pair a Bluetooth device without name from Settings app
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1093;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // OPEN: Settings > Network & Internet > Mobile network
