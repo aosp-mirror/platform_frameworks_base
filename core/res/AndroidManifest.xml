@@ -2635,10 +2635,6 @@
     <permission android:name="android.permission.BIND_AUTOFILL_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- @hide TODO(b/37563972): remove once clients use BIND_AUTOFILL_SERVICE -->
-    <permission android:name="android.permission.BIND_AUTOFILL"
-        android:protectionLevel="signature" />
-
     <!-- Must be required by hotword enrollment application,
          to ensure that only the system can interact with it.
          @hide <p>Not for use by third-party applications.</p> -->
