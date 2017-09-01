@@ -132,6 +132,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // Preloads the next task
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
+                Rect windowRect = getWindowRect(null /* windowRectOverride */);
+                if (windowRect.isEmpty()) {
+                    return;
+                }
+
                 // Load the next task only if we aren't svelte
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
@@ -146,8 +151,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     // This callback is made when a new activity is launched and the old one is
                     // paused so ignore the current activity and try and preload the thumbnail for
                     // the previous one.
-                    updateDummyStackViewLayout(mBackgroundLayoutAlgorithm, stack,
-                            getWindowRect(null /* windowRectOverride */));
+                    updateDummyStackViewLayout(mBackgroundLayoutAlgorithm, stack, windowRect);
 
                     // Launched from app is always the worst case (in terms of how many
                     // thumbnails/tasks visible)
