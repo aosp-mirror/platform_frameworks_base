@@ -3093,7 +3093,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final TaskRecord task = r.getTask();
-        if (task.isApplicationTask()) {
+        if (task.isActivityTypeStandard()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {
                 // We are switching app tracking.  Complete the current one.
                 if (mCurAppTimeTracker != null) {
@@ -9934,7 +9934,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (!allowed) {
                         // If the caller doesn't have the GET_TASKS permission, then only
                         // allow them to see a small subset of tasks -- their own and home.
-                        if (!tr.isHomeTask() && tr.effectiveUid != callingUid) {
+                        if (!tr.isActivityTypeHome() && tr.effectiveUid != callingUid) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Skipping, not allowed: " + tr);
                             continue;
                         }
@@ -12945,7 +12945,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int userId;
         synchronized (this) {
             final ActivityStack focusedStack = getFocusedStack();
-            if (focusedStack == null || focusedStack.isAssistantStack()) {
+            if (focusedStack == null || focusedStack.isActivityTypeAssistant()) {
                 return false;
             }
 
@@ -13050,7 +13050,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, receiverExtras,
                     userHandle);
-            pae.isHome = activity.isHomeActivity();
+            pae.isHome = activity.isActivityTypeHome();
 
             // Increment the sessionId if necessary
             if (newSessionId) {

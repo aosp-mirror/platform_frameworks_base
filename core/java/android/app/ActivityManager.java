@@ -16,6 +16,10 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -873,6 +877,26 @@ public class ActivityManager {
                     windowingMode = WINDOWING_MODE_UNDEFINED;
             }
             return windowingMode;
+        }
+
+        /** Returns the activity type that should be used for this input stack id. */
+        // TODO: To be removed once we are not using stack id for stuff...
+        public static int getActivityTypeForStackId(int stackId) {
+            final int activityType;
+            switch (stackId) {
+                case HOME_STACK_ID:
+                    activityType = ACTIVITY_TYPE_HOME;
+                    break;
+                case RECENTS_STACK_ID:
+                    activityType = ACTIVITY_TYPE_RECENTS;
+                    break;
+                case ASSISTANT_STACK_ID:
+                    activityType = ACTIVITY_TYPE_ASSISTANT;
+                    break;
+                default :
+                    activityType = ACTIVITY_TYPE_STANDARD;
+            }
+            return activityType;
         }
     }
 

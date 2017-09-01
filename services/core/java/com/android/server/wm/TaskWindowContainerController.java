@@ -51,18 +51,17 @@ public class TaskWindowContainerController
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
             StackWindowController stackController, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean toTop, boolean showForAllUsers,
-            TaskDescription taskDescription) {
+            boolean toTop, boolean showForAllUsers, TaskDescription taskDescription) {
         this(taskId, listener, stackController, userId, bounds, overrideConfig, resizeMode,
-                supportsPictureInPicture, homeTask, toTop, showForAllUsers, taskDescription,
+                supportsPictureInPicture, toTop, showForAllUsers, taskDescription,
                 WindowManagerService.getInstance());
     }
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
             StackWindowController stackController, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean toTop, boolean showForAllUsers,
-            TaskDescription taskDescription, WindowManagerService service) {
+            boolean toTop, boolean showForAllUsers, TaskDescription taskDescription,
+            WindowManagerService service) {
         super(listener, service);
         mTaskId = taskId;
         mHandler = new H(new WeakReference<>(this), service.mH.getLooper());
@@ -78,7 +77,7 @@ public class TaskWindowContainerController
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
             final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, taskDescription);
+                    supportsPictureInPicture, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             // We only want to move the parents to the parents if we are creating this task at the
             // top of its stack.
@@ -89,9 +88,9 @@ public class TaskWindowContainerController
     @VisibleForTesting
     Task createTask(int taskId, TaskStack stack, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, TaskDescription taskDescription) {
+            TaskDescription taskDescription) {
         return new Task(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
-                supportsPictureInPicture, homeTask, taskDescription, this);
+                supportsPictureInPicture, taskDescription, this);
     }
 
     @Override

@@ -36,6 +36,9 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.app.ActivityManager.StackId.isDynamicStack;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -72,9 +75,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAV
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
@@ -1507,7 +1507,7 @@ class ActivityStarter {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
                intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info,
-                       mStartActivity.isHomeActivity());
+                       mStartActivity.isActivityTypeHome());
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
@@ -1669,21 +1669,21 @@ class ActivityStarter {
         if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                 == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
             // Caller wants to appear on home activity.
-            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
             return;
-        } else if (focusedStack == null || focusedStack.isHomeStack()) {
+        } else if (focusedStack == null || focusedStack.isActivityTypeHome()) {
             // Task will be launched over the home stack, so return home.
-            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
             return;
         } else if (focusedStack != null && focusedStack != task.getStack() &&
-                focusedStack.isAssistantStack()) {
+                focusedStack.isActivityTypeAssistant()) {
             // Task was launched over the assistant stack, so return there
-            task.setTaskToReturnTo(ASSISTANT_ACTIVITY_TYPE);
+            task.setTaskToReturnTo(ACTIVITY_TYPE_ASSISTANT);
             return;
         }
 
         // Else we are coming from an application stack so return to an application.
-        task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+        task.setTaskToReturnTo(ACTIVITY_TYPE_STANDARD);
     }
 
     private void setTaskFromIntentActivity(ActivityRecord intentActivity) {
@@ -1791,7 +1791,7 @@ class ActivityStarter {
                     mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                     mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
-                    mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity.mActivityType);
+                    mVoiceInteractor, !mLaunchTaskBehind /* toTop */);
             addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
             if (mLaunchBounds != null) {
                 final int stackId = mTargetStack.mStackId;
@@ -1995,7 +1995,7 @@ class ActivityStarter {
         final ActivityRecord prev = mTargetStack.topActivity();
         final TaskRecord task = (prev != null) ? prev.getTask() : mTargetStack.createTaskRecord(
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
-                mIntent, null, null, true, mStartActivity.mActivityType);
+                mIntent, null, null, true);
         addOrReparentStartingActivity(task, "setTaskToCurrentTopOrCreateNewTask");
         mTargetStack.positionChildWindowContainerAtTop(task);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
@@ -2124,7 +2124,7 @@ class ActivityStarter {
                 canUseFocusedStack = true;
                 break;
             case ASSISTANT_STACK_ID:
-                canUseFocusedStack = r.isAssistantActivity();
+                canUseFocusedStack = r.isActivityTypeAssistant();
                 break;
             case DOCKED_STACK_ID:
                 // Any activity which supports split screen can go in the docked stack.
@@ -2155,13 +2155,13 @@ class ActivityStarter {
 
         // If the activity is of a specific type, return the associated stack, creating it if
         // necessary
-        if (r.isHomeActivity()) {
+        if (r.isActivityTypeHome()) {
             return mSupervisor.mHomeStack;
         }
-        if (r.isRecentsActivity()) {
+        if (r.isActivityTypeRecents()) {
             return mSupervisor.getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
-        if (r.isAssistantActivity()) {
+        if (r.isActivityTypeAssistant()) {
             return mSupervisor.getStack(ASSISTANT_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
 
@@ -2254,9 +2254,9 @@ class ActivityStarter {
             case PINNED_STACK_ID:
                 return r.supportsPictureInPicture();
             case RECENTS_STACK_ID:
-                return r.isRecentsActivity();
+                return r.isActivityTypeRecents();
             case ASSISTANT_STACK_ID:
-                return r.isAssistantActivity();
+                return r.isActivityTypeAssistant();
             default:
                 if (StackId.isDynamicStack(stackId)) {
                     return r.canBeLaunchedOnDisplay(displayId);

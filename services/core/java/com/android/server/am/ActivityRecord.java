@@ -33,6 +33,12 @@ import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
@@ -226,12 +232,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
-    static final int APPLICATION_ACTIVITY_TYPE = 0;
-    static final int HOME_ACTIVITY_TYPE = 1;
-    static final int RECENTS_ACTIVITY_TYPE = 2;
-    static final int ASSISTANT_ACTIVITY_TYPE = 3;
-    int mActivityType;
-
     private CharSequence nonLocalizedLabel;  // the label information from the package mgr.
     private int labelRes;           // the label information from the package mgr.
     private int icon;               // resource identifier of activity's icon.
@@ -388,7 +388,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
-                pw.print(" mActivityType="); pw.println(mActivityType);
+                pw.print(" mActivityType="); pw.println(
+                        activityTypeToString(getActivityType()));
         if (rootVoiceInteraction) {
             pw.print(prefix); pw.print("rootVoiceInteraction="); pw.println(rootVoiceInteraction);
         }
@@ -495,7 +496,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
-                pw.println(activityTypeToString(mActivityType));
+                pw.println(activityTypeToString(getActivityType()));
         if (requestedVrComponent != null) {
             pw.print(prefix);
             pw.print("requestedVrComponent=");
@@ -937,7 +938,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
                 ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L,
-                getOverrideConfiguration(), mBounds);
+                new Configuration(getOverrideConfiguration()), mBounds);
 
         task.addActivityToTop(this);
 
@@ -1027,10 +1028,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void setActivityType(boolean componentSpecified, int launchedFromUid, Intent intent,
             ActivityOptions options, ActivityRecord sourceRecord) {
+        int activityType = ACTIVITY_TYPE_UNDEFINED;
         if ((!componentSpecified || canLaunchHomeActivity(launchedFromUid, sourceRecord))
                 && isHomeIntent(intent) && !isResolverActivity()) {
             // This sure looks like a home activity!
-            mActivityType = HOME_ACTIVITY_TYPE;
+            activityType = ACTIVITY_TYPE_HOME;
 
             if (info.resizeMode == RESIZE_MODE_FORCE_RESIZEABLE
                     || info.resizeMode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
@@ -1038,13 +1040,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
         } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
-            mActivityType = RECENTS_ACTIVITY_TYPE;
+            activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchStackId() == ASSISTANT_STACK_ID
                 && canLaunchAssistActivity(launchedFromPackage)) {
-            mActivityType = ASSISTANT_ACTIVITY_TYPE;
-        } else {
-            mActivityType = APPLICATION_ACTIVITY_TYPE;
+            activityType = ACTIVITY_TYPE_ASSISTANT;
         }
+        setActivityType(activityType);
     }
 
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
@@ -1095,18 +1096,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return stack != null && stack.isInStackLocked(this) != null;
     }
 
-    boolean isHomeActivity() {
-        return mActivityType == HOME_ACTIVITY_TYPE;
-    }
-
-    boolean isRecentsActivity() {
-        return mActivityType == RECENTS_ACTIVITY_TYPE;
-    }
-
-    boolean isAssistantActivity() {
-        return mActivityType == ASSISTANT_ACTIVITY_TYPE;
-    }
-
     boolean isPersistable() {
         return (info.persistableMode == PERSIST_ROOT_ONLY ||
                 info.persistableMode == PERSIST_ACROSS_REBOOTS) &&
@@ -1133,7 +1122,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return whether this activity supports PiP multi-window and can be put in the pinned stack.
      */
     boolean supportsPictureInPicture() {
-        return service.mSupportsPictureInPicture && !isHomeActivity()
+        return service.mSupportsPictureInPicture && isActivityTypeStandard()
                 && info.supportsPictureInPicture();
     }
 
@@ -1159,7 +1148,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return whether this activity supports non-PiP multi-window.
      */
     private boolean supportsResizeableMultiWindow() {
-        return service.mSupportsMultiWindow && !isHomeActivity()
+        return service.mSupportsMultiWindow && !isActivityTypeHome()
                 && (ActivityInfo.isResizeableMode(info.resizeMode)
                         || service.mForceResizableActivities);
     }
@@ -1541,7 +1530,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         boolean isVisible = !behindFullscreenActivity || mLaunchTaskBehind;
 
-        if (service.mSupportsLeanbackOnly && isVisible && isRecentsActivity()) {
+        if (service.mSupportsLeanbackOnly && isVisible && isActivityTypeRecents()) {
             // On devices that support leanback only (Android TV), Recents activity can only be
             // visible if the home stack is the focused stack or we are in split-screen mode.
             isVisible = mStackSupervisor.getStack(DOCKED_STACK_ID) != null
@@ -1619,7 +1608,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         newIntents = null;
         stopped = false;
 
-        if (isHomeActivity()) {
+        if (isActivityTypeHome()) {
             ProcessRecord app = task.mActivities.get(0).app;
             if (app != null && app != service.mHomeProcess) {
                 service.mHomeProcess = app;
@@ -2149,7 +2138,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             config.getOverrideConfiguration());
     }
 
-    void setLastReportedConfiguration(Configuration global, Configuration override) {
+    private void setLastReportedConfiguration(Configuration global, Configuration override) {
         mLastReportedConfiguration.setConfiguration(global, override);
     }
 
@@ -2720,16 +2709,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         r.createTime = createTime;
 
         return r;
-    }
-
-    private static String activityTypeToString(int type) {
-        switch (type) {
-            case APPLICATION_ACTIVITY_TYPE: return "APPLICATION_ACTIVITY_TYPE";
-            case HOME_ACTIVITY_TYPE: return "HOME_ACTIVITY_TYPE";
-            case RECENTS_ACTIVITY_TYPE: return "RECENTS_ACTIVITY_TYPE";
-            case ASSISTANT_ACTIVITY_TYPE: return "ASSISTANT_ACTIVITY_TYPE";
-            default: return Integer.toString(type);
-        }
     }
 
     private static boolean isInVrUiMode(Configuration config) {

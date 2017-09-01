@@ -608,8 +608,7 @@ public class DockedStackDividerController implements DimLayerUser {
         final TaskStack fullscreenStack =
                 mDisplayContent.getStackById(FULLSCREEN_WORKSPACE_STACK_ID);
         final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
-        final boolean homeBehind = (fullscreenStack != null && fullscreenStack.isVisible())
-                || (homeStack.hasMultipleTaskWithHomeTaskNotTop());
+        final boolean homeBehind = fullscreenStack != null && fullscreenStack.isVisible();
         setMinimizedDockedStack(homeVisible && !homeBehind, animate);
     }
 

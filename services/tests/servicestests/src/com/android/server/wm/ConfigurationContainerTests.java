@@ -16,23 +16,29 @@
 
 package com.android.server.wm;
 
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import android.content.res.Configuration;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import android.content.res.Configuration;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test class for {@link ConfigurationContainer}.
@@ -199,6 +205,62 @@ public class ConfigurationContainerTests {
         assertEquals(childOverrideConfig2, child2.getOverrideConfiguration());
         assertEquals(mergedOverrideConfig2, child2.getMergedOverrideConfiguration());
         assertEquals(mergedConfig2, child2.getConfiguration());
+    }
+
+    @Test
+    public void testSetWindowingMode() throws Exception {
+        final TestConfigurationContainer root = new TestConfigurationContainer();
+        root.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        final TestConfigurationContainer child = root.addChild();
+        child.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(WINDOWING_MODE_UNDEFINED, root.getWindowingMode());
+        assertEquals(WINDOWING_MODE_FREEFORM, child.getWindowingMode());
+
+        root.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, root.getWindowingMode());
+        assertEquals(WINDOWING_MODE_FREEFORM, child.getWindowingMode());
+    }
+
+    @Test
+    public void testSetActivityType() throws Exception {
+        final TestConfigurationContainer root = new TestConfigurationContainer();
+        root.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        final TestConfigurationContainer child = root.addChild();
+        child.setActivityType(ACTIVITY_TYPE_STANDARD);
+        assertEquals(ACTIVITY_TYPE_UNDEFINED, root.getActivityType());
+        assertEquals(ACTIVITY_TYPE_STANDARD, child.getActivityType());
+
+        boolean gotException = false;
+        try {
+            // Can't change activity type once set.
+            child.setActivityType(ACTIVITY_TYPE_HOME);
+        } catch (IllegalStateException e) {
+            gotException = true;
+        }
+        assertTrue("Can't change activity type once set.", gotException);
+
+        gotException = false;
+        try {
+            // Parent can't change child's activity type once set.
+            root.setActivityType(ACTIVITY_TYPE_HOME);
+        } catch (IllegalStateException e) {
+            gotException = true;
+        }
+        assertTrue("Parent can't change activity type once set.", gotException);
+        assertEquals(ACTIVITY_TYPE_HOME, root.getActivityType());
+
+        final TestConfigurationContainer child2 = new TestConfigurationContainer();
+        child2.setActivityType(ACTIVITY_TYPE_RECENTS);
+
+        gotException = false;
+        try {
+            // Can't re-parent to a different activity type.
+            root.addChild(child2);
+        } catch (IllegalStateException e) {
+            gotException = true;
+        }
+        assertTrue("Can't re-parent to a different activity type.", gotException);
+
     }
 
     /**
