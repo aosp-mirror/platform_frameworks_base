@@ -137,6 +137,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private static final String FRAGMENT_TAG = "FRAGMENT_TAG";
 
+    private static final String MORE_OPTIONS_ACTIVITY_IN_PROGRESS_KEY =
+            PrintActivity.class.getName() + ".MORE_OPTIONS_ACTIVITY_IN_PROGRESS";
+
     private static final String HAS_PRINTED_PREF = "has_printed";
 
     private static final int LOADER_ID_ENABLED_PRINT_SERVICES = 1;
@@ -226,6 +229,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private Button mMoreOptionsButton;
 
+    /**
+     * The {@link #mMoreOptionsButton} was pressed and we started the
+     * @link #mAdvancedPrintOptionsActivity} and it has not yet {@link #onActivityResult returned}.
+     */
+    private boolean mIsMoreOptionsActivityInProgress;
+
     private ImageView mPrintButton;
 
     private ProgressMessageController mProgressMessageController;
@@ -267,6 +276,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         setTitle(R.string.print_dialog);
 
         Bundle extras = getIntent().getExtras();
+
+        if (savedInstanceState != null) {
+            mIsMoreOptionsActivityInProgress =
+                    savedInstanceState.getBoolean(MORE_OPTIONS_ACTIVITY_IN_PROGRESS_KEY);
+        }
 
         mPrintJob = extras.getParcelable(PrintManager.EXTRA_PRINT_JOB);
         if (mPrintJob == null) {
@@ -421,6 +435,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(MORE_OPTIONS_ACTIVITY_IN_PROGRESS_KEY,
+                mIsMoreOptionsActivityInProgress);
     }
 
     @Override
@@ -799,16 +821,24 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             intent.putExtra(PrintService.EXTRA_PRINT_DOCUMENT_INFO,
                     mPrintedDocument.getDocumentInfo().info);
 
+            mIsMoreOptionsActivityInProgress = true;
+
             // This is external activity and may not be there.
             try {
                 startActivityForResult(intent, ACTIVITY_REQUEST_POPULATE_ADVANCED_PRINT_OPTIONS);
             } catch (ActivityNotFoundException anfe) {
+                mIsMoreOptionsActivityInProgress = false;
                 Log.e(LOG_TAG, "Error starting activity for intent: " + intent, anfe);
             }
+
+            mMoreOptionsButton.setEnabled(!mIsMoreOptionsActivityInProgress);
         }
     }
 
     private void onAdvancedPrintOptionsActivityResult(int resultCode, Intent data) {
+        mIsMoreOptionsActivityInProgress = false;
+        mMoreOptionsButton.setEnabled(true);
+
         if (resultCode != RESULT_OK || data == null) {
             return;
         }
@@ -1903,7 +1933,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Advanced print options
         if (mAdvancedPrintOptionsActivity != null) {
             mMoreOptionsButton.setVisibility(View.VISIBLE);
-            mMoreOptionsButton.setEnabled(true);
+
+            mMoreOptionsButton.setEnabled(!mIsMoreOptionsActivityInProgress);
         } else {
             mMoreOptionsButton.setVisibility(View.GONE);
             mMoreOptionsButton.setEnabled(false);
