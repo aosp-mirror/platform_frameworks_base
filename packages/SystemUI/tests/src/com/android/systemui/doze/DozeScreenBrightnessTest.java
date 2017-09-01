@@ -60,7 +60,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensorManager = new FakeSensorManager(mContext);
         mSensor = mSensorManager.getFakeLightSensor();
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                mSensor.getSensor(), mHostFake, null /* handler */);
+                mSensor.getSensor(), mHostFake, null /* handler */,
+                new AlwaysOnDisplayPolicy(mContext));
     }
 
     @Test
@@ -135,7 +136,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     @Test
     public void testNullSensor() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                null /* sensor */, mHostFake, null /* handler */);
+                null /* sensor */, mHostFake, null /* handler */,
+                new AlwaysOnDisplayPolicy(mContext));
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
