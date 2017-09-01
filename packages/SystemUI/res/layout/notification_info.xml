@@ -62,7 +62,9 @@
             android:layout_height="wrap_content"
             android:textAppearance="@*android:style/TextAppearance.Material.Notification.Info"
             android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"/>
+            android:layout_marginEnd="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"/>
     </LinearLayout>
 
     <!-- Channel Info Block -->
