@@ -37,5 +37,9 @@
     <dimen name="car_start_driving_corner_radius">16dp</dimen>
     <dimen name="car_start_driving_padding_side">30dp</dimen>
     <dimen name="car_start_driving_height">80dp</dimen>
-    <dimen name="car_start_driving_text_size">32sp</dimen> <!-- B2 -->
+    <dimen name="car_start_driving_text_size">@dimen/car_body2_size</dimen>
+
+    <dimen name="car_qs_footer_user_name_text_size">@dimen/car_body2_size</dimen>
+
+    <dimen name="car_body2_size">26sp</dimen>
 </resources>
