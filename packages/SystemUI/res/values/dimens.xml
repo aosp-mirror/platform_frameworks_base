@@ -854,4 +854,7 @@
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 
+    <!-- Home button padding for sizing -->
+    <dimen name="home_padding">15dp</dimen>
+
 </resources>
