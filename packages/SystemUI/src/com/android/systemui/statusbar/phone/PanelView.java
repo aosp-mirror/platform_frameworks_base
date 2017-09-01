@@ -404,8 +404,8 @@ public abstract class PanelView extends FrameLayout {
                 false /* collapseWhenFinished */);
         notifyBarPanelExpansionChanged();
         if (mVibrateOnOpening && !isHapticFeedbackDisabled(mContext)) {
-            AsyncTask.execute(
-                    () -> mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_TICK)));
+            AsyncTask.execute(() ->
+                    mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_TICK, false)));
         }
     }
 
