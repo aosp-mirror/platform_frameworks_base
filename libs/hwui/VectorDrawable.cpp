@@ -511,22 +511,16 @@ void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* 
         }
     }
     if (!canReuseSurface || mCache.dirty) {
-        draw(surface.get(), dst);
+        if (surface) {
+            Bitmap& bitmap = getBitmapUpdateIfDirty();
+            SkBitmap skiaBitmap;
+            bitmap.getSkBitmap(&skiaBitmap);
+            if (!surface->getCanvas()->writePixels(skiaBitmap, dst.fLeft, dst.fTop)) {
+                ALOGD("VectorDrawable caching failed to efficiently upload");
+                surface->getCanvas()->drawBitmap(skiaBitmap, dst.fLeft, dst.fTop);
+            }
+        }
         mCache.dirty = false;
-    }
-}
-
-void Tree::draw(SkSurface* surface, const SkRect& dst) {
-    if (surface) {
-        SkCanvas* canvas = surface->getCanvas();
-        float scaleX = dst.width() / mProperties.getViewportWidth();
-        float scaleY = dst.height() / mProperties.getViewportHeight();
-        SkAutoCanvasRestore acr(canvas, true);
-        canvas->translate(dst.fLeft, dst.fTop);
-        canvas->clipRect(SkRect::MakeWH(dst.width(), dst.height()));
-        canvas->clear(SK_ColorTRANSPARENT);
-        canvas->scale(scaleX, scaleY);
-        mRootNode->draw(canvas, false);
     }
 }
 
@@ -570,22 +564,15 @@ void Tree::draw(SkCanvas* canvas) {
         // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
         // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
         // frame will be cached into the atlas.
+        Bitmap& bitmap = getBitmapUpdateIfDirty();
+        SkBitmap skiaBitmap;
+        bitmap.getSkBitmap(&skiaBitmap);
+
         int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
         int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        SkRect src = SkRect::MakeWH(scaledWidth, scaledHeight);
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-        sk_sp<SkColorSpace> colorSpace = nullptr;
-#else
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-#endif
-        SkImageInfo info = SkImageInfo::MakeN32(scaledWidth, scaledHeight, kPremul_SkAlphaType,
-                colorSpace);
-        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(canvas->getGrContext(),
-                SkBudgeted::kYes, info);
-        draw(surface.get(), src);
+        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight),
+                        mutateProperties()->getBounds(), getPaint(), SkCanvas::kFast_SrcRectConstraint);
         mCache.clear();
-        canvas->drawImageRect(surface->makeImageSnapshot().get(), mutateProperties()->getBounds(),
-                getPaint(), SkCanvas::kFast_SrcRectConstraint);
         markDirty();
     }
 }

@@ -270,7 +270,10 @@ sk_sp<SkSurface> VectorDrawableAtlas::createSurface(int width, int height, GrCon
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
 #endif
     SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
-    return SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info);
+    // This must have a top-left origin so that calls to surface->canvas->writePixels
+    // performs a basic texture upload instead of a more complex drawing operation
+    return SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info, 0,
+            kTopLeft_GrSurfaceOrigin, nullptr);
 }
 
 void VectorDrawableAtlas::setStorageMode(StorageMode mode) {

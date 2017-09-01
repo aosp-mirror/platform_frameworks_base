@@ -738,11 +738,6 @@ private:
     bool canReuseBitmap(Bitmap*, int width, int height);
     void updateBitmapCache(Bitmap& outCache, bool useStagingData);
 
-    /**
-     * Draws the root node into "surface" at a given "dst" position.
-     */
-    void draw(SkSurface* surface, const SkRect& dst);
-
     // Cap the bitmap size, such that it won't hurt the performance too much
     // and it won't crash due to a very large scale.
     // The drawable will look blurry above this size.
