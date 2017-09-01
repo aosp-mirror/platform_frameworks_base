@@ -301,6 +301,17 @@
          less than 0x600 -->
     <bool translatable="false" name="config_apfDrop802_3Frames">true</bool>
 
+    <!-- An array of Black listed EtherType, packets with EtherTypes within this array
+         will be dropped
+         TODO: need to put proper values, these are for testing purposes only -->
+    <integer-array translatable="false" name="config_apfEthTypeBlackList">
+        <item>0x88A2</item>
+        <item>0x88A4</item>
+        <item>0x88B8</item>
+        <item>0x88CD</item>
+        <item>0x88E3</item>
+    </integer-array>
+
     <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
          device behaviour is controlled by Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE.
          This is the default value of that setting. -->
