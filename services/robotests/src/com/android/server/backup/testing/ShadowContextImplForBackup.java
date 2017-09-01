@@ -29,20 +29,36 @@ import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowContextImpl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of ContextImpl shadow, handling bindServiceAsUser().
  */
 @Implements(className = ShadowContextImpl.CLASS_NAME)
-public class ShadowContextImplWithBindServiceAsUser extends ShadowContextImpl {
+public class ShadowContextImplForBackup extends ShadowContextImpl {
     public static Map<ComponentName, IBinder> sComponentBinderMap = new HashMap<>();
+    public static Set<ComponentName> sUnbindableComponents = new HashSet<>();
 
     @Implementation
     public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
             int flags, UserHandle user) {
+        if (sUnbindableComponents.contains(service.getComponent())) {
+            return false;
+        }
+
         ShadowApplication.getInstance().setComponentNameAndServiceForBindService(
                 service.getComponent(), sComponentBinderMap.get(service.getComponent()));
         return bindService(service, conn, flags);
+    }
+
+
+    /**
+     * Resets backup-related shadow state.
+     */
+    public static void resetBackupShadowState() {
+        sComponentBinderMap.clear();
+        sUnbindableComponents.clear();
     }
 }
