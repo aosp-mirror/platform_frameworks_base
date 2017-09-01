@@ -59,7 +59,7 @@ public class DozeFactory {
 
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
         machine.setParts(new DozeMachine.Part[]{
-                new DozePauser(handler, machine, alarmManager),
+                new DozePauser(handler, machine, alarmManager, new AlwaysOnDisplayPolicy(context)),
                 new DozeFalsingManagerAdapter(FalsingManager.getInstance(context)),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine),
@@ -76,7 +76,8 @@ public class DozeFactory {
             Handler handler) {
         Sensor sensor = DozeSensors.findSensorWithType(sensorManager,
                 context.getString(R.string.doze_brightness_sensor_type));
-        return new DozeScreenBrightness(context, service, sensorManager, sensor, host, handler);
+        return new DozeScreenBrightness(context, service, sensorManager, sensor, host, handler,
+                new AlwaysOnDisplayPolicy(context));
     }
 
     private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
