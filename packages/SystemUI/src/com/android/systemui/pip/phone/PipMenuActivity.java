@@ -19,6 +19,7 @@ package com.android.systemui.pip.phone;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MENU_STATE;
@@ -132,7 +133,8 @@ public class PipMenuActivity extends Activity {
                     showMenu(data.getInt(EXTRA_MENU_STATE),
                             data.getParcelable(EXTRA_STACK_BOUNDS),
                             data.getParcelable(EXTRA_MOVEMENT_BOUNDS),
-                            data.getBoolean(EXTRA_ALLOW_TIMEOUT));
+                            data.getBoolean(EXTRA_ALLOW_TIMEOUT),
+                            data.getBoolean(EXTRA_WILL_RESIZE_MENU));
                     break;
                 }
                 case MESSAGE_POKE_MENU:
@@ -307,12 +309,14 @@ public class PipMenuActivity extends Activity {
     }
 
     private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
-            boolean allowMenuTimeout) {
+            boolean allowMenuTimeout, boolean resizeMenuOnShow) {
         mAllowMenuTimeout = allowMenuTimeout;
         if (mMenuState != menuState) {
-            boolean deferTouchesUntilAnimationEnds = (mMenuState == MENU_STATE_FULL) ||
-                    (menuState == MENU_STATE_FULL);
-            mAllowTouches = !deferTouchesUntilAnimationEnds;
+            // Disallow touches if the menu needs to resize while showing, and we are transitioning
+            // to/from a full menu state.
+            boolean disallowTouchesUntilAnimationEnd = resizeMenuOnShow &&
+                    (mMenuState == MENU_STATE_FULL || menuState == MENU_STATE_FULL);
+            mAllowTouches = !disallowTouchesUntilAnimationEnd;
             cancelDelayedFinish();
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
@@ -409,7 +413,8 @@ public class PipMenuActivity extends Activity {
             Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);
             Rect movementBounds = intent.getParcelableExtra(EXTRA_MOVEMENT_BOUNDS);
             boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
-            showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout);
+            boolean willResizeMenu = intent.getBooleanExtra(EXTRA_WILL_RESIZE_MENU, false);
+            showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout, willResizeMenu);
         }
     }
 
