@@ -2028,4 +2028,10 @@
         been identified for them as running). [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
 
+
+    <!-- Warning shown when user input has been blocked due to another app overlaying screen
+         content. Since we don't know what the app is showing on top of the input target, we
+         can't verify user consent. [CHAR LIMIT=NONE] -->
+    <string name="touch_filtered_warning">Because an app is obscuring a permission request, Settings
+        can’t verify your response.</string>
 </resources>
