@@ -18,32 +18,36 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.annotation.RequiresPermission;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.UserHandle;
+import android.os.IBinder;
+import android.platform.test.annotations.Presubmit;
+
+import com.android.server.backup.testing.BackupTransportStub;
+import com.android.server.backup.testing.DefaultPackageManagerWithQueryIntentServicesAsUser;
+import com.android.server.backup.testing.ShadowBackupTransportStub;
+import com.android.server.backup.testing.ShadowContextImplWithBindServiceAsUser;
+import com.android.server.backup.testing.TransportBoundListenerStub;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.res.ResourceLoader;
-import org.robolectric.res.builder.DefaultPackageManager;
 import org.robolectric.res.builder.RobolectricPackageManager;
-import org.robolectric.shadows.ShadowContextImpl;
+import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -51,12 +55,18 @@ import java.util.List;
 @Config(
         manifest = Config.NONE,
         sdk = 23,
-        shadows = {TransportManagerTest.ShadowContextImplWithBindServiceAsUser.class}
+        shadows = {
+                ShadowContextImplWithBindServiceAsUser.class,
+                ShadowBackupTransportStub.class
+        }
 )
+@Presubmit
 public class TransportManagerTest {
     private static final String PACKAGE_NAME = "some.package.name";
     private static final String TRANSPORT1_NAME = "transport1.name";
     private static final String TRANSPORT2_NAME = "transport2.name";
+    private static final List<String> TRANSPORTS_NAMES = Arrays.asList(
+            TRANSPORT1_NAME, TRANSPORT2_NAME);
     private static final ComponentName TRANSPORT1_COMPONENT_NAME = new ComponentName(PACKAGE_NAME,
             TRANSPORT1_NAME);
     private static final ComponentName TRANSPORT2_COMPONENT_NAME = new ComponentName(PACKAGE_NAME,
@@ -66,72 +76,131 @@ public class TransportManagerTest {
 
     private RobolectricPackageManager mPackageManager;
 
-    @Mock private TransportManager.TransportBoundListener mTransportBoundListener;
+    @Mock private IBinder mTransport1BinderMock;
+    @Mock private IBinder mTransport2BinderMock;
+
+    private final BackupTransportStub mTransport1Stub = new BackupTransportStub(TRANSPORT1_NAME);
+    private final BackupTransportStub mTransport2Stub = new BackupTransportStub(TRANSPORT2_NAME);
+    private final TransportBoundListenerStub mTransportBoundListenerStub =
+            new TransportBoundListenerStub(true);
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        ShadowLog.stream = System.out;
         mPackageManager = new DefaultPackageManagerWithQueryIntentServicesAsUser(
                 RuntimeEnvironment.getAppResourceLoader());
         RuntimeEnvironment.setRobolectricPackageManager(mPackageManager);
+
+        ShadowContextImplWithBindServiceAsUser.sComponentBinderMap.put(TRANSPORT1_COMPONENT_NAME,
+                mTransport1BinderMock);
+        ShadowContextImplWithBindServiceAsUser.sComponentBinderMap.put(TRANSPORT2_COMPONENT_NAME,
+                mTransport2BinderMock);
+        ShadowBackupTransportStub.sBinderTransportMap.put(mTransport1BinderMock, mTransport1Stub);
+        ShadowBackupTransportStub.sBinderTransportMap.put(mTransport2BinderMock, mTransport2Stub);
     }
 
     @Test
-    public void onPackageAdded_bindsToAllTransports() {
-        Intent intent = new Intent(TransportManager.SERVICE_ACTION_TRANSPORT_HOST);
-        intent.setPackage(PACKAGE_NAME);
-
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.packageName = PACKAGE_NAME;
-        packageInfo.applicationInfo = new ApplicationInfo();
-        packageInfo.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
-
-        mPackageManager.addPackage(packageInfo);
-
-        ResolveInfo transport1 = new ResolveInfo();
-        transport1.serviceInfo = new ServiceInfo();
-        transport1.serviceInfo.packageName = PACKAGE_NAME;
-        transport1.serviceInfo.name = TRANSPORT1_NAME;
-
-        ResolveInfo transport2 = new ResolveInfo();
-        transport2.serviceInfo = new ServiceInfo();
-        transport2.serviceInfo.packageName = PACKAGE_NAME;
-        transport2.serviceInfo.name = TRANSPORT2_NAME;
-
-        mPackageManager.addResolveInfoForIntent(intent, Arrays.asList(transport1, transport2));
+    public void onPackageAdded_bindsToAllTransports() throws Exception {
+        setUpPackageWithTransports(PACKAGE_NAME, TRANSPORTS_NAMES,
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
         TransportManager transportManager = new TransportManager(
                 RuntimeEnvironment.application.getApplicationContext(),
                 new HashSet<>(TRANSPORTS_COMPONENT_NAMES),
-                null,
-                mTransportBoundListener,
+                null /* defaultTransport */,
+                mTransportBoundListenerStub,
                 ShadowLooper.getMainLooper());
         transportManager.onPackageAdded(PACKAGE_NAME);
 
         assertThat(transportManager.getAllTransportComponents()).asList().containsExactlyElementsIn(
                 TRANSPORTS_COMPONENT_NAMES);
+        assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
+                TRANSPORTS_NAMES);
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1Stub)).isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2Stub)).isTrue();
     }
 
-    private static class DefaultPackageManagerWithQueryIntentServicesAsUser extends
-            DefaultPackageManager {
+    @Test
+    public void onPackageAdded_whitelistIsNull_doesNotBindToTransports() throws Exception {
+        setUpPackageWithTransports(PACKAGE_NAME, TRANSPORTS_NAMES,
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
-        /* package */ DefaultPackageManagerWithQueryIntentServicesAsUser(
-                ResourceLoader appResourceLoader) {
-            super(appResourceLoader);
-        }
+        TransportManager transportManager = new TransportManager(
+                RuntimeEnvironment.application.getApplicationContext(),
+                null /* whitelist */,
+                null /* defaultTransport */,
+                mTransportBoundListenerStub,
+                ShadowLooper.getMainLooper());
+        transportManager.onPackageAdded(PACKAGE_NAME);
 
-        @Override
-        public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
-            return super.queryIntentServices(intent, flags);
-        }
+        assertThat(transportManager.getAllTransportComponents()).isEmpty();
+        assertThat(transportManager.getBoundTransportNames()).isEmpty();
+        assertThat(mTransportBoundListenerStub.isCalled()).isFalse();
     }
 
-    @Implements(className = ShadowContextImpl.CLASS_NAME)
-    public static class ShadowContextImplWithBindServiceAsUser extends ShadowContextImpl {
+    @Test
+    public void onPackageAdded_onlyOneTransportWhitelisted_onlyConnectsToWhitelistedTransport()
+            throws Exception {
+        setUpPackageWithTransports(PACKAGE_NAME, TRANSPORTS_NAMES,
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
-        @Implementation
-        public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
-                int flags, UserHandle user) {
-            return true;
-        }
+        TransportManager transportManager = new TransportManager(
+                RuntimeEnvironment.application.getApplicationContext(),
+                new HashSet<>(Collections.singleton(TRANSPORT2_COMPONENT_NAME)),
+                null /* defaultTransport */,
+                mTransportBoundListenerStub,
+                ShadowLooper.getMainLooper());
+        transportManager.onPackageAdded(PACKAGE_NAME);
+
+        assertThat(transportManager.getAllTransportComponents()).asList().containsExactlyElementsIn(
+                Collections.singleton(TRANSPORT2_COMPONENT_NAME));
+        assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
+                Collections.singleton(TRANSPORT2_NAME));
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1Stub)).isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2Stub)).isTrue();
     }
+
+    @Test
+    public void onPackageAdded_appIsNotPrivileged_doesNotBindToTransports() throws Exception {
+        setUpPackageWithTransports(PACKAGE_NAME, TRANSPORTS_NAMES, 0);
+
+        TransportManager transportManager = new TransportManager(
+                RuntimeEnvironment.application.getApplicationContext(),
+                new HashSet<>(TRANSPORTS_COMPONENT_NAMES),
+                null /* defaultTransport */,
+                mTransportBoundListenerStub,
+                ShadowLooper.getMainLooper());
+        transportManager.onPackageAdded(PACKAGE_NAME);
+
+        assertThat(transportManager.getAllTransportComponents()).isEmpty();
+        assertThat(transportManager.getBoundTransportNames()).isEmpty();
+        assertThat(mTransportBoundListenerStub.isCalled()).isFalse();
+    }
+
+    private void setUpPackageWithTransports(String packageName, List<String> transportNames,
+            int flags) throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.privateFlags = flags;
+
+        mPackageManager.addPackage(packageInfo);
+
+        List<ResolveInfo> transportsInfo = new ArrayList<>();
+        for (String transportName : transportNames) {
+            ResolveInfo info = new ResolveInfo();
+            info.serviceInfo = new ServiceInfo();
+            info.serviceInfo.packageName = packageName;
+            info.serviceInfo.name = transportName;
+            transportsInfo.add(info);
+        }
+
+        Intent intent = new Intent(TransportManager.SERVICE_ACTION_TRANSPORT_HOST);
+        intent.setPackage(packageName);
+
+        mPackageManager.addResolveInfoForIntent(intent, transportsInfo);
+    }
+
 }
