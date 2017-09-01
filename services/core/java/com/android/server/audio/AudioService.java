@@ -801,12 +801,23 @@ public class AudioService extends IAudioService.Stub
     public void systemReady() {
         sendMsg(mAudioHandler, MSG_SYSTEM_READY, SENDMSG_QUEUE,
                 0, 0, null, 0);
-        try {
-            ActivityManager.getService().registerUidObserver(mUidObserver,
-                    ActivityManager.UID_OBSERVER_CACHED | ActivityManager.UID_OBSERVER_GONE,
-                    ActivityManager.PROCESS_STATE_UNKNOWN, null);
-        } catch (RemoteException e) {
-            // ignored; both services live in system_server
+        if (false) {
+            // This is turned off for now, because it is racy and thus causes apps to break.
+            // Currently banning a uid means that if an app tries to start playing an audio
+            // stream, that will be preventing, and unbanning it will not allow that stream
+            // to resume.  However these changes in uid state are racy with what the app is doing,
+            // so that after taking a process out of the cached state we can't guarantee that
+            // we will unban the uid before the app actually tries to start playing audio.
+            // (To do that, the activity manager would need to wait until it knows for sure
+            // that the ban has been removed, before telling the app to do whatever it is
+            // supposed to do that caused it to go out of the cached state.)
+            try {
+                ActivityManager.getService().registerUidObserver(mUidObserver,
+                        ActivityManager.UID_OBSERVER_CACHED | ActivityManager.UID_OBSERVER_GONE,
+                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
+            } catch (RemoteException e) {
+                // ignored; both services live in system_server
+            }
         }
     }
 
