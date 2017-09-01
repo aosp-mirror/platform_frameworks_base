@@ -216,10 +216,7 @@ void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* pa
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    // Disable blending if this is the first draw to the main framebuffer, in case app has defined
-    // transparency where it doesn't make sense - as first draw in opaque window.
-    bool overrideDisableBlending = !mHasDrawn && mOpaque && !mRenderTarget.frameBufferId;
-    mRenderState.render(glop, mRenderTarget.orthoMatrix, overrideDisableBlending);
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, false);
     mHasDrawn = true;
 }
 
@@ -350,8 +347,14 @@ void BakedOpRenderer::renderGlopImpl(const Rect* dirtyBounds, const ClipBase* cl
         const Glop& glop) {
     prepareRender(dirtyBounds, clip);
     // Disable blending if this is the first draw to the main framebuffer, in case app has defined
-    // transparency where it doesn't make sense - as first draw in opaque window.
-    bool overrideDisableBlending = !mHasDrawn && mOpaque && !mRenderTarget.frameBufferId;
+    // transparency where it doesn't make sense - as first draw in opaque window. Note that we only
+    // apply this improvement when the blend mode is SRC_OVER - other modes (e.g. CLEAR) can be
+    // valid draws that affect other content (e.g. draw CLEAR, then draw DST_OVER)
+    bool overrideDisableBlending = !mHasDrawn
+        && mOpaque
+        && !mRenderTarget.frameBufferId
+        && glop.blend.src == GL_ONE
+        && glop.blend.dst == GL_ONE_MINUS_SRC_ALPHA;
     mRenderState.render(glop, mRenderTarget.orthoMatrix, overrideDisableBlending);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
