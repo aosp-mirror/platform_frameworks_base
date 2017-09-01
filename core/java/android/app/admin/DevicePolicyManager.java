@@ -6784,7 +6784,6 @@ public class DevicePolicyManager {
         return null;
     }
 
-    // STOPSHIP: Remove reference to CUR_DEVELOPMENT before shipping
     /**
      * Called by a device owner to disable the keyguard altogether.
      * <p>
@@ -6794,7 +6793,7 @@ public class DevicePolicyManager {
      * disabled.
      *
      * <p>
-     * As of {@link android.os.Build.VERSION_CODES#CUR_DEVELOPMENT}, this call also dismisses the
+     * As of {@link android.os.Build.VERSION_CODES#P}, this call also dismisses the
      * keyguard if it is currently shown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
