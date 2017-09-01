@@ -265,7 +265,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     /** Indication of what to run next when task exits. */
     // TODO: Shouldn't be needed if we have things in visual order. I.e. we stop using stacks or
     // have a stack per standard application type...
-    @WindowConfiguration.ActivityType
+    /*@WindowConfiguration.ActivityType*/
     private int mTaskToReturnTo = ACTIVITY_TYPE_STANDARD;
 
     /** If original intent did not allow relinquishing task identity, save that information */
@@ -887,7 +887,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return this.intent.filterEquals(intent);
     }
 
-    void setTaskToReturnTo(@WindowConfiguration.ActivityType int taskToReturnTo) {
+    void setTaskToReturnTo(/*@WindowConfiguration.ActivityType*/ int taskToReturnTo) {
         mTaskToReturnTo = taskToReturnTo == ACTIVITY_TYPE_RECENTS
                 ? ACTIVITY_TYPE_HOME : taskToReturnTo;
     }
@@ -1142,7 +1142,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     @Override
-    @WindowConfiguration.ActivityType
+    /*@WindowConfiguration.ActivityType*/
     public int getActivityType() {
         final int applicationType = super.getActivityType();
         if (applicationType != ACTIVITY_TYPE_UNDEFINED || mActivities.isEmpty()) {

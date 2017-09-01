@@ -130,20 +130,20 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Sets the windowing mode for the configuration container. */
-    public void setWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
+    public void setWindowingMode(/*@WindowConfiguration.WindowingMode*/ int windowingMode) {
         mTmpConfig.setTo(getOverrideConfiguration());
         mTmpConfig.windowConfiguration.setWindowingMode(windowingMode);
         onOverrideConfigurationChanged(mTmpConfig);
     }
 
     /** Returns the activity type associated with the the configuration container. */
-    @WindowConfiguration.ActivityType
+    /*@WindowConfiguration.ActivityType*/
     public int getActivityType() {
         return mFullConfiguration.windowConfiguration.getActivityType();
     }
 
     /** Sets the activity type to associate with the configuration container. */
-    public void setActivityType(@WindowConfiguration.ActivityType int activityType) {
+    public void setActivityType(/*@WindowConfiguration.ActivityType*/ int activityType) {
         int currentActivityType = getActivityType();
         if (currentActivityType == activityType) {
             return;
@@ -174,8 +174,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     public boolean hasCompatibleActivityType(ConfigurationContainer other) {
-        @WindowConfiguration.ActivityType int thisType = getActivityType();
-        @WindowConfiguration.ActivityType int otherType = other.getActivityType();
+        /*@WindowConfiguration.ActivityType*/ int thisType = getActivityType();
+        /*@WindowConfiguration.ActivityType*/ int otherType = other.getActivityType();
 
         return thisType == otherType
                 || thisType == ACTIVITY_TYPE_UNDEFINED
