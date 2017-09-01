@@ -88,7 +88,6 @@ public class MediaRouter {
         RouteInfo mBluetoothA2dpRoute;
 
         RouteInfo mSelectedRoute;
-        RouteInfo mSystemAudioRoute;
 
         final boolean mCanConfigureWifiDisplays;
         boolean mActivelyScanningWifiDisplays;
@@ -150,7 +149,6 @@ public class MediaRouter {
             }
 
             addRouteStatic(mDefaultAudioVideo);
-            mSystemAudioRoute = mDefaultAudioVideo;
 
             // This will select the active wifi display route if there is one.
             updateWifiDisplayStatus(mDisplayService.getWifiDisplayStatus());
@@ -185,7 +183,7 @@ public class MediaRouter {
         }
 
         void updateAudioRoutes(AudioRoutesInfo newRoutes) {
-            boolean updated = false;
+            boolean audioRoutesChanged = false;
             if (newRoutes.mainType != mCurAudioRoutesInfo.mainType) {
                 mCurAudioRoutesInfo.mainType = newRoutes.mainType;
                 int name;
@@ -201,11 +199,10 @@ public class MediaRouter {
                 }
                 mDefaultAudioVideo.mNameResId = name;
                 dispatchRouteChanged(mDefaultAudioVideo);
-                updated = true;
+                audioRoutesChanged = true;
             }
 
             final int mainType = mCurAudioRoutesInfo.mainType;
-
             if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
                 mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
                 if (mCurAudioRoutesInfo.bluetoothName != null) {
@@ -219,8 +216,6 @@ public class MediaRouter {
                         info.mDeviceType = RouteInfo.DEVICE_TYPE_BLUETOOTH;
                         mBluetoothA2dpRoute = info;
                         addRouteStatic(mBluetoothA2dpRoute);
-                        mSystemAudioRoute = mBluetoothA2dpRoute;
-                        selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mSystemAudioRoute, false);
                     } else {
                         mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.bluetoothName;
                         dispatchRouteChanged(mBluetoothA2dpRoute);
@@ -229,28 +224,30 @@ public class MediaRouter {
                     // BT disconnected
                     removeRouteStatic(mBluetoothA2dpRoute);
                     mBluetoothA2dpRoute = null;
-                    mSystemAudioRoute = mDefaultAudioVideo;
-                    selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mSystemAudioRoute, false);
                 }
-                updated = true;
+                audioRoutesChanged = true;
             }
 
-            if (mBluetoothA2dpRoute != null) {
-                final boolean a2dpEnabled = isBluetoothA2dpOn();
-                if (mSelectedRoute == mBluetoothA2dpRoute && !a2dpEnabled) {
-                    // A2DP off
-                    mSystemAudioRoute = mDefaultAudioVideo;
-                    updated = true;
-                } else if ((mSelectedRoute == mDefaultAudioVideo || mSelectedRoute == null) &&
-                        a2dpEnabled) {
-                    // A2DP on or BT connected
-                    mSystemAudioRoute = mBluetoothA2dpRoute;
-                    updated = true;
-                }
-            }
-            if (updated) {
+            if (audioRoutesChanged) {
+                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, getDefaultSystemAudioRoute(), false);
                 Log.v(TAG, "Audio routes updated: " + newRoutes + ", a2dp=" + isBluetoothA2dpOn());
             }
+        }
+
+        RouteInfo getDefaultSystemAudioRoute() {
+            boolean globalBluetoothA2doOn = false;
+            try {
+                globalBluetoothA2doOn = mMediaRouterService.isGlobalBluetoothA2doOn();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to call isSystemBluetoothA2doOn.", ex);
+            }
+            return (globalBluetoothA2doOn && mBluetoothA2dpRoute != null)
+                    ? mBluetoothA2dpRoute : mDefaultAudioVideo;
+        }
+
+        RouteInfo getCurrentSystemAudioRoute() {
+            return (isBluetoothA2dpOn() && mBluetoothA2dpRoute != null)
+                    ? mBluetoothA2dpRoute : mDefaultAudioVideo;
         }
 
         boolean isBluetoothA2dpOn() {
@@ -603,15 +600,13 @@ public class MediaRouter {
 
             @Override
             public void onRestoreRoute() {
+                // Skip restoring route if the selected route is not a system audio route, or
+                // MediaRouter is initializing.
                 if ((mSelectedRoute != mDefaultAudioVideo && mSelectedRoute != mBluetoothA2dpRoute)
-                        || mSelectedRoute == mSystemAudioRoute) {
+                        || mSelectedRoute == null) {
                     return;
                 }
-                try {
-                    sStatic.mAudioService.setBluetoothA2dpOn(mSelectedRoute == mBluetoothA2dpRoute);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error changing Bluetooth A2DP state", e);
-                }
+                mSelectedRoute.select();
             }
         }
     }
@@ -946,7 +941,7 @@ public class MediaRouter {
         boolean wasDefaultOrBluetoothRoute = (oldRoute == sStatic.mDefaultAudioVideo
                 || oldRoute == sStatic.mBluetoothA2dpRoute);
         if (oldRoute == route
-                && (!wasDefaultOrBluetoothRoute || oldRoute == sStatic.mSystemAudioRoute)) {
+                && (!wasDefaultOrBluetoothRoute || route == sStatic.getCurrentSystemAudioRoute())) {
             return;
         }
         if (!route.matchesTypes(types)) {
