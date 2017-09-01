@@ -536,7 +536,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
             synchronized (mLock) {
                 if (configManager != null) {
                     PersistableBundle b = configManager.getConfig();
-                    isKeepLppProfile = b.getBoolean(CarrierConfigManager.KEY_PERSIST_LPP_MODE_BOOL);
+                    if (b != null) {
+                        isKeepLppProfile =
+                                b.getBoolean(CarrierConfigManager.KEY_PERSIST_LPP_MODE_BOOL);
+                    }
                 }
                 if (isKeepLppProfile) {
                     // load current properties for the carrier
