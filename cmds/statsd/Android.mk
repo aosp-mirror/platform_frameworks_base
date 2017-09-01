@@ -24,7 +24,9 @@ LOCAL_MODULE := statsd
 
 LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsManager.aidl \
+    ../../core/java/android/os/IStatsCompanionService.aidl \
     src/StatsService.cpp \
+    src/AnomalyMonitor.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \
     src/main.cpp
