@@ -371,11 +371,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final boolean mSuppressDefaultPolicy;
 
     /** Defined network policies. */
+    @GuardedBy("mNetworkPoliciesSecondLock")
     final ArrayMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = new ArrayMap<>();
 
     /** Map from subId to subscription plans. */
+    @GuardedBy("mNetworkPoliciesSecondLock")
     final SparseArray<SubscriptionPlan[]> mSubscriptionPlans = new SparseArray<>();
     /** Map from subId to package name that owns subscription plans. */
+    @GuardedBy("mNetworkPoliciesSecondLock")
     final SparseArray<String> mSubscriptionPlansOwner = new SparseArray<>();
 
     /** Defined UID policies. */
@@ -2721,20 +2724,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return plans.toArray(new SubscriptionPlan[plans.size()]);
         }
 
-        synchronized (mUidRulesFirstLock) {
-            synchronized (mNetworkPoliciesSecondLock) {
-                // Only give out plan details to the package that defined them,
-                // so that we don't risk leaking plans between apps. We always
-                // let in core system components (like the Settings app).
-                final String ownerPackage = mSubscriptionPlansOwner.get(subId);
-                if (Objects.equals(ownerPackage, callingPackage)
-                        || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)) {
-                    return mSubscriptionPlans.get(subId);
-                } else {
-                    Log.w(TAG, "Not returning plans because caller " + callingPackage
-                            + " doesn't match owner " + ownerPackage);
-                    return null;
-                }
+        synchronized (mNetworkPoliciesSecondLock) {
+            // Only give out plan details to the package that defined them,
+            // so that we don't risk leaking plans between apps. We always
+            // let in core system components (like the Settings app).
+            final String ownerPackage = mSubscriptionPlansOwner.get(subId);
+            if (Objects.equals(ownerPackage, callingPackage)
+                    || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)) {
+                return mSubscriptionPlans.get(subId);
+            } else {
+                Log.w(TAG, "Not returning plans because caller " + callingPackage
+                        + " doesn't match owner " + ownerPackage);
+                return null;
             }
         }
     }
