@@ -38,6 +38,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -49,8 +50,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
+import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
@@ -64,9 +67,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
@@ -149,6 +154,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock private ICompanionDeviceManager mCompanionMgr;
     @Mock SnoozeHelper mSnoozeHelper;
     @Mock GroupHelper mGroupHelper;
+    @Mock
+    IBinder mPermOwner;
+    @Mock
+    IActivityManager mAm;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -208,6 +217,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
+        when(mAm.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -238,7 +248,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mPackageManager, mPackageManagerClient, mockLightsManager,
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                    mGroupHelper);
+                    mGroupHelper, mAm);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -592,6 +602,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(
+                any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -610,6 +622,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -624,6 +637,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -637,6 +651,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -658,6 +673,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -676,6 +692,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.cancelAllNotifications(PKG, parent.sbn.getUserId());
         waitForIdle();
         assertEquals(0, mService.getNotificationRecordCount());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -689,6 +706,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         assertEquals(0, mService.getNotificationRecordCount());
+        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -2446,5 +2464,65 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         int systemChecks = mService.countSystemChecks;
         mBinderService.getBackupPayload(1);
         assertEquals(1, mService.countSystemChecks - systemChecks);
+    }
+
+    @Test
+    public void revokeUriPermissions_update() throws Exception {
+        NotificationChannel c = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
+        c.setSound(null, Notification.AUDIO_ATTRIBUTES_DEFAULT);
+        Message message1 = new Message("", 0, "");
+        message1.setData("", Uri.fromParts("old", "", "old stuff"));
+        Message message2 = new Message("", 1, "");
+        message2.setData("", Uri.fromParts("new", "", "new stuff"));
+
+        Notification.Builder nb = new Notification.Builder(mContext, c.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(message1)
+                        .addMessage(message2));
+        StatusBarNotification oldSbn = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord oldRecord =
+                new NotificationRecord(mContext, oldSbn, c);
+
+        Notification.Builder nb1 = new Notification.Builder(mContext, c.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.MessagingStyle("").addMessage(message2));
+        StatusBarNotification newSbn = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord newRecord =
+                new NotificationRecord(mContext, newSbn, c);
+
+        mService.revokeUriPermissions(newRecord, oldRecord);
+
+        verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(message1.getDataUri()),
+                anyInt(), anyInt());
+    }
+
+    @Test
+    public void revokeUriPermissions_cancel() throws Exception {
+        NotificationChannel c = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
+        c.setSound(null, Notification.AUDIO_ATTRIBUTES_DEFAULT);
+        Message message1 = new Message("", 0, "");
+        message1.setData("", Uri.fromParts("old", "", "old stuff"));
+
+        Notification.Builder nb = new Notification.Builder(mContext, c.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(message1));
+        StatusBarNotification oldSbn = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord oldRecord =
+                new NotificationRecord(mContext, oldSbn, c);
+
+        mService.revokeUriPermissions(null, oldRecord);
+
+        verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(message1.getDataUri()),
+                anyInt(), anyInt());
     }
 }

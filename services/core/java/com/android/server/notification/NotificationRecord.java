@@ -38,6 +38,7 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -47,6 +48,7 @@ import android.service.notification.NotificationStats;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -64,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Holds data about notifications that should not be shared with the
@@ -927,6 +930,42 @@ public final class NotificationRecord {
 
     public void recordViewedSettings() {
         mStats.setViewedSettings();
+    }
+
+    public Set<Uri> getNotificationUris() {
+        Notification notification = getNotification();
+        Set<Uri> uris = new ArraySet<>();
+
+        if (notification.sound != null) {
+            uris.add(notification.sound);
+        }
+        if (notification.getChannelId() != null) {
+            NotificationChannel channel = getChannel();
+            if (channel != null && channel.getSound() != null) {
+                uris.add(channel.getSound());
+            }
+        }
+        if (notification.extras.containsKey(Notification.EXTRA_AUDIO_CONTENTS_URI)) {
+            uris.add(notification.extras.getParcelable(Notification.EXTRA_AUDIO_CONTENTS_URI));
+        }
+        if (notification.extras.containsKey(Notification.EXTRA_BACKGROUND_IMAGE_URI)) {
+            uris.add(notification.extras.getParcelable(Notification.EXTRA_BACKGROUND_IMAGE_URI));
+        }
+        if (Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
+            Parcelable[] newMessages =
+                    notification.extras.getParcelableArray(Notification.EXTRA_MESSAGES);
+            List<Notification.MessagingStyle.Message> messages
+                    = Notification.MessagingStyle.Message.getMessagesFromBundleArray(newMessages);
+            Parcelable[] histMessages =
+                    notification.extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
+            messages.addAll(
+                    Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages));
+            for (Notification.MessagingStyle.Message message : messages) {
+                uris.add(message.getDataUri());
+            }
+        }
+
+        return uris;
     }
 
     public LogMaker getLogMaker(long now) {
