@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.ClipData;
+import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,8 +64,11 @@ class DragDropController {
                             service.getDefaultDisplayContentLocked();
                     final Display display = displayContent.getDisplay();
 
-                    SurfaceControl surface = new SurfaceControl(session, "drag surface",
-                            width, height, TRANSLUCENT, HIDDEN);
+                    final SurfaceControl surface = new SurfaceControl.Builder(session)
+                            .setName("drag surface")
+                            .setSize(width, height)
+                            .setFormat(PixelFormat.TRANSLUCENT)
+                            .build();
                     surface.setLayerStack(display.getLayerStack());
                     float alpha = 1;
                     if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {

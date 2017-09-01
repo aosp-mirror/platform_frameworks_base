@@ -66,10 +66,10 @@ class SurfaceControlWithBackground extends SurfaceControl {
         mWindowSurfaceController = other.mWindowSurfaceController;
     }
 
-    public SurfaceControlWithBackground(SurfaceSession s, String name, int w, int h, int format,
-            int flags, int windowType, int ownerUid,
+    public SurfaceControlWithBackground(String name, SurfaceControl.Builder b,
+            int windowType, int w, int h,
             WindowSurfaceController windowSurfaceController) throws OutOfResourcesException {
-        super(s, name, w, h, format, flags, windowType, ownerUid);
+        super(b.build());
 
         // We should only show background behind app windows that are letterboxed in a task.
         if ((windowType != TYPE_BASE_APPLICATION && windowType != TYPE_APPLICATION_STARTING)
@@ -80,9 +80,11 @@ class SurfaceControlWithBackground extends SurfaceControl {
         mLastWidth = w;
         mLastHeight = h;
         mWindowSurfaceController.getContainerRect(mTmpContainerRect);
-        mBackgroundControl = new SurfaceControl(s, "Background for - " + name,
-                mTmpContainerRect.width(), mTmpContainerRect.height(), PixelFormat.OPAQUE,
-                flags | SurfaceControl.FX_SURFACE_DIM);
+        mBackgroundControl = b.setName("Background for - " + name)
+                .setSize(mTmpContainerRect.width(), mTmpContainerRect.height())
+                .setFormat(OPAQUE)
+                .setColorLayer(true)
+                .build();
     }
 
     @Override

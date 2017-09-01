@@ -532,10 +532,15 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mDeferredDestroySurfaceControl = mSurfaceControl;
 
                     updateOpaqueFlag();
-                    mSurfaceControl = new SurfaceControlWithBackground(mSurfaceSession,
-                            "SurfaceView - " + viewRoot.getTitle().toString(),
-                            mSurfaceWidth, mSurfaceHeight, mFormat,
-                            mSurfaceFlags);
+                    final String name = "SurfaceView - " + viewRoot.getTitle().toString();
+
+                    mSurfaceControl = new SurfaceControlWithBackground(
+                            name,
+                            (mSurfaceFlags & SurfaceControl.OPAQUE) != 0,
+                            new SurfaceControl.Builder(mSurfaceSession)
+                                    .setSize(mSurfaceWidth, mSurfaceHeight)
+                                    .setFormat(mFormat)
+                                    .setFlags(mSurfaceFlags));
                 } else if (mSurfaceControl == null) {
                     return;
                 }
@@ -1098,13 +1103,15 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         private boolean mOpaque = true;
         public boolean mVisible = false;
 
-        public SurfaceControlWithBackground(SurfaceSession s,
-                        String name, int w, int h, int format, int flags)
+        public SurfaceControlWithBackground(String name, boolean opaque, SurfaceControl.Builder b)
                        throws Exception {
-            super(s, name, w, h, format, flags);
-            mBackgroundControl = new SurfaceControl(s, "Background for - " + name, w, h,
-                    PixelFormat.OPAQUE, flags | SurfaceControl.FX_SURFACE_DIM);
-            mOpaque = (flags & SurfaceControl.OPAQUE) != 0;
+            super(b.setName(name).build());
+
+            mBackgroundControl = b.setName("Background for -" + name)
+                    .setFormat(OPAQUE)
+                    .setColorLayer(true)
+                    .build();
+            mOpaque = opaque;
         }
 
         @Override

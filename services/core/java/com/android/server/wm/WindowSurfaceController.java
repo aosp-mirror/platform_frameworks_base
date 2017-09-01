@@ -101,8 +101,14 @@ class WindowSurfaceController {
         mWindowSession = win.mSession;
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
+        final SurfaceControl.Builder b = new SurfaceControl.Builder(s)
+                .setName(name)
+                .setSize(w, h)
+                .setFormat(format)
+                .setFlags(flags)
+                .setMetadata(windowType, ownerUid);
         mSurfaceControl = new SurfaceControlWithBackground(
-                s, name, w, h, format, flags, windowType, ownerUid, this);
+                name, b, windowType, w, h, this);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
         if (mService.mRoot.mSurfaceTraceEnabled) {

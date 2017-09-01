@@ -104,9 +104,11 @@ public class DimLayer {
     private void constructSurface(WindowManagerService service) {
         service.openSurfaceTransaction();
         try {
-            mDimSurface = new SurfaceControl(service.mFxSession, mName,
-                    16, 16, PixelFormat.OPAQUE,
-                    SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
+            mDimSurface = new SurfaceControl.Builder(service.mFxSession)
+                    .setName(mName)
+                    .setSize(16, 16)
+                    .setColorLayer(true)
+                    .build();
 
             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                     "  DIM " + mDimSurface + ": CREATE");
