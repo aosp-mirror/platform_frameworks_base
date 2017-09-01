@@ -78,6 +78,8 @@ static StateExceptionFields gStateExceptionFields;
 
 using namespace android;
 
+using media::VolumeShaper;
+
 // ----------------------------------------------------------------------------
 
 struct fields_t {

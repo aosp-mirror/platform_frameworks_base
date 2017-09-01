@@ -44,6 +44,8 @@
 
 using namespace android;
 
+using ::android::media::VolumeShaper;
+
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/AudioTrack";
 static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
