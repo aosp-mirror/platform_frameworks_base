@@ -26,20 +26,22 @@ import com.android.systemui.util.AlarmTimeout;
  */
 public class DozePauser implements DozeMachine.Part {
     public static final String TAG = DozePauser.class.getSimpleName();
-    private static final long TIMEOUT = 10 * 1000;
     private final AlarmTimeout mPauseTimeout;
     private final DozeMachine mMachine;
+    private final long mTimeoutMs;
 
-    public DozePauser(Handler handler, DozeMachine machine, AlarmManager alarmManager) {
+    public DozePauser(Handler handler, DozeMachine machine, AlarmManager alarmManager,
+            AlwaysOnDisplayPolicy policy) {
         mMachine = machine;
         mPauseTimeout = new AlarmTimeout(alarmManager, this::onTimeout, TAG, handler);
+        mTimeoutMs = policy.proxScreenOffDelayMs;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD_PAUSING:
-                mPauseTimeout.schedule(TIMEOUT, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+                mPauseTimeout.schedule(mTimeoutMs, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
                 break;
             default:
                 mPauseTimeout.cancel();
