@@ -24,6 +24,15 @@
 #include "xml/XmlDom.h"
 
 namespace aapt {
+
+namespace configuration {
+void PrintTo(const AndroidSdk& sdk, std::ostream* os) {
+  *os << "SDK: min=" << sdk.min_sdk_version.value_or_default(-1)
+      << ", target=" << sdk.target_sdk_version.value_or_default(-1)
+      << ", max=" << sdk.max_sdk_version.value_or_default(-1);
+}
+}  // namespace configuration
+
 namespace {
 
 using ::android::ResTable_config;
@@ -76,9 +85,9 @@ constexpr const char* kValidConfig = R"(<?xml version="1.0" encoding="utf-8" ?>
     </locale-group>
     <android-sdk-group label="v19">
       <android-sdk
-          minSdkVersion="v19"
-          targetSdkVersion="v24"
-          maxSdkVersion="v25">
+          minSdkVersion="19"
+          targetSdkVersion="24"
+          maxSdkVersion="25">
         <manifest>
           <!--- manifest additions here XSLT? TODO -->
         </manifest>
@@ -156,7 +165,7 @@ TEST_F(ConfigurationParserTest, ValidateFile) {
 
   EXPECT_EQ(1ul, value.android_sdk_groups.size());
   EXPECT_TRUE(value.android_sdk_groups["v19"].min_sdk_version);
-  EXPECT_EQ("v19", value.android_sdk_groups["v19"].min_sdk_version.value());
+  EXPECT_EQ(19, value.android_sdk_groups["v19"].min_sdk_version.value());
 
   EXPECT_EQ(1ul, value.gl_texture_groups.size());
   EXPECT_EQ(1ul, value.gl_texture_groups["dxt1"].size());
@@ -321,9 +330,9 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
   static constexpr const char* xml = R"xml(
     <android-sdk-group label="v19">
       <android-sdk
-          minSdkVersion="v19"
-          targetSdkVersion="v24"
-          maxSdkVersion="v25">
+          minSdkVersion="19"
+          targetSdkVersion="24"
+          maxSdkVersion="25">
         <manifest>
           <!--- manifest additions here XSLT? TODO -->
         </manifest>
@@ -342,10 +351,39 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
   auto& out = config.android_sdk_groups["v19"];
 
   AndroidSdk sdk;
-  sdk.min_sdk_version = std::string("v19");
-  sdk.target_sdk_version = std::string("v24");
-  sdk.max_sdk_version = std::string("v25");
+  sdk.min_sdk_version = 19;
+  sdk.target_sdk_version = 24;
+  sdk.max_sdk_version = 25;
   sdk.manifest = AndroidManifest();
+
+  ASSERT_EQ(sdk, out);
+}
+
+TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_NonNumeric) {
+  static constexpr const char* xml = R"xml(
+    <android-sdk-group label="O">
+      <android-sdk
+          minSdkVersion="M"
+          targetSdkVersion="O"
+          maxSdkVersion="O">
+      </android-sdk>
+    </android-sdk-group>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+
+  ASSERT_EQ(1ul, config.android_sdk_groups.size());
+  ASSERT_EQ(1u, config.android_sdk_groups.count("O"));
+
+  auto& out = config.android_sdk_groups["O"];
+
+  AndroidSdk sdk;
+  sdk.min_sdk_version = {};  // Only the latest development version is supported.
+  sdk.target_sdk_version = 26;
+  sdk.max_sdk_version = 26;
 
   ASSERT_EQ(sdk, out);
 }

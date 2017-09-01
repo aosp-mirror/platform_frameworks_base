@@ -103,14 +103,14 @@ struct AndroidManifest {
 };
 
 struct AndroidSdk {
-  Maybe<std::string> min_sdk_version;
-  Maybe<std::string> target_sdk_version;
-  Maybe<std::string> max_sdk_version;
+  Maybe<int> min_sdk_version;
+  Maybe<int> target_sdk_version;
+  Maybe<int> max_sdk_version;
   Maybe<AndroidManifest> manifest;
 
-  static AndroidSdk ForMinSdk(std::string min_sdk) {
+  static AndroidSdk ForMinSdk(int min_sdk) {
     AndroidSdk sdk;
-    sdk.min_sdk_version = {std::move(min_sdk)};
+    sdk.min_sdk_version = min_sdk;
     return sdk;
   }
 

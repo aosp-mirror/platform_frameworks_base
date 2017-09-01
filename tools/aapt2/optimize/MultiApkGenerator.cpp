@@ -22,21 +22,46 @@
 #include "androidfw/StringPiece.h"
 
 #include "LoadedApk.h"
+#include "ResourceUtils.h"
 #include "configuration/ConfigurationParser.h"
 #include "filter/AbiFilter.h"
 #include "filter/Filter.h"
 #include "flatten/Archive.h"
+#include "flatten/XmlFlattener.h"
 #include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 
 using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::Artifact;
 using ::aapt::configuration::PostProcessingConfiguration;
+using ::aapt::xml::XmlResource;
 using ::android::StringPiece;
+
+namespace {
+
+Maybe<AndroidSdk> GetAndroidSdk(const Artifact& artifact, const PostProcessingConfiguration& config,
+                                IDiagnostics* diag) {
+  if (!artifact.android_sdk_group) {
+    return {};
+  }
+
+  const std::string& group_name = artifact.android_sdk_group.value();
+  auto group = config.android_sdk_groups.find(group_name);
+  // TODO: Remove validation when configuration parser ensures referential integrity.
+  if (group == config.android_sdk_groups.end()) {
+    diag->Error(DiagMessage() << "could not find referenced group '" << group_name << "'");
+    return {};
+  }
+
+  return group->second;
+}
+
+}  // namespace
 
 /**
  * Context wrapper that allows the min Android SDK value to be overridden.
@@ -127,6 +152,43 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
       return false;
     }
 
+    std::unique_ptr<XmlResource> manifest;
+
+    Maybe<AndroidSdk> maybe_sdk = GetAndroidSdk(artifact, config, diag);
+    if (maybe_sdk) {
+      // TODO(safarmer): Handle the rest of the Android SDK.
+      const AndroidSdk& android_sdk = maybe_sdk.value();
+
+      manifest = apk_->InflateManifest(context_);
+      if (!manifest) {
+        return false;
+      }
+
+      // Make sure the first element is <manifest> with package attribute.
+      xml::Element* manifest_el = manifest->root.get();
+      if (manifest_el == nullptr) {
+        return {};
+      }
+
+      if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
+        diag->Error(DiagMessage(manifest->file.source) << "root tag must be <manifest>");
+        return {};
+      }
+
+      if (xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
+        if (xml::Attribute* min_sdk_attr =
+                uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
+          if (min_sdk_attr == nullptr) {
+            diag->Error(DiagMessage(manifest->file.source.WithLine(uses_sdk_el->line_number))
+                        << "missing android:minSdkVersion");
+            return {};
+          }
+          const std::string& min_sdk_str = std::to_string(android_sdk.min_sdk_version.value());
+          min_sdk_attr->compiled_value = ResourceUtils::TryParseInt(min_sdk_str);
+        }
+      }
+    }
+
     std::string out = options.out_dir;
     if (!file::mkdirs(out)) {
       context_->GetDiagnostics()->Warn(DiagMessage() << "could not create out dir: " << out);
@@ -145,7 +207,7 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
     }
 
     if (!apk_->WriteToArchive(context_, table.get(), options.table_flattener_options, &filters,
-                              writer.get())) {
+                              writer.get(), manifest.get())) {
       return false;
     }
   }
@@ -208,37 +270,15 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
     splits.config_filter = &axis_filter;
   }
 
-  if (artifact.android_sdk_group) {
-    const std::string& group_name = artifact.android_sdk_group.value();
-    auto group = config.android_sdk_groups.find(group_name);
-    // TODO: Remove validation when configuration parser ensures referential integrity.
-    if (group == config.android_sdk_groups.end()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
-                                                      << group_name << "'");
-      return {};
-    }
-
-    const AndroidSdk& sdk = group->second;
-    if (!sdk.min_sdk_version) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "skipping SDK version. No min SDK: " << group_name);
-      return {};
-    }
-
-    ConfigDescription c;
-    const std::string& version = sdk.min_sdk_version.value();
-    if (!ConfigDescription::Parse(version, &c)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "could not parse min SDK: " << version);
-      return {};
-    }
-
-    wrappedContext.SetMinSdkVersion(c.sdkVersion);
+  Maybe<AndroidSdk> sdk = GetAndroidSdk(artifact, config, context_->GetDiagnostics());
+  if (sdk && sdk.value().min_sdk_version) {
+    wrappedContext.SetMinSdkVersion(sdk.value().min_sdk_version.value());
   }
 
   std::unique_ptr<ResourceTable> table = old_table.Clone();
 
   VersionCollapser collapser;
-  if (!collapser.Consume(context_, table.get())) {
+  if (!collapser.Consume(&wrappedContext, table.get())) {
     context_->GetDiagnostics()->Error(DiagMessage() << "Failed to strip versioned resources");
     return {};
   }

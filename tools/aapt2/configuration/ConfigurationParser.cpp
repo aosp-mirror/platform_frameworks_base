@@ -27,6 +27,7 @@
 
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
+#include "ResourceUtils.h"
 #include "io/File.h"
 #include "io/FileSystem.h"
 #include "io/StringInputStream.h"
@@ -499,11 +500,11 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
       AndroidSdk entry;
       for (const auto& attr : child->attributes) {
         if (attr.name == "minSdkVersion") {
-          entry.min_sdk_version = {attr.value};
+          entry.min_sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
         } else if (attr.name == "targetSdkVersion") {
-          entry.target_sdk_version = {attr.value};
+          entry.target_sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
         } else if (attr.name == "maxSdkVersion") {
-          entry.max_sdk_version = {attr.value};
+          entry.max_sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
         } else {
           diag->Warn(DiagMessage() << "Unknown attribute: " << attr.name << " = " << attr.value);
         }

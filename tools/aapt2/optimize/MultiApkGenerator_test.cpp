@@ -50,14 +50,6 @@ using ::testing::Return;
 using ::testing::Test;
 using ::testing::_;
 
-/** Subclass the LoadedApk class so that we can mock the WriteToArchive method. */
-class MockApk : public LoadedApk {
- public:
-  MockApk(std::unique_ptr<ResourceTable> table) : LoadedApk({"test.apk"}, {}, std::move(table)){};
-  MOCK_METHOD5(WriteToArchive, bool(IAaptContext*, ResourceTable*, const TableFlattenerOptions&,
-                                    FilterChain*, IArchiveWriter*));
-};
-
 /**
  * Subclass the MultiApkGenerator class so that we can access the protected FilterTable method to
  * directly test table filter.
@@ -111,54 +103,10 @@ class MultiApkGeneratorTest : public ::testing::Test {
   ConfigDescription v21_ = ParseConfigOrDie("v21");
 };
 
-TEST_F(MultiApkGeneratorTest, FromBaseApk) {
-  std::unique_ptr<ResourceTable> table = BuildTable();
-
-  MockApk apk{std::move(table)};
-
-  EXPECT_CALL(apk, WriteToArchive(_, _, _, _, _)).Times(0);
-
-  test::Context ctx;
-  PostProcessingConfiguration empty_config;
-  TableFlattenerOptions table_flattener_options;
-
-  MultiApkGenerator generator{&apk, &ctx};
-  EXPECT_TRUE(generator.FromBaseApk({"out", empty_config, table_flattener_options}));
-
-  Artifact x64 = test::ArtifactBuilder()
-                     .SetName("${basename}.x64.apk")
-                     .SetAbiGroup("x64")
-                     .SetLocaleGroup("en")
-                     .SetDensityGroup("xhdpi")
-                     .Build();
-
-  Artifact intel = test::ArtifactBuilder()
-                       .SetName("${basename}.intel.apk")
-                       .SetAbiGroup("intel")
-                       .SetLocaleGroup("europe")
-                       .SetDensityGroup("large")
-                       .Build();
-
-  auto config = test::PostProcessingConfigurationBuilder()
-                    .SetLocaleGroup("en", {"en"})
-                    .SetLocaleGroup("europe", {"en", "fr", "de", "es"})
-                    .SetAbiGroup("x64", {Abi::kX86_64})
-                    .SetAbiGroup("intel", {Abi::kX86_64, Abi::kX86})
-                    .SetDensityGroup("xhdpi", {"xhdpi"})
-                    .SetDensityGroup("large", {"xhdpi", "xxhdpi", "xxxhdpi"})
-                    .AddArtifact(x64)
-                    .AddArtifact(intel)
-                    .Build();
-
-  // Called once for each artifact.
-  EXPECT_CALL(apk, WriteToArchive(Eq(&ctx), _, _, _, _)).Times(2).WillRepeatedly(Return(true));
-  EXPECT_TRUE(generator.FromBaseApk({"out", config, table_flattener_options}));
-}
-
 TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
   std::unique_ptr<ResourceTable> table = BuildTable();
 
-  MockApk apk{std::move(table)};
+  LoadedApk apk = {{"test.apk"}, {}, std::move(table)};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(19).Build();
   PostProcessingConfiguration empty_config;
   TableFlattenerOptions table_flattener_options;
@@ -174,7 +122,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
                     .SetLocaleGroup("en", {"en"})
                     .SetAbiGroup("x64", {Abi::kX86_64})
                     .SetDensityGroup("xhdpi", {"xhdpi"})
-                    .SetAndroidSdk("v23", AndroidSdk::ForMinSdk("v23"))
+                    .SetAndroidSdk("v23", AndroidSdk::ForMinSdk(23))
                     .AddArtifact(x64)
                     .Build();
 
@@ -199,7 +147,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
 TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
   std::unique_ptr<ResourceTable> table = BuildTable();
 
-  MockApk apk{std::move(table)};
+  LoadedApk apk = {{"test.apk"}, {}, std::move(table)};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
   PostProcessingConfiguration empty_config;
   TableFlattenerOptions table_flattener_options;
@@ -215,7 +163,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
                     .SetLocaleGroup("en", {"en"})
                     .SetAbiGroup("x64", {Abi::kX86_64})
                     .SetDensityGroup("xhdpi", {"xhdpi"})
-                    .SetAndroidSdk("v4", AndroidSdk::ForMinSdk("v4"))
+                    .SetAndroidSdk("v4", AndroidSdk::ForMinSdk(4))
                     .AddArtifact(x64)
                     .Build();
 
@@ -238,7 +186,7 @@ TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
 TEST_F(MultiApkGeneratorTest, VersionFilterNoVersion) {
   std::unique_ptr<ResourceTable> table = BuildTable();
 
-  MockApk apk{std::move(table)};
+  LoadedApk apk = {{"test.apk"}, {}, std::move(table)};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
   PostProcessingConfiguration empty_config;
   TableFlattenerOptions table_flattener_options;
