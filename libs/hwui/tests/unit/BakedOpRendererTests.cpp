@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <BakedOpRenderer.h>
+#include <GlopBuilder.h>
 #include <tests/common/TestUtils.h>
 
 using namespace android::uirenderer;
@@ -52,4 +53,54 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, startRepaintLayer_clear) {
                 << "Now right side being repainted, so region should be entirely clear";
         renderer.endLayer();
     }
+}
+
+static void drawFirstOp(RenderState& renderState, int color, SkBlendMode mode) {
+    BakedOpRenderer renderer(Caches::getInstance(), renderState, true, false, sLightInfo);
+
+    renderer.startFrame(100, 100, Rect(100, 100));
+    SkPaint paint;
+    paint.setColor(color);
+    paint.setBlendMode(mode);
+
+    Rect dest(0, 0, 100, 100);
+    Glop glop;
+    GlopBuilder(renderState, Caches::getInstance(), &glop)
+            .setRoundRectClipState(nullptr)
+            .setMeshUnitQuad()
+            .setFillPaint(paint, 1.0f)
+            .setTransform(Matrix4::identity(), TransformFlags::None)
+            .setModelViewMapUnitToRectSnap(dest)
+            .build();
+    renderer.renderGlop(nullptr, nullptr, glop);
+    renderer.endFrame(Rect(100, 100));
+}
+
+static void verifyBlend(RenderState& renderState, GLenum expectedSrc, GLenum expectedDst) {
+    EXPECT_TRUE(renderState.blend().getEnabled());
+    GLenum src;
+    GLenum dst;
+    renderState.blend().getFactors(&src, &dst);
+    EXPECT_EQ(expectedSrc, src);
+    EXPECT_EQ(expectedDst, dst);
+}
+
+static void verifyBlendDisabled(RenderState& renderState) {
+    EXPECT_FALSE(renderState.blend().getEnabled());
+}
+
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, firstDrawBlend_clear) {
+    // initialize blend state to nonsense value
+    renderThread.renderState().blend().setFactors(GL_ONE, GL_ONE);
+
+    drawFirstOp(renderThread.renderState(), 0xfeff0000, SkBlendMode::kClear);
+    verifyBlend(renderThread.renderState(), GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, firstDrawBlend_srcover) {
+    // initialize blend state to nonsense value
+    renderThread.renderState().blend().setFactors(GL_ONE, GL_ONE);
+
+    drawFirstOp(renderThread.renderState(), 0xfeff0000, SkBlendMode::kSrcOver);
+    verifyBlendDisabled(renderThread.renderState());
 }
