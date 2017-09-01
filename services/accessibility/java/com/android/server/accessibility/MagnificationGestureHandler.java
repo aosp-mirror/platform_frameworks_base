@@ -16,6 +16,21 @@
 
 package com.android.server.accessibility;
 
+import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_POINTER_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_UP;
+import static android.view.MotionEvent.ACTION_UP;
+
+import static com.android.server.accessibility.GestureUtils.distance;
+
+import static java.lang.Math.abs;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.copyOfRange;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +42,6 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -36,6 +50,8 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * This class handles magnification in response to touch events.
@@ -85,91 +101,109 @@ import android.view.accessibility.AccessibilityEvent;
  *
  * 7. The magnification scale will be persisted in settings and in the cloud.
  */
+@SuppressWarnings("WeakerAccess")
 class MagnificationGestureHandler implements EventStreamTransformation {
     private static final String LOG_TAG = "MagnificationEventHandler";
 
-    private static final boolean DEBUG_STATE_TRANSITIONS = false;
-    private static final boolean DEBUG_DETECTING = false;
-    private static final boolean DEBUG_PANNING = false;
+    private static final boolean DEBUG_ALL = false;
+    private static final boolean DEBUG_STATE_TRANSITIONS = false || DEBUG_ALL;
+    private static final boolean DEBUG_DETECTING = false || DEBUG_ALL;
+    private static final boolean DEBUG_PANNING = false || DEBUG_ALL;
 
-    private static final int STATE_DELEGATING = 1;
-    private static final int STATE_DETECTING = 2;
-    private static final int STATE_VIEWPORT_DRAGGING = 3;
-    private static final int STATE_MAGNIFIED_INTERACTION = 4;
+    /** @see #handleMotionEventStateDelegating */
+    @VisibleForTesting static final int STATE_DELEGATING = 1;
+    /** @see DetectingStateHandler */
+    @VisibleForTesting static final int STATE_DETECTING = 2;
+    /** @see ViewportDraggingStateHandler */
+    @VisibleForTesting static final int STATE_VIEWPORT_DRAGGING = 3;
+    /** @see PanningScalingStateHandler */
+    @VisibleForTesting static final int STATE_PANNING_SCALING = 4;
 
     private static final float MIN_SCALE = 2.0f;
     private static final float MAX_SCALE = 5.0f;
 
-    private final MagnificationController mMagnificationController;
-    private final DetectingStateHandler mDetectingStateHandler;
-    private final MagnifiedContentInteractionStateHandler mMagnifiedContentInteractionStateHandler;
-    private final StateViewportDraggingHandler mStateViewportDraggingHandler;
+    @VisibleForTesting final MagnificationController mMagnificationController;
+
+    @VisibleForTesting final DetectingStateHandler mDetectingStateHandler;
+    @VisibleForTesting final PanningScalingStateHandler mPanningScalingStateHandler;
+    @VisibleForTesting final ViewportDraggingStateHandler mViewportDraggingStateHandler;
 
     private final ScreenStateReceiver mScreenStateReceiver;
 
-    private final boolean mDetectTripleTap;
-    private final boolean mTriggerable;
+    /**
+     * {@code true} if this detector should detect and respond to triple-tap
+     * gestures for engaging and disengaging magnification,
+     * {@code false} if it should ignore such gestures
+     */
+    final boolean mDetectTripleTap;
 
-    private EventStreamTransformation mNext;
+    /**
+     * Whether {@link #mShortcutTriggered shortcut} is enabled
+     */
+    final boolean mDetectShortcutTrigger;
 
-    private int mCurrentState;
-    private int mPreviousState;
+    EventStreamTransformation mNext;
 
-    private boolean mTranslationEnabledBeforePan;
+    @VisibleForTesting int mCurrentState;
+    @VisibleForTesting int mPreviousState;
 
-    private boolean mShortcutTriggered;
+    @VisibleForTesting boolean mShortcutTriggered;
+
+    /**
+     * Time of last {@link MotionEvent#ACTION_DOWN} while in {@link #STATE_DELEGATING}
+     */
+    long mDelegatingStateDownTime;
 
     private PointerCoords[] mTempPointerCoords;
     private PointerProperties[] mTempPointerProperties;
 
-    private long mDelegatingStateDownTime;
-
     /**
      * @param context Context for resolving various magnification-related resources
-     * @param ams AccessibilityManagerService used to obtain a {@link MagnificationController}
+     * @param magnificationController the {@link MagnificationController}
+     *
      * @param detectTripleTap {@code true} if this detector should detect and respond to triple-tap
-     *                                    gestures for engaging and disengaging magnification,
-     *                                    {@code false} if it should ignore such gestures
-     * @param triggerable {@code true} if this detector should be "triggerable" by some external
-     *                                shortcut invoking {@link #notifyShortcutTriggered}, {@code
-     *                                false} if it should ignore such triggers.
+     *                                gestures for engaging and disengaging magnification,
+     *                                {@code false} if it should ignore such gestures
+     * @param detectShortcutTrigger {@code true} if this detector should be "triggerable" by some
+     *                           external shortcut invoking {@link #notifyShortcutTriggered},
+     *                           {@code false} if it should ignore such triggers.
      */
-    public MagnificationGestureHandler(Context context, AccessibilityManagerService ams,
-            boolean detectTripleTap, boolean triggerable) {
-        mMagnificationController = ams.getMagnificationController();
-        mDetectingStateHandler = new DetectingStateHandler(context);
-        mStateViewportDraggingHandler = new StateViewportDraggingHandler();
-        mMagnifiedContentInteractionStateHandler =
-                new MagnifiedContentInteractionStateHandler(context);
-        mDetectTripleTap = detectTripleTap;
-        mTriggerable = triggerable;
+    public MagnificationGestureHandler(Context context,
+            MagnificationController magnificationController,
+            boolean detectTripleTap,
+            boolean detectShortcutTrigger) {
+        mMagnificationController = magnificationController;
 
-        if (triggerable) {
+        mDetectingStateHandler = new DetectingStateHandler(context);
+        mViewportDraggingStateHandler = new ViewportDraggingStateHandler();
+        mPanningScalingStateHandler =
+                new PanningScalingStateHandler(context);
+
+        mDetectTripleTap = detectTripleTap;
+        mDetectShortcutTrigger = detectShortcutTrigger;
+
+        if (mDetectShortcutTrigger) {
             mScreenStateReceiver = new ScreenStateReceiver(context, this);
             mScreenStateReceiver.register();
         } else {
             mScreenStateReceiver = null;
         }
 
-        transitionToState(STATE_DETECTING);
+        transitionTo(STATE_DETECTING);
     }
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
-            if (mNext != null) {
-                mNext.onMotionEvent(event, rawEvent, policyFlags);
-            }
+        if ((!mDetectTripleTap && !mDetectShortcutTrigger)
+                || !event.isFromSource(SOURCE_TOUCHSCREEN)) {
+            dispatchTransformedEvent(event, rawEvent, policyFlags);
             return;
         }
-        if (!mDetectTripleTap && !mTriggerable) {
-            if (mNext != null) {
-                dispatchTransformedEvent(event, rawEvent, policyFlags);
-            }
-            return;
-        }
-        mMagnifiedContentInteractionStateHandler.onMotionEvent(event, rawEvent, policyFlags);
-        switch (mCurrentState) {
+        // Local copy to avoid dispatching the same event to more than one state handler
+        // in case mPanningScalingStateHandler changes mCurrentState
+        int currentState = mCurrentState;
+        mPanningScalingStateHandler.onMotionEvent(event, rawEvent, policyFlags);
+        switch (currentState) {
             case STATE_DELEGATING: {
                 handleMotionEventStateDelegating(event, rawEvent, policyFlags);
             }
@@ -179,17 +213,17 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             }
             break;
             case STATE_VIEWPORT_DRAGGING: {
-                mStateViewportDraggingHandler.onMotionEvent(event, rawEvent, policyFlags);
+                mViewportDraggingStateHandler.onMotionEvent(event, rawEvent, policyFlags);
             }
             break;
-            case STATE_MAGNIFIED_INTERACTION: {
-                // mMagnifiedContentInteractionStateHandler handles events only
+            case STATE_PANNING_SCALING: {
+                // mPanningScalingStateHandler handles events only
                 // if this is the current state since it uses ScaleGestureDetector
                 // and a GestureDetector which need well formed event stream.
             }
             break;
             default: {
-                throw new IllegalStateException("Unknown state: " + mCurrentState);
+                throw new IllegalStateException("Unknown state: " + currentState);
             }
         }
     }
@@ -215,8 +249,8 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
     @Override
     public void clearEvents(int inputSource) {
-        if (inputSource == InputDevice.SOURCE_TOUCHSCREEN) {
-            clear();
+        if (inputSource == SOURCE_TOUCHSCREEN) {
+            clearAndTransitionToStateDetecting();
         }
 
         if (mNext != null) {
@@ -229,20 +263,25 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         if (mScreenStateReceiver != null) {
             mScreenStateReceiver.unregister();
         }
-        clear();
+        clearAndTransitionToStateDetecting();
     }
 
     void notifyShortcutTriggered() {
-        if (mTriggerable) {
-            if (mMagnificationController.resetIfNeeded(true)) {
-                clear();
+        if (mDetectShortcutTrigger) {
+            boolean wasMagnifying = mMagnificationController.resetIfNeeded(/* animate */ true);
+            if (wasMagnifying) {
+                clearAndTransitionToStateDetecting();
             } else {
-                setMagnificationShortcutTriggered(!mShortcutTriggered);
+                toggleShortcutTriggered();
             }
         }
     }
 
-    private void setMagnificationShortcutTriggered(boolean state) {
+    private void toggleShortcutTriggered() {
+        setShortcutTriggered(!mShortcutTriggered);
+    }
+
+    private void setShortcutTriggered(boolean state) {
         if (mShortcutTriggered == state) {
             return;
         }
@@ -251,27 +290,25 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         mMagnificationController.setForceShowMagnifiableBounds(state);
     }
 
-    private void clear() {
+    void clearAndTransitionToStateDetecting() {
+        setShortcutTriggered(false);
         mCurrentState = STATE_DETECTING;
-        setMagnificationShortcutTriggered(false);
         mDetectingStateHandler.clear();
-        mStateViewportDraggingHandler.clear();
-        mMagnifiedContentInteractionStateHandler.clear();
+        mViewportDraggingStateHandler.clear();
+        mPanningScalingStateHandler.clear();
     }
 
     private void handleMotionEventStateDelegating(MotionEvent event,
             MotionEvent rawEvent, int policyFlags) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN: {
-                mDelegatingStateDownTime = event.getDownTime();
-            }
-            break;
-            case MotionEvent.ACTION_UP: {
-                if (mDetectingStateHandler.mDelayedEventQueue == null) {
-                    transitionToState(STATE_DETECTING);
-                }
-            }
-            break;
+        if (event.getActionMasked() == ACTION_UP) {
+            transitionTo(STATE_DETECTING);
+        }
+        delegateEvent(event, rawEvent, policyFlags);
+    }
+
+    void delegateEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mDelegatingStateDownTime = event.getDownTime();
         }
         if (mNext != null) {
             // We cache some events to see if the user wants to trigger magnification.
@@ -287,13 +324,15 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
     private void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
-        // If the event is within the magnified portion of the screen we have
+        if (mNext == null) return; // Nowhere to dispatch to
+
+        // If the touchscreen event is within the magnified portion of the screen we have
         // to change its location to be where the user thinks he is poking the
         // UI which may have been magnified and panned.
-        final float eventX = event.getX();
-        final float eventY = event.getY();
         if (mMagnificationController.isMagnifying()
-                && mMagnificationController.magnificationRegionContains(eventX, eventY)) {
+                && event.isFromSource(SOURCE_TOUCHSCREEN)
+                && mMagnificationController.magnificationRegionContains(
+                        event.getX(), event.getY())) {
             final float scale = mMagnificationController.getScale();
             final float scaledOffsetX = mMagnificationController.getOffsetX();
             final float scaledOffsetY = mMagnificationController.getOffsetY();
@@ -347,32 +386,25 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         return mTempPointerProperties;
     }
 
-    private void transitionToState(int state) {
+    private void transitionTo(int state) {
         if (DEBUG_STATE_TRANSITIONS) {
-            switch (state) {
-                case STATE_DELEGATING: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_DELEGATING");
-                }
-                break;
-                case STATE_DETECTING: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_DETECTING");
-                }
-                break;
-                case STATE_VIEWPORT_DRAGGING: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_VIEWPORT_DRAGGING");
-                }
-                break;
-                case STATE_MAGNIFIED_INTERACTION: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_MAGNIFIED_INTERACTION");
-                }
-                break;
-                default: {
-                    throw new IllegalArgumentException("Unknown state: " + state);
-                }
-            }
+            Slog.i(LOG_TAG, (stateToString(mCurrentState) + " -> " + stateToString(state)
+                    + " at " + asList(copyOfRange(new RuntimeException().getStackTrace(), 1, 5)))
+                    .replace(getClass().getName(), ""));
         }
         mPreviousState = mCurrentState;
         mCurrentState = state;
+    }
+
+    private static String stateToString(int state) {
+        switch (state) {
+            case STATE_DELEGATING: return "STATE_DELEGATING";
+            case STATE_DETECTING: return "STATE_DETECTING";
+            case STATE_VIEWPORT_DRAGGING: return "STATE_VIEWPORT_DRAGGING";
+            case STATE_PANNING_SCALING: return "STATE_PANNING_SCALING";
+            case 0: return "0";
+            default: throw new IllegalArgumentException("Unknown state: " + state);
+        }
     }
 
     private interface MotionEventHandler {
@@ -384,21 +416,20 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
     /**
      * This class determines if the user is performing a scale or pan gesture.
+     *
+     * @see #STATE_PANNING_SCALING
      */
-    private final class MagnifiedContentInteractionStateHandler extends SimpleOnGestureListener
+    final class PanningScalingStateHandler extends SimpleOnGestureListener
             implements OnScaleGestureListener, MotionEventHandler {
 
         private final ScaleGestureDetector mScaleGestureDetector;
-
         private final GestureDetector mGestureDetector;
+        final float mScalingThreshold;
 
-        private final float mScalingThreshold;
+        float mInitialScaleFactor = -1;
+        boolean mScaling;
 
-        private float mInitialScaleFactor = -1;
-
-        private boolean mScaling;
-
-        public MagnifiedContentInteractionStateHandler(Context context) {
+        public PanningScalingStateHandler(Context context) {
             final TypedValue scaleValue = new TypedValue();
             context.getResources().getValue(
                     com.android.internal.R.dimen.config_screen_magnification_scaling_threshold,
@@ -411,26 +442,39 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+            // Dispatches #onScaleBegin, #onScale, #onScaleEnd
             mScaleGestureDetector.onTouchEvent(event);
+            // Dispatches #onScroll
             mGestureDetector.onTouchEvent(event);
-            if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
+
+            if (mCurrentState != STATE_PANNING_SCALING) {
                 return;
             }
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                clear();
-                mMagnificationController.persistScale();
-                if (mPreviousState == STATE_VIEWPORT_DRAGGING) {
-                    transitionToState(STATE_VIEWPORT_DRAGGING);
-                } else {
-                    transitionToState(STATE_DETECTING);
-                }
+
+            int action = event.getActionMasked();
+            if (action == ACTION_POINTER_UP
+                    && event.getPointerCount() == 2 // includes the pointer currently being released
+                    && mPreviousState == STATE_VIEWPORT_DRAGGING) {
+
+                persistScaleAndTransitionTo(STATE_VIEWPORT_DRAGGING);
+
+            } else if (action == ACTION_UP) {
+
+                persistScaleAndTransitionTo(STATE_DETECTING);
+
             }
         }
 
+        public void persistScaleAndTransitionTo(int state) {
+            mMagnificationController.persistScale();
+            clear();
+            transitionTo(state);
+        }
+
         @Override
-        public boolean onScroll(MotionEvent first, MotionEvent second, float distanceX,
-                float distanceY) {
-            if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
+        public boolean onScroll(MotionEvent first, MotionEvent second,
+                float distanceX, float distanceY) {
+            if (mCurrentState != STATE_PANNING_SCALING) {
                 return true;
             }
             if (DEBUG_PANNING) {
@@ -447,14 +491,15 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             if (!mScaling) {
                 if (mInitialScaleFactor < 0) {
                     mInitialScaleFactor = detector.getScaleFactor();
-                } else {
-                    final float deltaScale = detector.getScaleFactor() - mInitialScaleFactor;
-                    if (Math.abs(deltaScale) > mScalingThreshold) {
-                        mScaling = true;
-                        return true;
-                    }
+                    return false;
                 }
-                return false;
+                final float deltaScale = detector.getScaleFactor() - mInitialScaleFactor;
+                if (abs(deltaScale) > mScalingThreshold) {
+                    mScaling = true;
+                    return true;
+                } else {
+                    return false;
+                }
             }
 
             final float initialScale = mMagnificationController.getScale();
@@ -485,7 +530,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            return (mCurrentState == STATE_MAGNIFIED_INTERACTION);
+            return (mCurrentState == STATE_PANNING_SCALING);
         }
 
         @Override
@@ -498,60 +543,65 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             mInitialScaleFactor = -1;
             mScaling = false;
         }
+
+        @Override
+        public String toString() {
+            return "MagnifiedContentInteractionStateHandler{" +
+                    "mInitialScaleFactor=" + mInitialScaleFactor +
+                    ", mScaling=" + mScaling +
+                    '}';
+        }
     }
 
     /**
      * This class handles motion events when the event dispatcher has
      * determined that the user is performing a single-finger drag of the
      * magnification viewport.
+     *
+     * @see #STATE_VIEWPORT_DRAGGING
      */
-    private final class StateViewportDraggingHandler implements MotionEventHandler {
+    final class ViewportDraggingStateHandler implements MotionEventHandler {
 
+        /** Whether to disable zoom after dragging ends */
+        boolean mZoomedInBeforeDrag;
         private boolean mLastMoveOutsideMagnifiedRegion;
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             final int action = event.getActionMasked();
             switch (action) {
-                case MotionEvent.ACTION_DOWN: {
-                    throw new IllegalArgumentException("Unexpected event type: ACTION_DOWN");
-                }
-                case MotionEvent.ACTION_POINTER_DOWN: {
+                case ACTION_POINTER_DOWN: {
                     clear();
-                    transitionToState(STATE_MAGNIFIED_INTERACTION);
+                    transitionTo(STATE_PANNING_SCALING);
                 }
                 break;
-                case MotionEvent.ACTION_MOVE: {
+                case ACTION_MOVE: {
                     if (event.getPointerCount() != 1) {
                         throw new IllegalStateException("Should have one pointer down.");
                     }
                     final float eventX = event.getX();
                     final float eventY = event.getY();
                     if (mMagnificationController.magnificationRegionContains(eventX, eventY)) {
-                        if (mLastMoveOutsideMagnifiedRegion) {
-                            mLastMoveOutsideMagnifiedRegion = false;
-                            mMagnificationController.setCenter(eventX, eventY, true,
-                                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-                        } else {
-                            mMagnificationController.setCenter(eventX, eventY, false,
-                                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-                        }
+                        mMagnificationController.setCenter(eventX, eventY,
+                                /* animate */ mLastMoveOutsideMagnifiedRegion,
+                                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+                        mLastMoveOutsideMagnifiedRegion = false;
                     } else {
                         mLastMoveOutsideMagnifiedRegion = true;
                     }
                 }
                 break;
-                case MotionEvent.ACTION_UP: {
-                    if (!mTranslationEnabledBeforePan) {
-                        mMagnificationController.reset(true);
-                    }
+                case ACTION_UP: {
+                    if (!mZoomedInBeforeDrag) zoomOff();
                     clear();
-                    transitionToState(STATE_DETECTING);
+                    transitionTo(STATE_DETECTING);
                 }
                 break;
-                case MotionEvent.ACTION_POINTER_UP: {
+
+                case ACTION_DOWN:
+                case ACTION_POINTER_UP: {
                     throw new IllegalArgumentException(
-                            "Unexpected event type: ACTION_POINTER_UP");
+                            "Unexpected event type: " + MotionEvent.actionToString(action));
                 }
             }
         }
@@ -560,211 +610,224 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         public void clear() {
             mLastMoveOutsideMagnifiedRegion = false;
         }
+
+        @Override
+        public String toString() {
+            return "ViewportDraggingStateHandler{" +
+                    "mZoomedInBeforeDrag=" + mZoomedInBeforeDrag +
+                    ", mLastMoveOutsideMagnifiedRegion=" + mLastMoveOutsideMagnifiedRegion +
+                    '}';
+        }
     }
 
     /**
      * This class handles motion events when the event dispatch has not yet
      * determined what the user is doing. It watches for various tap events.
+     *
+     * @see #STATE_DETECTING
      */
-    private final class DetectingStateHandler implements MotionEventHandler {
+    final class DetectingStateHandler implements MotionEventHandler, Handler.Callback {
 
-        private static final int MESSAGE_ON_ACTION_TAP_AND_HOLD = 1;
-
+        private static final int MESSAGE_ON_TRIPLE_TAP_AND_HOLD = 1;
         private static final int MESSAGE_TRANSITION_TO_DELEGATING_STATE = 2;
 
-        private static final int ACTION_TAP_COUNT = 3;
-
-        private final int mTapTimeSlop = ViewConfiguration.getJumpTapTimeout();
-
-        private final int mMultiTapTimeSlop;
-
-        private final int mTapDistanceSlop;
-
-        private final int mMultiTapDistanceSlop;
+        final int mLongTapMinDelay = ViewConfiguration.getJumpTapTimeout();
+        final int mSwipeMinDistance;
+        final int mMultiTapMaxDelay;
+        final int mMultiTapMaxDistance;
 
         private MotionEventInfo mDelayedEventQueue;
+        MotionEvent mLastDown;
+        private MotionEvent mPreLastDown;
+        private MotionEvent mLastUp;
+        private MotionEvent mPreLastUp;
 
-        private MotionEvent mLastDownEvent;
-
-        private MotionEvent mLastTapUpEvent;
-
-        private int mTapCount;
+        Handler mHandler = new Handler(this);
 
         public DetectingStateHandler(Context context) {
-            mMultiTapTimeSlop = ViewConfiguration.getDoubleTapTimeout()
+            mMultiTapMaxDelay = ViewConfiguration.getDoubleTapTimeout()
                     + context.getResources().getInteger(
                     com.android.internal.R.integer.config_screen_magnification_multi_tap_adjustment);
-            mTapDistanceSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-            mMultiTapDistanceSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
+            mSwipeMinDistance = ViewConfiguration.get(context).getScaledTouchSlop();
+            mMultiTapMaxDistance = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         }
 
-        private final Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                final int type = message.what;
-                switch (type) {
-                    case MESSAGE_ON_ACTION_TAP_AND_HOLD: {
-                        MotionEvent event = (MotionEvent) message.obj;
-                        final int policyFlags = message.arg1;
-                        onActionTapAndHold(event, policyFlags);
-                    }
-                    break;
-                    case MESSAGE_TRANSITION_TO_DELEGATING_STATE: {
-                        transitionToState(STATE_DELEGATING);
-                        sendDelayedMotionEvents();
-                        clear();
-                    }
-                    break;
-                    default: {
-                        throw new IllegalArgumentException("Unknown message type: " + type);
-                    }
+        @Override
+        public boolean handleMessage(Message message) {
+            final int type = message.what;
+            switch (type) {
+                case MESSAGE_ON_TRIPLE_TAP_AND_HOLD: {
+                    onTripleTapAndHold(/* down */ (MotionEvent) message.obj);
+                }
+                break;
+                case MESSAGE_TRANSITION_TO_DELEGATING_STATE: {
+                    transitionToDelegatingState(/* andClear */ true);
+                }
+                break;
+                default: {
+                    throw new IllegalArgumentException("Unknown message type: " + type);
                 }
             }
-        };
+            return true;
+        }
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             cacheDelayedMotionEvent(event, rawEvent, policyFlags);
-            final int action = event.getActionMasked();
-            switch (action) {
+            switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
+
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
+
                     if (!mMagnificationController.magnificationRegionContains(
                             event.getX(), event.getY())) {
-                        transitionToDelegatingState(!mShortcutTriggered);
-                        return;
-                    }
-                    if (mShortcutTriggered) {
-                        Message message = mHandler.obtainMessage(MESSAGE_ON_ACTION_TAP_AND_HOLD,
-                                policyFlags, 0, event);
-                        mHandler.sendMessageDelayed(message,
-                                ViewConfiguration.getLongPressTimeout());
-                        return;
-                    }
-                    if (mDetectTripleTap) {
-                        if ((mTapCount == ACTION_TAP_COUNT - 1) && (mLastDownEvent != null)
-                                && GestureUtils.isMultiTap(mLastDownEvent, event, mMultiTapTimeSlop,
-                                        mMultiTapDistanceSlop, 0)) {
-                            Message message = mHandler.obtainMessage(MESSAGE_ON_ACTION_TAP_AND_HOLD,
-                                    policyFlags, 0, event);
-                            mHandler.sendMessageDelayed(message,
-                                    ViewConfiguration.getLongPressTimeout());
-                        } else if (mTapCount < ACTION_TAP_COUNT) {
-                            Message message = mHandler.obtainMessage(
-                                    MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-                            mHandler.sendMessageDelayed(message, mMultiTapTimeSlop);
-                        }
-                        clearLastDownEvent();
-                        mLastDownEvent = MotionEvent.obtain(event);
-                    } else if (mMagnificationController.isMagnifying()) {
-                        // If magnified, consume an ACTION_DOWN until mMultiTapTimeSlop or
-                        // mTapDistanceSlop is reached to ensure MAGNIFIED_INTERACTION is reachable.
-                        Message message = mHandler.obtainMessage(
-                                MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-                        mHandler.sendMessageDelayed(message, mMultiTapTimeSlop);
-                        return;
+
+                        transitionToDelegatingState(/* andClear */ !mShortcutTriggered);
+
+                    } else if (isMultiTapTriggered(2 /* taps */)) {
+
+                        // 3tap and hold
+                        delayedTransitionToDraggingState(event);
+
+                    } else if (mDetectTripleTap
+                            // If magnified, delay an ACTION_DOWN for mMultiTapMaxDelay
+                            // to ensure reachability of
+                            // STATE_PANNING_SCALING(triggerable with ACTION_POINTER_DOWN)
+                            || mMagnificationController.isMagnifying()) {
+
+                        delayedTransitionToDelegatingState();
+
                     } else {
-                        transitionToDelegatingState(true);
-                        return;
+
+                        // Delegate pending events without delay
+                        transitionToDelegatingState(/* andClear */ true);
                     }
                 }
                 break;
-                case MotionEvent.ACTION_POINTER_DOWN: {
+                case ACTION_POINTER_DOWN: {
                     if (mMagnificationController.isMagnifying()) {
-                        mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-                        transitionToState(STATE_MAGNIFIED_INTERACTION);
+                        transitionTo(STATE_PANNING_SCALING);
                         clear();
                     } else {
-                        transitionToDelegatingState(true);
+                        transitionToDelegatingState(/* andClear */ true);
                     }
                 }
                 break;
-                case MotionEvent.ACTION_MOVE: {
-                    if (mLastDownEvent != null && mTapCount < ACTION_TAP_COUNT - 1) {
-                        final double distance = GestureUtils.computeDistance(mLastDownEvent,
-                                event, 0);
-                        if (Math.abs(distance) > mTapDistanceSlop) {
-                            transitionToDelegatingState(true);
-                        }
+                case ACTION_MOVE: {
+                    if (isFingerDown()
+                            && distance(mLastDown, /* move */ event) > mSwipeMinDistance
+                            // For convenience, viewport dragging on 3tap&hold takes precedence
+                            // over insta-delegating on 3tap&swipe
+                            // (which is a rare combo to be used aside from magnification)
+                            && !isMultiTapTriggered(2 /* taps */)) {
+
+                        // Swipe detected - delegate skipping timeout
+                        transitionToDelegatingState(/* andClear */ true);
                     }
                 }
                 break;
-                case MotionEvent.ACTION_UP: {
-                    mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
+                case ACTION_UP: {
+
+                    mHandler.removeMessages(MESSAGE_ON_TRIPLE_TAP_AND_HOLD);
+
                     if (!mMagnificationController.magnificationRegionContains(
                             event.getX(), event.getY())) {
-                        transitionToDelegatingState(!mShortcutTriggered);
-                        return;
+
+                        transitionToDelegatingState(/* andClear */ !mShortcutTriggered);
+
+                    } else if (isMultiTapTriggered(3 /* taps */)) {
+
+                        onTripleTap(/* up */ event);
+
+                    } else if (
+                            // Possible to be false on: 3tap&drag -> scale -> PTR_UP -> UP
+                            isFingerDown()
+                                //TODO long tap should never happen here
+                            && (timeBetween(mLastDown, /* mLastUp */ event) >= mLongTapMinDelay)
+                                    || distance(mLastDown, /* mLastUp */ event)
+                                            >= mSwipeMinDistance) {
+
+                        transitionToDelegatingState(/* andClear */ true);
+
                     }
-                    if (mShortcutTriggered) {
-                        clear();
-                        onActionTap(event, policyFlags);
-                        return;
-                    }
-                    if (mLastDownEvent == null) {
-                        return;
-                    }
-                    if (!GestureUtils.isTap(mLastDownEvent, event, mTapTimeSlop,
-                            mTapDistanceSlop, 0)) {
-                        transitionToDelegatingState(true);
-                        return;
-                    }
-                    if (mLastTapUpEvent != null && !GestureUtils.isMultiTap(
-                            mLastTapUpEvent, event, mMultiTapTimeSlop, mMultiTapDistanceSlop, 0)) {
-                        transitionToDelegatingState(true);
-                        return;
-                    }
-                    mTapCount++;
-                    if (DEBUG_DETECTING) {
-                        Slog.i(LOG_TAG, "Tap count:" + mTapCount);
-                    }
-                    if (mTapCount == ACTION_TAP_COUNT) {
-                        clear();
-                        onActionTap(event, policyFlags);
-                        return;
-                    }
-                    clearLastTapUpEvent();
-                    mLastTapUpEvent = MotionEvent.obtain(event);
-                }
-                break;
-                case MotionEvent.ACTION_POINTER_UP: {
-                    /* do nothing */
                 }
                 break;
             }
+        }
+
+        public boolean isMultiTapTriggered(int numTaps) {
+
+            // Shortcut acts as the 2 initial taps
+            if (mShortcutTriggered) return tapCount() + 2 >= numTaps;
+
+            return mDetectTripleTap
+                    && tapCount() >= numTaps
+                    && isMultiTap(mPreLastDown, mLastDown)
+                    && isMultiTap(mPreLastUp, mLastUp);
+        }
+
+        private boolean isMultiTap(MotionEvent first, MotionEvent second) {
+            return GestureUtils.isMultiTap(first, second, mMultiTapMaxDelay, mMultiTapMaxDistance);
+        }
+
+        public boolean isFingerDown() {
+            return mLastDown != null;
+        }
+
+        private long timeBetween(@Nullable MotionEvent a, @Nullable MotionEvent b) {
+            if (a == null && b == null) return 0;
+            return abs(timeOf(a) - timeOf(b));
+        }
+
+        /**
+         * Nullsafe {@link MotionEvent#getEventTime} that interprets null event as something that
+         * has happened long enough ago to be gone from the event queue.
+         * Thus the time for a null event is a small number, that is below any other non-null
+         * event's time.
+         *
+         * @return {@link MotionEvent#getEventTime}, or {@link Long#MIN_VALUE} if the event is null
+         */
+        private long timeOf(@Nullable MotionEvent event) {
+            return event != null ? event.getEventTime() : Long.MIN_VALUE;
+        }
+
+        public int tapCount() {
+            return MotionEventInfo.countOf(mDelayedEventQueue, ACTION_UP);
+        }
+
+        /** -> {@link #STATE_DELEGATING} */
+        public void delayedTransitionToDelegatingState() {
+            mHandler.sendEmptyMessageDelayed(
+                    MESSAGE_TRANSITION_TO_DELEGATING_STATE,
+                    mMultiTapMaxDelay);
+        }
+
+        /** -> {@link #STATE_VIEWPORT_DRAGGING} */
+        public void delayedTransitionToDraggingState(MotionEvent event) {
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(MESSAGE_ON_TRIPLE_TAP_AND_HOLD, event),
+                    ViewConfiguration.getLongPressTimeout());
         }
 
         @Override
         public void clear() {
-            setMagnificationShortcutTriggered(false);
-            mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
+            setShortcutTriggered(false);
+            mHandler.removeMessages(MESSAGE_ON_TRIPLE_TAP_AND_HOLD);
             mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-            clearTapDetectionState();
             clearDelayedMotionEvents();
         }
 
-        private void clearTapDetectionState() {
-            mTapCount = 0;
-            clearLastTapUpEvent();
-            clearLastDownEvent();
-        }
-
-        private void clearLastTapUpEvent() {
-            if (mLastTapUpEvent != null) {
-                mLastTapUpEvent.recycle();
-                mLastTapUpEvent = null;
-            }
-        }
-
-        private void clearLastDownEvent() {
-            if (mLastDownEvent != null) {
-                mLastDownEvent.recycle();
-                mLastDownEvent = null;
-            }
-        }
 
         private void cacheDelayedMotionEvent(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
+            if (event.getActionMasked() == ACTION_DOWN) {
+                mPreLastDown = mLastDown;
+                mLastDown = event;
+            } else if (event.getActionMasked() == ACTION_UP) {
+                mPreLastUp = mLastUp;
+                mLastUp = event;
+            }
+
             MotionEventInfo info = MotionEventInfo.obtain(event, rawEvent,
                     policyFlags);
             if (mDelayedEventQueue == null) {
@@ -782,8 +845,13 @@ class MagnificationGestureHandler implements EventStreamTransformation {
             while (mDelayedEventQueue != null) {
                 MotionEventInfo info = mDelayedEventQueue;
                 mDelayedEventQueue = info.mNext;
-                MagnificationGestureHandler.this.onMotionEvent(info.mEvent, info.mRawEvent,
-                        info.mPolicyFlags);
+
+                // Because MagnifiedInteractionStateHandler requires well-formed event stream
+                mPanningScalingStateHandler.onMotionEvent(
+                        info.event, info.rawEvent, info.policyFlags);
+
+                delegateEvent(info.event, info.rawEvent, info.policyFlags);
+
                 info.recycle();
             }
         }
@@ -794,91 +862,136 @@ class MagnificationGestureHandler implements EventStreamTransformation {
                 mDelayedEventQueue = info.mNext;
                 info.recycle();
             }
+            mPreLastDown = null;
+            mPreLastUp = null;
+            mLastDown = null;
+            mLastUp = null;
         }
 
-        private void transitionToDelegatingState(boolean andClear) {
-            transitionToState(STATE_DELEGATING);
+        void transitionToDelegatingState(boolean andClear) {
+            transitionTo(STATE_DELEGATING);
             sendDelayedMotionEvents();
-            if (andClear) {
-                clear();
-            }
+            if (andClear) clear();
         }
 
-        private void onActionTap(MotionEvent up, int policyFlags) {
+        private void onTripleTap(MotionEvent up) {
+
             if (DEBUG_DETECTING) {
-                Slog.i(LOG_TAG, "onActionTap()");
+                Slog.i(LOG_TAG, "onTripleTap(); delayed: "
+                        + MotionEventInfo.toString(mDelayedEventQueue));
             }
-
-            if (!mMagnificationController.isMagnifying()) {
-                final float targetScale = mMagnificationController.getPersistedScale();
-                final float scale = MathUtils.constrain(targetScale, MIN_SCALE, MAX_SCALE);
-                mMagnificationController.setScaleAndCenter(scale, up.getX(), up.getY(), true,
-                        AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-            } else {
-                mMagnificationController.reset(true);
-            }
-        }
-
-        private void onActionTapAndHold(MotionEvent down, int policyFlags) {
-            if (DEBUG_DETECTING) {
-                Slog.i(LOG_TAG, "onActionTapAndHold()");
-            }
-
             clear();
-            mTranslationEnabledBeforePan = mMagnificationController.isMagnifying();
 
-            final float targetScale = mMagnificationController.getPersistedScale();
-            final float scale = MathUtils.constrain(targetScale, MIN_SCALE, MAX_SCALE);
-            mMagnificationController.setScaleAndCenter(scale, down.getX(), down.getY(), true,
-                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-
-            transitionToState(STATE_VIEWPORT_DRAGGING);
+            // Toggle zoom
+            if (mMagnificationController.isMagnifying()) {
+                zoomOff();
+            } else {
+                zoomOn(up.getX(), up.getY());
+            }
         }
+
+        void onTripleTapAndHold(MotionEvent down) {
+
+            if (DEBUG_DETECTING) Slog.i(LOG_TAG, "onTripleTapAndHold()");
+            clear();
+
+            mViewportDraggingStateHandler.mZoomedInBeforeDrag =
+                    mMagnificationController.isMagnifying();
+
+            zoomOn(down.getX(), down.getY());
+
+            transitionTo(STATE_VIEWPORT_DRAGGING);
+        }
+
+        @Override
+        public String toString() {
+            return "DetectingStateHandler{" +
+                    "tapCount()=" + tapCount() +
+                    ", mDelayedEventQueue=" + MotionEventInfo.toString(mDelayedEventQueue) +
+                    '}';
+        }
+    }
+
+    private void zoomOn(float centerX, float centerY) {
+        final float scale = MathUtils.constrain(
+                mMagnificationController.getPersistedScale(),
+                MIN_SCALE, MAX_SCALE);
+        mMagnificationController.setScaleAndCenter(
+                scale, centerX, centerY,
+                /* animate */ true,
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+    }
+
+    private void zoomOff() {
+        mMagnificationController.reset(/* animate */ true);
+    }
+
+    private static MotionEvent recycleAndNullify(@Nullable MotionEvent event) {
+        if (event != null) {
+            event.recycle();
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "MagnificationGestureHandler{" +
+                "mDetectingStateHandler=" + mDetectingStateHandler +
+                ", mMagnifiedInteractionStateHandler=" + mPanningScalingStateHandler +
+                ", mViewportDraggingStateHandler=" + mViewportDraggingStateHandler +
+                ", mDetectTripleTap=" + mDetectTripleTap +
+                ", mDetectShortcutTrigger=" + mDetectShortcutTrigger +
+                ", mCurrentState=" + stateToString(mCurrentState) +
+                ", mPreviousState=" + stateToString(mPreviousState) +
+                ", mShortcutTriggered=" + mShortcutTriggered +
+                ", mDelegatingStateDownTime=" + mDelegatingStateDownTime +
+                ", mMagnificationController=" + mMagnificationController +
+                '}';
     }
 
     private static final class MotionEventInfo {
 
         private static final int MAX_POOL_SIZE = 10;
-
         private static final Object sLock = new Object();
-
         private static MotionEventInfo sPool;
-
         private static int sPoolSize;
 
         private MotionEventInfo mNext;
-
         private boolean mInPool;
 
-        public MotionEvent mEvent;
-
-        public MotionEvent mRawEvent;
-
-        public int mPolicyFlags;
+        public MotionEvent event;
+        public MotionEvent rawEvent;
+        public int policyFlags;
 
         public static MotionEventInfo obtain(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
             synchronized (sLock) {
-                MotionEventInfo info;
-                if (sPoolSize > 0) {
-                    sPoolSize--;
-                    info = sPool;
-                    sPool = info.mNext;
-                    info.mNext = null;
-                    info.mInPool = false;
-                } else {
-                    info = new MotionEventInfo();
-                }
+                MotionEventInfo info = obtainInternal();
                 info.initialize(event, rawEvent, policyFlags);
                 return info;
             }
         }
 
+        @NonNull
+        private static MotionEventInfo obtainInternal() {
+            MotionEventInfo info;
+            if (sPoolSize > 0) {
+                sPoolSize--;
+                info = sPool;
+                sPool = info.mNext;
+                info.mNext = null;
+                info.mInPool = false;
+            } else {
+                info = new MotionEventInfo();
+            }
+            return info;
+        }
+
         private void initialize(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
-            mEvent = MotionEvent.obtain(event);
-            mRawEvent = MotionEvent.obtain(rawEvent);
-            mPolicyFlags = policyFlags;
+            this.event = MotionEvent.obtain(event);
+            this.rawEvent = MotionEvent.obtain(rawEvent);
+            this.policyFlags = policyFlags;
         }
 
         public void recycle() {
@@ -897,11 +1010,22 @@ class MagnificationGestureHandler implements EventStreamTransformation {
         }
 
         private void clear() {
-            mEvent.recycle();
-            mEvent = null;
-            mRawEvent.recycle();
-            mRawEvent = null;
-            mPolicyFlags = 0;
+            event = recycleAndNullify(event);
+            rawEvent = recycleAndNullify(rawEvent);
+            policyFlags = 0;
+        }
+
+        static int countOf(MotionEventInfo info, int eventType) {
+            if (info == null) return 0;
+            return (info.event.getAction() == eventType ? 1 : 0)
+                    + countOf(info.mNext, eventType);
+        }
+
+        public static String toString(MotionEventInfo info) {
+            return info == null
+                    ? ""
+                    : MotionEvent.actionToString(info.event.getAction()).replace("ACTION_", "")
+                            + " " + MotionEventInfo.toString(info.mNext);
         }
     }
 
@@ -927,7 +1051,7 @@ class MagnificationGestureHandler implements EventStreamTransformation {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            mGestureHandler.setMagnificationShortcutTriggered(false);
+            mGestureHandler.setShortcutTriggered(false);
         }
     }
 }
