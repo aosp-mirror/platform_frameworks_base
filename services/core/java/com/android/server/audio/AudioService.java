@@ -6134,12 +6134,12 @@ public class AudioService extends IAudioService.Stub
     private int mSafeMediaVolumeIndex;
     // mSafeUsbMediaVolumeIndex is used for USB Headsets and is the music volume UI index
     // corresponding to a gain of -30 dBFS in audio flinger mixer.
-    // We remove -15 dBs from the theoretical -15dB to account for the EQ boost when bands are set
-    // to max gain.
+    // We remove -22 dBs from the theoretical -15dB to account for the EQ + bass boost
+    // amplification when both effects are on with all band gains at maximum.
     // This level corresponds to a loudness of 85 dB SPL for the warning to be displayed when
     // the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
     private int mSafeUsbMediaVolumeIndex;
-    private static final float SAFE_VOLUME_GAIN_DBFS = -30.0f;
+    private static final float SAFE_VOLUME_GAIN_DBFS = -37.0f;
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
                                                 AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
