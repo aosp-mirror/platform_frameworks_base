@@ -33,7 +33,6 @@ import android.util.Pools.SynchronizedPool;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -1528,9 +1527,6 @@ public class StaticLayout extends Layout {
     private static native long nNewBuilder();
     private static native void nFreeBuilder(long nativePtr);
     private static native void nFinishBuilder(long nativePtr);
-
-    /* package */ static native long nLoadHyphenator(ByteBuffer buf, int offset,
-            int minPrefix, int minSuffix);
 
     // Set up paragraph text and settings; done as one big method to minimize jni crossings
     private static native void nSetupParagraph(
