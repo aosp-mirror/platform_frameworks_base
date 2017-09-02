@@ -115,7 +115,7 @@ public class MbmsStreamingSession implements AutoCloseable {
      * @return An instance of {@link MbmsStreamingSession}, or null if an error occurred.
      */
     public static @Nullable MbmsStreamingSession create(@NonNull Context context,
-            @NonNull MbmsStreamingSessionCallback callback, int subscriptionId,
+            final @NonNull MbmsStreamingSessionCallback callback, int subscriptionId,
             @NonNull Handler handler) {
         if (!sIsInitialized.compareAndSet(false, true)) {
             throw new IllegalStateException("Cannot create two instances of MbmsStreamingSession");
@@ -123,7 +123,7 @@ public class MbmsStreamingSession implements AutoCloseable {
         MbmsStreamingSession session = new MbmsStreamingSession(context, callback,
                 subscriptionId, handler);
 
-        int result = session.bindAndInitialize();
+        final int result = session.bindAndInitialize();
         if (result != MbmsException.SUCCESS) {
             sIsInitialized.set(false);
             handler.post(new Runnable() {
