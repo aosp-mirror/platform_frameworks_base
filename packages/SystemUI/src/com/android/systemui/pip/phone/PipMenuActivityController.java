@@ -63,6 +63,7 @@ public class PipMenuActivityController {
     public static final String EXTRA_STACK_BOUNDS = "stack_bounds";
     public static final String EXTRA_MOVEMENT_BOUNDS = "movement_bounds";
     public static final String EXTRA_ALLOW_TIMEOUT = "allow_timeout";
+    public static final String EXTRA_WILL_RESIZE_MENU = "resize_menu_on_show";
     public static final String EXTRA_DISMISS_FRACTION = "dismiss_fraction";
     public static final String EXTRA_MENU_STATE = "menu_state";
 
@@ -268,7 +269,8 @@ public class PipMenuActivityController {
             // If we haven't requested the start activity, or if it previously took too long to
             // start, then start it
             startMenuActivity(MENU_STATE_NONE, null /* stackBounds */,
-                    null /* movementBounds */, false /* allowMenuTimeout */);
+                    null /* movementBounds */, false /* allowMenuTimeout */,
+                    false /* resizeMenuOnShow */);
         }
     }
 
@@ -276,18 +278,20 @@ public class PipMenuActivityController {
      * Shows the menu activity.
      */
     public void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
-            boolean allowMenuTimeout) {
+            boolean allowMenuTimeout, boolean willResizeMenu) {
         if (DEBUG) {
             Log.d(TAG, "showMenu() state=" + menuState
                     + " hasActivity=" + (mToActivityMessenger != null)
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
+
         if (mToActivityMessenger != null) {
             Bundle data = new Bundle();
             data.putInt(EXTRA_MENU_STATE, menuState);
             data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
             data.putParcelable(EXTRA_MOVEMENT_BOUNDS, movementBounds);
             data.putBoolean(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
+            data.putBoolean(EXTRA_WILL_RESIZE_MENU, willResizeMenu);
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_SHOW_MENU;
             m.obj = data;
@@ -299,7 +303,8 @@ public class PipMenuActivityController {
         } else if (!mStartActivityRequested || isStartActivityRequestedElapsed()) {
             // If we haven't requested the start activity, or if it previously took too long to
             // start, then start it
-            startMenuActivity(menuState, stackBounds, movementBounds, allowMenuTimeout);
+            startMenuActivity(menuState, stackBounds, movementBounds, allowMenuTimeout,
+                    willResizeMenu);
         }
     }
 
@@ -372,7 +377,7 @@ public class PipMenuActivityController {
      * Starts the menu activity on the top task of the pinned stack.
      */
     private void startMenuActivity(int menuState, Rect stackBounds, Rect movementBounds,
-            boolean allowMenuTimeout) {
+            boolean allowMenuTimeout, boolean willResizeMenu) {
         try {
             StackInfo pinnedStackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
@@ -388,6 +393,7 @@ public class PipMenuActivityController {
                 }
                 intent.putExtra(EXTRA_MENU_STATE, menuState);
                 intent.putExtra(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
+                intent.putExtra(EXTRA_WILL_RESIZE_MENU, willResizeMenu);
                 ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
                 options.setLaunchTaskId(
                         pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
