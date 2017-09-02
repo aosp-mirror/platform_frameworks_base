@@ -7873,6 +7873,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isIntentSenderAForegroundService(IIntentSender pendingResult) {
+        if (pendingResult instanceof PendingIntentRecord) {
+            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
+            return res.key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE;
+        }
+        return false;
+    }
+
+    @Override
     public Intent getIntentForIntentSender(IIntentSender pendingResult) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "getIntentForIntentSender()");
