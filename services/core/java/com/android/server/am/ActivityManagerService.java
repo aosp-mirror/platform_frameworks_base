@@ -1471,7 +1471,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Flag that indicates if multi-window is enabled.
      *
      * For any particular form of multi-window to be enabled, generic multi-window must be enabled
-     * in {@link com.android.internal.R.bool.config_supportsMultiWindow} config or
+     * in {@link com.android.internal.R.bool#config_supportsMultiWindow} config or
      * {@link Settings.Global#DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES} development option set.
      * At least one of the forms of multi-window must be enabled in order for this flag to be
      * initialized to 'true'.
@@ -13464,7 +13464,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Schedule the given thread a normal scheduling priority.
      *
-     * @param newTid the tid of the thread to adjust the scheduling of.
+     * @param tid the tid of the thread to adjust the scheduling of.
      * @param suppressLogs {@code true} if any error logging should be disabled.
      *
      * @return {@code true} if this succeeded.
@@ -13477,6 +13477,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!suppressLogs) {
                 Slog.w(TAG, "Failed to set scheduling policy, thread does not exist:\n" + e);
             }
+        } catch (SecurityException e) {
+            if (!suppressLogs) {
+                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
+            }
         }
         return false;
     }
@@ -13484,7 +13488,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Schedule the given thread an FIFO scheduling priority.
      *
-     * @param newTid the tid of the thread to adjust the scheduling of.
+     * @param tid the tid of the thread to adjust the scheduling of.
      * @param suppressLogs {@code true} if any error logging should be disabled.
      *
      * @return {@code true} if this succeeded.
@@ -13496,6 +13500,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (IllegalArgumentException e) {
             if (!suppressLogs) {
                 Slog.w(TAG, "Failed to set scheduling policy, thread does not exist:\n" + e);
+            }
+        } catch (SecurityException e) {
+            if (!suppressLogs) {
+                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
             }
         }
         return false;
@@ -22054,13 +22062,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                                app.curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
                         mVrController.onTopProcChangedLocked(app);
                         if (mUseFifoUiScheduling) {
-                            // Reset UI pipeline to SCHED_OTHER
-                            setThreadScheduler(app.pid, SCHED_OTHER, 0);
-                            setThreadPriority(app.pid, app.savedPriority);
-                            if (app.renderThreadTid != 0) {
-                                setThreadScheduler(app.renderThreadTid,
-                                    SCHED_OTHER, 0);
-                                setThreadPriority(app.renderThreadTid, -4);
+                            try {
+                                // Reset UI pipeline to SCHED_OTHER
+                                setThreadScheduler(app.pid, SCHED_OTHER, 0);
+                                setThreadPriority(app.pid, app.savedPriority);
+                                if (app.renderThreadTid != 0) {
+                                    setThreadScheduler(app.renderThreadTid,
+                                        SCHED_OTHER, 0);
+                                    setThreadPriority(app.renderThreadTid, -4);
+                                }
+                            } catch (IllegalArgumentException e) {
+                                Slog.w(TAG,
+                                        "Failed to set scheduling policy, thread does not exist:\n"
+                                                + e);
+                            } catch (SecurityException e) {
+                                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
                             }
                         } else {
                             // Reset priority for top app UI and render threads
