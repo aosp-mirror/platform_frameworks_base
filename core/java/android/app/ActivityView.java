@@ -232,8 +232,8 @@ public class ActivityView extends ViewGroup {
     private class SurfaceCallback implements SurfaceHolder.Callback {
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
+            mSurface = mSurfaceView.getHolder().getSurface();
             if (mVirtualDisplay == null) {
-                mSurface = mSurfaceView.getHolder().getSurface();
                 initVirtualDisplay();
                 if (mVirtualDisplay != null && mActivityViewCallback != null) {
                     mActivityViewCallback.onActivityViewReady(ActivityView.this);
