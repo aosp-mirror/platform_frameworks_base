@@ -75,7 +75,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
 
         return initialize(new MbmsStreamingSessionCallback() {
             @Override
-            public void onError(int errorCode, String message) {
+            public void onError(final int errorCode, final String message) {
                 try {
                     callback.onError(errorCode, message);
                 } catch (RemoteException e) {
@@ -84,7 +84,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             }
 
             @Override
-            public void onStreamingServicesUpdated(List<StreamingServiceInfo> services) {
+            public void onStreamingServicesUpdated(final List<StreamingServiceInfo> services) {
                 try {
                     callback.onStreamingServicesUpdated(services);
                 } catch (RemoteException e) {
@@ -150,8 +150,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @hide
      */
     @Override
-    public int startStreaming(int subscriptionId, String serviceId,
-            IStreamingServiceCallback callback) throws RemoteException {
+    public int startStreaming(final int subscriptionId, String serviceId,
+            final IStreamingServiceCallback callback) throws RemoteException {
         final int uid = Binder.getCallingUid();
         callback.asBinder().linkToDeath(new DeathRecipient() {
             @Override
@@ -162,7 +162,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
 
         return startStreaming(subscriptionId, serviceId, new StreamingServiceCallback() {
             @Override
-            public void onError(int errorCode, String message) {
+            public void onError(final int errorCode, final String message) {
                 try {
                     callback.onError(errorCode, message);
                 } catch (RemoteException e) {
@@ -171,8 +171,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             }
 
             @Override
-            public void onStreamStateUpdated(@StreamingService.StreamingState int state,
-                    @StreamingService.StreamingStateChangeReason int reason) {
+            public void onStreamStateUpdated(@StreamingService.StreamingState final int state,
+                    @StreamingService.StreamingStateChangeReason final int reason) {
                 try {
                     callback.onStreamStateUpdated(state, reason);
                 } catch (RemoteException e) {
@@ -190,7 +190,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             }
 
             @Override
-            public void onBroadcastSignalStrengthUpdated(int signalStrength) {
+            public void onBroadcastSignalStrengthUpdated(final int signalStrength) {
                 try {
                     callback.onBroadcastSignalStrengthUpdated(signalStrength);
                 } catch (RemoteException e) {
@@ -199,7 +199,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             }
 
             @Override
-            public void onStreamMethodUpdated(int methodType) {
+            public void onStreamMethodUpdated(final int methodType) {
                 try {
                     callback.onStreamMethodUpdated(methodType);
                 } catch (RemoteException e) {

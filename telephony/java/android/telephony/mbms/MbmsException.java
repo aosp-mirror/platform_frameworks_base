@@ -33,7 +33,7 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates that the app attempted to perform an operation on an instance of
-     * TODO link android.telephony.MbmsDownloadManager or
+     * {@link android.telephony.MbmsDownloadSession} or
      * {@link MbmsStreamingSession} without being bound to the middleware.
      */
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 2;
@@ -49,8 +49,7 @@ public class MbmsException extends Exception {
         private InitializationErrors() {}
         /**
          * Indicates that the app tried to create more than one instance each of
-         * {@link MbmsStreamingSession} or
-         * TODO link android.telephony.MbmsDownloadManager
+         * {@link MbmsStreamingSession} or {@link android.telephony.MbmsDownloadSession}.
          */
         public static final int ERROR_DUPLICATE_INITIALIZE = 101;
         /** Indicates that the app is not authorized to access media via MBMS.*/
@@ -68,7 +67,7 @@ public class MbmsException extends Exception {
         /**
          * Indicates that the app attempted to perform an operation before receiving notification
          * that the middleware is ready via {@link MbmsStreamingSessionCallback#onMiddlewareReady()}
-         * or TODO: link MbmsDownloadManagerCallback#middlewareReady
+         * or {@link MbmsDownloadSessionCallback#onMiddlewareReady()}.
          */
         public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 201;
         /**

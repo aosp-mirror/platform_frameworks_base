@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.telephony.MbmsDownloadSession;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.MbmsDownloadReceiver;
 
@@ -39,8 +40,8 @@ public class VendorUtils {
     /**
      * The MBMS middleware should send this when a download of single file has completed or
      * failed. Mandatory extras are
-     * {@link android.telephony.MbmsDownloadManager#EXTRA_MBMS_DOWNLOAD_RESULT}
-     * {@link android.telephony.MbmsDownloadManager#EXTRA_MBMS_FILE_INFO}
+     * {@link MbmsDownloadSession#EXTRA_MBMS_DOWNLOAD_RESULT}
+     * {@link MbmsDownloadSession#EXTRA_MBMS_FILE_INFO}
      * {@link #EXTRA_REQUEST}
      * {@link #EXTRA_TEMP_LIST}
      * {@link #EXTRA_FINAL_URI}
