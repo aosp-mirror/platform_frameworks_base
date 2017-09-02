@@ -177,6 +177,34 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         }
     }
 
+    /**
+     * Safely multiple a value by a rational.
+     * <p>
+     * Internally it uses integer-based math whenever possible, but switches
+     * over to double-based math if values would overflow.
+     */
+    @VisibleForTesting
+    public static long multiplySafe(long value, long num, long den) {
+        long x = value;
+        long y = num;
+
+        // Logic shamelessly borrowed from Math.multiplyExact()
+        long r = x * y;
+        long ax = Math.abs(x);
+        long ay = Math.abs(y);
+        if (((ax | ay) >>> 31 != 0)) {
+            // Some bits greater than 2^31 that might cause overflow
+            // Check the result using the divide operator
+            // and check for the special case of Long.MIN_VALUE * -1
+            if (((y != 0) && (r / y != x)) ||
+                    (x == Long.MIN_VALUE && y == -1)) {
+                // Use double math to avoid overflowing
+                return (long) (((double) num / den) * value);
+            }
+        }
+        return r / den;
+    }
+
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel) {
         return getRelevantUids(accessLevel, Binder.getCallingUid());
     }
@@ -274,8 +302,8 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             final long rawRxBytes = entry.rxBytes;
             final long rawTxBytes = entry.txBytes;
             final long targetBytes = augmentPlan.getDataUsageBytes();
-            final long targetRxBytes = (rawRxBytes * targetBytes) / rawBytes;
-            final long targetTxBytes = (rawTxBytes * targetBytes) / rawBytes;
+            final long targetRxBytes = multiplySafe(targetBytes, rawRxBytes, rawBytes);
+            final long targetTxBytes = multiplySafe(targetBytes, rawTxBytes, rawBytes);
 
             // Scale all matching buckets to reach anchor target
             final long beforeTotal = combined.getTotalBytes();
@@ -283,8 +311,8 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 combined.getValues(i, entry);
                 if (entry.bucketStart >= augmentStart
                         && entry.bucketStart + entry.bucketDuration <= augmentEnd) {
-                    entry.rxBytes = (entry.rxBytes * targetRxBytes) / rawRxBytes;
-                    entry.txBytes = (entry.txBytes * targetTxBytes) / rawTxBytes;
+                    entry.rxBytes = multiplySafe(targetRxBytes, entry.rxBytes, rawRxBytes);
+                    entry.txBytes = multiplySafe(targetTxBytes, entry.txBytes, rawTxBytes);
                     // We purposefully clear out packet counters to indicate
                     // that this data has been augmented.
                     entry.rxPackets = 0;
