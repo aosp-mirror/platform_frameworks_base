@@ -164,7 +164,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -3545,15 +3544,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
         pw.print(prefix); pw.println("mStacks=" + mStacks);
-        // TODO: move this to LockTaskController
-        final SparseArray<String[]> packages = mService.mLockTaskPackages;
-        if (packages.size() > 0) {
-            pw.print(prefix); pw.println("mLockTaskPackages (userId:packages)=");
-            for (int i = 0; i < packages.size(); ++i) {
-                pw.print(prefix); pw.print(prefix); pw.print(packages.keyAt(i));
-                pw.print(":"); pw.println(Arrays.toString(packages.valueAt(i)));
-            }
-        }
         if (!mWaitingForActivityVisible.isEmpty()) {
             pw.print(prefix); pw.println("mWaitingForActivityVisible=");
             for (int i = 0; i < mWaitingForActivityVisible.size(); ++i) {

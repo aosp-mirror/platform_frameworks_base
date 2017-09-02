@@ -78,7 +78,6 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
-import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -857,8 +856,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
         mResizeMode = info.resizeMode;
         mSupportsPictureInPicture = info.supportsPictureInPicture();
-        mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
+        mLockTaskMode = info.lockTaskLaunchMode;
+        if (!mPrivileged && (mLockTaskMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
+                || mLockTaskMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
+            // Non-priv apps are not allowed to use always or never, fall back to default
+            mLockTaskMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        }
         setLockTaskAuth();
     }
 
@@ -1409,16 +1413,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void setLockTaskAuth() {
-        if (!mPrivileged &&
-                (mLockTaskMode == LOCK_TASK_LAUNCH_MODE_ALWAYS ||
-                        mLockTaskMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
-            // Non-priv apps are not allowed to use always or never, fall back to default
-            mLockTaskMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
-        }
+        final String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
         switch (mLockTaskMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                mLockTaskAuth = isLockTaskWhitelistedLocked() ?
-                    LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
+                mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
+                        ? LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_NEVER:
@@ -1430,29 +1429,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                mLockTaskAuth = isLockTaskWhitelistedLocked() ?
-                        LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
+                mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
+                        ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }
         if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
                 " mLockTaskAuth=" + lockTaskAuthToString());
-    }
-
-    private boolean isLockTaskWhitelistedLocked() {
-        String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
-        if (pkg == null) {
-            return false;
-        }
-        String[] packages = mService.mLockTaskPackages.get(userId);
-        if (packages == null) {
-            return false;
-        }
-        for (int i = packages.length - 1; i >= 0; --i) {
-            if (pkg.equals(packages[i])) {
-                return true;
-            }
-        }
-        return false;
     }
 
     boolean isOverHomeStack() {

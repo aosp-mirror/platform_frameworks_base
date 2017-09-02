@@ -20,19 +20,13 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.os.Process.SYSTEM_UID;
+
 import static com.android.server.am.LockTaskController.STATUS_BAR_MASK_LOCKED;
 import static com.android.server.am.LockTaskController.STATUS_BAR_MASK_PINNED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import android.app.StatusBarManager;
 import android.app.admin.IDevicePolicyManager;
@@ -72,7 +66,8 @@ import org.mockito.verification.VerificationMode;
 @SmallTest
 public class LockTaskControllerTest {
     private static final String TEST_PACKAGE_NAME = "com.test.package";
-    private static final String TEST_CLASS_NAME = TEST_PACKAGE_NAME + ".TestClass";
+    private static final String TEST_PACKAGE_NAME_2 = "com.test.package2";
+    private static final String TEST_CLASS_NAME = ".TestClass";
     private static final int TEST_USER_ID = 123;
     private static final int TEST_UID = 10467;
 
@@ -309,12 +304,108 @@ public class LockTaskControllerTest {
         verify(mLockPatternUtils).requireCredentialEntry(UserHandle.USER_ALL);
     }
 
+    @Test
+    public void testUpdateLockTaskPackages() throws Exception {
+        String[] whitelist1 = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
+        String[] whitelist2 = {TEST_PACKAGE_NAME};
+
+        // No package is whitelisted initially
+        for (String pkg : whitelist1) {
+            assertFalse("Package shouldn't be whitelisted: " + pkg,
+                    mLockTaskController.isPackageWhitelisted(TEST_USER_ID, pkg));
+            assertFalse("Package shouldn't be whitelisted for user 0: " + pkg,
+                    mLockTaskController.isPackageWhitelisted(0, pkg));
+        }
+
+        // Apply whitelist
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist1);
+
+        // Assert the whitelist is applied to the correct user
+        for (String pkg : whitelist1) {
+            assertTrue("Package should be whitelisted: " + pkg,
+                    mLockTaskController.isPackageWhitelisted(TEST_USER_ID, pkg));
+            assertFalse("Package shouldn't be whitelisted for user 0: " + pkg,
+                    mLockTaskController.isPackageWhitelisted(0, pkg));
+        }
+
+        // Update whitelist
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist2);
+
+        // Assert the new whitelist is applied
+        assertTrue("Package should remain whitelisted: " + TEST_PACKAGE_NAME,
+                mLockTaskController.isPackageWhitelisted(TEST_USER_ID, TEST_PACKAGE_NAME));
+        assertFalse("Package should no longer be whitelisted: " + TEST_PACKAGE_NAME_2,
+                mLockTaskController.isPackageWhitelisted(TEST_USER_ID, TEST_PACKAGE_NAME_2));
+    }
+
+    @Test
+    public void testUpdateLockTaskPackages_taskRemoved() throws Exception {
+        // GIVEN two tasks which are whitelisted initially
+        TaskRecord tr1 = getTaskRecordForUpdate(TEST_PACKAGE_NAME, true);
+        TaskRecord tr2 = getTaskRecordForUpdate(TEST_PACKAGE_NAME_2, false);
+        String[] whitelist = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+
+        // GIVEN the tasks are launched into LockTask mode
+        mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
+        mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
+        assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
+        assertTrue(mLockTaskController.checkLockedTask(tr1));
+        assertTrue(mLockTaskController.checkLockedTask(tr2));
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED);
+
+        // WHEN removing one package from whitelist
+        whitelist = new String[] {TEST_PACKAGE_NAME};
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+
+        // THEN the task running that package should be stopped
+        verify(tr2).performClearTaskLocked();
+        assertFalse(mLockTaskController.checkLockedTask(tr2));
+        // THEN the other task should remain locked
+        assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
+        assertTrue(mLockTaskController.checkLockedTask(tr1));
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED);
+
+        // WHEN removing the last package from whitelist
+        whitelist = new String[] {};
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+
+        // THEN the last task should be cleared, and the system should quit LockTask mode
+        verify(tr1).performClearTaskLocked();
+        assertFalse(mLockTaskController.checkLockedTask(tr1));
+        assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
+        verifyLockTaskStopped(times(1));
+    }
+
     private TaskRecord getTaskRecord(int lockTaskAuth) {
+        return getTaskRecord(TEST_PACKAGE_NAME, lockTaskAuth);
+    }
+
+    private TaskRecord getTaskRecord(String pkg, int lockTaskAuth) {
         TaskRecord tr = mock(TaskRecord.class);
         tr.mLockTaskAuth = lockTaskAuth;
         tr.intent = new Intent()
-                .setComponent(new ComponentName(TEST_PACKAGE_NAME, TEST_CLASS_NAME));
+                .setComponent(ComponentName.createRelative(pkg, TEST_CLASS_NAME));
         tr.userId = TEST_USER_ID;
+        return tr;
+    }
+
+    /**
+     * @param isAppAware {@code true} if the app has marked if_whitelisted in its manifest
+     */
+    private TaskRecord getTaskRecordForUpdate(String pkg, boolean isAppAware) {
+        final int authIfWhitelisted = isAppAware
+                ? TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE
+                : TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
+        TaskRecord tr = getTaskRecord(pkg, authIfWhitelisted);
+        doAnswer((invocation) -> {
+            boolean isWhitelisted =
+                    mLockTaskController.isPackageWhitelisted(TEST_USER_ID, pkg);
+            tr.mLockTaskAuth = isWhitelisted
+                    ? authIfWhitelisted
+                    : TaskRecord.LOCK_TASK_AUTH_PINNABLE;
+            return null;
+        }).when(tr).setLockTaskAuth();
         return tr;
     }
 
