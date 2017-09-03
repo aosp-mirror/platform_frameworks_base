@@ -106,8 +106,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     private boolean mPreserveNonFloatingState = false;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            TaskDescription taskDescription, TaskWindowContainerController controller) {
+            int resizeMode, boolean supportsPictureInPicture, TaskDescription taskDescription,
+            TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
@@ -115,7 +115,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
         setController(controller);
-        setBounds(bounds, overrideConfig);
+        setBounds(bounds, getOverrideConfiguration());
         mTaskDescription = taskDescription;
 
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
@@ -273,6 +273,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
+    // TODO: There is probably not a need to pass in overrideConfig anymore since any change to it
+    // will be automatically propagated from the AM. Also, mBound is going to be in
+    // WindowConfiguration long term.
     private int setBounds(Rect bounds, Configuration overrideConfig) {
         if (overrideConfig == null) {
             overrideConfig = Configuration.EMPTY;

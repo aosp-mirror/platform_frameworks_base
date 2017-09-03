@@ -237,12 +237,14 @@ class WindowTestsBase {
         return createStackControllerOnStackOnDisplay(stackId, dc);
     }
 
-    StackWindowController createStackControllerOnStackOnDisplay(int stackId,
-            DisplayContent dc) {
+    StackWindowController createStackControllerOnStackOnDisplay(int stackId, DisplayContent dc) {
         final Configuration overrideConfig = new Configuration();
-        overrideConfig.windowConfiguration.setWindowingMode(getWindowingModeForStackId(stackId));
-        return new StackWindowController(stackId, null, dc.getDisplayId(),
-                true /* onTop */, new Rect(), overrideConfig, sWm);
+        overrideConfig.windowConfiguration.setWindowingMode(
+                getWindowingModeForStackId(stackId));
+        final StackWindowController controller = new StackWindowController(stackId, null,
+                dc.getDisplayId(), true /* onTop */, new Rect(), sWm);
+        controller.onOverrideConfigurationChanged(overrideConfig);
+        return controller;
     }
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */

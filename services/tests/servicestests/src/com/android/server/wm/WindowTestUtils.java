@@ -66,7 +66,7 @@ public class WindowTestUtils {
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     public static Task createTaskInStack(WindowManagerService service, TaskStack stack,
             int userId) {
-        final Task newTask = new Task(sNextTaskId++, stack, userId, service, null, EMPTY, 0, false,
+        final Task newTask = new Task(sNextTaskId++, stack, userId, service, null, 0, false,
                 new ActivityManager.TaskDescription(), null);
         stack.addTask(newTask, POSITION_TOP);
         return newTask;
@@ -94,19 +94,17 @@ public class WindowTestUtils {
         TestAppWindowToken(DisplayContent dc) {
             super(dc.mService, new IApplicationToken.Stub() {
                 public String getName() {return null;}
-                }, false, dc, true /* fillsParent */,
-                    null /* overrideConfig */, null /* bounds */);
+                }, false, dc, true /* fillsParent */, null /* bounds */);
         }
 
         TestAppWindowToken(WindowManagerService service, IApplicationToken token,
                 boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
                 boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
                 int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller,
-                Configuration overrideConfig, Rect bounds) {
+                boolean alwaysFocusable, AppWindowContainerController controller, Rect bounds) {
             super(service, token, voiceInteraction, dc, inputDispatchingTimeoutNanos, fullscreen,
                     showForAllUsers, targetSdk, orientation, rotationAnimationHint, configChanges,
-                    launchTaskBehind, alwaysFocusable, controller, overrideConfig, bounds);
+                    launchTaskBehind, alwaysFocusable, controller, bounds);
         }
 
         int getWindowsCount() {
@@ -174,10 +172,10 @@ public class WindowTestUtils {
         private boolean mIsAnimating = false;
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-                Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
+                int resizeMode, boolean supportsPictureInPicture,
                 TaskWindowContainerController controller) {
-            super(taskId, stack, userId, service, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, new ActivityManager.TaskDescription(), controller);
+            super(taskId, stack, userId, service, bounds, resizeMode, supportsPictureInPicture,
+                    new ActivityManager.TaskDescription(), controller);
         }
 
         boolean shouldDeferRemoval() {
@@ -218,6 +216,18 @@ public class WindowTestUtils {
         TestTaskWindowContainerController(StackWindowController stackController) {
             super(sNextTaskId++, new TaskWindowContainerListener() {
                         @Override
+                        public void registerConfigurationChangeListener(
+                                ConfigurationContainerListener listener) {
+
+                        }
+
+                        @Override
+                        public void unregisterConfigurationChangeListener(
+                                ConfigurationContainerListener listener) {
+
+                        }
+
+                        @Override
                         public void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
 
                         }
@@ -226,18 +236,16 @@ public class WindowTestUtils {
                         public void requestResize(Rect bounds, int resizeMode) {
 
                         }
-                    }, stackController, 0 /* userId */, null /* bounds */,
-                    EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE,
+                    }, stackController, 0 /* userId */, null /* bounds */, RESIZE_MODE_UNRESIZEABLE,
                     false /* supportsPictureInPicture */, true /* toTop*/,
                     true /* showForAllUsers */, new ActivityManager.TaskDescription(),
                     stackController.mService);
         }
 
         @Override
-        TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds,
-                Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-                ActivityManager.TaskDescription taskDescription) {
-            return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
+        TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds, int resizeMode,
+                boolean supportsPictureInPicture, ActivityManager.TaskDescription taskDescription) {
+            return new TestTask(taskId, stack, userId, mService, bounds, resizeMode,
                     supportsPictureInPicture, this);
         }
     }
@@ -258,7 +266,7 @@ public class WindowTestUtils {
                     false /* launchTaskBehind */, false /* alwaysFocusable */,
                     0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
                     0 /* inputDispatchingTimeoutNanos */, taskController.mService,
-                    null /* overrideConfig */, null /* bounds */);
+                    null /* bounds */);
             mToken = token;
         }
 
@@ -267,13 +275,12 @@ public class WindowTestUtils {
                 boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
                 boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
                 int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller,
-                Configuration overrideConfig, Rect bounds) {
+                boolean alwaysFocusable, AppWindowContainerController controller, Rect bounds) {
             return new TestAppWindowToken(service, token, voiceInteraction, dc,
                     inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
                     orientation,
                     rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
-                    controller, overrideConfig, bounds);
+                    controller, bounds);
         }
 
         AppWindowToken getAppWindowToken(DisplayContent dc) {

@@ -26,6 +26,8 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 
+import java.util.ArrayList;
+
 /**
  * Contains common logic for classes that have override configurations and are organized in a
  * hierarchy.
@@ -47,6 +49,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * topmost container's override config instead of global config.
      */
     private Configuration mMergedOverrideConfiguration = new Configuration();
+
+    private ArrayList<ConfigurationContainerListener> mChangeListeners = new ArrayList<>();
 
     // TODO: Can't have ag/2592611 soon enough!
     private final Configuration mTmpConfig = new Configuration();
@@ -90,6 +94,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         onConfigurationChanged(parent != null ? parent.getConfiguration() : Configuration.EMPTY);
         // Update merged override config of this container and all its children.
         onMergedOverrideConfigurationChanged();
+
+        // Inform listeners of the change.
+        for (int i = mChangeListeners.size() - 1; i >=0; --i) {
+            mChangeListeners.get(i).onOverrideConfigurationChanged(overrideConfiguration);
+        }
     }
 
     /**
@@ -173,6 +182,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return getActivityType() == ACTIVITY_TYPE_STANDARD;
     }
 
+    public boolean isActivityTypeStandardOrUndefined() {
+        /*@WindowConfiguration.ActivityType*/ final int activityType = getActivityType();
+        return activityType == ACTIVITY_TYPE_STANDARD || activityType == ACTIVITY_TYPE_UNDEFINED;
+    }
+
     public boolean hasCompatibleActivityType(ConfigurationContainer other) {
         /*@WindowConfiguration.ActivityType*/ int thisType = getActivityType();
         /*@WindowConfiguration.ActivityType*/ int otherType = other.getActivityType();
@@ -180,6 +194,18 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return thisType == otherType
                 || thisType == ACTIVITY_TYPE_UNDEFINED
                 || otherType == ACTIVITY_TYPE_UNDEFINED;
+    }
+
+    public void registerConfigurationChangeListener(ConfigurationContainerListener listener) {
+        if (mChangeListeners.contains(listener)) {
+            return;
+        }
+        mChangeListeners.add(listener);
+        listener.onOverrideConfigurationChanged(mOverrideConfiguration);
+    }
+
+    public void unregisterConfigurationChangeListener(ConfigurationContainerListener listener) {
+        mChangeListeners.remove(listener);
     }
 
     /**

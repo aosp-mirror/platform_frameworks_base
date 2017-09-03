@@ -16,12 +16,16 @@
 
 package com.android.server.wm;
 
+import android.app.WindowConfiguration;
+import android.content.res.Configuration;
 import org.junit.Test;
 
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.content.res.Configuration.EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -79,5 +83,28 @@ public class WindowContainerControllerTests extends WindowTestsBase {
 
         controller.removeContainer();
         assertNull(controller.mContainer);
+    }
+
+    @Test
+    public void testOnOverrideConfigurationChanged() throws Exception {
+        final WindowContainerController controller = new WindowContainerController(null, sWm);
+        final WindowContainer container = new WindowContainer();
+
+        controller.setContainer(container);
+        assertEquals(controller.mContainer, container);
+        assertEquals(EMPTY, container.getOverrideConfiguration());
+
+        final Configuration config = new Configuration();
+        config.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        config.windowConfiguration.setAppBounds(10, 10, 10, 10);
+
+        // Assert that the config change through the controller is propagated to the container.
+        controller.onOverrideConfigurationChanged(config);
+        assertEquals(config, container.getOverrideConfiguration());
+
+        // Assert the container configuration isn't changed after removal from the controller.
+        controller.removeContainer();
+        controller.onOverrideConfigurationChanged(EMPTY);
+        assertEquals(config, container.getOverrideConfiguration());
     }
 }
