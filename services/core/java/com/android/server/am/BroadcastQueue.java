@@ -1445,20 +1445,19 @@ public final class BroadcastQueue {
         r.receiverTime = now;
         r.anrCount++;
 
-        // Current receiver has passed its expiration date.
-        if (r.nextReceiver <= 0) {
-            Slog.w(TAG, "Timeout on receiver with nextReceiver <= 0");
-            return;
-        }
-
         ProcessRecord app = null;
         String anrMessage = null;
 
-        Object curReceiver = r.receivers.get(r.nextReceiver-1);
-        r.delivery[r.nextReceiver-1] = BroadcastRecord.DELIVERY_TIMEOUT;
-        Slog.w(TAG, "Receiver during timeout: " + curReceiver);
+        Object curReceiver;
+        if (r.nextReceiver > 0) {
+            curReceiver = r.receivers.get(r.nextReceiver-1);
+            r.delivery[r.nextReceiver-1] = BroadcastRecord.DELIVERY_TIMEOUT;
+        } else {
+            curReceiver = r.curReceiver;
+        }
+        Slog.w(TAG, "Receiver during timeout of " + r + " : " + curReceiver);
         logBroadcastReceiverDiscardLocked(r);
-        if (curReceiver instanceof BroadcastFilter) {
+        if (curReceiver != null && curReceiver instanceof BroadcastFilter) {
             BroadcastFilter bf = (BroadcastFilter)curReceiver;
             if (bf.receiverList.pid != 0
                     && bf.receiverList.pid != ActivityManagerService.MY_PID) {

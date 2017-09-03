@@ -421,7 +421,7 @@ public class NotificationManager {
      * Creates a notification channel that notifications can be posted to.
      *
      * This can also be used to restore a deleted channel and to update an existing channel's
-     * name, description, and/or importance.
+     * name, description, group, and/or importance.
      *
      * <p>The name and description should only be changed if the locale changes
      * or in response to the user renaming this channel. For example, if a user has a channel
@@ -430,6 +430,9 @@ public class NotificationManager {
      *
      * <p>The importance of an existing channel will only be changed if the new importance is lower
      * than the current value and the user has not altered any settings on this channel.
+     *
+     * <p>The group an existing channel will only be changed if the channel does not already
+     * belong to a group.
      *
      * All other fields are ignored for channels that already exist.
      *

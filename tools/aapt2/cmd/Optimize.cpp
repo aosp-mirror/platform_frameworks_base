@@ -194,8 +194,10 @@ class OptimizeCommand {
 
     if (options_.configuration && options_.output_dir) {
       MultiApkGenerator generator{apk.get(), context_};
-      if (!generator.FromBaseApk(options_.output_dir.value(), options_.configuration.value(),
-                                 options_.table_flattener_options)) {
+      MultiApkGeneratorOptions generator_options = {options_.output_dir.value(),
+                                                    options_.configuration.value(),
+                                                    options_.table_flattener_options};
+      if (!generator.FromBaseApk(generator_options)) {
         return 1;
       }
     }
@@ -323,11 +325,13 @@ int Optimize(const std::vector<StringPiece>& args) {
   std::vector<std::string> configs;
   std::vector<std::string> split_args;
   bool verbose = false;
+  bool print_only = false;
   Flags flags =
       Flags()
           .OptionalFlag("-o", "Path to the output APK.", &options.output_path)
           .OptionalFlag("-d", "Path to the output directory (for splits).", &options.output_dir)
           .OptionalFlag("-x", "Path to XML configuration file.", &config_path)
+          .OptionalSwitch("-p", "Print the multi APK artifacts and exit.", &print_only)
           .OptionalFlag(
               "--target-densities",
               "Comma separated list of the screen densities that the APK will be optimized for.\n"
@@ -372,12 +376,12 @@ int Optimize(const std::vector<StringPiece>& args) {
   }
 
   context.SetVerbose(verbose);
+  IDiagnostics* diag = context.GetDiagnostics();
 
   if (target_densities) {
     // Parse the target screen densities.
     for (const StringPiece& config_str : util::Tokenize(target_densities.value(), ',')) {
-      Maybe<uint16_t> target_density =
-          ParseTargetDensityParameter(config_str, context.GetDiagnostics());
+      Maybe<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
       if (!target_density) {
         return 1;
       }
@@ -387,7 +391,7 @@ int Optimize(const std::vector<StringPiece>& args) {
 
   std::unique_ptr<IConfigFilter> filter;
   if (!configs.empty()) {
-    filter = ParseConfigFilterParameters(configs, context.GetDiagnostics());
+    filter = ParseConfigFilterParameters(configs, diag);
     if (filter == nullptr) {
       return 1;
     }
@@ -398,26 +402,45 @@ int Optimize(const std::vector<StringPiece>& args) {
   for (const std::string& split_arg : split_args) {
     options.split_paths.emplace_back();
     options.split_constraints.emplace_back();
-    if (!ParseSplitParameter(split_arg, context.GetDiagnostics(), &options.split_paths.back(),
+    if (!ParseSplitParameter(split_arg, diag, &options.split_paths.back(),
                              &options.split_constraints.back())) {
       return 1;
     }
   }
 
   if (config_path) {
-    if (!options.output_dir) {
-      context.GetDiagnostics()->Error(
-          DiagMessage() << "Output directory is required when using a configuration file");
-      return 1;
-    }
     std::string& path = config_path.value();
     Maybe<ConfigurationParser> for_path = ConfigurationParser::ForPath(path);
     if (for_path) {
-      options.configuration = for_path.value().WithDiagnostics(context.GetDiagnostics()).Parse();
+      options.configuration = for_path.value().WithDiagnostics(diag).Parse();
     } else {
-      context.GetDiagnostics()->Error(DiagMessage() << "Could not parse config file " << path);
+      diag->Error(DiagMessage() << "Could not parse config file " << path);
       return 1;
     }
+
+    if (print_only) {
+      std::vector<std::string> names;
+      const PostProcessingConfiguration& config = options.configuration.value();
+      if (!config.AllArtifactNames(file::GetFilename(apk_path), &names, diag)) {
+        diag->Error(DiagMessage() << "Failed to generate output artifact list");
+        return 1;
+      }
+
+      for (const auto& name : names) {
+        std::cout << name << std::endl;
+      }
+      return 0;
+    }
+
+    // Since we know that we are going to process the APK (not just print targets), make sure we
+    // have somewhere to write them to.
+    if (!options.output_dir) {
+      diag->Error(DiagMessage() << "Output directory is required when using a configuration file");
+      return 1;
+    }
+  } else if (print_only) {
+    diag->Error(DiagMessage() << "Asked to print artifacts without providing a configurations");
+    return 1;
   }
 
   if (!ExtractAppDataFromManifest(&context, apk.get(), &options)) {

@@ -132,6 +132,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // Preloads the next task
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
+                Rect windowRect = getWindowRect(null /* windowRectOverride */);
+                if (windowRect.isEmpty()) {
+                    return;
+                }
+
                 // Load the next task only if we aren't svelte
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
@@ -146,8 +151,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     // This callback is made when a new activity is launched and the old one is
                     // paused so ignore the current activity and try and preload the thumbnail for
                     // the previous one.
-                    updateDummyStackViewLayout(mBackgroundLayoutAlgorithm, stack,
-                            getWindowRect(null /* windowRectOverride */));
+                    updateDummyStackViewLayout(mBackgroundLayoutAlgorithm, stack, windowRect);
 
                     // Launched from app is always the worst case (in terms of how many
                     // thumbnails/tasks visible)
@@ -376,6 +380,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void toggleRecents(int growTarget) {
+        // Skip preloading if the task is locked
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isScreenPinningActive()) {
+            return;
+        }
+
         // Skip this toggle if we are already waiting to trigger recents via alt-tab
         if (mFastAltTabTrigger.isDozing()) {
             return;
@@ -391,7 +401,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mTriggeredFromAltTab = false;
 
         try {
-            SystemServicesProxy ssp = Recents.getSystemServices();
             MutableBoolean isHomeStackVisible = new MutableBoolean(true);
             long elapsedTime = SystemClock.elapsedRealtime() - mLastToggleTime;
 
@@ -454,11 +463,16 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void preloadRecents() {
+        // Skip preloading if the task is locked
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isScreenPinningActive()) {
+            return;
+        }
+
         // Preload only the raw task list into a new load plan (which will be consumed by the
         // RecentsActivity) only if there is a task to animate to.  Post this to ensure that we
         // don't block the touch feedback on the nav bar button which triggers this.
         mHandler.post(() -> {
-            SystemServicesProxy ssp = Recents.getSystemServices();
             MutableBoolean isHomeStackVisible = new MutableBoolean(true);
             if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
                 ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();

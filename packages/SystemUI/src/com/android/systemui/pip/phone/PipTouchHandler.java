@@ -170,7 +170,7 @@ public class PipTouchHandler {
         @Override
         public void onPipShowMenu() {
             mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                    mMovementBounds, true /* allowMenuTimeout */);
+                    mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
         }
     }
 
@@ -214,7 +214,7 @@ public class PipTouchHandler {
         // Only show the menu if the user isn't currently interacting with the PiP
         if (!mTouchState.isUserInteracting()) {
             mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                    mMovementBounds, false /* allowMenuTimeout */);
+                    mMovementBounds, false /* allowMenuTimeout */, willResizeMenu());
         }
     }
 
@@ -236,7 +236,7 @@ public class PipTouchHandler {
 
         if (mShowPipMenuOnAnimationEnd) {
             mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
-                    mMovementBounds, true /* allowMenuTimeout */);
+                    mMovementBounds, true /* allowMenuTimeout */, false /* willResizeMenu */);
             mShowPipMenuOnAnimationEnd = false;
         }
     }
@@ -337,7 +337,7 @@ public class PipTouchHandler {
 
     private void onAccessibilityShowMenu() {
         mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                mMovementBounds, false /* allowMenuTimeout */);
+                mMovementBounds, false /* allowMenuTimeout */, willResizeMenu());
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -704,7 +704,7 @@ public class PipTouchHandler {
                     // If the menu is still visible, and we aren't minimized, then just poke the
                     // menu so that it will timeout after the user stops touching it
                     mMenuController.showMenu(mMenuState, mMotionHelper.getBounds(),
-                            mMovementBounds, true /* allowMenuTimeout */);
+                            mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
                 } else {
                     // If the menu is not visible, then we can still be showing the activity for the
                     // dismiss overlay, so just finish it after the animation completes
@@ -731,7 +731,7 @@ public class PipTouchHandler {
                 setMinimizedStateInternal(false);
             } else if (mMenuState != MENU_STATE_FULL) {
                 mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                        mMovementBounds, true /* allowMenuTimeout */);
+                        mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
             } else {
                 mMenuController.hideMenu();
                 mMotionHelper.expandPip();
@@ -771,6 +771,14 @@ public class PipTouchHandler {
             setMinimizedStateInternal(false);
         }
         cleanUpDismissTarget();
+    }
+
+    /**
+     * @return whether the menu will resize as a part of showing the full menu.
+     */
+    private boolean willResizeMenu() {
+        return mExpandedBounds.width() != mNormalBounds.width() ||
+                mExpandedBounds.height() != mNormalBounds.height();
     }
 
     public void dump(PrintWriter pw, String prefix) {

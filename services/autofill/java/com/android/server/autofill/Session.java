@@ -597,7 +597,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     getFillContextByRequestIdLocked(requestId).getStructure(), extras);
         }
 
-        mService.setAuthenticationSelected(id);
+        mService.setAuthenticationSelected(id, mClientState);
 
         final int authenticationId = AutofillManager.makeAuthenticationId(requestId, datasetIndex);
         mHandlerCaller.getHandler().post(() -> startAuthentication(authenticationId,
@@ -970,7 +970,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
-                mService.setSaveShown(id);
+                mService.setSaveShown(id, mClientState);
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo,
@@ -1532,14 +1532,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             // Autofill it directly...
             if (dataset.getAuthentication() == null) {
-                mService.setDatasetSelected(dataset.getId(), id);
+                mService.setDatasetSelected(dataset.getId(), id, mClientState);
 
                 autoFillApp(dataset);
                 return;
             }
 
             // ...or handle authentication.
-            mService.setDatasetAuthenticationSelected(dataset.getId(), id);
+            mService.setDatasetAuthenticationSelected(dataset.getId(), id, mClientState);
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntent(
                     getFillContextByRequestIdLocked(requestId).getStructure(), mClientState);

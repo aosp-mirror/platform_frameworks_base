@@ -215,6 +215,7 @@ public class RankingHelper implements RankingConfig {
                                 if (!TextUtils.isEmpty(id)) {
                                     NotificationChannelGroup group
                                             = new NotificationChannelGroup(id, groupName);
+                                    group.populateFromXml(parser);
                                     r.groups.put(id, group);
                                 }
                             }
@@ -493,6 +494,19 @@ public class RankingHelper implements RankingConfig {
         updateConfig();
     }
 
+    @Override
+    public boolean isGroupBlocked(String packageName, int uid, String groupId) {
+        if (groupId == null) {
+            return false;
+        }
+        Record r = getOrCreateRecord(packageName, uid);
+        NotificationChannelGroup group = r.groups.get(groupId);
+        if (group == null) {
+            return false;
+        }
+        return group.isBlocked();
+    }
+
     int getPackagePriority(String pkg, int uid) {
         return getOrCreateRecord(pkg, uid).priority;
     }
@@ -514,8 +528,15 @@ public class RankingHelper implements RankingConfig {
         }
         final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
         if (!group.equals(oldGroup)) {
-            // will log for new entries as well as name changes
+            // will log for new entries as well as name/description changes
             MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
+        }
+        if (oldGroup != null) {
+            group.setChannels(oldGroup.getChannels());
+
+            if (fromTargetApp) {
+                group.setBlocked(oldGroup.isBlocked());
+            }
         }
         r.groups.put(group.getId(), group);
     }
@@ -552,6 +573,9 @@ public class RankingHelper implements RankingConfig {
             existing.setName(channel.getName().toString());
             existing.setDescription(channel.getDescription());
             existing.setBlockableSystem(channel.isBlockableSystem());
+            if (existing.getGroup() == null) {
+                existing.setGroup(channel.getGroup());
+            }
 
             // Apps are allowed to downgrade channel importance if the user has not changed any
             // fields on this channel yet.
@@ -684,6 +708,27 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
+    public NotificationChannelGroup getNotificationChannelGroupWithChannels(String pkg,
+            int uid, String groupId, boolean includeDeleted) {
+        Preconditions.checkNotNull(pkg);
+        Record r = getRecord(pkg, uid);
+        if (r == null || groupId == null || !r.groups.containsKey(groupId)) {
+            return null;
+        }
+        NotificationChannelGroup group = r.groups.get(groupId).clone();
+        group.setChannels(new ArrayList<>());
+        int N = r.channels.size();
+        for (int i = 0; i < N; i++) {
+            final NotificationChannel nc = r.channels.valueAt(i);
+            if (includeDeleted || !nc.isDeleted()) {
+                if (groupId.equals(nc.getGroup())) {
+                    group.addChannel(nc);
+                }
+            }
+        }
+        return group;
+    }
+
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
             int uid) {
         Preconditions.checkNotNull(pkg);
@@ -710,6 +755,7 @@ public class RankingHelper implements RankingConfig {
                         NotificationChannelGroup ncg = groups.get(nc.getGroup());
                         if (ncg == null) {
                             ncg = r.groups.get(nc.getGroup()).clone();
+                            ncg.setChannels(new ArrayList<>());
                             groups.put(nc.getGroup(), ncg);
 
                         }

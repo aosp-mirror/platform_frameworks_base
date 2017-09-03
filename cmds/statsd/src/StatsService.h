@@ -18,6 +18,8 @@
 #define STATS_SERVICE_H
 
 #include <android/os/BnStatsManager.h>
+#include <binder/IResultReceiver.h>
+#include <binder/IShellCallback.h>
 #include <utils/Looper.h>
 
 #include <deque>
@@ -36,9 +38,13 @@ public:
     StatsService(const sp<Looper>& handlerLooper);
     virtual ~StatsService();
 
-    virtual status_t dump(int fd, const Vector<String16>& args);
-    virtual Status systemRunning();
+    virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
 
+    virtual status_t dump(int fd, const Vector<String16>& args);
+
+    virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+
+    virtual Status systemRunning();
 };
 
 #endif // STATS_SERVICE_H

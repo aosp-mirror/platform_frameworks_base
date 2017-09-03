@@ -422,7 +422,7 @@ public class StatusBarWindowView extends FrameLayout {
             mFloatingActionMode.finish();
         }
         cleanupFloatingActionModeViews();
-        mFloatingToolbar = new FloatingToolbar(mContext, mFakeWindow);
+        mFloatingToolbar = new FloatingToolbar(mFakeWindow);
         final FloatingActionMode mode =
                 new FloatingActionMode(mContext, callback, originatingView, mFloatingToolbar);
         mFloatingActionModeOriginatingView = originatingView;

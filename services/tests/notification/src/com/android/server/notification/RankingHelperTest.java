@@ -240,10 +240,21 @@ public class RankingHelperTest extends NotificationTestCase {
     private void compareGroups(NotificationChannelGroup expected, NotificationChannelGroup actual) {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getDescription(), actual.getDescription());
+        assertEquals(expected.isBlocked(), actual.isBlocked());
     }
 
     private NotificationChannel getChannel() {
         return new NotificationChannel("id", "name", IMPORTANCE_LOW);
+    }
+
+    private NotificationChannel findChannel(List<NotificationChannel> channels, String id) {
+        for (NotificationChannel channel : channels) {
+            if (channel.getId().equals(id)) {
+                return channel;
+            }
+        }
+        return null;
     }
 
     @Test
@@ -299,6 +310,8 @@ public class RankingHelperTest extends NotificationTestCase {
     @Test
     public void testChannelXml() throws Exception {
         NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
+        ncg.setBlocked(true);
+        ncg.setDescription("group desc");
         NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
@@ -1294,6 +1307,26 @@ public class RankingHelperTest extends NotificationTestCase {
     }
 
     @Test
+    public void testCreateChannel_addToGroup() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("group", "");
+        mHelper.createNotificationChannelGroup(PKG, UID, group, true);
+        NotificationChannel nc = new NotificationChannel("id", "hello", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG, UID, nc, true);
+        NotificationChannel actual = mHelper.getNotificationChannel(PKG, UID, "id", false);
+        assertNull(actual.getGroup());
+
+        nc = new NotificationChannel("id", "hello", IMPORTANCE_HIGH);
+        nc.setGroup(group.getId());
+        mHelper.createNotificationChannel(PKG, UID, nc, true);
+
+        actual = mHelper.getNotificationChannel(PKG, UID, "id", false);
+        assertNotNull(actual.getGroup());
+        assertEquals(IMPORTANCE_DEFAULT, actual.getImportance());
+
+        verify(mHandler, times(1)).requestSort();
+    }
+
+    @Test
     public void testDumpChannelsJson() throws Exception {
         final ApplicationInfo upgrade = new ApplicationInfo();
         upgrade.targetSdkVersion = Build.VERSION_CODES.O;
@@ -1387,5 +1420,78 @@ public class RankingHelperTest extends NotificationTestCase {
 
         assertEquals(newLabel, mHelper.getNotificationChannel(PKG, UID,
                 NotificationChannel.DEFAULT_CHANNEL_ID, false).getName());
+    }
+
+    @Test
+    public void testIsGroupBlocked_noGroup() throws Exception {
+        assertFalse(mHelper.isGroupBlocked(PKG, UID, null));
+
+        assertFalse(mHelper.isGroupBlocked(PKG, UID, "non existent group"));
+    }
+
+    @Test
+    public void testIsGroupBlocked_notBlocked() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
+        mHelper.createNotificationChannelGroup(PKG, UID, group, true);
+
+        assertFalse(mHelper.isGroupBlocked(PKG, UID, group.getId()));
+    }
+
+    @Test
+    public void testIsGroupBlocked_blocked() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
+        mHelper.createNotificationChannelGroup(PKG, UID, group, true);
+        group.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG, UID, group, false);
+
+        assertTrue(mHelper.isGroupBlocked(PKG, UID, group.getId()));
+    }
+
+    @Test
+    public void testIsGroup_appCannotResetBlock() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
+        mHelper.createNotificationChannelGroup(PKG, UID, group, true);
+        NotificationChannelGroup group2 = group.clone();
+        group2.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG, UID, group2, false);
+        assertTrue(mHelper.isGroupBlocked(PKG, UID, group.getId()));
+
+        NotificationChannelGroup group3 = group.clone();
+        group3.setBlocked(false);
+        mHelper.createNotificationChannelGroup(PKG, UID, group3, true);
+        assertTrue(mHelper.isGroupBlocked(PKG, UID, group.getId()));
+    }
+
+    @Test
+    public void testGetNotificationChannelGroupWithChannels() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("group", "");
+        NotificationChannelGroup other = new NotificationChannelGroup("something else", "");
+        mHelper.createNotificationChannelGroup(PKG, UID, group, true);
+        mHelper.createNotificationChannelGroup(PKG, UID, other, true);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        a.setGroup(group.getId());
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_DEFAULT);
+        b.setGroup(other.getId());
+        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        c.setGroup(group.getId());
+        NotificationChannel d = new NotificationChannel("d", "d", IMPORTANCE_DEFAULT);
+
+        mHelper.createNotificationChannel(PKG, UID, a, true);
+        mHelper.createNotificationChannel(PKG, UID, b, true);
+        mHelper.createNotificationChannel(PKG, UID, c, true);
+        mHelper.createNotificationChannel(PKG, UID, d, true);
+        mHelper.deleteNotificationChannel(PKG, UID, c.getId());
+
+        NotificationChannelGroup retrieved = mHelper.getNotificationChannelGroupWithChannels(
+                PKG, UID, group.getId(), true);
+        assertEquals(2, retrieved.getChannels().size());
+        compareChannels(a, findChannel(retrieved.getChannels(), a.getId()));
+        compareChannels(c, findChannel(retrieved.getChannels(), c.getId()));
+
+        retrieved = mHelper.getNotificationChannelGroupWithChannels(
+                PKG, UID, group.getId(), false);
+        assertEquals(1, retrieved.getChannels().size());
+        compareChannels(a, findChannel(retrieved.getChannels(), a.getId()));
     }
 }

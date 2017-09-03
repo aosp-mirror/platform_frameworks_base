@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.testutis;
+package com.android.server.testutils;
 
 import android.test.MoreAsserts;
 
 import junit.framework.Assert;
+
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 public class TestUtils {
     private TestUtils() {
@@ -43,5 +46,18 @@ public class TestUtils {
         }
         Assert.fail("Expected exception type " + expectedExceptionType.getName()
                 + " was not thrown");
+    }
+
+    /**
+     * EasyMock-style "strict" mock that throws immediately on any interaction that was not
+     * explicitly allowed.
+     *
+     * You can allow certain method calls on a whitelist basis by stubbing them e.g. with
+     * {@link Mockito#doAnswer}, {@link Mockito#doNothing}, etc.
+     */
+    public static <T> T strictMock(Class<T> c) {
+        return Mockito.mock(c, (Answer) invocation -> {
+            throw new AssertionError("Unexpected invocation: " + invocation);
+        });
     }
 }

@@ -1103,12 +1103,12 @@ public class ActivityInfo extends ComponentInfo
     }
 
     /** @hide */
-    public void dump(Printer pw, String prefix, int flags) {
+    public void dump(Printer pw, String prefix, int dumpFlags) {
         super.dumpFront(pw, prefix);
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "taskAffinity=" + taskAffinity
                     + " targetActivity=" + targetActivity
                     + " persistableMode=" + persistableModeToString());
@@ -1127,7 +1127,7 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "lockTaskLaunchMode="
                     + lockTaskLaunchModeToString(lockTaskLaunchMode));
         }
@@ -1143,7 +1143,7 @@ public class ActivityInfo extends ComponentInfo
         if (maxAspectRatio != 0) {
             pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
         }
-        super.dumpBack(pw, prefix, flags);
+        super.dumpBack(pw, prefix, dumpFlags);
     }
 
     public String toString() {

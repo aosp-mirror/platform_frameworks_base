@@ -453,7 +453,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \
 	media/java/android/media/IPlaybackConfigDispatcher.aidl \
-	media/java/android/media/IPlayer.aidl \
+	../av/media/libaudioclient/aidl/android/media/IPlayer.aidl \
 	media/java/android/media/IRecordingConfigDispatcher.aidl \
 	media/java/android/media/IRemoteDisplayCallback.aidl \
 	media/java/android/media/IRemoteDisplayProvider.aidl \
@@ -587,6 +587,7 @@ LOCAL_AIDL_INCLUDES += \
 LOCAL_AIDL_INCLUDES += \
 	frameworks/av/camera/aidl \
 	frameworks/av/drm/libmediadrm/aidl \
+	frameworks/av/media/libaudioclient/aidl \
 	frameworks/native/aidl/gui \
 	system/netd/server/binder \
 	system/bt/binder

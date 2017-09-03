@@ -26,6 +26,7 @@ import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.StringParceledListSlice;
 import android.graphics.Bitmap;
@@ -355,4 +356,6 @@ interface IDevicePolicyManager {
 
     boolean isCurrentInputMethodSetByOwner();
     StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
+
+    boolean clearApplicationUserData(in ComponentName admin, in String packageName, in IPackageDataObserver callback);
 }

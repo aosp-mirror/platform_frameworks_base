@@ -67,7 +67,7 @@ public class PluginManagerTest extends SysuiTestCase {
     public void setup() throws Exception {
         mDependency.injectTestDependency(Dependency.BG_LOOPER,
                 TestableLooper.get(this).getLooper());
-        mRealExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        mRealExceptionHandler = Thread.getUncaughtExceptionPreHandler();
         mMockExceptionHandler = mock(UncaughtExceptionHandler.class);
         mMockFactory = mock(PluginInstanceManagerFactory.class);
         mMockPluginInstance = mock(PluginInstanceManager.class);
@@ -167,9 +167,9 @@ public class PluginManagerTest extends SysuiTestCase {
     }
 
     private void resetExceptionHandler() {
-        mPluginExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        mPluginExceptionHandler = Thread.getUncaughtExceptionPreHandler();
         // Set back the real exception handler so the test can crash if it wants to.
-        Thread.setDefaultUncaughtExceptionHandler(mRealExceptionHandler);
+        Thread.setUncaughtExceptionPreHandler(mRealExceptionHandler);
     }
 
     @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)

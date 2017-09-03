@@ -7820,13 +7820,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.VIRTUAL_KEY:
                 return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
             case HapticFeedbackConstants.KEYBOARD_PRESS:  // == HapticFeedbackConstants.KEYBOARD_TAP
                 return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
             default:
                 return null;
         }

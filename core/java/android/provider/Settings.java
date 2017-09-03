@@ -31,6 +31,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
@@ -1311,6 +1312,18 @@ public final class Settings {
             = "android.settings.CHANNEL_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show notification settings for a single {@link NotificationChannelGroup}.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package containing the channel group to display.
+     *     Input: {@link #EXTRA_CHANNEL_GROUP_ID}, the id of the channel group to display.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHANNEL_GROUP_NOTIFICATION_SETTINGS =
+            "android.settings.CHANNEL_GROUP_NOTIFICATION_SETTINGS";
+
+    /**
      * Activity Extra: The package owner of the notification channel settings to display.
      * <p>
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
@@ -1324,6 +1337,15 @@ public final class Settings {
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
      */
     public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
+
+    /**
+     * Activity Extra: The {@link NotificationChannelGroup#getId()} of the notification channel
+     * group settings to display.
+     * <p>
+     * This must be passed as an extra field to the
+     * {@link #ACTION_CHANNEL_GROUP_NOTIFICATION_SETTINGS}.
+     */
+    public static final String EXTRA_CHANNEL_GROUP_ID = "android.provider.extra.CHANNEL_GROUP_ID";
 
     /**
      * Activity Action: Show notification redaction settings.
@@ -9332,6 +9354,25 @@ public final class Settings {
          * @hide
          */
         public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
+
+        /**
+         * Always on display(AOD) specific settings
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "prox_screen_off_delay=10000,screen_brightness_array=0:1:2:3:4"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * screen_brightness_array         (string)
+         * dimming_scrim_array             (string)
+         * prox_screen_off_delay           (long)
+         * prox_cooldown_trigger           (long)
+         * prox_cooldown_period            (long)
+         * </pre>
+         * @hide
+         */
+        public static final String ALWAYS_ON_DISPLAY_CONSTANTS = "always_on_display_constants";
 
         /**
          * App standby (app idle) specific settings.

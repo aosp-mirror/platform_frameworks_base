@@ -26,6 +26,11 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
@@ -44,6 +49,7 @@ import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
@@ -54,15 +60,12 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
@@ -75,6 +78,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -135,6 +139,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private static final String ATTR_USERID = "user_id";
     private static final String ATTR_USER_SETUP_COMPLETE = "user_setup_complete";
     private static final String ATTR_EFFECTIVE_UID = "effective_uid";
+    @Deprecated
     private static final String ATTR_TASKTYPE = "task_type";
     private static final String ATTR_FIRSTACTIVETIME = "first_active_time";
     private static final String ATTR_LASTACTIVETIME = "last_active_time";
@@ -248,9 +253,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     /** Current stack. Setter must always be used to update the value. */
     private ActivityStack mStack;
 
-    /** Takes on same set of values as ActivityRecord.mActivityType */
-    int taskType;
-
     /** Takes on same value as first root activity */
     boolean isPersistable = false;
     int maxRecents;
@@ -260,10 +262,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * (positive) or back (negative). Absolute value indicates time. */
     long mLastTimeMoved = System.currentTimeMillis();
 
-    /** Indication of what to run next when task exits. Use ActivityRecord types.
-     * ActivityRecord.APPLICATION_ACTIVITY_TYPE indicates to resume the task below this one in the
-     * task stack. */
-    private int mTaskToReturnTo = APPLICATION_ACTIVITY_TYPE;
+    /** Indication of what to run next when task exits. */
+    // TODO: Shouldn't be needed if we have things in visual order. I.e. we stop using stacks or
+    // have a stack per standard application type...
+    /*@WindowConfiguration.ActivityType*/
+    private int mTaskToReturnTo = ACTIVITY_TYPE_STANDARD;
 
     /** If original intent did not allow relinquishing task identity, save that information */
     private boolean mNeverRelinquishIdentity = true;
@@ -316,7 +319,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private TaskWindowContainerController mWindowContainerController;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor, int type) {
+            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -329,7 +332,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mActivities = new ArrayList<>();
         mCallingUid = info.applicationInfo.uid;
         mCallingPackage = info.packageName;
-        taskType = type;
         setIntent(_intent, info);
         setMinDimensions(info);
         touchActiveTime();
@@ -358,8 +360,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         maxRecents = Math.min(Math.max(info.maxRecents, 1),
                 ActivityManager.getMaxAppRecentsLimitStatic());
 
-        taskType = APPLICATION_ACTIVITY_TYPE;
-        mTaskToReturnTo = HOME_ACTIVITY_TYPE;
+        mTaskToReturnTo = ACTIVITY_TYPE_HOME;
         lastTaskDescription = _taskDescription;
         touchActiveTime();
         mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
@@ -368,7 +369,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
-            boolean _autoRemoveRecents, boolean _askedCompatMode, int _taskType, int _userId,
+            boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
             int _effectiveUid, String _lastDescription, ArrayList<ActivityRecord> activities,
             long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
@@ -393,8 +394,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         isAvailable = true;
         autoRemoveRecents = _autoRemoveRecents;
         askedCompatMode = _askedCompatMode;
-        taskType = _taskType;
-        mTaskToReturnTo = HOME_ACTIVITY_TYPE;
+        mTaskToReturnTo = ACTIVITY_TYPE_HOME;
         userId = _userId;
         mUserSetupComplete = userSetupComplete;
         effectiveUid = _effectiveUid;
@@ -433,8 +433,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final Configuration overrideConfig = getOverrideConfiguration();
         setWindowContainerController(new TaskWindowContainerController(taskId, this,
                 getStack().getWindowContainerController(), userId, bounds, overrideConfig,
-                mResizeMode, mSupportsPictureInPicture, isHomeTask(), onTop, showForAllUsers,
-                lastTaskDescription));
+                mResizeMode, mSupportsPictureInPicture, onTop,
+                showForAllUsers, lastTaskDescription));
     }
 
     /**
@@ -887,21 +887,29 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return this.intent.filterEquals(intent);
     }
 
-    void setTaskToReturnTo(int taskToReturnTo) {
-        mTaskToReturnTo = (taskToReturnTo == RECENTS_ACTIVITY_TYPE)
-                ? HOME_ACTIVITY_TYPE : taskToReturnTo;
+    void setTaskToReturnTo(/*@WindowConfiguration.ActivityType*/ int taskToReturnTo) {
+        mTaskToReturnTo = taskToReturnTo == ACTIVITY_TYPE_RECENTS
+                ? ACTIVITY_TYPE_HOME : taskToReturnTo;
     }
 
     void setTaskToReturnTo(ActivityRecord source) {
-        if (source.isRecentsActivity()) {
-            setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
-        } else if (source.isAssistantActivity()) {
-            setTaskToReturnTo(ASSISTANT_ACTIVITY_TYPE);
+        if (source.isActivityTypeRecents()) {
+            setTaskToReturnTo(ACTIVITY_TYPE_RECENTS);
+        } else if (source.isActivityTypeAssistant()) {
+            setTaskToReturnTo(ACTIVITY_TYPE_ASSISTANT);
         }
     }
 
     int getTaskToReturnTo() {
         return mTaskToReturnTo;
+    }
+
+    boolean returnsToHomeTask() {
+        return mTaskToReturnTo == ACTIVITY_TYPE_HOME;
+    }
+
+    boolean returnsToStandardTask() {
+        return mTaskToReturnTo == ACTIVITY_TYPE_STANDARD;
     }
 
     void setPrevAffiliate(TaskRecord prevAffiliate) {
@@ -1133,6 +1141,16 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         addActivityAtIndex(mActivities.size(), r);
     }
 
+    @Override
+    /*@WindowConfiguration.ActivityType*/
+    public int getActivityType() {
+        final int applicationType = super.getActivityType();
+        if (applicationType != ACTIVITY_TYPE_UNDEFINED || mActivities.isEmpty()) {
+            return applicationType;
+        }
+        return mActivities.get(0).getActivityType();
+    }
+
     /**
      * Adds an activity {@param r} at the given {@param index}. The activity {@param r} must either
      * be in the current task or unparented to any task.
@@ -1153,7 +1171,17 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
         // Only set this based on the first activity
         if (mActivities.isEmpty()) {
-            taskType = r.mActivityType;
+            // TODO: propagating this change to the WM side...Should probably be done by having
+            // ConfigurationContainer change listener that the WindowContainerController registers
+            // for.
+            if (r.getActivityType() == ACTIVITY_TYPE_UNDEFINED) {
+                // Normally non-standard activity type for the activity record will be set when the
+                // object is created, however we delay setting the standard application type until
+                // this point so that the task can set the type for additional activities added in
+                // the else condition below.
+                r.setActivityType(ACTIVITY_TYPE_STANDARD);
+            }
+            setActivityType(r.getActivityType());
             isPersistable = r.isPersistable();
             mCallingUid = r.launchedFromUid;
             mCallingPackage = r.launchedFromPackage;
@@ -1162,7 +1190,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                     ActivityManager.getMaxAppRecentsLimitStatic());
         } else {
             // Otherwise make all added activities match this one.
-            r.mActivityType = taskType;
+            r.setActivityType(getActivityType());
         }
 
         final int size = mActivities.size();
@@ -1427,28 +1455,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return false;
     }
 
-    boolean isHomeTask() {
-        return taskType == HOME_ACTIVITY_TYPE;
-    }
-
-    boolean isRecentsTask() {
-        return taskType == RECENTS_ACTIVITY_TYPE;
-    }
-
-    boolean isAssistantTask() {
-        return taskType == ASSISTANT_ACTIVITY_TYPE;
-    }
-
-    boolean isApplicationTask() {
-        return taskType == APPLICATION_ACTIVITY_TYPE;
-    }
-
     boolean isOverHomeStack() {
-        return mTaskToReturnTo == HOME_ACTIVITY_TYPE;
+        return mTaskToReturnTo == ACTIVITY_TYPE_HOME;
     }
 
     boolean isOverAssistantStack() {
-        return mTaskToReturnTo == ASSISTANT_ACTIVITY_TYPE;
+        return mTaskToReturnTo == ACTIVITY_TYPE_ASSISTANT;
     }
 
     private boolean isResizeable(boolean checkSupportsPip) {
@@ -1642,7 +1654,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
         out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
-        out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
         out.attribute(null, ATTR_FIRSTACTIVETIME, String.valueOf(firstActiveTime));
         out.attribute(null, ATTR_LASTACTIVETIME, String.valueOf(lastActiveTime));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
@@ -1712,7 +1723,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         boolean rootHasReset = false;
         boolean autoRemoveRecents = false;
         boolean askedCompatMode = false;
-        int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+        int taskType = 0;
         int userId = 0;
         boolean userSetupComplete = true;
         int effectiveUid = -1;
@@ -1867,7 +1878,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // they are marked as RESIZE_MODE_RESIZEABLE to RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
             // since we didn't have that differentiation before version 1 and the system didn't
             // resize home activities before then.
-            if (taskType == HOME_ACTIVITY_TYPE && resizeMode == RESIZE_MODE_RESIZEABLE) {
+            if (taskType == 1 /* old home type */ && resizeMode == RESIZE_MODE_RESIZEABLE) {
                 resizeMode = RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
             }
         } else {
@@ -1883,7 +1894,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
-                autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
+                autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
                 callingUid, callingPackage, resizeMode, supportsPictureInPicture, privileged,
@@ -2105,13 +2116,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * The task will be moved (and stack focus changed) later if necessary.
      */
     int getLaunchStackId() {
-        if (isRecentsTask()) {
+        if (isActivityTypeRecents()) {
             return RECENTS_STACK_ID;
         }
-        if (isHomeTask()) {
+        if (isActivityTypeHome()) {
             return HOME_STACK_ID;
         }
-        if (isAssistantTask()) {
+        if (isActivityTypeAssistant()) {
             return ASSISTANT_STACK_ID;
         }
         if (mBounds != null) {
@@ -2190,12 +2201,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             pw.print(prefix); pw.print("realActivity=");
             pw.println(realActivity.flattenToShortString());
         }
-        if (autoRemoveRecents || isPersistable || taskType != 0 || mTaskToReturnTo != 0
-                || numFullscreen != 0) {
+        if (autoRemoveRecents || isPersistable || !isActivityTypeStandard()
+                || mTaskToReturnTo != ACTIVITY_TYPE_STANDARD || numFullscreen != 0) {
             pw.print(prefix); pw.print("autoRemoveRecents="); pw.print(autoRemoveRecents);
                     pw.print(" isPersistable="); pw.print(isPersistable);
                     pw.print(" numFullscreen="); pw.print(numFullscreen);
-                    pw.print(" taskType="); pw.print(taskType);
+                    pw.print(" activityType="); pw.print(getActivityType());
                     pw.print(" mTaskToReturnTo="); pw.println(mTaskToReturnTo);
         }
         if (rootWasReset || mNeverRelinquishIdentity || mReuseTask

@@ -866,10 +866,18 @@ public class Location implements Parcelable {
     /**
      * Get the estimated speed accuracy of this location, in meters per second.
      *
-     * <p>We define speed accuracy as the radius of 68% confidence. In other
-     * words, if you draw a circle centered at this location's speed, and with a radius
-     * equal to the speed accuracy, then there is a 68% probability that the true speed is
-     * inside the circle.
+     * <p>We define speed accuracy as a 1-standard-deviation value, i.e. as 1-side of the
+     * 2-sided range above and below the estimated
+     * speed reported by {@link #getSpeed()}, within which there is a 68% probability of
+     * finding the true speed.
+     *
+     * <p>For example, if {@link #getSpeed()} returns 5.0, and
+     * {@link #getSpeedAccuracyMetersPerSecond()} returns 1.0, then there is a 68% probably of the
+     * true speed being between 4.0 and 6.0 meters per second.
+     *
+     * <p>Note that the speed and speed accuracy is often better than would be obtained simply from
+     * differencing sequential positions, such as when the Doppler measurements from GNSS satellites
+     * are used.
      *
      * <p>If this location does not have a speed accuracy, then 0.0 is returned.
      */
@@ -914,10 +922,13 @@ public class Location implements Parcelable {
     /**
      * Get the estimated bearing accuracy of this location, in degrees.
      *
-     * <p>We define bearing accuracy as the radius of 68% confidence. In other
-     * words, if you draw a circle centered at this location's bearing, and with a radius
-     * equal to the bearing accuracy, then there is a 68% probability that the true bearing is
-     * inside the circle.
+     * <p>We define bearing accuracy as a 1-standard-deviation value, i.e. as 1-side of the
+     * 2-sided range on each side of the estimated bearing reported by {@link #getBearing()},
+     * within which there is a 68% probability of finding the true bearing.
+     *
+     * <p>For example, if {@link #getBearing()} returns 60., and
+     * {@link #getBearingAccuracyDegrees()} ()} returns 10., then there is a 68% probably of the
+     * true bearing being between 50. and 70. degrees.
      *
      * <p>If this location does not have a bearing accuracy, then 0.0 is returned.
      */

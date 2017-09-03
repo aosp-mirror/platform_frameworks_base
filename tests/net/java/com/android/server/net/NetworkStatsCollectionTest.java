@@ -27,7 +27,10 @@ import static android.os.Process.myUid;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.net.NetworkStatsCollection.multiplySafe;
+
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.net.NetworkIdentity;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
@@ -40,6 +43,7 @@ import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.format.DateUtils;
+import android.util.RecurrenceRule;
 
 import com.android.frameworks.tests.net.R;
 
@@ -53,6 +57,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,12 +77,25 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
     private static final long TIME_B = 1326110400000L; // UTC: Monday 9th January 2012 12:00:00 PM
     private static final long TIME_C = 1326132000000L; // UTC: Monday 9th January 2012 06:00:00 PM
 
+    private static Clock sOriginalClock;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        sOriginalClock = RecurrenceRule.sClock;
 
         // ignore any device overlay while testing
         NetworkTemplate.forceAllNetworkTypes();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        RecurrenceRule.sClock = sOriginalClock;
+    }
+
+    private void setClock(Instant instant) {
+        RecurrenceRule.sClock = Clock.fixed(instant, ZoneId.systemDefault());
     }
 
     public void testReadLegacyNetwork() throws Exception {
@@ -237,6 +257,9 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         final NetworkStatsCollection emptyCollection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
         final NetworkStatsCollection collection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
         collection.readLegacyNetwork(testFile);
+
+        // We're in the future, but not that far off
+        setClock(Instant.parse("2012-06-01T00:00:00.00Z"));
 
         // Test a bunch of plans that should result in no augmentation
         final List<SubscriptionPlan> plans = new ArrayList<>();
@@ -416,6 +439,28 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         }
     }
 
+    public void testAugmentPlanGigantic() throws Exception {
+        // We're in the future, but not that far off
+        setClock(Instant.parse("2012-06-01T00:00:00.00Z"));
+
+        // Create a simple history with a ton of measured usage
+        final NetworkStatsCollection large = new NetworkStatsCollection(HOUR_IN_MILLIS);
+        final NetworkIdentitySet ident = new NetworkIdentitySet();
+        ident.add(new NetworkIdentity(ConnectivityManager.TYPE_MOBILE, -1, TEST_IMSI, null,
+                false, true));
+        large.recordData(ident, UID_ALL, SET_ALL, TAG_NONE, TIME_A, TIME_B,
+                new NetworkStats.Entry(12_730_893_164L, 1, 0, 0, 0));
+
+        // Verify untouched total
+        assertEquals(12_730_893_164L, getHistory(large, null, TIME_A, TIME_C).getTotalBytes());
+
+        // Verify anchor that might cause overflows
+        final SubscriptionPlan plan = SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2012-01-09T00:00:00.00Z"))
+                .setDataUsage(4_939_212_390L, TIME_B).build();
+        assertEquals(4_939_212_386L, getHistory(large, plan, TIME_A, TIME_C).getTotalBytes());
+    }
+
     public void testRounding() throws Exception {
         final NetworkStatsCollection coll = new NetworkStatsCollection(HOUR_IN_MILLIS);
 
@@ -435,6 +480,25 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
 
         assertEquals(TIME_A, coll.roundUp(TIME_A - 1));
         assertEquals(TIME_A - HOUR_IN_MILLIS, coll.roundDown(TIME_A - 1));
+    }
+
+    public void testMultiplySafe() {
+        assertEquals(25, multiplySafe(50, 1, 2));
+        assertEquals(100, multiplySafe(50, 2, 1));
+
+        assertEquals(-10, multiplySafe(30, -1, 3));
+        assertEquals(0, multiplySafe(30, 0, 3));
+        assertEquals(10, multiplySafe(30, 1, 3));
+        assertEquals(20, multiplySafe(30, 2, 3));
+        assertEquals(30, multiplySafe(30, 3, 3));
+        assertEquals(40, multiplySafe(30, 4, 3));
+
+        assertEquals(100_000_000_000L,
+                multiplySafe(300_000_000_000L, 10_000_000_000L, 30_000_000_000L));
+        assertEquals(100_000_000_010L,
+                multiplySafe(300_000_000_000L, 10_000_000_001L, 30_000_000_000L));
+        assertEquals(823_202_048L,
+                multiplySafe(4_939_212_288L, 2_121_815_528L, 12_730_893_165L));
     }
 
     /**

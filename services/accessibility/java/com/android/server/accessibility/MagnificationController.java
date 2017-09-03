@@ -16,11 +16,6 @@
 
 package com.android.server.accessibility;
 
-import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.SomeArgs;
-import com.android.server.LocalServices;
-
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
@@ -41,6 +36,12 @@ import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.WindowManagerInternal;
 import android.view.animation.DecelerateInterpolator;
+
+import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.SomeArgs;
+import com.android.server.LocalServices;
 
 import java.util.Locale;
 
@@ -138,7 +139,7 @@ class MagnificationController implements Handler.Callback {
     private final WindowManagerInternal mWindowManager;
 
     // Flag indicating that we are registered with window manager.
-    private boolean mRegistered;
+    @VisibleForTesting boolean mRegistered;
 
     private boolean mUnregisterPending;
 
@@ -148,9 +149,14 @@ class MagnificationController implements Handler.Callback {
         mHandler = new Handler(context.getMainLooper(), this);
     }
 
-    public MagnificationController(Context context, AccessibilityManagerService ams, Object lock,
-            Handler handler, WindowManagerInternal windowManagerInternal,
-            ValueAnimator valueAnimator, SettingsBridge settingsBridge) {
+    public MagnificationController(
+            Context context,
+            AccessibilityManagerService ams,
+            Object lock,
+            Handler handler,
+            WindowManagerInternal windowManagerInternal,
+            ValueAnimator valueAnimator,
+            SettingsBridge settingsBridge) {
         mHandler = handler;
         mWindowManager = windowManagerInternal;
         mMainThreadId = context.getMainLooper().getThread().getId();
@@ -672,8 +678,7 @@ class MagnificationController implements Handler.Callback {
      * Resets magnification if magnification and auto-update are both enabled.
      *
      * @param animate whether the animate the transition
-     * @return {@code true} if magnification was reset to the disabled state,
-     *         {@code false} if magnification is still active
+     * @return whether was {@link #isMagnifying magnifying}
      */
     boolean resetIfNeeded(boolean animate) {
         synchronized (mLock) {
@@ -788,6 +793,19 @@ class MagnificationController implements Handler.Callback {
                 break;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "MagnificationController{" +
+                "mCurrentMagnificationSpec=" + mCurrentMagnificationSpec +
+                ", mMagnificationRegion=" + mMagnificationRegion +
+                ", mMagnificationBounds=" + mMagnificationBounds +
+                ", mUserId=" + mUserId +
+                ", mIdOfLastServiceToMagnify=" + mIdOfLastServiceToMagnify +
+                ", mRegistered=" + mRegistered +
+                ", mUnregisterPending=" + mUnregisterPending +
+                '}';
     }
 
     /**

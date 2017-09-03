@@ -417,7 +417,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             final boolean triggerable = (mEnabledFeatures
                     & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
             mMagnificationGestureHandler = new MagnificationGestureHandler(
-                    mContext, mAms, detectControlGestures, triggerable);
+                    mContext, mAms.getMagnificationController(),
+                    detectControlGestures, triggerable);
             addFirstEventHandler(mMagnificationGestureHandler);
         }
 

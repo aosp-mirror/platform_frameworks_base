@@ -30,6 +30,7 @@
 #include "io/File.h"
 #include "io/FileSystem.h"
 #include "io/StringInputStream.h"
+#include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
@@ -149,23 +150,48 @@ static bool ReplacePlaceholder(const StringPiece& placeholder, const Maybe<Strin
   return true;
 }
 
-Maybe<std::string> Artifact::ToArtifactName(const StringPiece& format, IDiagnostics* diag,
-                                            const StringPiece& base_name,
-                                            const StringPiece& ext) const {
-  std::string result = format.to_string();
+/**
+ * Returns the common artifact base name from a template string.
+ */
+Maybe<std::string> ToBaseName(std::string result, const StringPiece& apk_name, IDiagnostics* diag) {
+  const StringPiece ext = file::GetExtension(apk_name);
+  size_t end_index = apk_name.to_string().rfind(ext.to_string());
+  const std::string base_name =
+      (end_index != std::string::npos) ? std::string{apk_name.begin(), end_index} : "";
 
-  Maybe<StringPiece> maybe_base_name =
-      base_name.empty() ? Maybe<StringPiece>{} : Maybe<StringPiece>{base_name};
-  if (!ReplacePlaceholder("${basename}", maybe_base_name, &result, diag)) {
-    return {};
+  // Base name is optional.
+  if (result.find("${basename}") != std::string::npos) {
+    Maybe<StringPiece> maybe_base_name =
+        base_name.empty() ? Maybe<StringPiece>{} : Maybe<StringPiece>{base_name};
+    if (!ReplacePlaceholder("${basename}", maybe_base_name, &result, diag)) {
+      return {};
+    }
   }
 
   // Extension is optional.
   if (result.find("${ext}") != std::string::npos) {
-    if (!ReplacePlaceholder("${ext}", {ext}, &result, diag)) {
+    // Make sure we disregard the '.' in the extension when replacing the placeholder.
+    if (!ReplacePlaceholder("${ext}", {ext.substr(1)}, &result, diag)) {
       return {};
     }
+  } else {
+    // If no extension is specified, and the name template does not end in the current extension,
+    // add the existing extension.
+    if (!util::EndsWith(result, ext)) {
+      result.append(ext.to_string());
+    }
   }
+
+  return result;
+}
+
+Maybe<std::string> Artifact::ToArtifactName(const StringPiece& format, const StringPiece& apk_name,
+                                            IDiagnostics* diag) const {
+  Maybe<std::string> base = ToBaseName(format.to_string(), apk_name, diag);
+  if (!base) {
+    return {};
+  }
+  std::string result = std::move(base.value());
 
   if (!ReplacePlaceholder("${abi}", abi_group, &result, diag)) {
     return {};
@@ -194,29 +220,37 @@ Maybe<std::string> Artifact::ToArtifactName(const StringPiece& format, IDiagnost
   return result;
 }
 
-Maybe<std::string> Artifact::Name(const StringPiece& base_name, const StringPiece& ext,
-                                  IDiagnostics* diag) const {
+Maybe<std::string> Artifact::Name(const StringPiece& apk_name, IDiagnostics* diag) const {
   if (!name) {
     return {};
   }
 
-  std::string result = name.value();
+  return ToBaseName(name.value(), apk_name, diag);
+}
 
-  // Base name is optional.
-  if (result.find("${basename}") != std::string::npos) {
-    if (!ReplacePlaceholder("${basename}", {base_name}, &result, diag)) {
-      return {};
+bool PostProcessingConfiguration::AllArtifactNames(const StringPiece& apk_name,
+                                                   std::vector<std::string>* artifact_names,
+                                                   IDiagnostics* diag) const {
+  for (const auto& artifact : artifacts) {
+    Maybe<std::string> name;
+    if (artifact.name) {
+      name = artifact.Name(apk_name, diag);
+    } else {
+      if (!artifact_format) {
+        diag->Error(DiagMessage() << "No global artifact template and an artifact name is missing");
+        return false;
+      }
+      name = artifact.ToArtifactName(artifact_format.value(), apk_name, diag);
     }
+
+    if (!name) {
+      return false;
+    }
+
+    artifact_names->push_back(std::move(name.value()));
   }
 
-  // Extension is optional.
-  if (result.find("${ext}") != std::string::npos) {
-    if (!ReplacePlaceholder("${ext}", {ext}, &result, diag)) {
-      return {};
-    }
-  }
-
-  return result;
+  return true;
 }
 
 }  // namespace configuration
@@ -454,8 +488,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
     return false;
   }
 
-  auto& group = config->android_sdk_groups[label];
   bool valid = true;
+  bool found = false;
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "android-sdk") {
@@ -486,7 +520,11 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
         }
       }
 
-      group.push_back(entry);
+      config->android_sdk_groups[label] = entry;
+      if (found) {
+        valid = false;
+      }
+      found = true;
     }
   }
 

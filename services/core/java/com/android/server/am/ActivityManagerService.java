@@ -462,7 +462,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
-    private static final String TAG_LOCKSCREEN = TAG + POSTFIX_LOCKSCREEN;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_LRU = TAG + POSTFIX_LRU;
     private static final String TAG_MU = TAG + POSTFIX_MU;
@@ -480,7 +479,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_UID_OBSERVERS = TAG + POSTFIX_UID_OBSERVERS;
     private static final String TAG_URI_PERMISSION = TAG + POSTFIX_URI_PERMISSION;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
-    private static final String TAG_VISIBLE_BEHIND = TAG + POSTFIX_VISIBLE_BEHIND;
 
     // Mock "pretend we're idle now" broadcast action to the job scheduler; declared
     // here so that while the job scheduler can depend on AMS, the other way around
@@ -1474,7 +1472,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Flag that indicates if multi-window is enabled.
      *
      * For any particular form of multi-window to be enabled, generic multi-window must be enabled
-     * in {@link com.android.internal.R.bool.config_supportsMultiWindow} config or
+     * in {@link com.android.internal.R.bool#config_supportsMultiWindow} config or
      * {@link Settings.Global#DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES} development option set.
      * At least one of the forms of multi-window must be enabled in order for this flag to be
      * initialized to 'true'.
@@ -1562,6 +1560,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final ArrayList<UidRecord.ChangeItem> mPendingUidChanges = new ArrayList<>();
     final ArrayList<UidRecord.ChangeItem> mAvailUidChanges = new ArrayList<>();
+
+    OomAdjObserver mCurOomAdjObserver;
+    int mCurOomAdjUid;
+
+    interface OomAdjObserver {
+        void onOomAdjMessage(String msg);
+    }
 
     /**
      * Runtime CPU use collection thread.  This object's lock is used to
@@ -1684,7 +1689,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
-    static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 70;
+    static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
+    static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 71;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -1919,6 +1925,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             case DISPATCH_UIDS_CHANGED_UI_MSG: {
                 dispatchUidsChanged();
+            } break;
+            case DISPATCH_OOM_ADJ_OBSERVER_MSG: {
+                dispatchOomAdjObserver((String)msg.obj);
             } break;
             case PUSH_TEMP_WHITELIST_UI_MSG: {
                 pushTempWhitelist();
@@ -3093,7 +3102,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final TaskRecord task = r.getTask();
-        if (task.isApplicationTask()) {
+        if (task.isActivityTypeStandard()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {
                 // We are switching app tracking.  Complete the current one.
                 if (mCurAppTimeTracker != null) {
@@ -4459,6 +4468,38 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         } catch (RemoteException e) {
+        }
+    }
+
+    void dispatchOomAdjObserver(String msg) {
+        OomAdjObserver observer;
+        synchronized (this) {
+            observer = mCurOomAdjObserver;
+        }
+
+        if (observer != null) {
+            observer.onOomAdjMessage(msg);
+        }
+    }
+
+    void setOomAdjObserver(int uid, OomAdjObserver observer) {
+        synchronized (this) {
+            mCurOomAdjUid = uid;
+            mCurOomAdjObserver = observer;
+        }
+    }
+
+    void clearOomAdjObserver() {
+        synchronized (this) {
+            mCurOomAdjUid = -1;
+            mCurOomAdjObserver = null;
+        }
+    }
+
+    void reportOomAdjMessageLocked(String tag, String msg) {
+        Slog.d(tag, msg);
+        if (mCurOomAdjObserver != null) {
+            mUiHandler.obtainMessage(DISPATCH_OOM_ADJ_OBSERVER_MSG, msg).sendToTarget();
         }
     }
 
@@ -7832,6 +7873,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isIntentSenderAForegroundService(IIntentSender pendingResult) {
+        if (pendingResult instanceof PendingIntentRecord) {
+            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
+            return res.key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE;
+        }
+        return false;
+    }
+
+    @Override
     public Intent getIntentForIntentSender(IIntentSender pendingResult) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "getIntentForIntentSender()");
@@ -9934,7 +9984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (!allowed) {
                         // If the caller doesn't have the GET_TASKS permission, then only
                         // allow them to see a small subset of tasks -- their own and home.
-                        if (!tr.isHomeTask() && tr.effectiveUid != callingUid) {
+                        if (!tr.isActivityTypeHome() && tr.effectiveUid != callingUid) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Skipping, not allowed: " + tr);
                             continue;
                         }
@@ -12945,7 +12995,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int userId;
         synchronized (this) {
             final ActivityStack focusedStack = getFocusedStack();
-            if (focusedStack == null || focusedStack.isAssistantStack()) {
+            if (focusedStack == null || focusedStack.isActivityTypeAssistant()) {
                 return false;
             }
 
@@ -13050,7 +13100,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, receiverExtras,
                     userHandle);
-            pae.isHome = activity.isHomeActivity();
+            pae.isHome = activity.isActivityTypeHome();
 
             // Increment the sessionId if necessary
             if (newSessionId) {
@@ -13277,7 +13327,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r != null) {
-                    final ActivityOptions activityOptions = r.pendingOptions;
+                    final ActivityOptions activityOptions = r.takeOptionsLocked();
                     return activityOptions == null ? null : activityOptions.toBundle();
                 }
                 return null;
@@ -13350,7 +13400,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Schedule the given thread a normal scheduling priority.
      *
-     * @param newTid the tid of the thread to adjust the scheduling of.
+     * @param tid the tid of the thread to adjust the scheduling of.
      * @param suppressLogs {@code true} if any error logging should be disabled.
      *
      * @return {@code true} if this succeeded.
@@ -13363,6 +13413,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!suppressLogs) {
                 Slog.w(TAG, "Failed to set scheduling policy, thread does not exist:\n" + e);
             }
+        } catch (SecurityException e) {
+            if (!suppressLogs) {
+                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
+            }
         }
         return false;
     }
@@ -13370,7 +13424,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Schedule the given thread an FIFO scheduling priority.
      *
-     * @param newTid the tid of the thread to adjust the scheduling of.
+     * @param tid the tid of the thread to adjust the scheduling of.
      * @param suppressLogs {@code true} if any error logging should be disabled.
      *
      * @return {@code true} if this succeeded.
@@ -13382,6 +13436,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (IllegalArgumentException e) {
             if (!suppressLogs) {
                 Slog.w(TAG, "Failed to set scheduling policy, thread does not exist:\n" + e);
+            }
+        } catch (SecurityException e) {
+            if (!suppressLogs) {
+                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
             }
         }
         return false;
@@ -21864,10 +21922,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         int changes = 0;
 
         if (app.curAdj != app.setAdj) {
-            ProcessList.setOomAdj(app.pid, app.info.uid, app.curAdj);
-            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                    "Set " + app.pid + " " + app.processName + " adj " + app.curAdj + ": "
-                    + app.adjType);
+            ProcessList.setOomAdj(app.pid, app.uid, app.curAdj);
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.info.uid) {
+                String msg = "Set " + app.pid + " " + app.processName + " adj "
+                        + app.curAdj + ": " + app.adjType;
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
+            }
             app.setAdj = app.curAdj;
             app.verifiedAdj = ProcessList.INVALID_ADJ;
         }
@@ -21875,9 +21935,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app.setSchedGroup != app.curSchedGroup) {
             int oldSchedGroup = app.setSchedGroup;
             app.setSchedGroup = app.curSchedGroup;
-            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                    "Setting sched group of " + app.processName
-                    + " to " + app.curSchedGroup);
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.uid) {
+                String msg = "Setting sched group of " + app.processName
+                        + " to " + app.curSchedGroup;
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
+            }
             if (app.waitingToKill != null && app.curReceivers.isEmpty()
                     && app.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND) {
                 app.kill(app.waitingToKill, true);
@@ -21936,13 +21998,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                                app.curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
                         mVrController.onTopProcChangedLocked(app);
                         if (mUseFifoUiScheduling) {
-                            // Reset UI pipeline to SCHED_OTHER
-                            setThreadScheduler(app.pid, SCHED_OTHER, 0);
-                            setThreadPriority(app.pid, app.savedPriority);
-                            if (app.renderThreadTid != 0) {
-                                setThreadScheduler(app.renderThreadTid,
-                                    SCHED_OTHER, 0);
-                                setThreadPriority(app.renderThreadTid, -4);
+                            try {
+                                // Reset UI pipeline to SCHED_OTHER
+                                setThreadScheduler(app.pid, SCHED_OTHER, 0);
+                                setThreadPriority(app.pid, app.savedPriority);
+                                if (app.renderThreadTid != 0) {
+                                    setThreadScheduler(app.renderThreadTid,
+                                        SCHED_OTHER, 0);
+                                    setThreadPriority(app.renderThreadTid, -4);
+                                }
+                            } catch (IllegalArgumentException e) {
+                                Slog.w(TAG,
+                                        "Failed to set scheduling policy, thread does not exist:\n"
+                                                + e);
+                            } catch (SecurityException e) {
+                                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
                             }
                         } else {
                             // Reset priority for top app UI and render threads
@@ -22014,9 +22084,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "Not requesting PSS of " + app + ": next=" + (app.nextPssTime-now));
         }
         if (app.setProcState != app.curProcState) {
-            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                    "Proc state change of " + app.processName
-                            + " to " + app.curProcState);
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.uid) {
+                String msg = "Proc state change of " + app.processName
+                        + " to " + app.curProcState;
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
+            }
             boolean setImportant = app.setProcState < ActivityManager.PROCESS_STATE_SERVICE;
             boolean curImportant = app.curProcState < ActivityManager.PROCESS_STATE_SERVICE;
             if (setImportant && !curImportant) {

@@ -124,6 +124,7 @@ import android.util.SparseIntArray;
 import android.util.TrustedTime;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
@@ -241,12 +242,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
 
+    @GuardedBy("mStatsLock")
     private NetworkStatsRecorder mDevRecorder;
+    @GuardedBy("mStatsLock")
     private NetworkStatsRecorder mXtRecorder;
+    @GuardedBy("mStatsLock")
     private NetworkStatsRecorder mUidRecorder;
+    @GuardedBy("mStatsLock")
     private NetworkStatsRecorder mUidTagRecorder;
 
     /** Cached {@link #mXtRecorder} stats. */
+    @GuardedBy("mStatsLock")
     private NetworkStatsCollection mXtStatsCached;
 
     /** Current counter sets for each UID. */
@@ -328,15 +334,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return;
         }
 
-        // create data recorders along with historical rotators
-        mDevRecorder = buildRecorder(PREFIX_DEV, mSettings.getDevConfig(), false);
-        mXtRecorder = buildRecorder(PREFIX_XT, mSettings.getXtConfig(), false);
-        mUidRecorder = buildRecorder(PREFIX_UID, mSettings.getUidConfig(), false);
-        mUidTagRecorder = buildRecorder(PREFIX_UID_TAG, mSettings.getUidTagConfig(), true);
-
-        updatePersistThresholds();
-
         synchronized (mStatsLock) {
+            // create data recorders along with historical rotators
+            mDevRecorder = buildRecorder(PREFIX_DEV, mSettings.getDevConfig(), false);
+            mXtRecorder = buildRecorder(PREFIX_XT, mSettings.getXtConfig(), false);
+            mUidRecorder = buildRecorder(PREFIX_UID, mSettings.getUidConfig(), false);
+            mUidTagRecorder = buildRecorder(PREFIX_UID_TAG, mSettings.getUidTagConfig(), true);
+
+            updatePersistThresholdsLocked();
+
             // upgrade any legacy stats, migrating them to rotated files
             maybeUpgradeLegacyStatsLocked();
 
@@ -674,9 +680,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             int flags, int fields, @NetworkStatsAccess.Level int accessLevel, int callingUid) {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
-        return mXtStatsCached.getHistory(template, resolveSubscriptionPlan(template, flags),
-                UID_ALL, SET_ALL, TAG_NONE, fields, Long.MIN_VALUE, Long.MAX_VALUE,
-                accessLevel, callingUid);
+        final SubscriptionPlan augmentPlan = resolveSubscriptionPlan(template, flags);
+        synchronized (mStatsLock) {
+            return mXtStatsCached.getHistory(template, augmentPlan,
+                    UID_ALL, SET_ALL, TAG_NONE, fields, Long.MIN_VALUE, Long.MAX_VALUE,
+                    accessLevel, callingUid);
+        }
     }
 
     @Override
@@ -813,7 +822,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         synchronized (mStatsLock) {
             if (!mSystemReady) return;
 
-            updatePersistThresholds();
+            updatePersistThresholdsLocked();
 
             mDevRecorder.maybePersistLocked(currentTime);
             mXtRecorder.maybePersistLocked(currentTime);
@@ -869,7 +878,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * reflect current {@link #mPersistThreshold} value. Always defers to
      * {@link Global} values when defined.
      */
-    private void updatePersistThresholds() {
+    private void updatePersistThresholdsLocked() {
         mDevRecorder.setPersistThreshold(mSettings.getDevPersistBytes(mPersistThreshold));
         mXtRecorder.setPersistThreshold(mSettings.getXtPersistBytes(mPersistThreshold));
         mUidRecorder.setPersistThreshold(mSettings.getUidPersistBytes(mPersistThreshold));
@@ -1311,7 +1320,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         synchronized (mStatsLock) {
             if (args.length > 0 && "--proto".equals(args[0])) {
                 // In this case ignore all other arguments.
-                dumpProto(fd);
+                dumpProtoLocked(fd);
                 return;
             }
 
@@ -1387,7 +1396,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    private void dumpProto(FileDescriptor fd) {
+    private void dumpProtoLocked(FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
         // TODO Right now it writes all history.  Should it limit to the "since-boot" log?

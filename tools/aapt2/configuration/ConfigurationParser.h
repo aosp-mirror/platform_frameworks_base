@@ -33,6 +33,10 @@ namespace configuration {
 template<class T>
 using Group = std::unordered_map<std::string, std::vector<T>>;
 
+/** A mapping of group label to a single configuration item. */
+template <class T>
+using Entry = std::unordered_map<std::string, T>;
+
 /** Output artifact configuration options. */
 struct Artifact {
   /** Name to use for output of processing foo.apk -> foo.<name>.apk. */
@@ -51,13 +55,11 @@ struct Artifact {
   Maybe<std::string> gl_texture_group;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> ToArtifactName(const android::StringPiece& format, IDiagnostics* diag,
-                                    const android::StringPiece& base_name = "",
-                                    const android::StringPiece& ext = "apk") const;
+  Maybe<std::string> ToArtifactName(const android::StringPiece& format,
+                                    const android::StringPiece& apk_name, IDiagnostics* diag) const;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> Name(const android::StringPiece& base_name, const android::StringPiece& ext,
-                          IDiagnostics* diag) const;
+  Maybe<std::string> Name(const android::StringPiece& apk_name, IDiagnostics* diag) const;
 };
 
 /** Enumeration of currently supported ABIs. */
@@ -106,6 +108,12 @@ struct AndroidSdk {
   Maybe<std::string> max_sdk_version;
   Maybe<AndroidManifest> manifest;
 
+  static AndroidSdk ForMinSdk(std::string min_sdk) {
+    AndroidSdk sdk;
+    sdk.min_sdk_version = {std::move(min_sdk)};
+    return sdk;
+  }
+
   inline friend bool operator==(const AndroidSdk& lhs, const AndroidSdk& rhs) {
     return lhs.min_sdk_version == rhs.min_sdk_version &&
         lhs.target_sdk_version == rhs.target_sdk_version &&
@@ -136,9 +144,13 @@ struct PostProcessingConfiguration {
   Group<Abi> abi_groups;
   Group<ConfigDescription> screen_density_groups;
   Group<ConfigDescription> locale_groups;
-  Group<AndroidSdk> android_sdk_groups;
+  Entry<AndroidSdk> android_sdk_groups;
   Group<DeviceFeature> device_feature_groups;
   Group<GlTexture> gl_texture_groups;
+
+  /** Helper method that generates a list of artifact names and returns true on success. */
+  bool AllArtifactNames(const android::StringPiece& apk_name,
+                        std::vector<std::string>* artifact_names, IDiagnostics* diag) const;
 };
 
 }  // namespace configuration

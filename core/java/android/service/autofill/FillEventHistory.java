@@ -81,10 +81,13 @@ public final class FillEventHistory implements Parcelable {
     /**
      * Returns the client state set in the previous {@link FillResponse}.
      *
-     * <p><b>NOTE: </b>the state is associated with the app that was autofilled in the previous
+     * <p><b>Note: </b>the state is associated with the app that was autofilled in the previous
      * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
      * , which is not necessary the same app being autofilled now.
+     *
+     * @deprecated use {@link #getEvents()} then {@link Event#getClientState()} instead.
      */
+    @Deprecated
     @Nullable public Bundle getClientState() {
         return mClientState;
     }
@@ -126,7 +129,6 @@ public final class FillEventHistory implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(mClientState);
-
         if (mEvents == null) {
             dest.writeInt(0);
         } else {
@@ -137,6 +139,7 @@ public final class FillEventHistory implements Parcelable {
                 Event event = mEvents.get(i);
                 dest.writeInt(event.getType());
                 dest.writeString(event.getDatasetId());
+                dest.writeBundle(event.getClientState());
             }
         }
     }
@@ -177,6 +180,7 @@ public final class FillEventHistory implements Parcelable {
 
         @EventIds private final int mEventType;
         @Nullable private final String mDatasetId;
+        @Nullable private final Bundle mClientState;
 
         /**
          * Returns the type of the event.
@@ -197,18 +201,32 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
+         * Returns the client state from the {@link FillResponse} used to generate this event.
+         *
+         * <p><b>Note: </b>the state is associated with the app that was autofilled in the previous
+         * {@link
+         * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)},
+         * which is not necessary the same app being autofilled now.
+         */
+        @Nullable public Bundle getClientState() {
+            return mClientState;
+        }
+
+        /**
          * Creates a new event.
          *
          * @param eventType The type of the event
          * @param datasetId The dataset the event was on, or {@code null} if the event was on the
          *                  whole response.
+         * @param clientState The client state associated with the event.
          *
          * @hide
          */
-        public Event(int eventType, String datasetId) {
+        public Event(int eventType, @Nullable String datasetId, @Nullable Bundle clientState) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_SAVE_SHOWN,
                     "eventType");
             mDatasetId = datasetId;
+            mClientState = clientState;
         }
     }
 
@@ -220,7 +238,8 @@ public final class FillEventHistory implements Parcelable {
 
                     int numEvents = parcel.readInt();
                     for (int i = 0; i < numEvents; i++) {
-                        selection.addEvent(new Event(parcel.readInt(), parcel.readString()));
+                        selection.addEvent(new Event(parcel.readInt(), parcel.readString(),
+                                parcel.readBundle()));
                     }
 
                     return selection;

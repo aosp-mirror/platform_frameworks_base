@@ -78,4 +78,12 @@ public class ExceptionUtils {
         propagateIfInstanceOf(t, RuntimeException.class);
         throw new RuntimeException(t);
     }
+
+    /**
+     * Gets the root {@link Throwable#getCause() cause} of {@code t}
+     */
+    public static @NonNull Throwable getRootCause(@NonNull Throwable t) {
+        while (t.getCause() != null) t = t.getCause();
+        return t;
+    }
 }

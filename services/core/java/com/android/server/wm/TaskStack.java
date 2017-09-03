@@ -18,18 +18,9 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
-import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -52,7 +43,6 @@ import static com.android.server.wm.proto.StackProto.ID;
 import static com.android.server.wm.proto.StackProto.TASKS;
 
 import android.app.ActivityManager.StackId;
-import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -170,20 +160,10 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     Task findHomeTask() {
-        if (mStackId != HOME_STACK_ID) {
+        if (!isActivityTypeHome() || mChildren.isEmpty()) {
             return null;
         }
-
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            if (mChildren.get(i).isHomeTask()) {
-                return mChildren.get(i);
-            }
-        }
-        return null;
-    }
-
-    boolean hasMultipleTaskWithHomeTaskNotTop() {
-        return mChildren.size() > 1 && !mChildren.get(mChildren.size() - 1).isHomeTask();
+        return mChildren.get(mChildren.size() - 1);
     }
 
     /**
@@ -1470,7 +1450,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
              * small portion which the home stack currently is resized to.
              */
 
-            if (task.isHomeTask() && isMinimizedDockAndHomeStackResizable()) {
+            if (task.isActivityTypeHome() && isMinimizedDockAndHomeStackResizable()) {
                 mDisplayContent.getLogicalDisplayRect(mTmpRect);
             } else {
                 task.getDimBounds(mTmpRect);
@@ -1525,7 +1505,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override  // AnimatesBounds
-    public void onAnimationStart(boolean schedulePipModeChangedCallback) {
+    public void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mService.mWindowMap) {
             mBoundsAnimatingRequested = false;
@@ -1550,9 +1530,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             final PinnedStackWindowController controller =
                     (PinnedStackWindowController) getController();
             if (schedulePipModeChangedCallback && controller != null) {
-                // We need to schedule the PiP mode change after the animation down, so use the
-                // final bounds
-                controller.updatePictureInPictureModeForPinnedStackAnimation(null);
+                // We need to schedule the PiP mode change before the animation up. It is possible
+                // in this case for the animation down to not have been completed, so always
+                // force-schedule and update to the client to ensure that it is notified that it
+                // is no longer in picture-in-picture mode
+                controller.updatePictureInPictureModeForPinnedStackAnimation(null, forceUpdate);
             }
         }
     }
@@ -1580,7 +1562,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 // We need to schedule the PiP mode change after the animation down, so use the
                 // final bounds
                 controller.updatePictureInPictureModeForPinnedStackAnimation(
-                        mBoundsAnimationTarget);
+                        mBoundsAnimationTarget, false /* forceUpdate */);
             }
 
             if (finalStackSize != null) {

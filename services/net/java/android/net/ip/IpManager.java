@@ -94,7 +94,6 @@ import java.util.stream.Collectors;
  */
 public class IpManager extends StateMachine {
     private static final boolean DBG = false;
-    private static final boolean VDBG = false;
 
     // For message logging.
     private static final Class[] sMessageClasses = { IpManager.class, DhcpClient.class };
@@ -526,17 +525,18 @@ public class IpManager extends StateMachine {
     public static final String DUMP_ARG = "ipmanager";
     public static final String DUMP_ARG_CONFIRM = "confirm";
 
-    private static final int CMD_STOP = 1;
-    private static final int CMD_START = 2;
-    private static final int CMD_CONFIRM = 3;
-    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE = 4;
+    private static final int CMD_TERMINATE_AFTER_STOP             = 1;
+    private static final int CMD_STOP                             = 2;
+    private static final int CMD_START                            = 3;
+    private static final int CMD_CONFIRM                          = 4;
+    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE       = 5;
     // Sent by NetlinkTracker to communicate netlink events.
-    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 5;
-    private static final int CMD_UPDATE_TCP_BUFFER_SIZES = 6;
-    private static final int CMD_UPDATE_HTTP_PROXY = 7;
-    private static final int CMD_SET_MULTICAST_FILTER = 8;
-    private static final int EVENT_PROVISIONING_TIMEOUT = 9;
-    private static final int EVENT_DHCPACTION_TIMEOUT = 10;
+    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 6;
+    private static final int CMD_UPDATE_TCP_BUFFER_SIZES          = 7;
+    private static final int CMD_UPDATE_HTTP_PROXY                = 8;
+    private static final int CMD_SET_MULTICAST_FILTER             = 9;
+    private static final int EVENT_PROVISIONING_TIMEOUT           = 10;
+    private static final int EVENT_DHCPACTION_TIMEOUT             = 11;
 
     private static final int MAX_LOG_RECORDS = 500;
     private static final int MAX_PACKET_RECORDS = 100;
@@ -704,6 +704,16 @@ public class IpManager extends StateMachine {
         mMultinetworkPolicyTracker.start();
     }
 
+    private void stopStateMachineUpdaters() {
+        try {
+            mNwService.unregisterObserver(mNetlinkTracker);
+        } catch (RemoteException e) {
+            logError("Couldn't unregister NetlinkTracker: %s", e);
+        }
+
+        mMultinetworkPolicyTracker.shutdown();
+    }
+
     @Override
     protected void onQuitting() {
         mCallback.onQuit();
@@ -712,8 +722,7 @@ public class IpManager extends StateMachine {
     // Shut down this IpManager instance altogether.
     public void shutdown() {
         stop();
-        mMultinetworkPolicyTracker.shutdown();
-        quit();
+        sendMessage(CMD_TERMINATE_AFTER_STOP);
     }
 
     public static ProvisioningConfiguration.Builder buildProvisioningConfiguration() {
@@ -858,7 +867,7 @@ public class IpManager extends StateMachine {
 
         final String richerLogLine = getWhatToString(msg.what) + " " + logLine;
         mLog.log(richerLogLine);
-        if (VDBG) {
+        if (DBG) {
             Log.d(mTag, richerLogLine);
         }
 
@@ -1013,19 +1022,19 @@ public class IpManager extends StateMachine {
     private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
         switch (delta) {
             case GAINED_PROVISIONING:
-                if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
+                if (DBG) { Log.d(mTag, "onProvisioningSuccess()"); }
                 recordMetric(IpManagerEvent.PROVISIONING_OK);
                 mCallback.onProvisioningSuccess(newLp);
                 break;
 
             case LOST_PROVISIONING:
-                if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
+                if (DBG) { Log.d(mTag, "onProvisioningFailure()"); }
                 recordMetric(IpManagerEvent.PROVISIONING_FAIL);
                 mCallback.onProvisioningFailure(newLp);
                 break;
 
             default:
-                if (VDBG) { Log.d(mTag, "onLinkPropertiesChange()"); }
+                if (DBG) { Log.d(mTag, "onLinkPropertiesChange()"); }
                 mCallback.onLinkPropertiesChange(newLp);
                 break;
         }
@@ -1113,7 +1122,7 @@ public class IpManager extends StateMachine {
             addAllReachableDnsServers(newLp, config.dnsServers);
         }
         final LinkProperties oldLp = mLinkProperties;
-        if (VDBG) {
+        if (DBG) {
             Log.d(mTag, String.format("Netlink-seen LPs: %s, new LPs: %s; old LPs: %s",
                     netlinkLinkProperties, newLp, oldLp));
         }
@@ -1153,7 +1162,7 @@ public class IpManager extends StateMachine {
         ifcg.setLinkAddress(address);
         try {
             mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-            if (VDBG) Log.d(mTag, "IPv4 configuration succeeded");
+            if (DBG) Log.d(mTag, "IPv4 configuration succeeded");
         } catch (IllegalStateException | RemoteException e) {
             logError("IPv4 configuration failed: %s", e);
             return false;
@@ -1176,7 +1185,7 @@ public class IpManager extends StateMachine {
         final LinkProperties newLp = assembleLinkProperties();
         final ProvisioningChange delta = setLinkProperties(newLp);
 
-        if (VDBG) {
+        if (DBG) {
             Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
         }
         mCallback.onNewDhcpResults(dhcpResults);
@@ -1192,7 +1201,7 @@ public class IpManager extends StateMachine {
         // any addresses upon entry to StoppedState.
         clearIPv4Address();
         mDhcpResults = null;
-        if (VDBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
+        if (DBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
         mCallback.onNewDhcpResults(null);
 
         handleProvisioningFailure();
@@ -1348,6 +1357,11 @@ public class IpManager extends StateMachine {
         @Override
         public boolean processMessage(Message msg) {
             switch (msg.what) {
+                case CMD_TERMINATE_AFTER_STOP:
+                    stopStateMachineUpdaters();
+                    quit();
+                    break;
+
                 case CMD_STOP:
                     break;
 

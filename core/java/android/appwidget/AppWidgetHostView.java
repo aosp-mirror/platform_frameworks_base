@@ -40,7 +40,6 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -469,7 +468,9 @@ public class AppWidgetHostView extends FrameLayout {
                 // We've already done this -- nothing to do.
                 return ;
             }
-            Log.w(TAG, "updateAppWidget couldn't find any view, using error view", exception);
+            if (exception != null) {
+                Log.w(TAG, "Error inflating RemoteViews : " + exception.toString());
+            }
             content = getErrorView();
             mViewMode = VIEW_MODE_ERROR;
         }

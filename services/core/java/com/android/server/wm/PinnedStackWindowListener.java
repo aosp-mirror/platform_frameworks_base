@@ -28,5 +28,6 @@ public interface PinnedStackWindowListener extends StackWindowListener {
      * Called when the stack container pinned stack animation will change the picture-in-picture
      * mode. This is a direct call into ActivityManager.
      */
-    default void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {}
+    default void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds,
+            boolean forceUpdate) {}
 }

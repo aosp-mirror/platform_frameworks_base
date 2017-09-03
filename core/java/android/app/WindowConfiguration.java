@@ -55,7 +55,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Can be freely resized within its parent container. */
     public static final int WINDOWING_MODE_FREEFORM = 4;
 
-    @IntDef(value = {
+    @IntDef({
             WINDOWING_MODE_UNDEFINED,
             WINDOWING_MODE_FULLSCREEN,
             WINDOWING_MODE_PINNED,
@@ -64,15 +64,41 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     })
     public @interface WindowingMode {}
 
+    /** The current activity type of the configuration. */
+    private @ActivityType int mActivityType;
+
+    /** Activity type is currently not defined. */
+    public static final int ACTIVITY_TYPE_UNDEFINED = 0;
+    /** Standard activity type. Nothing special about the activity... */
+    public static final int ACTIVITY_TYPE_STANDARD = 1;
+    /** Home/Launcher activity type. */
+    public static final int ACTIVITY_TYPE_HOME = 2;
+    /** Recents/Overview activity type. */
+    public static final int ACTIVITY_TYPE_RECENTS = 3;
+    /** Assistant activity type. */
+    public static final int ACTIVITY_TYPE_ASSISTANT = 4;
+
+    @IntDef({
+            ACTIVITY_TYPE_UNDEFINED,
+            ACTIVITY_TYPE_STANDARD,
+            ACTIVITY_TYPE_HOME,
+            ACTIVITY_TYPE_RECENTS,
+            ACTIVITY_TYPE_ASSISTANT,
+    })
+    public @interface ActivityType {}
+
     /** Bit that indicates that the {@link #mAppBounds} changed. */
     public static final int WINDOW_CONFIG_APP_BOUNDS = 1 << 0;
     /** Bit that indicates that the {@link #mWindowingMode} changed. */
     public static final int WINDOW_CONFIG_WINDOWING_MODE = 1 << 1;
+    /** Bit that indicates that the {@link #mActivityType} changed. */
+    public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 2;
 
     @IntDef(flag = true,
             value = {
                     WINDOW_CONFIG_APP_BOUNDS,
                     WINDOW_CONFIG_WINDOWING_MODE,
+                    WINDOW_CONFIG_ACTIVITY_TYPE,
             })
     public @interface WindowConfig {}
 
@@ -92,11 +118,13 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(mAppBounds, flags);
         dest.writeInt(mWindowingMode);
+        dest.writeInt(mActivityType);
     }
 
     private void readFromParcel(Parcel source) {
         mAppBounds = source.readParcelable(Rect.class.getClassLoader());
         mWindowingMode = source.readInt();
+        mActivityType = source.readInt();
     }
 
     @Override
@@ -158,9 +186,27 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mWindowingMode;
     }
 
+    public void setActivityType(@ActivityType int activityType) {
+        if (mActivityType == activityType) {
+            return;
+        }
+        if (mActivityType != ACTIVITY_TYPE_UNDEFINED
+                && activityType != ACTIVITY_TYPE_UNDEFINED) {
+            throw new IllegalStateException("Can't change activity type once set: " + this
+                    + " activityType=" + activityTypeToString(activityType));
+        }
+        mActivityType = activityType;
+    }
+
+    @ActivityType
+    public int getActivityType() {
+        return mActivityType;
+    }
+
     public void setTo(WindowConfiguration other) {
         setAppBounds(other.mAppBounds);
         setWindowingMode(other.mWindowingMode);
+        setActivityType(other.mActivityType);
     }
 
     /** Set this object to completely undefined. */
@@ -171,6 +217,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public void setToDefaults() {
         setAppBounds(null);
         setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        setActivityType(ACTIVITY_TYPE_UNDEFINED);
     }
 
     /**
@@ -190,6 +237,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                 && mWindowingMode != delta.mWindowingMode) {
             changed |= WINDOW_CONFIG_WINDOWING_MODE;
             setWindowingMode(delta.mWindowingMode);
+        }
+        if (delta.mActivityType != ACTIVITY_TYPE_UNDEFINED
+                && mActivityType != delta.mActivityType) {
+            changed |= WINDOW_CONFIG_ACTIVITY_TYPE;
+            setActivityType(delta.mActivityType);
         }
         return changed;
     }
@@ -219,6 +271,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             changes |= WINDOW_CONFIG_WINDOWING_MODE;
         }
 
+        if ((compareUndefined || other.mActivityType != ACTIVITY_TYPE_UNDEFINED)
+                && mActivityType != other.mActivityType) {
+            changes |= WINDOW_CONFIG_ACTIVITY_TYPE;
+        }
+
         return changes;
     }
 
@@ -240,6 +297,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             if (n != 0) return n;
         }
         n = mWindowingMode - that.mWindowingMode;
+        if (n != 0) return n;
+        n = mActivityType - that.mActivityType;
         if (n != 0) return n;
 
         // if (n != 0) return n;
@@ -263,13 +322,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             result = 31 * result + mAppBounds.hashCode();
         }
         result = 31 * result + mWindowingMode;
+        result = 31 * result + mActivityType;
         return result;
     }
 
     @Override
     public String toString() {
         return "{mAppBounds=" + mAppBounds
-                + " mWindowingMode=" + windowingModeToString(mWindowingMode) + "}";
+                + " mWindowingMode=" + windowingModeToString(mWindowingMode)
+                + " mActivityType=" + activityTypeToString(mActivityType) + "}";
     }
 
     /**
@@ -365,5 +426,16 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             case WINDOWING_MODE_FREEFORM: return "freeform";
         }
         return String.valueOf(windowingMode);
+    }
+
+    public static String activityTypeToString(@ActivityType int applicationType) {
+        switch (applicationType) {
+            case ACTIVITY_TYPE_UNDEFINED: return "undefined";
+            case ACTIVITY_TYPE_STANDARD: return "standard";
+            case ACTIVITY_TYPE_HOME: return "home";
+            case ACTIVITY_TYPE_RECENTS: return "recents";
+            case ACTIVITY_TYPE_ASSISTANT: return "assistant";
+        }
+        return String.valueOf(applicationType);
     }
 }

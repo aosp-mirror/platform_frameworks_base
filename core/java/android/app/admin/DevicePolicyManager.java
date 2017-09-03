@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
@@ -47,6 +48,7 @@ import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -5981,6 +5983,26 @@ public class DevicePolicyManager {
     public static final int MAKE_USER_DEMO = 0x0004;
 
     /**
+     * Flag used by {@link #createAndManageUser} to specificy that the newly created user should be
+     * started in the background as part of the user creation.
+     */
+    // TODO: Investigate solutions for the case where reboot happens before setup is completed.
+    public static final int START_USER_IN_BACKGROUND = 0x0008;
+
+    /**
+     * @hide
+     */
+    @IntDef(
+            flag = true,
+            prefix = {"SKIP_", "MAKE_USER_", "START_"},
+            value = {SKIP_SETUP_WIZARD, MAKE_USER_EPHEMERAL, MAKE_USER_DEMO,
+                    START_USER_IN_BACKGROUND}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CreateAndManageUserFlags {}
+
+
+    /**
      * Called by a device owner to create a user with the specified name and a given component of
      * the calling package as profile owner. The UserHandle returned by this method should not be
      * persisted as user handles are recycled as users are removed and created. If you need to
@@ -6011,7 +6033,7 @@ public class DevicePolicyManager {
     public @Nullable UserHandle createAndManageUser(@NonNull ComponentName admin,
             @NonNull String name,
             @NonNull ComponentName profileOwner, @Nullable PersistableBundle adminExtras,
-            int flags) {
+            @CreateAndManageUserFlags int flags) {
         throwIfParentInstance("createAndManageUser");
         try {
             return mService.createAndManageUser(admin, name, profileOwner, adminExtras, flags);
@@ -6769,6 +6791,10 @@ public class DevicePolicyManager {
      * type. However, this call has no effect if a password, pin or pattern is currently set. If a
      * password, pin or pattern is set after the keyguard was disabled, the keyguard stops being
      * disabled.
+     *
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#P}, this call also dismisses the
+     * keyguard if it is currently shown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the keyguard, {@code false} reenables it.
@@ -8108,5 +8134,52 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by the device owner or profile owner to clear application user data of a given
+     * package. The behaviour of this is equivalent to the target application calling
+     * {@link android.app.ActivityManager#clearApplicationUserData()}.
+     *
+     * <p><strong>Note:</strong> an application can store data outside of its application data, e.g.
+     * external storage or user dictionary. This data will not be wiped by calling this API.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package which will have its user data wiped.
+     * @param listener A callback object that will inform the caller when the clearing is done.
+     * @param handler The handler indicating the thread on which the listener should be invoked.
+     * @throws SecurityException if the caller is not the device owner/profile owner.
+     * @return whether the clearing succeeded.
+     */
+    public boolean clearApplicationUserData(@NonNull ComponentName admin,
+            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
+            @NonNull Handler handler) {
+        throwIfParentInstance("clearAppData");
+        try {
+            return mService.clearApplicationUserData(admin, packageName,
+                    new IPackageDataObserver.Stub() {
+                        public void onRemoveCompleted(String pkg, boolean succeeded) {
+                            handler.post(() ->
+                                    listener.onApplicationUserDataCleared(pkg, succeeded));
+                        }
+                    });
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback used in {@link #clearApplicationUserData}
+     * to indicate that the clearing of an application's user data is done.
+     */
+    public interface OnClearApplicationUserDataListener {
+        /**
+         * Method invoked when clearing the application user data has completed.
+         *
+         * @param packageName The name of the package which had its user data cleared.
+         * @param succeeded Whether the clearing succeeded. Clearing fails for device administrator
+         *                  apps and protected system packages.
+         */
+        void onApplicationUserDataCleared(String packageName, boolean succeeded);
     }
 }

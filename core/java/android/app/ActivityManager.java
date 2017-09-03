@@ -16,6 +16,10 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -873,6 +877,26 @@ public class ActivityManager {
                     windowingMode = WINDOWING_MODE_UNDEFINED;
             }
             return windowingMode;
+        }
+
+        /** Returns the activity type that should be used for this input stack id. */
+        // TODO: To be removed once we are not using stack id for stuff...
+        public static int getActivityTypeForStackId(int stackId) {
+            final int activityType;
+            switch (stackId) {
+                case HOME_STACK_ID:
+                    activityType = ACTIVITY_TYPE_HOME;
+                    break;
+                case RECENTS_STACK_ID:
+                    activityType = ACTIVITY_TYPE_RECENTS;
+                    break;
+                case ASSISTANT_STACK_ID:
+                    activityType = ACTIVITY_TYPE_ASSISTANT;
+                    break;
+                default :
+                    activityType = ACTIVITY_TYPE_STANDARD;
+            }
+            return activityType;
         }
     }
 
@@ -2698,7 +2722,8 @@ public class ActivityManager {
      * the user choosing to clear the app's data from within the device settings UI.  It
      * erases all dynamic data associated with the app -- its private data and data in its
      * private area on external storage -- but does not remove the installed application
-     * itself, nor any OBB files.
+     * itself, nor any OBB files. It also revokes all runtime permissions that the app has acquired,
+     * clears all notifications and removes all Uri grants related to this application.
      *
      * @return {@code true} if the application successfully requested that the application's
      *     data be erased; {@code false} otherwise.

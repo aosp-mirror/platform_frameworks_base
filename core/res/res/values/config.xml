@@ -1537,16 +1537,16 @@
     <integer translatable="false" name="config_bluetooth_max_advertisers">0</integer>
 
     <!-- Idle current for bluetooth controller. 0 by default-->
-    <integer translatable="false" name="config_bluetooth_idle_cur_ma">1</integer>
+    <integer translatable="false" name="config_bluetooth_idle_cur_ma">0</integer>
 
     <!-- Rx current for bluetooth controller. 0 by default-->
-    <integer translatable="false" name="config_bluetooth_rx_cur_ma">2</integer>
+    <integer translatable="false" name="config_bluetooth_rx_cur_ma">0</integer>
 
     <!-- Tx current for bluetooth controller. 0 by default-->
-    <integer translatable="false" name="config_bluetooth_tx_cur_ma">3</integer>
+    <integer translatable="false" name="config_bluetooth_tx_cur_ma">0</integer>
 
     <!-- Operating volatage for bluetooth controller. 0 by default-->
-    <integer translatable="false" name="config_bluetooth_operating_voltage_mv">4</integer>
+    <integer translatable="false" name="config_bluetooth_operating_voltage_mv">0</integer>
 
     <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
     <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>

@@ -22,7 +22,7 @@ import static android.os.UserManagerInternal.CAMERA_DISABLED_GLOBALLY;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_LOCALLY;
 import static android.os.UserManagerInternal.CAMERA_NOT_DISABLED;
 
-import static com.android.server.testutis.TestUtils.assertExpectException;
+import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -54,11 +54,11 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.PasswordMetrics;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
@@ -167,6 +167,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
+        doReturn(Collections.singletonList(new ResolveInfo()))
+                .when(getServices().packageManager).queryBroadcastReceiversAsUser(
+                        any(Intent.class),
+                        anyInt(),
+                        any(UserHandle.class));
 
         // By default, pretend all users are running and unlocked.
         when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(true);

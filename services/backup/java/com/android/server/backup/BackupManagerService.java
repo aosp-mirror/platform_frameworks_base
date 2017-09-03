@@ -10475,7 +10475,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     public ComponentName[] listAllTransportComponents() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
-        return mTransportManager.getAllTransportCompenents();
+        return mTransportManager.getAllTransportComponents();
     }
 
     @Override
@@ -10520,7 +10520,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         Slog.v(TAG, "selectBackupTransportAsync() called with transport " +
                 transport.flattenToShortString());
 
-        mTransportManager.ensureTransportReady(transport, new SelectBackupTransportCallback() {
+        mTransportManager.ensureTransportReady(transport, new TransportManager.TransportReadyCallback() {
             @Override
             public void onSuccess(String transportName) {
                 mTransportManager.selectTransport(transportName);

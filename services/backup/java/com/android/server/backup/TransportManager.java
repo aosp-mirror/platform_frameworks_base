@@ -41,10 +41,12 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +59,9 @@ public class TransportManager {
 
     private static final String TAG = "BackupTransportManager";
 
-    private static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
+    @VisibleForTesting
+    /* package */ static final String SERVICE_ACTION_TRANSPORT_HOST =
+            "android.backup.TRANSPORT_HOST";
 
     private static final long REBINDING_TIMEOUT_UNPROVISIONED_MS = 30 * 1000; // 30 sec
     private static final long REBINDING_TIMEOUT_PROVISIONED_MS = 5 * 60 * 1000; // 5 mins
@@ -91,11 +95,31 @@ public class TransportManager {
     @GuardedBy("mTransportLock")
     private final Map<String, ComponentName> mBoundTransports = new ArrayMap<>();
 
+    /**
+     * Callback interface for {@link #ensureTransportReady(ComponentName, TransportReadyCallback)}.
+     */
+    public interface TransportReadyCallback {
+
+        /**
+         * Will be called when the transport is ready.
+         */
+        void onSuccess(String transportName);
+
+        /**
+         * Will be called when it's not possible to make transport ready.
+         */
+        void onFailure(int reason);
+    }
+
     TransportManager(Context context, Set<ComponentName> whitelist, String defaultTransport,
             TransportBoundListener listener, Looper looper) {
         mContext = context;
         mPackageManager = context.getPackageManager();
-        mTransportWhitelist = (whitelist != null) ? whitelist : new ArraySet<>();
+        if (whitelist != null) {
+            mTransportWhitelist = whitelist;
+        } else {
+            mTransportWhitelist = new ArraySet<>();
+        }
         mCurrentTransportName = defaultTransport;
         mTransportBoundListener = listener;
         mHandler = new RebindOnTimeoutHandler(looper);
@@ -186,7 +210,7 @@ public class TransportManager {
         }
     }
 
-    ComponentName[] getAllTransportCompenents() {
+    ComponentName[] getAllTransportComponents() {
         synchronized (mTransportLock) {
             return mValidTransports.keySet().toArray(new ComponentName[mValidTransports.size()]);
         }
@@ -208,7 +232,8 @@ public class TransportManager {
         }
     }
 
-    void ensureTransportReady(ComponentName transportComponent, SelectBackupTransportCallback listener) {
+    void ensureTransportReady(ComponentName transportComponent,
+            TransportReadyCallback listener) {
         synchronized (mTransportLock) {
             TransportConnection conn = mValidTransports.get(transportComponent);
             if (conn == null) {
@@ -252,7 +277,7 @@ public class TransportManager {
                 intent, 0, UserHandle.USER_SYSTEM);
         if (hosts != null) {
             for (ResolveInfo host : hosts) {
-                final ComponentName infoComponentName = host.serviceInfo.getComponentName();
+                final ComponentName infoComponentName = getComponentName(host.serviceInfo);
                 boolean shouldBind = false;
                 if (components != null && packageName != null) {
                     for (String component : components) {
@@ -310,14 +335,14 @@ public class TransportManager {
         Intent intent = new Intent(mTransportServiceIntent)
                 .setComponent(componentName);
         return mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
-                UserHandle.SYSTEM);
+                createSystemUserHandle());
     }
 
     private class TransportConnection implements ServiceConnection {
 
         // Hold mTransportsLock to access these fields so as to provide a consistent view of them.
         private IBackupTransport mBinder;
-        private final List<SelectBackupTransportCallback> mListeners = new ArrayList<>();
+        private final List<TransportReadyCallback> mListeners = new ArrayList<>();
         private String mTransportName;
 
         private final ComponentName mTransportComponent;
@@ -333,7 +358,7 @@ public class TransportManager {
                 boolean success = false;
 
                 EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE,
-                    component.flattenToShortString(), 1);
+                        component.flattenToShortString(), 1);
 
                 try {
                     mTransportName = mBinder.name();
@@ -350,7 +375,7 @@ public class TransportManager {
                     if (success) {
                         Slog.d(TAG, "Bound to transport: " + componentShortString);
                         mBoundTransports.put(mTransportName, component);
-                        for (SelectBackupTransportCallback listener : mListeners) {
+                        for (TransportReadyCallback listener : mListeners) {
                             listener.onSuccess(mTransportName);
                         }
                         // cancel rebinding on timeout for this component as we've already connected
@@ -363,7 +388,7 @@ public class TransportManager {
                         mContext.unbindService(this);
                         mValidTransports.remove(component);
                         mBinder = null;
-                        for (SelectBackupTransportCallback listener : mListeners) {
+                        for (TransportReadyCallback listener : mListeners) {
                             listener.onFailure(BackupManager.ERROR_TRANSPORT_INVALID);
                         }
                     }
@@ -423,7 +448,7 @@ public class TransportManager {
             }
         }
 
-        private void addListener(SelectBackupTransportCallback listener) {
+        private void addListener(TransportReadyCallback listener) {
             synchronized (mTransportLock) {
                 if (mBinder == null) {
                     // We are waiting for bind to complete. If mBinder is set to null after the bind
@@ -437,7 +462,8 @@ public class TransportManager {
         }
 
         private long getRebindTimeout() {
-            final boolean isDeviceProvisioned = Settings.Global.getInt(mContext.getContentResolver(),
+            final boolean isDeviceProvisioned = Settings.Global.getInt(
+                    mContext.getContentResolver(),
                     Settings.Global.DEVICE_PROVISIONED, 0) != 0;
             return isDeviceProvisioned
                     ? REBINDING_TIMEOUT_PROVISIONED_MS
@@ -445,7 +471,7 @@ public class TransportManager {
         }
     }
 
-    interface TransportBoundListener {
+    public interface TransportBoundListener {
         /** Should return true if this is a valid transport. */
         boolean onTransportBound(IBackupTransport binder);
     }
@@ -465,7 +491,7 @@ public class TransportManager {
                 synchronized (mTransportLock) {
                     if (mBoundTransports.containsValue(transportComponent)) {
                         Slog.d(TAG, "Explicit rebinding timeout passed, but already bound to "
-                            + componentShortString + " so not attempting to rebind");
+                                + componentShortString + " so not attempting to rebind");
                         return;
                     }
                     Slog.d(TAG, "Explicit rebinding timeout passed, attempting rebinding to: "
@@ -491,5 +517,19 @@ public class TransportManager {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Slog.v(TAG, message);
         }
+    }
+
+    // These only exists to make it testable with Robolectric, which is not updated to API level 24
+    // yet.
+    // TODO: Get rid of this once Robolectric is updated.
+    private static ComponentName getComponentName(ServiceInfo serviceInfo) {
+        return new ComponentName(serviceInfo.packageName, serviceInfo.name);
+    }
+
+    // These only exists to make it testable with Robolectric, which is not updated to API level 24
+    // yet.
+    // TODO: Get rid of this once Robolectric is updated.
+    private static UserHandle createSystemUserHandle() {
+        return new UserHandle(UserHandle.USER_SYSTEM);
     }
 }

@@ -522,10 +522,11 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an authentication was selected.
      */
-    void setAuthenticationSelected(int sessionId) {
+    void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState) {
         synchronized (mLock) {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
-                mEventHistory.addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null));
+                mEventHistory
+                        .addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState));
             }
         }
     }
@@ -533,11 +534,13 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an dataset authentication was selected.
      */
-    void setDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId) {
+    void setDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
+            @Nullable Bundle clientState) {
         synchronized (mLock) {
             if (isValidEventLocked("setDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
-                        new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
+                        new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
+                                clientState));
             }
         }
     }
@@ -545,10 +548,10 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an save Ui is shown.
      */
-    void setSaveShown(int sessionId) {
+    void setSaveShown(int sessionId, @Nullable Bundle clientState) {
         synchronized (mLock) {
             if (isValidEventLocked("setSaveShown()", sessionId)) {
-                mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
+                mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState));
             }
         }
     }
@@ -556,10 +559,12 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when a dataset was selected.
      */
-    void setDatasetSelected(@Nullable String selectedDataset, int sessionId) {
+    void setDatasetSelected(@Nullable String selectedDataset, int sessionId,
+            @Nullable Bundle clientState) {
         synchronized (mLock) {
             if (isValidEventLocked("setDatasetSelected()", sessionId)) {
-                mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
+                mEventHistory.addEvent(
+                        new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState));
             }
         }
     }

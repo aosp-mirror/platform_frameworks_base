@@ -43,11 +43,11 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.START_USER_IN_BACKGROUND;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -80,9 +80,9 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
-import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.trust.TrustManager;
@@ -93,6 +93,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -614,11 +615,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
+                    maybeSendAdminEnabledBroadcastLocked(userHandle);
                     // Reset the policy data
                     mUserData.remove(userHandle);
-                    sendAdminEnabledBroadcastLocked(userHandle);
                 }
                 handlePackagesChanged(null /* check all admins */, userHandle);
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                synchronized (DevicePolicyManagerService.this) {
+                    maybeSendAdminEnabledBroadcastLocked(userHandle);
+                }
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 handlePackagesChanged(null /* check all admins */, userHandle);
             } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
@@ -1854,6 +1859,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
@@ -2372,11 +2378,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         sendAdminCommandLocked(admin, action, null, result);
     }
 
-    /**
-     * Send an update to one specific admin, get notified when that admin returns a result.
-     */
     void sendAdminCommandLocked(ActiveAdmin admin, String action, Bundle adminExtras,
             BroadcastReceiver result) {
+        sendAdminCommandLocked(admin, action, adminExtras, result, false);
+    }
+
+    /**
+     * Send an update to one specific admin, get notified when that admin returns a result.
+     *
+     * @return whether the broadcast was successfully sent
+     */
+    boolean sendAdminCommandLocked(ActiveAdmin admin, String action, Bundle adminExtras,
+            BroadcastReceiver result, boolean inForeground) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
         if (UserManager.isDeviceInDemoMode(mContext)) {
@@ -2385,8 +2398,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (action.equals(DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING)) {
             intent.putExtra("expiration", admin.passwordExpirationDate);
         }
+        if (inForeground) {
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        }
         if (adminExtras != null) {
             intent.putExtras(adminExtras);
+        }
+        if (mInjector.getPackageManager().queryBroadcastReceiversAsUser(
+                intent,
+                PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                admin.getUserHandle()).isEmpty()) {
+            return false;
         }
         if (result != null) {
             mContext.sendOrderedBroadcastAsUser(intent, admin.getUserHandle(),
@@ -2394,6 +2416,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
         }
+        return true;
     }
 
     /**
@@ -8099,20 +8122,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-
-    private void sendAdminEnabledBroadcastLocked(int userHandle) {
+    private void maybeSendAdminEnabledBroadcastLocked(int userHandle) {
         DevicePolicyData policyData = getUserData(userHandle);
         if (policyData.mAdminBroadcastPending) {
             // Send the initialization data to profile owner and delete the data
             ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+            boolean clearInitBundle = true;
             if (admin != null) {
                 PersistableBundle initBundle = policyData.mInitBundle;
-                sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
-                        initBundle == null ? null : new Bundle(initBundle), null);
+                clearInitBundle = sendAdminCommandLocked(admin,
+                        DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
+                        initBundle == null ? null : new Bundle(initBundle),
+                        null /* result receiver */,
+                        true /* send in foreground */);
             }
-            policyData.mInitBundle = null;
-            policyData.mAdminBroadcastPending = false;
-            saveSettingsLocked(userHandle);
+            if (clearInitBundle) {
+                // If there's no admin or we've successfully called the admin, clear the init bundle
+                // otherwise, keep it around
+                policyData.mInitBundle = null;
+                policyData.mAdminBroadcastPending = false;
+                saveSettingsLocked(userHandle);
+            }
         }
     }
 
@@ -8158,7 +8188,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (user == null) {
             return null;
         }
-        // Set admin.
         final long id = mInjector.binderClearCallingIdentity();
         try {
             final String adminPkg = admin.getPackageName();
@@ -8171,30 +8200,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
                 }
             } catch (RemoteException e) {
-                Slog.e(LOG_TAG, "Failed to make remote calls for createAndManageUser, "
-                        + "removing created user", e);
-                mUserManager.removeUser(user.getIdentifier());
-                return null;
+                // Does not happen, same process
             }
 
+            // Set admin.
             setActiveAdmin(profileOwner, true, userHandle);
-            // User is not started yet, the broadcast by setActiveAdmin will not be received.
-            // So we store adminExtras for broadcasting when the user starts for first time.
-            synchronized(this) {
+            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
+            setProfileOwner(profileOwner, ownerName, userHandle);
+
+            synchronized (this) {
                 DevicePolicyData policyData = getUserData(userHandle);
                 policyData.mInitBundle = adminExtras;
                 policyData.mAdminBroadcastPending = true;
                 saveSettingsLocked(userHandle);
             }
-            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
-            setProfileOwner(profileOwner, ownerName, userHandle);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.USER_SETUP_COMPLETE, 1, userHandle);
             }
 
+            if ((flags & START_USER_IN_BACKGROUND) != 0) {
+                try {
+                    mInjector.getIActivityManager().startUserInBackground(user.getIdentifier());
+                } catch (RemoteException re) {
+                    // Does not happen, same process
+                }
+            }
+
             return user;
+        } catch (Throwable re) {
+            mUserManager.removeUser(user.getIdentifier());
+            return null;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
@@ -9077,6 +9114,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return false;
             }
             mLockPatternUtils.setLockScreenDisabled(disabled, userId);
+            mInjector.getIWindowManager().dismissKeyguard(null);
+        } catch (RemoteException e) {
+            // Same process, does not happen.
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
@@ -11145,5 +11185,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return new StringParceledListSlice(
                     new ArrayList<>(getUserData(userId).mOwnerInstalledCaCerts));
         }
+    }
+
+    @Override
+    public boolean clearApplicationUserData(ComponentName admin, String packageName,
+            IPackageDataObserver callback) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+        final int userId = UserHandle.getCallingUserId();
+
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            return ActivityManager.getService().clearApplicationUserData(packageName, callback,
+                    userId);
+        } catch(RemoteException re) {
+            // Same process, should not happen.
+        } catch (SecurityException se) {
+            // This can happen e.g. for device admin packages, do not throw out the exception,
+            // because callers have no means to know beforehand for which packages this might
+            // happen.
+            Slog.w(LOG_TAG, "Not allowed to clear application user data for package " + packageName,
+                    se);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+
+        if (callback != null) {
+            try {
+                // If there was a throw above, we send back that removal failed
+                callback.onRemoveCompleted(packageName, false);
+            } catch (RemoteException re) {
+                // Caller is no longer available, ignore
+            }
+        }
+        return false;
     }
 }
