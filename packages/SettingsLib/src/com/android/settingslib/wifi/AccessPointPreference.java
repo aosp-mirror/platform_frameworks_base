@@ -76,10 +76,10 @@ public class AccessPointPreference extends Preference {
     public static String generatePreferenceKey(AccessPoint accessPoint) {
         StringBuilder builder = new StringBuilder();
 
-        if (TextUtils.isEmpty(accessPoint.getBssid())) {
-            builder.append(accessPoint.getSsidStr());
-        } else {
+        if (TextUtils.isEmpty(accessPoint.getSsidStr())) {
             builder.append(accessPoint.getBssid());
+        } else {
+            builder.append(accessPoint.getSsidStr());
         }
 
         builder.append(',').append(accessPoint.getSecurity());

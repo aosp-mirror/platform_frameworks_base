@@ -31,7 +31,7 @@ interface BoundsAnimationTarget {
      * @param schedulePipModeChangedCallback whether or not to schedule the PiP mode changed
      * callbacks
      */
-    void onAnimationStart(boolean schedulePipModeChangedCallback);
+    void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate);
 
     /**
      * Sets the size of the target (without any intermediate steps, like scheduling animation)

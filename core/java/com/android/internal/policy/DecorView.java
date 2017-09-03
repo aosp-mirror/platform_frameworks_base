@@ -1812,7 +1812,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mFloatingActionMode.finish();
         }
         cleanupFloatingActionModeViews();
-        mFloatingToolbar = new FloatingToolbar(mContext, mWindow);
+        mFloatingToolbar = new FloatingToolbar(mWindow);
         final FloatingActionMode mode =
                 new FloatingActionMode(mContext, callback, originatingView, mFloatingToolbar);
         mFloatingActionModeOriginatingView = originatingView;

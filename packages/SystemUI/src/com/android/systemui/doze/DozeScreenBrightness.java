@@ -42,7 +42,7 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
 
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, DozeHost host,
-            Handler handler) {
+            Handler handler, AlwaysOnDisplayPolicy policy) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
@@ -50,10 +50,8 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
         mDozeHost = host;
         mHandler = handler;
 
-        mSensorToBrightness = context.getResources().getIntArray(
-                R.array.config_doze_brightness_sensor_to_brightness);
-        mSensorToScrimOpacity = context.getResources().getIntArray(
-                R.array.config_doze_brightness_sensor_to_scrim_opacity);
+        mSensorToBrightness = policy.screenBrightnessArray;
+        mSensorToScrimOpacity = policy.dimmingScrimArray;
     }
 
     @Override

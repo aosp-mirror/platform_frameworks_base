@@ -1498,7 +1498,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override  // AnimatesBounds
-    public void onAnimationStart(boolean schedulePipModeChangedCallback) {
+    public void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mService.mWindowMap) {
             mBoundsAnimatingRequested = false;
@@ -1523,9 +1523,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             final PinnedStackWindowController controller =
                     (PinnedStackWindowController) getController();
             if (schedulePipModeChangedCallback && controller != null) {
-                // We need to schedule the PiP mode change after the animation down, so use the
-                // final bounds
-                controller.updatePictureInPictureModeForPinnedStackAnimation(null);
+                // We need to schedule the PiP mode change before the animation up. It is possible
+                // in this case for the animation down to not have been completed, so always
+                // force-schedule and update to the client to ensure that it is notified that it
+                // is no longer in picture-in-picture mode
+                controller.updatePictureInPictureModeForPinnedStackAnimation(null, forceUpdate);
             }
         }
     }
@@ -1553,7 +1555,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 // We need to schedule the PiP mode change after the animation down, so use the
                 // final bounds
                 controller.updatePictureInPictureModeForPinnedStackAnimation(
-                        mBoundsAnimationTarget);
+                        mBoundsAnimationTarget, false /* forceUpdate */);
             }
 
             if (finalStackSize != null) {

@@ -1046,22 +1046,22 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
-    public void dump(Printer pw, String prefix, int flags) {
+    public void dump(Printer pw, String prefix, int dumpFlags) {
         super.dumpFront(pw, prefix);
-        if ((flags&DUMP_FLAG_DETAILS) != 0 && className != null) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0 && className != null) {
             pw.println(prefix + "className=" + className);
         }
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
         pw.println(prefix + "processName=" + processName);
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "taskAffinity=" + taskAffinity);
         }
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
                 + " privateFlags=0x" + Integer.toHexString(privateFlags)
                 + " theme=0x" + Integer.toHexString(theme));
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
                     + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
                     + " largestWidthLimitDp=" + largestWidthLimitDp);
@@ -1080,12 +1080,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (resourceDirs != null) {
             pw.println(prefix + "resourceDirs=" + Arrays.toString(resourceDirs));
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0 && seInfo != null) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0 && seInfo != null) {
             pw.println(prefix + "seinfo=" + seInfo);
             pw.println(prefix + "seinfoUser=" + seInfoUser);
         }
         pw.println(prefix + "dataDir=" + dataDir);
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "deviceProtectedDataDir=" + deviceProtectedDataDir);
             pw.println(prefix + "credentialProtectedDataDir=" + credentialProtectedDataDir);
             if (sharedLibraryFiles != null) {
@@ -1104,7 +1104,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode
                 + " targetSandboxVersion=" + targetSandboxVersion);
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             if (manageSpaceActivityName != null) {
                 pw.println(prefix + "manageSpaceActivityName=" + manageSpaceActivityName);
             }

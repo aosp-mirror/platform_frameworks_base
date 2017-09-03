@@ -183,7 +183,7 @@ public class VoiceInteractionManagerService extends SystemService {
         private final boolean mEnableService;
 
         VoiceInteractionManagerServiceStub() {
-            mEnableService = shouldEnableService(mContext.getResources());
+            mEnableService = shouldEnableService(mContext);
         }
 
         // TODO: VI Make sure the caller is the current user or profile
@@ -348,10 +348,15 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        private boolean shouldEnableService(Resources res) {
-            // VoiceInteractionService should not be enabled on low ram devices unless it has the config flag.
-            return !ActivityManager.isLowRamDeviceStatic() ||
-                    getForceVoiceInteractionServicePackage(res) != null;
+        private boolean shouldEnableService(Context context) {
+            // VoiceInteractionService should not be enabled on any low RAM devices
+            // or devices that have not declared the recognition feature, unless the
+            // device's configuration has explicitly set the config flag for a fixed
+            // voice interaction service.
+            return (!ActivityManager.isLowRamDeviceStatic()
+                            && context.getPackageManager().hasSystemFeature(
+                                    PackageManager.FEATURE_VOICE_RECOGNIZERS)) ||
+                    getForceVoiceInteractionServicePackage(context.getResources()) != null;
         }
 
         private String getForceVoiceInteractionServicePackage(Resources res) {

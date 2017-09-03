@@ -366,7 +366,6 @@ public class AppWindowContainerController
                 // if made visible again.
                 wtoken.removeDeadWindows();
                 wtoken.setVisibleBeforeClientHidden();
-                mService.mUnknownAppVisibilityController.appRemovedOrHidden(wtoken);
             } else {
                 if (!mService.mAppTransition.isTransitionSet()
                         && mService.mAppTransition.isReady()) {

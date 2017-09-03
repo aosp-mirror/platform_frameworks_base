@@ -302,7 +302,7 @@ public final class FillResponse implements Parcelable {
         // TODO: create a dump() method instead
         return new StringBuilder(
                 "FillResponse : [mRequestId=" + mRequestId)
-                .append(", datasets=").append(mDatasets)
+                .append(", datasets=").append(mDatasets == null ? "N/A" : mDatasets.getList())
                 .append(", saveInfo=").append(mSaveInfo)
                 .append(", clientState=").append(mClientState != null)
                 .append(", hasPresentation=").append(mPresentation != null)

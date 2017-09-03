@@ -54,7 +54,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     SystemUI-proto \
     SystemUI-tags \
     legacy-android-test \
-    testables
+    testables \
+    truth-prebuilt \
 
 LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.car
 

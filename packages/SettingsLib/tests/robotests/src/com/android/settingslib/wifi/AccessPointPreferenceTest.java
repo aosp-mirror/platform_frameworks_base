@@ -36,26 +36,28 @@ public class AccessPointPreferenceTest {
     private Context mContext = RuntimeEnvironment.application;
 
     @Test
-    public void generatePreferenceKey_shouldReturnSsidPlusSecurity() {
+    public void generatePreferenceKey_returnsSsidPlusSecurity() {
         String ssid = "ssid";
+        String bssid = "00:00:00:00:00:00";
         int security = AccessPoint.SECURITY_WEP;
         String expectedKey = ssid + ',' + security;
 
         TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setSsid(ssid).setSecurity(security);
+        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
 
         assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
                 .isEqualTo(expectedKey);
     }
 
     @Test
-    public void generatePreferenceKey_shouldReturnBssidPlusSecurity() {
-        String bssid = "bssid";
+    public void generatePreferenceKey_emptySsidReturnsBssidPlusSecurity() {
+        String ssid = "";
+        String bssid = "00:00:00:00:00:00";
         int security = AccessPoint.SECURITY_WEP;
         String expectedKey = bssid + ',' + security;
 
         TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setBssid(bssid).setSecurity(security);
+        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
 
         assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
                 .isEqualTo(expectedKey);
