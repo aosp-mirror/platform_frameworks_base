@@ -63,6 +63,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class OffloadController {
     private static final String TAG = OffloadController.class.getSimpleName();
+    private static final String ANYIP = "0.0.0.0";
+    private static final ForwardedStats EMPTY_STATS = new ForwardedStats();
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
@@ -148,6 +150,14 @@ public class OffloadController {
                     public void onStoppedUnsupported() {
                         if (!started()) return;
                         mLog.log("onStoppedUnsupported");
+                        // Poll for statistics and trigger a sweep of tethering
+                        // stats by observers. This might not succeed, but it's
+                        // worth trying anyway. We need to do this because from
+                        // this point on we continue with software forwarding,
+                        // and we need to synchronize stats and limits between
+                        // software and hardware forwarding.
+                        updateStatsForAllUpstreams();
+                        forceTetherStatsPoll();
                     }
 
                     @Override
@@ -155,11 +165,15 @@ public class OffloadController {
                         if (!started()) return;
                         mLog.log("onSupportAvailable");
 
-                        // [1] Poll for statistics and notify NetworkStats
-                        // [2] (Re)Push all state:
-                        //     [a] push local prefixes
-                        //     [b] push downstreams
-                        //     [c] push upstream parameters
+                        // [1] Poll for statistics and trigger a sweep of stats
+                        // by observers. We need to do this to ensure that any
+                        // limits set take into account any software tethering
+                        // traffic that has been happening in the meantime.
+                        updateStatsForAllUpstreams();
+                        forceTetherStatsPoll();
+                        // [2] (Re)Push all state.
+                        // TODO: computeAndPushLocalPrefixes()
+                        // TODO: push all downstream state.
                         pushUpstreamParameters(null);
                     }
 
@@ -181,12 +195,7 @@ public class OffloadController {
                         // The stats for the previous upstream were already updated on this thread
                         // just after the upstream was changed, so they are also up-to-date.
                         updateStatsForCurrentUpstream();
-
-                        try {
-                            mNms.tetherLimitReached(mStatsProvider);
-                        } catch (RemoteException e) {
-                            mLog.e("Cannot report data limit reached: " + e);
-                        }
+                        forceTetherStatsPoll();
                     }
 
                     @Override
@@ -305,13 +314,33 @@ public class OffloadController {
         maybeUpdateStats(currentUpstreamInterface());
     }
 
+    private void updateStatsForAllUpstreams() {
+        // In practice, there should only ever be a single digit number of
+        // upstream interfaces over the lifetime of an active tethering session.
+        // Roughly speaking, imagine a very ambitious one or two of each of the
+        // following interface types: [ "rmnet_data", "wlan", "eth", "rndis" ].
+        for (Map.Entry<String, ForwardedStats> kv : mForwardedStats.entrySet()) {
+            maybeUpdateStats(kv.getKey());
+        }
+    }
+
+    private void forceTetherStatsPoll() {
+        try {
+            mNms.tetherLimitReached(mStatsProvider);
+        } catch (RemoteException e) {
+            mLog.e("Cannot report data limit reached: " + e);
+        }
+    }
+
     public void setUpstreamLinkProperties(LinkProperties lp) {
         if (!started() || Objects.equals(mUpstreamLinkProperties, lp)) return;
 
-        String prevUpstream = (mUpstreamLinkProperties != null) ?
-                mUpstreamLinkProperties.getInterfaceName() : null;
+        final String prevUpstream = currentUpstreamInterface();
 
         mUpstreamLinkProperties = (lp != null) ? new LinkProperties(lp) : null;
+        // Make sure we record this interface in the ForwardedStats map.
+        final String iface = currentUpstreamInterface();
+        if (!TextUtils.isEmpty(iface)) mForwardedStats.putIfAbsent(iface, EMPTY_STATS);
 
         // TODO: examine return code and decide what to do if programming
         // upstream parameters fails (probably just wait for a subsequent
@@ -378,16 +407,20 @@ public class OffloadController {
     }
 
     private boolean pushUpstreamParameters(String prevUpstream) {
-        if (mUpstreamLinkProperties == null) {
+        final String iface = currentUpstreamInterface();
+
+        if (TextUtils.isEmpty(iface)) {
+            final boolean rval = mHwInterface.setUpstreamParameters("", ANYIP, ANYIP, null);
+            // Update stats after we've told the hardware to stop forwarding so
+            // we don't miss packets.
             maybeUpdateStats(prevUpstream);
-            return mHwInterface.setUpstreamParameters(null, null, null, null);
+            return rval;
         }
 
         // A stacked interface cannot be an upstream for hardware offload.
         // Consequently, we examine only the primary interface name, look at
         // getAddresses() rather than getAllAddresses(), and check getRoutes()
         // rather than getAllRoutes().
-        final String iface = mUpstreamLinkProperties.getInterfaceName();
         final ArrayList<String> v6gateways = new ArrayList<>();
         String v4addr = null;
         String v4gateway = null;
