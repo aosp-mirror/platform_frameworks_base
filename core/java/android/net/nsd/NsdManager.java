@@ -21,24 +21,23 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.Messenger;
-import android.text.TextUtils;
+import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
-
-import java.util.concurrent.CountDownLatch;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * The Network Service Discovery Manager class provides the API to discover services
@@ -244,7 +243,7 @@ public final class NsdManager {
         return name;
     }
 
-    private static int FIRST_LISTENER_KEY = 1;
+    private static final int FIRST_LISTENER_KEY = 1;
 
     private final INsdManager mService;
     private final Context mContext;
@@ -278,6 +277,7 @@ public final class NsdManager {
     @VisibleForTesting
     public void disconnect() {
         mAsyncChannel.disconnect();
+        mHandler.getLooper().quitSafely();
     }
 
     /**
@@ -650,7 +650,7 @@ public final class NsdManager {
 
     private static void checkServiceInfo(NsdServiceInfo serviceInfo) {
         checkNotNull(serviceInfo, "NsdServiceInfo cannot be null");
-        checkStringNotEmpty(serviceInfo.getServiceName(),"Service name cannot be empty");
+        checkStringNotEmpty(serviceInfo.getServiceName(), "Service name cannot be empty");
         checkStringNotEmpty(serviceInfo.getServiceType(), "Service type cannot be empty");
     }
 }
