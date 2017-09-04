@@ -1070,6 +1070,8 @@ public class Editor {
     }
 
     private void startDragAndDrop() {
+        getSelectionActionModeHelper().onSelectionDrag();
+
         // TODO: Fix drag and drop in full screen extracted mode.
         if (mTextView.isInExtractedMode()) {
             return;
@@ -3947,7 +3949,7 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            getSelectionActionModeHelper().onSelectionAction();
+            getSelectionActionModeHelper().onSelectionAction(item.getItemId());
 
             if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;
