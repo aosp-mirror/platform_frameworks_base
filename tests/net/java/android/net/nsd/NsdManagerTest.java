@@ -28,6 +28,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
 
 import android.os.HandlerThread;
 import android.os.Handler;
@@ -38,6 +39,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.os.Message;
 import android.os.Messenger;
 import com.android.internal.util.AsyncChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +58,8 @@ public class NsdManagerTest {
     @Mock INsdManager mService;
     MockServiceHandler mServiceHandler;
 
+    NsdManager mManager;
+
     long mTimeoutMs = 100; // non-final so that tests can adjust the value.
 
     @Before
@@ -64,11 +68,23 @@ public class NsdManagerTest {
 
         mServiceHandler = spy(MockServiceHandler.create(mContext));
         when(mService.getMessenger()).thenReturn(new Messenger(mServiceHandler));
+
+        mManager = makeManager();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        waitForIdleHandler(mServiceHandler, mTimeoutMs);
+        mServiceHandler.chan.disconnect();
+        mServiceHandler.stop();
+        if (mManager != null) {
+            mManager.disconnect();
+        }
     }
 
     @Test
     public void testResolveService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo request = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo reply = new NsdServiceInfo("resolved_name", "resolved_type");
@@ -88,7 +104,7 @@ public class NsdManagerTest {
 
     @Test
     public void testParallelResolveService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo request = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo reply = new NsdServiceInfo("resolved_name", "resolved_type");
@@ -111,7 +127,7 @@ public class NsdManagerTest {
 
     @Test
     public void testRegisterService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo request1 = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo request2 = new NsdServiceInfo("another_name", "another_type");
@@ -170,7 +186,7 @@ public class NsdManagerTest {
 
     @Test
     public void testDiscoverService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo reply1 = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo reply2 = new NsdServiceInfo("another_name", "a_type");
@@ -248,7 +264,7 @@ public class NsdManagerTest {
 
     @Test
     public void testInvalidCalls() {
-        NsdManager manager = new NsdManager(mContext, mService);
+        NsdManager manager = mManager;
 
         NsdManager.RegistrationListener listener1 = mock(NsdManager.RegistrationListener.class);
         NsdManager.DiscoveryListener listener2 = mock(NsdManager.DiscoveryListener.class);
@@ -349,6 +365,10 @@ public class NsdManagerTest {
                 chan.connect(mContext, this, msg.replyTo);
                 chan.sendMessage(AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED);
             }
+        }
+
+        public void stop() {
+            getLooper().quitSafely();
         }
 
         public static MockServiceHandler create(Context context) {
