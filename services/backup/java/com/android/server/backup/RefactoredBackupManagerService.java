@@ -750,7 +750,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mRunBackupIntent = PendingIntent.getBroadcast(context, 0, backupIntent, 0);
 
         Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
-        backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        initIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mRunInitIntent = PendingIntent.getBroadcast(context, 0, initIntent, 0);
 
         // Set up the backup-request journaling
