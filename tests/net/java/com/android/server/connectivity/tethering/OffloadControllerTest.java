@@ -32,12 +32,13 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -436,6 +437,9 @@ public class OffloadControllerTest {
         ethernetStats.txBytes = 100000;
         when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(ethernetStats);
         offload.setUpstreamLinkProperties(null);
+        // Expect that we first clear the HAL's upstream parameters.
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(""), eq("0.0.0.0"), eq("0.0.0.0"), eq(null));
         // Expect that we fetch stats from the previous upstream.
         inOrder.verify(mHardware, times(1)).getForwardedStats(eq(ethernetIface));
 
@@ -445,8 +449,6 @@ public class OffloadControllerTest {
         waitForIdle();
         // There is no current upstream, so no stats are fetched.
         inOrder.verify(mHardware, never()).getForwardedStats(any());
-        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
-                eq(null), eq(null), eq(null), eq(null));
         inOrder.verifyNoMoreInteractions();
 
         assertEquals(2, stats.size());
@@ -619,6 +621,73 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, times(1)).removeDownstreamPrefix(RNDIS0, USB_PREFIX);
         inOrder.verify(mHardware, times(1)).removeDownstreamPrefix(RNDIS0, IPV6_DISCARD_PREFIX);
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testControlCallbackOnStoppedUnsupportedFetchesAllStats() throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        // Pretend to set a few different upstreams (only the interface name
+        // matters for this test; we're ignoring IP and route information).
+        final LinkProperties upstreamLp = new LinkProperties();
+        for (String ifname : new String[]{RMNET0, WLAN0, RMNET0}) {
+            upstreamLp.setInterfaceName(ifname);
+            offload.setUpstreamLinkProperties(upstreamLp);
+        }
+
+        // Clear invocation history, especially the getForwardedStats() calls
+        // that happen with setUpstreamParameters().
+        clearInvocations(mHardware);
+
+        OffloadHardwareInterface.ControlCallback callback = mControlCallbackCaptor.getValue();
+        callback.onStoppedUnsupported();
+
+        // Verify forwarded stats behaviour.
+        verify(mHardware, times(1)).getForwardedStats(eq(RMNET0));
+        verify(mHardware, times(1)).getForwardedStats(eq(WLAN0));
+        verifyNoMoreInteractions(mHardware);
+        verify(mNMService, times(1)).tetherLimitReached(mTetherStatsProviderCaptor.getValue());
+        verifyNoMoreInteractions(mNMService);
+    }
+
+    @Test
+    public void testControlCallbackOnSupportAvailableFetchesAllStatsAndPushesAllParameters()
+            throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        // Pretend to set a few different upstreams (only the interface name
+        // matters for this test; we're ignoring IP and route information).
+        final LinkProperties upstreamLp = new LinkProperties();
+        for (String ifname : new String[]{RMNET0, WLAN0, RMNET0}) {
+            upstreamLp.setInterfaceName(ifname);
+            offload.setUpstreamLinkProperties(upstreamLp);
+        }
+
+        // Clear invocation history, especially the getForwardedStats() calls
+        // that happen with setUpstreamParameters().
+        clearInvocations(mHardware);
+
+        OffloadHardwareInterface.ControlCallback callback = mControlCallbackCaptor.getValue();
+        callback.onSupportAvailable();
+
+        // Verify forwarded stats behaviour.
+        verify(mHardware, times(1)).getForwardedStats(eq(RMNET0));
+        verify(mHardware, times(1)).getForwardedStats(eq(WLAN0));
+        verify(mNMService, times(1)).tetherLimitReached(mTetherStatsProviderCaptor.getValue());
+        verifyNoMoreInteractions(mNMService);
+
+        // TODO: verify local prefixes and downstreams are also pushed to the HAL.
+        verify(mHardware, times(1)).setUpstreamParameters(eq(RMNET0), any(), any(), any());
+        verify(mHardware, times(1)).setDataLimit(eq(RMNET0), anyLong());
+        verifyNoMoreInteractions(mHardware);
     }
 
     private static void assertArrayListContains(ArrayList<String> list, String... elems) {
