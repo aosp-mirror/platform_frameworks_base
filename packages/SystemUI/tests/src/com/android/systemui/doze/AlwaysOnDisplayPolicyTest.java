@@ -61,9 +61,9 @@ public class AlwaysOnDisplayPolicyTest extends SysuiTestCase {
 
         AlwaysOnDisplayPolicy policy = new AlwaysOnDisplayPolicy(mContext);
 
-        assertThat(policy.proxScreenOffDelayMs).isEqualTo(10 * DateUtils.MINUTE_IN_MILLIS);
-        assertThat(policy.proxCooldownTriggerMs).isEqualTo(2 * DateUtils.MINUTE_IN_MILLIS);
-        assertThat(policy.proxCooldownPeriodMs).isEqualTo(5 * DateUtils.MINUTE_IN_MILLIS);
+        assertThat(policy.proxScreenOffDelayMs).isEqualTo(10 * DateUtils.SECOND_IN_MILLIS);
+        assertThat(policy.proxCooldownTriggerMs).isEqualTo(2 * DateUtils.SECOND_IN_MILLIS);
+        assertThat(policy.proxCooldownPeriodMs).isEqualTo(5 * DateUtils.SECOND_IN_MILLIS);
         assertThat(policy.screenBrightnessArray).isEqualTo(mContext.getResources().getIntArray(
                 R.array.config_doze_brightness_sensor_to_brightness));
         assertThat(policy.dimmingScrimArray).isEqualTo(mContext.getResources().getIntArray(
