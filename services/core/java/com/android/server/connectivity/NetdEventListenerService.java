@@ -25,6 +25,7 @@ import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.net.metrics.WakeupEvent;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -59,11 +60,22 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     private static final int CONNECT_LATENCY_FILL_RATE    = 15 * (int) DateUtils.SECOND_IN_MILLIS;
     private static final int CONNECT_LATENCY_MAXIMUM_RECORDS = 20000;
 
+    @VisibleForTesting
+    static final int WAKEUP_EVENT_BUFFER_LENGTH = 1024;
+
+    private static final String WAKEUP_EVENT_IFACE_PREFIX = "iface:";
+
     // Sparse arrays of DNS and connect events, grouped by net id.
     @GuardedBy("this")
     private final SparseArray<DnsEvent> mDnsEvents = new SparseArray<>();
     @GuardedBy("this")
     private final SparseArray<ConnectStats> mConnectEvents = new SparseArray<>();
+
+    // Ring buffer array for storing packet wake up events sent by Netd.
+    @GuardedBy("this")
+    private final WakeupEvent[] mWakeupEvents = new WakeupEvent[WAKEUP_EVENT_BUFFER_LENGTH];
+    @GuardedBy("this")
+    private long mWakeupEventCursor = 0;
 
     private final ConnectivityManager mCm;
 
@@ -137,6 +149,44 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     @Override
     public synchronized void onWakeupEvent(String prefix, int uid, int gid, long timestampNs) {
+        maybeVerboseLog("onWakeupEvent(%s, %d, %d, %sns)", prefix, uid, gid, timestampNs);
+
+        // TODO: add ip protocol and port
+
+        String iface = prefix.replaceFirst(WAKEUP_EVENT_IFACE_PREFIX, "");
+        long timestampMs = timestampNs / 1000000;
+        // FIXME: Netd timestampNs is always 0.
+        timestampMs = System.currentTimeMillis();
+
+        addWakupEvent(iface, timestampMs, uid);
+    }
+
+    @GuardedBy("this")
+    private void addWakupEvent(String iface, long timestampMs, int uid) {
+        int index = wakeupEventIndex(mWakeupEventCursor);
+        mWakeupEventCursor++;
+        WakeupEvent event = new WakeupEvent();
+        event.iface = iface;
+        event.timestampMs = timestampMs;
+        event.uid = uid;
+        mWakeupEvents[index] = event;
+    }
+
+    @GuardedBy("this")
+    private WakeupEvent[] getWakeupEvents() {
+        int length = (int) Math.min(mWakeupEventCursor, (long) mWakeupEvents.length);
+        WakeupEvent[] out = new WakeupEvent[length];
+        // Reverse iteration from youngest event to oldest event.
+        long inCursor = mWakeupEventCursor - 1;
+        int outIdx = out.length - 1;
+        while (outIdx >= 0) {
+            out[outIdx--] = mWakeupEvents[wakeupEventIndex(inCursor--)];
+        }
+        return out;
+    }
+
+    private static int wakeupEventIndex(long cursor) {
+        return (int) Math.abs(cursor % WAKEUP_EVENT_BUFFER_LENGTH);
     }
 
     public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
@@ -155,6 +205,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     public synchronized void list(PrintWriter pw) {
         listEvents(pw, mConnectEvents, (x) -> x);
         listEvents(pw, mDnsEvents, (x) -> x);
+        listWakeupEvents(pw, getWakeupEvents());
     }
 
     public synchronized void listAsProtos(PrintWriter pw) {
@@ -170,10 +221,16 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         in.clear();
     }
 
-    public static <T> void listEvents(
+    private static <T> void listEvents(
             PrintWriter pw, SparseArray<T> events, Function<T, Object> mapper) {
         for (int i = 0; i < events.size(); i++) {
             pw.println(mapper.apply(events.valueAt(i)).toString());
+        }
+    }
+
+    private static void listWakeupEvents(PrintWriter pw, WakeupEvent[] events) {
+        for (WakeupEvent wakeup : events) {
+            pw.println(wakeup);
         }
     }
 

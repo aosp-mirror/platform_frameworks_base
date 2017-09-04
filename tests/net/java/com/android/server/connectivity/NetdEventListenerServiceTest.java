@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
 import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -72,6 +73,52 @@ public class NetdEventListenerServiceTest {
         when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
 
         mNetdEventListenerService = new NetdEventListenerService(mCm);
+    }
+
+    @Test
+    public void testWakeupEventLogging() throws Exception {
+        final int BUFFER_LENGTH = NetdEventListenerService.WAKEUP_EVENT_BUFFER_LENGTH;
+
+        // Assert no events
+        String[] events1 = listNetdEvent();
+        assertEquals(new String[]{""}, events1);
+
+        long now = System.currentTimeMillis();
+        String prefix = "iface:wlan0";
+        int[] uids = { 10001, 10002, 10004, 1000, 10052, 10023, 10002, 10123, 10004 };
+        for (int uid : uids) {
+            mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, now);
+        }
+
+        String[] events2 = listNetdEvent();
+        assertEquals(uids.length, events2.length);
+        for (int i = 0; i < uids.length; i++) {
+            String got = events2[i];
+            assertContains(got, "wlan0");
+            assertContains(got, "uid: " + uids[i]);
+        }
+
+        int uid = 20000;
+        for (int i = 0; i < BUFFER_LENGTH * 2; i++) {
+            long ts = now + 10;
+            mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, ts);
+        }
+
+        // Assert there are BUFFER_LENGTH events all with uid 20000
+        String[] events3 = listNetdEvent();
+        assertEquals(BUFFER_LENGTH, events3.length);
+        for (String got : events3) {
+            assertContains(got, "wlan0");
+            assertContains(got, "uid: " + uid);
+        }
+
+        uid = 45678;
+        mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, now);
+
+        String[] events4 = listNetdEvent();
+        String lastEvent = events4[events4.length - 1];
+        assertContains(lastEvent, "wlan0");
+        assertContains(lastEvent, "uid: " + uid);
     }
 
     @Test
@@ -328,5 +375,16 @@ public class NetdEventListenerServiceTest {
                     Comparator.comparingInt((p) -> p.key));
         }
         return log.toString();
+    }
+
+    String[] listNetdEvent() throws Exception {
+        StringWriter buffer = new StringWriter();
+        PrintWriter writer = new PrintWriter(buffer);
+        mNetdEventListenerService.list(writer);
+        return buffer.toString().split("\\n");
+    }
+
+    static void assertContains(String got, String want) {
+        assertTrue(got + " did not contain \"" + want + "\"", got.contains(want));
     }
 }
