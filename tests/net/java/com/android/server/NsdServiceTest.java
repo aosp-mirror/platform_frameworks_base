@@ -95,6 +95,9 @@ public class NsdServiceTest {
         client2.disconnect();
 
         verify(mDaemon, timeout(mTimeoutMs).times(1)).stop();
+
+        client1.disconnect();
+        client2.disconnect();
     }
 
     @Test
@@ -131,6 +134,8 @@ public class NsdServiceTest {
 
         // checks that request are cleaned
         verifyDaemonCommands("stop-register 2", "stop-discover 3", "stop-resolve 4");
+
+        client.disconnect();
     }
 
     NsdService makeService() {
