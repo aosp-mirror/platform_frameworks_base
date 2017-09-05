@@ -456,6 +456,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static final int MAX_WAKELOCK_LOGS = 20;
     private final LocalLog mWakelockLogs = new LocalLog(MAX_WAKELOCK_LOGS);
+    private int mTotalWakelockAcquisitions = 0;
+    private int mTotalWakelockReleases = 0;
+    private long mTotalWakelockDurationMs = 0;
+    private long mMaxWakelockDurationMs = 0;
+    private long mLastWakeLockAcquireTimestamp = 0;
 
     // Array of <Network,ReadOnlyLocalLogs> tracking network validation and results
     private static final int MAX_VALIDATION_LOGS = 10;
@@ -1947,6 +1952,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println();
             pw.println("NetTransition WakeLock activity (most recent first):");
             pw.increaseIndent();
+            pw.println("total acquisitions: " + mTotalWakelockAcquisitions);
+            pw.println("total releases: " + mTotalWakelockReleases);
+            pw.println("cumulative duration: " + (mTotalWakelockDurationMs / 1000) + "s");
+            pw.println("longest duration: " + (mMaxWakelockDurationMs / 1000) + "s");
+            if (mTotalWakelockAcquisitions > mTotalWakelockReleases) {
+                long duration = SystemClock.elapsedRealtime() - mLastWakeLockAcquireTimestamp;
+                pw.println("currently holding WakeLock for: " + (duration / 1000) + "s");
+            }
             mWakelockLogs.reverseDump(fd, pw, args);
             pw.decreaseIndent();
         }
@@ -3014,6 +3027,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return;
             }
             mNetTransitionWakeLock.acquire();
+            mLastWakeLockAcquireTimestamp = SystemClock.elapsedRealtime();
+            mTotalWakelockAcquisitions++;
         }
         mWakelockLogs.log("ACQUIRE for " + forWhom);
         Message msg = mHandler.obtainMessage(EVENT_EXPIRE_NET_TRANSITION_WAKELOCK);
@@ -3046,6 +3061,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return;
             }
             mNetTransitionWakeLock.release();
+            long lockDuration = SystemClock.elapsedRealtime() - mLastWakeLockAcquireTimestamp;
+            mTotalWakelockDurationMs += lockDuration;
+            mMaxWakelockDurationMs = Math.max(mMaxWakelockDurationMs, lockDuration);
+            mTotalWakelockReleases++;
         }
         mWakelockLogs.log(String.format("RELEASE (%s)", event));
     }
