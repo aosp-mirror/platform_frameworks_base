@@ -190,6 +190,14 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
+    public void testRoamingNoService_DoesNotCrash() {
+        setupDefaultSignal();
+        setCdma();
+        mServiceState = null;
+        updateServiceState();
+    }
+
+    @Test
     public void testQsSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
