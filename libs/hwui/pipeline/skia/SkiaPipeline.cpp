@@ -83,7 +83,8 @@ void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry
 
 void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
         bool opaque, bool wideColorGamut) {
-    // TODO: Handle wide color gamut
+    sk_sp<GrContext> cachedContext;
+
     // Render all layers that need to be updated, in order.
     for (size_t i = 0; i < layers.entries().size(); i++) {
         RenderNode* layerNode = layers.entries()[i].renderNode.get();
@@ -126,9 +127,22 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
             RenderNodeDrawable root(layerNode, layerCanvas, false);
             root.forceDraw(layerCanvas);
             layerCanvas->restoreToCount(saveCount);
-            layerCanvas->flush();
             mLightCenter = savedLightCenter;
+
+            // cache the current context so that we can defer flushing it until
+            // either all the layers have been rendered or the context changes
+            GrContext* currentContext = layerCanvas->getGrContext();
+            if (cachedContext.get() != currentContext) {
+                if (cachedContext.get()) {
+                    cachedContext->flush();
+                }
+                cachedContext.reset(SkSafeRef(currentContext));
+            }
         }
+    }
+
+    if (cachedContext.get()) {
+        cachedContext->flush();
     }
 }
 
