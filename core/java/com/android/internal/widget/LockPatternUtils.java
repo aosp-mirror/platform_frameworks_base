@@ -303,7 +303,7 @@ public class LockPatternUtils {
     }
 
     public void reportFailedPasswordAttempt(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled()) {
+        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return;
         }
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
@@ -311,7 +311,7 @@ public class LockPatternUtils {
     }
 
     public void reportSuccessfulPasswordAttempt(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled()) {
+        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return;
         }
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(userId);
@@ -319,21 +319,21 @@ public class LockPatternUtils {
     }
 
     public void reportPasswordLockout(int timeoutMs, int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled()) {
+        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return;
         }
         getTrustManager().reportUnlockLockout(timeoutMs, userId);
     }
 
     public int getCurrentFailedPasswordAttempts(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled()) {
+        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return 0;
         }
         return getDevicePolicyManager().getCurrentFailedPasswordAttempts(userId);
     }
 
     public int getMaximumFailedPasswordsForWipe(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled()) {
+        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return 0;
         }
         return getDevicePolicyManager().getMaximumFailedPasswordsForWipe(
@@ -1768,11 +1768,12 @@ public class LockPatternUtils {
         return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
     }
 
-    public static boolean userOwnsFrpCredential(UserInfo info) {
-        return info != null && info.isPrimary() && info.isAdmin() && frpCredentialEnabled();
+    public static boolean userOwnsFrpCredential(Context context, UserInfo info) {
+        return info != null && info.isPrimary() && info.isAdmin() && frpCredentialEnabled(context);
     }
 
-    public static boolean frpCredentialEnabled() {
-        return FRP_CREDENTIAL_ENABLED;
+    public static boolean frpCredentialEnabled(Context context) {
+        return FRP_CREDENTIAL_ENABLED && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableCredentialFactoryResetProtection);
     }
 }

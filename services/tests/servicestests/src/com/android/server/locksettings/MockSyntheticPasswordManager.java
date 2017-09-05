@@ -15,6 +15,7 @@
  */
 package com.android.server.locksettings;
 
+import android.content.Context;
 import android.hardware.weaver.V1_0.IWeaver;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -35,9 +36,9 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
     private FakeGateKeeperService mGateKeeper;
     private IWeaver mWeaverService;
 
-    public MockSyntheticPasswordManager(LockSettingsStorage storage,
+    public MockSyntheticPasswordManager(Context context, LockSettingsStorage storage,
             FakeGateKeeperService gatekeeper, UserManager userManager) {
-        super(storage, userManager);
+        super(context, storage, userManager);
         mGateKeeper = gatekeeper;
     }
 
