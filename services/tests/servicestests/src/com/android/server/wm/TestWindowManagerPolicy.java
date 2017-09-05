@@ -568,11 +568,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean canMagnifyWindow(int windowType) {
-        return false;
-    }
-
-    @Override
     public boolean isTopLevelWindow(int windowType) {
         return false;
     }

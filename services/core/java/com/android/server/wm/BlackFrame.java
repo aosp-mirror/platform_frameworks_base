@@ -30,7 +30,6 @@ import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 
 /**
  * Four black surfaces put together to make a black frame.
@@ -42,22 +41,22 @@ public class BlackFrame {
         final int layer;
         final SurfaceControl surface;
 
-        BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b, int layerStack)
-                throws OutOfResourcesException {
+        BlackSurface(int layer,
+                int l, int t, int r, int b, DisplayContent dc) throws OutOfResourcesException {
             left = l;
             top = t;
             this.layer = layer;
             int w = r-l;
             int h = b-t;
 
-            surface = new SurfaceControl.Builder(session)
+            surface = dc.makeOverlay()
                     .setName("BlackSurface")
                     .setSize(w, h)
                     .setColorLayer(true)
+                    .setParent(null) // TODO: Work-around for b/69259549
                     .build();
 
             surface.setAlpha(1);
-            surface.setLayerStack(layerStack);
             surface.setLayer(layer);
             surface.show();
             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
@@ -114,30 +113,32 @@ public class BlackFrame {
         }
     }
 
-    public BlackFrame(SurfaceSession session, Rect outer, Rect inner, int layer, int layerStack,
+    public BlackFrame(Rect outer, Rect inner, int layer, DisplayContent dc,
             boolean forceDefaultOrientation) throws OutOfResourcesException {
         boolean success = false;
 
         mForceDefaultOrientation = forceDefaultOrientation;
 
+        // TODO: Why do we use 4 surfaces instead of just one big one behind the screenshot?
+        // b/68253229
         mOuterRect = new Rect(outer);
         mInnerRect = new Rect(inner);
         try {
             if (outer.top < inner.top) {
-                mBlackSurfaces[0] = new BlackSurface(session, layer,
-                        outer.left, outer.top, inner.right, inner.top, layerStack);
+                mBlackSurfaces[0] = new BlackSurface(layer,
+                        outer.left, outer.top, inner.right, inner.top, dc);
             }
             if (outer.left < inner.left) {
-                mBlackSurfaces[1] = new BlackSurface(session, layer,
-                        outer.left, inner.top, inner.left, outer.bottom, layerStack);
+                mBlackSurfaces[1] = new BlackSurface(layer,
+                        outer.left, inner.top, inner.left, outer.bottom, dc);
             }
             if (outer.bottom > inner.bottom) {
-                mBlackSurfaces[2] = new BlackSurface(session, layer,
-                        inner.left, inner.bottom, outer.right, outer.bottom, layerStack);
+                mBlackSurfaces[2] = new BlackSurface(layer,
+                        inner.left, inner.bottom, outer.right, outer.bottom, dc);
             }
             if (outer.right > inner.right) {
-                mBlackSurfaces[3] = new BlackSurface(session, layer,
-                        inner.right, outer.top, outer.right, inner.bottom, layerStack);
+                mBlackSurfaces[3] = new BlackSurface(layer,
+                        inner.right, outer.top, outer.right, inner.bottom, dc);
             }
             success = true;
         } finally {

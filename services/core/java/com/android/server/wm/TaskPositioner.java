@@ -243,7 +243,9 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     /**
      * @param display The Display that the window being dragged is on.
      */
-    void register(Display display) {
+    void register(DisplayContent displayContent) {
+        final Display display = displayContent.getDisplay();
+
         if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "Registering task positioner");
         }
@@ -305,7 +307,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
         mService.pauseRotationLocked();
 
-        mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId(), TAG_LOCAL);
+        mDimLayer = new DimLayer(mService, this, displayContent, TAG_LOCAL);
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);

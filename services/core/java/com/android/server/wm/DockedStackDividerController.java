@@ -146,7 +146,7 @@ public class DockedStackDividerController implements DimLayerUser {
         mService = service;
         mDisplayContent = displayContent;
         final Context context = service.mContext;
-        mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId(),
+        mDimLayer = new DimLayer(displayContent.mService, this, displayContent,
                 "DockedStackDim");
         mMinimizedDockInterpolator = AnimationUtils.loadInterpolator(
                 context, android.R.interpolator.fast_out_slow_in);

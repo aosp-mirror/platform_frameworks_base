@@ -66,7 +66,7 @@ public class TaskPositionerTests extends WindowTestsBase {
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
 
         mPositioner = new TaskPositioner(sWm);
-        mPositioner.register(display);
+        mPositioner.register(mDisplayContent);
     }
 
     /**

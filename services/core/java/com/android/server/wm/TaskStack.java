@@ -700,7 +700,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         mDisplayContent = dc;
-        mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId(),
+        mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent,
                 "animation background stackId=" + mStackId);
         updateBoundsForWindowModeChange();
         super.onDisplayChanged(dc);
@@ -914,6 +914,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     @Override
     void onParentSet() {
+        super.onParentSet();
+
         if (getParent() != null || mDisplayContent == null) {
             return;
         }

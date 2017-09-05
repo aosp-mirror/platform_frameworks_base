@@ -67,8 +67,7 @@ public class DimLayer {
 
     private boolean mDestroyed = false;
 
-    private final int mDisplayId;
-
+    private final DisplayContent mDisplayContent;
 
     /** Interface implemented by users of the dim layer */
     interface DimLayerUser {
@@ -93,18 +92,18 @@ public class DimLayer {
 
     private final String mName;
 
-    DimLayer(WindowManagerService service, DimLayerUser user, int displayId, String name) {
+    DimLayer(WindowManagerService service, DimLayerUser user, DisplayContent dc, String name) {
         mUser = user;
-        mDisplayId = displayId;
+        mDisplayContent = dc;
         mService = service;
         mName = name;
-        if (DEBUG_DIM_LAYER) Slog.v(TAG, "Ctor: displayId=" + displayId);
+        if (DEBUG_DIM_LAYER) Slog.v(TAG, "Ctor: dc=" + dc);
     }
 
     private void constructSurface(WindowManagerService service) {
         service.openSurfaceTransaction();
         try {
-            mDimSurface = new SurfaceControl.Builder(service.mFxSession)
+            mDimSurface = mDisplayContent.makeSurface()
                     .setName(mName)
                     .setSize(16, 16)
                     .setColorLayer(true)
@@ -112,7 +111,6 @@ public class DimLayer {
 
             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                     "  DIM " + mDimSurface + ": CREATE");
-            mDimSurface.setLayerStack(mDisplayId);
             adjustBounds();
             adjustAlpha(mAlpha);
             adjustLayer(mLayer);

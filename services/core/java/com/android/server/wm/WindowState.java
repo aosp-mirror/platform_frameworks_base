@@ -23,6 +23,7 @@ import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
+import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
@@ -41,6 +42,7 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
@@ -54,6 +56,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
@@ -147,6 +152,8 @@ import android.view.IWindowId;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
@@ -4387,5 +4394,65 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             return false;
         }
+    }
+
+    @Override
+    boolean shouldMagnify() {
+        if (mAttrs.type == TYPE_INPUT_METHOD ||
+                mAttrs.type == TYPE_INPUT_METHOD_DIALOG) {
+            return false;
+        } else if (isScreenOverlay()) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    boolean isScreenOverlay() {
+        // It's tempting to wonder: Have we forgotten the rounded corners overlay?
+        // worry not: it's a fake TYPE_NAVIGATION_BAR.
+        if (mAttrs.type == TYPE_MAGNIFICATION_OVERLAY ||
+                mAttrs.type == TYPE_NAVIGATION_BAR ||
+                mAttrs.type == TYPE_STATUS_BAR) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    SurfaceSession getSession() {
+        if (mSession.mSurfaceSession != null) {
+            return mSession.mSurfaceSession;
+        } else {
+            return getParent().getSession();
+        }
+    }
+
+    @Override
+    boolean needsZBoost() {
+        return getAnimLayerAdjustment() > 0 || mWillReplaceWindow;
+    }
+
+    @Override
+    SurfaceControl.Builder makeSurface() {
+        return mToken.makeChildSurface(this);
+    }
+
+    @Override
+    void prepareSurfaces() {
+        mWinAnimator.prepareSurfaceLocked(true);
+        super.prepareSurfaces();
+    }
+
+    @Override
+    void assignLayer(Transaction t, int layer) {
+        // See comment in assignRelativeLayerForImeTargetChild
+        if (!isChildWindow()
+                || (mService.mInputMethodTarget != getParentWindow())
+                || !inSplitScreenWindowingMode()) {
+            super.assignLayer(t, layer);
+            return;
+        }
+        getDisplayContent().assignRelativeLayerForImeTargetChild(t, this);
     }
 }

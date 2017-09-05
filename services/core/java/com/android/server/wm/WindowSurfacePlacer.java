@@ -704,7 +704,7 @@ class WindowSurfacePlacer {
 
             // Create a new surface for the thumbnail
             WindowState window = appToken.findMainWindow();
-            final SurfaceControl surfaceControl = new SurfaceControl.Builder(mService.mFxSession)
+            final SurfaceControl surfaceControl = appToken.makeSurface()
                     .setName("thumbnail anim")
                     .setSize(dirty.width(), dirty.height())
                     .setFormat(PixelFormat.TRANSLUCENT)
@@ -712,7 +712,6 @@ class WindowSurfacePlacer {
                             window != null ? window.mOwnerUid : Binder.getCallingUid())
                     .build();
 
-            surfaceControl.setLayerStack(display.getLayerStack());
             if (SHOW_TRANSACTIONS) {
                 Slog.i(TAG, "  THUMBNAIL " + surfaceControl + ": CREATE");
             }
@@ -750,10 +749,13 @@ class WindowSurfacePlacer {
             anim.restrictDuration(MAX_ANIMATION_DURATION);
             anim.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
 
-            openingAppAnimator.updateThumbnailLayer();
             openingAppAnimator.thumbnail = surfaceControl;
             openingAppAnimator.thumbnailAnimation = anim;
             mService.mAppTransition.getNextAppTransitionStartRect(taskId, mTmpStartRect);
+
+            // We parent the thumbnail to the app token, and just place it
+            // on top of anything else in the app token.
+            surfaceControl.setLayer(Integer.MAX_VALUE);
         } catch (Surface.OutOfResourcesException e) {
             Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w="
                     + dirty.width() + " h=" + dirty.height(), e);

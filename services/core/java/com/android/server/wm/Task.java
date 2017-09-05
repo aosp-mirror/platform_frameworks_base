@@ -237,6 +237,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @Override
     void onParentSet() {
+        super.onParentSet();
+
         // Update task bounds if needed.
         updateDisplayInfo(getDisplayContent());
 

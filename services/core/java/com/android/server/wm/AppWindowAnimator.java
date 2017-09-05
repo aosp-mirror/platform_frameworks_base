@@ -253,7 +253,6 @@ public class AppWindowAnimator {
 
     private void updateLayers() {
         mAppToken.getDisplayContent().assignWindowLayers(false /* relayoutNeeded */);
-        updateThumbnailLayer();
     }
 
     private void stepThumbnailAnimation(long currentTime) {
@@ -283,24 +282,9 @@ public class AppWindowAnimator {
                 + "][" + tmpFloats[Matrix.MSKEW_X]
                 + "," + tmpFloats[Matrix.MSCALE_Y] + "]");
         thumbnail.setAlpha(thumbnailTransformation.getAlpha());
-        updateThumbnailLayer();
         thumbnail.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
                 tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
         thumbnail.setWindowCrop(thumbnailTransformation.getClipRect());
-    }
-
-    /**
-     * Updates the thumbnail layer z order to just above the highest animation layer if changed
-     */
-    void updateThumbnailLayer() {
-        if (thumbnail != null) {
-            final int layer = mAppToken.getHighestAnimLayer();
-            if (DEBUG_LAYERS) Slog.v(TAG,
-                    "Setting thumbnail layer " + mAppToken + ": layer=" + layer);
-            thumbnail.setLayer(layer + WindowManagerService.WINDOW_LAYER_MULTIPLIER
-                    - WindowManagerService.LAYER_OFFSET_THUMBNAIL);
-            mThumbnailLayer = layer;
-        }
     }
 
     /**

@@ -54,7 +54,6 @@ class DimLayerController {
         final boolean previousFullscreen = state.dimLayer != null
                 && state.dimLayer == mSharedFullScreenDimLayer;
         DimLayer newDimLayer;
-        final int displayId = mDisplayContent.getDisplayId();
         if (dimLayerUser.dimFullscreen()) {
             if (previousFullscreen && mSharedFullScreenDimLayer != null) {
                 // Update the bounds for fullscreen in case of rotation.
@@ -69,8 +68,8 @@ class DimLayerController {
                     newDimLayer = state.dimLayer;
                 } else {
                     // Create new full screen dim layer.
-                    newDimLayer = new DimLayer(mDisplayContent.mService, dimLayerUser, displayId,
-                            getDimLayerTag(dimLayerUser));
+                    newDimLayer = new DimLayer(mDisplayContent.mService, dimLayerUser,
+                            mDisplayContent, getDimLayerTag(dimLayerUser));
                 }
                 dimLayerUser.getDimBounds(mTmpBounds);
                 newDimLayer.setBounds(mTmpBounds);
@@ -80,7 +79,7 @@ class DimLayerController {
             }
         } else {
             newDimLayer = (state.dimLayer == null || previousFullscreen)
-                    ? new DimLayer(mDisplayContent.mService, dimLayerUser, displayId,
+                    ? new DimLayer(mDisplayContent.mService, dimLayerUser, mDisplayContent,
                             getDimLayerTag(dimLayerUser))
                     : state.dimLayer;
             dimLayerUser.getDimBounds(mTmpBounds);

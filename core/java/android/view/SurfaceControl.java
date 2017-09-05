@@ -61,6 +61,8 @@ public class SurfaceControl {
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
     private static native void nativeApplyTransaction(long transactionObj, boolean sync);
+    private static native void nativeMergeTransaction(long transactionObj,
+            long otherTransactionObj);
     private static native void nativeSetAnimationTransaction(long transactionObj);
 
     private static native void nativeSetLayer(long transactionObj, long nativeObject, int zorder);
@@ -651,6 +653,19 @@ public class SurfaceControl {
                 return;
             }
             sGlobalTransaction.apply(sync);
+        }
+    }
+
+    /**
+     * Merge the supplied transaction in to the deprecated "global" transaction.
+     * This clears the supplied transaction in an identical fashion to {@link Transaction#merge}.
+     * <p>
+     * This is a utility for interop with legacy-code and will go away with the Global Transaction.
+     */
+    @Deprecated
+    public static void mergeToGlobalTransaction(Transaction t) {
+        synchronized(sGlobalTransaction) {
+            sGlobalTransaction.merge(t);
         }
     }
 
@@ -1368,7 +1383,7 @@ public class SurfaceControl {
          * Sets the security of the surface.  Setting the flag is equivalent to creating the
          * Surface with the {@link #SECURE} flag.
          */
-        Transaction setSecure(SurfaceControl sc, boolean isSecure) {
+        public Transaction setSecure(SurfaceControl sc, boolean isSecure) {
             sc.checkNotReleased();
             if (isSecure) {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, SECURE, SECURE);
@@ -1447,6 +1462,15 @@ public class SurfaceControl {
         /** flag the transaction as an animation */
         public Transaction setAnimationTransaction() {
             nativeSetAnimationTransaction(mNativeObject);
+            return this;
+        }
+
+        /**
+         * Merge the other transaction into this transaction, clearing the
+         * other transaction as if it had been applied.
+         */
+        public Transaction merge(Transaction other) {
+            nativeMergeTransaction(mNativeObject, other.mNativeObject);
             return this;
         }
     }

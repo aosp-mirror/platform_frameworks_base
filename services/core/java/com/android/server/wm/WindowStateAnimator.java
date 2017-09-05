@@ -60,7 +60,6 @@ import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.MagnificationSpec;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -559,7 +558,10 @@ class WindowStateAnimator {
         }
         if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", false);
         if (mSurfaceController != null) {
-            mSurfaceController.setLayer(mAnimLayer + 1);
+            // Our SurfaceControl is always at layer 0 within the parent Surface managed by
+            // window-state. We want this old Surface to stay on top of the new one
+            // until we do the swap, so we place it at layer 1.
+            mSurfaceController.mSurfaceControl.setLayer(1);
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
@@ -730,7 +732,6 @@ class WindowStateAnimator {
         try {
             mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, false);
             mSurfaceController.setLayerStackInTransaction(getLayerStack());
-            mSurfaceController.setLayer(mAnimLayer);
         } finally {
             mService.closeSurfaceTransaction("createSurfaceLocked");
         }
@@ -867,22 +868,6 @@ class WindowStateAnimator {
         mPendingDestroySurface = null;
     }
 
-    void applyMagnificationSpec(MagnificationSpec spec, Matrix transform) {
-        final int surfaceInsetLeft = mWin.mAttrs.surfaceInsets.left;
-        final int surfaceInsetTop = mWin.mAttrs.surfaceInsets.top;
-
-        if (spec != null && !spec.isNop()) {
-            float scale = spec.scale;
-            transform.postScale(scale, scale);
-            transform.postTranslate(spec.offsetX, spec.offsetY);
-
-            // As we are scaling the whole surface, to keep the content
-            // in the same position we will also have to scale the surfaceInsets.
-            transform.postTranslate(-(surfaceInsetLeft*scale - surfaceInsetLeft),
-                    -(surfaceInsetTop*scale - surfaceInsetTop));
-        }
-    }
-
     void computeShownFrameLocked() {
         final boolean selfTransformation = mHasLocalTransformation;
         Transformation attachedTransformation =
@@ -969,11 +954,6 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
 
-            MagnificationSpec spec = getMagnificationSpec();
-            if (spec != null) {
-                applyMagnificationSpec(spec, tmpMatrix);
-            }
-
             // "convert" it into SurfaceFlinger's format
             // (a 2x2 matrix + an offset)
             // Here we must not transform the position of the surface
@@ -1057,49 +1037,16 @@ class WindowStateAnimator {
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
-        MagnificationSpec spec = getMagnificationSpec();
-        if (spec != null) {
-            final Rect frame = mWin.mFrame;
-            final float tmpFloats[] = mService.mTmpFloats;
-            final Matrix tmpMatrix = mWin.mTmpMatrix;
-
-            tmpMatrix.setScale(mWin.mGlobalScale, mWin.mGlobalScale);
-            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
-
-            applyMagnificationSpec(spec, tmpMatrix);
-
-            tmpMatrix.getValues(tmpFloats);
-
-            mHaveMatrix = true;
-            mDsDx = tmpFloats[Matrix.MSCALE_X];
-            mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDtDy = tmpFloats[Matrix.MSKEW_X];
-            mDsDy = tmpFloats[Matrix.MSCALE_Y];
-            float x = tmpFloats[Matrix.MTRANS_X];
-            float y = tmpFloats[Matrix.MTRANS_Y];
-            mWin.mShownPosition.set(Math.round(x), Math.round(y));
-
-            mShownAlpha = mAlpha;
-        } else {
-            mWin.mShownPosition.set(mWin.mFrame.left, mWin.mFrame.top);
-            if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
-                mWin.mShownPosition.offset(mWin.mXOffset, mWin.mYOffset);
-            }
-            mShownAlpha = mAlpha;
-            mHaveMatrix = false;
-            mDsDx = mWin.mGlobalScale;
-            mDtDx = 0;
-            mDtDy = 0;
-            mDsDy = mWin.mGlobalScale;
+        mWin.mShownPosition.set(mWin.mFrame.left, mWin.mFrame.top);
+        if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
+            mWin.mShownPosition.offset(mWin.mXOffset, mWin.mYOffset);
         }
-    }
-
-    private MagnificationSpec getMagnificationSpec() {
-        //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && mWin.getDisplayId() == DEFAULT_DISPLAY) {
-            return mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
-        }
-        return null;
+        mShownAlpha = mAlpha;
+        mHaveMatrix = false;
+        mDsDx = mWin.mGlobalScale;
+        mDtDx = 0;
+        mDtDy = 0;
+        mDsDy = mWin.mGlobalScale;
     }
 
     /**
@@ -1138,26 +1085,6 @@ class WindowStateAnimator {
 
         if (stack.getWindowConfiguration().tasksAreFloating()) {
             w.expandForSurfaceInsets(finalClipRect);
-        }
-
-        // We may be applying a magnification spec to all windows,
-        // simulating a transformation in screen space, in which case
-        // we need to transform all other screen space values...including
-        // the final crop. This is kind of messed up and we should look
-        // in to actually transforming screen-space via a parent-layer.
-        // b/38322835
-        MagnificationSpec spec = getMagnificationSpec();
-        if (spec != null && !spec.isNop()) {
-            Matrix transform = mWin.mTmpMatrix;
-            RectF finalCrop = mService.mTmpRectF;
-            transform.reset();
-            transform.postScale(spec.scale, spec.scale);
-            transform.postTranslate(-spec.offsetX, -spec.offsetY);
-            transform.mapRect(finalCrop);
-            finalClipRect.top = (int) finalCrop.top;
-            finalClipRect.left = (int) finalCrop.left;
-            finalClipRect.right = (int) finalCrop.right;
-            finalClipRect.bottom = (int) finalCrop.bottom;
         }
 
         return true;
@@ -1615,7 +1542,6 @@ class WindowStateAnimator {
                         mDtDy * w.mHScale * mExtraHScale,
                         mDsDy * w.mVScale * mExtraVScale,
                         recoveringMemory);
-            mSurfaceController.setLayer(mAnimLayer);
 
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
