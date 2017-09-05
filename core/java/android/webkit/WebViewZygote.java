@@ -28,7 +28,6 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +47,8 @@ public class WebViewZygote {
     private static final Object sLock = new Object();
 
     /**
-     * Instance that maintains the socket connection to the zygote. This is null if the zygote
-     * is not running or is not connected.
+     * Instance that maintains the socket connection to the zygote. This is {@code null} if the
+     * zygote is not running or is not connected.
      */
     @GuardedBy("sLock")
     private static ZygoteProcess sZygote;
@@ -75,7 +74,7 @@ public class WebViewZygote {
     private static String sPackageCacheKey;
 
     /**
-     * Flag for whether multi-process WebView is enabled. If this is false, the zygote
+     * Flag for whether multi-process WebView is enabled. If this is {@code false}, the zygote
      * will not be started.
      */
     @GuardedBy("sLock")

@@ -47,7 +47,7 @@ public final class UrlInterceptRegistry {
     /**
      * set the flag to control whether url intercept is enabled or disabled
      * 
-     * @param disabled true to disable the cache
+     * @param disabled {@code true} to disable the cache
      *
      * @hide
      * @deprecated This class was intended to be used by Gears. Since Gears was
@@ -77,7 +77,7 @@ public final class UrlInterceptRegistry {
      * before any that were previously registered.
      *
      * @param handler The new UrlInterceptHandler object
-     * @return true if the handler was not previously registered.
+     * @return {@code true} if the handler was not previously registered.
      *
      * @hide
      * @deprecated This class was intended to be used by Gears. Since Gears was
@@ -98,7 +98,7 @@ public final class UrlInterceptRegistry {
      * Unregister a previously registered UrlInterceptHandler.
      *
      * @param handler A previously registered UrlInterceptHandler.
-     * @return true if the handler was found and removed from the list.
+     * @return {@code true} if the handler was found and removed from the list.
      *
      * @hide
      * @deprecated This class was intended to be used by Gears. Since Gears was
@@ -112,7 +112,7 @@ public final class UrlInterceptRegistry {
 
     /**
      * Given an url, returns the CacheResult of the first
-     * UrlInterceptHandler interested, or null if none are.
+     * UrlInterceptHandler interested, or {@code null} if none are.
      *
      * @return A CacheResult containing surrogate content.
      *
@@ -139,7 +139,7 @@ public final class UrlInterceptRegistry {
 
     /**
      * Given an url, returns the PluginData of the first
-     * UrlInterceptHandler interested, or null if none are or if
+     * UrlInterceptHandler interested, or {@code null} if none are or if
      * intercepts are disabled.
      *
      * @return A PluginData instance containing surrogate content.

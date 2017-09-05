@@ -69,7 +69,7 @@ public class UserPackage {
     }
 
     /**
-     * Return true if the package is installed and not hidden
+     * Return {@code true} if the package is installed and not hidden
      */
     public boolean isInstalledPackage() {
         if (mPackageInfo == null) return false;

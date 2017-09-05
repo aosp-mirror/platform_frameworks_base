@@ -109,8 +109,8 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
 
     /*
      * Move the highlight to the next match.
-     * @param next If true, find the next match further down in the document.
-     *             If false, find the previous match, up in the document.
+     * @param next If {@code true}, find the next match further down in the document.
+     *             If {@code false}, find the previous match, up in the document.
      */
     private void findNext(boolean next) {
         if (mWebView == null) {

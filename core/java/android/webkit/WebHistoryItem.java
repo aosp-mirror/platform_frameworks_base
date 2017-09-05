@@ -65,8 +65,8 @@ public abstract class WebHistoryItem implements Cloneable {
     public abstract String getTitle();
 
     /**
-     * Return the favicon of this history item or null if no favicon was found.
-     * @return A Bitmap containing the favicon for this history item or null.
+     * Return the favicon of this history item or {@code null} if no favicon was found.
+     * @return A Bitmap containing the favicon for this history item or {@code null}.
      * Note: The VM ensures 32-bit atomic read/write operations so we don't have
      * to synchronize this method.
      */

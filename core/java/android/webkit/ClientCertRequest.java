@@ -42,13 +42,13 @@ public abstract class ClientCertRequest {
     public ClientCertRequest() { }
 
     /**
-     * Returns the acceptable types of asymmetric keys (can be null).
+     * Returns the acceptable types of asymmetric keys (can be {@code null}).
      */
     public abstract String[] getKeyTypes();
 
     /**
      * Returns the acceptable certificate issuers for the certificate
-     *            matching the private key (can be null).
+     *            matching the private key (can be {@code null}).
      */
     public abstract Principal[] getPrincipals();
 

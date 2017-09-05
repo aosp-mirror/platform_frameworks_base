@@ -25,7 +25,7 @@ import java.io.Serializable;
  */
 public abstract class WebBackForwardList implements Cloneable, Serializable {
     /**
-     * Return the current history item. This method returns null if the list is
+     * Return the current history item. This method returns {@code null} if the list is
      * empty.
      * @return The current history item.
      */

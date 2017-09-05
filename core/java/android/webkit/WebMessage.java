@@ -53,7 +53,7 @@ public class WebMessage {
     }
 
     /**
-     * Returns the ports that are sent with the message, or null if no port
+     * Returns the ports that are sent with the message, or {@code null} if no port
      * is sent.
      */
     public WebMessagePort[] getPorts() {
