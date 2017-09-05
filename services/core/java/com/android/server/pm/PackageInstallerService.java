@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -45,6 +46,7 @@ import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -724,6 +726,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
         } else {
+            ApplicationInfo appInfo = mPm.getApplicationInfo(callerPackageName, 0, userId);
+            if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
+                mContext.enforceCallingOrSelfPermission(Manifest.permission.REQUEST_DELETE_PACKAGES,
+                        null);
+            }
+
             // Take a short detour to confirm with user
             final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
             intent.setData(Uri.fromParts("package", versionedPackage.getPackageName(), null));

@@ -2776,8 +2776,9 @@
         android:protectionLevel="signature|appop" />
 
     <!-- Allows an application to request deleting packages. Apps
-         targeting APIs greater than 25 must hold this permission in
-         order to use {@link android.content.Intent#ACTION_UNINSTALL_PACKAGE}.
+         targeting APIs {@link android.os.Build.VERSION_CODES#P} or greater must hold this
+         permission in order to use {@link android.content.Intent#ACTION_UNINSTALL_PACKAGE} or
+         {@link android.content.pm.PackageInstaller#uninstall}.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_DELETE_PACKAGES"
