@@ -211,6 +211,10 @@ public class PipMenuActivityController {
         EventBus.getDefault().register(this);
     }
 
+    public boolean isMenuActivityVisible() {
+        return mToActivityMessenger != null;
+    }
+
     public void onActivityPinned() {
         if (mMenuState == MENU_STATE_NONE) {
             // If the menu is not visible, then re-register the input consumer if it is not already
