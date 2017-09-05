@@ -228,6 +228,7 @@ public final class PlaybackActivityMonitor
                         "releasing player piid:" + piid));
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
+                apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
             }
         }
     }
