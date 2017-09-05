@@ -953,7 +953,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": different user");
                 continue;
             }
-            final ActivityRecord r = task.getTopActivity();
+
+            // Overlays should not be considered as the task's logical top activity.
+            final ActivityRecord r = task.getTopActivity(false /* includeOverlays */);
             if (r == null || r.finishing || r.userId != userId ||
                     r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch root " + r);
