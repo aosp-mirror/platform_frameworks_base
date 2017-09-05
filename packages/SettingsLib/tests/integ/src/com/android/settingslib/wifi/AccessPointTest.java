@@ -417,56 +417,6 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testSpeedLabel_isDerivedFromConnectedBssidWhenScoreAvailable() {
-        int rssi = -55;
-        String bssid = "00:00:00:00:00:00";
-        int networkId = 123;
-
-        WifiInfo info = new WifiInfo();
-        info.setRssi(rssi);
-        info.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
-        info.setBSSID(bssid);
-        info.setNetworkId(networkId);
-
-        ArrayList<ScanResult> scanResults = new ArrayList<>();
-        ScanResult scanResultUnconnected = createScanResult(TEST_SSID, "11:11:11:11:11:11", rssi);
-        scanResults.add(scanResultUnconnected);
-
-        ScanResult scanResultConnected = createScanResult(TEST_SSID, bssid, rssi);
-        scanResults.add(scanResultConnected);
-
-        AccessPoint ap =
-                new TestAccessPointBuilder(mContext)
-                        .setActive(true)
-                        .setNetworkId(networkId)
-                        .setSsid(TEST_SSID)
-                        .setScanResultCache(scanResults)
-                        .setWifiInfo(info)
-                        .build();
-
-        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultUnconnected))
-                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) Speed.SLOW);
-
-        int connectedSpeed = Speed.VERY_FAST;
-        RssiCurve connectedBadgeCurve = mock(RssiCurve.class);
-        Bundle attr1 = new Bundle();
-        attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, connectedBadgeCurve);
-        ScoredNetwork connectedScore = new ScoredNetwork(
-                NetworkKey.createFromScanResult(scanResultConnected),
-                connectedBadgeCurve,
-                false /* meteredHint */,
-                attr1);
-        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultConnected))
-                .thenReturn(connectedScore);
-        when(connectedBadgeCurve.lookupScore(anyInt())).thenReturn((byte) connectedSpeed);
-
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
-
-        assertThat(ap.getSpeed()).isEqualTo(connectedSpeed);
-    }
-
-    @Test
     public void testSummaryString_showsSpeedLabel() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
@@ -940,7 +890,7 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testSpeedLabelUsesFallbackScoreWhenConnectedAccessPointScoreUnavailable() {
+    public void testSpeedLabelFallbackScoreIgnoresNullCurves() {
         int rssi = -55;
         String bssid = "00:00:00:00:00:00";
         int networkId = 123;

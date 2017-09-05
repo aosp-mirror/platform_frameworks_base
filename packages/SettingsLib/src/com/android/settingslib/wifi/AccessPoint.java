@@ -494,23 +494,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         int oldSpeed = mSpeed;
         mSpeed = generateAverageSpeedForSsid();
 
-        // set speed to the connected ScanResult if the AccessPoint is the active network
-        if (isActive() && mInfo != null) {
-            TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(mInfo.getBSSID());
-            if (timedScore != null) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Set score using specific access point curve for connected AP: "
-                            + getSsidStr());
-                }
-                // TODO(b/63073866): Map using getLevel rather than specific rssi value so score
-                // doesn't change without a visible wifi bar change.
-                int speed = timedScore.getScore().calculateBadge(mInfo.getRssi());
-                if (speed != Speed.NONE) {
-                    mSpeed = speed;
-                }
-            }
-        }
-
         boolean changed = oldSpeed != mSpeed;
         if(WifiTracker.sVerboseLogging && changed) {
             Log.i(TAG, String.format("%s: Set speed to %d", ssid, mSpeed));
@@ -528,6 +511,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             Log.d(TAG, String.format("Generating fallbackspeed for %s using cache: %s",
                     getSsidStr(), mScoredNetworkCache));
         }
+
+        // TODO(b/63073866): If flickering issues persist, consider mapping using getLevel rather
+        // than specific rssi value so score doesn't change without a visible wifi bar change. This
+        // issue is likely to be more evident for the active AP whose RSSI value is not half-lifed.
 
         int count = 0;
         int totalSpeed = 0;
