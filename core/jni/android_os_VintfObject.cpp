@@ -56,7 +56,7 @@ static inline jobjectArray toJavaStringArray(JNIEnv* env, const V& v) {
 }
 
 template<typename T>
-static void tryAddSchema(const T* object, const XmlConverter<T>& converter,
+static void tryAddSchema(const std::shared_ptr<const T>& object, const XmlConverter<T>& converter,
         const std::string& description,
         std::vector<std::string>* cStrings) {
     if (object == nullptr) {
@@ -66,7 +66,7 @@ static void tryAddSchema(const T* object, const XmlConverter<T>& converter,
     }
 }
 
-static void tryAddHalNamesAndVersions(const HalManifest *manifest,
+static void tryAddHalNamesAndVersions(const std::shared_ptr<const HalManifest>& manifest,
         const std::string& description,
         std::set<std::string> *output) {
     if (manifest == nullptr) {
@@ -119,7 +119,7 @@ static jobjectArray android_os_VintfObject_getHalNamesAndVersions(JNIEnv* env, j
 }
 
 static jstring android_os_VintfObject_getSepolicyVersion(JNIEnv* env, jclass) {
-    const HalManifest *manifest = VintfObject::GetDeviceHalManifest();
+    std::shared_ptr<const HalManifest> manifest = VintfObject::GetDeviceHalManifest();
     if (manifest == nullptr || manifest->type() != SchemaType::DEVICE) {
         LOG(WARNING) << __FUNCTION__ << "Cannot get device manifest";
         return nullptr;
@@ -129,7 +129,7 @@ static jstring android_os_VintfObject_getSepolicyVersion(JNIEnv* env, jclass) {
 }
 
 static jobject android_os_VintfObject_getVndkSnapshots(JNIEnv* env, jclass) {
-    const HalManifest *manifest = VintfObject::GetFrameworkHalManifest();
+    std::shared_ptr<const HalManifest> manifest = VintfObject::GetFrameworkHalManifest();
     if (manifest == nullptr || manifest->type() != SchemaType::FRAMEWORK) {
         LOG(WARNING) << __FUNCTION__ << "Cannot get framework manifest";
         return nullptr;
