@@ -87,32 +87,29 @@ public:
     friend class iterator;
     class iterator : public std::iterator<std::random_access_iterator_tag, uint8_t> {
     public:
-        iterator(const FdBuffer& buffer, ssize_t index, ssize_t offset)
-                : mFdBuffer(buffer), mIndex(index), mOffset(offset) {}
-        iterator& operator=(iterator& other) const { return other; }
-        iterator& operator+(size_t offset); // this is implemented in .cpp
-        iterator& operator+=(size_t offset) { return *this + offset; }
-        iterator& operator++() { return *this + 1; }
-        iterator operator++(int) { return *this + 1; }
-        bool operator==(iterator other) const {
-            return mIndex == other.mIndex && mOffset == other.mOffset;
-        }
-        bool operator!=(iterator other) const { return !(*this == other); }
-        int operator-(iterator other) const { return (int)bytesRead() - (int)other.bytesRead(); }
-        reference operator*() const { return mFdBuffer.mBuffers[mIndex][mOffset]; }
+        iterator(const FdBuffer& buffer, ssize_t index, ssize_t offset);
+        iterator& operator=(iterator& other) const;
+        iterator& operator+(size_t offset);
+        iterator& operator+=(size_t offset);
+        iterator& operator++();
+        iterator operator++(int);
+        bool operator==(iterator other) const;
+        bool operator!=(iterator other) const;
+        int operator-(iterator other) const;
+        reference operator*() const;
 
         // return the snapshot of the current iterator
-        iterator snapshot() const { return iterator(mFdBuffer, mIndex, mOffset); }
+        iterator snapshot() const;
         // how many bytes are read
         size_t bytesRead() const;
         // random access could make the iterator out of bound
-        bool outOfBound() const { return bytesRead() > mFdBuffer.size(); }
+        bool outOfBound() const;
     private:
         const FdBuffer& mFdBuffer;
         size_t mIndex;
         size_t mOffset;
     };
-    iterator begin() const { return iterator(*this, 0, 0); }
+    iterator begin() const;
     iterator end() const;
 
 private:

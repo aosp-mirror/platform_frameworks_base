@@ -25,14 +25,16 @@ namespace os {
 
 IncidentReportArgs::IncidentReportArgs()
     :mSections(),
-     mAll(false)
+     mAll(false),
+     mDest(-1)
 {
 }
 
 IncidentReportArgs::IncidentReportArgs(const IncidentReportArgs& that)
     :mSections(that.mSections),
      mHeaders(that.mHeaders),
-     mAll(that.mAll)
+     mAll(that.mAll),
+     mDest(that.mDest)
 {
 }
 
@@ -72,6 +74,11 @@ IncidentReportArgs::writeToParcel(Parcel* out) const
         if (err != NO_ERROR) {
             return err;
         }
+    }
+
+    err = out->writeInt32(mDest);
+    if (err != NO_ERROR) {
+        return err;
     }
 
     return NO_ERROR;
@@ -120,6 +127,13 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
         }
     }
 
+    int32_t dest;
+    err = in->readInt32(&dest);
+    if (err != NO_ERROR) {
+        return err;
+    }
+    mDest = dest;
+
     return OK;
 }
 
@@ -130,6 +144,12 @@ IncidentReportArgs::setAll(bool all)
     if (all) {
         mSections.clear();
     }
+}
+
+void
+IncidentReportArgs::setDest(int dest)
+{
+    mDest = dest;
 }
 
 void

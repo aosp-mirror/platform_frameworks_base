@@ -76,8 +76,7 @@ public:
     };
 
 protected:
-    IBinder* onAsBinder() override { return nullptr; };
-
+    virtual IBinder* onAsBinder() override { return nullptr; };
 };
 
 class ReporterTest : public Test {

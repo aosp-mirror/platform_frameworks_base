@@ -58,10 +58,13 @@ public:
     PrivacySpec() : dest(DEST_DEFAULT_VALUE) {}
     PrivacySpec(uint8_t dest) : dest(dest) {}
 
+    bool operator<(const PrivacySpec& other) const;
+
     bool CheckPremission(const Privacy* privacy) const;
     bool RequireAll() const;
 };
 
+PrivacySpec new_spec_from_args(int dest);
 PrivacySpec get_default_dropbox_spec();
 
 #endif // PRIVACY_H

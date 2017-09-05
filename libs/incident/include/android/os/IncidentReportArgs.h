@@ -39,12 +39,13 @@ public:
     virtual status_t readFromParcel(const Parcel* in);
 
     void setAll(bool all);
+    void setDest(int dest);
     void addSection(int section);
     void addHeader(const vector<int8_t>& header);
 
-    inline bool all() const { return mAll; };
+    inline bool all() const { return mAll; }
     bool containsSection(int section) const;
-
+    inline int dest() const { return mDest; }
     inline const set<int>& sections() const { return mSections; }
     inline const vector<vector<int8_t>>& headers() const { return mHeaders; }
 
@@ -54,6 +55,7 @@ private:
     set<int> mSections;
     vector<vector<int8_t>> mHeaders;
     bool mAll;
+    int mDest;
 };
 
 }

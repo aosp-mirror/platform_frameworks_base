@@ -88,6 +88,12 @@ static bool allowDest(const uint8_t dest, const uint8_t policy)
 }
 
 bool
+PrivacySpec::operator<(const PrivacySpec& other) const
+{
+  return dest < other.dest;
+}
+
+bool
 PrivacySpec::CheckPremission(const Privacy* privacy) const
 {
     uint8_t policy = privacy == NULL ? DEST_DEFAULT_VALUE : privacy->dest;
@@ -96,5 +102,10 @@ PrivacySpec::CheckPremission(const Privacy* privacy) const
 
 bool
 PrivacySpec::RequireAll() const { return dest == DEST_LOCAL; }
+
+PrivacySpec new_spec_from_args(int dest) {
+  if (dest < 0) return PrivacySpec();
+  return PrivacySpec(dest);
+}
 
 PrivacySpec get_default_dropbox_spec() { return PrivacySpec(DEST_AUTOMATIC); }

@@ -259,6 +259,12 @@ FdBuffer::flush(int fd) const
 }
 
 FdBuffer::iterator
+FdBuffer::begin() const
+{
+    return iterator(*this, 0, 0);
+}
+
+FdBuffer::iterator
 FdBuffer::end() const
 {
     if (mBuffers.empty() || mCurrentWritten < 0) return begin();
@@ -267,6 +273,17 @@ FdBuffer::end() const
         return FdBuffer::iterator(*this, mBuffers.size(), 0);
     return FdBuffer::iterator(*this, mBuffers.size() - 1, mCurrentWritten);
 }
+
+// ===============================================================================
+FdBuffer::iterator::iterator(const FdBuffer& buffer, ssize_t index, ssize_t offset)
+        : mFdBuffer(buffer),
+          mIndex(index),
+          mOffset(offset)
+{
+}
+
+FdBuffer::iterator&
+FdBuffer::iterator::operator=(iterator& other) const { return other; }
 
 FdBuffer::iterator&
 FdBuffer::iterator::operator+(size_t offset)
@@ -280,8 +297,50 @@ FdBuffer::iterator::operator+(size_t offset)
     return *this;
 }
 
+FdBuffer::iterator&
+FdBuffer::iterator::operator+=(size_t offset) { return *this + offset; }
+
+FdBuffer::iterator&
+FdBuffer::iterator::operator++() { return *this + 1; }
+
+FdBuffer::iterator
+FdBuffer::iterator::operator++(int) { return *this + 1; }
+
+bool
+FdBuffer::iterator::operator==(iterator other) const
+{
+    return mIndex == other.mIndex && mOffset == other.mOffset;
+}
+
+bool
+FdBuffer::iterator::operator!=(iterator other) const { return !(*this == other); }
+
+int
+FdBuffer::iterator::operator-(iterator other) const
+{
+    return (int)bytesRead() - (int)other.bytesRead();
+}
+
+FdBuffer::iterator::reference
+FdBuffer::iterator::operator*() const
+{
+    return mFdBuffer.mBuffers[mIndex][mOffset];
+}
+
+FdBuffer::iterator
+FdBuffer::iterator::snapshot() const
+{
+    return FdBuffer::iterator(mFdBuffer, mIndex, mOffset);
+}
+
 size_t
 FdBuffer::iterator::bytesRead() const
 {
     return mIndex * BUFFER_SIZE + mOffset;
+}
+
+bool
+FdBuffer::iterator::outOfBound() const
+{
+    return bytesRead() > mFdBuffer.size();
 }
