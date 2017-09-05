@@ -38,9 +38,11 @@ import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Base64;
+
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.DNSLookupBatch;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
+
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -48,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,9 +94,13 @@ public class NetdEventListenerServiceTest {
         }
 
         String[] events2 = listNetdEvent();
-        assertEquals(uids.length, events2.length);
+        int expectedLength2 = uids.length + 1; // +1 for the WakeupStats line
+        assertEquals(expectedLength2, events2.length);
+        assertContains(events2[0], "WakeupStats");
+        assertContains(events2[0], "wlan0");
         for (int i = 0; i < uids.length; i++) {
-            String got = events2[i];
+            String got = events2[i+1];
+            assertContains(got, "WakeupEvent");
             assertContains(got, "wlan0");
             assertContains(got, "uid: " + uids[i]);
         }
@@ -104,10 +111,14 @@ public class NetdEventListenerServiceTest {
             mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, ts);
         }
 
-        // Assert there are BUFFER_LENGTH events all with uid 20000
         String[] events3 = listNetdEvent();
-        assertEquals(BUFFER_LENGTH, events3.length);
-        for (String got : events3) {
+        int expectedLength3 = BUFFER_LENGTH + 1; // +1 for the WakeupStats line
+        assertEquals(expectedLength3, events3.length);
+        assertContains(events2[0], "WakeupStats");
+        assertContains(events2[0], "wlan0");
+        for (int i = 1; i < expectedLength3; i++) {
+            String got = events3[i];
+            assertContains(got, "WakeupEvent");
             assertContains(got, "wlan0");
             assertContains(got, "uid: " + uid);
         }
@@ -117,8 +128,66 @@ public class NetdEventListenerServiceTest {
 
         String[] events4 = listNetdEvent();
         String lastEvent = events4[events4.length - 1];
+        assertContains(lastEvent, "WakeupEvent");
         assertContains(lastEvent, "wlan0");
         assertContains(lastEvent, "uid: " + uid);
+    }
+
+    @Test
+    public void testWakeupStatsLogging() throws Exception {
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10123);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10008);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("wlan0", 10008);
+        wakeupEvent("rmnet0", 1000);
+        wakeupEvent("wlan0", 10004);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("wlan0", 0);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("rmnet0", 10052);
+        wakeupEvent("wlan0", 0);
+        wakeupEvent("rmnet0", 1000);
+        wakeupEvent("wlan0", 1010);
+
+        String got = flushStatistics();
+        String want = String.join("\n",
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 3",
+                "    duration_sec: 0",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 2",
+                "    total_wakeups: 5",
+                "    unrouted_wakeups: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 2",
+                "    duration_sec: 0",
+                "    non_application_wakeups: 1",
+                "    root_wakeups: 2",
+                "    system_wakeups: 3",
+                "    total_wakeups: 10",
+                "    unrouted_wakeups: 2",
+                "  >",
+                ">",
+                "version: 2\n");
+        assertEquals(want, got);
     }
 
     @Test
@@ -342,6 +411,11 @@ public class NetdEventListenerServiceTest {
 
     void dnsEvent(int netId, int type, int result, int latency) throws Exception {
         mNetdEventListenerService.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
+    }
+
+    void wakeupEvent(String iface, int uid) throws Exception {
+        String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
+        mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, 0);
     }
 
     void asyncDump(long durationMs) throws Exception {
