@@ -1043,9 +1043,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     ActivityRecord getTopActivity() {
+        return getTopActivity(true /* includeOverlays */);
+    }
+
+    ActivityRecord getTopActivity(boolean includeOverlays) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            if (r.finishing) {
+            if (r.finishing || (!includeOverlays && r.mTaskOverlay)) {
                 continue;
             }
             return r;

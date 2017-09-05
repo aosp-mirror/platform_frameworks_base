@@ -87,11 +87,17 @@ public class ActivityTestsBase {
 
     protected static ActivityRecord createActivity(ActivityManagerService service,
             ComponentName component, TaskRecord task) {
+        return createActivity(service, component, task, 0 /* userId */);
+    }
+
+    protected static ActivityRecord createActivity(ActivityManagerService service,
+            ComponentName component, TaskRecord task, int uid) {
         Intent intent = new Intent();
         intent.setComponent(component);
         final ActivityInfo aInfo = new ActivityInfo();
         aInfo.applicationInfo = new ApplicationInfo();
         aInfo.applicationInfo.packageName = component.getPackageName();
+        aInfo.applicationInfo.uid = uid;
         AttributeCache.init(service.mContext);
         final ActivityRecord activity = new ActivityRecord(service, null /* caller */,
                 0 /* launchedFromPid */, 0, null, intent, null,
