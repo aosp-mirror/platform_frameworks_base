@@ -17,10 +17,14 @@
 package com.android.systemui.pip.phone;
 
 import android.graphics.PointF;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 
@@ -31,9 +35,17 @@ public class PipTouchState {
     private static final String TAG = "PipTouchHandler";
     private static final boolean DEBUG = false;
 
-    private ViewConfiguration mViewConfig;
+    @VisibleForTesting
+    static final long DOUBLE_TAP_TIMEOUT = 200;
+
+    private final Handler mHandler;
+    private final ViewConfiguration mViewConfig;
+    private final Runnable mDoubleTapTimeoutCallback;
 
     private VelocityTracker mVelocityTracker;
+    private long mDownTouchTime = 0;
+    private long mLastDownTouchTime = 0;
+    private long mUpTouchTime = 0;
     private final PointF mDownTouch = new PointF();
     private final PointF mDownDelta = new PointF();
     private final PointF mLastTouch = new PointF();
@@ -41,13 +53,22 @@ public class PipTouchState {
     private final PointF mVelocity = new PointF();
     private boolean mAllowTouches = true;
     private boolean mIsUserInteracting = false;
+    // Set to true only if the multiple taps occur within the double tap timeout
+    private boolean mIsDoubleTap = false;
+    // Set to true only if a gesture
+    private boolean mIsWaitingForDoubleTap = false;
     private boolean mIsDragging = false;
+    // The previous gesture was a drag
+    private boolean mPreviouslyDragging = false;
     private boolean mStartedDragging = false;
     private boolean mAllowDraggingOffscreen = false;
     private int mActivePointerId;
 
-    public PipTouchState(ViewConfiguration viewConfig) {
+    public PipTouchState(ViewConfiguration viewConfig, Handler handler,
+            Runnable doubleTapTimeoutCallback) {
         mViewConfig = viewConfig;
+        mHandler = handler;
+        mDoubleTapTimeoutCallback = doubleTapTimeoutCallback;
     }
 
     /**
@@ -81,6 +102,14 @@ public class PipTouchState {
                 mDownTouch.set(mLastTouch);
                 mAllowDraggingOffscreen = true;
                 mIsUserInteracting = true;
+                mDownTouchTime = ev.getEventTime();
+                mIsDoubleTap = !mPreviouslyDragging &&
+                        (mDownTouchTime - mLastDownTouchTime) < DOUBLE_TAP_TIMEOUT;
+                mIsWaitingForDoubleTap = false;
+                mLastDownTouchTime = mDownTouchTime;
+                if (mDoubleTapTimeoutCallback != null) {
+                    mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
+                }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -155,7 +184,11 @@ public class PipTouchState {
                     break;
                 }
 
+                mUpTouchTime = ev.getEventTime();
                 mLastTouch.set(ev.getX(pointerIndex), ev.getY(pointerIndex));
+                mPreviouslyDragging = mIsDragging;
+                mIsWaitingForDoubleTap = !mIsDoubleTap && !mIsDragging &&
+                        (mUpTouchTime - mDownTouchTime) < DOUBLE_TAP_TIMEOUT;
 
                 // Fall through to clean up
             }
@@ -249,6 +282,39 @@ public class PipTouchState {
      */
     public boolean allowDraggingOffscreen() {
         return mAllowDraggingOffscreen;
+    }
+
+    /**
+     * @return whether this gesture is a double-tap.
+     */
+    public boolean isDoubleTap() {
+        return mIsDoubleTap;
+    }
+
+    /**
+     * @return whether this gesture will potentially lead to a following double-tap.
+     */
+    public boolean isWaitingForDoubleTap() {
+        return mIsWaitingForDoubleTap;
+    }
+
+    /**
+     * Schedules the callback to run if the next double tap does not occur.  Only runs if
+     * isWaitingForDoubleTap() is true.
+     */
+    public void scheduleDoubleTapTimeoutCallback() {
+        if (mIsWaitingForDoubleTap) {
+            long delay = getDoubleTapTimeoutCallbackDelay();
+            mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
+            mHandler.postDelayed(mDoubleTapTimeoutCallback, delay);
+        }
+    }
+
+    @VisibleForTesting long getDoubleTapTimeoutCallbackDelay() {
+        if (mIsWaitingForDoubleTap) {
+            return Math.max(0, DOUBLE_TAP_TIMEOUT - (mUpTouchTime - mDownTouchTime));
+        }
+        return -1;
     }
 
     private void initOrResetVelocityTracker() {

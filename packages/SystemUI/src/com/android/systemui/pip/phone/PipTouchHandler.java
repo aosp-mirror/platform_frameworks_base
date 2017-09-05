@@ -187,13 +187,15 @@ public class PipTouchHandler {
         mMenuController.addListener(mMenuListener);
         mDismissViewController = new PipDismissViewController(context);
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
-        mTouchState = new PipTouchState(mViewConfig);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2.5f);
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mMenuController,
                 mSnapAlgorithm, mFlingAnimationUtils);
+        mTouchState = new PipTouchState(mViewConfig, mHandler,
+                () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                        mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
 
         Resources res = context.getResources();
         mExpandedShortestEdgeSize = res.getDimensionPixelSize(
@@ -429,7 +431,7 @@ public class PipTouchHandler {
                 final float distance = bounds.bottom - target;
                 fraction = Math.min(distance / bounds.height(), 1f);
             }
-            if (Float.compare(fraction, 0f) != 0 || mMenuState != MENU_STATE_NONE) {
+            if (Float.compare(fraction, 0f) != 0 || mMenuController.isMenuActivityVisible()) {
                 // Update if the fraction > 0, or if fraction == 0 and the menu was already visible
                 mMenuController.setDismissFraction(fraction);
             }
@@ -730,8 +732,20 @@ public class PipTouchHandler {
                         null /* animatorListener */);
                 setMinimizedStateInternal(false);
             } else if (mMenuState != MENU_STATE_FULL) {
-                mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
-                        mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
+                if (mTouchState.isDoubleTap()) {
+                    // Expand to fullscreen if this is a double tap
+                    mMotionHelper.expandPip();
+                } else if (!mTouchState.isWaitingForDoubleTap()) {
+                    // User has stalled long enough for this not to be a drag or a double tap, just
+                    // expand the menu
+                    mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                            mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
+                } else {
+                    // Next touch event _may_ be the second tap for the double-tap, schedule a
+                    // fallback runnable to trigger the menu if no touch event occurs before the
+                    // next tap
+                    mTouchState.scheduleDoubleTapTimeoutCallback();
+                }
             } else {
                 mMenuController.hideMenu();
                 mMotionHelper.expandPip();
