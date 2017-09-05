@@ -27,6 +27,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.ip.InterfaceController;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.util.NetdService;
@@ -107,8 +108,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private final SharedLog mLog;
     private final INetworkManagementService mNMService;
+    private final INetd mNetd;
     private final INetworkStatsService mStatsService;
     private final IControlsTethering mTetherController;
+    private final InterfaceController mInterfaceCtrl;
 
     private final String mIfaceName;
     private final int mInterfaceType;
@@ -136,8 +139,11 @@ public class TetherInterfaceStateMachine extends StateMachine {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNMService = nMService;
+        // TODO: This should be passed in for testability.
+        mNetd = NetdService.getInstance();
         mStatsService = statsService;
         mTetherController = tetherController;
+        mInterfaceCtrl = new InterfaceController(ifaceName, nMService, mNetd, mLog);
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
         mLinkProperties = new LinkProperties();
@@ -179,6 +185,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private void stopIPv4() { configureIPv4(false); }
 
+    // TODO: Refactor this in terms of calls to InterfaceController.
     private boolean configureIPv4(boolean enabled) {
         if (VDBG) Log.d(TAG, "configureIPv4(" + enabled + ")");
 
@@ -381,8 +388,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private void configureLocalIPv6Dns(
             HashSet<Inet6Address> deprecatedDnses, HashSet<Inet6Address> newDnses) {
-        final INetd netd = NetdService.getInstance();
-        if (netd == null) {
+        // TODO: Is this really necessary? Can we not fail earlier if INetd cannot be located?
+        if (mNetd == null) {
             if (newDnses != null) newDnses.clear();
             mLog.e("No netd service instance available; not setting local IPv6 addresses");
             return;
@@ -391,11 +398,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
         // [1] Remove deprecated local DNS IP addresses.
         if (!deprecatedDnses.isEmpty()) {
             for (Inet6Address dns : deprecatedDnses) {
-                final String dnsString = dns.getHostAddress();
-                try {
-                    netd.interfaceDelAddress(mIfaceName, dnsString, RFC7421_PREFIX_LENGTH);
-                } catch (ServiceSpecificException | RemoteException e) {
-                    mLog.e("Failed to remove local dns IP " + dnsString + ": " + e);
+                if (!mInterfaceCtrl.removeAddress(dns, RFC7421_PREFIX_LENGTH)) {
+                    mLog.e("Failed to remove local dns IP " + dns);
                 }
 
                 mLinkProperties.removeLinkAddress(new LinkAddress(dns, RFC7421_PREFIX_LENGTH));
@@ -410,11 +414,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
             }
 
             for (Inet6Address dns : addedDnses) {
-                final String dnsString = dns.getHostAddress();
-                try {
-                    netd.interfaceAddAddress(mIfaceName, dnsString, RFC7421_PREFIX_LENGTH);
-                } catch (ServiceSpecificException | RemoteException e) {
-                    mLog.e("Failed to add local dns IP " + dnsString + ": " + e);
+                if (!mInterfaceCtrl.addAddress(dns, RFC7421_PREFIX_LENGTH)) {
+                    mLog.e("Failed to add local dns IP " + dns);
                     newDnses.remove(dns);
                 }
 
@@ -423,7 +424,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         }
 
         try {
-            netd.tetherApplyDnsInterfaces();
+            mNetd.tetherApplyDnsInterfaces();
         } catch (ServiceSpecificException | RemoteException e) {
             mLog.e("Failed to update local DNS caching server");
             if (newDnses != null) newDnses.clear();

@@ -22,7 +22,6 @@ import com.android.internal.util.WakeupMessage;
 import android.content.Context;
 import android.net.DhcpResults;
 import android.net.INetd;
-import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties.ProvisioningChange;
@@ -43,9 +42,7 @@ import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.SystemClock;
-import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
@@ -568,7 +565,7 @@ public class IpManager extends StateMachine {
     private final LocalLog mConnectivityPacketLog;
     private final MessageHandlingLogger mMsgStateLogger;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
-    private final INetd mNetd;
+    private final InterfaceController mInterfaceCtrl;
 
     private NetworkInterface mNetworkInterface;
 
@@ -612,11 +609,12 @@ public class IpManager extends StateMachine {
         mClatInterfaceName = CLAT_PREFIX + ifName;
         mCallback = new LoggingCallbackWrapper(callback);
         mNwService = nwService;
-        mNetd = netd;
 
         mLog = new SharedLog(MAX_LOG_RECORDS, mTag);
         mConnectivityPacketLog = new LocalLog(MAX_PACKET_RECORDS);
         mMsgStateLogger = new MessageHandlingLogger();
+
+        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNwService, netd, mLog);
 
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
@@ -1157,29 +1155,6 @@ public class IpManager extends StateMachine {
         return (delta != ProvisioningChange.LOST_PROVISIONING);
     }
 
-    private boolean setIPv4Address(LinkAddress address) {
-        final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-        ifcg.setLinkAddress(address);
-        try {
-            mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-            if (DBG) Log.d(mTag, "IPv4 configuration succeeded");
-        } catch (IllegalStateException | RemoteException e) {
-            logError("IPv4 configuration failed: %s", e);
-            return false;
-        }
-        return true;
-    }
-
-    private void clearIPv4Address() {
-        try {
-            final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-            ifcg.setLinkAddress(new LinkAddress("0.0.0.0/0"));
-            mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-        } catch (IllegalStateException | RemoteException e) {
-            logError("Failed to clear IPv4 address on interface %s: %s", mInterfaceName, e);
-        }
-    }
-
     private void handleIPv4Success(DhcpResults dhcpResults) {
         mDhcpResults = new DhcpResults(dhcpResults);
         final LinkProperties newLp = assembleLinkProperties();
@@ -1199,7 +1174,7 @@ public class IpManager extends StateMachine {
         // that could trigger a call to this function. If we missed handling
         // that message in StartedState for some reason we would still clear
         // any addresses upon entry to StoppedState.
-        clearIPv4Address();
+        mInterfaceCtrl.clearIPv4Address();
         mDhcpResults = null;
         if (DBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
         mCallback.onNewDhcpResults(null);
@@ -1238,7 +1213,7 @@ public class IpManager extends StateMachine {
         // If we have a StaticIpConfiguration attempt to apply it and
         // handle the result accordingly.
         if (mConfiguration.mStaticIpConfig != null) {
-            if (setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
+            if (mInterfaceCtrl.setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
                 handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
             } else {
                 return false;
@@ -1253,46 +1228,16 @@ public class IpManager extends StateMachine {
         return true;
     }
 
-    private void setIPv6AddrGenModeIfSupported() throws RemoteException {
-        try {
-            mNwService.setIPv6AddrGenMode(mInterfaceName, mConfiguration.mIPv6AddrGenMode);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode != OsConstants.EOPNOTSUPP) {
-                logError("Unable to set IPv6 addrgen mode: %s", e);
-            }
-        }
-    }
-
     private boolean startIPv6() {
-        // Set privacy extensions.
-        try {
-            mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
-
-            setIPv6AddrGenModeIfSupported();
-            mNwService.enableIpv6(mInterfaceName);
-        } catch (IllegalStateException | RemoteException | ServiceSpecificException e) {
-            logError("Unable to change interface settings: %s", e);
-            return false;
-        }
-
-        return true;
+        return mInterfaceCtrl.setIPv6PrivacyExtensions(true) &&
+               mInterfaceCtrl.setIPv6AddrGenModeIfSupported(mConfiguration.mIPv6AddrGenMode) &&
+               mInterfaceCtrl.enableIPv6();
     }
 
     private boolean applyInitialConfig(InitialConfiguration config) {
-        if (mNetd == null) {
-            logError("tried to add %s to %s but INetd was null", config, mInterfaceName);
-            return false;
-        }
-
         // TODO: also support specifying a static IPv4 configuration in InitialConfiguration.
         for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIPv6)) {
-            try {
-                mNetd.interfaceAddAddress(
-                        mInterfaceName, addr.getAddress().getHostAddress(), addr.getPrefixLength());
-            } catch (ServiceSpecificException | RemoteException e) {
-                logError("failed to add %s to %s: %s", addr, mInterfaceName, e);
-                return false;
-            }
+            if (!mInterfaceCtrl.addAddress(addr)) return false;
         }
 
         return true;
@@ -1329,17 +1274,8 @@ public class IpManager extends StateMachine {
         //     - we don't get IPv4 routes from netlink
         // so we neither react to nor need to wait for changes in either.
 
-        try {
-            mNwService.disableIpv6(mInterfaceName);
-        } catch (Exception e) {
-            logError("Failed to disable IPv6: %s", e);
-        }
-
-        try {
-            mNwService.clearInterfaceAddresses(mInterfaceName);
-        } catch (Exception e) {
-            logError("Failed to clear addresses: %s", e);
-        }
+        mInterfaceCtrl.disableIPv6();
+        mInterfaceCtrl.clearAllAddresses();
     }
 
     class StoppedState extends State {
@@ -1418,7 +1354,7 @@ public class IpManager extends StateMachine {
                     break;
 
                 case DhcpClient.CMD_CLEAR_LINKADDRESS:
-                    clearIPv4Address();
+                    mInterfaceCtrl.clearIPv4Address();
                     break;
 
                 case DhcpClient.CMD_ON_QUIT:
@@ -1674,12 +1610,12 @@ public class IpManager extends StateMachine {
                     break;
 
                 case DhcpClient.CMD_CLEAR_LINKADDRESS:
-                    clearIPv4Address();
+                    mInterfaceCtrl.clearIPv4Address();
                     break;
 
                 case DhcpClient.CMD_CONFIGURE_LINKADDRESS: {
                     final LinkAddress ipAddress = (LinkAddress) msg.obj;
-                    if (setIPv4Address(ipAddress)) {
+                    if (mInterfaceCtrl.setIPv4Address(ipAddress)) {
                         mDhcpClient.sendMessage(DhcpClient.EVENT_LINKADDRESS_CONFIGURED);
                     } else {
                         logError("Failed to set IPv4 address.");

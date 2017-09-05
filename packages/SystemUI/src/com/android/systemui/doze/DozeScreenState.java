@@ -25,8 +25,9 @@ import android.view.Display;
 public class DozeScreenState implements DozeMachine.Part {
     private final DozeMachine.Service mDozeService;
     private final Handler mHandler;
+    private final Runnable mApplyPendingScreenState = this::applyPendingScreenState;
+
     private int mPendingScreenState = Display.STATE_UNKNOWN;
-    private Runnable mApplyPendingScreenState = this::applyPendingScreenState;
 
     public DozeScreenState(DozeMachine.Service service, Handler handler) {
         mDozeService = service;
