@@ -53,7 +53,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private final static boolean DEBUG_DEXOPT = true;
 
     // The synthetic library dependencies denoting "no checks."
-    private final static String[] NO_LIBRARIES = new String[] { "&" };
+    private final static String[] NO_LIBRARIES =
+            new String[] { PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK };
 
     // The amount of "available" (free - low threshold) space necessary at the start of an OTA to
     // not bulk-delete unused apps' odex files.
@@ -325,7 +326,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         mPackageManagerService.getDexManager().dexoptSecondaryDex(
                 new DexoptOptions(pkg.packageName, compilationReason,
                         DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                        DexoptOptions.DEXOPT_BOOT_COMPLETE));
+                                DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
         return commands;
     }
