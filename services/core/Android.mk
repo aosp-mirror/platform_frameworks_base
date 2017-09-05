@@ -4,7 +4,10 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := services.core
 
-LOCAL_AIDL_INCLUDES := system/netd/server/binder
+LOCAL_AIDL_INCLUDES := \
+    frameworks/native/aidl/binder \
+    system/netd/server/binder
+
 
 LOCAL_SRC_FILES += \
     $(call all-java-files-under,java) \

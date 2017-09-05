@@ -76,6 +76,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -1897,38 +1898,34 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return new NetworkStats(SystemClock.elapsedRealtime(), 0);
             }
 
-            final NativeDaemonEvent[] events;
+            final PersistableBundle bundle;
             try {
-                events = mConnector.executeForList("bandwidth", "gettetherstats");
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+                bundle = mNetdService.tetherGetStats();
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException("problem parsing tethering stats: ", e);
             }
-            final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-            for (NativeDaemonEvent event : events) {
-                if (event.getCode() != TetheringStatsListResult) continue;
 
-                // 114 ifaceIn ifaceOut rx_bytes rx_packets tx_bytes tx_packets
-                final StringTokenizer tok = new StringTokenizer(event.getMessage());
+            final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(),
+                    bundle.size());
+            final NetworkStats.Entry entry = new NetworkStats.Entry();
+
+            for (String iface : bundle.keySet()) {
+                long[] statsArray = bundle.getLongArray(iface);
                 try {
-                    final String ifaceIn = tok.nextToken();
-                    final String ifaceOut = tok.nextToken();
-
-                    final NetworkStats.Entry entry = new NetworkStats.Entry();
-                    entry.iface = ifaceOut;
+                    entry.iface = iface;
                     entry.uid = UID_TETHERING;
                     entry.set = SET_DEFAULT;
                     entry.tag = TAG_NONE;
-                    entry.rxBytes = Long.parseLong(tok.nextToken());
-                    entry.rxPackets = Long.parseLong(tok.nextToken());
-                    entry.txBytes = Long.parseLong(tok.nextToken());
-                    entry.txPackets = Long.parseLong(tok.nextToken());
+                    entry.rxBytes   = statsArray[INetd.TETHER_STATS_RX_BYTES];
+                    entry.rxPackets = statsArray[INetd.TETHER_STATS_RX_PACKETS];
+                    entry.txBytes   = statsArray[INetd.TETHER_STATS_TX_BYTES];
+                    entry.txPackets = statsArray[INetd.TETHER_STATS_TX_PACKETS];
                     stats.combineValues(entry);
-                } catch (NoSuchElementException e) {
-                    throw new IllegalStateException("problem parsing tethering stats: " + event);
-                } catch (NumberFormatException e) {
-                    throw new IllegalStateException("problem parsing tethering stats: " + event);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new IllegalStateException("invalid tethering stats for " + iface, e);
                 }
             }
+
             return stats;
         }
 
