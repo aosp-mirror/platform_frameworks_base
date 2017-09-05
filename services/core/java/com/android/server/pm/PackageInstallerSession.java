@@ -813,13 +813,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session not sealed");
         }
 
-        try {
-            resolveStageDirLocked();
-        } catch (IOException e) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to resolve stage location", e);
-        }
-
         Preconditions.checkNotNull(mPackageName);
         Preconditions.checkNotNull(mSignatures);
         Preconditions.checkNotNull(mResolvedBaseFile);
@@ -939,6 +932,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedBaseFile = null;
         mResolvedStagedFiles.clear();
         mResolvedInheritedFiles.clear();
+
+        try {
+            resolveStageDirLocked();
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to resolve stage location", e);
+        }
 
         final File[] removedFiles = mResolvedStageDir.listFiles(sRemovedFilter);
         final List<String> removeSplitList = new ArrayList<>();
