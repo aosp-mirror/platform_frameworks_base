@@ -275,9 +275,9 @@ class AutomaticBrightnessController {
         boolean enableSensor = enable && !dozing;
         if (enableSensor && !mLightSensorEnabled && mActiveDozeLightSensor) {
             mActiveDozeLightSensor = false;
-        } else if (!enableSensor && mLightSensorEnabled) {
+        } else if (!enableSensor && mLightSensorEnabled && mLuxLevels.hasDynamicDozeBrightness()) {
             // keep the light sensor active until another light sample is taken while dozing
-            mActiveDozeLightSensor = mLuxLevels.hasDynamicDozeBrightness();
+            mActiveDozeLightSensor = true;
             adjustLightSensorRate(mInitialLightSensorRate);
             if (mUseNewSensorSamplesForDoze) {
                 mAmbientLightRingBuffer.clear();
