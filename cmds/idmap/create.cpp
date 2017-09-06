@@ -104,10 +104,14 @@ fail:
             }
         }
 
-        uint32_t cached_target_crc, cached_overlay_crc;
+        uint32_t version, cached_target_crc, cached_overlay_crc;
         String8 cached_target_path, cached_overlay_path;
-        if (!ResTable::getIdmapInfo(buf, N, NULL, &cached_target_crc, &cached_overlay_crc,
+        if (!ResTable::getIdmapInfo(buf, N, &version, &cached_target_crc, &cached_overlay_crc,
                     &cached_target_path, &cached_overlay_path)) {
+            return true;
+        }
+
+        if (version != ResTable::IDMAP_CURRENT_VERSION) {
             return true;
         }
 
