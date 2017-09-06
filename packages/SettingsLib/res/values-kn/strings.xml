@@ -34,7 +34,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ವ್ಯಾಪ್ತಿಯಲ್ಲಿಲ್ಲ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವಿಲ್ಲ"</string>
-    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ರಿಂದ ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ನಿಂದ ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s ಮೂಲಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ನೆಟ್‌ವರ್ಕ್ ರೇಟಿಂಗ್ ಒದಗಿಸುವವರ ಮೂಲಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
@@ -94,7 +94,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ಜೋಡಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ಜೋಡಿ ಮಾಡು"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡಿ"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ಸಂಪರ್ಕಪಡಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ಸಂಪರ್ಕಗೊಳಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಣೆ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ತಪ್ಪಾಗಿರುವ ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣದಿಂದಾಗಿ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಸಂವಹನ ನಡೆಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ವೈ-ಫೈ ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ಮೊಬೈಲ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ಹಾರ್ಡ್‌ವೇರ್‌ನ ವೇಗವರ್ಧನೆಯನ್ನು ಟೆಥರಿಂಗ್ ಮಾಡಿ"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ಹೆಸರುಗಳಿಲ್ಲದ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ಇನ್ ಬ್ಯಾಂಡ್ ರಿಂಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿ"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ಮೂಲಕ ಆಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ಹೆಸರುಗಳಿಲ್ಲದ (ಕೇವಲ MAC ವಿಳಾಸಗಳು ಮಾತ್ರ) ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ರಿಮೋಟ್ ಸಾಧನಗಳೊಂದಿಗೆ ಒಪ್ಪಲಾಗದ ಜೋರಾದ ವಾಲ್ಯೂಮ್ ಅಥವಾ ನಿಯಂತ್ರಣದ ಕೊರತೆಯಂತಹ ವಾಲ್ಯೂಮ್ ಸಮಸ್ಯೆಗಳಂತಹ ಸಂದರ್ಭದಲ್ಲಿ ಬ್ಲೂಟೂತ್ ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್ ವೈಶಿಷ್ಟ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬಹುದು."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ಫೋನ್‌ನ ರಿಂಗ್‌ಟೋನ್‌ಗಳನ್ನು ಬ್ಲೂಟೂತ್ ಹೆಡ್‌ಸೆಟ್‌ಗಳಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಅನುಮತಿ ನೀಡಿ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>

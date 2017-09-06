@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"वाय-फाय रोम स्‍कॅनला नेहमी अनुमती द्या"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा नेहमी सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिंग हार्डवेअर प्रवेग"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"संपूर्ण आवाज अक्षम करा"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"इन-बँड रिंगिंग सक्षम करा"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लूटूथ AVRCP आवृत्ती"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डीव्हाइस आणि त्यावरील अॅप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वर अॅप्स पडताळून पाहा"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अॅप्स तपासा."</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूरस्थ डीव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य अक्षम करते."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"फोनवरील रिंगटोन ब्लूटूथ हेडसेटवर वाजू द्या"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानिक टर्मिनल"</string>
@@ -300,9 +298,9 @@
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"सूचना चॅनेल चेतावण्या दाखवा"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"एखादे अ‍ॅप वैध चॅनेलशिवाय सूचना पोस्ट करते तेव्हा स्क्रीनवर चेतावणी देते"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यवर अॅप्सना अनुमती देण्याची सक्ती करा"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"मॅनिफेस्ट मूल्यांकडे दुर्लक्ष करून, कोणत्याही अॅपला बाह्य संचयनावर लेखन केले जाण्यासाठी पात्र बनविते"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"manifest मूल्यांकडे दुर्लक्ष करून, कोणत्याही अॅपला बाह्य स्टोरेजवर लेखन केले जाण्यासाठी पात्र बनविते"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"क्र‍ियाकलापाचा आकार बदलण्यायोग्य होण्याची सक्ती करा"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"मॅनिफेस्ट मूल्यांकडे दुर्लक्ष करून, एकाधिक-विंडोसाठी सर्व क्रियाकलापांचा आकार बदलण्यायोग्य करा."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"manifest मूल्यांकडे दुर्लक्ष करून, एकाधिक-विंडोसाठी सर्व क्रियाकलापांचा आकार बदलण्यायोग्य करा."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"freeform विंडो सक्षम करा"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"प्रायोगिक मुक्तस्वरूपाच्या विंडोसाठी समर्थन सक्षम करा."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"डेस्कटॉप बॅकअप संकेतशब्द"</string>

@@ -72,7 +72,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"સંપર્ક શેરિંગ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ઇન્ટરનેટ કનેક્શન શેરિંગ"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"ટેક્સ્ટ સંદેશા"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ઍક્સેસ"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"સિમ ઍક્સેસ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ઑડિઓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ઑડિઓ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"મીડિયા ઑડિઓ સાથે કનેક્ટ કર્યુ"</string>
@@ -86,7 +86,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ઉપકરણ સાથે સ્થાનિક ઇન્ટરનેટ કનેક્શન શેર કરે છે"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ઇન્ટરનેટ ઍક્સેસ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"નકશા માટે વાપરો"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM ઍક્સેસ માટે ઉપયોગ કરો"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"સિમ ઍક્સેસ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"મીડિયા ઑડિઓ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ફોન ઑડિઓ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ફાઇલ સ્થાનાંતર માટે ઉપયોગ કરો"</string>
@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"હંમેશા વાઇ-ફાઇ રોમ સ્કૅન્સને મંજૂરી આપો"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"મોબાઇલ ડેટા હંમેશાં સક્રિય"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"નામ વિનાના બ્લૂટૂથ ઉપકરણો બતાવો"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ચોક્કસ વૉલ્યૂમને અક્ષમ કરો"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"બેંડમાં રિંગ કરવાનું સક્ષમ કરો"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"બ્લૂટૂથ AVRCP સંસ્કરણ"</string>
@@ -228,14 +227,13 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"વાઇ-ફાઇ  સક્રિય હોય ત્યારે પણ, હંમેશા મોબાઇલ ડેટાને સક્રિય રાખો (ઝડપી નેટવર્ક સ્વિચિંગ માટે)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"જો ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ ઉપલબ્ધ હોય તો તેનો ઉપયોગ કરો"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ડિબગિંગને મંજૂરી આપીએ?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ઉપકરણ વચ્ચે ડેટાને કૉપિ કરવા, સૂચના વગર તમારા ઉપકરણ પર ઍપ્લિકેશનો ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ઉપકરણ વચ્ચે ડેટાને કૉપિ કરવા, નોટિફિકેશન વગર તમારા ઉપકરણ પર ઍપ્લિકેશનો ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"તમે અગાઉ અધિકૃત કરેલા તમામ કમ્પ્યુટર્સમાંથી USB ડિબગિંગ પરની અ‍ૅક્સેસ રદબાતલ કરીએ?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"વિકાસ સેટિંગ્સને મંજૂરી આપીએ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"આ સેટિંગ્સ ફક્ત વિકાસનાં ઉપયોગ માટે જ હેતુબદ્ધ છે. તે તમારા ઉપકરણ અને તેના પરની એપ્લિકેશન્સનાં ભંગ થવા અથવા ખરાબ વર્તનનું કારણ બની શકે છે."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB પર ઍપ્લિકેશનો ચકાસો"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"હાનિકારક વર્તણૂંક માટે ADB/ADT મારફતે ઇન્સ્ટોલ કરવામાં આવેલી ઍપ્લિકેશનો તપાસો."</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"નામ વગરના (ફક્ત MAC ઍડ્રેસવાળા) બ્લૂટૂથ ઉપકરણો બતાવવામાં આવશે"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"રિમોટ ઉપકરણોમાં વધુ પડતું ઊંચું વૉલ્યૂમ અથવા નિયંત્રણની કમી જેવી વૉલ્યૂમની સમસ્યાઓની સ્થિતિમાં બ્લૂટૂથ ચોક્કસ વૉલ્યૂમ સુવિધાને અક્ષમ કરે છે."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ફોનની રિંગટોન બ્લૂટૂથ હૅડસેટ પર વાગવાની મંજૂરી આપો"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"સ્થાનિક ટર્મિનલ"</string>
@@ -297,8 +295,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"બૅકગ્રાઉન્ડ પ્રક્રિયા સીમા"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"બધા ANR બતાવો"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"બૅકગ્રાઉન્ડ ઍપ્લિકેશનો માટે ઍપ્લિકેશન પ્રતિસાદ આપતી નથી સંવાદ બતાવો"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"સૂચના ચૅનલની ચેતવણી બતાવો"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ઍપ્લિકેશન માન્ય ચૅનલ વિના સૂચના પોસ્ટ કરે તો સ્ક્રીન પર ચેતવણી દેખાય છે"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"નોટિફિકેશન ચૅનલની ચેતવણી બતાવો"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ઍપ્લિકેશન માન્ય ચૅનલ વિના નોટિફિકેશન પોસ્ટ કરે તો સ્ક્રીન પર ચેતવણી દેખાય છે"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"બાહ્ય પર એપ્લિકેશનોને મંજૂરી આપવાની ફરજ પાડો"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>
@@ -319,7 +317,7 @@
   <string-array name="color_mode_descriptions">
     <item msgid="4979629397075120893">"વધારેલ રંગો"</item>
     <item msgid="8280754435979370728">"આંખો વડે જોઈ શકાતાં કુદરતી રંગો"</item>
-    <item msgid="5363960654009010371">"ડિજિટલ સામગ્રી માટે ઓપ્ટિમાઇઝ કરાયેલા રંગો"</item>
+    <item msgid="5363960654009010371">"ડિજિટલ કન્ટેન્ટ માટે ઓપ્ટિમાઇઝ કરાયેલા રંગો"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"નિષ્ક્રિય ઍપ્લિકેશનો"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"નિષ્ક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
