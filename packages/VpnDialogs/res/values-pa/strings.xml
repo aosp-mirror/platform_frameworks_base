@@ -28,8 +28,8 @@
     <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> ਨੂੰ ਹਰ ਸਮੇਂ ਕਨੈਕਟ ਰਹਿਣ ਲਈ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ ਹੈ, ਪਰ ਇਹ ਫਿਲਹਾਲ ਕਨੈਕਟ ਨਹੀਂ ਹੋ ਸਕਦੀ। ਤੁਹਾਡਾ ਫ਼ੋਨ <xliff:g id="VPN_APP_1">%1$s</xliff:g> ਨਾਲ ਮੁੜ-ਕਨੈਕਟ ਹੋਣ ਤੱਕ ਕਿਸੇ ਜਨਤਕ ਨੈੱਟਵਰਕ ਦੀ ਵਰਤੋਂ ਕਰੇਗਾ।"</string>
     <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> ਨੂੰ ਹਰ ਸਮੇਂ ਕਨੈਕਟ ਰਹਿਣ ਲਈ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ ਹੈ, ਪਰ ਇਹ ਫਿਲਹਾਲ ਕਨੈਕਟ ਨਹੀਂ ਹੋ ਸਕਦੀ। VPN ਨਾਲ ਮੁੜ-ਕਨੈਕਟ ਹੋਣ ਤੱਕ ਤੁਸੀਂ ਕਨੈਕਟ ਨਹੀਂ ਕਰ ਸਕਦੇ।"</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
-    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
-    <string name="configure" msgid="4905518375574791375">"ਕੌਂਫਿਗਰ ਕਰੋ"</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Change VPN settings"</string>
+    <string name="configure" msgid="4905518375574791375">"ਰੂਪ-ਰੇਖਾ ਬਦਲੋ"</string>
     <string name="disconnect" msgid="971412338304200056">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="open_app" msgid="3717639178595958667">"ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="dismiss" msgid="6192859333764711227">"ਖਾਰਜ ਕਰੋ"</string>
