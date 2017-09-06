@@ -1657,7 +1657,14 @@ class WindowStateAnimator {
                     if (mWin.mAppToken != null) {
                         mWin.mAppToken.setCanTurnScreenOn(false);
                     }
-                    mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
+
+                    // We do not add {@code SET_TURN_ON_SCREEN} when the screen is already
+                    // interactive as the value may persist until the next animation, which could
+                    // potentially occurring while turning off the screen. This would lead to the
+                    // screen incorrectly turning back on.
+                    if (!mService.mPowerManager.isInteractive()) {
+                        mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
+                    }
                 }
             }
             if (hasSurface()) {
