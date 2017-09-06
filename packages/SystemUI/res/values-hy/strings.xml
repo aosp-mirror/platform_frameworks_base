@@ -290,7 +290,7 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Կարգավորումներ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Ժամանակը"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ես"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"Օտատեր"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Օգտատեր"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Նոր օգտատեր"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Միացված չէ"</string>
@@ -384,7 +384,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Նոր օգտատեր"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Հյուր"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Հյուր ավելացնել"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Ավելացնել հյուր"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Հեռացնել հյուրին"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Հեռացնե՞լ հյուրին:"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>

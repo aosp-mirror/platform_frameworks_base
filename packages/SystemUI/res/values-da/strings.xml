@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"System-UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Appinfo"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dine seneste skærme vises her"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Luk de seneste apps"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -279,7 +279,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Roter skærmen automatisk"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"Tilstanden <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotationen er låst"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Stående format"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Stående"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Liggende"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Inputmetode"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Placering"</string>
@@ -760,7 +760,7 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Lagerplads"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant apps kræver ingen installation."</string>
-    <string name="app_info" msgid="6856026610594615344">"Oplysninger om appen"</string>
+    <string name="app_info" msgid="6856026610594615344">"Appinfo"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Gå til website"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobildata"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi er slået fra"</string>

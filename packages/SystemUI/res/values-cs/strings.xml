@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"UI systému"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazat"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odebrat ze seznamu"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informace o aplikaci"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"O aplikaci"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Zde budou zobrazeny vaše poslední obrazovky"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zavřít nové aplikace"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -774,7 +774,7 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Úložiště"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Okamžité aplikace"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikace není třeba instalovat."</string>
-    <string name="app_info" msgid="6856026610594615344">"Informace o aplikaci"</string>
+    <string name="app_info" msgid="6856026610594615344">"O aplikaci"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Přejít na web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilní data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi je vypnuta"</string>

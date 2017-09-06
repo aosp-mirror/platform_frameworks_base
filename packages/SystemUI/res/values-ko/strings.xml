@@ -242,9 +242,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"충전 중"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"모바일 데이터가 일시 중지됨"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"모바일 데이터가 일시중지됨"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속하면 데이터 사용량에 따른 요금이 부과될 수 있습니다."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속하면 데이터 사용량에 따라 요금이 부과될 수 있습니다."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"재개"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>

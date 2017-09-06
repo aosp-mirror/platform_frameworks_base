@@ -156,7 +156,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك شريحة SIM."</string>
-    <string name="accessibility_cell_data" msgid="5326139158682385073">"بيانات الجوال"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"بيانات الجوّال"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"تشغيل بيانات الجوال"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"إيقاف بيانات الجوال"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
@@ -244,7 +244,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"جارٍ الشحن"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"بيانات شبكات الجيل الثاني والثالث متوقفة مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"تم إيقاف بيانات شبكة الجيل الرابع مؤقتًا"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"تم إيقاف بيانات الجوال مؤقتًا"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"تم إيقاف بيانات الجوّال مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"تم إيقاف البيانات مؤقتًا"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"تم الوصول إلى حد البيانات الذي عيَّنته. لم يُعد بإمكانك استخدام بيانات الجوال.\n\nفي حالة الاستئناف، قد يتم تطبيق الرسوم لاستخدام البيانات."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"استئناف"</string>
@@ -328,7 +328,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"استخدام البيانات"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"البيانات المتبقية"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"فوق القيد"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> مستخدم"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> مستخدَمة"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"قيد <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"تحذير <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"وضع العمل"</string>
