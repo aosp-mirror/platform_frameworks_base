@@ -52,6 +52,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.Zygote;
@@ -87,6 +88,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
     static final boolean DEBUG = false;
 
+    private static final int NO_VERSION = -1;
+    /** Increment by one every time and add the corresponding upgrade logic in
+     *  {@link #upgradeLocked(int)} below. The first version was 1 */
+    private static final int CURRENT_VERSION = 1;
+
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
 
@@ -112,14 +118,16 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     };
 
-    private final SparseArray<UidState> mUidStates = new SparseArray<>();
+    @VisibleForTesting
+    final SparseArray<UidState> mUidStates = new SparseArray<>();
 
     /*
      * These are app op restrictions imposed per user from various parties.
      */
     private final ArrayMap<IBinder, ClientRestrictionState> mOpUserRestrictions = new ArrayMap<>();
 
-    private static final class UidState {
+    @VisibleForTesting
+    static final class UidState {
         public final int uid;
         public ArrayMap<String, Ops> pkgOps;
         public SparseIntArray opModes;
@@ -1398,6 +1406,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     void readState() {
+        int oldVersion = NO_VERSION;
         synchronized (mFile) {
             synchronized (this) {
                 FileInputStream stream;
@@ -1420,6 +1429,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                     if (type != XmlPullParser.START_TAG) {
                         throw new IllegalStateException("no start tag found");
+                    }
+
+                    final String versionString = parser.getAttributeValue(null, "v");
+                    if (versionString != null) {
+                        oldVersion = Integer.parseInt(versionString);
                     }
 
                     int outerDepth = parser.getDepth();
@@ -1464,6 +1478,55 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
+        synchronized (this) {
+            upgradeLocked(oldVersion);
+        }
+    }
+
+    private void upgradeRunAnyInBackgroundLocked() {
+        for (int i = 0; i < mUidStates.size(); i++) {
+            final UidState uidState = mUidStates.valueAt(i);
+            if (uidState == null) {
+                continue;
+            }
+            if (uidState.opModes != null) {
+                final int idx = uidState.opModes.indexOfKey(AppOpsManager.OP_RUN_IN_BACKGROUND);
+                if (idx >= 0) {
+                    uidState.opModes.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
+                            uidState.opModes.valueAt(idx));
+                }
+            }
+            if (uidState.pkgOps == null) {
+                continue;
+            }
+            for (int j = 0; j < uidState.pkgOps.size(); j++) {
+                Ops ops = uidState.pkgOps.valueAt(j);
+                if (ops != null) {
+                    final Op op = ops.get(AppOpsManager.OP_RUN_IN_BACKGROUND);
+                    if (op != null && op.mode != AppOpsManager.opToDefaultMode(op.op)) {
+                        final Op copy = new Op(op.uid, op.packageName,
+                                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
+                        copy.mode = op.mode;
+                        ops.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, copy);
+                    }
+                }
+            }
+        }
+    }
+
+    private void upgradeLocked(int oldVersion) {
+        if (oldVersion >= CURRENT_VERSION) {
+            return;
+        }
+        Slog.d(TAG, "Upgrading app-ops xml from version " + oldVersion + " to " + CURRENT_VERSION);
+        switch (oldVersion) {
+            case NO_VERSION:
+                upgradeRunAnyInBackgroundLocked();
+                // fall through
+            case 1:
+                // for future upgrades
+        }
+        scheduleFastWriteLocked();
     }
 
     void readUidOps(XmlPullParser parser) throws NumberFormatException,
@@ -1613,6 +1676,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 out.setOutput(stream, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
+                out.attribute(null, "v", String.valueOf(CURRENT_VERSION));
 
                 final int uidStateCount = mUidStates.size();
                 for (int i = 0; i < uidStateCount; i++) {

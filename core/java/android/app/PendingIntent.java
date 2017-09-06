@@ -20,18 +20,17 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
 
@@ -1005,6 +1004,19 @@ public final class PendingIntent implements Parcelable {
         try {
             return ActivityManager.getService()
                 .isIntentSenderAnActivity(mTarget);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Check whether this PendingIntent will launch a foreground service
+     */
+    public boolean isForegroundService() {
+        try {
+            return ActivityManager.getService()
+                    .isIntentSenderAForegroundService(mTarget);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
