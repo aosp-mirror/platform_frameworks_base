@@ -20,7 +20,6 @@ import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -955,6 +954,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new StatusBarShellCommand(this)).exec(
                 this, in, out, err, args, callback, resultReceiver);
+    }
+
+    public String[] getStatusBarIcons() {
+        return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
     }
 
     // ================================================================================
