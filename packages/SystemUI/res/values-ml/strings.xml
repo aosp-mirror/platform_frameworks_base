@@ -293,7 +293,7 @@
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ഉപയോക്താവ്"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"പുതിയ ഉപയോക്താവ്"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"വൈഫൈ"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"കണ‌ക്റ്റുചെയ്‌തിട്ടില്ല"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"കണ‌ക്റ്റ് ചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"നെറ്റ്‌വർക്ക് ഒന്നുമില്ല"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"വൈഫൈ ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"വൈഫൈ ഓണാണ്"</string>

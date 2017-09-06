@@ -242,7 +242,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Quvvat olmoqda"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G internet to‘xtatib qo‘yildi"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G internet to‘xtatib qo‘yildi"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobil internet pauza qilingan"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobil internet pauza qilindi"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Internetdan foydalanish to‘xtatib qo‘yildi"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Belgilangan trafik sarflab bo‘lindi. Endi mobil internetdan foydalana olmaysiz.\n\nDavom ettiradigan bo‘lsangiz, trafik uchun to‘lov olinishi mumkin."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Davom etish"</string>
@@ -383,10 +383,10 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Foydalanuvchini o‘zgartirish. Joriy foydalanuvchi – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Joriy foydalanuvchi <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Profilni ko‘rsatish"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"Foydalanuvchi qo‘shish"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Foydalanuvchi"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Yangi foydalanuvchi"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Mehmon"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Mehmon qo‘shish"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Mehmon"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Mehmon rejimini o‘chirish"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -673,7 +673,7 @@
     <string name="right_keycode" msgid="708447961000848163">"O‘ngga tugmasi kodi"</string>
     <string name="left_icon" msgid="3096287125959387541">"Chapga belgisi"</string>
     <string name="right_icon" msgid="3952104823293824311">"O‘ngga belgisi"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kerakli elementni tortib qo‘shing"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Keraklisini tepaga torting"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"O‘chirish uchun bu yerga torting"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vaqt"</string>

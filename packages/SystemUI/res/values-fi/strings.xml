@@ -240,7 +240,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Ladataan"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G-tiedonsiirto keskeytettiin"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-tiedonsiirto keskeytettiin"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobiilidatan käyttö on keskeytetty."</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobiilidatan käyttö on keskeytetty"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Tiedonsiirto keskeytettiin"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Asettamasi dataraja on saavutettu. Et enää käytä mobiilidataa.\n\nJos jatkat käyttöä, datan käytöstä saatetaan periä maksuja."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jatka"</string>

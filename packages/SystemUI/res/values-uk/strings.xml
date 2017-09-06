@@ -246,7 +246,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Передавання даних 4G призупинено"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Мобільне передавання даних призупинено"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Передавання даних призупинено"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Досягнуто вказаного обмеження обсягу даних. Мобільне передавання даних вимкнено.\n\nЯкщо ввімкнути його, може стягуватися плата за використання трафіку."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Досягнуто ліміту мобільного трафіку. Ви його більше не витрачаєте.\n\nЯкщо ви продовжите, може стягуватися плата за використання трафіку."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Відновити"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Немає з’єднання"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi під’єднано"</string>
