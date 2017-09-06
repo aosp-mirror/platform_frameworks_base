@@ -60,13 +60,15 @@
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (डिफ़ॉल्ट)"</item>
-    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
-    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+    <item msgid="2809759619990248160">"AVRCP 1.3"</item>
+    <item msgid="6199178154704729352">"AVRCP 1.5"</item>
+    <item msgid="5172170854953034852">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
     <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="1913619118958233129">"avrcp15"</item>
-    <item msgid="7142710449249088270">"avrcp16"</item>
+    <item msgid="3011533352527449572">"avrcp13"</item>
+    <item msgid="8837606198371920819">"avrcp15"</item>
+    <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"सिस्टम चयन का उपयोग करें (डिफ़ॉल्ट)"</item>
@@ -75,7 +77,7 @@
     <item msgid="5254942598247222737">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडियो"</item>
     <item msgid="2091430979086738145">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ऑडियो"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"वैकल्पिक कोडेक सक्षम करें"</item>
+    <item msgid="723675059572222462">"वैकल्पिक कोडेक चालू करें"</item>
     <item msgid="3304843301758635896">"वैकल्पिक कोडेक अक्षम करें"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
@@ -85,7 +87,7 @@
     <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडियो"</item>
     <item msgid="298198075927343893">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ऑडियो"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"वैकल्पिक कोडेक सक्षम करें"</item>
+    <item msgid="2209680154067241740">"वैकल्पिक कोडेक चालू करें"</item>
     <item msgid="741805482892725657">"वैकल्पिक कोडेक अक्षम करें"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">

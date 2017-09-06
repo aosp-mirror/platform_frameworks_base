@@ -110,11 +110,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"აპების წაშლა"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"წაშლილი აპები და მომხმარებლები"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB მოდემი"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB ტეტერინგი"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"პორტატული უსადენო ქსელი"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-მოდემი"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"მოდემის რეჟიმი"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"მოდემი და პორტატული უსადენო ქსელი"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth ტეტერინგი"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ტეტერინგი"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"ტეტერინგი და პორტატული უსადენო ქსელი"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"სამსახურის ყველა აპი"</string>
     <string name="user_guest" msgid="8475274842845401871">"სტუმარი"</string>
     <string name="unknown" msgid="1592123443519355854">"უცნობი"</string>
@@ -168,7 +168,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"პარამეტრების დაყენება აპების დეველოპერებისთვის"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"ამ მომხმარებლისთვის დეველოპერის პარამეტრები არ არის ხელმისაწვდომი"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN პარამეტრები ამ მომხმარებლისათვის მიუწვდომელია"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ტეთერინგის პარამეტრები ამ მომხმარებლისათვის მიუწვდომელია"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"ტეტერინგის პარამეტრები ამ მომხმარებლისათვის მიუწვდომელია"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"წვდომის წერტილის (APN) პარამეტრები ამ მომხმარებლისათვის მიუწვდომელია"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB გამართვა"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"გამართვის რეჟიმი, როდესაც USB შეერთებულია"</string>
@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi Roam სკანირების მუდამ დაშვება"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"მობილური ინტერნეტის ყოველთვის გააქტიურება"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ტეტერინგის აპარატურული აჩქარება"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth-მოწყობილობების ჩვენება სახელების გარეშე"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ხმის აბსოლუტური სიძლიერის გათიშვა"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ზოლსშიდა დარეკვის ჩართვა"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth-ის AVRCP-ის ვერსია"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ამ პარამეტრების გამოყენება დასაშვებია მხოლოდ დეველოპერული მიზნებით. მათმა გამოყენებამ შეიძლება გამოიწვიოს თქვენი მოწყობილობის და მისი აპლიკაციების დაზიანება ან გაუმართავი მუშაობა."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"აპლიკაციების USB-ს საშუალებით შემოწმება"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"შეამოწმეთ, რამდენად უსაფრთხოა ADB/ADT-ის საშუალებით ინსტალირებული აპლიკაციები."</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-მოწყობილობები ნაჩვენები იქნება სახელების გარეშე (მხოლოდ MAC-მისამართები)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"გათიშავს Bluetooth-ის ხმის აბსოლუტური სიძლიერის ფუნქციას დისტანციურ მოწყობილობებზე ხმასთან დაკავშირებული ისეთი პრობლემების არსებობის შემთხვევაში, როგორიცაა ხმის დაუშვებლად მაღალი სიძლიერე ან კონტროლის შეუძლებლობა."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ტელეფონის ზარების Bluetooth-ყურსაცვამებზე დაკვრის დაშვება"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ადგილობრივი ტერმინალი"</string>
