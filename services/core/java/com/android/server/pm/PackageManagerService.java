@@ -9844,12 +9844,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
             }
-            final PackageParser.Package p = mPackages.get(packageName);
-            if (p == null) {
-                return;
-            }
-            p.mLastPackageUsageTimeInMills[reason] = System.currentTimeMillis();
+            notifyPackageUseLocked(packageName, reason);
         }
+    }
+
+    private void notifyPackageUseLocked(String packageName, int reason) {
+        final PackageParser.Package p = mPackages.get(packageName);
+        if (p == null) {
+            return;
+        }
+        p.mLastPackageUsageTimeInMills[reason] = System.currentTimeMillis();
     }
 
     @Override
@@ -25514,6 +25518,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public boolean hasInstantApplicationMetadata(String packageName, int userId) {
             synchronized (mPackages) {
                 return mInstantAppRegistry.hasInstantApplicationMetadataLPr(packageName, userId);
+            }
+        }
+
+        @Override
+        public void notifyPackageUse(String packageName, int reason) {
+            synchronized (mPackages) {
+                PackageManagerService.this.notifyPackageUseLocked(packageName, reason);
             }
         }
     }

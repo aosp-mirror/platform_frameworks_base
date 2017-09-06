@@ -32,7 +32,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -182,7 +181,7 @@ public class BackgroundRestrictionsTest {
         }
     }
 
-    private void setAppOpsModeAllowed(boolean allow) throws PackageManager.NameNotFoundException {
+    private void setAppOpsModeAllowed(boolean allow) {
         mAppOpsManager.setMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, mTestPackageUid,
                 TEST_APP_PACKAGE, allow ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
     }

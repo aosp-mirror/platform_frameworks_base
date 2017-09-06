@@ -88,7 +88,7 @@ static void splitAndPrint(const string& args) {
     }
 }
 
-static const char* replaceAll(const string& field_name, const char oldC, const string& newS) {
+static const std::string replaceAll(const string& field_name, const char oldC, const string& newS) {
     if (field_name.find_first_of(oldC) == field_name.npos) return field_name.c_str();
     size_t pos = 0, idx = 0;
     char* res = new char[field_name.size() * newS.size() + 1]; // assign a larger buffer
@@ -104,7 +104,9 @@ static const char* replaceAll(const string& field_name, const char oldC, const s
         }
     }
     res[idx] = '\0';
-    return res;
+    std::string result(res);
+    delete [] res;
+    return result;
 }
 
 static inline bool isDefaultDest(const FieldDescriptor* field) {
@@ -118,7 +120,8 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
     for (int i=0; i<descriptor->field_count(); i++) {
         hasDefaultFlags[i] = true; // set default to true
         const FieldDescriptor* field = descriptor->field(i);
-        const char* field_name = replaceAll(field->full_name(), '.', "__");
+        const std::string field_name_str = replaceAll(field->full_name(), '.', "__");
+        const char* field_name = field_name_str.c_str();
         // check if the same name is already defined
         if (msgNames.find(field_name) != msgNames.end()) {
             hasDefaultFlags[i] = msgNames[field_name];
@@ -142,7 +145,7 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
                 printf("static const char* %s_patterns[] = {\n", field_name);
                 for (int i=0; i<p.patterns_size(); i++) {
                     // the generated string need to escape backslash as well, need to dup it here
-                    printf("    \"%s\",\n", replaceAll(p.patterns(i), '\\', "\\\\"));
+                    printf("    \"%s\",\n", replaceAll(p.patterns(i), '\\', "\\\\").c_str());
                 }
                 printf("    NULL };\n");
                 printf("static Privacy %s = { %d, %d, %d, %s_patterns };\n", field_name, field->number(),
@@ -170,7 +173,7 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
         if (hasDefaultFlags[i]) continue;
-        printf("    &%s,\n", replaceAll(field->full_name(), '.', "__"));
+        printf("    &%s,\n", replaceAll(field->full_name(), '.', "__").c_str());
     }
     printf("    NULL };\n");
     emptyline();
