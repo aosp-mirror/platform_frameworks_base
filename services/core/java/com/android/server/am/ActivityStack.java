@@ -466,15 +466,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTmpRect2.setEmpty();
         updateOverrideConfiguration();
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
-                mTmpRect2, getOverrideConfiguration());
+                mTmpRect2);
         mStackSupervisor.mStacks.put(mStackId, this);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
-    T createStackWindowController(int displayId, boolean onTop, Rect outBounds,
-            Configuration overrideConfig) {
-        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds,
-                overrideConfig);
+    T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
+        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds);
     }
 
     T getWindowContainerController() {

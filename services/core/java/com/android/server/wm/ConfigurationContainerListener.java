@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package com.android.server.wm;
 
+import android.content.res.Configuration;
+
 /**
- * Interface used by the owner/creator of the container to listen to changes with the container.
- * @see WindowContainerController
+ * Interface for listening to changes in a {@link ConfigurationContainer}.
  */
-public interface WindowContainerListener {
-    void registerConfigurationChangeListener(ConfigurationContainerListener listener);
-    void unregisterConfigurationChangeListener(ConfigurationContainerListener listener);
+public interface ConfigurationContainerListener {
+
+    void onOverrideConfigurationChanged(Configuration overrideConfiguration);
 }

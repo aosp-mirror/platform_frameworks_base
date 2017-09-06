@@ -27,6 +27,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+import static android.content.res.Configuration.EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -55,22 +56,22 @@ public class ConfigurationContainerTests {
     public void testConfigurationInit() throws Exception {
         // Check root container initial config.
         final TestConfigurationContainer root = new TestConfigurationContainer();
-        assertEquals(Configuration.EMPTY, root.getOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, root.getMergedOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, root.getConfiguration());
+        assertEquals(EMPTY, root.getOverrideConfiguration());
+        assertEquals(EMPTY, root.getMergedOverrideConfiguration());
+        assertEquals(EMPTY, root.getConfiguration());
 
         // Check child initial config.
         final TestConfigurationContainer child1 = root.addChild();
-        assertEquals(Configuration.EMPTY, child1.getOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, child1.getMergedOverrideConfiguration());
-        assertEquals(Configuration.EMPTY, child1.getConfiguration());
+        assertEquals(EMPTY, child1.getOverrideConfiguration());
+        assertEquals(EMPTY, child1.getMergedOverrideConfiguration());
+        assertEquals(EMPTY, child1.getConfiguration());
 
         // Check child initial config if root has overrides.
         final Configuration rootOverrideConfig = new Configuration();
         rootOverrideConfig.fontScale = 1.3f;
         root.onOverrideConfigurationChanged(rootOverrideConfig);
         final TestConfigurationContainer child2 = root.addChild();
-        assertEquals(Configuration.EMPTY, child2.getOverrideConfiguration());
+        assertEquals(EMPTY, child2.getOverrideConfiguration());
         assertEquals(rootOverrideConfig, child2.getMergedOverrideConfiguration());
         assertEquals(rootOverrideConfig, child2.getConfiguration());
 
@@ -83,7 +84,7 @@ public class ConfigurationContainerTests {
         rootFullConfig.updateFrom(rootOverrideConfig);
 
         final TestConfigurationContainer child3 = root.addChild();
-        assertEquals(Configuration.EMPTY, child3.getOverrideConfiguration());
+        assertEquals(EMPTY, child3.getOverrideConfiguration());
         assertEquals(rootOverrideConfig, child3.getMergedOverrideConfiguration());
         assertEquals(rootFullConfig, child3.getConfiguration());
     }
@@ -263,6 +264,22 @@ public class ConfigurationContainerTests {
 
     }
 
+    @Test
+    public void testRegisterConfigurationChangeListener() throws Exception {
+        final TestConfigurationContainer container = new TestConfigurationContainer();
+        final TestConfigurationChangeListener listener = new TestConfigurationChangeListener();
+        final Configuration config = new Configuration();
+        config.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        config.windowConfiguration.setAppBounds(10, 10, 10, 10);
+        container.onOverrideConfigurationChanged(config);
+        container.registerConfigurationChangeListener(listener);
+        // Assert listener got the current config. of the container after it was registered.
+        assertEquals(config, listener.mOverrideConfiguration);
+        // Assert listener gets changes to override configuration.
+        container.onOverrideConfigurationChanged(EMPTY);
+        assertEquals(EMPTY, listener.mOverrideConfiguration);
+    }
+
     /**
      * Contains minimal implementation of {@link ConfigurationContainer}'s abstract behavior needed
      * for testing.
@@ -301,6 +318,15 @@ public class ConfigurationContainerTests {
         @Override
         protected ConfigurationContainer getParent() {
             return mParent;
+        }
+    }
+
+    private class TestConfigurationChangeListener implements ConfigurationContainerListener {
+
+        final Configuration mOverrideConfiguration = new Configuration();
+
+        public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+            mOverrideConfiguration.setTo(overrideConfiguration);
         }
     }
 }
