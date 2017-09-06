@@ -66,6 +66,8 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightControllerImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
+import com.android.systemui.statusbar.policy.IconLogger;
+import com.android.systemui.statusbar.policy.IconLoggerImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -296,6 +298,9 @@ public class Dependency extends SystemUI {
 
 
         mProviders.put(PowerUI.WarningsUI.class, () -> new PowerNotificationWarnings(mContext));
+
+        mProviders.put(IconLogger.class, () -> new IconLoggerImpl(mContext,
+                getDependency(BG_LOOPER), getDependency(MetricsLogger.class)));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

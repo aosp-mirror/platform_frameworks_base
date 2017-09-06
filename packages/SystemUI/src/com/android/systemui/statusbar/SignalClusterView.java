@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
@@ -65,6 +66,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private static final String SLOT_MOBILE = "mobile";
     private static final String SLOT_WIFI = "wifi";
     private static final String SLOT_ETHERNET = "ethernet";
+    private static final String SLOT_VPN = "vpn";
 
     private final NetworkController mNetworkController;
     private final SecurityController mSecurityController;
@@ -116,6 +118,8 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private boolean mBlockEthernet;
     private boolean mActivityEnabled;
     private boolean mForceBlockWifi;
+
+    private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -447,14 +451,15 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private void apply() {
         if (mWifiGroup == null) return;
 
-        mVpn.setVisibility(mVpnVisible ? View.VISIBLE : View.GONE);
         if (mVpnVisible) {
             if (mLastVpnIconId != mVpnIconId) {
                 setIconForView(mVpn, mVpnIconId);
                 mLastVpnIconId = mVpnIconId;
             }
+            mIconLogger.onIconShown(SLOT_VPN);
             mVpn.setVisibility(View.VISIBLE);
         } else {
+            mIconLogger.onIconHidden(SLOT_VPN);
             mVpn.setVisibility(View.GONE);
         }
         if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
@@ -466,8 +471,10 @@ public class SignalClusterView extends LinearLayout implements NetworkController
                 mLastEthernetIconId = mEthernetIconId;
             }
             mEthernetGroup.setContentDescription(mEthernetDescription);
+            mIconLogger.onIconShown(SLOT_ETHERNET);
             mEthernetGroup.setVisibility(View.VISIBLE);
         } else {
+            mIconLogger.onIconHidden(SLOT_ETHERNET);
             mEthernetGroup.setVisibility(View.GONE);
         }
 
@@ -481,9 +488,11 @@ public class SignalClusterView extends LinearLayout implements NetworkController
                 setIconForView(mWifiDark, mWifiStrengthId);
                 mLastWifiStrengthId = mWifiStrengthId;
             }
+            mIconLogger.onIconShown(SLOT_WIFI);
             mWifiGroup.setContentDescription(mWifiDescription);
             mWifiGroup.setVisibility(View.VISIBLE);
         } else {
+            mIconLogger.onIconHidden(SLOT_WIFI);
             mWifiGroup.setVisibility(View.GONE);
         }
 
@@ -505,6 +514,11 @@ public class SignalClusterView extends LinearLayout implements NetworkController
                 }
             }
         }
+        if (anyMobileVisible) {
+            mIconLogger.onIconShown(SLOT_MOBILE);
+        } else {
+            mIconLogger.onIconHidden(SLOT_MOBILE);
+        }
 
         if (mIsAirplaneMode) {
             if (mLastAirplaneIconId != mAirplaneIconId) {
@@ -512,8 +526,10 @@ public class SignalClusterView extends LinearLayout implements NetworkController
                 mLastAirplaneIconId = mAirplaneIconId;
             }
             mAirplane.setContentDescription(mAirplaneContentDescription);
+            mIconLogger.onIconShown(SLOT_AIRPLANE);
             mAirplane.setVisibility(View.VISIBLE);
         } else {
+            mIconLogger.onIconHidden(SLOT_AIRPLANE);
             mAirplane.setVisibility(View.GONE);
         }
 
@@ -529,7 +545,13 @@ public class SignalClusterView extends LinearLayout implements NetworkController
             mWifiSignalSpacer.setVisibility(View.GONE);
         }
 
-        mNoSimsCombo.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
+        if (mNoSimsVisible) {
+            mIconLogger.onIconShown(SLOT_MOBILE);
+            mNoSimsCombo.setVisibility(View.VISIBLE);
+        } else {
+            mIconLogger.onIconHidden(SLOT_MOBILE);
+            mNoSimsCombo.setVisibility(View.GONE);
+        }
 
         boolean anythingVisible = mNoSimsVisible || mWifiVisible || mIsAirplaneMode
                 || anyMobileVisible || mVpnVisible || mEthernetVisible;
