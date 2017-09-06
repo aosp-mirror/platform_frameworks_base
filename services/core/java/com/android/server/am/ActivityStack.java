@@ -70,6 +70,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAV
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
@@ -2061,10 +2062,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         try {
             final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
                     "makeInvisible", true /* beforeStopping */);
-            // Defer telling the client it is hidden if it can enter Pip and isn't current stopped
-            // or stopping. This gives it a chance to enter Pip in onPause().
+            // Defer telling the client it is hidden if it can enter Pip and isn't current paused,
+            // stopped or stopping. This gives it a chance to enter Pip in onPause().
+            // TODO: There is still a question surrounding activities in multi-window mode that want
+            // to enter Pip after they are paused, but are still visible. I they should be okay to
+            // enter Pip in those cases, but not "auto-Pip" which is what this condition covers and
+            // the current contract for "auto-Pip" is that the app should enter it before onPause
+            // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
-                    && r.state != STOPPING && r.state != STOPPED;
+                    && r.state != STOPPING && r.state != STOPPED && r.state != PAUSED;
             r.setDeferHidingClient(deferHidingClient);
             r.setVisible(false);
 
