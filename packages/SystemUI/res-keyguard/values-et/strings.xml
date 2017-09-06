@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Vale muster"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Vale PIN-kood"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Proovige <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast uuesti."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast.</item>
+      <item quantity="one">Proovige uuesti 1 sekundi pärast.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Joonistage oma muster"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Sisestage SIM-kaardi PIN-kood."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Sisestage operaatori „<xliff:g id="CARRIER">%1$s</xliff:g>” SIM-kaardi PIN-kood."</string>

@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Padrón incorrecto"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Contrasinal incorrecto"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN incorrecto"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Téntao de novo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">Téntao de novo dentro de <xliff:g id="NUMBER">%d</xliff:g> segundos.</item>
+      <item quantity="one">Téntao de novo dentro de 1 segundo.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Debuxa o teu padrón"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Introduce o PIN da SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Introduce o PIN da SIM para \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>

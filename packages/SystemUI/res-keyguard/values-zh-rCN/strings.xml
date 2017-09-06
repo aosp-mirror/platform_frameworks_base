@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"图案错误"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"密码错误"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN 码错误"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。</item>
+      <item quantity="one">请在 1 秒后重试。</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"绘制您的图案"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"请输入 SIM 卡 PIN 码。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"请输入“<xliff:g id="CARRIER">%1$s</xliff:g>”的 SIM 卡 PIN 码。"</string>

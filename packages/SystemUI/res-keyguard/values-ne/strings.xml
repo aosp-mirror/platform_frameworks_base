@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"गलत ढाँचा"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"गलत PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।</item>
+      <item quantity="one">१ सेकेन्डपछि फेरि प्रयास गर्नुहोस्।</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"आफ्नो ढाँचा कोर्नुहोस्"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM को PIN प्रविष्टि गर्नुहोस्।"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" को SIM को PIN प्रविष्ट गर्नुहोस्।"</string>

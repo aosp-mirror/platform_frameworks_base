@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Padrão incorreto"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Palavra-passe incorreta"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN incorreto"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Tente novamente dentro de <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one">Tente novamente dentro de 1 segundo.</item>
+      <item quantity="other">Tente novamente dentro de <xliff:g id="NUMBER">%d</xliff:g> segundos.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Desenhe o seu padrão"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Introduza o PIN do cartão SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Introduza o PIN do cartão SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>

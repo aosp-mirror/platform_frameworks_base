@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ಪಿನ್‌ ತಪ್ಪಾಗಿದೆ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</item>
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"ನಿಮ್ಮ ಪ್ಯಾಟರ್ನ್ ಚಿತ್ರಿಸಿ"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ಸಿಮ್‌ ಪಿನ್‌ ನಮೂದಿಸಿ."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ಗಾಗಿ ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ."</string>

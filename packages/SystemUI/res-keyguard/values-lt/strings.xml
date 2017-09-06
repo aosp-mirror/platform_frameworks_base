@@ -57,7 +57,12 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Netinkamas atrakinimo piešinys"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Netinkamas slaptažodis"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Netinkamas PIN kodas"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sek."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundės.</item>
+      <item quantity="few">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundžių.</item>
+      <item quantity="many">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundės.</item>
+      <item quantity="other">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundžių.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Nupieškite atrakinimo piešinį"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Įveskite SIM kortelės PIN kodą."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Įveskite „<xliff:g id="CARRIER">%1$s</xliff:g>“ SIM kortelės PIN kodą"</string>

@@ -473,7 +473,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तुम्ही मॅन्युअली अनलॉक करेपर्यंत डीव्हाइस लॉक राहील"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचना अधिक जलद मिळवा"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपण अनलॉक करण्‍यापूर्वी त्यांना पहा"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नाही धन्यवाद"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नाही, नको"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट अप"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"आता बंद करा"</string>
@@ -483,7 +483,7 @@
     <string name="screen_pinning_description" msgid="8909878447196419623">"आपण अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"आपण अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"समजले"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"नाही धन्यवाद"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"नाही, नको"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"आपण सेटिंग्जमध्ये ते पुढील वेळी चालू कराल तेव्हा ते पुन्हा दिसेल."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"लपवा"</string>

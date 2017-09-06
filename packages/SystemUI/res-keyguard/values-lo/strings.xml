@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"ຮູບແບບຜິດ"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ.</item>
+      <item quantity="one">ລອງໃໝ່ໃນອີກ 1 ວິນາທີ.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"ແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານ"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ໃສ່ລະຫັດ PIN ຂອງຊິມ."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"ໃສ່ລະຫັດ PIN ຂອງຊິມສຳລັບ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>

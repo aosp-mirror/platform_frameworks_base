@@ -77,7 +77,7 @@
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezaji cha maudhui (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nyuma"</string>
@@ -284,7 +284,7 @@
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mbinu ya uingizaji"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Kutambua Eneo"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Kitambua eneo kimezimwa"</string>
-    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha midia"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha faili"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Simu za Dharura Pekee"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Mipangilio"</string>
@@ -353,8 +353,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Tafuta"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Sogeza juu kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Sogeza kushoto kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
-    <string name="zen_priority_introduction" msgid="1149025108714420281">"Hutasumbuliwa na sauti na mitetemo, isipokuwa inayotokana na kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Hutasumbuliwa na sauti na mitetemo, isipokuwa inayotokana na kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Badilisha upendavyo"</string>
     <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hatua hii huzuia mitetemo na sauti ZOTE, ikiwa ni pamoja na inayotokana na kengele, muziki video na michezo. Bado utaweza kupiga simu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa ni pamoja na ile inayotokana na kengele, muziki, video na michezo."</string>
@@ -384,7 +384,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Mtumiaji mpya"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza aliyealikwa"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Data na programu zote katika kipindi hiki zitafutwa."</string>
@@ -476,7 +476,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hapana, asante"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Sanidi"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="6930243045593601084">"Zima sasa"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Izime sasa"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Panua"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Kunja"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skrini imebandikwa"</string>
@@ -596,8 +596,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Kushoto"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Kulia"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Katikati"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Sogeza"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Nafasi"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Nafasinyuma"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Cheza/Sitisha"</string>

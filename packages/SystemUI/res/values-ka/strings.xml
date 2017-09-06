@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"მობილური ინტერნეტი"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"მობილური ინტერნეტი ჩართულია"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"მობილური ინტერნეტი გამორთულია"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ის ჩართვა"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ტეტერინგის ჩართვა"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"თვითმფრინავის რეჟიმი"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ჩართულია."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ბარათი არ არის."</string>
@@ -312,7 +312,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"დაკავშირებულია"</string>
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"დაკავშირებულია. ბატარეის დონე: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"დაკავშირება..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"მოდემის რეჟიმი"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ტეტერინგი"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"წვდომის წერტილი"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"შეტყობინებები"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ფანარი"</string>

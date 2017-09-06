@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"غلط پیٹرن"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"غلط پاسورڈ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"‏غلط PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> سیکنڈز میں دوبارہ کوشش کریں۔</item>
+      <item quantity="one">1 سیکنڈ میں دوبارہ کوشش کریں۔</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"اپنا پیٹرن ڈرا کریں"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"‏SIM PIN درج کریں۔"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"‏\"<xliff:g id="CARRIER">%1$s</xliff:g>\" کیلئے SIM PIN درج کریں۔"</string>
