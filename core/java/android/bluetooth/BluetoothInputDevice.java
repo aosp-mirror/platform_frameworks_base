@@ -222,7 +222,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     private Context mContext;
     private ServiceListener mServiceListener;
     private BluetoothAdapter mAdapter;
-    private IBluetoothInputDevice mService;
+    private volatile IBluetoothInputDevice mService;
 
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
@@ -331,15 +331,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.connect(device);
+                return service.connect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -370,15 +371,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.disconnect(device);
+                return service.disconnect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -388,15 +390,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
-        if (mService != null && isEnabled()) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getConnectedDevices();
+                return service.getConnectedDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
     }
 
@@ -406,15 +409,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
-        if (mService != null && isEnabled()) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getDevicesMatchingConnectionStates(states);
+                return service.getDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
     }
 
@@ -424,15 +428,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getConnectionState(device);
+                return service.getConnectionState(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return BluetoothProfile.STATE_DISCONNECTED;
     }
 
@@ -453,19 +458,20 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             if (priority != BluetoothProfile.PRIORITY_OFF
                     && priority != BluetoothProfile.PRIORITY_ON) {
                 return false;
             }
             try {
-                return mService.setPriority(device, priority);
+                return service.setPriority(device, priority);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -484,15 +490,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getPriority(device);
+                return service.getPriority(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.PRIORITY_OFF;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return BluetoothProfile.PRIORITY_OFF;
     }
 
@@ -517,17 +524,12 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     };
 
     private boolean isEnabled() {
-        if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
-        return false;
+        return mAdapter.getState() == BluetoothAdapter.STATE_ON;
     }
 
-    private boolean isValidDevice(BluetoothDevice device) {
-        if (device == null) return false;
-
-        if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
-        return false;
+    private static boolean isValidDevice(BluetoothDevice device) {
+        return device != null && BluetoothAdapter.checkBluetoothAddress(device.getAddress());
     }
-
 
     /**
      * Initiate virtual unplug for a HID input device.
@@ -540,16 +542,17 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean virtualUnplug(BluetoothDevice device) {
         if (DBG) log("virtualUnplug(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.virtualUnplug(device);
+                return service.virtualUnplug(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
 
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
 
     }
@@ -565,15 +568,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean getProtocolMode(BluetoothDevice device) {
         if (VDBG) log("getProtocolMode(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getProtocolMode(device);
+                return service.getProtocolMode(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -588,15 +592,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean setProtocolMode(BluetoothDevice device, int protocolMode) {
         if (DBG) log("setProtocolMode(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.setProtocolMode(device, protocolMode);
+                return service.setProtocolMode(device, protocolMode);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -615,19 +620,19 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     public boolean getReport(BluetoothDevice device, byte reportType, byte reportId,
             int bufferSize) {
         if (VDBG) {
-            log(
-                    "getReport(" + device + "), reportType=" + reportType + " reportId=" + reportId
-                            + "bufferSize=" + bufferSize);
+            log("getReport(" + device + "), reportType=" + reportType + " reportId=" + reportId
+                    + "bufferSize=" + bufferSize);
         }
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getReport(device, reportType, reportId, bufferSize);
+                return service.getReport(device, reportType, reportId, bufferSize);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -644,15 +649,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean setReport(BluetoothDevice device, byte reportType, String report) {
         if (VDBG) log("setReport(" + device + "), reportType=" + reportType + " report=" + report);
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.setReport(device, reportType, report);
+                return service.setReport(device, reportType, report);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -668,15 +674,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean sendData(BluetoothDevice device, String report) {
         if (DBG) log("sendData(" + device + "), report=" + report);
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.sendData(device, report);
+                return service.sendData(device, report);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -691,15 +698,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean getIdleTime(BluetoothDevice device) {
         if (DBG) log("getIdletime(" + device + ")");
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getIdleTime(device);
+                return service.getIdleTime(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -715,15 +723,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      */
     public boolean setIdleTime(BluetoothDevice device, byte idleTime) {
         if (DBG) log("setIdletime(" + device + "), idleTime=" + idleTime);
-        if (mService != null && isEnabled() && isValidDevice(device)) {
+        final IBluetoothInputDevice service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.setIdleTime(device, idleTime);
+                return service.setIdleTime(device, idleTime);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
