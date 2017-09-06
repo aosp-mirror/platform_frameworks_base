@@ -1542,18 +1542,7 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     @Override
     public List<String> getAllProviders() {
-        ArrayList<String> out;
-        synchronized (mLock) {
-            out = new ArrayList<>(mProviders.size());
-            for (LocationProviderInterface provider : mProviders) {
-                String name = provider.getName();
-                if (LocationManager.FUSED_PROVIDER.equals(name)) {
-                    continue;
-                }
-                out.add(name);
-            }
-        }
-
+        List<String> out = getProviders(null /*criteria*/, false /*enabledOnly*/);
         if (D) Log.d(TAG, "getAllProviders()=" + out);
         return out;
     }
