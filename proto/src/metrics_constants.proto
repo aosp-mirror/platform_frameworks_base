@@ -3527,6 +3527,7 @@ message MetricsEvent {
     NOTIFICATION_SNOOZED_CRITERIA = 832;
 
     // FIELD - The context (source) from which an action is performed
+    // For QS, this is a boolean of whether the panel is expanded
     FIELD_CONTEXT = 833;
 
     // ACTION: Settings advanced button is expanded
@@ -4286,6 +4287,18 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O MR
     APPLICATIONS_STORAGE_PHOTOS = 1092;
+
+    // ACTION: Logged when the status bar icons change.
+    // OS: O MR
+    STATUS_BAR_ICONS_CHANGED = 1093;
+
+    // FIELD: Bitfield indicating which icons are shown.
+    // OS: O MR
+    FIELD_STATUS_ICONS = 1094;
+
+    // FIELD: Number of status icons currently shown.
+    // OS: O MR
+    FIELD_NUM_STATUS_ICONS = 1095;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
