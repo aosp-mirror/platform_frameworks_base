@@ -1432,7 +1432,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃瞄…"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃描…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在連線..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可用"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"無法使用"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形不對"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒後再試一次。"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。</item>
+      <item quantity="one">請在 1 秒後再試一次。</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM 卡 PIN 碼"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN 碼"</string>

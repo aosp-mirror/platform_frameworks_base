@@ -490,7 +490,7 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Слишком много попыток. Повторите позже."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Слишком много попыток. Сканер отпечатков пальцев отключен."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторите попытку."</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Отпечаток <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок отпечатка пальца"</string>
@@ -1492,7 +1492,12 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильный графический ключ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Неправильный пароль"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Неправильный PIN-код"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Повторите попытку через <xliff:g id="NUMBER">%1$d</xliff:g> сек."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
+      <item quantity="few">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+      <item quantity="many">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
+      <item quantity="other">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Введите графический ключ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Введите PIN-код SIM-карты"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Введите PIN"</string>

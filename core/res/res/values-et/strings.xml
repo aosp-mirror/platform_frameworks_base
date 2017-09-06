@@ -1131,7 +1131,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Rakendus %1$s soovib luua ühenduse WiFi-võrguga %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Rakendus"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WiFi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käivitage WiFi otseühendus. See lülitab välja WiFi kliendi/leviala."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käivitage WiFi otseühendus. See lülitab välja WiFi kliendi/kuumkoha."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"WiFi otseühenduse käivitamine ebaõnnestus."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"WiFi Direct on sees"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Puudutage seadete nägemiseks"</string>
@@ -1303,7 +1303,7 @@
     <string name="submit" msgid="1602335572089911941">"Saada"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Autorežiim lubatud"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Puudutage autorežiimist väljumiseks."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Jagamine või tööpunkt on aktiivne"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Jagamine või kuumkoht on aktiivne"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Puudutage seadistamiseks."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Jagamine on keelatud"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Lisateabe saamiseks võtke ühendust oma administraatoriga"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Vale muster"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Vale PIN-kood"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Proovige uuesti <xliff:g id="NUMBER">%1$d</xliff:g> sekundi pärast."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast.</item>
+      <item quantity="one">Proovige uuesti 1 sekundi pärast.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Joonistage oma muster"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Sisestage SIM-i PIN-kood"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Sisestage PIN-kood"</string>

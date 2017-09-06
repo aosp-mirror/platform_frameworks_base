@@ -214,7 +214,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Hitno"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvještaj o greškama"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kreirajte izvještaj o greškama"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao poruka e-pošte. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao e-poruka. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivni izvještaj"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Koristite ovu opciju u većini slučajeva. Ova opcija vam omogućava praćenje napretka izvještaja, unos dodatnih detalja o problemu i pravljenje snimaka ekrana. Moglo bi doći do izostavljanja nekih manje korištenih dijelova za čije prijavljivanje je potrebno dugo vremena."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Kompletan izvještaj"</string>
@@ -871,7 +871,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Prošli mjesec"</string>
     <string name="older" msgid="5211975022815554840">"Starije"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"datuma <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"u <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"godine <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"dan"</string>
@@ -1204,7 +1204,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nisu potrebna odobrenja"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ovo se možda dodatno plaća"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Uredu"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Ovaj uređaj se puni preko USB-a"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Punjenje uređaja putem USB-a"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB napaja priključeni uređaj"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB za prijenos fajlova"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB za prijenos slika"</string>
@@ -1409,9 +1409,9 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Dodirnite za prikaz potrošnje i postavki."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Dostignut limit za 2G-3G podatke"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dostignut limit za 4G podatke"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Dostignut limit za mob. podatke"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Dostignuto ograničenje za prijenos podataka"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dostignut limit Wi-Fi podataka"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Podaci pauz. za ostatak ciklusa"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Prijenos podataka je pauziran za ostatak ciklusa"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Premašeni 2G-3G podaci"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Premašeni 4G podaci"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Prekoračeno je ograničenje za podatke na mobilnom uređaju"</string>
@@ -1471,7 +1471,11 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pogrešan uzorak"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Pogrešna lozinka"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Pogrešan PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER">%1$d</xliff:g>."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekundu.</item>
+      <item quantity="few">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekunde.</item>
+      <item quantity="other">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekundi.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Nacrtajte obrazac"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Unesite PIN za SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Unesite PIN"</string>

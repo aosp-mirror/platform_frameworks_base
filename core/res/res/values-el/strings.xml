@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Λάθος μοτίβο"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Λανθασμένος κωδικός πρόσβασης"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Λανθασμένος κωδικός PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%1$d</xliff:g> δευτερόλεπτα."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα.</item>
+      <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Σχεδιάστε το μοτίβο σας"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Εισαγωγή PIN SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Πληκτρολογήστε το PIN"</string>

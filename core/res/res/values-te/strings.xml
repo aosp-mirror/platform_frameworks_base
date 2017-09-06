@@ -67,10 +67,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"అవాంఛిత అంతరాయ కాల్‌ల తిరస్కరణ"</string>
     <string name="CndMmi" msgid="3116446237081575808">"కాలింగ్ నంబర్ బట్వాడా"</string>
     <string name="DndMmi" msgid="1265478932418334331">"అంతరాయం కలిగించవద్దు"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"కాలర్ ID డిఫాల్ట్‌గా పరిమితానికి ఉంటుంది. తదుపరి కాల్: పరిమితం చేయబడింది"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"కాలర్ ID డిఫాల్ట్‌గా పరిమితానికి ఉంటుంది. తదుపరి కాల్: అపరిమితం"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"కాలర్ ID డిఫాల్ట్‌గా అపరిమితానికి ఉంటుంది. తదుపరి కాల్: పరిమితం చేయబడింది"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"కాలర్ ID డిఫాల్ట్‌గా అపరిమితానికి ఉంటుంది. తదుపరి కాల్: అపరిమితం"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"కాలర్ ID డిఫాల్ట్‌గా పరిమితానికి ఉంటుంది. తర్వాత కాల్: పరిమితం చేయబడింది"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"కాలర్ ID డిఫాల్ట్‌గా పరిమితానికి ఉంటుంది. తర్వాత కాల్: అపరిమితం"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"కాలర్ ID డిఫాల్ట్‌గా అపరిమితానికి ఉంటుంది. తర్వాత కాల్: పరిమితం చేయబడింది"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"కాలర్ ID డిఫాల్ట్‌గా అపరిమితానికి ఉంటుంది. తర్వాత కాల్: అపరిమితం"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"డేటా సేవ లేదు"</string>
@@ -546,7 +546,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"క్యారియర్ సందేశ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"క్యారియర్ సేవలకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"క్యారియర్ సేవలకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"అంతరాయం కలిగించవద్దును  యాక్సెస్ చేయడం"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"అంతరాయం కలిగించవద్దును యాక్సెస్ చేయడం"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
@@ -722,9 +722,9 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"సిమ్ కార్డును చొప్పించండి."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"సిమ్ కార్డు లేదు లేదా చదవగలిగేలా లేదు. సిమ్ కార్డును చొప్పించండి."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"నిరుపయోగ సిమ్ కార్డు."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"మీ సిమ్ కార్డు శాశ్వతంగా నిలిపివేయబడింది.\n మరో సిమ్ కార్డు కోసం మీ వైర్‌లెస్ సేవా ప్రదాతను సంప్రదించండి."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"మీ SIM కార్డ్ శాశ్వతంగా నిలిపివేయబడింది.\n మరో SIM కార్డ్‌ని పొందడం కోసం మీ వైర్‌లెస్ సేవా ప్రదాతను సంప్రదించండి."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"మునుపటి ట్రాక్"</string>
-    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"తదుపరి ట్రాక్"</string>
+    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"తర్వాత ట్రాక్"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"పాజ్ చేయి"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"ప్లే చేయి"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"ఆపివేయి"</string>
@@ -986,9 +986,9 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> అమలులో ఉంది"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"మరింత సమాచారం కోసం లేదా అనువర్తనాన్ని ఆపివేయడం కోసం నొక్కండి."</string>
     <string name="ok" msgid="5970060430562524910">"సరే"</string>
-    <string name="cancel" msgid="6442560571259935130">"రద్దు చేయండి"</string>
+    <string name="cancel" msgid="6442560571259935130">"రద్దు చేయి"</string>
     <string name="yes" msgid="5362982303337969312">"సరే"</string>
-    <string name="no" msgid="5141531044935541497">"రద్దు చేయండి"</string>
+    <string name="no" msgid="5141531044935541497">"రద్దు చేయి"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"గమనిక"</string>
     <string name="loading" msgid="7933681260296021180">"లోడ్ చేస్తోంది…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ఆన్‌లో ఉంది"</string>
@@ -1264,13 +1264,13 @@
     <string name="ime_action_go" msgid="8320845651737369027">"వెళ్లు"</string>
     <string name="ime_action_search" msgid="658110271822807811">"వెతుకు"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"పంపు"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"తదుపరి"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"తర్వాత"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"పూర్తయింది"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"మునుపటి"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"అమలు చేయి"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nనంబర్ డయల్ చేయండి"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>ని ఉపయోగించి\nపరిచయాన్ని సృష్టించండి"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"క్రింది ఒకటి లేదా అంతకంటే ఎక్కువ యాప్‌లు మీ ఖాతాను యాక్సెస్ చేయడానికి ఇప్పుడే మరియు భవిష్యత్తులో అనుమతిని అభ్యర్థించవచ్చు."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"క్రింది ఒకటి లేదా అంతకంటే ఎక్కువ యాప్‌లు మీ ఖాతాను యాక్సెస్ చేయడానికి ఇప్పుడు మరియు భవిష్యత్తులో అనుమతిని అభ్యర్థించవచ్చు."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"మీరు ఈ అభ్యర్థనను అనుమతించాలనుకుంటున్నారా?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"యాక్సెస్ అభ్యర్థన"</string>
     <string name="allow" msgid="7225948811296386551">"అనుమతించండి"</string>
@@ -1305,10 +1305,10 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"కారు మోడ్ నుండి నిష్క్రమించడానికి నొక్కండి."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"టీథర్ చేయబడినది లేదా హాట్‌స్పాట్ సక్రియంగా ఉండేది"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"సెటప్ చేయడానికి నొక్కండి."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"టీథెరింగ్ నిలిపివేయబడింది"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"టెథెరింగ్ నిలిపివేయబడింది"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"వివరాల కోసం మీ నిర్వాహకులను సంప్రదించండి"</string>
     <string name="back_button_label" msgid="2300470004503343439">"వెనుకకు"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"తదుపరి"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"తర్వాత"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"దాటవేయి"</string>
     <string name="no_matches" msgid="8129421908915840737">"సరిపోలికలు లేవు"</string>
     <string name="find_on_page" msgid="1946799233822820384">"పేజీలో కనుగొనండి"</string>
@@ -1354,13 +1354,13 @@
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"సంవత్సరాన్ని పెంచండి"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"సంవత్సరాన్ని తగ్గించండి"</string>
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"మునుపటి నెల"</string>
-    <string name="date_picker_next_month_button" msgid="5559507736887605055">"తదుపరి నెల"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"తర్వాత నెల"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"రద్దు చేయి"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"తొలగించు"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"పూర్తయింది"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"మోడ్ మార్పు"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"షిఫ్ట్"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"యాప్‌ను ఎంచుకోండి"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>ని ప్రారంభించడం సాధ్యపడలేదు"</string>
@@ -1394,8 +1394,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"పేర్కొన్న పరిమితి కంటే <xliff:g id="SIZE">%s</xliff:g> మించిపోయింది."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"నేపథ్య డేటా పరిమితం చేయబడింది"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"నియంత్రణ తీసివేయడానికి నొక్కండి."</string>
-    <string name="ssl_certificate" msgid="6510040486049237639">"భద్రతా ప్రమాణపత్రం"</string>
-    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ఈ ప్రమాణపత్రం చెల్లుబాటు అవుతుంది."</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"భద్రతా సర్టిఫికెట్"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ఈ సర్టిఫికెట్ చెల్లుబాటు అవుతుంది."</string>
     <string name="issued_to" msgid="454239480274921032">"దీనికి జారీ చేయబడింది:"</string>
     <string name="common_name" msgid="2233209299434172646">"సాధారణ పేరు:"</string>
     <string name="org_name" msgid="6973561190762085236">"సంస్థ:"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ఆకృతి తప్పు"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"పాస్‌వర్డ్ తప్పు"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"పిన్‌ తప్పు"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి.</item>
+      <item quantity="one">1 సెకనులో మళ్లీ ప్రయత్నించండి.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"మీ నమూనాను గీయండి"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"సిమ్ పిన్‌ను నమోదు చేయండి"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"పిన్‌ను నమోదు చేయండి"</string>
@@ -1483,14 +1486,14 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"తీసివేయి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"యాక్సెస్ షార్ట్‌కట్ ఉపయోగించాలా?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ ఫీచర్:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్‌లో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"యాక్సెస్ బటన్‌ను మీరు నొక్కినప్పుడు ఉపయోగించాల్సిన ఒక ఫీచర్‌ను ఎంచుకోండి:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ఫీచర్‌లను మార్చడానికి, యాక్సెస్ సామర్థ్య బటన్‌ను నొక్కి &amp; పట్టుకోండి."</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"యాక్సెస్ సామర్థ్య బటన్‌ను మీరు నొక్కినప్పుడు ఉపయోగించాల్సిన ఒక ఫీచర్‌ను ఎంచుకోండి:"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"ఫీచర్లను మార్చడానికి, యాక్సెస్ సామర్థ్య బటన్‌ను నొక్కి &amp; పట్టుకోండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"మాగ్నిఫికేషన్"</string>
     <string name="user_switched" msgid="3768006783166984410">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>కి మారుస్తోంది…"</string>
@@ -1664,7 +1667,7 @@
       <item quantity="one">1 గం పాటు</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
-    <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (తదుపరి అలారం) వరకు"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (తర్వాత అలారం) వరకు"</string>
     <string name="zen_mode_forever" msgid="1916263162129197274">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

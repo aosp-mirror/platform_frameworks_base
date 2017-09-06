@@ -1386,7 +1386,7 @@
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Limite de données 4G atteinte"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Limite données mobiles atteinte"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Limite données Wi-Fi atteinte"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Données suspend. pour reste cycle"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Données suspendues jusqu\'à la fin du cycle"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Quota de données 2G-3G dépassé"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Quota de données 4G dépassé"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Quota utilisation données dépassé"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Schéma incorrect."</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Mot de passe incorrect."</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Code PIN incorrect."</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Réessayez dans <xliff:g id="NUMBER">%1$d</xliff:g> secondes."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> seconde.</item>
+      <item quantity="other">Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Dessinez votre schéma."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Saisissez le code PIN de la carte SIM."</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Saisissez le code PIN."</string>
@@ -1742,8 +1745,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Productivité"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Mémoire de l\'appareil"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Débogage USB"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"heure"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minute"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"heures"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"minutes"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Définir l\'heure"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Veuillez indiquer une heure valide"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Indiquez l\'heure"</string>

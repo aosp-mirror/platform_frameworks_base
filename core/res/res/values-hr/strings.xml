@@ -1211,8 +1211,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Otkriven je analogni audiododatak"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Priključeni uređaj nije kompatibilan s ovim telefonom. Dodirnite da biste saznali više."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za otklanjanje pogrešaka USB-om"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje pogrešaka putem USB-a."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za otklanjanje pogrešaka putem USB-a"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste takvo otklanjanje onemogućili."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Odaberite da biste onemogućili rješavanje programske pogreške na USB-u."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izrada izvješća o programskoj pogrešci…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite li podijeliti izvješće o programskoj pogrešci?"</string>
@@ -1407,9 +1407,9 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Dodirnite za upotrebu i postavke"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Dost. ogr. 2G–3G prijenosa pod."</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dost. ogr. 4G prijenosa podataka"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Dosegnuto je ograničenje mobilnog podatkovnog prometa"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Dosegnuto je ograničenje za mob. podatkovni promet"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dost. ogr. Wi-Fi prijenosa pod."</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Podaci su pauz. za ostatak cikl."</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Podaci su pauzirani do kraja ciklusa"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Prekoračeno ograničenje 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Prekoračeno je ograničenje 4G podataka"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Prekoračeno je ograničenje za podatke na mobilnom uređaju"</string>
@@ -1469,7 +1469,11 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pogrešan obrazac"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Pogrešna zaporka"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Pogrešan PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Pokušajte ponovo za <xliff:g id="NUMBER">%1$d</xliff:g> s."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekundu</item>
+      <item quantity="few">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekunde</item>
+      <item quantity="other">Pokušajte ponovo za <xliff:g id="NUMBER">%d</xliff:g> sekundi</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Iscrtajte svoj obrazac"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Unesite PIN za SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Unesite PIN"</string>
@@ -1652,7 +1656,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih radnji. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio podatkovni promet, Ušteda podataka onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio podatkovni promet, Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
