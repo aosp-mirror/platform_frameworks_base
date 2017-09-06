@@ -57,7 +57,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        mBatterySaverPolicy = new BatterySaverPolicy(mHandler);
+        mBatterySaverPolicy = new BatterySaverPolicy(getContext(), mHandler);
         mBatterySaverPolicy.start(getContext().getContentResolver());
     }
 
