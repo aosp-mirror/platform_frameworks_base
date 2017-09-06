@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.AsyncTask;
@@ -73,6 +74,9 @@ final class SelectionActionModeHelper {
     private AsyncTask mTextClassificationAsyncTask;
 
     private final SelectionTracker mSelectionTracker;
+
+    // TODO remove nullable marker once the switch gating the feature gets removed
+    @Nullable
     private final SmartSelectSprite mSmartSelectSprite;
 
     SelectionActionModeHelper(@NonNull Editor editor) {
@@ -85,7 +89,8 @@ final class SelectionActionModeHelper {
                 new SelectionTracker(mTextView.getContext(), mTextView.isTextEditable());
 
         if (SMART_SELECT_ANIMATION_ENABLED) {
-            mSmartSelectSprite = new SmartSelectSprite(mTextView);
+            mSmartSelectSprite = new SmartSelectSprite(mTextView.getContext(),
+                    mTextView::invalidate);
         } else {
             mSmartSelectSprite = null;
         }
@@ -167,6 +172,12 @@ final class SelectionActionModeHelper {
         cancelAsyncTask();
     }
 
+    public void onDraw(final Canvas canvas) {
+        if (mSmartSelectSprite != null) {
+            mSmartSelectSprite.draw(canvas);
+        }
+    }
+
     private void cancelAsyncTask() {
         if (mTextClassificationAsyncTask != null) {
             mTextClassificationAsyncTask.cancel(true);
@@ -233,19 +244,6 @@ final class SelectionActionModeHelper {
         if (selectionRectangles.size() != 1) {
             onAnimationEndCallback.run();
             return;
-        }
-
-        /*
-         * TODO Figure out a more robust approach for this
-         * We have to translate all the generated rectangles by the top-left padding of the
-         * TextView because the padding influences the rendering of the ViewOverlay, but is not
-         * taken into account when generating the selection path rectangles.
-         */
-        for (RectF rectangle : selectionRectangles) {
-            rectangle.left += mTextView.getPaddingLeft();
-            rectangle.right += mTextView.getPaddingLeft();
-            rectangle.top += mTextView.getPaddingTop();
-            rectangle.bottom += mTextView.getPaddingTop();
         }
 
         final PointF touchPoint = new PointF(

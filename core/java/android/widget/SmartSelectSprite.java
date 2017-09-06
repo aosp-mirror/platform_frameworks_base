@@ -36,10 +36,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.Shape;
 import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewOverlay;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.util.Collections;
@@ -50,7 +50,6 @@ import java.util.List;
 /**
  * A utility class for creating and animating the Smart Select animation.
  */
-// TODO Do not rely on ViewOverlays for drawing the Smart Select sprite
 final class SmartSelectSprite {
 
     private static final int EXPAND_DURATION = 300;
@@ -65,8 +64,8 @@ final class SmartSelectSprite {
     private final Interpolator mCornerInterpolator;
     private final float mStrokeWidth;
 
-    private final View mView;
     private Animator mActiveAnimator = null;
+    private final Runnable mInvalidator;
     @ColorInt
     private final int mStrokeColor;
 
@@ -331,8 +330,12 @@ final class SmartSelectSprite {
 
     }
 
-    SmartSelectSprite(final View view) {
-        final Context context = view.getContext();
+    /**
+     * @param context     The {@link Context} in which the animation will run
+     * @param invalidator A {@link Runnable} which will be called every time the animation updates,
+     *                    indicating that the view drawing the animation should invalidate itself
+     */
+    SmartSelectSprite(final Context context, final Runnable invalidator) {
         mExpandInterpolator = AnimationUtils.loadInterpolator(
                 context,
                 android.R.interpolator.fast_out_slow_in);
@@ -341,7 +344,7 @@ final class SmartSelectSprite {
                 android.R.interpolator.fast_out_linear_in);
         mStrokeWidth = dpToPixel(context, STROKE_WIDTH_DP);
         mStrokeColor = getStrokeColor(context);
-        mView = view;
+        mInvalidator = Preconditions.checkNotNull(invalidator);
     }
 
     /**
@@ -366,7 +369,7 @@ final class SmartSelectSprite {
         cancelAnimation();
 
         final ValueAnimator.AnimatorUpdateListener updateListener =
-                valueAnimator -> mView.invalidate();
+                valueAnimator -> mInvalidator.run();
 
         final List<RoundedRectangleShape> shapes = new LinkedList<>();
         final List<Animator> cornerAnimators = new LinkedList<>();
@@ -421,7 +424,6 @@ final class SmartSelectSprite {
 
         mExistingRectangleList = rectangleList;
         mExistingDrawable = shapeDrawable;
-        mView.getOverlay().add(shapeDrawable);
 
         mActiveAnimator = createAnimator(rectangleList, startingOffsetLeft, startingOffsetRight,
                 cornerAnimators, updateListener,
@@ -480,7 +482,7 @@ final class SmartSelectSprite {
             @Override
             public void onAnimationEnd(Animator animator) {
                 mExistingRectangleList.setDisplayType(RectangleList.DisplayType.POLYGON);
-                mExistingDrawable.invalidateSelf();
+                mInvalidator.run();
 
                 onAnimationEnd.run();
             }
@@ -581,11 +583,9 @@ final class SmartSelectSprite {
     }
 
     private void removeExistingDrawables() {
-        final ViewOverlay overlay = mView.getOverlay();
-        overlay.remove(mExistingDrawable);
-
         mExistingDrawable = null;
         mExistingRectangleList = null;
+        mInvalidator.run();
     }
 
     /**
@@ -596,6 +596,12 @@ final class SmartSelectSprite {
             mActiveAnimator.cancel();
             mActiveAnimator = null;
             removeExistingDrawables();
+        }
+    }
+
+    public void draw(Canvas canvas) {
+        if (mExistingDrawable != null) {
+            mExistingDrawable.draw(canvas);
         }
     }
 
