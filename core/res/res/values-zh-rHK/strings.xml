@@ -1420,7 +1420,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃瞄…"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃描…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在連線..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可用"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"無法使用"</string>

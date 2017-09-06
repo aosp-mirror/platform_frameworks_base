@@ -1591,7 +1591,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"नंतर पुन्हा प्रयत्न करा"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"पूर्ण स्क्रीन पाहत आहात"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"पूर्ण स्क्रीनवर पाहत आहात"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"बाहेर पडण्यासाठी, वरून खाली स्वाइप करा."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"समजले"</string>
     <string name="done_label" msgid="2093726099505892398">"पूर्ण झाले"</string>
@@ -1750,7 +1750,7 @@
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g> आणि <xliff:g id="TYPE_1">%2$s</xliff:g> सेव्ह करायची?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> सेव्ह करायची?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सेव्ह करा"</string>
-    <string name="autofill_save_no" msgid="2625132258725581787">"नाही धन्यवाद"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"नाही, नको"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"संकेतशब्द"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पत्ता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
