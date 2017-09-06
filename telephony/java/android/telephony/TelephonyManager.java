@@ -5159,7 +5159,12 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use  {@link android.telecom.TelecomManager#placeCall(Uri address,
+     * Bundle extras)} instead.
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public void call(String callingPackage, String number) {
@@ -5172,7 +5177,11 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#endCall()} instead.
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public boolean endCall() {
@@ -5186,7 +5195,11 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#acceptRingingCall} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void answerRingingCall() {
@@ -5199,7 +5212,11 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#silenceRinger} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @SuppressLint("Doclava125")
     public void silenceRinger() {
@@ -5754,10 +5771,13 @@ public class TelephonyManager {
     }
 
     /**
+     * @deprecated Use {@link android.telecom.TelecomManager#silenceRinger} instead
      * Whether the phone supports TTY mode.
      *
      * @return {@code true} if the device supports TTY mode, and {@code false} otherwise.
+     *
      */
+    @Deprecated
     public boolean isTtyModeSupported() {
         try {
             ITelephony telephony = getITelephony();
