@@ -4101,6 +4101,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return true;
         }
         enforceFullCrossUsersPermission(userHandle);
+        enforceUserUnlocked(userHandle, parent);
 
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -4120,7 +4121,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceManagedProfile(userHandle, "call APIs refering to the parent profile");
 
         synchronized (this) {
-            int targetUser = getProfileParentId(userHandle);
+            final int targetUser = getProfileParentId(userHandle);
+            enforceUserUnlocked(targetUser, false);
             DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, false));
             return isActivePasswordSufficientForUserLocked(policy, targetUser, false);
         }
@@ -4128,8 +4130,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
-        enforceUserUnlocked(userHandle, parent);
-
         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
                 && !policy.mPasswordStateHasBeenSetSinceBoot) {
             // Before user enters their password for the first time after a reboot, return the
@@ -4462,7 +4462,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 result = mLockPatternUtils.setLockCredentialWithToken(password,
                         TextUtils.isEmpty(password) ? LockPatternUtils.CREDENTIAL_TYPE_NONE
                                 : LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                        tokenHandle, token, userHandle);
+                                quality, tokenHandle, token, userHandle);
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
@@ -5466,6 +5466,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Notify DPMS regarding the metric of the current password. This happens when the user changes
+     * the password, but also when the user just unlocks the keyguard. In comparison,
+     * reportPasswordChanged() is only called when the user changes the password.
+     */
     @Override
     public void setActivePasswordState(PasswordMetrics metrics, int userHandle) {
         if (!mHasFeature) {
