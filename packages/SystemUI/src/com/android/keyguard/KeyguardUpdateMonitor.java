@@ -38,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
@@ -52,6 +53,7 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -156,6 +158,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
             "com.android.settings", "com.android.settings.FallbackHome");
+
+
+    /**
+     * If true, the system is in the half-boot-to-decryption-screen state.
+     * Prudently disable lockscreen.
+     */
+    public static final boolean CORE_APPS_ONLY;
+    static {
+        try {
+            CORE_APPS_ONLY = IPackageManager.Stub.asInterface(
+                    ServiceManager.getService("package")).isOnlyCoreApps();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     private static KeyguardUpdateMonitor sInstance;
 
