@@ -414,7 +414,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * Returns true if windows in this container should be given move animations by default.
      */
     public boolean hasMovementAnimations() {
-        return mWindowingMode == WINDOWING_MODE_PINNED;
+        return mWindowingMode != WINDOWING_MODE_PINNED;
     }
 
     private static String windowingModeToString(@WindowingMode int windowingMode) {
