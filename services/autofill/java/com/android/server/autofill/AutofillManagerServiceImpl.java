@@ -533,9 +533,9 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an dataset authentication was selected.
      */
-    void setDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId) {
+    void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId) {
         synchronized (mLock) {
-            if (isValidEventLocked("setDatasetAuthenticationSelected()", sessionId)) {
+            if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
             }
@@ -545,9 +545,9 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an save Ui is shown.
      */
-    void setSaveShown(int sessionId) {
+    void logSaveShown(int sessionId) {
         synchronized (mLock) {
-            if (isValidEventLocked("setSaveShown()", sessionId)) {
+            if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
             }
         }
@@ -556,7 +556,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when a dataset was selected.
      */
-    void setDatasetSelected(@Nullable String selectedDataset, int sessionId) {
+    void logDatasetSelected(@Nullable String selectedDataset, int sessionId) {
         synchronized (mLock) {
             if (isValidEventLocked("setDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
