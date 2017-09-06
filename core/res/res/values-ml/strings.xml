@@ -1170,7 +1170,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"അനുമതികളൊന്നും ആവശ്യമില്ല"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ഇത് നിങ്ങൾക്ക് പണച്ചെലവിനിടയാക്കാം"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ശരി"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"ഈ ഉപകരണം USB ചാർജുചെയ്യുന്നു"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB ഈ ഉപകരണം ചാർജജ് ചെയ്യുന്നു"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"ഘടിപ്പിച്ചിട്ടുള്ള ഉപകരണത്തിന് USB വൈദ്യുതി നൽകുന്നു"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ഫയൽ കൈമാറ്റത്തിനുള്ള USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ഫോട്ടോ കൈമാറ്റത്തിനായുള്ള USB"</string>
@@ -1414,7 +1414,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"സിസ്റ്റം"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ബ്ലൂടൂത്ത് ഓഡിയോ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"വയർലെസ് ഡിസ്‌പ്ലേ"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"കാസ്‌റ്റുചെയ്യുക"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"കാസ്‌റ്റ് ചെയ്യുക"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ഉപകരണത്തിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"സ്‌ക്രീൻ ഉപകരണത്തിലേക്ക് കാസ്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ഉപകരണങ്ങൾക്കായി തിരയുന്നു…"</string>

@@ -214,7 +214,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Hitno"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvještaj o greškama"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kreirajte izvještaj o greškama"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao poruka e-pošte. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao e-poruka. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivni izvještaj"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Koristite ovu opciju u većini slučajeva. Ova opcija vam omogućava praćenje napretka izvještaja, unos dodatnih detalja o problemu i pravljenje snimaka ekrana. Moglo bi doći do izostavljanja nekih manje korištenih dijelova za čije prijavljivanje je potrebno dugo vremena."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Kompletan izvještaj"</string>
@@ -1194,7 +1194,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nisu potrebna odobrenja"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ovo se možda dodatno plaća"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Uredu"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Ovaj uređaj se puni preko USB-a"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Punjenje uređaja putem USB-a"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB napaja priključeni uređaj"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB za prijenos fajlova"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB za prijenos slika"</string>
@@ -1397,9 +1397,9 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Dodirnite za prikaz potrošnje i postavki."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Dostignut limit za 2G-3G podatke"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dostignut limit za 4G podatke"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Dostignut limit za mob. podatke"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Dostignuto ograničenje za prijenos podataka"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dostignut limit Wi-Fi podataka"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Podaci pauz. za ostatak ciklusa"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Prijenos podataka je pauziran za ostatak ciklusa"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Premašeni 2G-3G podaci"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Premašeni 4G podaci"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Prekoračeno je ograničenje za podatke na mobilnom uređaju"</string>

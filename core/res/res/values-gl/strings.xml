@@ -1170,7 +1170,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Non é necesario ningún permiso"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"é posible que teñas que pagar"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"O USB está cargando este dispositivo"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Cargando este dispositivo por USB"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"O USB está proporcionando enerxía ao dispositivo conectado"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferencia de ficheiros"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferencia de fotos"</string>
@@ -1372,9 +1372,9 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Toca para uso e configuración."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Límite de datos de 2G-3G acadado"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Límite de datos de 4G acadado"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Límite de datos móbiles acadado"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Alcanzouse o límite de datos móbiles"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Límite de datos da wifi acadado"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Datos pausados para o ciclo"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Datos pausados para o resto do ciclo"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Límite de datos 2G-3G superado"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Límite de datos 4G superado"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Límite de datos móbiles superado"</string>
@@ -1420,7 +1420,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Configuración"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Desconectar"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"Analizando..."</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Explorando..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Conectando..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Dispoñible"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Non dispoñibles"</string>
