@@ -1933,6 +1933,7 @@ public:
             void** outData, size_t* outSize) const;
 
     static const size_t IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256;
+    static const uint32_t IDMAP_CURRENT_VERSION = 0x00000001;
 
     // Retrieve idmap meta-data.
     //
