@@ -107,6 +107,7 @@ public class DctConstants {
     public static final int EVENT_PCO_DATA_RECEIVED = BASE + 45;
     public static final int EVENT_SET_CARRIER_DATA_ENABLED = BASE + 46;
     public static final int EVENT_DATA_RECONNECT = BASE + 47;
+    public static final int EVENT_ROAMING_SETTING_CHANGE = BASE + 48;
 
     /***** Constants *****/
 
