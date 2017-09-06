@@ -40,7 +40,6 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     private final ProcessRecord mProc;
     private final boolean mRepeating;
     private final boolean mIsRestartable;
-
     private CharSequence mName;
 
     static int CANT_SHOW = -1;
@@ -110,17 +109,16 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.app_error_dialog, frame, true);
 
-        boolean hasRestart = !mRepeating && mIsRestartable;
         final boolean hasReceiver = mProc.errorReportReceiver != null;
 
         final TextView restart = findViewById(com.android.internal.R.id.aerr_restart);
         restart.setOnClickListener(this);
-        restart.setVisibility(hasRestart ? View.VISIBLE : View.GONE);
+        restart.setVisibility(mIsRestartable ? View.VISIBLE : View.GONE);
         final TextView report = findViewById(com.android.internal.R.id.aerr_report);
         report.setOnClickListener(this);
         report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
         final TextView close = findViewById(com.android.internal.R.id.aerr_close);
-        close.setVisibility(!hasRestart ? View.VISIBLE : View.GONE);
+        close.setVisibility(mRepeating ? View.VISIBLE : View.GONE);
         close.setOnClickListener(this);
 
         boolean showMute = !Build.IS_USER && Settings.Global.getInt(context.getContentResolver(),
