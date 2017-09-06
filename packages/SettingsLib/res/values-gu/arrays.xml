@@ -50,24 +50,20 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"ક્યારેય તપાસશો નહીં"</item>
-    <item msgid="6042769699089883931">"ફક્ત DRM સામગ્રી માટે તપાસો"</item>
+    <item msgid="6042769699089883931">"ફક્ત DRM કન્ટેન્ટ માટે તપાસો"</item>
     <item msgid="9174900380056846820">"હંમેશાં તપાસો"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"HDCP તપાસનો ક્યારેય ઉપયોગ કરશો નહીં"</item>
-    <item msgid="3878793616631049349">"ફક્ત DRM સામગ્રી માટે HDCP તપાસનો ઉપયોગ કરો"</item>
+    <item msgid="3878793616631049349">"ફક્ત DRM કન્ટેન્ટ માટે HDCP તપાસનો ઉપયોગ કરો"</item>
     <item msgid="45075631231212732">"હંમેશા HDCP તપાસનો ઉપયોગ કરો"</item>
   </string-array>
-  <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"AVRCP 1.4 (ડિફૉલ્ટ)"</item>
-    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
-    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
-  </string-array>
-  <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="1913619118958233129">"avrcp15"</item>
-    <item msgid="7142710449249088270">"avrcp16"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_avrcp_versions:1 (2809759619990248160) -->
+    <!-- no translation found for bluetooth_avrcp_versions:2 (6199178154704729352) -->
+    <!-- no translation found for bluetooth_avrcp_versions:3 (5172170854953034852) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:1 (3011533352527449572) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:2 (8837606198371920819) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:3 (3422726142222090896) -->
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
     <item msgid="7539690996561263909">"SBC"</item>

@@ -170,9 +170,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Setările VPN nu sunt disponibile pentru acest utilizator"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Setările pentru tethering nu sunt disponibile pentru acest utilizator"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Setările pentru „Nume puncte de acces” nu sunt disponibile pentru acest utilizator"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Depanare USB"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Remedierea erorilor prin USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Mod de depanare când este conectat USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Revoc autorizații depanare USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Revoc autorizații remediere a erorilor prin USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Comandă rapidă pentru raportul de erori"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Afișați un buton în meniul de pornire pentru a realiza un raport de erori"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Activ permanent"</string>
@@ -226,8 +226,8 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Activați inspectarea atributelor de vizualizare"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Păstrați întotdeauna conexiunea de date mobile activată, chiar și atunci când funcția Wi‑Fi este activată (pentru comutarea rapidă între rețele)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Folosiți accelerarea hardware pentru tethering, dacă este disponibilă"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Permiteți depanarea USB?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"Depanarea USB are exclusiv scopuri de dezvoltare. Utilizați-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Permiteți remedierea erorilor prin USB?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Remedierea erorilor prin USB are exclusiv scopuri de dezvoltare. Utilizați-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Revocați accesul la remedierea erorilor prin USB de pe toate computerele pe care le-ați autorizat anterior?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Permiteți setările pentru dezvoltare?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aceste setări sunt destinate exclusiv utilizării pentru dezvoltare. Din cauza lor, este posibil ca dispozitivul dvs. și aplicațiile de pe acesta să nu mai funcționeze sau să funcționeze necorespunzător."</string>

@@ -65,7 +65,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Ulangan (HSP/HFP/A2DP dan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefon chaqiruvlari"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fayl o‘tkazish"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fayl uzatish"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Kiritish qurilmasi"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internetga kirish"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontaktlarni ulashish"</string>
