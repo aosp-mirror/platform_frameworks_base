@@ -59,7 +59,6 @@ namespace android {
 #endif
 
 #define IDMAP_MAGIC             0x504D4449
-#define IDMAP_CURRENT_VERSION   0x00000001
 
 #define APP_PACKAGE_ID      0x7f
 #define SYS_PACKAGE_ID      0x01
@@ -246,11 +245,11 @@ static bool assertIdmapHeader(const void* idmap, size_t size) {
     }
 
     const uint32_t version = htodl(*(reinterpret_cast<const uint32_t*>(idmap) + 1));
-    if (version != IDMAP_CURRENT_VERSION) {
+    if (version != ResTable::IDMAP_CURRENT_VERSION) {
         // We are strict about versions because files with this format are
         // auto-generated and don't need backwards compatibility.
         ALOGW("idmap: version mismatch in header (is 0x%08x, expected 0x%08x)",
-                version, IDMAP_CURRENT_VERSION);
+                version, ResTable::IDMAP_CURRENT_VERSION);
         return false;
     }
     return true;
@@ -6855,7 +6854,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
 
     uint32_t* data = (uint32_t*)*outData;
     *data++ = htodl(IDMAP_MAGIC);
-    *data++ = htodl(IDMAP_CURRENT_VERSION);
+    *data++ = htodl(ResTable::IDMAP_CURRENT_VERSION);
     *data++ = htodl(targetCrc);
     *data++ = htodl(overlayCrc);
     const char* paths[] = { targetPath, overlayPath };
