@@ -74,7 +74,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
         if (listening) {

@@ -45,7 +45,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (listening) {
             mDataSaverController.addCallback(this);
         } else {
