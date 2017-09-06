@@ -1193,7 +1193,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ກວດພົບອຸປະກອນເສີມສຽງ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ອຸປະກອນທີ່ເຊື່ອມຕໍ່ນັ້ນບໍ່ສາມາດໃຊ້ຮ່ວມກັບໂທລະສັບນີ້ໄດ້. ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັ໊ກຜ່ານ USB ແລ້ວ"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັກຜ່ານ USB ແລ້ວ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"ແຕະເພື່ອປິດການດີບັກຜ່ານ USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ເລືອກເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ກຳລັງຂໍລາຍງານຂໍ້ຜິດພາດ…"</string>

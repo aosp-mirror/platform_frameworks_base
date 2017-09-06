@@ -1086,7 +1086,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Sauti ya Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Sauti ya toni mlio"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Sauti ya simu"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya midia"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya faili"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Sauti ya arifa"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Mlio chaguo-msingi"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Chaguo-msingi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1384,9 +1384,9 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Gonga ili uangalie matumizi na mipangilio."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Kikomo data ya 2G-3G kimefikiwa"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Kikomo cha data ya 4G kimefikiwa"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Umefikisha kiwango cha juu kinachoruhusiwa cha matumizi ya data ya simu"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Umefikisha kipimo cha juu cha data"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Kikomo data ya Wi-Fi kimefikiwa"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Data imesitishwa kwa mzunguko uliosalia"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Matumizi ya data yamesitishwa kwa kipindi kilichosalia"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kikomo cha data ya 2G-3G kimezidishwa"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kikomo cha data cha 4G kimezidishwa"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Umepitisha kiwango cha data ulichoweka"</string>

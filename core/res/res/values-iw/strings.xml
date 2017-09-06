@@ -431,7 +431,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"מאפשרת לאפליקציה להשתמש במשדר האינפרה-אדום של הטאבלט."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"מאפשרת לאפליקציה להשתמש במשדר האינפא-האדום של הטלוויזיה."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"מאפשרת לאפליקציה להשתמש במשדר האינפרא-אדום של הטלפון."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"הגדר טפט"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"הגדרת טפט"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"מאפשר לאפליקציה להגדיר את טפט המערכת."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"התאמת גודל הטפט שלך"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"מאפשר לאפליקציה להגדיר את סמני הגודל של טפט המערכת."</string>
@@ -817,7 +817,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"צא מדף זה"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"הישאר בדף זה"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nהאם אתה בטוח שברצונך לנווט אל מחוץ לדף זה?"</string>
-    <string name="save_password_label" msgid="6860261758665825069">"אשר"</string>
+    <string name="save_password_label" msgid="6860261758665825069">"אישור"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"טיפ: הקש פעמיים כדי להגדיל ולהקטין."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"מילוי אוטומטי"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"הגדר מילוי אוטומטי"</string>
@@ -859,7 +859,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"תפריט+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"רווח"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"מחק"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"מחיקה"</string>
     <string name="search_go" msgid="8298016669822141719">"חיפוש"</string>
     <string name="search_hint" msgid="1733947260773056054">"חיפוש…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"חיפוש"</string>
@@ -1009,7 +1009,7 @@
     <string name="paste" msgid="5629880836805036433">"הדבק"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"הדבק כטקסט פשוט"</string>
     <string name="replace" msgid="5781686059063148930">"החלף..."</string>
-    <string name="delete" msgid="6098684844021697789">"מחק"</string>
+    <string name="delete" msgid="6098684844021697789">"מחיקה"</string>
     <string name="copyUrl" msgid="2538211579596067402">"העתק כתובת אתר"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"בחר טקסט"</string>
     <string name="undo" msgid="7905788502491742328">"ביטול"</string>
@@ -1017,7 +1017,7 @@
     <string name="autofill" msgid="3035779615680565188">"מילוי אוטומטי"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"בחירת טקסט"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"הוסף למילון"</string>
-    <string name="deleteText" msgid="6979668428458199034">"מחק"</string>
+    <string name="deleteText" msgid="6979668428458199034">"מחיקה"</string>
     <string name="inputMethod" msgid="1653630062304567879">"שיטת קלט"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"פעולות טקסט"</string>
     <string name="email" msgid="4560673117055050403">"אימייל"</string>
@@ -1045,7 +1045,7 @@
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"פתח"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"ערוך באמצעות"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ערוך באמצעות %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ערוך"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"עריכה"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"שתף באמצעות"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏שתף באמצעות %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"שתף"</string>
@@ -1213,7 +1213,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"סיום"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"‏כרטיס ה-SIM נוסף"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"הפעל מחדש את המכשיר כדי לגשת אל הרשת הסלולרית."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"הפעל מחדש"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"הפעלה מחדש"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"‏כדי שה-SIM החדש שלך יפעל כראוי, תצטרך להתקין אפליקציה מהספק ולפתוח אותה."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"קבל את האפליקציה"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"לא עכשיו"</string>
@@ -1238,7 +1238,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"המכשיר זיהה התקן אודיו אנלוגי"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ההתקן שחיברת לא תואם לטלפון הזה. הקש למידע נוסף."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏ניפוי באגים של USB מחובר"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"‏הקש כדי להשבית ניפוי באגים של USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"‏יש להקיש כדי להשבית ניפוי באגים של USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"‏בחר להשבית ניפוי באגים ב-USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"עיבוד דוח על באג..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"האם לשתף דוח על באג?"</string>
@@ -1405,7 +1405,7 @@
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"החודש הבא"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ביטול"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"מחק"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"מחיקה"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"סיום"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"שינוי מצב"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
@@ -1427,7 +1427,7 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏כונן USB"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"‏כונן USB של <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‏אחסון USB"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"ערוך"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"עריכה"</string>
     <string name="data_usage_warning_title" msgid="3620440638180218181">"התראה על שימוש בנתונים"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"הקש כדי להציג נתוני שימוש והגדרות."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‏הגעת למגבלת הנתונים של 2G-3G"</string>
@@ -1831,7 +1831,7 @@
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏האם לשמור <xliff:g id="TYPE">%1$s</xliff:g> בשירות &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"‏האם לשמור <xliff:g id="TYPE_0">%1$s</xliff:g> ו<xliff:g id="TYPE_1">%2$s</xliff:g> בשירות &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"‏האם לשמור <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ו<xliff:g id="TYPE_2">%3$s</xliff:g> בשירות &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_yes" msgid="6398026094049005921">"שמור"</string>
+    <string name="autofill_save_yes" msgid="6398026094049005921">"שמירה"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"לא, תודה"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"סיסמה"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"כתובת"</string>

@@ -107,7 +107,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Բաժանորդի սարքում ընտրված է հեռատիպի HCO ռեժիմը"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Բաժանորդի սարքում ընտրված է հեռատիպի VCO ռեժիմը"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Բաժանորդի սարքում ընտրված է հեռատիպի ԱՆՋԱՏ ռեժիմը"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Ձայնային"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Ձայնային կապ"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Տվյալներ"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Ֆաքս"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -1704,8 +1704,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Չդասակարգված"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Դուք սահմանել եք այս ծանուցումների կարևորությունը:"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Կարևոր է, քանի որ որոշակի մարդիկ են ներգրավված:"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օտատեր ստեղծել:"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օտատեր ստեղծել (նման հաշվով Օտատեր արդեն գոյություն ունի):"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել:"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտատեր ստեղծել (նման հաշվով Օգտատեր արդեն գոյություն ունի):"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Ավելացնել լեզու"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Նախընտրելի տարածաշրջան"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Մուտքագրեք լեզուն"</string>

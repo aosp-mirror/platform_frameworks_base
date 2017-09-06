@@ -1184,7 +1184,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"dette kan koste dig penge"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB, der oplader denne enhed"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB oplader denne enhed"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB, der leverer strøm til den tilsluttede enhed"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB til filoverførsel"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB til billedoverførsel"</string>
@@ -1727,7 +1727,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tryk for at se filer"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fastgør"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Frigør"</string>
-    <string name="app_info" msgid="6856026610594615344">"Oplysninger om appen"</string>
+    <string name="app_info" msgid="6856026610594615344">"Appinfo"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Starter demoen…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Nulstiller enheden…"</string>

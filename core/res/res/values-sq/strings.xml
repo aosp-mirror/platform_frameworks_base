@@ -268,7 +268,7 @@
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Trokit për detaje mbi baterinë dhe përdorimin e të dhënave"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modaliteti i sigurisë"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Sistemi \"android\""</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Sistemi Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Ndryshoje te \"Personale\""</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Ndryshoje te \"Puna\""</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktet"</string>
