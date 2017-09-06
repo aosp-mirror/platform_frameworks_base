@@ -156,6 +156,7 @@ public class RescueParty {
      * Check if we're currently attempting to reboot for a factory reset.
      */
     public static boolean isAttemptingFactoryReset() {
+        if (isDisabled()) return false;
         return SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) == LEVEL_FACTORY_RESET;
     }
 
@@ -164,6 +165,7 @@ public class RescueParty {
      * opportunity to reset any settings depending on our rescue level.
      */
     public static void onSettingsProviderPublished(Context context) {
+        if (isDisabled()) return;
         handleNativeRescuePartyResets();
         executeRescueLevel(context);
     }
@@ -206,6 +208,7 @@ public class RescueParty {
     }
 
     private static void executeRescueLevel(Context context) {
+        if (isDisabled()) return;
         final int level = SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE);
         if (level == LEVEL_NONE) return;
 
