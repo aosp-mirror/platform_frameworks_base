@@ -70,11 +70,10 @@ LOCAL_MODULE := android.test.mock.sdk
 
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
 
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 # Make sure to run droiddoc first to generate the stub source files.
-$(full_classes_compiled_jar) : $(android_test_mock_gen_stamp)
-$(full_classes_jack) : $(android_test_mock_gen_stamp)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(android_test_mock_gen_stamp)
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Archive a copy of the classes.jar in SDK build.
 $(call dist-for-goals,sdk win_sdk,$(full_classes_jar):android.test.mock.jar)
