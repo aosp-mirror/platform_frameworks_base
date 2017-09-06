@@ -652,7 +652,7 @@ public class AppWindowContainerController
 
             // Use the same thread to remove the window as we used to add it, as otherwise we end up
             // with things in the view hierarchy being called from different threads.
-            mHandler.post(() -> {
+            mService.mAnimationHandler.post(() -> {
                 if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Removing startingView=" + surface);
                 try {
                     surface.remove();
