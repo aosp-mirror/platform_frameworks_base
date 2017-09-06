@@ -17,6 +17,8 @@ package android.util;
 
 import android.text.TextUtils;
 
+import java.util.Collection;
+
 /**
  * Parses a list of key=value pairs, separated by some delimiter, and puts the results in
  * an internal Map. Values can be then queried by key, or if not found, a default value
@@ -146,5 +148,12 @@ public class KeyValueListParser {
             }
         }
         return def;
+    }
+
+    /**
+     * @return All the keys.
+     */
+    public Collection<String> getKeys() {
+        return mValues.keySet();
     }
 }
