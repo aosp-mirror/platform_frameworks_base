@@ -136,7 +136,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     int batteryLevel = lastDevice.getBatteryLevel();
                     if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
                         BluetoothDeviceLayerDrawable drawable = createLayerDrawable(mContext,
-                                R.drawable.ic_qs_bluetooth_connected, batteryLevel);
+                                R.drawable.ic_qs_bluetooth_connected, batteryLevel,
+                                mContext.getResources().getFraction(
+                                        R.fraction.bt_battery_scale_fraction, 1, 1));
                         state.icon = new DrawableIcon(drawable);
                     }
                 }
