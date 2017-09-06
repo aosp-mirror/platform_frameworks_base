@@ -334,6 +334,20 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public Bundle call(String method, String name, Bundle args) {
+        if (name != null && args != null && Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
+            Object value = args.get(Settings.NameValueTable.VALUE);
+
+            if ((value == null)
+                    && (Global.LOW_POWER_MODE_TRIGGER_LEVEL.equals(name)
+                    || name.startsWith(Settings.Global.BATTERY_SAVER_CONSTANTS)
+                    || name.startsWith(Settings.Global.ALARM_MANAGER_CONSTANTS)
+                    || name.startsWith(Settings.Global.JOB_SCHEDULER_CONSTANTS))) {
+                Slog.wtf("XXX", "Detected writing null: " + method + ", " + name);
+                return new Bundle();
+            }
+        }
+
+
         final int requestingUserId = getRequestingUserId(args);
         switch (method) {
             case Settings.CALL_METHOD_GET_GLOBAL: {
