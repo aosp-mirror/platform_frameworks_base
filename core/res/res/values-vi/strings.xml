@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Không có dịch vụ thoại/khẩn cấp"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tạm thời không được cung cấp bởi mạng di động tại vị trí của bạn"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Không thể kết nối mạng"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại mạng được chọn trong Cài đặt &gt; Mạng và Internet &gt; Mạng di động &gt; Loại mạng ưa thích."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại mạng được chọn trong Cài đặt &gt; Mạng và Internet &gt; Mạng di động &gt; Loại mạng ưu tiên."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Gọi qua Wi‑Fi đang hoạt động"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Cuộc gọi khẩn cấp yêu cầu có mạng di động."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Thông báo"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Hình sai"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN sai"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Hãy thử lại sau <xliff:g id="NUMBER">%1$d</xliff:g> giây."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">Hãy thử lại sau <xliff:g id="NUMBER">%d</xliff:g> giây.</item>
+      <item quantity="one">Hãy thử lại sau 1 giây.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Vẽ hình của bạn"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Nhập PIN của SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Nhập PIN"</string>
@@ -1628,7 +1631,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Do quản trị viên của bạn xóa"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu. Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví như, hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

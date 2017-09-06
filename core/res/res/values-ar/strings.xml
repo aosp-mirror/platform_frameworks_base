@@ -1261,7 +1261,7 @@
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"انقر لإعداده."</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تعيين الوقت"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تعيين التاريخ"</string>
-    <string name="date_time_set" msgid="5777075614321087758">"تعيين"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"ضبط"</string>
     <string name="date_time_done" msgid="2507683751759308828">"تم"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"جديد: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"يقدمه <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1481,7 +1481,7 @@
     <string name="data_usage_limit_body" msgid="291731708279614081">"توقفت البيانات مؤقتًا لاستكمال الدورة"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"‏تم تجاوز حد بيانات شبكات 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"‏تم تجاوز حد بيانات 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"تم تجاوز حد بيانات الجوال"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"تم تجاوز حد بيانات الجوّال"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"‏تم تجاوز حد بيانات شبكة Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> فوق الحد المعين."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"تم تقييد بيانات الخلفية"</string>
@@ -1538,7 +1538,14 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"نقش خاطئ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"كلمة مرور خاطئة"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"رقم تعريف شخصي خاطئ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%1$d</xliff:g> ثانية."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="zero">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية.</item>
+      <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="NUMBER">%d</xliff:g>).</item>
+      <item quantity="few">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثوانٍ.</item>
+      <item quantity="many">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية.</item>
+      <item quantity="other">حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية.</item>
+      <item quantity="one">حاول مرة أخرى خلال ثانية واحدة.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ارسم نقشك"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"‏أدخل رمز PIN لبطاقة SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"‏أدخل رمز PIN"</string>

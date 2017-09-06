@@ -867,7 +867,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"上个月"</string>
     <string name="older" msgid="5211975022815554840">"往前"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"日期：<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"年份：<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"天"</string>
@@ -1130,7 +1130,7 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"要允许连接吗？"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"“%1$s”应用想要连接到 WLAN 网络“%2$s”"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"一款应用"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN直连"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN 直连"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动WLAN直连。此操作将会关闭WLAN客户端/热点。"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动WLAN直连。"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用WLAN直连"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"图案错误"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密码错误"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN码有误"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"请在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒后重试。"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。</item>
+      <item quantity="one">请在 1 秒后重试。</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"绘制您的图案"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入SIM卡PIN码"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"输入PIN码"</string>

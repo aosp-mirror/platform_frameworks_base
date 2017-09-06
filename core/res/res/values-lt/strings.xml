@@ -1492,7 +1492,12 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Netinkamas atrakinimo piešinys"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Netinkamas slaptažodis"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Netinkamas PIN kodas"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Bandyti dar kartą po <xliff:g id="NUMBER">%1$d</xliff:g> sek."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundės.</item>
+      <item quantity="few">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundžių.</item>
+      <item quantity="many">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundės.</item>
+      <item quantity="other">Bandykite dar kartą po <xliff:g id="NUMBER">%d</xliff:g> sekundžių.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Nupieškite atrakinimo piešinį"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Įveskite SIM PIN kodą"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Įveskite PIN kodą"</string>

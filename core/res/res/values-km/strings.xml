@@ -1191,8 +1191,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុសយូអេសប៊ី"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​ USB"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុស USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ជ្រើស​ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"កំពុងទទួលយករបាយការណ៍កំហុស…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
@@ -1448,7 +1448,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"លំនាំ​មិន​ត្រឹមត្រូវ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"កូដ PIN មិន​ត្រឹមត្រូវ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER">%1$d</xliff:g> វិនាទី។"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។</item>
+      <item quantity="one">ព្យាយាមម្តងទៀតក្នុងរយៈពេល 1 វិនាទី។</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"គូរ​លំនាំ​របស់​អ្នក"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"បញ្ចូល​កូដ PIN ស៊ីម​កាត"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"បញ្ចូល​​កូដ PIN"</string>

@@ -1448,7 +1448,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"වැරදි රටාවකි"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"වැරදි මුරපදය"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN එක වැරදියි"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"තත්පර <xliff:g id="NUMBER">%1$d</xliff:g> ට පසුව නැවත උත්සහ කරන්න."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න.</item>
+      <item quantity="other">තත්පර <xliff:g id="NUMBER">%d</xliff:g>කින් නැවත උත්සාහ කරන්න.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ඔබගේ රටාව අඳින්න"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN ඇතුලු කරන්න"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN එක ඇතුළු කරන්න"</string>
