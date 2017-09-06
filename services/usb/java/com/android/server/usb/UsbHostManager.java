@@ -22,8 +22,10 @@ import android.content.Context;
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
@@ -32,8 +34,11 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
+import com.android.server.usb.descriptors.report.TextReportCanvas;
+import com.android.server.usb.descriptors.tree.UsbDescriptorsTree;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -42,6 +47,8 @@ import java.util.HashMap;
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    private final Context mContext;
 
     // contains all connected USB devices
     private final HashMap<String, UsbDevice> mDevices = new HashMap<>();
@@ -69,6 +76,8 @@ public class UsbHostManager {
 
     public UsbHostManager(Context context, UsbAlsaManager alsaManager,
             UsbSettingsManager settingsManager) {
+        mContext = context;
+
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
         mUsbAlsaManager = alsaManager;
@@ -265,8 +274,8 @@ public class UsbHostManager {
                 if (parser.parseDevice(mNewDevice.getDeviceName())) {
                     isInputHeadset = parser.isInputHeadset();
                     isOutputHeadset = parser.isOutputHeadset();
-                    Slog.i(TAG, "---- isHeadset[in:" + isInputHeadset
-                            + " , out:" + isOutputHeadset + "]");
+                    Slog.i(TAG, "---- isHeadset[in: " + isInputHeadset
+                            + " , out: " + isOutputHeadset + "]");
                 }
                 mUsbAlsaManager.usbDeviceAdded(mNewDevice,
                         isInputHeadset, isOutputHeadset);
@@ -338,6 +347,33 @@ public class UsbHostManager {
             }
             if (mUsbDeviceConnectionHandler != null) {
                 pw.println("Default USB Host Connection handler: " + mUsbDeviceConnectionHandler);
+            }
+
+            Collection<UsbDevice> devices = mDevices.values();
+            if (devices.size() != 0) {
+                pw.println("USB Peripheral Descriptors");
+                for (UsbDevice device : devices) {
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    UsbDescriptorParser parser = new UsbDescriptorParser();
+                    if (parser.parseDevice(device.getDeviceName())) {
+                        UsbDescriptorsTree descriptorTree = new UsbDescriptorsTree();
+                        descriptorTree.parse(parser);
+
+                        UsbManager usbManager =
+                                (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+                        UsbDeviceConnection connection = usbManager.openDevice(device);
+
+                        descriptorTree.report(new TextReportCanvas(connection, stringBuilder));
+                        connection.close();
+
+                        stringBuilder.append("isHeadset[in: " + parser.isInputHeadset()
+                                + " , out: " + parser.isOutputHeadset() + "]");
+                    } else {
+                        stringBuilder.append("Error Parsing USB Descriptors");
+                    }
+                    pw.println(stringBuilder.toString());
+                }
             }
         }
     }

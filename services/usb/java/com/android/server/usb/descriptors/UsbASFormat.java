@@ -102,6 +102,6 @@ public class UsbASFormat extends UsbACInterface {
     public void report(ReportCanvas canvas) {
         super.report(canvas);
 
-        canvas.write(UsbStrings.getFormatName(getFormatType()));
+        canvas.writeParagraph(UsbStrings.getFormatName(getFormatType()), /*emphasis*/false);
     }
 }
