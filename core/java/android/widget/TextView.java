@@ -9364,7 +9364,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (mEditor != null) mEditor.sendOnTextChanged(start, after);
+        if (mEditor != null) mEditor.sendOnTextChanged(start, before, after);
     }
 
     /**
