@@ -70,6 +70,7 @@ public final class JobStatus {
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
     static final int CONSTRAINT_NOT_ROAMING = 1<<24;
     static final int CONSTRAINT_METERED = 1<<23;
+    static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1<<22;
 
     static final int CONNECTIVITY_MASK =
             CONSTRAINT_UNMETERED | CONSTRAINT_CONNECTIVITY |
@@ -707,6 +708,10 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state);
     }
 
+    boolean setBackgroundNotRestrictedConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, state);
+    }
+
     boolean setConstraintSatisfied(int constraint, boolean state) {
         boolean old = (satisfiedConstraints&constraint) != 0;
         if (old == state) {
@@ -758,12 +763,16 @@ public final class JobStatus {
         // satisfied).
         // AppNotIdle implicit constraint must be satisfied
         // DeviceNotDozing implicit constraint must be satisfied
+        // NotRestrictedInBackground implicit constraint must be satisfied
         final boolean deadlineSatisfied = (!job.isPeriodic() && hasDeadlineConstraint()
                 && (satisfiedConstraints & CONSTRAINT_DEADLINE) != 0);
         final boolean notIdle = (satisfiedConstraints & CONSTRAINT_APP_NOT_IDLE) != 0;
         final boolean notDozing = (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0
                 || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
-        return (isConstraintsSatisfied() || deadlineSatisfied) && notIdle && notDozing;
+        final boolean notRestrictedInBg =
+                (satisfiedConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0;
+        return (isConstraintsSatisfied() || deadlineSatisfied) && notIdle && notDozing
+                && notRestrictedInBg;
     }
 
     static final int CONSTRAINTS_OF_INTEREST =
