@@ -713,12 +713,15 @@ class LockSettingsStorage {
         private static final String DATABASE_NAME = "locksettings.db";
 
         private static final int DATABASE_VERSION = 2;
+        private static final int IDLE_CONNECTION_TIMEOUT_MS = 30000;
 
         private Callback mCallback;
 
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             setWriteAheadLoggingEnabled(true);
+            // Memory optimization - close idle connections after 30s of inactivity
+            setIdleConnectionTimeout(IDLE_CONNECTION_TIMEOUT_MS);
         }
 
         public void setCallback(Callback callback) {
