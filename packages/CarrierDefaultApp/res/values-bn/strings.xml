@@ -12,6 +12,6 @@
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"মোবাইল ডেটার স্ট্যাটাস"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"মোবাইল নেটওয়ার্কে সাইন-ইন করুন"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"আপনি যে নেটওয়ার্কে যোগ দেওয়ার চেষ্টা করছেন সেটিতে নিরাপত্তাজনিত সমস্যা আছে।"</string>
-    <string name="ssl_error_example" msgid="6188711843183058764">"যেমন, লগইন পৃষ্ঠাটি যে প্রতিষ্ঠানের পৃষ্ঠা বলে দেখানো আছে, আসলে তা নাও হতে পারে৷"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"যেমন, লগ-ইন পৃষ্ঠাটি যে প্রতিষ্ঠানের পৃষ্ঠা বলে দেখানো আছে, আসলে তা নাও হতে পারে৷"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"যাই হোক, ব্রাউজারের মাধ্যমে চালিয়ে যান"</string>
 </resources>
