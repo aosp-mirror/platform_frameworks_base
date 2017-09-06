@@ -57,7 +57,12 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Nieprawidłowy wzór"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Nieprawidłowe hasło"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Nieprawidłowy kod PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> s."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="few">Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sekundy.</item>
+      <item quantity="many">Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sekund.</item>
+      <item quantity="other">Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sekundy.</item>
+      <item quantity="one">Spróbuj ponownie za sekundę</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Narysuj wzór"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Wpisz kod PIN karty SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Wpisz kod PIN karty SIM „<xliff:g id="CARRIER">%1$s</xliff:g>”."</string>

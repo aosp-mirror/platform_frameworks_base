@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Interf sist"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do app"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Inform. do app"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Suas telas recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar apps recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -478,7 +478,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Não, obrigado"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurar"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desligar agora"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desativar agora"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expandir"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Recolher"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A tela está fixada"</string>

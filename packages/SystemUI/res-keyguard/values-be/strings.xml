@@ -57,7 +57,12 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Няправільны ўзор"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Няправільны пароль"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Няправільны PIN-код"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> с."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
+      <item quantity="few">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+      <item quantity="many">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
+      <item quantity="other">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Намалюйце ўзор"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Увядзіце PIN-код SIM-карты."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Увядзіце PIN-код SIM-карты для \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>

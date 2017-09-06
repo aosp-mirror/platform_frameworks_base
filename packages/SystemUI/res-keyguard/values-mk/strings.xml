@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Погрешна шема"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Погрешен PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one">Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунда.</item>
+      <item quantity="other">Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунди.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Нацртајте ја шемата"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Внесете PIN на SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Внесете PIN на SIM за „<xliff:g id="CARRIER">%1$s</xliff:g>“."</string>

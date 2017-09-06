@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Mchoro si Sahihi"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Nenosiri si Sahihi"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Nambari ya PIN si sahihi"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%d</xliff:g>."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%d</xliff:g>.</item>
+      <item quantity="one">Jaribu tena baada ya sekunde 1.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Chora mchoro wako"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Weka PIN ya SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Weka PIN ya SIM ya \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>

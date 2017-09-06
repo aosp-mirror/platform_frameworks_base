@@ -227,8 +227,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Ficklampan har aktiverats."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Färginverteringen har inaktiverats."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Färginverteringen har aktiverats."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Den mobila trådlösa surfzonen har inaktiverats."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Den mobila trådlösa surfzonen har aktiverats."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Den mobila surfzonen har inaktiverats."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Den mobila surfzonen har aktiverats."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Castningen av skärmen har stoppats."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Arbetsläget är inaktiverat."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Arbetsläget aktiverat."</string>

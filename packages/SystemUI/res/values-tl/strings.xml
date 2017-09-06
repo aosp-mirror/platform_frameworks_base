@@ -242,7 +242,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Naka-pause ang 4G data"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Naka-pause ang mobile data"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Naka-pause ang data"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Naabot na ang itinakda mong limitasyon sa data. Hindi ka na gumagamit ng mobile data.\n\nKung magpapatuloy ka, maaaring may mga singil sa paggamit ng data."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Naabot na ang itinakda mong limitasyon ng data. Hindi ka na gumagamit ng mobile data.\n\nKung magpapatuloy ka, maaaring may mga singil sa paggamit ng data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Ipagpatuloy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Walang koneksyon sa Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"nakakonekta ang Wi-Fi"</string>
@@ -354,7 +354,7 @@
     <string name="description_direction_up" msgid="7169032478259485180">"Mag-slide pataas para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Mag-slide pakaliwa para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="1149025108714420281">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, kaganapan, at tumatawag na tutukuyin mo. Maririnig mo pa rin ang kahit na anong piliin mong i-play kabilang ang mga musika, video, at laro."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban mula sa mga alarm. Maririnig mo pa rin ang kahit na anong piliin mong i-play kabilang ang mga musika, video, at laro."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban sa mga alarm. Maririnig mo pa rin ang anumang pipiliin mong i-play kabilang ang mga musika, video, at laro."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"I-customize"</string>
     <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Bina-block nito ang LAHAT ng tunog at pag-vibrate, kabilang ang mula sa mga alarm, musika, video, at laro. Makakatawag ka pa rin."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bina-block nito ang LAHAT ng tunog at pag-vibrate, kabilang ang mula sa mga alarm, musika, video at laro."</string>
@@ -762,7 +762,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Hindi kailangang i-install ang mga instant na app."</string>
     <string name="app_info" msgid="6856026610594615344">"Impormasyon ng app"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Pumunta sa web"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Data ng mobile"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Mobile data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Naka-off ang Wi-Fi"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Naka-off ang Bluetooth"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Naka-off ang Huwag Istorbohin"</string>
