@@ -99,7 +99,9 @@ public final class BluetoothLeScanner {
 
     /**
      * Start Bluetooth LE scan with default parameters and no filters. The scan results will be
-     * delivered through {@code callback}.
+     * delivered through {@code callback}. For unfiltered scans, scanning is stopped on screen
+     * off to save power. Scanning is resumed when screen is turned on again. To avoid this, use
+     * {@link #startScan(List, ScanSettings, ScanCallback)} with desired {@link ScanFilter}.
      * <p>
      * An app must hold
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
@@ -116,6 +118,9 @@ public final class BluetoothLeScanner {
 
     /**
      * Start Bluetooth LE scan. The scan results will be delivered through {@code callback}.
+     * For unfiltered scans, scanning is stopped on screen off to save power. Scanning is
+     * resumed when screen is turned on again. To avoid this, do filetered scanning by
+     * using proper {@link ScanFilter}.
      * <p>
      * An app must hold
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
