@@ -98,11 +98,11 @@ public class AlwaysOnDisplayPolicy {
         }
 
         proxScreenOffDelayMs = mParser.getLong(KEY_PROX_SCREEN_OFF_DELAY_MS,
-                10 * DateUtils.MINUTE_IN_MILLIS);
+                10 * DateUtils.SECOND_IN_MILLIS);
         proxCooldownTriggerMs = mParser.getLong(KEY_PROX_COOLDOWN_TRIGGER_MS,
-                2 * DateUtils.MINUTE_IN_MILLIS);
+                2 * DateUtils.SECOND_IN_MILLIS);
         proxCooldownPeriodMs = mParser.getLong(KEY_PROX_COOLDOWN_PERIOD_MS,
-                5 * DateUtils.MINUTE_IN_MILLIS);
+                5 * DateUtils.SECOND_IN_MILLIS);
         screenBrightnessArray = parseIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
                 resources.getIntArray(R.array.config_doze_brightness_sensor_to_brightness));
         dimmingScrimArray = parseIntArray(KEY_DIMMING_SCRIM_ARRAY,

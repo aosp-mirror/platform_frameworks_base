@@ -888,7 +888,7 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     // Render into the surface
     {
         ContextFactory factory;
-        RenderProxy proxy{false, renderNode, &factory};
+        RenderProxy proxy{true, renderNode, &factory};
         proxy.loadSystemProperties();
         proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
         proxy.initialize(surface);

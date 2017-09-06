@@ -38,6 +38,10 @@ public final class UsbStrings {
     private static HashMap<Integer, String> sTerminalNames;
     private static HashMap<Integer, String> sFormatNames;
 
+    static {
+        allocUsbStrings();
+    }
+
     private static void initDescriptorNames() {
         sDescriptorNames = new HashMap<Byte, String>();
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_DEVICE, "Device");
@@ -246,7 +250,7 @@ public final class UsbStrings {
     /**
      * Initializes string tables.
      */
-    public static void allocUsbStrings() {
+    private static void allocUsbStrings() {
         initDescriptorNames();
         initACControlInterfaceNames();
         initACStreamingInterfaceNames();
@@ -255,19 +259,6 @@ public final class UsbStrings {
         initAudioEncodingNames();
         initTerminalNames();
         initFormatNames();
-    }
-
-    /**
-     * Deinitializes string tables.
-     */
-    public static void releaseUsbStrings() {
-        sDescriptorNames = null;
-        sACControlInterfaceNames = null;
-        sACStreamingInterfaceNames = null;
-        sClassNames = null;
-        sAudioSubclassNames = null;
-        sAudioEncodingNames = null;
-        sTerminalNames = null;
     }
 
     /**

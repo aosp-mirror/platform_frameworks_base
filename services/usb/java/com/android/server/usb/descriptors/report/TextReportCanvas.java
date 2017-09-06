@@ -40,6 +40,12 @@ public final class TextReportCanvas extends ReportCanvas {
         mStringBuilder = stringBuilder;
     }
 
+    private void writeListIndent() {
+        for (int space = 0; space < mListIndent; space++) {
+            mStringBuilder.append(" ");
+        }
+    }
+
     @Override
     public void write(String text) {
         mStringBuilder.append(text);
@@ -47,7 +53,8 @@ public final class TextReportCanvas extends ReportCanvas {
 
     @Override
     public void openHeader(int level) {
-        mStringBuilder.append("[" + level + " - ");
+        writeListIndent();
+        mStringBuilder.append("[");
     }
 
     @Override
@@ -56,7 +63,8 @@ public final class TextReportCanvas extends ReportCanvas {
     }
 
     @Override
-    public void openParagraph(boolean inRed) {
+    public void openParagraph(boolean emphasis) {
+        writeListIndent();
     }
 
     @Override
@@ -75,30 +83,20 @@ public final class TextReportCanvas extends ReportCanvas {
         closeParagraph();
     }
 
-    private void writeListIndent() {
-        for (int space = 0; space < mListIndent; space++) {
-            mStringBuilder.append(" ");
-        }
-    }
-
     @Override
     public void openList() {
         mListIndent += LIST_INDENT_AMNT;
-        writeListIndent();
-        mStringBuilder.append("---->\n");
     }
 
     @Override
     public void closeList() {
-        writeListIndent();
         mListIndent -= LIST_INDENT_AMNT;
-        mStringBuilder.append("<----\n");
     }
 
     @Override
     public void openListItem() {
         writeListIndent();
-        mStringBuilder.append(" - ");
+        mStringBuilder.append("- ");
     }
 
     @Override

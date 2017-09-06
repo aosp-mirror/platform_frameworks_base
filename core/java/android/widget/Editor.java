@@ -41,7 +41,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -1066,6 +1065,8 @@ public class Editor {
     }
 
     private void startDragAndDrop() {
+        getSelectionActionModeHelper().onSelectionDrag();
+
         // TODO: Fix drag and drop in full screen extracted mode.
         if (mTextView.isInExtractedMode()) {
             return;
@@ -3919,10 +3920,6 @@ public class Editor {
                         textClassification.getLabel())
                         .setIcon(textClassification.getIcon())
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                mMetricsLogger.write(
-                        new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
-                                .setType(MetricsEvent.TYPE_OPEN)
-                                .setSubtype(textClassification.getLogType()));
             }
         }
 
@@ -3940,7 +3937,7 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            getSelectionActionModeHelper().onSelectionAction();
+            getSelectionActionModeHelper().onSelectionAction(item.getItemId());
 
             if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;
@@ -3964,9 +3961,6 @@ public class Editor {
                                 .onClick(mTextView);
                     }
                 }
-                mMetricsLogger.action(
-                        MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
-                        textClassification.getLogType());
                 stopTextActionMode();
                 return true;
             }

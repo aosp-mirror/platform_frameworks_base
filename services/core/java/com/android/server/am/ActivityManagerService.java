@@ -3588,10 +3588,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void notifyPackageUse(String packageName, int reason) {
-        IPackageManager pm = AppGlobals.getPackageManager();
-        try {
-            pm.notifyPackageUse(packageName, reason);
-        } catch (RemoteException e) {
+        synchronized(this) {
+            getPackageManagerInternalLocked().notifyPackageUse(packageName, reason);
         }
     }
 
