@@ -58,22 +58,20 @@ public class DozeFactory {
                 params);
 
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
-        DozeScreenBrightness screenBrightness = createDozeScreenBrightness(
-                context, wrappedService, sensorManager, host, handler);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager, new AlwaysOnDisplayPolicy(context)),
                 new DozeFalsingManagerAdapter(FalsingManager.getInstance(context)),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
-                        handler, screenBrightness, wakeLock, machine),
+                        handler, wakeLock, machine),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager),
                 new DozeScreenState(wrappedService, handler),
-                screenBrightness,
+                createDozeScreenBrightness(context, wrappedService, sensorManager, host, handler),
         });
 
         return machine;
     }
 
-    private DozeScreenBrightness createDozeScreenBrightness(Context context,
+    private DozeMachine.Part createDozeScreenBrightness(Context context,
             DozeMachine.Service service, SensorManager sensorManager, DozeHost host,
             Handler handler) {
         Sensor sensor = DozeSensors.findSensorWithType(sensorManager,
@@ -84,11 +82,10 @@ public class DozeFactory {
 
     private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
             DozeHost host, AlarmManager alarmManager, AmbientDisplayConfiguration config,
-            DozeParameters params, Handler handler, DozeScreenBrightness screenBrightness,
-            WakeLock wakeLock, DozeMachine machine) {
+            DozeParameters params, Handler handler, WakeLock wakeLock, DozeMachine machine) {
         boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, alarmManager, config, params,
-                sensorManager, handler, screenBrightness, wakeLock, allowPulseTriggers);
+                sensorManager, handler, wakeLock, allowPulseTriggers);
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
