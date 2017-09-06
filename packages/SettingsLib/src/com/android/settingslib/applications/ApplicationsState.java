@@ -1665,7 +1665,8 @@ public class ApplicationsState {
                         isCategorized =
                                 FILTER_AUDIO.filterApp(entry)
                                         || FILTER_GAMES.filterApp(entry)
-                                        || FILTER_MOVIES.filterApp(entry);
+                                        || FILTER_MOVIES.filterApp(entry)
+                                        || FILTER_PHOTOS.filterApp(entry);
                     }
                     return !isCategorized;
                 }
