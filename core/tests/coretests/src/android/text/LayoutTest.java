@@ -299,7 +299,8 @@ public class LayoutTest {
          */
 
         layout.getSelection(5 /* startIndex */, 5 /* endIndex */,
-                (left, top, right, bottom) -> fail(String.format(Locale.getDefault(),
+                (left, top, right, bottom, textSelectionLayout) -> fail(
+                        String.format(Locale.getDefault(),
                         "Did not expect any rectangles, got a rectangle with (left: %f,"
                                 + " top: %f), (right: %f, bottom: %f)",
                         left, top, right, bottom)));
@@ -313,7 +314,8 @@ public class LayoutTest {
         final List<RectF> rectangles = new ArrayList<>();
 
         layout.getSelection(0 /* startIndex */, 1 /* endIndex */,
-                (left, top, right, bottom) -> rectangles.add(new RectF(left, top, right, bottom)));
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
 
         /*
          * The selection we expect will only cover the letter "a". Hence, we expect one rectangle
@@ -343,7 +345,8 @@ public class LayoutTest {
         final List<RectF> rectangles = new ArrayList<>();
 
         layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
-                (left, top, right, bottom) -> rectangles.add(new RectF(left, top, right, bottom)));
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
 
         /*
          * The selection that will be selected is "a\n" - the selection starts at the beginning
@@ -388,7 +391,8 @@ public class LayoutTest {
         final List<RectF> rectangles = new ArrayList<>();
 
         layout.getSelection(0 /* startIndex */, 3 /* endIndex */,
-                (left, top, right, bottom) -> rectangles.add(new RectF(left, top, right, bottom)));
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
 
         /*
          * The selection that will be selected is "a\nb" - the selection starts at the beginning
@@ -430,7 +434,8 @@ public class LayoutTest {
         final List<RectF> rectangles = new ArrayList<>();
 
         layout.getSelection(0 /* startIndex */, 1 /* endIndex */,
-                (left, top, right, bottom) -> rectangles.add(new RectF(left, top, right, bottom)));
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
 
         /*
          * In the single line selection case, we expect that only one rectangle covering the letter
@@ -452,6 +457,44 @@ public class LayoutTest {
 
         assertTrue(generatedPath.isRect(pathRectangle));
         assertEquals(rectangle, pathRectangle);
+    }
+
+    @Test
+    public void testGetSelection_latinTextDirection() {
+        final Layout layout = new StaticLayout("abc", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) ->
+                        assertEquals(Layout.TextSelectionLayout.LEFT_TO_RIGHT,
+                                textSelectionLayout));
+    }
+
+    @Test
+    public void testGetSelection_arabicTextDirection() {
+        final Layout layout = new StaticLayout("غينيا", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) ->
+                        assertEquals(Layout.TextSelectionLayout.RIGHT_TO_LEFT,
+                                textSelectionLayout));
+    }
+
+    @Test
+    public void testGetSelection_mixedLatinAndArabicTextDirection() {
+        final Layout layout = new StaticLayout("abcغينيا", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        final List<Integer> layouts = new ArrayList<>(2);
+
+        layout.getSelection(0 /* startIndex */, 6 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> layouts.add(
+                        textSelectionLayout));
+
+        assertEquals(2, layouts.size());
+        assertEquals(Layout.TextSelectionLayout.LEFT_TO_RIGHT, (long) layouts.get(0));
+        assertEquals(Layout.TextSelectionLayout.RIGHT_TO_LEFT, (long) layouts.get(1));
     }
 
     @Test
