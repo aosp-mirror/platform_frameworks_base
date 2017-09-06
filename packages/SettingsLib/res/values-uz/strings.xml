@@ -65,7 +65,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Ulangan (HSP/HFP/A2DP dan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefon chaqiruvlari"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fayl o‘tkazish"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fayl uzatish"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Kiritish qurilmasi"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internetga kirish"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontaktlarni ulashish"</string>
@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi tarmoqlarini qidirishga doim ruxsat"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil internet doim yoniq tursin"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Modem rejimida apparatli tezlashtirish"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth qurilmalarini nomlarisiz ko‘rsatish"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Ovoz balangligining mutlaq darajasini o‘chirib qo‘yish"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bitta liniyada jiringlashni yoqish"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP versiyasi"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu sozlamalar faqat dasturlash maqsadlariga mo‘ljallangan. Shuning uchun, ular qurilmangizga va undagi ilovalariga shikast yetkazib, noto‘g‘ri ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB orqali o‘rnatish"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT orqali o‘rnatilgan ilovalar xavfsizligini tekshiring"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth qurilmalari nomsiz (faqat MAC manzillari) ko‘rsatiladi"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Masofadan ulanadigan qurilmalar bilan muammolar yuz berganda, jumladan, juda baland ovoz yoki sozlamalarni boshqarib bo‘lmaydigan holatlarda Bluetooth ovozi balandligining mutlaq darajasini o‘chirib qo‘yadi."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Bluetooth quloqliklarda ijro etish uchun telefonda ringtonlarga ruxsat bering"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Mahalliy terminal"</string>

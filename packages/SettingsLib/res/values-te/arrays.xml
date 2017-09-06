@@ -58,20 +58,32 @@
     <item msgid="3878793616631049349">"DRM కంటెంట్‌కు మాత్రమే HDCP తనిఖీని ఉపయోగించండి"</item>
     <item msgid="45075631231212732">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించు"</item>
   </string-array>
-  <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"AVRCP 1.4 (డిఫాల్ట్)"</item>
-    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
-    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+    <!-- no translation found for bluetooth_avrcp_versions:1 (2809759619990248160) -->
+    <!-- no translation found for bluetooth_avrcp_versions:2 (6199178154704729352) -->
+    <!-- no translation found for bluetooth_avrcp_versions:3 (5172170854953034852) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:1 (3011533352527449572) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:2 (8837606198371920819) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:3 (3422726142222090896) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"సిస్టమ్ ఎంపికను ఉపయోగించండి (డిఫాల్ట్)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="5254942598247222737">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ఆడియో"</item>
+    <item msgid="2091430979086738145">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ఆడియో"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"ఐచ్ఛిక కోడెక్‌లను ప్రారంభించు"</item>
+    <item msgid="3304843301758635896">"ఐచ్ఛిక కోడెక్‌లను నిలిపివేయి"</item>
   </string-array>
-  <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="1913619118958233129">"avrcp15"</item>
-    <item msgid="7142710449249088270">"avrcp16"</item>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"సిస్టమ్ ఎంపికను ఉపయోగించండి (డిఫాల్ట్)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ఆడియో"</item>
+    <item msgid="298198075927343893">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ఆడియో"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"ఐచ్ఛిక కోడెక్‌లను ప్రారంభించు"</item>
+    <item msgid="741805482892725657">"ఐచ్ఛిక కోడెక్‌లను నిలిపివేయి"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (5254942598247222737) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (2091430979086738145) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (7848030269621918608) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (298198075927343893) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"సిస్టమ్ ఎంపికను ఉపయోగించండి (డిఫాల్ట్)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
