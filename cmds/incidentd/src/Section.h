@@ -45,6 +45,18 @@ public:
 };
 
 /**
+ * Section that generates incident headers.
+ */
+class HeaderSection : public Section
+{
+public:
+    HeaderSection();
+    virtual ~HeaderSection();
+
+    virtual status_t Execute(ReportRequestSet* requests) const;
+};
+
+/**
  * Section that reads in a file.
  */
 class FileSection : public Section

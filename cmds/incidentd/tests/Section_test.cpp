@@ -39,6 +39,8 @@ using ::testing::StrEq;
 using ::testing::internal::CaptureStdout;
 using ::testing::internal::GetCapturedStdout;
 
+// NOTICE: this test requires /system/bin/incident_helper is installed.
+
 class SimpleListener : public IIncidentReportStatusListener
 {
 public:
@@ -54,7 +56,43 @@ protected:
     virtual IBinder* onAsBinder() override { return nullptr; };
 };
 
-// NOTICE: this test requires /system/bin/incident_helper is installed.
+TEST(SectionTest, HeaderSection) {
+    TemporaryFile output2;
+    HeaderSection hs;
+    ReportRequestSet requests;
+
+    IncidentReportArgs args1, args2;
+    args1.addSection(1);
+    args1.addSection(2);
+    args2.setAll(true);
+
+    vector<int8_t> head1;
+    head1.push_back('a');
+    head1.push_back('x');
+    head1.push_back('e');
+
+    vector<int8_t> head2;
+    head2.push_back('p');
+    head2.push_back('u');
+    head2.push_back('p');
+
+    args1.addHeader(head1);
+    args1.addHeader(head2);
+    args2.addHeader(head2);
+
+    requests.add(new ReportRequest(args1, new SimpleListener(), -1));
+    requests.add(new ReportRequest(args2, new SimpleListener(), output2.fd));
+    requests.setMainFd(STDOUT_FILENO);
+
+    string content;
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, hs.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x3" "axe\n\x03pup"));
+
+    EXPECT_TRUE(ReadFileToString(output2.path, &content));
+    EXPECT_THAT(content, StrEq("\n\x03pup"));
+}
+
 TEST(SectionTest, FileSection) {
     TemporaryFile tf;
     FileSection fs(REVERSE_PARSER, tf.path);
