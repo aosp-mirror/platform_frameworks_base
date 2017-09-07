@@ -33,15 +33,15 @@ public class WebViewClient {
      * Give the host application a chance to take over the control when a new
      * url is about to be loaded in the current WebView. If WebViewClient is not
      * provided, by default WebView will ask Activity Manager to choose the
-     * proper handler for the url. If WebViewClient is provided, return true
-     * means the host application handles the url, while return false means the
+     * proper handler for the url. If WebViewClient is provided, return {@code true}
+     * means the host application handles the url, while return {@code false} means the
      * current WebView handles the url.
      * This method is not called for requests using the POST "method".
      *
      * @param view The WebView that is initiating the callback.
      * @param url The url to be loaded.
-     * @return True if the host application wants to leave the current WebView
-     *         and handle the url itself, otherwise return false.
+     * @return {@code true} if the host application wants to leave the current WebView
+     *         and handle the url itself, otherwise return {@code false}.
      * @deprecated Use {@link #shouldOverrideUrlLoading(WebView, WebResourceRequest)
      *             shouldOverrideUrlLoading(WebView, WebResourceRequest)} instead.
      */
@@ -54,8 +54,8 @@ public class WebViewClient {
      * Give the host application a chance to take over the control when a new
      * url is about to be loaded in the current WebView. If WebViewClient is not
      * provided, by default WebView will ask Activity Manager to choose the
-     * proper handler for the url. If WebViewClient is provided, return true
-     * means the host application handles the url, while return false means the
+     * proper handler for the url. If WebViewClient is provided, return {@code true}
+     * means the host application handles the url, while return {@code false} means the
      * current WebView handles the url.
      *
      * <p>Notes:
@@ -63,15 +63,15 @@ public class WebViewClient {
      * <li>This method is not called for requests using the POST &quot;method&quot;.</li>
      * <li>This method is also called for subframes with non-http schemes, thus it is
      * strongly disadvised to unconditionally call {@link WebView#loadUrl(String)}
-     * with the request's url from inside the method and then return true,
+     * with the request's url from inside the method and then return {@code true},
      * as this will make WebView to attempt loading a non-http url, and thus fail.</li>
      * </ul>
      * </p>
      *
      * @param view The WebView that is initiating the callback.
      * @param request Object containing the details of the request.
-     * @return True if the host application wants to leave the current WebView
-     *         and handle the url itself, otherwise return false.
+     * @return {@code true} if the host application wants to leave the current WebView
+     *         and handle the url itself, otherwise return {@code false}.
      */
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         return shouldOverrideUrlLoading(view, request.getUrl().toString());
@@ -148,7 +148,7 @@ public class WebViewClient {
 
     /**
      * Notify the host application of a resource request and allow the
-     * application to return the data.  If the return value is null, the WebView
+     * application to return the data.  If the return value is {@code null}, the WebView
      * will continue to load the resource as usual.  Otherwise, the return
      * response and data will be used.  NOTE: This method is called on a thread
      * other than the UI thread so clients should exercise caution
@@ -158,7 +158,7 @@ public class WebViewClient {
      *             resource.
      * @param url The raw url of the resource.
      * @return A {@link android.webkit.WebResourceResponse} containing the
-     *         response information or null if the WebView should load the
+     *         response information or {@code null} if the WebView should load the
      *         resource itself.
      * @deprecated Use {@link #shouldInterceptRequest(WebView, WebResourceRequest)
      *             shouldInterceptRequest(WebView, WebResourceRequest)} instead.
@@ -171,7 +171,7 @@ public class WebViewClient {
 
     /**
      * Notify the host application of a resource request and allow the
-     * application to return the data.  If the return value is null, the WebView
+     * application to return the data.  If the return value is {@code null}, the WebView
      * will continue to load the resource as usual.  Otherwise, the return
      * response and data will be used.  NOTE: This method is called on a thread
      * other than the UI thread so clients should exercise caution
@@ -181,7 +181,7 @@ public class WebViewClient {
      *             resource.
      * @param request Object containing the details of the request.
      * @return A {@link android.webkit.WebResourceResponse} containing the
-     *         response information or null if the WebView should load the
+     *         response information or {@code null} if the WebView should load the
      *         resource itself.
      */
     public WebResourceResponse shouldInterceptRequest(WebView view,
@@ -326,7 +326,7 @@ public class WebViewClient {
      *
      * @param view The WebView that is initiating the callback.
      * @param url The url being visited.
-     * @param isReload True if this url is being reloaded.
+     * @param isReload {@code true} if this url is being reloaded.
      */
     public void doUpdateVisitedHistory(WebView view, String url,
             boolean isReload) {
@@ -406,14 +406,14 @@ public class WebViewClient {
     /**
      * Give the host application a chance to handle the key event synchronously.
      * e.g. menu shortcut key events need to be filtered this way. If return
-     * true, WebView will not handle the key event. If return false, WebView
+     * true, WebView will not handle the key event. If return {@code false}, WebView
      * will always handle the key event, so none of the super in the view chain
-     * will see the key event. The default behavior returns false.
+     * will see the key event. The default behavior returns {@code false}.
      *
      * @param view The WebView that is initiating the callback.
      * @param event The key event.
-     * @return True if the host application wants to handle the key event
-     *         itself, otherwise return false
+     * @return {@code true} if the host application wants to handle the key event
+     *         itself, otherwise return {@code false}
      */
     public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
         return false;
@@ -422,7 +422,7 @@ public class WebViewClient {
     /**
      * Notify the host application that a key was not handled by the WebView.
      * Except system keys, WebView always consumes the keys in the normal flow
-     * or if shouldOverrideKeyEvent returns true. This is called asynchronously
+     * or if shouldOverrideKeyEvent returns {@code true}. This is called asynchronously
      * from where the key is dispatched. It gives the host application a chance
      * to handle the unhandled key events.
      *
@@ -436,7 +436,7 @@ public class WebViewClient {
     /**
      * Notify the host application that a input event was not handled by the WebView.
      * Except system keys, WebView always consumes input events in the normal flow
-     * or if shouldOverrideKeyEvent returns true. This is called asynchronously
+     * or if shouldOverrideKeyEvent returns {@code true}. This is called asynchronously
      * from where the event is dispatched. It gives the host application a chance
      * to handle the unhandled input events.
      *
@@ -483,7 +483,7 @@ public class WebViewClient {
      * user has been processed.
      * @param view The WebView requesting the login.
      * @param realm The account realm used to look up accounts.
-     * @param account An optional account. If not null, the account should be
+     * @param account An optional account. If not {@code null}, the account should be
      *                checked against accounts on the device. If it is a valid
      *                account, it should be used to log in the user.
      * @param args Authenticator specific arguments used to log in the user.
@@ -512,7 +512,7 @@ public class WebViewClient {
      *
      * @param view The WebView which needs to be cleaned up.
      * @param detail the reason why it exited.
-     * @return true if the host application handled the situation that process has
+     * @return {@code true} if the host application handled the situation that process has
      *         exited, otherwise, application will crash if render process crashed,
      *         or be killed if render process was killed by the system.
      */

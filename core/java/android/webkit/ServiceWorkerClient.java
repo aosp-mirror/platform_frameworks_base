@@ -24,7 +24,7 @@ public class ServiceWorkerClient {
 
     /**
      * Notify the host application of a resource request and allow the
-     * application to return the data. If the return value is null, the
+     * application to return the data. If the return value is {@code null}, the
      * Service Worker will continue to load the resource as usual.
      * Otherwise, the return response and data will be used.
      * NOTE: This method is called on a thread other than the UI thread
@@ -33,7 +33,7 @@ public class ServiceWorkerClient {
      *
      * @param request Object containing the details of the request.
      * @return A {@link android.webkit.WebResourceResponse} containing the
-     *         response information or null if the WebView should load the
+     *         response information or {@code null} if the WebView should load the
      *         resource itself.
      * @see WebViewClient#shouldInterceptRequest(WebView, WebResourceRequest)
      */

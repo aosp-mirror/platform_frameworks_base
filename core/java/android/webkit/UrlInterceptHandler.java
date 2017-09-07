@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.webkit.CacheManager.CacheResult;
 import android.webkit.PluginData;
+
 import java.util.Map;
 
 /**
@@ -30,11 +31,11 @@ public interface UrlInterceptHandler {
 
     /**
      * Given an URL, returns the CacheResult which contains the
-     * surrogate response for the request, or null if the handler is
+     * surrogate response for the request, or {@code null} if the handler is
      * not interested.
      *
      * @param url URL string.
-     * @param headers The headers associated with the request. May be null.
+     * @param headers The headers associated with the request. May be {@code null}.
      * @return The CacheResult containing the surrogate response.
      *
      * @hide
@@ -45,11 +46,11 @@ public interface UrlInterceptHandler {
 
     /**
      * Given an URL, returns the PluginData which contains the
-     * surrogate response for the request, or null if the handler is
+     * surrogate response for the request, or {@code null} if the handler is
      * not interested.
      *
      * @param url URL string.
-     * @param headers The headers associated with the request. May be null.
+     * @param headers The headers associated with the request. May be {@code null}.
      * @return The PluginData containing the surrogate response.
      *
      * @hide
