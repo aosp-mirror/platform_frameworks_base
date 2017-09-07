@@ -82,6 +82,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.PackageParser.PARSE_IS_OEM;
 import static android.content.pm.PackageParser.PARSE_IS_PRIVILEGED;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
@@ -2650,7 +2651,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final File oemAppDir = new File(Environment.getOemDirectory(), "app");
             scanDirTracedLI(oemAppDir, mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM
-                    | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
+                    | PackageParser.PARSE_IS_SYSTEM_DIR
+                    | PackageParser.PARSE_IS_OEM, scanFlags, 0);
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
@@ -2820,7 +2822,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                     | PackageParser.PARSE_IS_SYSTEM_DIR;
                         } else if (FileUtils.contains(oemAppDir, scanFile)) {
                             reparseFlags = PackageParser.PARSE_IS_SYSTEM
-                                    | PackageParser.PARSE_IS_SYSTEM_DIR;
+                                    | PackageParser.PARSE_IS_SYSTEM_DIR
+                                    | PackageParser.PARSE_IS_OEM;
                         } else {
                             Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
                             continue;
@@ -9345,6 +9348,13 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 updatedPkg.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
             }
+            // If new package is not located in "/oem" (e.g. due to an OTA),
+            // it needs to drop FLAG_OEM.
+            if (locationIsOem(scanFile)) {
+                updatedPkg.pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_OEM;
+            } else {
+                updatedPkg.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_OEM;
+            }
 
             if (ps != null && !ps.codePath.equals(scanFile)) {
                 // The path has changed from what was last scanned...  check the
@@ -9462,6 +9472,12 @@ public class PackageManagerService extends IPackageManager.Stub
             // flag set initially
             if ((updatedPkg.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
                 policyFlags |= PackageParser.PARSE_IS_PRIVILEGED;
+            }
+
+            // An updated OEM app will not have the PARSE_IS_OEM
+            // flag set initially
+            if ((updatedPkg.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0) {
+                policyFlags |= PackageParser.PARSE_IS_OEM;
             }
         }
 
@@ -11181,6 +11197,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if ((policyFlags&PackageParser.PARSE_IS_PRIVILEGED) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+        }
+
+        if ((policyFlags&PackageParser.PARSE_IS_OEM) != 0) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_OEM;
         }
 
         if (!isSystemApp(pkg)) {
@@ -13254,6 +13274,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
             BasePermission bp, PermissionsState origPermissions) {
+        boolean oemPermission = (bp.protectionLevel
+                & PermissionInfo.PROTECTION_FLAG_OEM) != 0;
         boolean privilegedPermission = (bp.protectionLevel
                 & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0;
         boolean privappPermissionsDisable =
@@ -13291,9 +13313,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         == PackageManager.SIGNATURE_MATCH)
                 || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH);
-        if (!allowed && privilegedPermission) {
+        if (!allowed && (privilegedPermission || oemPermission)) {
             if (isSystemApp(pkg)) {
-                // For updated system applications, a system permission
+                // For updated system applications, a privileged/oem permission
                 // is granted only if it had been defined by the original application.
                 if (pkg.isUpdatedSystemApp()) {
                     final PackageSetting sysPs = mSettings
@@ -13302,7 +13324,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         // If the original was granted this permission, we take
                         // that grant decision as read and propagate it to the
                         // update.
-                        if (sysPs.isPrivileged()) {
+                        if ((privilegedPermission && sysPs.isPrivileged())
+                                || (oemPermission && sysPs.isOem()
+                                        && canGrantOemPermission(sysPs, perm))) {
                             allowed = true;
                         }
                     } else {
@@ -13312,32 +13336,39 @@ public class PackageManagerService extends IPackageManager.Stub
                         // before.  In this case we do want to allow the app to
                         // now get the new permission if the ancestral apk is
                         // privileged to get it.
-                        if (sysPs != null && sysPs.pkg != null && sysPs.isPrivileged()) {
-                            // TODO(gboyer): This is the same as isPackageRequestingPermission().
-                            for (int j = 0; j < sysPs.pkg.requestedPermissions.size(); j++) {
-                                if (perm.equals(sysPs.pkg.requestedPermissions.get(j))) {
-                                    allowed = true;
-                                    break;
-                                }
-                            }
+                        if (sysPs != null && sysPs.pkg != null
+                                && isPackageRequestingPermission(sysPs.pkg, perm)
+                                && ((privilegedPermission && sysPs.isPrivileged())
+                                        || (oemPermission && sysPs.isOem()
+                                                && canGrantOemPermission(sysPs, perm)))) {
+                            allowed = true;
                         }
                         // Also if a privileged parent package on the system image or any of
-                        // its children requested a privileged permission, the updated child
+                        // its children requested a privileged/oem permission, the updated child
                         // packages can also get the permission.
                         if (pkg.parentPackage != null) {
                             final PackageSetting disabledSysParentPs = mSettings
                                     .getDisabledSystemPkgLPr(pkg.parentPackage.packageName);
-                            if (disabledSysParentPs != null && disabledSysParentPs.pkg != null
-                                    && disabledSysParentPs.isPrivileged()) {
-                                if (isPackageRequestingPermission(disabledSysParentPs.pkg, perm)) {
+                            final PackageParser.Package disabledSysParentPkg =
+                                    (disabledSysParentPs == null || disabledSysParentPs.pkg == null)
+                                    ? null : disabledSysParentPs.pkg;
+                            if (disabledSysParentPkg != null
+                                    && ((privilegedPermission && disabledSysParentPs.isPrivileged())
+                                            || (oemPermission && disabledSysParentPs.isOem()))) {
+                                if (isPackageRequestingPermission(disabledSysParentPkg, perm)
+                                        && canGrantOemPermission(disabledSysParentPs, perm)) {
                                     allowed = true;
-                                } else if (disabledSysParentPs.pkg.childPackages != null) {
-                                    final int count = disabledSysParentPs.pkg.childPackages.size();
+                                } else if (disabledSysParentPkg.childPackages != null) {
+                                    final int count = disabledSysParentPkg.childPackages.size();
                                     for (int i = 0; i < count; i++) {
-                                        PackageParser.Package disabledSysChildPkg =
-                                                disabledSysParentPs.pkg.childPackages.get(i);
-                                        if (isPackageRequestingPermission(disabledSysChildPkg,
-                                                perm)) {
+                                        final PackageParser.Package disabledSysChildPkg =
+                                                disabledSysParentPkg.childPackages.get(i);
+                                        final PackageSetting disabledSysChildPs =
+                                                mSettings.getDisabledSystemPkgLPr(
+                                                        disabledSysChildPkg.packageName);
+                                        if (isPackageRequestingPermission(disabledSysChildPkg, perm)
+                                                && canGrantOemPermission(
+                                                        disabledSysChildPs, perm)) {
                                             allowed = true;
                                             break;
                                         }
@@ -13347,7 +13378,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 } else {
-                    allowed = isPrivilegedApp(pkg);
+                    allowed = (privilegedPermission && isPrivilegedApp(pkg))
+                            || (oemPermission && isOemApp(pkg)
+                                    && canGrantOemPermission(
+                                            mSettings.getPackageLPr(pkg.packageName), perm));
                 }
             }
         }
@@ -13392,6 +13426,20 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return allowed;
+    }
+
+    private static boolean canGrantOemPermission(PackageSetting ps, String permission) {
+        if (!ps.isOem()) {
+            return false;
+        }
+        // all oem permissions must explicitly be granted or denied
+        final Boolean granted =
+                SystemConfig.getInstance().getOemPermissions(ps.name).get(permission);
+        if (granted == null) {
+            throw new IllegalStateException("OEM permission" + permission + " requested by package "
+                    + ps.name + " must be explicitly declared granted or not");
+        }
+        return Boolean.TRUE == granted;
     }
 
     private boolean isPackageRequestingPermission(PackageParser.Package pkg, String permission) {
@@ -17787,13 +17835,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
-            // Set the system/privileged flags as needed
+            // Set the system/privileged/oem flags as needed
             final boolean privileged =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+            final boolean oem =
+                    (oldPackage.applicationInfo.privateFlags
+                            & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
             final int systemPolicyFlags = policyFlags
                     | PackageParser.PARSE_IS_SYSTEM
-                    | (privileged ? PackageParser.PARSE_IS_PRIVILEGED : 0);
+                    | (privileged ? PARSE_IS_PRIVILEGED : 0)
+                    | (oem ? PARSE_IS_OEM : 0);
 
             replaceSystemPackageLIF(oldPackage, pkg, systemPolicyFlags, scanFlags,
                     user, allUsers, installerPackageName, res, installReason);
@@ -18644,6 +18696,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             + perm.info.name + "; Removing ephemeral.");
                     perm.info.protectionLevel &= ~PermissionInfo.PROTECTION_FLAG_INSTANT;
                 }
+
                 // Check whether the newly-scanned package wants to define an already-defined perm
                 if (bp != null) {
                     // If the defining package is signed with our cert, it's okay.  This
@@ -18997,6 +19050,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static boolean isPrivilegedApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    private static boolean isOemApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
     }
 
     private static boolean hasDomainURLs(PackageParser.Package pkg) {
@@ -19752,6 +19809,16 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    static boolean locationIsOem(File path) {
+        try {
+            return path.getCanonicalPath().startsWith(
+                    Environment.getOemDirectory().getCanonicalPath());
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to access code path " + path);
+        }
+        return false;
+    }
+
     /*
      * Tries to delete system package.
      */
@@ -19868,6 +19935,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_IS_SYSTEM_DIR;
         if (isPrivileged || locationIsPrivileged(codePath)) {
             parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
+        }
+        if (locationIsOem(codePath)) {
+            parseFlags |= PackageParser.PARSE_IS_OEM;
         }
 
         final PackageParser.Package newPkg =

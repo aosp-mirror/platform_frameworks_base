@@ -586,24 +586,32 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_VIRTUAL_PRELOAD = 1 << 16;
 
+    /**
+     * Value for {@linl #privateFlags}: whether this app is pre-installed on the
+     * OEM partition of the system image.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_OEM = 1 << 17;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
-            PRIVATE_FLAG_HIDDEN,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION,
+            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE,
+            PRIVATE_FLAG_BACKUP_IN_FOREGROUND,
             PRIVATE_FLAG_CANT_SAVE_STATE,
-            PRIVATE_FLAG_FORWARD_LOCK,
-            PRIVATE_FLAG_PRIVILEGED,
-            PRIVATE_FLAG_HAS_DOMAIN_URLS,
             PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE,
             PRIVATE_FLAG_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_FORWARD_LOCK,
+            PRIVATE_FLAG_HAS_DOMAIN_URLS,
+            PRIVATE_FLAG_HIDDEN,
             PRIVATE_FLAG_INSTANT,
-            PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
-            PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
-            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
-            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE,
-            PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION,
-            PRIVATE_FLAG_BACKUP_IN_FOREGROUND,
-            PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
             PRIVATE_FLAG_ISOLATED_SPLIT_LOADING,
+            PRIVATE_FLAG_OEM,
+            PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
+            PRIVATE_FLAG_PRIVILEGED,
+            PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
+            PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
             PRIVATE_FLAG_VIRTUAL_PRELOAD,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1552,6 +1560,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isVirtualPreload() {
         return (privateFlags & PRIVATE_FLAG_VIRTUAL_PRELOAD) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOem() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
     }
 
     /**

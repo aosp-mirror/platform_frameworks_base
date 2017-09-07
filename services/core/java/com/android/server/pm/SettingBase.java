@@ -58,6 +58,7 @@ abstract class SettingBase {
     void setPrivateFlags(int pkgPrivateFlags) {
         this.pkgPrivateFlags = pkgPrivateFlags
                 & (ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
+                | ApplicationInfo.PRIVATE_FLAG_OEM
                 | ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK
                 | ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER);
     }
