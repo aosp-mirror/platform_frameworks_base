@@ -21,6 +21,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.argThat;
@@ -94,6 +95,7 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testPopulate() {
         LogMaker maker = mock(LogMaker.class);
         when(maker.setSubtype(anyInt())).thenReturn(maker);
+        when(maker.addTaggedData(anyInt(), any())).thenReturn(maker);
         mTile.getState().value = true;
         mTile.populate(maker);
         verify(maker).addTaggedData(eq(FIELD_QS_VALUE), eq(1));
