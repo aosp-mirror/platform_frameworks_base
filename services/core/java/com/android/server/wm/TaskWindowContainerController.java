@@ -49,19 +49,18 @@ public class TaskWindowContainerController
     private final H mHandler;
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
-            StackWindowController stackController, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean toTop, boolean showForAllUsers, TaskDescription taskDescription) {
-        this(taskId, listener, stackController, userId, bounds, overrideConfig, resizeMode,
+            StackWindowController stackController, int userId, Rect bounds, int resizeMode,
+            boolean supportsPictureInPicture, boolean toTop, boolean showForAllUsers,
+            TaskDescription taskDescription) {
+        this(taskId, listener, stackController, userId, bounds, resizeMode,
                 supportsPictureInPicture, toTop, showForAllUsers, taskDescription,
                 WindowManagerService.getInstance());
     }
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
-            StackWindowController stackController, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean toTop, boolean showForAllUsers, TaskDescription taskDescription,
-            WindowManagerService service) {
+            StackWindowController stackController, int userId, Rect bounds, int resizeMode,
+            boolean supportsPictureInPicture, boolean toTop, boolean showForAllUsers,
+            TaskDescription taskDescription, WindowManagerService service) {
         super(listener, service);
         mTaskId = taskId;
         mHandler = new H(new WeakReference<>(this), service.mH.getLooper());
@@ -76,7 +75,7 @@ public class TaskWindowContainerController
                         + stackController);
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
-            final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
+            final Task task = createTask(taskId, stack, userId, bounds, resizeMode,
                     supportsPictureInPicture, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             // We only want to move the parents to the parents if we are creating this task at the
@@ -86,10 +85,9 @@ public class TaskWindowContainerController
     }
 
     @VisibleForTesting
-    Task createTask(int taskId, TaskStack stack, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            TaskDescription taskDescription) {
-        return new Task(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
+    Task createTask(int taskId, TaskStack stack, int userId, Rect bounds, int resizeMode,
+            boolean supportsPictureInPicture, TaskDescription taskDescription) {
+        return new Task(taskId, stack, userId, mService, bounds, resizeMode,
                 supportsPictureInPicture, taskDescription, this);
     }
 

@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"លំនាំ​មិន​ត្រឹមត្រូវ​ទេ"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ​ទេ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"សូម​ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី​ទៀត។"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។</item>
+      <item quantity="one">ព្យាយាមម្តងទៀតក្នុងរយៈពេល 1 វិនាទី។</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"គូរ​លំនាំ​របស់​អ្នក"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"បញ្ចូល​កូដ PIN របស់​ស៊ីម។"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"បញ្ចូល​កូដ PIN របស់​ស៊ីម​សម្រាប់ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"។"</string>

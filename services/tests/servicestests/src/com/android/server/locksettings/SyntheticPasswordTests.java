@@ -23,8 +23,9 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
+import static org.mockito.Mockito.verify;
 
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.PasswordMetrics;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
@@ -272,14 +273,22 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
         assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
-        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode();
+        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
+                PRIMARY_USER_ID).getResponseCode();
         assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 handle, TOKEN.getBytes(), PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
+        // Verify DPM gets notified about new device lock
+        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        PasswordMetrics metric = PasswordMetrics.computeForPassword(PATTERN);
+        metric.quality = PASSWORD_QUALITY_SOMETHING;
+        verify(mDevicePolicyManager).setActivePasswordState(metric, PRIMARY_USER_ID);
+
         assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID).getResponseCode());
+                mService.verifyCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0,
+                        PRIMARY_USER_ID).getResponseCode());
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 

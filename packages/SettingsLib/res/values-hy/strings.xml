@@ -118,7 +118,7 @@
     <string name="managed_user_title" msgid="8109605045406748842">"Բոլոր աշխատանքային հավելվածները"</string>
     <string name="user_guest" msgid="8475274842845401871">"Հյուր"</string>
     <string name="unknown" msgid="1592123443519355854">"Անհայտ"</string>
-    <string name="running_process_item_user_label" msgid="3129887865552025943">"Օտատեր՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="running_process_item_user_label" msgid="3129887865552025943">"Օգտատեր՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Կանխադրված կարգավորումներ չկան"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Տեքստի հնչեցման կարգավորումներ"</string>
@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Միշտ թույլատրել Wi‑Fi ռոումինգի որոնումը"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Բջջային ինտերնետը միշտ ակտիվ է"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Սարքակազմի արագացման միացում"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Ցուցադրել Bluetooth սարքերն առանց անունների"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Միացնել ներխմբային զանգը"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP տարբերակը"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Այս կարգավորումները միայն ծրագրավորման նպատակների համար են նախատեսված: Դրանք կարող են խանգարել ձեր սարքի կամ ծրագրի աշխատանքին:"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ստուգել հավելվածները USB-ի նկատմամբ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Ստուգեք տեղադրված հավելվածը ADB/ADT-ի միջոցով կասկածելի աշխատանքի պատճառով:"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth սարքերը կցուցադրվեն առանց անունների (միայն MAC հասցեները)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ՝ երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Ընձեռել հեռախոսի բոլոր զանգերանգների Bluetooth ականջակալներով նվագարկումը"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Տեղային տերմինալ"</string>

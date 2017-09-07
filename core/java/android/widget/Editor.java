@@ -1689,6 +1689,10 @@ public class Editor {
         } else {
             layout.draw(canvas, highlight, highlightPaint, cursorOffsetVertical);
         }
+
+        if (mSelectionActionModeHelper != null) {
+            mSelectionActionModeHelper.onDraw(canvas);
+        }
     }
 
     private void drawHardwareAccelerated(Canvas canvas, Layout layout, Path highlight,

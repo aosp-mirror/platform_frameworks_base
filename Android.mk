@@ -1582,6 +1582,20 @@ LOCAL_SRC_FILES := \
     $(call all-proto-files-under, libs/incident/proto)
 include $(BUILD_HOST_JAVA_LIBRARY)
 
+# ====  java proto device library (for test only)  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := platformprotosnano
+LOCAL_MODULE_TAGS := tests optional
+LOCAL_PROTOC_OPTIMIZE_TYPE := nano
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+LOCAL_PROTO_JAVA_OUTPUT_PARAMS := \
+    store_unknown_fields = true
+LOCAL_JAVA_LIBRARIES := core-oj core-libart
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto)
+include $(BUILD_STATIC_JAVA_LIBRARY)
+
 
 # Include subdirectory makefiles
 # ============================================================

@@ -56,8 +56,8 @@ public class TaskStackContainersTests extends WindowTestsBase {
         overrideConfig.windowConfiguration.setWindowingMode(
                 getWindowingModeForStackId(PINNED_STACK_ID));
         mPinnedStack = new StackWindowController(PINNED_STACK_ID, null,
-                mDisplayContent.getDisplayId(), true /* onTop */, new Rect(),
-                overrideConfig, sWm).mContainer;
+                mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
+        mPinnedStack.onOverrideConfigurationChanged(overrideConfig);
 
         // Stack should contain visible app window to be considered visible.
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);

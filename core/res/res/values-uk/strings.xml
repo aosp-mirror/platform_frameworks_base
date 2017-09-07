@@ -1492,7 +1492,12 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Неправильний пароль"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Неправильний PIN-код"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Повторіть спробу через <xliff:g id="NUMBER">%1$d</xliff:g> с."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
+      <item quantity="few">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунди.</item>
+      <item quantity="many">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
+      <item quantity="other">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунди.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Намалюйте ключ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Введіть PIN-код SIM-карти"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Введіть PIN-код"</string>

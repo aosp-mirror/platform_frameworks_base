@@ -291,7 +291,13 @@ class XmlPrinter : public xml::Visitor {
         std::cerr << "(" << attr.compiled_attribute.value().id.value_or_default(ResourceId(0x0))
                   << ")";
       }
-      std::cerr << "=" << attr.value << "\n";
+      std::cerr << "=";
+      if (attr.compiled_value != nullptr) {
+        std::cerr << *attr.compiled_value;
+      } else {
+        std::cerr << attr.value;
+      }
+      std::cerr << "\n";
     }
 
     prefix_ += "  ";

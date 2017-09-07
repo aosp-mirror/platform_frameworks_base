@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Onjuist patroon"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Onjuist wachtwoord"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Onjuiste pincode"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw.</item>
+      <item quantity="one">Probeer het over één seconde opnieuw.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Teken je patroon"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Geef de pincode van de simkaart op."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Geef de pincode voor de simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\' op."</string>

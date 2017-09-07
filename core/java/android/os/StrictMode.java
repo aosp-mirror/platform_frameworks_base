@@ -317,13 +317,7 @@ public final class StrictMode {
     private static final HashMap<Class, Integer> EMPTY_CLASS_LIMIT_MAP =
             new HashMap<Class, Integer>();
 
-    /**
-     * The current VmPolicy in effect.
-     *
-     * <p>TODO: these are redundant (mask is in VmPolicy). Should remove sVmPolicyMask.
-     */
-    private static volatile int sVmPolicyMask = 0;
-
+    /** The current VmPolicy in effect. */
     private static volatile VmPolicy sVmPolicy = VmPolicy.LAX;
 
     /** {@hide} */
@@ -1168,7 +1162,12 @@ public final class StrictMode {
      * @hide
      */
     public static void enableDeathOnFileUriExposure() {
-        sVmPolicyMask |= DETECT_VM_FILE_URI_EXPOSURE | PENALTY_DEATH_ON_FILE_URI_EXPOSURE;
+        sVmPolicy =
+                new VmPolicy(
+                        sVmPolicy.mask
+                                | DETECT_VM_FILE_URI_EXPOSURE
+                                | PENALTY_DEATH_ON_FILE_URI_EXPOSURE,
+                        sVmPolicy.classInstanceLimit);
     }
 
     /**
@@ -1178,7 +1177,12 @@ public final class StrictMode {
      * @hide
      */
     public static void disableDeathOnFileUriExposure() {
-        sVmPolicyMask &= ~(DETECT_VM_FILE_URI_EXPOSURE | PENALTY_DEATH_ON_FILE_URI_EXPOSURE);
+        sVmPolicy =
+                new VmPolicy(
+                        sVmPolicy.mask
+                                & ~(DETECT_VM_FILE_URI_EXPOSURE
+                                        | PENALTY_DEATH_ON_FILE_URI_EXPOSURE),
+                        sVmPolicy.classInstanceLimit);
     }
 
     /**
@@ -1709,14 +1713,13 @@ public final class StrictMode {
     public static void setVmPolicy(final VmPolicy policy) {
         synchronized (StrictMode.class) {
             sVmPolicy = policy;
-            sVmPolicyMask = policy.mask;
             setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
 
             Looper looper = Looper.getMainLooper();
             if (looper != null) {
                 MessageQueue mq = looper.mQueue;
                 if (policy.classInstanceLimit.size() == 0
-                        || (sVmPolicyMask & VM_PENALTY_MASK) == 0) {
+                        || (sVmPolicy.mask & VM_PENALTY_MASK) == 0) {
                     mq.removeIdleHandler(sProcessIdleHandler);
                     sIsIdlerRegistered = false;
                 } else if (!sIsIdlerRegistered) {
@@ -1726,9 +1729,9 @@ public final class StrictMode {
             }
 
             int networkPolicy = NETWORK_POLICY_ACCEPT;
-            if ((sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0) {
-                if ((sVmPolicyMask & PENALTY_DEATH) != 0
-                        || (sVmPolicyMask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0) {
+            if ((sVmPolicy.mask & DETECT_VM_CLEARTEXT_NETWORK) != 0) {
+                if ((sVmPolicy.mask & PENALTY_DEATH) != 0
+                        || (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0) {
                     networkPolicy = NETWORK_POLICY_REJECT;
                 } else {
                     networkPolicy = NETWORK_POLICY_LOG;
@@ -1771,37 +1774,37 @@ public final class StrictMode {
 
     /** @hide */
     public static boolean vmSqliteObjectLeaksEnabled() {
-        return (sVmPolicyMask & DETECT_VM_CURSOR_LEAKS) != 0;
+        return (sVmPolicy.mask & DETECT_VM_CURSOR_LEAKS) != 0;
     }
 
     /** @hide */
     public static boolean vmClosableObjectLeaksEnabled() {
-        return (sVmPolicyMask & DETECT_VM_CLOSABLE_LEAKS) != 0;
+        return (sVmPolicy.mask & DETECT_VM_CLOSABLE_LEAKS) != 0;
     }
 
     /** @hide */
     public static boolean vmRegistrationLeaksEnabled() {
-        return (sVmPolicyMask & DETECT_VM_REGISTRATION_LEAKS) != 0;
+        return (sVmPolicy.mask & DETECT_VM_REGISTRATION_LEAKS) != 0;
     }
 
     /** @hide */
     public static boolean vmFileUriExposureEnabled() {
-        return (sVmPolicyMask & DETECT_VM_FILE_URI_EXPOSURE) != 0;
+        return (sVmPolicy.mask & DETECT_VM_FILE_URI_EXPOSURE) != 0;
     }
 
     /** @hide */
     public static boolean vmCleartextNetworkEnabled() {
-        return (sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0;
+        return (sVmPolicy.mask & DETECT_VM_CLEARTEXT_NETWORK) != 0;
     }
 
     /** @hide */
     public static boolean vmContentUriWithoutPermissionEnabled() {
-        return (sVmPolicyMask & DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION) != 0;
+        return (sVmPolicy.mask & DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION) != 0;
     }
 
     /** @hide */
     public static boolean vmUntaggedSocketEnabled() {
-        return (sVmPolicyMask & DETECT_VM_UNTAGGED_SOCKET) != 0;
+        return (sVmPolicy.mask & DETECT_VM_UNTAGGED_SOCKET) != 0;
     }
 
     /** @hide */
@@ -1827,7 +1830,7 @@ public final class StrictMode {
     /** @hide */
     public static void onFileUriExposed(Uri uri, String location) {
         final String message = uri + " exposed beyond app through " + location;
-        if ((sVmPolicyMask & PENALTY_DEATH_ON_FILE_URI_EXPOSURE) != 0) {
+        if ((sVmPolicy.mask & PENALTY_DEATH_ON_FILE_URI_EXPOSURE) != 0) {
             throw new FileUriExposedException(message);
         } else {
             onVmPolicyViolation(null, new Throwable(message));
@@ -1873,7 +1876,7 @@ public final class StrictMode {
             }
         }
 
-        final boolean forceDeath = (sVmPolicyMask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
+        final boolean forceDeath = (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
         onVmPolicyViolation(
                 HexDump.dumpHexString(firstPacket).trim(), new Throwable(msg), forceDeath);
     }
@@ -1898,10 +1901,10 @@ public final class StrictMode {
     /** @hide */
     public static void onVmPolicyViolation(
             String message, Throwable originStack, boolean forceDeath) {
-        final boolean penaltyDropbox = (sVmPolicyMask & PENALTY_DROPBOX) != 0;
-        final boolean penaltyDeath = ((sVmPolicyMask & PENALTY_DEATH) != 0) || forceDeath;
-        final boolean penaltyLog = (sVmPolicyMask & PENALTY_LOG) != 0;
-        final ViolationInfo info = new ViolationInfo(message, originStack, sVmPolicyMask);
+        final boolean penaltyDropbox = (sVmPolicy.mask & PENALTY_DROPBOX) != 0;
+        final boolean penaltyDeath = ((sVmPolicy.mask & PENALTY_DEATH) != 0) || forceDeath;
+        final boolean penaltyLog = (sVmPolicy.mask & PENALTY_LOG) != 0;
+        final ViolationInfo info = new ViolationInfo(message, originStack, sVmPolicy.mask);
 
         // Erase stuff not relevant for process-wide violations
         info.numAnimationsRunning = 0;
@@ -1929,7 +1932,7 @@ public final class StrictMode {
             Log.e(TAG, message, originStack);
         }
 
-        int violationMaskSubset = PENALTY_DROPBOX | (ALL_VM_DETECT_BITS & sVmPolicyMask);
+        int violationMaskSubset = PENALTY_DROPBOX | (ALL_VM_DETECT_BITS & sVmPolicy.mask);
 
         if (penaltyDropbox && !penaltyDeath) {
             // Common case for userdebug/eng builds.  If no death and

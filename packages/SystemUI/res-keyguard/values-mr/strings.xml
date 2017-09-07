@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"चुकीचा पॅटर्न"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"चुकीचा संकेतशब्द"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"चुकीचा पिन"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> सेकंदात पुन्हा प्रयत्न करा.</item>
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> सेकंदांत पुन्हा प्रयत्न करा.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"तुमचा पॅटर्न काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"सिम पिन एंटर करा"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन एंटर करा"</string>

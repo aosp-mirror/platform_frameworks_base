@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"解鎖圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN 碼錯誤"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other">請於 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。</item>
+      <item quantity="one">請於 1 秒後再試一次。</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"畫出解鎖圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"輸入 SIM 卡的 PIN 碼。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"輸入「<xliff:g id="CARRIER">%1$s</xliff:g>」SIM 卡的 PIN 碼。"</string>

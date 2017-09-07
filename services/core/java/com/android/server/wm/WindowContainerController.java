@@ -16,9 +16,7 @@
 
 package com.android.server.wm;
 
-import android.os.IBinder;
-
-import java.util.HashMap;
+import android.content.res.Configuration;
 
 /**
  * Class that allows the owner/creator of a {@link WindowContainer} to communicate directly with the
@@ -29,7 +27,8 @@ import java.util.HashMap;
  *
  * Test class: {@link WindowContainerControllerTests}
  */
-class WindowContainerController<E extends WindowContainer, I extends WindowContainerListener> {
+class WindowContainerController<E extends WindowContainer, I extends WindowContainerListener>
+        implements ConfigurationContainerListener {
 
     final WindowManagerService mService;
     final RootWindowContainer mRoot;
@@ -53,18 +52,32 @@ class WindowContainerController<E extends WindowContainer, I extends WindowConta
                     + " for controller=" + this + " Already set to=" + mContainer);
         }
         mContainer = container;
+        if (mContainer != null && mListener != null) {
+            mListener.registerConfigurationChangeListener(this);
+        }
     }
 
     void removeContainer() {
         // TODO: See if most uses cases should support removeIfPossible here.
         //mContainer.removeIfPossible();
-        if (mContainer != null) {
-            mContainer.setController(null);
-            mContainer = null;
+        if (mContainer == null) {
+            return;
+        }
+
+        mContainer.setController(null);
+        mContainer = null;
+        if (mListener != null) {
+            mListener.unregisterConfigurationChangeListener(this);
         }
     }
 
-    boolean checkCallingPermission(String permission, String func) {
-        return mService.checkCallingPermission(permission, func);
+    @Override
+    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                return;
+            }
+            mContainer.onOverrideConfigurationChanged(overrideConfiguration);
+        }
     }
 }

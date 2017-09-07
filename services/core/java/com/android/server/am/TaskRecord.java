@@ -430,9 +430,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
-        final Configuration overrideConfig = getOverrideConfiguration();
         setWindowContainerController(new TaskWindowContainerController(taskId, this,
-                getStack().getWindowContainerController(), userId, bounds, overrideConfig,
+                getStack().getWindowContainerController(), userId, bounds,
                 mResizeMode, mSupportsPictureInPicture, onTop,
                 showForAllUsers, lastTaskDescription));
     }
@@ -1175,9 +1174,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
         // Only set this based on the first activity
         if (mActivities.isEmpty()) {
-            // TODO: propagating this change to the WM side...Should probably be done by having
-            // ConfigurationContainer change listener that the WindowContainerController registers
-            // for.
             if (r.getActivityType() == ACTIVITY_TYPE_UNDEFINED) {
                 // Normally non-standard activity type for the activity record will be set when the
                 // object is created, however we delay setting the standard application type until

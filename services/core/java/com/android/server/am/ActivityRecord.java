@@ -191,10 +191,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
-    private static final String TAG_SCREENSHOTS = TAG + POSTFIX_SCREENSHOTS;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
-    private static final String TAG_THUMBNAILS = TAG + POSTFIX_THUMBNAILS;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
@@ -937,8 +935,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
-                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L,
-                new Configuration(getOverrideConfiguration()), mBounds);
+                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L, mBounds);
 
         task.addActivityToTop(this);
 
@@ -1122,7 +1119,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return whether this activity supports PiP multi-window and can be put in the pinned stack.
      */
     boolean supportsPictureInPicture() {
-        return service.mSupportsPictureInPicture && isActivityTypeStandard()
+        return service.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
                 && info.supportsPictureInPicture();
     }
 

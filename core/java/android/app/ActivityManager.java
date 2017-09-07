@@ -45,7 +45,6 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -62,7 +61,6 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -665,11 +663,17 @@ public class ActivityManager {
             SystemProperties.getBoolean("debug.force_low_ram", false);
 
     /** @hide */
+    @TestApi
     public static class StackId {
+
+        private StackId() {
+        }
+
         /** Invalid stack ID. */
         public static final int INVALID_STACK_ID = -1;
 
-        /** First static stack ID. */
+        /** First static stack ID.
+         * @hide */
         public static final int FIRST_STATIC_STACK_ID = 0;
 
         /** Home activity stack ID. */
@@ -693,25 +697,30 @@ public class ActivityManager {
         /** ID of stack that contains activities launched by the assistant. */
         public static final int ASSISTANT_STACK_ID = RECENTS_STACK_ID + 1;
 
-        /** Last static stack stack ID. */
+        /** Last static stack stack ID.
+         * @hide */
         public static final int LAST_STATIC_STACK_ID = ASSISTANT_STACK_ID;
 
-        /** Start of ID range used by stacks that are created dynamically. */
+        /** Start of ID range used by stacks that are created dynamically.
+         * @hide */
         public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
 
         // TODO: Figure-out a way to remove this.
+        /** @hide */
         public static boolean isStaticStack(int stackId) {
             return stackId >= FIRST_STATIC_STACK_ID && stackId <= LAST_STATIC_STACK_ID;
         }
 
         // TODO: It seems this mostly means a stack on a secondary display now. Need to see if
         // there are other meanings. If not why not just use information from the display?
+        /** @hide */
         public static boolean isDynamicStack(int stackId) {
             return stackId >= FIRST_DYNAMIC_STACK_ID;
         }
 
         /**
          * Returns true if dynamic stacks are allowed to be visible behind the input stack.
+         * @hide
          */
         // TODO: Figure-out a way to remove.
         public static boolean isDynamicStacksVisibleBehindAllowed(int stackId) {
@@ -721,6 +730,7 @@ public class ActivityManager {
         /**
          * Returns true if we try to maintain focus in the current stack when the top activity
          * finishes.
+         * @hide
          */
         // TODO: Figure-out a way to remove. Probably isn't needed in the new world...
         public static boolean keepFocusInStackIfPossible(int stackId) {
@@ -730,6 +740,7 @@ public class ActivityManager {
 
         /**
          * Returns true if Stack size is affected by the docked stack changing size.
+         * @hide
          */
         // TODO: Figure-out a way to remove.
         public static boolean isResizeableByDockedStack(int stackId) {
@@ -740,6 +751,7 @@ public class ActivityManager {
         /**
          * Returns true if the size of tasks in the input stack are affected by the docked stack
          * changing size.
+         * @hide
          */
         // TODO: What is the difference between this method and the one above??
         public static boolean isTaskResizeableByDockedStack(int stackId) {
@@ -750,6 +762,7 @@ public class ActivityManager {
 
         /**
          * Returns true if the input stack is affected by drag resizing.
+         * @hide
          */
         public static boolean isStackAffectedByDragResizing(int stackId) {
             return isStaticStack(stackId) && stackId != PINNED_STACK_ID
@@ -760,6 +773,7 @@ public class ActivityManager {
          * Returns true if the windows of tasks being moved to the target stack from the source
          * stack should be replaced, meaning that window manager will keep the old window around
          * until the new is ready.
+         * @hide
          */
         public static boolean replaceWindowsOnTaskMove(int sourceStackId, int targetStackId) {
             return sourceStackId == FREEFORM_WORKSPACE_STACK_ID
@@ -769,6 +783,7 @@ public class ActivityManager {
         /**
          * Return whether a stackId is a stack that be a backdrop to a translucent activity.  These
          * are generally fullscreen stacks.
+         * @hide
          */
         public static boolean isBackdropToTranslucentActivity(int stackId) {
             return stackId == FULLSCREEN_WORKSPACE_STACK_ID
@@ -778,6 +793,7 @@ public class ActivityManager {
         /**
          * Returns true if animation specs should be constructed for app transition that moves
          * the task to the specified stack.
+         * @hide
          */
         public static boolean useAnimationSpecForAppTransition(int stackId) {
             // TODO: INVALID_STACK_ID is also animated because we don't persist stack id's across
@@ -792,6 +808,7 @@ public class ActivityManager {
         /**
          * Returns true if activities from stasks in the given {@param stackId} are allowed to
          * enter picture-in-picture.
+         * @hide
          */
         public static boolean isAllowedToEnterPictureInPicture(int stackId) {
             return stackId != HOME_STACK_ID && stackId != ASSISTANT_STACK_ID &&
@@ -801,6 +818,7 @@ public class ActivityManager {
         /**
          * Returns true if the top task in the task is allowed to return home when finished and
          * there are other tasks in the stack.
+         * @hide
          */
         public static boolean allowTopTaskToReturnHome(int stackId) {
             return stackId != PINNED_STACK_ID;
@@ -809,6 +827,7 @@ public class ActivityManager {
         /**
          * Returns true if the stack should be resized to match the bounds specified by
          * {@link ActivityOptions#setLaunchBounds} when launching an activity into the stack.
+         * @hide
          */
         public static boolean resizeStackWithLaunchBounds(int stackId) {
             return stackId == PINNED_STACK_ID;
@@ -819,6 +838,7 @@ public class ActivityManager {
          * fullscreen, i. e. they can become the top opaque fullscreen window, meaning that it
          * controls system bars, lockscreen occluded/dismissing state, screen rotation animation,
          * etc.
+         * @hide
          */
         // TODO: What about the other side of docked stack if we move this to WindowConfiguration?
         public static boolean normallyFullscreenWindows(int stackId) {
@@ -830,6 +850,7 @@ public class ActivityManager {
          * Returns true if the input stack id should only be present on a device that supports
          * multi-window mode.
          * @see android.app.ActivityManager#supportsMultiWindow
+         * @hide
          */
         // TODO: What about the other side of docked stack if we move this to WindowConfiguration?
         public static boolean isMultiWindowStack(int stackId) {
@@ -839,12 +860,14 @@ public class ActivityManager {
 
         /**
          * Returns true if the input {@param stackId} is HOME_STACK_ID or RECENTS_STACK_ID
+         * @hide
          */
         public static boolean isHomeOrRecentsStack(int stackId) {
             return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID;
         }
 
-        /** Returns true if the input stack and its content can affect the device orientation. */
+        /** Returns true if the input stack and its content can affect the device orientation.
+         * @hide */
         public static boolean canSpecifyOrientation(int stackId) {
             return stackId == HOME_STACK_ID
                     || stackId == RECENTS_STACK_ID
@@ -853,7 +876,8 @@ public class ActivityManager {
                     || isDynamicStack(stackId);
         }
 
-        /** Returns the windowing mode that should be used for this input stack id. */
+        /** Returns the windowing mode that should be used for this input stack id.
+         * @hide */
         // TODO: To be removed once we are not using stack id for stuff...
         public static int getWindowingModeForStackId(int stackId) {
             final int windowingMode;
@@ -879,7 +903,8 @@ public class ActivityManager {
             return windowingMode;
         }
 
-        /** Returns the activity type that should be used for this input stack id. */
+        /** Returns the activity type that should be used for this input stack id.
+         * @hide */
         // TODO: To be removed once we are not using stack id for stuff...
         public static int getActivityTypeForStackId(int stackId) {
             final int activityType;

@@ -187,7 +187,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private boolean mDisablePreviewScreenshots;
 
-    Task mLastParent;
+    private Task mLastParent;
 
     /**
      * See {@link #canTurnScreenOn()}
@@ -198,8 +198,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
             int configChanges, boolean launchTaskBehind, boolean alwaysFocusable,
-            AppWindowContainerController controller, Configuration overrideConfig, Rect bounds) {
-        this(service, token, voiceInteraction, dc, fullscreen, overrideConfig, bounds);
+            AppWindowContainerController controller, Rect bounds) {
+        this(service, token, voiceInteraction, dc, fullscreen, bounds);
         setController(controller);
         mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
         mShowForAllUsers = showForAllUsers;
@@ -216,7 +216,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
-            DisplayContent dc, boolean fillsParent, Configuration overrideConfig, Rect bounds) {
+            DisplayContent dc, boolean fillsParent, Rect bounds) {
         super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
                 false /* ownerCanManageAppTokens */);
         appToken = token;
@@ -224,9 +224,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mFillsParent = fillsParent;
         mInputApplicationHandle = new InputApplicationHandle(this);
         mAppAnimator = new AppWindowAnimator(this, service);
-        if (overrideConfig != null) {
-            onOverrideConfigurationChanged(overrideConfig);
-        }
         if (bounds != null) {
             mBounds.set(bounds);
         }

@@ -30,7 +30,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"திறக்க, பின்னை உள்ளிடவும்"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"தவறான பின் குறியீடு."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"சார்ஜ் செய்யப்பட்டது"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"சார்ஜாகிறது"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"சார்ஜ் ஆகிறது"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"வேகமாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"மெதுவாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"சார்ஜரை இணைக்கவும்."</string>
@@ -57,7 +57,10 @@
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"தவறான பேட்டர்ன்"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"தவறான கடவுச்சொல்"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"தவறான பின்"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> வினாடிகளுக்குப் பிறகு முயலவும்.</item>
+      <item quantity="one">1 வினாடிக்குப் பிறகு முயலவும்.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"பேட்டர்னை வரையவும்"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"சிம் பின்னை உள்ளிடவும்."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\"க்கான சிம் பின்னை உள்ளிடவும்."</string>

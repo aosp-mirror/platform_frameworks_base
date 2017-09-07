@@ -22812,6 +22812,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             requestPssAllProcsLocked(now, false, mProcessStats.isMemFactorLowered());
         }
 
+        ArrayList<UidRecord> becameIdle = null;
+
         // Update from any uid changes.
         if (mLocalPowerManager != null) {
             mLocalPowerManager.startUidChanges();
@@ -22844,6 +22846,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     if (uidRec.idle && !uidRec.setIdle) {
                         uidChange = UidRecord.CHANGE_IDLE;
+                        if (becameIdle == null) {
+                            becameIdle = new ArrayList<>();
+                        }
+                        becameIdle.add(uidRec);
                     }
                 } else {
                     if (uidRec.idle) {
@@ -22873,6 +22879,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (mLocalPowerManager != null) {
             mLocalPowerManager.finishUidChanges();
+        }
+
+        if (becameIdle != null) {
+            // If we have any new uids that became idle this time, we need to make sure
+            // they aren't left with running services.
+            for (int i = becameIdle.size() - 1; i >= 0; i--) {
+                mServices.stopInBackgroundLocked(becameIdle.get(i).uid);
+            }
         }
 
         if (mProcessStats.shouldWriteNowLocked(now)) {

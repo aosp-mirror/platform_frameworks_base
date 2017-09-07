@@ -2533,7 +2533,7 @@ public class DevicePolicyManager {
      * @return Returns true if the password meets the current requirements, else false.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
-     * @throws InvalidStateException if the user is not unlocked.
+     * @throws IllegalStateException if the user is not unlocked.
      */
     public boolean isActivePasswordSufficient() {
         if (mService != null) {

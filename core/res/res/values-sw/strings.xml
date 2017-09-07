@@ -1082,7 +1082,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Sauti ya Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Sauti ya toni mlio"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Sauti ya simu"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya midia"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya faili"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Sauti ya arifa"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Mlio chaguo-msingi"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Chaguo-msingi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1382,9 +1382,9 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Gonga ili uangalie matumizi na mipangilio."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Kikomo data ya 2G-3G kimefikiwa"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Kikomo cha data ya 4G kimefikiwa"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Umefikisha kiwango cha juu kinachoruhusiwa cha matumizi ya data ya simu"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Umefikisha kipimo cha juu cha data"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Kikomo data ya Wi-Fi kimefikiwa"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Data imesitishwa kwa mzunguko uliosalia"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Matumizi ya data yamesitishwa kwa kipindi kilichosalia"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kikomo cha data ya 2G-3G kimezidishwa"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kikomo cha data cha 4G kimezidishwa"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Umepitisha kiwango cha data ulichoweka"</string>
@@ -1444,7 +1444,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Mchoro huo si sahihi"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Nenosiri Lisilo sahihi"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Nambari ya PIN si sahihi"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%1$d</xliff:g>."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%d</xliff:g>.</item>
+      <item quantity="one">Jaribu tena baada ya sekunde 1.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingiza PIN ya SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>

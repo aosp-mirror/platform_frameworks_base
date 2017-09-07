@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Schéma incorrect."</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Mot de passe incorrect."</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"NIP incorrect."</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Réessayez dans <xliff:g id="NUMBER">%1$d</xliff:g> secondes."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Réessayer dans <xliff:g id="NUMBER">%d</xliff:g> seconde.</item>
+      <item quantity="other">Réessayer dans <xliff:g id="NUMBER">%d</xliff:g> secondes.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Dessinez votre schéma."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Saisissez le NIP de la carte SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Saisissez le NIP."</string>

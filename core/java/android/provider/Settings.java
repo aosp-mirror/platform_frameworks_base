@@ -8556,6 +8556,16 @@ public final class Settings {
         public static final String NETWORK_SCORING_UI_ENABLED = "network_scoring_ui_enabled";
 
         /**
+         * Value to specify how long in milliseconds to retain seen score cache curves to be used
+         * when generating SSID only bases score curves.
+         *
+         * Type: long
+         * @hide
+         */
+        public static final String SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS =
+                "speed_label_cache_eviction_age_millis";
+
+        /**
          * Value to specify if network recommendations from
          * {@link com.android.server.NetworkScoreService} are enabled.
          *
@@ -10787,6 +10797,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ANIMATOR_DURATION_SCALE);
             INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES);
             INSTANT_APP_SETTINGS.add(WTF_IS_FATAL);
+            INSTANT_APP_SETTINGS.add(SEND_ACTION_APP_ERROR);
         }
 
         /**

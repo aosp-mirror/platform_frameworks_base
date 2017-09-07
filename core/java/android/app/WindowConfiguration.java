@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -31,6 +32,7 @@ import android.view.DisplayInfo;
  * up-to-date and ran anytime changes are made to this class.
  * @hide
  */
+@TestApi
 public class WindowConfiguration implements Parcelable, Comparable<WindowConfiguration> {
 
     /**
@@ -44,17 +46,23 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** The current windowing mode of the configuration. */
     private @WindowingMode int mWindowingMode;
 
-    /** Windowing mode is currently not defined. */
+    /** Windowing mode is currently not defined.
+     * @hide */
     public static final int WINDOWING_MODE_UNDEFINED = 0;
-    /** Occupies the full area of the screen or the parent container. */
+    /** Occupies the full area of the screen or the parent container.
+     * @hide */
     public static final int WINDOWING_MODE_FULLSCREEN = 1;
-    /** Always on-top (always visible). of other siblings in its parent container. */
+    /** Always on-top (always visible). of other siblings in its parent container.
+     * @hide */
     public static final int WINDOWING_MODE_PINNED = 2;
-    /** Occupies a dedicated region of the screen or its parent container. */
+    /** Occupies a dedicated region of the screen or its parent container.
+     * @hide */
     public static final int WINDOWING_MODE_DOCKED = 3;
-    /** Can be freely resized within its parent container. */
+    /** Can be freely resized within its parent container.
+     * @hide */
     public static final int WINDOWING_MODE_FREEFORM = 4;
 
+    /** @hide */
     @IntDef({
             WINDOWING_MODE_UNDEFINED,
             WINDOWING_MODE_FULLSCREEN,
@@ -67,17 +75,21 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** The current activity type of the configuration. */
     private @ActivityType int mActivityType;
 
-    /** Activity type is currently not defined. */
+    /** Activity type is currently not defined.
+     * @hide */
     public static final int ACTIVITY_TYPE_UNDEFINED = 0;
-    /** Standard activity type. Nothing special about the activity... */
+    /** Standard activity type. Nothing special about the activity...
+     * @hide */
     public static final int ACTIVITY_TYPE_STANDARD = 1;
     /** Home/Launcher activity type. */
     public static final int ACTIVITY_TYPE_HOME = 2;
     /** Recents/Overview activity type. */
     public static final int ACTIVITY_TYPE_RECENTS = 3;
-    /** Assistant activity type. */
+    /** Assistant activity type.
+     * @hide */
     public static final int ACTIVITY_TYPE_ASSISTANT = 4;
 
+    /** @hide */
     @IntDef({
             ACTIVITY_TYPE_UNDEFINED,
             ACTIVITY_TYPE_STANDARD,
@@ -87,13 +99,17 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     })
     public @interface ActivityType {}
 
-    /** Bit that indicates that the {@link #mAppBounds} changed. */
+    /** Bit that indicates that the {@link #mAppBounds} changed.
+     * @hide */
     public static final int WINDOW_CONFIG_APP_BOUNDS = 1 << 0;
-    /** Bit that indicates that the {@link #mWindowingMode} changed. */
+    /** Bit that indicates that the {@link #mWindowingMode} changed.
+     * @hide */
     public static final int WINDOW_CONFIG_WINDOWING_MODE = 1 << 1;
-    /** Bit that indicates that the {@link #mActivityType} changed. */
+    /** Bit that indicates that the {@link #mActivityType} changed.
+     * @hide */
     public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 2;
 
+    /** @hide */
     @IntDef(flag = true,
             value = {
                     WINDOW_CONFIG_APP_BOUNDS,
@@ -102,10 +118,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             })
     public @interface WindowConfig {}
 
+    /** @hide */
     public WindowConfiguration() {
         unset();
     }
 
+    /** @hide */
     public WindowConfiguration(WindowConfiguration configuration) {
         setTo(configuration);
     }
@@ -132,6 +150,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return 0;
     }
 
+    /** @hide */
     public static final Creator<WindowConfiguration> CREATOR = new Creator<WindowConfiguration>() {
         @Override
         public WindowConfiguration createFromParcel(Parcel in) {
@@ -148,6 +167,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * Set {@link #mAppBounds} to the input Rect.
      * @param rect The rect value to set {@link #mAppBounds} to.
      * @see #getAppBounds()
+     * @hide
      */
     public void setAppBounds(Rect rect) {
         if (rect == null) {
@@ -161,6 +181,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * @see #setAppBounds(Rect)
      * @see #getAppBounds()
+     * @hide
      */
     public void setAppBounds(int left, int top, int right, int bottom) {
         if (mAppBounds == null) {
@@ -172,20 +193,24 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /**
      * @see #setAppBounds(Rect)
+     * @hide
      */
     public Rect getAppBounds() {
         return mAppBounds;
     }
 
+    /** @hide */
     public void setWindowingMode(@WindowingMode int windowingMode) {
         mWindowingMode = windowingMode;
     }
 
+    /** @hide */
     @WindowingMode
     public int getWindowingMode() {
         return mWindowingMode;
     }
 
+    /** @hide */
     public void setActivityType(@ActivityType int activityType) {
         if (mActivityType == activityType) {
             return;
@@ -198,22 +223,26 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         mActivityType = activityType;
     }
 
+    /** @hide */
     @ActivityType
     public int getActivityType() {
         return mActivityType;
     }
 
+    /** @hide */
     public void setTo(WindowConfiguration other) {
         setAppBounds(other.mAppBounds);
         setWindowingMode(other.mWindowingMode);
         setActivityType(other.mActivityType);
     }
 
-    /** Set this object to completely undefined. */
+    /** Set this object to completely undefined.
+     * @hide */
     public void unset() {
         setToDefaults();
     }
 
+    /** @hide */
     public void setToDefaults() {
         setAppBounds(null);
         setWindowingMode(WINDOWING_MODE_UNDEFINED);
@@ -226,6 +255,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * are ignored and not copied in to the current Configuration.
      *
      * @return a bit mask of the changed fields, as per {@link #diff}
+     * @hide
      */
     public @WindowConfig int updateFrom(@NonNull WindowConfiguration delta) {
         int changed = 0;
@@ -255,6 +285,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * values has changed, containing any combination of {@link WindowConfig} flags.
      *
      * @see Configuration#diff(Configuration)
+     * @hide
      */
     public @WindowConfig long diff(WindowConfiguration other, boolean compareUndefined) {
         long changes = 0;
@@ -305,6 +336,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return n;
     }
 
+    /** @hide */
     @Override
     public boolean equals(Object that) {
         if (that == null) return false;
@@ -315,6 +347,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return this.compareTo((WindowConfiguration) that) == 0;
     }
 
+    /** @hide */
     @Override
     public int hashCode() {
         int result = 0;
@@ -326,6 +359,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return result;
     }
 
+    /** @hide */
     @Override
     public String toString() {
         return "{mAppBounds=" + mAppBounds
@@ -336,6 +370,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if the activities associated with this window configuration display a shadow
      * around their border.
+     * @hide
      */
     public boolean hasWindowShadow() {
         return tasksAreFloating();
@@ -344,6 +379,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if the activities associated with this window configuration display a decor
      * view.
+     * @hide
      */
     public boolean hasWindowDecorCaption() {
         return mWindowingMode == WINDOWING_MODE_FREEFORM;
@@ -352,12 +388,14 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if the tasks associated with this window configuration can be resized
      * independently of their parent container.
+     * @hide
      */
     public boolean canResizeTask() {
         return mWindowingMode == WINDOWING_MODE_FREEFORM;
     }
 
-    /** Returns true if the task bounds should persist across power cycles. */
+    /** Returns true if the task bounds should persist across power cycles.
+     * @hide */
     public boolean persistTaskBounds() {
         return mWindowingMode == WINDOWING_MODE_FREEFORM;
     }
@@ -366,6 +404,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * Returns true if the tasks associated with this window configuration are floating.
      * Floating tasks are laid out differently as they are allowed to extend past the display bounds
      * without overscan insets.
+     * @hide
      */
     public boolean tasksAreFloating() {
         return mWindowingMode == WINDOWING_MODE_FREEFORM || mWindowingMode == WINDOWING_MODE_PINNED;
@@ -373,6 +412,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /**
      * Returns true if the windows associated with this window configuration can receive input keys.
+     * @hide
      */
     public boolean canReceiveKeys() {
         return mWindowingMode != WINDOWING_MODE_PINNED;
@@ -381,6 +421,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if the container associated with this window configuration is always-on-top of
      * its siblings.
+     * @hide
      */
     public boolean isAlwaysOnTop() {
         return mWindowingMode == WINDOWING_MODE_PINNED;
@@ -389,6 +430,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if any visible windows belonging to apps with this window configuration should
      * be kept on screen when the app is killed due to something like the low memory killer.
+     * @hide
      */
     public boolean keepVisibleDeadAppWindowOnScreen() {
         return mWindowingMode != WINDOWING_MODE_PINNED;
@@ -397,6 +439,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if the backdrop on the client side should match the frame of the window.
      * Returns false, if the backdrop should be fullscreen.
+     * @hide
      */
     public boolean useWindowFrameForBackdrop() {
         return mWindowingMode == WINDOWING_MODE_FREEFORM || mWindowingMode == WINDOWING_MODE_PINNED;
@@ -405,6 +448,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * Returns true if this container may be scaled without resizing, and windows within may need
      * to be configured as such.
+     * @hide
      */
     public boolean windowsAreScaleable() {
         return mWindowingMode == WINDOWING_MODE_PINNED;
@@ -412,6 +456,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /**
      * Returns true if windows in this container should be given move animations by default.
+     * @hide
      */
     public boolean hasMovementAnimations() {
         return mWindowingMode == WINDOWING_MODE_PINNED;
@@ -428,6 +473,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return String.valueOf(windowingMode);
     }
 
+    /** @hide */
     public static String activityTypeToString(@ActivityType int applicationType) {
         switch (applicationType) {
             case ACTIVITY_TYPE_UNDEFINED: return "undefined";

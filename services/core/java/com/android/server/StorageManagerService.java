@@ -56,6 +56,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IVold;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -96,6 +97,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.AppFuseMount;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
@@ -108,7 +110,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
-import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.storage.AppFuseBridge;
 
@@ -200,6 +201,9 @@ class StorageManagerService extends IStorageManager.Stub
             mStorageManagerService.onCleanupUser(userHandle);
         }
     }
+
+    /** Flag to enable binder-based interface to vold */
+    private static final boolean ENABLE_BINDER = true;
 
     private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
@@ -470,6 +474,8 @@ class StorageManagerService extends IStorageManager.Stub
 
     private final Thread mConnectorThread;
     private final Thread mCryptConnectorThread;
+
+    private volatile IVold mVold;
 
     private volatile boolean mSystemReady = false;
     private volatile boolean mBootCompleted = false;
@@ -916,7 +922,11 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
-                mConnector.execute("volume", "reset");
+                if (ENABLE_BINDER) {
+                    mVold.reset();
+                } else {
+                    mConnector.execute("volume", "reset");
+                }
 
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
@@ -925,7 +935,7 @@ class StorageManagerService extends IStorageManager.Stub
                 for (int userId : systemUnlockedUsers) {
                     mConnector.execute("volume", "user_started", userId);
                 }
-            } catch (NativeDaemonConnectorException e) {
+            } catch (RemoteException | NativeDaemonConnectorException e) {
                 Slog.w(TAG, "Failed to reset vold", e);
             }
         }
@@ -1574,8 +1584,35 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void start() {
+        connect();
         mConnectorThread.start();
         mCryptConnectorThread.start();
+    }
+
+    private void connect() {
+        IBinder binder = ServiceManager.getService("vold");
+        if (binder != null) {
+            try {
+                binder.linkToDeath(new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        Slog.w(TAG, "vold died; reconnecting");
+                        connect();
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                binder = null;
+            }
+        }
+
+        if (binder != null) {
+            mVold = IVold.Stub.asInterface(binder);
+        } else {
+            Slog.w(TAG, "vold not found; trying again");
+            BackgroundThread.getHandler().postDelayed(() -> {
+                connect();
+            }, DateUtils.SECOND_IN_MILLIS);
+        }
     }
 
     private void systemReady() {

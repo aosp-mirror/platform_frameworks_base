@@ -181,12 +181,12 @@ public class AppWindowContainerController
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int configChanges,
             boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos,
-            Configuration overrideConfig, Rect bounds) {
+            Rect bounds) {
         this(taskController, token, listener, index, requestedOrientation, fullscreen,
                 showForAllUsers,
                 configChanges, voiceInteraction, launchTaskBehind, alwaysFocusable,
                 targetSdkVersion, rotationAnimationHint, inputDispatchingTimeoutNanos,
-                WindowManagerService.getInstance(), overrideConfig, bounds);
+                WindowManagerService.getInstance(), bounds);
     }
 
     public AppWindowContainerController(TaskWindowContainerController taskController,
@@ -194,7 +194,7 @@ public class AppWindowContainerController
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int configChanges,
             boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos,
-            WindowManagerService service, Configuration overrideConfig, Rect bounds) {
+            WindowManagerService service, Rect bounds) {
         super(listener, service);
         mHandler = new H(service.mH.getLooper());
         mToken = token;
@@ -215,7 +215,7 @@ public class AppWindowContainerController
             atoken = createAppWindow(mService, token, voiceInteraction, task.getDisplayContent(),
                     inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdkVersion,
                     requestedOrientation, rotationAnimationHint, configChanges, launchTaskBehind,
-                    alwaysFocusable, this, overrideConfig, bounds);
+                    alwaysFocusable, this, bounds);
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
                     + " controller=" + taskController + " at " + index);
             task.addChild(atoken, index);
@@ -227,12 +227,11 @@ public class AppWindowContainerController
             boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
             boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
             int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-            boolean alwaysFocusable, AppWindowContainerController controller,
-            Configuration overrideConfig, Rect bounds) {
+            boolean alwaysFocusable, AppWindowContainerController controller, Rect bounds) {
         return new AppWindowToken(service, token, voiceInteraction, dc,
                 inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
                 rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
-                controller, overrideConfig, bounds);
+                controller, bounds);
     }
 
     public void removeContainer(int displayId) {
@@ -651,7 +650,7 @@ public class AppWindowContainerController
 
             // Use the same thread to remove the window as we used to add it, as otherwise we end up
             // with things in the view hierarchy being called from different threads.
-            mHandler.post(() -> {
+            mService.mAnimationHandler.post(() -> {
                 if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Removing startingView=" + surface);
                 try {
                     surface.remove();

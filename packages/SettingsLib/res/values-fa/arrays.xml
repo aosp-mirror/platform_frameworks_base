@@ -58,16 +58,12 @@
     <item msgid="3878793616631049349">"‏استفاده از بررسی HDCP فقط برای محتوای DRM"</item>
     <item msgid="45075631231212732">"‏همیشه از بررسی HDCP استفاده شود"</item>
   </string-array>
-  <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"‏AVRCP نسخه ۱.۴ (پیش‌فرض)"</item>
-    <item msgid="2089555299377409443">"‏AVRCP نسخه ۱.۵"</item>
-    <item msgid="2895327394279434278">"‏AVRCP نسخه ۱.۶"</item>
-  </string-array>
-  <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="2838624067805073303">"‏avrcp نسخه ۱۴"</item>
-    <item msgid="1913619118958233129">"‏avrcp نسخه ۱۵"</item>
-    <item msgid="7142710449249088270">"‏avrcp نسخه ۱۶"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_avrcp_versions:1 (2809759619990248160) -->
+    <!-- no translation found for bluetooth_avrcp_versions:2 (6199178154704729352) -->
+    <!-- no translation found for bluetooth_avrcp_versions:3 (5172170854953034852) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:1 (3011533352527449572) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:2 (8837606198371920819) -->
+    <!-- no translation found for bluetooth_avrcp_version_values:3 (3422726142222090896) -->
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"استفاده از انتخاب سیستم (پیش‌فرض)"</item>
     <item msgid="7539690996561263909">"SBC"</item>

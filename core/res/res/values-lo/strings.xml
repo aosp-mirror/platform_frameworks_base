@@ -1189,7 +1189,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ກວດພົບອຸປະກອນເສີມສຽງ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ອຸປະກອນທີ່ເຊື່ອມຕໍ່ນັ້ນບໍ່ສາມາດໃຊ້ຮ່ວມກັບໂທລະສັບນີ້ໄດ້. ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັ໊ກຜ່ານ USB ແລ້ວ"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັກຜ່ານ USB ແລ້ວ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"ແຕະເພື່ອປິດການດີບັກຜ່ານ USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ເລືອກເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ກຳລັງຂໍລາຍງານຂໍ້ຜິດພາດ…"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ຮູບແບບຜິດ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"ລະຫັດ PIN ຜິດ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%1$d</xliff:g> ວິນາທີ."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ.</item>
+      <item quantity="one">ລອງໃໝ່ໃນອີກ 1 ວິນາທີ.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"ໃສ່ລະຫັດ PIN ຂອງຊິມ"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ໃສ່ລະຫັດ PIN"</string>

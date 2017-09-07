@@ -1492,7 +1492,12 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Napačen vzorec"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Napačno geslo"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Napačen PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Čez <xliff:g id="NUMBER">%1$d</xliff:g> sekund poskusite znova."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekundo.</item>
+      <item quantity="two">Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekundi.</item>
+      <item quantity="few">Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekunde.</item>
+      <item quantity="other">Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekund.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Narišite vzorec"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Vnesite PIN za kartico SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Vnesite PIN"</string>

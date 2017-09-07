@@ -1303,7 +1303,7 @@
     <string name="submit" msgid="1602335572089911941">"Skicka"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Billäge aktiverat"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Tryck om du vill avsluta billäge."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfpunkt aktiverad"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfzon aktiverad"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Tryck om du vill konfigurera."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Internetdelning har inaktiverats"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Kontakta administratören om du vill veta mer"</string>
@@ -1446,7 +1446,10 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Fel grafiskt lösenord"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Fel lösenord"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Fel PIN-kod"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Försök igen om <xliff:g id="NUMBER">%1$d</xliff:g> sekunder."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="other">Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder.</item>
+      <item quantity="one">Försök igen om 1 sekund.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Rita ditt grafiska lösenord"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ange PIN-kod för SIM-kortet"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ange PIN-kod"</string>

@@ -122,7 +122,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Айрым демейки параметрлер туураланды"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Демейкилер коюлган жок"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Кеп синтезаторунун жөндөөлөрү"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Текстти-оозекилөө"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Кеп синтезатору"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Кеп ылдамдыгы"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Текст айтылчу ылдамдык"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Негизги тон"</string>
@@ -136,7 +136,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Үн дайындарын орнотуу"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Кеп синтезине керектүү үн дайындарын орнотуңуз"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Бул кепти синтездөө каражаты бардык айтыла турган текстти, анын ичинде сырсөздөр жана насыя карточкасынын номери сыяктуу жеке маалыматты, топтошу мүмкүн. Ал <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> каражатынан алынат. Бул кепти синтездөө каражаты колдонулсунбу?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Бул тилде текстти-оозекилөө үчүн иштеп турган интернет-байланыш керек."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Бул тилде кеп синтезаторун иштетүү үчүн Интернетке туташуу керек."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Бул айтылганды синтездөөнүн мисалы"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Абалкы тилдин абалы"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> толук колдоого алынган"</string>
@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi Роуминг Скандоо мүмкүнчүлүгүнө ар дайым уруксат берилсин"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилдик Интернет иштей берсин"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингдин иштешин тездетүү"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Аталышсыз Bluetooth түзмөктөрү көрсөтүлсүн"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Үндүн абсолюттук деңгээли өчүрүлсүн"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Канал аралык чалууну иштетүү"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP версиясы"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB аркылуу келген колдонмолорду ырастоо"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT аркылуу орнотулган колдонмолорду зыянкечтикке текшерүү."</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Аталышсыз Bluetooth түзмөктөрү (MAC даректери менен гана) көрсөтүлөт"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Алыскы түзмөктөр өтө катуу добуш чыгарып же көзөмөлдөнбөй жатса Bluetooth \"Үндүн абсолюттук деңгээли\" функциясын өчүрөт."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Телефондогу рингтондор Bluetooth гарнитурасында ойнотулсун"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергиликтүү терминал"</string>
