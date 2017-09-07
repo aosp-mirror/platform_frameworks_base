@@ -17,9 +17,6 @@
 package com.android.internal.policy;
 
 import android.graphics.Outline;
-import android.graphics.drawable.InsetDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.util.Pair;
 import android.view.ViewOutlineProvider;
 import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.R;
@@ -1106,8 +1103,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             boolean navBarToLeftEdge = isNavBarToLeftEdge(mLastBottomInset, mLastLeftInset);
             int navBarSize = getNavBarSize(mLastBottomInset, mLastRightInset, mLastLeftInset);
             updateColorViewInt(mNavigationColorViewState, sysUiVisibility,
-                    mWindow.mNavigationBarColor, mWindow.mNavigationBarDividerColor, navBarSize,
-                    navBarToRightEdge || navBarToLeftEdge, navBarToLeftEdge,
+                    mWindow.mNavigationBarColor, navBarSize, navBarToRightEdge || navBarToLeftEdge,
+                    navBarToLeftEdge,
                     0 /* sideInset */, animate && !disallowAnimate, false /* force */);
 
             boolean statusBarNeedsRightInset = navBarToRightEdge
@@ -1117,7 +1114,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             int statusBarSideInset = statusBarNeedsRightInset ? mLastRightInset
                     : statusBarNeedsLeftInset ? mLastLeftInset : 0;
             updateColorViewInt(mStatusColorViewState, sysUiVisibility,
-                    calculateStatusBarColor(), 0, mLastTopInset,
+                    calculateStatusBarColor(), mLastTopInset,
                     false /* matchVertical */, statusBarNeedsLeftInset, statusBarSideInset,
                     animate && !disallowAnimate,
                     mForceWindowDrawsStatusBarBackground);
@@ -1204,7 +1201,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * @param state the color view to update.
      * @param sysUiVis the current systemUiVisibility to apply.
      * @param color the current color to apply.
-     * @param dividerColor the current divider color to apply.
      * @param size the current size in the non-parent-matching dimension.
      * @param verticalBar if true the view is attached to a vertical edge, otherwise to a
      *                    horizontal edge,
@@ -1212,7 +1208,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * @param animate if true, the change will be animated.
      */
     private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
-            int dividerColor, int size, boolean verticalBar, boolean seascape, int sideMargin,
+            int size, boolean verticalBar, boolean seascape, int sideMargin,
             boolean animate, boolean force) {
         state.present = state.attributes.isPresent(sysUiVis, mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
@@ -1231,7 +1227,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (view == null) {
             if (showView) {
                 state.view = view = new View(mContext);
-                setColor(view, color, dividerColor, verticalBar, seascape);
+                view.setBackgroundColor(color);
                 view.setTransitionName(state.attributes.transitionName);
                 view.setId(state.attributes.id);
                 visibilityChanged = true;
@@ -1266,7 +1262,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 view.setLayoutParams(lp);
             }
             if (showView) {
-                setColor(view, color, dividerColor, verticalBar, seascape);
+                view.setBackgroundColor(color);
             }
         }
         if (visibilityChanged) {
@@ -1297,33 +1293,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         state.visible = show;
         state.color = color;
-    }
-
-    private static void setColor(View v, int color, int dividerColor, boolean verticalBar,
-            boolean seascape) {
-        if (dividerColor != 0) {
-            final Pair<Boolean, Boolean> dir = (Pair<Boolean, Boolean>) v.getTag();
-            if (dir == null || dir.first != verticalBar || dir.second != seascape) {
-                final int size = Math.round(
-                        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1,
-                                v.getContext().getResources().getDisplayMetrics()));
-                // Use an inset to make the divider line on the side that faces the app.
-                final InsetDrawable d = new InsetDrawable(new ColorDrawable(color),
-                        verticalBar && !seascape ? size : 0,
-                        !verticalBar ? size : 0,
-                        verticalBar && seascape ? size : 0, 0);
-                v.setBackground(new LayerDrawable(new Drawable[] {
-                        new ColorDrawable(dividerColor), d }));
-                v.setTag(new Pair<>(verticalBar, seascape));
-            } else {
-                final LayerDrawable d = (LayerDrawable) v.getBackground();
-                final InsetDrawable inset = ((InsetDrawable) d.getDrawable(0));
-                ((ColorDrawable) inset.getDrawable()).setColor(dividerColor);
-                ((ColorDrawable) d.getDrawable(1)).setColor(color);
-            }
-        } else {
-            v.setBackgroundColor(color);
-        }
     }
 
     private void updateColorViewTranslations() {
