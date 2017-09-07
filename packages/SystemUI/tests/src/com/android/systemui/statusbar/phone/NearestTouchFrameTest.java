@@ -71,6 +71,24 @@ public class NearestTouchFrameTest extends SysuiTestCase {
     }
 
     @Test
+    public void testInvisibleViews() {
+        View left = mockViewAt(0, 0, 10, 10);
+        View right = mockViewAt(20, 0, 10, 10);
+        when(left.getVisibility()).thenReturn(View.INVISIBLE);
+
+        mNearestTouchFrame.addView(left);
+        mNearestTouchFrame.addView(right);
+        mNearestTouchFrame.onMeasure(0, 0);
+
+        MotionEvent ev = MotionEvent.obtain(0, 0, 0,
+                12 /* x */, 5 /* y */, 0);
+        mNearestTouchFrame.onTouchEvent(ev);
+        verify(left, never()).onTouchEvent(eq(ev));
+        verify(right, never()).onTouchEvent(eq(ev));
+        ev.recycle();
+    }
+
+    @Test
     public void testHorizontalSelection_Left() {
         View left = mockViewAt(0, 0, 10, 10);
         View right = mockViewAt(20, 0, 10, 10);
