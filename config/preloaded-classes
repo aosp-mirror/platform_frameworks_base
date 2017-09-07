@@ -1848,6 +1848,7 @@ android.os.SharedMemory
 android.os.ShellCallback
 android.os.StatFs
 android.os.StrictMode
+android.os.StrictMode$$Lambda$0
 android.os.StrictMode$1
 android.os.StrictMode$2
 android.os.StrictMode$3
@@ -1872,6 +1873,7 @@ android.os.StrictMode$ThreadPolicy$Builder
 android.os.StrictMode$ThreadSpanState
 android.os.StrictMode$ViolationInfo
 android.os.StrictMode$ViolationInfo$1
+android.os.StrictMode$ViolationLogger
 android.os.StrictMode$VmPolicy
 android.os.StrictMode$VmPolicy$Builder
 android.os.SystemClock
