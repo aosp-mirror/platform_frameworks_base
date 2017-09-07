@@ -5225,12 +5225,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            // We deprecated Build.SERIAL and it is not accessible to
-            // Instant Apps and target APIs higher than O MR1. Since access to the serial
-            // is now behind a permission we push down the value.
-            final String buildSerial = (!appInfo.isInstantApp()
-                    && appInfo.targetSdkVersion < Build.VERSION_CODES.P)
-                            ? sTheRealBuildSerial : Build.UNKNOWN;
+            final String buildSerial = Build.UNKNOWN;
 
             // Check if this is a secondary process that should be incorporated into some
             // currently active instrumentation.  (Note we do this AFTER all of the profiling
