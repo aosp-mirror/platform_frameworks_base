@@ -1620,6 +1620,11 @@
     <permission android:name="android.permission.ACCESS_PDB_STATE"
         android:protectionLevel="signature" />
 
+    <!-- Allows testing if a passwords is forbidden by the admins.
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.TEST_BLACKLISTED_PASSWORD"
+        android:protectionLevel="signature" />
+
     <!-- @hide Allows system update service to notify device owner about pending updates.
    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE"
