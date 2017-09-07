@@ -228,6 +228,11 @@ public final class FillEventHistory implements Parcelable {
             mDatasetId = datasetId;
             mClientState = clientState;
         }
+
+        @Override
+        public String toString() {
+            return "FillEvent [datasetId=" + mDatasetId + ", type=" + mEventType + "]";
+        }
     }
 
     public static final Parcelable.Creator<FillEventHistory> CREATOR =

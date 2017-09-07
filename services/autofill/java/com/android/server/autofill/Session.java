@@ -177,6 +177,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private PendingUi mPendingSaveUi;
 
     /**
+     * List of dataset ids selected by the user.
+     */
+    @GuardedBy("mLock")
+    private ArrayList<String> mSelectedDatasetIds;
+
+    /**
      * Receiver of assist data from the app's {@link Activity}.
      */
     private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
@@ -1098,7 +1104,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // until the dispatch happens. The items in the list don't need to be cloned
         // since we don't hold on them anywhere else. The client state is not touched
         // by us, so no need to copy.
-        final SaveRequest saveRequest = new SaveRequest(new ArrayList<>(mContexts), mClientState);
+        final SaveRequest saveRequest = new SaveRequest(new ArrayList<>(mContexts), mClientState,
+                mSelectedDatasetIds);
         mRemoteFillService.onSaveRequest(saveRequest);
     }
 
@@ -1626,6 +1633,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mHasCallback: "); pw.println(mHasCallback);
         pw.print(prefix); pw.print("mClientState: "); pw.println(
                 Helper.bundleToString(mClientState));
+        pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
         mRemoteFillService.dump(prefix, pw);
     }
 
@@ -1666,6 +1674,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
 
                     mClient.autofill(id, ids, values);
+                    if (dataset.getId() != null) {
+                        if (mSelectedDatasetIds == null) {
+                            mSelectedDatasetIds = new ArrayList<>();
+                        }
+                        mSelectedDatasetIds.add(dataset.getId());
+                    }
                     setViewStatesLocked(null, dataset, ViewState.STATE_AUTOFILLED, false);
                 }
             } catch (RemoteException e) {
