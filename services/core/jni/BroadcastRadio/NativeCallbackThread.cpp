@@ -48,15 +48,19 @@ void NativeCallbackThread::threadLoop() {
         return;
     }
 
-    while (!mExiting) {
-        ALOGV("Waiting for task...");
+    while (true) {
         Task task;
         {
             unique_lock<mutex> lk(mQueueMutex);
-            mQueueCond.wait(lk);
-            if (mExiting) break;
 
-            if (mQueue.empty()) continue;
+            if (mExiting) break;
+            if (mQueue.empty()) {
+                ALOGV("Waiting for task...");
+                mQueueCond.wait(lk);
+                if (mExiting) break;
+                if (mQueue.empty()) continue;
+            }
+
             task = mQueue.front();
             mQueue.pop();
         }
@@ -74,6 +78,7 @@ void NativeCallbackThread::threadLoop() {
     ALOGE_IF(res != JNI_OK, "Couldn't detach thread");
 
     ALOGV("Native callback thread %p finished", this);
+    ALOGD_IF(!mQueue.empty(), "Skipped execution of %zu tasks", mQueue.size());
 }
 
 void NativeCallbackThread::enqueue(const Task &task) {
@@ -84,6 +89,7 @@ void NativeCallbackThread::enqueue(const Task &task) {
         return;
     }
 
+    ALOGV("Adding task to the queue...");
     mQueue.push(task);
     mQueueCond.notify_one();
 }
