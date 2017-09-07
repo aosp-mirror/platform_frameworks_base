@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
-import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -48,8 +47,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -352,8 +353,8 @@ public final class StrictMode {
                 } else {
                     msg = "StrictMode policy violation:";
                 }
-                if (info.crashInfo != null) {
-                    Log.d(TAG, msg + " " + info.crashInfo.stackTrace);
+                if (info.hasStackTrace()) {
+                    Log.d(TAG, msg + " " + info.getStackTrace());
                 } else {
                     Log.d(TAG, msg + " missing stack trace!");
                 }
@@ -1247,28 +1248,6 @@ public final class StrictMode {
         }
     }
 
-    /** Like parsePolicyFromMessage(), but returns the violation. */
-    private static int parseViolationFromMessage(String message) {
-        if (message == null) {
-            return 0;
-        }
-        int violationIndex = message.indexOf("violation=");
-        if (violationIndex == -1) {
-            return 0;
-        }
-        int numberStartIndex = violationIndex + "violation=".length();
-        int numberEndIndex = message.indexOf(' ', numberStartIndex);
-        if (numberEndIndex == -1) {
-            numberEndIndex = message.length();
-        }
-        String violationString = message.substring(numberStartIndex, numberEndIndex);
-        try {
-            return Integer.parseInt(violationString);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
     private static final ThreadLocal<ArrayList<ViolationInfo>> violationsBeingTimed =
             new ThreadLocal<ArrayList<ViolationInfo>>() {
                 @Override
@@ -1516,7 +1495,7 @@ public final class StrictMode {
         // to people who push/pop temporary policy in regions of code,
         // hence the policy being passed around.
         void handleViolation(final ViolationInfo info) {
-            if (info == null || info.crashInfo == null || info.crashInfo.stackTrace == null) {
+            if (info == null || !info.hasStackTrace()) {
                 Log.wtf(TAG, "unexpected null stacktrace");
                 return;
             }
@@ -1530,7 +1509,7 @@ public final class StrictMode {
                     gatheredViolations.set(violations);
                 }
                 for (ViolationInfo previous : violations) {
-                    if (info.crashInfo.stackTrace.equals(previous.crashInfo.stackTrace)) {
+                    if (info.getStackTrace().equals(previous.getStackTrace())) {
                         // Duplicate. Don't log.
                         return;
                     }
@@ -1576,8 +1555,7 @@ public final class StrictMode {
             }
 
             if (violationMaskSubset != 0) {
-                int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
-                violationMaskSubset |= violationBit;
+                violationMaskSubset |= info.getViolationBit();
                 final int savedPolicyMask = getThreadPolicyMask();
 
                 final boolean justDropBox = (info.policy & THREAD_PENALTY_MASK) == PENALTY_DROPBOX;
@@ -1622,8 +1600,7 @@ public final class StrictMode {
     }
 
     private static void executeDeathPenalty(ViolationInfo info) {
-        int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
-        throw new StrictModeViolation(info.policy, violationBit, null);
+        throw new StrictModeViolation(info.policy, info.getViolationBit(), null);
     }
 
     /**
@@ -2027,21 +2004,14 @@ public final class StrictMode {
      * read back all the encoded violations.
      */
     /* package */ static void readAndHandleBinderCallViolations(Parcel p) {
-        // Our own stack trace to append
-        StringWriter sw = new StringWriter();
-        sw.append("# via Binder call with stack:\n");
-        PrintWriter pw = new FastPrintWriter(sw, false, 256);
-        new LogStackTrace().printStackTrace(pw);
-        pw.flush();
-        String ourStack = sw.toString();
-
+        LogStackTrace localCallSite = new LogStackTrace();
         final int policyMask = getThreadPolicyMask();
         final boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
 
         final int size = p.readInt();
         for (int i = 0; i < size; i++) {
             final ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
-            info.crashInfo.appendStackTrace(ourStack);
+            info.addLocalStack(localCallSite);
             BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
             if (policy instanceof AndroidBlockGuardPolicy) {
                 ((AndroidBlockGuardPolicy) policy).handleViolationWithTimingAttempt(info);
@@ -2366,10 +2336,18 @@ public final class StrictMode {
      */
     @TestApi
     public static final class ViolationInfo implements Parcelable {
-        public final String message;
+        /** Some VM violations provide additional information outside the throwable. */
+        @Nullable private final String mMessagePrefix;
 
-        /** Stack and other stuff info. */
-        @Nullable public final ApplicationErrorReport.CrashInfo crashInfo;
+        /** Stack and violation details. */
+        @Nullable private final Throwable mThrowable;
+
+        private final Deque<Throwable> mBinderStack = new ArrayDeque<>();
+
+        /** Memoized stack trace of full violation. */
+        @Nullable private String mStackTrace;
+        /** Memoized violation bit. */
+        private int mViolationBit;
 
         /** The strict mode policy mask at the time of violation. */
         public final int policy;
@@ -2404,19 +2382,25 @@ public final class StrictMode {
 
         /** Create an uninitialized instance of ViolationInfo */
         public ViolationInfo() {
-            message = null;
-            crashInfo = null;
+            mMessagePrefix = null;
+            mThrowable = null;
             policy = 0;
         }
 
+        /** Create an instance of ViolationInfo. */
         public ViolationInfo(Throwable tr, int policy) {
             this(null, tr, policy);
         }
 
-        /** Create an instance of ViolationInfo initialized from an exception. */
-        public ViolationInfo(String message, Throwable tr, int policy) {
-            this.message = message;
-            crashInfo = new ApplicationErrorReport.CrashInfo(tr);
+        /**
+         * Create an instance of ViolationInfo initialized from an exception with a message prefix.
+         *
+         * @deprecated prefixes belong in the Throwable.
+         */
+        @Deprecated
+        public ViolationInfo(String messagePrefix, Throwable tr, int policy) {
+            this.mMessagePrefix = messagePrefix;
+            this.mThrowable = tr;
             violationUptimeMillis = SystemClock.uptimeMillis();
             this.policy = policy;
             this.numAnimationsRunning = ValueAnimator.getCurrentAnimationsCount();
@@ -2446,11 +2430,101 @@ public final class StrictMode {
             }
         }
 
+        /** Equivalent output to {@link ApplicationErrorReport.CrashInfo#stackTrace}. */
+        public String getStackTrace() {
+            if (mThrowable != null && mStackTrace == null) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new FastPrintWriter(sw, false, 256);
+                mThrowable.printStackTrace(pw);
+                for (Throwable t : mBinderStack) {
+                    pw.append("# via Binder call with stack:\n");
+                    t.printStackTrace(pw);
+                }
+                pw.flush();
+                pw.close();
+                mStackTrace = sw.toString();
+            }
+            return mStackTrace;
+        }
+
+        /**
+         * Optional message describing this violation.
+         *
+         * @hide
+         */
+        @TestApi
+        public String getViolationDetails() {
+            if (mThrowable != null) {
+                return mThrowable.getMessage();
+            } else {
+                return "";
+            }
+        }
+
+        /**
+         * A handful of VM violations provide extra information that should be presented before
+         * {@link #getViolationDetails()}.
+         *
+         * @hide
+         */
+        @TestApi
+        public String getMessagePrefix() {
+            return mMessagePrefix != null ? mMessagePrefix : "";
+        }
+
+        /** If this violation has a useful stack trace.
+         *
+         * @hide
+         */
+        public boolean hasStackTrace() {
+            return mThrowable != null;
+        }
+
+        /**
+         * Add a {@link Throwable} from the current process that caused the underlying violation.
+         *
+         * @hide
+         */
+        void addLocalStack(Throwable t) {
+            mBinderStack.addFirst(t);
+        }
+
+        /**
+         * Retrieve the type of StrictMode violation.
+         *
+         * @hide
+         */
+        int getViolationBit() {
+            if (mThrowable == null || mThrowable.getMessage() == null) {
+                return 0;
+            }
+            if (mViolationBit != 0) {
+                return mViolationBit;
+            }
+            String message = mThrowable.getMessage();
+            int violationIndex = message.indexOf("violation=");
+            if (violationIndex == -1) {
+                return 0;
+            }
+            int numberStartIndex = violationIndex + "violation=".length();
+            int numberEndIndex = message.indexOf(' ', numberStartIndex);
+            if (numberEndIndex == -1) {
+                numberEndIndex = message.length();
+            }
+            String violationString = message.substring(numberStartIndex, numberEndIndex);
+            try {
+                mViolationBit = Integer.parseInt(violationString);
+                return mViolationBit;
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+
         @Override
         public int hashCode() {
             int result = 17;
-            if (crashInfo != null) {
-                result = 37 * result + crashInfo.stackTrace.hashCode();
+            if (mThrowable != null) {
+                result = 37 * result + mThrowable.hashCode();
             }
             if (numAnimationsRunning != 0) {
                 result *= 37;
@@ -2478,11 +2552,11 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            message = in.readString();
-            if (in.readInt() != 0) {
-                crashInfo = new ApplicationErrorReport.CrashInfo(in);
-            } else {
-                crashInfo = null;
+            mMessagePrefix = in.readString();
+            mThrowable = (Throwable) in.readSerializable();
+            int binderStackSize = in.readInt();
+            for (int i = 0; i < binderStackSize; i++) {
+                mBinderStack.add((Throwable) in.readSerializable());
             }
             int rawPolicy = in.readInt();
             if (unsetGatheringBit) {
@@ -2502,12 +2576,11 @@ public final class StrictMode {
         /** Save a ViolationInfo instance to a parcel. */
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(message);
-            if (crashInfo != null) {
-                dest.writeInt(1);
-                crashInfo.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
+            dest.writeString(mMessagePrefix);
+            dest.writeSerializable(mThrowable);
+            dest.writeInt(mBinderStack.size());
+            for (Throwable t : mBinderStack) {
+                dest.writeSerializable(t);
             }
             int start = dest.dataPosition();
             dest.writeInt(policy);
@@ -2542,8 +2615,8 @@ public final class StrictMode {
 
         /** Dump a ViolationInfo instance to a Printer. */
         public void dump(Printer pw, String prefix) {
-            if (crashInfo != null) {
-                crashInfo.dump(pw, prefix);
+            if (mThrowable != null) {
+                pw.println(prefix + "stackTrace: " + getStackTrace());
             }
             pw.println(prefix + "policy: " + policy);
             if (durationMillis != -1) {
