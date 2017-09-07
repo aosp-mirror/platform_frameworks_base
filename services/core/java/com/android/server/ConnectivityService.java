@@ -4343,11 +4343,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             int currentScore, NetworkMisc networkMisc) {
         enforceConnectivityInternalPermission();
 
+        LinkProperties lp = new LinkProperties(linkProperties);
+        lp.ensureDirectlyConnectedRoutes();
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
-                new Network(reserveNetId()), new NetworkInfo(networkInfo), new LinkProperties(
-                linkProperties), new NetworkCapabilities(networkCapabilities), currentScore,
+                new Network(reserveNetId()), new NetworkInfo(networkInfo), lp,
+                new NetworkCapabilities(networkCapabilities), currentScore,
                 mContext, mTrackerHandler, new NetworkMisc(networkMisc), mDefaultRequest, this);
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
@@ -4657,6 +4659,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (nai) {
             nai.linkProperties = newLp;
         }
+        // msg.obj is already a defensive copy.
+        nai.linkProperties.ensureDirectlyConnectedRoutes();
         if (nai.everConnected) {
             updateLinkProperties(nai, oldLp);
         }
