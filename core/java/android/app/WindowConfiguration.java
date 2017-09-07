@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityThread.isSystem;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -215,7 +217,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (mActivityType == activityType) {
             return;
         }
-        if (mActivityType != ACTIVITY_TYPE_UNDEFINED
+
+        // Error check within system server that we are not changing activity type which can be
+        // dangerous. It is okay for things to change in the application process as it doesn't
+        // affect how other things is the system is managed.
+        if (isSystem()
+                && mActivityType != ACTIVITY_TYPE_UNDEFINED
                 && activityType != ACTIVITY_TYPE_UNDEFINED) {
             throw new IllegalStateException("Can't change activity type once set: " + this
                     + " activityType=" + activityTypeToString(activityType));
