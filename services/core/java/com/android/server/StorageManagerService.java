@@ -207,6 +207,9 @@ class StorageManagerService extends IStorageManager.Stub
     // Disable this since it messes up long-running cryptfs operations.
     private static final boolean WATCHDOG_ENABLE = false;
 
+    /** Flag to enable ASECs */
+    private static final boolean ASEC_ENABLE = false;
+
     /**
      * Our goal is for all Android devices to be usable as development devices,
      * which includes the new Direct Boot mode added in N. For devices that
@@ -1018,7 +1021,9 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         // Let package manager load internal ASECs.
-        mPms.scanAvailableAsecs();
+        if (ASEC_ENABLE) {
+            mPms.scanAvailableAsecs();
+        }
 
         // Notify people waiting for ASECs to be scanned that it's done.
         mAsecsScanned.countDown();
@@ -2210,6 +2215,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public String[] getSecureContainerList() {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_ACCESS);
         waitForReady();
         warnOnNotMounted();
@@ -2224,6 +2230,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     public int createSecureContainer(String id, int sizeMb, String fstype, String key,
             int ownerUid, boolean external) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_CREATE);
         waitForReady();
         warnOnNotMounted();
@@ -2246,6 +2253,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public int resizeSecureContainer(String id, int sizeMb, String key) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_CREATE);
         waitForReady();
         warnOnNotMounted();
@@ -2260,6 +2268,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int finalizeSecureContainer(String id) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_CREATE);
         warnOnNotMounted();
 
@@ -2277,6 +2286,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int fixPermissionsSecureContainer(String id, int gid, String filename) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_CREATE);
         warnOnNotMounted();
 
@@ -2294,6 +2304,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int destroySecureContainer(String id, boolean force) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_DESTROY);
         waitForReady();
         warnOnNotMounted();
@@ -2334,6 +2345,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int mountSecureContainer(String id, String key, int ownerUid, boolean readOnly) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
         warnOnNotMounted();
@@ -2364,6 +2376,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int unmountSecureContainer(String id, boolean force) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
         warnOnNotMounted();
@@ -2407,6 +2420,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public boolean isSecureContainerMounted(String id) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_ACCESS);
         waitForReady();
         warnOnNotMounted();
@@ -2417,6 +2431,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int renameSecureContainer(String oldId, String newId) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_RENAME);
         waitForReady();
         warnOnNotMounted();
@@ -2442,6 +2457,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public String getSecureContainerPath(String id) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_ACCESS);
         waitForReady();
         warnOnNotMounted();
@@ -2463,6 +2479,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public String getSecureContainerFilesystemPath(String id) {
+        if (!ASEC_ENABLE) throw new UnsupportedOperationException();
         enforcePermission(android.Manifest.permission.ASEC_ACCESS);
         waitForReady();
         warnOnNotMounted();
