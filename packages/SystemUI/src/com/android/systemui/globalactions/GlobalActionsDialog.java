@@ -14,6 +14,8 @@
 
 package com.android.systemui.globalactions;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+
 import com.android.internal.R;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
@@ -310,7 +312,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
-                mItems.add(getLockdownAction());
+                if (Settings.Secure.getInt(mContext.getContentResolver(),
+                            Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0) != 0) {
+                    mItems.add(getLockdownAction());
+                }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
                 mItems.add(getVoiceAssistAction());
             } else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
@@ -575,7 +580,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
             @Override
             public void onPress() {
-                new LockPatternUtils(mContext).requireCredentialEntry(UserHandle.USER_ALL);
+                new LockPatternUtils(mContext)
+                        .requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
+                                UserHandle.USER_ALL);
                 try {
                     WindowManagerGlobal.getWindowManagerService().lockNow(null);
                 } catch (RemoteException e) {
