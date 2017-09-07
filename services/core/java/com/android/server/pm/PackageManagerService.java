@@ -8077,7 +8077,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
                     if (filterAppAccessLPr(ps, callingUid, userId)) {
-                        return null;
+                        continue;
                     }
                     final PackageInfo pi = generatePackageInfo(ps, flags, userId);
                     if (pi != null) {
@@ -8092,7 +8092,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
                     if (filterAppAccessLPr(ps, callingUid, userId)) {
-                        return null;
+                        continue;
                     }
                     final PackageInfo pi = generatePackageInfo((PackageSetting)
                             p.mExtras, flags, userId);
@@ -8204,7 +8204,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         if (filterAppAccessLPr(ps, callingUid, userId)) {
-                            return null;
+                            continue;
                         }
                         ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
                                 ps.readUserState(userId), userId);
@@ -8230,7 +8230,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         if (filterAppAccessLPr(ps, callingUid, userId)) {
-                            return null;
+                            continue;
                         }
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
                                 ps.readUserState(userId), userId);
