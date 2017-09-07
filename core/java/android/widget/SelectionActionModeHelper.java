@@ -265,7 +265,7 @@ final class SelectionActionModeHelper {
         // TODO filter out invalid rectangles
         // getSelection might give us overlapping and zero-dimension rectangles which will interfere
         // with the Smart Select animation
-        layout.getSelection(start, end, (left, top, right, bottom) ->
+        layout.getSelection(start, end, (left, top, right, bottom, textSelectionLayout) ->
                 result.add(new RectF(left, top, right, bottom)));
 
         result.sort(SmartSelectSprite.RECTANGLE_COMPARATOR);
