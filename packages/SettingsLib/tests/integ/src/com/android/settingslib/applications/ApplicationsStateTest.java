@@ -103,6 +103,13 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testOtherAppsRejectsImageApp() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_IMAGE;
+
+        assertThat(ApplicationsState.FILTER_OTHER_APPS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
     public void testOtherAppsAcceptsDefaultCategory() {
         mEntry.info.category = ApplicationInfo.CATEGORY_UNDEFINED;
 

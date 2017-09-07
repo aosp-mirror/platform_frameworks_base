@@ -193,8 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Ruhusu Uchanganuzi wa Matumizi ya Mitandao mingine"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Iendelee kutumia data ya simu"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Kuongeza kasi kwa kutumia maunzi ili kusambaza mtandao"</string>
-    <!-- no translation found for bluetooth_show_devices_without_names (4708446092962060176) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Onyesha vifaa vya Bluetooth visivyo na majina"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zima sauti kamili"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Washa kipengele cha mlio wa simu katika kituo hicho hicho"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Toleo la Bluetooth AVRCP"</string>
@@ -234,8 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Mipangilio hii imekusudiwa kwa matumizi ya usanidi tu. Inaweza kusababisha kifaa chako na programu zilizoko kuvunjika au kutofanya kazi vizuri."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Thibitisha programu kupitia USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kagua programu zilizosakinishwa kupitia ADB/ADT kwa tabia ya kudhuru."</string>
-    <!-- no translation found for bluetooth_show_devices_without_names_summary (2351196058115755520) -->
-    <skip />
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Itaonyesha vifaa vya Bluetooth bila majina (anwani za MAC pekee)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Huzima kipengele cha Bluetooth cha sauti kamili kunapotokea matatizo ya sauti katika vifaa vya mbali kama vile sauti ya juu mno au inaposhindikana kuidhibiti."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Ruhusu milio ya simu kwenye simu ichezwe kwenye Vifaa vya sauti vya Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Kituo cha karibu"</string>

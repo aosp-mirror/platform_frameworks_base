@@ -353,8 +353,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Tafuta"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Sogeza juu kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Sogeza kushoto kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
-    <string name="zen_priority_introduction" msgid="1149025108714420281">"Hutasumbuliwa na sauti na mitetemo, isipokuwa inayotokana na kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Hutasumbuliwa na sauti na mitetemo, isipokuwa inayotokana na kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Badilisha upendavyo"</string>
     <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hatua hii huzuia mitetemo na sauti ZOTE, ikiwa ni pamoja na inayotokana na kengele, muziki video na michezo. Bado utaweza kupiga simu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa ni pamoja na ile inayotokana na kengele, muziki, video na michezo."</string>
@@ -384,7 +384,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Mtumiaji mpya"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza aliyealikwa"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Data na programu zote katika kipindi hiki zitafutwa."</string>
@@ -476,7 +476,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hapana, asante"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Sanidi"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="6930243045593601084">"Zima sasa"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Izime sasa"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Panua"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Kunja"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skrini imebandikwa"</string>

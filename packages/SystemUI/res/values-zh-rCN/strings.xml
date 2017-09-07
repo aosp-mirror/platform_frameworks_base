@@ -240,9 +240,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"正在充电"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 数据网络已暂停使用"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 数据网络已暂停使用"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"移动数据已暂停使用"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"已暂停使用移动数据网络"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"数据网络已暂停使用"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"您的数据用量已达到所设置的用量上限，因此系统已停用移动数据。\n\n如果您要继续使用移动数据，则可能需要支付相应的数据流量费用。"</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"您的数据流量消耗已达到所设置的上限，因此已停用移动数据网络。\n\n如果您要继续使用移动数据网络，则可能需要支付相应的流量费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢复"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"已连接到WLAN网络"</string>

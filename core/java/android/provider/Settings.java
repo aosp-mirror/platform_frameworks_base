@@ -10200,6 +10200,15 @@ public final class Settings {
                 "euicc_factory_reset_timeout_millis";
 
         /**
+         * Flag to set the timeout for when to refresh the storage settings cached data.
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String STORAGE_SETTINGS_CLOBBER_THRESHOLD =
+                "storage_settings_clobber_threshold";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -10763,6 +10772,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ANIMATOR_DURATION_SCALE);
             INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES);
             INSTANT_APP_SETTINGS.add(WTF_IS_FATAL);
+            INSTANT_APP_SETTINGS.add(SEND_ACTION_APP_ERROR);
         }
 
         /**

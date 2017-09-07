@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.storage.IStorageManager;
@@ -56,7 +57,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
 
         @Override
         public Handler getHandler() {
-            return mock(Handler.class);
+            return new Handler(Looper.getMainLooper());
         }
 
         @Override

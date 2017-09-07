@@ -1470,10 +1470,8 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             final int oldHeight = holder.row.getLayoutParams().height;
-            int measuredRowHeight = holder.measuredRowHeight + holder.row.getPaddingTop()
-                    + holder.row.getPaddingBottom();
             holder.row.getLayoutParams().height = Math.max(1,
-                    (int) (measuredRowHeight * getRowScale(rowPosition)));
+                    (int) (holder.measuredRowHeight * getRowScale(rowPosition)));
             if (holder.row.getLayoutParams().height != oldHeight) {
                 holder.row.requestLayout();
             }

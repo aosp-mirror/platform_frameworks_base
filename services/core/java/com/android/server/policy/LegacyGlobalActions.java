@@ -202,11 +202,14 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
                 && !(mAdapter.getItem(0) instanceof LongPressAction)) {
             ((SinglePressAction) mAdapter.getItem(0)).onPress();
         } else {
-            WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
-            attrs.setTitle("LegacyGlobalActions");
-            mDialog.getWindow().setAttributes(attrs);
-            mDialog.show();
-            mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
+            if (mDialog != null) {
+                WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
+                attrs.setTitle("LegacyGlobalActions");
+                mDialog.getWindow().setAttributes(attrs);
+                mDialog.show();
+                mDialog.getWindow().getDecorView().setSystemUiVisibility(
+                        View.STATUS_BAR_DISABLE_EXPAND);
+            }
         }
     }
 

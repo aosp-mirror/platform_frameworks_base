@@ -194,10 +194,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"వైఫై ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"మొబైల్ <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"బ్యాటరీ <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"ఎయిర్‌ప్లైన్ మోడ్ ఆఫ్‌లో ఉంది."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ఎయిర్‌ప్లైన్ మోడ్ ఆన్‌లో ఉంది."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ఎయిర్‌ప్లైన్ మోడ్ ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ఎయిర్‌ప్లైన్ మోడ్ ఆన్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"ఎయిర్‌ప్లేన్ మోడ్ ఆఫ్‌లో ఉంది."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ఎయిర్‌ప్లేన్ మోడ్ ఆన్‌లో ఉంది."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ఎయిర్‌ప్లేన్ మోడ్ ఆఫ్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ఎయిర్‌ప్లేన్ మోడ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, ప్రాధాన్యత మాత్రమే."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, మొత్తం నిశ్శబ్దం."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, అలారాలు మాత్రమే."</string>
@@ -516,7 +516,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"ఈథర్‌నెట్"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"అలారం"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"కార్యాలయ ప్రొఫైల్‌"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"ఎయిర్‌ప్లైన్ మోడ్"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="add_tile" msgid="2995389510240786221">"టైల్‌ను జోడించండి"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"ప్రసార టైల్"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తర్వాత అలారం మీరు ఆ లోపల దీన్ని ఆఫ్ చేయకుంటే వినిపించదు"</string>

@@ -1293,7 +1293,7 @@
     <string name="submit" msgid="1602335572089911941">"Skicka"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Billäge aktiverat"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Tryck om du vill avsluta billäge."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfpunkt aktiverad"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfzon aktiverad"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Tryck om du vill konfigurera."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Tillbaka"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Nästa"</string>

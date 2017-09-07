@@ -154,7 +154,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final Injector mInjector;
     private final Context mContext;
-    private final Handler mHandler;
+    @VisibleForTesting
+    protected final Handler mHandler;
     @VisibleForTesting
     protected final LockSettingsStorage mStorage;
     private final LockSettingsStrongAuth mStrongAuth;
@@ -1736,6 +1737,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         return response;
     }
 
+    /**
+     * Call this method to notify DPMS regarding the latest password metric. This should be called
+     * when the user is authenticating or when a new password is being set.
+     */
     private void notifyActivePasswordMetricsAvailable(String password, @UserIdInt int userId) {
         final PasswordMetrics metrics;
         if (password == null) {
@@ -2197,6 +2202,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, newHandle, userId);
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
+
+        notifyActivePasswordMetricsAvailable(credential, userId);
         return newHandle;
     }
 
@@ -2246,13 +2253,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+
+            notifyActivePasswordMetricsAvailable(credential, userId);
         } else /* response == null || responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
             Slog.w(TAG, "spBasedSetLockCredentialInternalLocked: " +
                     (response != null ? "rate limit exceeded" : "failed"));
             return;
         }
-        notifyActivePasswordMetricsAvailable(credential, userId);
-
     }
 
     @Override
@@ -2358,6 +2365,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.w(TAG, "Invalid escrow token supplied");
                 return false;
             }
+            // Update PASSWORD_TYPE_KEY since it's needed by notifyActivePasswordMetricsAvailable()
+            // called by setLockCredentialWithAuthTokenLocked().
+            // TODO: refactor usage of PASSWORD_TYPE_KEY b/65239740
+            setLong(LockPatternUtils.PASSWORD_TYPE_KEY, requestedQuality, userId);
             long oldHandle = getSyntheticPasswordHandleLocked(userId);
             setLockCredentialWithAuthTokenLocked(credential, type, result.authToken,
                     requestedQuality, userId);
