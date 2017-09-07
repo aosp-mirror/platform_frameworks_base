@@ -466,7 +466,7 @@ public class LayoutTest {
 
         layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
                 (left, top, right, bottom, textSelectionLayout) ->
-                        assertEquals(Layout.TextSelectionLayout.LEFT_TO_RIGHT,
+                        assertEquals(Layout.TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT,
                                 textSelectionLayout));
     }
 
@@ -477,7 +477,7 @@ public class LayoutTest {
 
         layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
                 (left, top, right, bottom, textSelectionLayout) ->
-                        assertEquals(Layout.TextSelectionLayout.RIGHT_TO_LEFT,
+                        assertEquals(Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT,
                                 textSelectionLayout));
     }
 
@@ -493,8 +493,8 @@ public class LayoutTest {
                         textSelectionLayout));
 
         assertEquals(2, layouts.size());
-        assertEquals(Layout.TextSelectionLayout.LEFT_TO_RIGHT, (long) layouts.get(0));
-        assertEquals(Layout.TextSelectionLayout.RIGHT_TO_LEFT, (long) layouts.get(1));
+        assertEquals(Layout.TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT, (long) layouts.get(0));
+        assertEquals(Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT, (long) layouts.get(1));
     }
 
     @Test

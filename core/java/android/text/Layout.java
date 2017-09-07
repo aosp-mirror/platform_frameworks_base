@@ -1735,10 +1735,10 @@ public abstract class Layout {
                     final boolean isRtl = (dirs.mDirections[i + 1] & RUN_RTL_FLAG) != 0;
                     if (isRtl) {
                         consumer.accept(left, top, right, bottom,
-                                TextSelectionLayout.RIGHT_TO_LEFT);
+                                TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
                     } else {
                         consumer.accept(left, top, right, bottom,
-                                TextSelectionLayout.LEFT_TO_RIGHT);
+                                TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT);
                     }
                 }
             }
@@ -1795,19 +1795,19 @@ public abstract class Layout {
 
             if (getParagraphDirection(startline) == DIR_RIGHT_TO_LEFT) {
                 consumer.accept(getLineLeft(startline), top, 0, getLineBottom(startline),
-                        TextSelectionLayout.RIGHT_TO_LEFT);
+                        TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
             } else {
                 consumer.accept(getLineRight(startline), top, width, getLineBottom(startline),
-                        TextSelectionLayout.LEFT_TO_RIGHT);
+                        TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT);
             }
 
             for (int i = startline + 1; i < endline; i++) {
                 top = getLineTop(i);
                 bottom = getLineBottom(i);
                 if (getParagraphDirection(i) == DIR_RIGHT_TO_LEFT) {
-                    consumer.accept(0, top, width, bottom, TextSelectionLayout.RIGHT_TO_LEFT);
+                    consumer.accept(0, top, width, bottom, TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
                 } else {
-                    consumer.accept(0, top, width, bottom, TextSelectionLayout.LEFT_TO_RIGHT);
+                    consumer.accept(0, top, width, bottom, TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT);
                 }
             }
 
@@ -1818,10 +1818,10 @@ public abstract class Layout {
 
             if (getParagraphDirection(endline) == DIR_RIGHT_TO_LEFT) {
                 consumer.accept(width, top, getLineRight(endline), bottom,
-                        TextSelectionLayout.RIGHT_TO_LEFT);
+                        TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
             } else {
                 consumer.accept(0, top, getLineLeft(endline), bottom,
-                        TextSelectionLayout.LEFT_TO_RIGHT);
+                        TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT);
             }
         }
     }
@@ -2326,11 +2326,13 @@ public abstract class Layout {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TextSelectionLayout.RIGHT_TO_LEFT, TextSelectionLayout.LEFT_TO_RIGHT})
-    public @interface TextSelectionLayout {
-        int RIGHT_TO_LEFT = 0;
-        int LEFT_TO_RIGHT = 1;
-    }
+    @IntDef({TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT, TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT})
+    public @interface TextSelectionLayout {}
+
+    /** @hide */
+    public static final int TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT = 0;
+    /** @hide */
+    public static final int TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT = 1;
 
     /** @hide */
     @FunctionalInterface
