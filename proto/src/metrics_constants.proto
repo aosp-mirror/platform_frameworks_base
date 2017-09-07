@@ -4300,6 +4300,11 @@ message MetricsEvent {
     // OS: O MR
     FIELD_NUM_STATUS_ICONS = 1095;
 
+    // ACTION: Logged when user tries to pair a Bluetooth device without name from Settings app
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1096;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
