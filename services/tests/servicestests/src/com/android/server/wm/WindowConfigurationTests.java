@@ -125,14 +125,9 @@ public class WindowConfigurationTests extends WindowTestsBase {
         config.setActivityType(ACTIVITY_TYPE_HOME);
         assertEquals(ACTIVITY_TYPE_HOME, config.getActivityType());
 
-        boolean gotException = false;
-        try {
-            // Can't change activity type once set.
-            config.setActivityType(ACTIVITY_TYPE_STANDARD);
-        } catch (IllegalStateException e) {
-            gotException = true;
-        }
-        assertTrue("Can't change activity type once set.", gotException);
+        // Allowed to change from app process.
+        config.setActivityType(ACTIVITY_TYPE_STANDARD);
+        assertEquals(ACTIVITY_TYPE_STANDARD, config.getActivityType());
     }
 
     /** Ensures the configuration app bounds at the root level match the app dimensions. */
