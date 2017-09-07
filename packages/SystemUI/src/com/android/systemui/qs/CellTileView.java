@@ -44,7 +44,10 @@ public class CellTileView extends SignalTileView {
     }
 
     protected void updateIcon(ImageView iv, State state) {
-        if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
+        if (!(state.icon instanceof SignalIcon)) {
+            super.updateIcon(iv, state);
+            return;
+        } else if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
             mSignalDrawable.setLevel(((SignalIcon) state.icon).getState());
             iv.setImageDrawable(mSignalDrawable);
             iv.setTag(R.id.qs_icon_tag, state.icon);
