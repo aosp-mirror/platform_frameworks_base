@@ -566,6 +566,7 @@ LOCAL_SRC_FILES += \
 
 LOCAL_SRC_FILES += \
 	../../system/netd/server/binder/android/net/INetd.aidl \
+	../../system/vold/binder/android/os/IVold.aidl \
 	../native/cmds/installd/binder/android/os/IInstalld.aidl \
 
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings

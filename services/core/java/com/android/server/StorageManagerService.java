@@ -681,13 +681,18 @@ class StorageManagerService extends IStorageManager.Stub
                     final IStorageShutdownObserver obs = (IStorageShutdownObserver) msg.obj;
                     boolean success = false;
                     try {
-                        success = mConnector.execute("volume", "shutdown").isClassOk();
-                    } catch (NativeDaemonConnectorException ignored) {
+                        if (ENABLE_BINDER) {
+                            mVold.shutdown();
+                        } else {
+                            success = mConnector.execute("volume", "shutdown").isClassOk();
+                        }
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, e);
                     }
                     if (obs != null) {
                         try {
                             obs.onShutDownComplete(success ? 0 : -1);
-                        } catch (RemoteException ignored) {
+                        } catch (Exception ignored) {
                         }
                     }
                     break;
@@ -699,9 +704,14 @@ class StorageManagerService extends IStorageManager.Stub
                         break;
                     }
                     try {
-                        mConnector.execute("volume", "mount", vol.id, vol.mountFlags,
-                                vol.mountUserId);
-                    } catch (NativeDaemonConnectorException ignored) {
+                        if (ENABLE_BINDER) {
+                            mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
+                        } else {
+                            mConnector.execute("volume", "mount", vol.id, vol.mountFlags,
+                                    vol.mountUserId);
+                        }
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, e);
                     }
                     break;
                 }
@@ -761,7 +771,11 @@ class StorageManagerService extends IStorageManager.Stub
                 if (Intent.ACTION_USER_ADDED.equals(action)) {
                     final UserManager um = mContext.getSystemService(UserManager.class);
                     final int userSerialNumber = um.getUserSerialNumber(userId);
-                    mConnector.execute("volume", "user_added", userId, userSerialNumber);
+                    if (ENABLE_BINDER) {
+                        mVold.onUserAdded(userId, userSerialNumber);
+                    } else {
+                        mConnector.execute("volume", "user_added", userId, userSerialNumber);
+                    }
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     synchronized (mVolumes) {
                         final int size = mVolumes.size();
@@ -773,10 +787,14 @@ class StorageManagerService extends IStorageManager.Stub
                             }
                         }
                     }
-                    mConnector.execute("volume", "user_removed", userId);
+                    if (ENABLE_BINDER) {
+                        mVold.onUserRemoved(userId);
+                    } else {
+                        mConnector.execute("volume", "user_removed", userId);
+                    }
                 }
-            } catch (NativeDaemonConnectorException e) {
-                Slog.w(TAG, "Failed to send user details to vold", e);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
             }
         }
     };
@@ -930,13 +948,21 @@ class StorageManagerService extends IStorageManager.Stub
 
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
-                    mConnector.execute("volume", "user_added", user.id, user.serialNumber);
+                    if (ENABLE_BINDER) {
+                        mVold.onUserAdded(user.id, user.serialNumber);
+                    } else {
+                        mConnector.execute("volume", "user_added", user.id, user.serialNumber);
+                    }
                 }
                 for (int userId : systemUnlockedUsers) {
-                    mConnector.execute("volume", "user_started", userId);
+                    if (ENABLE_BINDER) {
+                        mVold.onUserStarted(userId);
+                    } else {
+                        mConnector.execute("volume", "user_started", userId);
+                    }
                 }
-            } catch (RemoteException | NativeDaemonConnectorException e) {
-                Slog.w(TAG, "Failed to reset vold", e);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
             }
         }
     }
@@ -948,8 +974,13 @@ class StorageManagerService extends IStorageManager.Stub
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
         try {
-            mConnector.execute("volume", "user_started", userId);
-        } catch (NativeDaemonConnectorException ignored) {
+            if (ENABLE_BINDER) {
+                mVold.onUserStarted(userId);
+            } else {
+                mConnector.execute("volume", "user_started", userId);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
 
         // Record user as started so newly mounted volumes kick off events
@@ -973,8 +1004,13 @@ class StorageManagerService extends IStorageManager.Stub
         Slog.d(TAG, "onCleanupUser " + userId);
 
         try {
-            mConnector.execute("volume", "user_stopped", userId);
-        } catch (NativeDaemonConnectorException ignored) {
+            if (ENABLE_BINDER) {
+                mVold.onUserStopped(userId);
+            } else {
+                mConnector.execute("volume", "user_stopped", userId);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
 
         synchronized (mLock) {
@@ -1804,9 +1840,13 @@ class StorageManagerService extends IStorageManager.Stub
             throw new SecurityException("Mounting " + volId + " restricted by policy");
         }
         try {
-            mConnector.execute("volume", "mount", vol.id, vol.mountFlags, vol.mountUserId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
+            } else {
+                mConnector.execute("volume", "mount", vol.id, vol.mountFlags, vol.mountUserId);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1833,9 +1873,13 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         try {
-            mConnector.execute("volume", "unmount", vol.id);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.unmount(vol.id);
+            } else {
+                mConnector.execute("volume", "unmount", vol.id);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1846,9 +1890,13 @@ class StorageManagerService extends IStorageManager.Stub
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
         try {
-            mConnector.execute("volume", "format", vol.id, "auto");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.format(vol.id, "auto");
+            } else {
+                mConnector.execute("volume", "format", vol.id, "auto");
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1859,13 +1907,16 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             // TODO: make benchmark async so we don't block other commands
-            final NativeDaemonEvent res = mConnector.execute(3 * DateUtils.MINUTE_IN_MILLIS,
-                    "volume", "benchmark", volId);
-            return Long.parseLong(res.getMessage());
-        } catch (NativeDaemonTimeoutException e) {
+            if (ENABLE_BINDER) {
+                return mVold.benchmark(volId);
+            } else {
+                final NativeDaemonEvent res = mConnector.execute(3 * DateUtils.MINUTE_IN_MILLIS,
+                        "volume", "benchmark", volId);
+                return Long.parseLong(res.getMessage());
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
             return Long.MAX_VALUE;
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1876,12 +1927,14 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
-            mConnector.execute("volume", "partition", diskId, "public");
+            if (ENABLE_BINDER) {
+                mVold.partition(diskId, IVold.PARTITION_TYPE_PUBLIC, -1);
+            } else {
+                mConnector.execute("volume", "partition", diskId, "public");
+            }
             waitForLatch(latch, "partitionPublic", 3 * DateUtils.MINUTE_IN_MILLIS);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        } catch (TimeoutException e) {
-            throw new IllegalStateException(e);
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1893,12 +1946,14 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
-            mConnector.execute("volume", "partition", diskId, "private");
+            if (ENABLE_BINDER) {
+                mVold.partition(diskId, IVold.PARTITION_TYPE_PRIVATE, -1);
+            } else {
+                mConnector.execute("volume", "partition", diskId, "private");
+            }
             waitForLatch(latch, "partitionPrivate", 3 * DateUtils.MINUTE_IN_MILLIS);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        } catch (TimeoutException e) {
-            throw new IllegalStateException(e);
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1910,12 +1965,14 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
-            mConnector.execute("volume", "partition", diskId, "mixed", ratio);
+            if (ENABLE_BINDER) {
+                mVold.partition(diskId, IVold.PARTITION_TYPE_MIXED, ratio);
+            } else {
+                mConnector.execute("volume", "partition", diskId, "mixed", ratio);
+            }
             waitForLatch(latch, "partitionMixed", 3 * DateUtils.MINUTE_IN_MILLIS);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        } catch (TimeoutException e) {
-            throw new IllegalStateException(e);
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1999,9 +2056,13 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void forgetPartition(String partGuid) {
         try {
-            mConnector.execute("volume", "forget_partition", partGuid);
-        } catch (NativeDaemonConnectorException e) {
-            Slog.w(TAG, "Failed to forget key for " + partGuid + ": " + e);
+            if (ENABLE_BINDER) {
+                mVold.forgetPartition(partGuid);
+            } else {
+                mConnector.execute("volume", "forget_partition", partGuid);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -2035,20 +2096,22 @@ class StorageManagerService extends IStorageManager.Stub
             case Zygote.MOUNT_EXTERNAL_DEFAULT: {
                 modeName = "default";
             } break;
-
             case Zygote.MOUNT_EXTERNAL_READ: {
                 modeName = "read";
             } break;
-
             case Zygote.MOUNT_EXTERNAL_WRITE: {
                 modeName = "write";
             } break;
         }
 
         try {
-            mConnector.execute("volume", "remount_uid", uid, modeName);
-        } catch (NativeDaemonConnectorException e) {
-            Slog.w(TAG, "Failed to remount UID " + uid + " as " + modeName + ": " + e);
+            if (ENABLE_BINDER) {
+                mVold.remountUid(uid, mode);
+            } else {
+                mConnector.execute("volume", "remount_uid", uid, modeName);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -2199,9 +2262,13 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         try {
-            mConnector.execute("volume", "move_storage", from.id, to.id);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.moveStorage(from.id, to.id);
+            } else {
+                mConnector.execute("volume", "move_storage", from.id, to.id);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -3185,10 +3252,14 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
-                mConnector.execute("volume", "mkdirs", appPath);
+                if (ENABLE_BINDER) {
+                    mVold.mkdirs(appPath);
+                } else {
+                    mConnector.execute("volume", "mkdirs", appPath);
+                }
                 return 0;
-            } catch (NativeDaemonConnectorException e) {
-                return e.getCode();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
             }
         }
 
