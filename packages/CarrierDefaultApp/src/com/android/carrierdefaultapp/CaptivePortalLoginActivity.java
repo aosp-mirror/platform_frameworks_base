@@ -180,7 +180,8 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void done(boolean success) {
-        if (DBG) logd(String.format("Result success %b for %s", success, mUrl.toString()));
+        if (DBG) logd(String.format("Result success %b for %s", success,
+                mUrl != null ? mUrl.toString() : "null"));
         if (success) {
             // Trigger re-evaluation upon success http response code
             CarrierActionUtils.applyCarrierAction(
