@@ -392,6 +392,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       {"declare-styleable", std::mem_fn(&ResourceParser::ParseDeclareStyleable)},
       {"integer-array", std::mem_fn(&ResourceParser::ParseIntegerArray)},
       {"java-symbol", std::mem_fn(&ResourceParser::ParseSymbol)},
+      {"overlayable", std::mem_fn(&ResourceParser::ParseOverlayable)},
       {"plurals", std::mem_fn(&ResourceParser::ParsePlural)},
       {"public", std::mem_fn(&ResourceParser::ParsePublic)},
       {"public-group", std::mem_fn(&ResourceParser::ParsePublicGroup)},
@@ -498,7 +499,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     const auto bag_iter = elToBagMap.find(resource_type);
     if (bag_iter != elToBagMap.end()) {
       // Ensure we have a name (unless this is a <public-group>).
-      if (resource_type != "public-group") {
+      if (resource_type != "public-group" && resource_type != "overlayable") {
         if (!maybe_name) {
           diag_->Error(DiagMessage(out_resource->source)
                        << "<" << parser->element_name() << "> missing 'name' attribute");
@@ -690,6 +691,11 @@ bool ResourceParser::ParseString(xml::XmlPullParser* parser,
 
 bool ResourceParser::ParsePublic(xml::XmlPullParser* parser,
                                  ParsedResource* out_resource) {
+  if (out_resource->config != ConfigDescription::DefaultConfig()) {
+    diag_->Warn(DiagMessage(out_resource->source)
+                << "ignoring configuration '" << out_resource->config << "' for <public> tag");
+  }
+
   Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
   if (!maybe_type) {
     diag_->Error(DiagMessage(out_resource->source)
@@ -726,8 +732,13 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser,
   return true;
 }
 
-bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser,
-                                      ParsedResource* out_resource) {
+bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (out_resource->config != ConfigDescription::DefaultConfig()) {
+    diag_->Warn(DiagMessage(out_resource->source)
+                << "ignoring configuration '" << out_resource->config
+                << "' for <public-group> tag");
+  }
+
   Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
   if (!maybe_type) {
     diag_->Error(DiagMessage(out_resource->source)
@@ -842,13 +853,83 @@ bool ResourceParser::ParseSymbolImpl(xml::XmlPullParser* parser,
   return true;
 }
 
-bool ResourceParser::ParseSymbol(xml::XmlPullParser* parser,
-                                 ParsedResource* out_resource) {
-  if (ParseSymbolImpl(parser, out_resource)) {
-    out_resource->symbol_state = SymbolState::kPrivate;
-    return true;
+bool ResourceParser::ParseSymbol(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (out_resource->config != ConfigDescription::DefaultConfig()) {
+    diag_->Warn(DiagMessage(out_resource->source)
+                << "ignoring configuration '" << out_resource->config << "' for <"
+                << parser->element_name() << "> tag");
   }
-  return false;
+
+  if (!ParseSymbolImpl(parser, out_resource)) {
+    return false;
+  }
+
+  out_resource->symbol_state = SymbolState::kPrivate;
+  return true;
+}
+
+bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (out_resource->config != ConfigDescription::DefaultConfig()) {
+    diag_->Warn(DiagMessage(out_resource->source)
+                << "ignoring configuration '" << out_resource->config << "' for <overlayable> tag");
+  }
+
+  if (Maybe<StringPiece> maybe_policy = xml::FindNonEmptyAttribute(parser, "policy")) {
+    const StringPiece& policy = maybe_policy.value();
+    if (policy != "system") {
+      diag_->Error(DiagMessage(out_resource->source)
+                   << "<overlayable> has invalid policy '" << policy << "'");
+      return false;
+    }
+  }
+
+  bool error = false;
+  const size_t depth = parser->depth();
+  while (xml::XmlPullParser::NextChildNode(parser, depth)) {
+    if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
+      // Skip text/comments.
+      continue;
+    }
+
+    const Source item_source = source_.WithLine(parser->line_number());
+    const std::string& element_namespace = parser->element_namespace();
+    const std::string& element_name = parser->element_name();
+    if (element_namespace.empty() && element_name == "item") {
+      Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
+      if (!maybe_name) {
+        diag_->Error(DiagMessage(item_source)
+                     << "<item> within an <overlayable> tag must have a 'name' attribute");
+        error = true;
+        continue;
+      }
+
+      Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
+      if (!maybe_type) {
+        diag_->Error(DiagMessage(item_source)
+                     << "<item> within an <overlayable> tag must have a 'type' attribute");
+        error = true;
+        continue;
+      }
+
+      const ResourceType* type = ParseResourceType(maybe_type.value());
+      if (type == nullptr) {
+        diag_->Error(DiagMessage(out_resource->source)
+                     << "invalid resource type '" << maybe_type.value()
+                     << "' in <item> within an <overlayable>");
+        error = true;
+        continue;
+      }
+
+      // TODO(b/64980941): Mark the symbol as overlayable and allow marking which entity can overlay
+      // the resource (system/app).
+
+      xml::XmlPullParser::SkipCurrentElement(parser);
+    } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
+      diag_->Error(DiagMessage(item_source) << ":" << element_name << ">");
+      error = true;
+    }
+  }
+  return !error;
 }
 
 bool ResourceParser::ParseAddResource(xml::XmlPullParser* parser,
