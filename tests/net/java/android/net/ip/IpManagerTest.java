@@ -180,7 +180,8 @@ public class IpManagerTest {
         // Add N - 1 addresses
         for (int i = 0; i < lastAddr; i++) {
             mObserver.addressUpdated(iface, new LinkAddress(addresses[i]));
-            verify(mCb, timeout(100).times(1)).onLinkPropertiesChange(any());
+            verify(mCb, timeout(100)).onLinkPropertiesChange(any());
+            reset(mCb);
         }
 
         // Add Nth address
