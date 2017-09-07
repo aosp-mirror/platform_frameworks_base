@@ -2568,9 +2568,8 @@ public final class StrictMode {
     // now we suppress the stack trace because it's useless and/or
     // misleading.
     private static class InstanceCountViolation extends Throwable {
-        final Class mClass;
-        final long mInstances;
-        final int mLimit;
+        private final long mInstances;
+        private final int mLimit;
 
         private static final StackTraceElement[] FAKE_STACK = {
             new StackTraceElement(
@@ -2580,7 +2579,6 @@ public final class StrictMode {
         public InstanceCountViolation(Class klass, long instances, int limit) {
             super(klass.toString() + "; instances=" + instances + "; limit=" + limit);
             setStackTrace(FAKE_STACK);
-            mClass = klass;
             mInstances = instances;
             mLimit = limit;
         }
