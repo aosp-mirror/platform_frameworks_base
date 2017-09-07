@@ -64,7 +64,7 @@ class PackagePbDeserializer {
   bool DeserializeFromPb(const pb::Package& pb_package, ResourceTable* table) {
     Maybe<uint8_t> id;
     if (pb_package.has_package_id()) {
-      id = static_cast<uint8_t>(pb_package.package_id());
+      id = static_cast<uint8_t>(pb_package.package_id().id());
     }
 
     std::map<ResourceId, ResourceNameRef> id_index;
@@ -90,10 +90,7 @@ class PackagePbDeserializer {
                                     &entry->symbol_status.source);
           }
 
-          if (pb_status.has_comment()) {
-            entry->symbol_status.comment = pb_status.comment();
-          }
-
+          entry->symbol_status.comment = pb_status.comment();
           entry->symbol_status.allow_new = pb_status.allow_new();
 
           SymbolState visibility = DeserializeVisibilityFromPb(pb_status.visibility());
@@ -101,15 +98,15 @@ class PackagePbDeserializer {
 
           if (visibility == SymbolState::kPublic) {
             // This is a public symbol, we must encode the ID now if there is one.
-            if (pb_entry.has_id()) {
-              entry->id = static_cast<uint16_t>(pb_entry.id());
+            if (pb_entry.has_entry_id()) {
+              entry->id = static_cast<uint16_t>(pb_entry.entry_id().id());
             }
 
             if (type->symbol_status.state != SymbolState::kPublic) {
               // If the type has not been made public, do so now.
               type->symbol_status.state = SymbolState::kPublic;
-              if (pb_type.has_id()) {
-                type->id = static_cast<uint8_t>(pb_type.id());
+              if (pb_type.has_type_id()) {
+                type->id = static_cast<uint8_t>(pb_type.type_id().id());
               }
             }
           } else if (visibility == SymbolState::kPrivate) {
@@ -119,7 +116,8 @@ class PackagePbDeserializer {
           }
         }
 
-        ResourceId resid(pb_package.package_id(), pb_type.id(), pb_entry.id());
+        ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),
+                         pb_entry.entry_id().id());
         if (resid.is_valid()) {
           id_index[resid] = ResourceNameRef(pkg->name, type->type, entry->name);
         }
@@ -321,11 +319,11 @@ class PackagePbDeserializer {
     out_ref->reference_type = DeserializeReferenceTypeFromPb(pb_ref.type());
     out_ref->private_reference = pb_ref.private_();
 
-    if (pb_ref.has_id()) {
+    if (pb_ref.id() != 0) {
       out_ref->id = ResourceId(pb_ref.id());
     }
 
-    if (pb_ref.has_name()) {
+    if (!pb_ref.name().empty()) {
       ResourceNameRef name_ref;
       if (!ResourceUtils::ParseResourceName(pb_ref.name(), &name_ref, nullptr)) {
         diag_->Error(DiagMessage(source_) << "invalid reference name '" << pb_ref.name() << "'");
@@ -344,10 +342,7 @@ class PackagePbDeserializer {
       DeserializeSourceFromPb(pb_item.source(), *source_pool_, &source);
       out_value->SetSource(std::move(source));
     }
-
-    if (pb_item.has_comment()) {
-      out_value->SetComment(pb_item.comment());
-    }
+    out_value->SetComment(pb_item.comment());
   }
 
  private:
