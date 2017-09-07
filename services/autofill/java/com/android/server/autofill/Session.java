@@ -462,14 +462,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         if (response == null) {
-            if (sVerbose) Slog.v(TAG, "canceling session " + id + " when server returned null");
-            if ((requestFlags & FLAG_MANUAL_REQUEST) != 0) {
-                getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
-            }
-            mService.resetLastResponse();
-            // Nothing to be done, but need to notify client.
-            notifyUnavailableToClient();
-            removeSelf();
+            processNullResponseLocked(requestFlags);
             return;
         }
 
@@ -754,16 +747,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
+        if (sDebug) Slog.d(TAG, "setAuthenticationResultLocked(): result=" + result);
         if (result instanceof FillResponse) {
             final FillResponse response = (FillResponse) result;
             mMetricsLogger.action(MetricsEvent.AUTOFILL_AUTHENTICATED, mPackageName);
             replaceResponseLocked(authenticatedResponse, response);
         } else if (result instanceof Dataset) {
+            // TODO: add proper metric
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
                 final Dataset dataset = (Dataset) result;
                 authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 autoFill(requestId, datasetIdx, dataset);
             }
+        } else {
+            if (result != null) {
+                Slog.w(TAG, "service returned invalid auth type: " + result);
+            }
+            // TODO: add proper metric (on else)
+            processNullResponseLocked(0);
         }
     }
 
@@ -1414,6 +1415,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mResponses.put(newResponse.getRequestId(), newResponse);
         // Now process the new response
         processResponseLocked(newResponse, 0);
+    }
+
+    private void processNullResponseLocked(int flags) {
+        if (sVerbose) Slog.v(TAG, "canceling session " + id + " when server returned null");
+        if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+            getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
+        }
+        mService.resetLastResponse();
+        // Nothing to be done, but need to notify client.
+        notifyUnavailableToClient();
+        removeSelf();
     }
 
     private void processResponseLocked(@NonNull FillResponse newResponse, int flags) {
