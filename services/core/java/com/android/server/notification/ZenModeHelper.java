@@ -465,6 +465,8 @@ public class ZenModeHelper {
                             + "from " + currRule.getName() + " to " + defaultRule.name);
                     // update default rule (if locale changed, name of rule will change)
                     AutomaticZenRule defaultAutoRule = createAutomaticZenRule(defaultRule);
+                    // ensure enabled state is carried over from current rule
+                    defaultAutoRule.setEnabled(currRule.isEnabled());
                     updateAutomaticZenRule(ruleId, defaultAutoRule,
                             "locale changed");
                 }
