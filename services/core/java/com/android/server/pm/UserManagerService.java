@@ -128,6 +128,7 @@ import java.util.List;
  *
  * Method naming convention:
  * <ul>
+ * <li> Methods suffixed with "LAr" should be called within the {@link #mAppRestrictionsLock} lock.
  * <li> Methods suffixed with "LP" should be called within the {@link #mPackagesLock} lock.
  * <li> Methods suffixed with "LR" should be called within the {@link #mRestrictionsLock} lock.
  * <li> Methods suffixed with "LU" should be called within the {@link #mUsersLock} lock.
@@ -232,6 +233,8 @@ public class UserManagerService extends IUserManager.Stub {
     // Short-term lock for internal state, when interaction/sync with PM is not required
     private final Object mUsersLock = LockGuard.installNewLock(LockGuard.INDEX_USER);
     private final Object mRestrictionsLock = new Object();
+    // Used for serializing access to app restriction files
+    private final Object mAppRestrictionsLock = new Object();
 
     private final Handler mHandler;
 
@@ -2328,13 +2331,11 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Removes the app restrictions file for a specific package and user id, if it exists.
      */
-    private void cleanAppRestrictionsForPackage(String pkg, int userId) {
-        synchronized (mPackagesLock) {
-            File dir = Environment.getUserSystemDirectory(userId);
-            File resFile = new File(dir, packageToRestrictionsFileName(pkg));
-            if (resFile.exists()) {
-                resFile.delete();
-            }
+    private static void cleanAppRestrictionsForPackageLAr(String pkg, int userId) {
+        File dir = Environment.getUserSystemDirectory(userId);
+        File resFile = new File(dir, packageToRestrictionsFileName(pkg));
+        if (resFile.exists()) {
+            resFile.delete();
         }
     }
 
@@ -2853,9 +2854,9 @@ public class UserManagerService extends IUserManager.Stub {
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
             checkSystemOrRoot("get application restrictions for other user/app " + packageName);
         }
-        synchronized (mPackagesLock) {
+        synchronized (mAppRestrictionsLock) {
             // Read the restrictions from XML
-            return readApplicationRestrictionsLP(packageName, userId);
+            return readApplicationRestrictionsLAr(packageName, userId);
         }
     }
 
@@ -2866,12 +2867,12 @@ public class UserManagerService extends IUserManager.Stub {
         if (restrictions != null) {
             restrictions.setDefusable(true);
         }
-        synchronized (mPackagesLock) {
+        synchronized (mAppRestrictionsLock) {
             if (restrictions == null || restrictions.isEmpty()) {
-                cleanAppRestrictionsForPackage(packageName, userId);
+                cleanAppRestrictionsForPackageLAr(packageName, userId);
             } else {
                 // Write the restrictions to XML
-                writeApplicationRestrictionsLP(packageName, restrictions, userId);
+                writeApplicationRestrictionsLAr(packageName, restrictions, userId);
             }
         }
 
@@ -2894,15 +2895,17 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private Bundle readApplicationRestrictionsLP(String packageName, int userId) {
+    @GuardedBy("mAppRestrictionsLock")
+    private static Bundle readApplicationRestrictionsLAr(String packageName, int userId) {
         AtomicFile restrictionsFile =
                 new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
                         packageToRestrictionsFileName(packageName)));
-        return readApplicationRestrictionsLP(restrictionsFile);
+        return readApplicationRestrictionsLAr(restrictionsFile);
     }
 
     @VisibleForTesting
-    static Bundle readApplicationRestrictionsLP(AtomicFile restrictionsFile) {
+    @GuardedBy("mAppRestrictionsLock")
+    static Bundle readApplicationRestrictionsLAr(AtomicFile restrictionsFile) {
         final Bundle restrictions = new Bundle();
         final ArrayList<String> values = new ArrayList<>();
         if (!restrictionsFile.getBaseFile().exists()) {
@@ -2985,16 +2988,18 @@ public class UserManagerService extends IUserManager.Stub {
         return childBundle;
     }
 
-    private void writeApplicationRestrictionsLP(String packageName,
+    @GuardedBy("mAppRestrictionsLock")
+    private static void writeApplicationRestrictionsLAr(String packageName,
             Bundle restrictions, int userId) {
         AtomicFile restrictionsFile = new AtomicFile(
                 new File(Environment.getUserSystemDirectory(userId),
                         packageToRestrictionsFileName(packageName)));
-        writeApplicationRestrictionsLP(restrictions, restrictionsFile);
+        writeApplicationRestrictionsLAr(restrictions, restrictionsFile);
     }
 
     @VisibleForTesting
-    static void writeApplicationRestrictionsLP(Bundle restrictions, AtomicFile restrictionsFile) {
+    @GuardedBy("mAppRestrictionsLock")
+    static void writeApplicationRestrictionsLAr(Bundle restrictions, AtomicFile restrictionsFile) {
         FileOutputStream fos = null;
         try {
             fos = restrictionsFile.startWrite();
@@ -3238,7 +3243,7 @@ public class UserManagerService extends IUserManager.Stub {
         return -1;
     }
 
-    private String packageToRestrictionsFileName(String packageName) {
+    private static String packageToRestrictionsFileName(String packageName) {
         return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
     }
 
