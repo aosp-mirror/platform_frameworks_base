@@ -41,6 +41,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.GuardedBy;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -65,7 +66,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Tracks saved or available wifi networks and their state.
  */
 public class WifiTracker {
-    // TODO(b/36733768): Remove flag includeSaved and includePasspoints.
+    /**
+     * Default maximum age in millis of cached scored networks in
+     * {@link AccessPoint#mScoredNetworkCache} to be used for speed label generation.
+     */
+    private static final long MAX_CACHED_SCORE_AGE_MILLIS_DEFAULT =
+            20 * DateUtils.MINUTE_IN_MILLIS;
 
     private static final String TAG = "WifiTracker";
     private static final boolean DBG() {
@@ -75,6 +81,8 @@ public class WifiTracker {
     /** verbose logging flag. this flag is set thru developer debugging options
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
     public static boolean sVerboseLogging;
+
+    // TODO(b/36733768): Remove flag includeSaved and includePasspoints.
 
     // TODO: Allow control of this?
     // Combo scans can take 5-6s to complete - set to 10s.
@@ -138,7 +146,9 @@ public class WifiTracker {
     private final NetworkScoreManager mNetworkScoreManager;
     private final WifiNetworkScoreCache mScoreCache;
     private boolean mNetworkScoringUiEnabled;
-    private final ContentObserver mObserver;
+    private final ContentObserver mScoringEnabledObserver;
+    private final ContentObserver mSpeedLabelCacheAgeObserver;
+    private long mMaxSpeedLabelScoreCacheAge;
 
     @GuardedBy("mLock")
     private final Set<NetworkKey> mRequestedScores = new ArraySet<>();
@@ -237,13 +247,24 @@ public class WifiTracker {
             }
         });
 
-        mObserver = new ContentObserver(mWorkHandler) {
+        mScoringEnabledObserver = new ContentObserver(mWorkHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 mNetworkScoringUiEnabled =
                         Settings.Global.getInt(
                                 mContext.getContentResolver(),
                                 Settings.Global.NETWORK_SCORING_UI_ENABLED, 0) == 1;
+            }
+        };
+
+        mSpeedLabelCacheAgeObserver = new ContentObserver(mWorkHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mMaxSpeedLabelScoreCacheAge =
+                        Settings.Global.getLong(
+                                mContext.getContentResolver(),
+                                Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
+                                MAX_CACHED_SCORE_AGE_MILLIS_DEFAULT);
             }
         };
     }
@@ -324,8 +345,15 @@ public class WifiTracker {
             mContext.getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.NETWORK_SCORING_UI_ENABLED),
                     false /* notifyForDescendants */,
-                    mObserver);
-            mObserver.onChange(false /* selfChange */); // Set mScoringUiEnabled
+                    mScoringEnabledObserver);
+            mScoringEnabledObserver.onChange(false /* selfChange */); // Set mScoringUiEnabled
+
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(
+                            Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS),
+                    false /* notifyForDescendants */,
+                    mSpeedLabelCacheAgeObserver);
+            mSpeedLabelCacheAgeObserver.onChange(false /* selfChange */); // Set initial value
 
             resumeScanning();
             if (!mRegistered) {
@@ -377,7 +405,8 @@ public class WifiTracker {
             }
             unregisterScoreCache();
             pauseScanning();
-            mContext.getContentResolver().unregisterContentObserver(mObserver);
+            mContext.getContentResolver().unregisterContentObserver(mScoringEnabledObserver);
+            mContext.getContentResolver().unregisterContentObserver(mSpeedLabelCacheAgeObserver);
 
             mWorkHandler.removePendingMessages();
             mMainHandler.removePendingMessages();
@@ -616,7 +645,7 @@ public class WifiTracker {
 
         requestScoresForNetworkKeys(scoresToRequest);
         for (AccessPoint ap : accessPoints) {
-            ap.update(mScoreCache, mNetworkScoringUiEnabled);
+            ap.update(mScoreCache, mNetworkScoringUiEnabled, mMaxSpeedLabelScoreCacheAge);
         }
 
         // Pre-sort accessPoints to speed preference insertion
@@ -717,7 +746,7 @@ public class WifiTracker {
                     updated = true;
                     if (previouslyConnected != ap.isActive()) reorder = true;
                 }
-                if (ap.update(mScoreCache, mNetworkScoringUiEnabled)) {
+                if (ap.update(mScoreCache, mNetworkScoringUiEnabled, mMaxSpeedLabelScoreCacheAge)) {
                     reorder = true;
                     updated = true;
                 }
@@ -751,7 +780,8 @@ public class WifiTracker {
         synchronized (mLock) {
             boolean updated = false;
             for (int i = 0; i < mInternalAccessPoints.size(); i++) {
-                if (mInternalAccessPoints.get(i).update(mScoreCache, mNetworkScoringUiEnabled)) {
+                if (mInternalAccessPoints.get(i).update(
+                        mScoreCache, mNetworkScoringUiEnabled, mMaxSpeedLabelScoreCacheAge)) {
                     updated = true;
                 }
             }
