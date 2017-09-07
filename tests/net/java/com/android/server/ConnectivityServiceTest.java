@@ -64,6 +64,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
+import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.StringNetworkSpecifier;
 import android.net.metrics.IpConnectivityLog;
@@ -88,6 +89,7 @@ import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.LogPrinter;
 
@@ -109,7 +111,10 @@ import org.mockito.Spy;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -304,6 +309,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private String mRedirectUrl;
 
         MockNetworkAgent(int transport) {
+            this(transport, new LinkProperties());
+        }
+
+        MockNetworkAgent(int transport, LinkProperties linkProperties) {
             final int type = transportToLegacyType(transport);
             final String typeName = ConnectivityManager.getNetworkTypeName(type);
             mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
@@ -329,7 +338,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mHandlerThread.start();
             mNetworkAgent = new NetworkAgent(mHandlerThread.getLooper(), mServiceContext,
                     "Mock-" + typeName, mNetworkInfo, mNetworkCapabilities,
-                    new LinkProperties(), mScore, new NetworkMisc()) {
+                    linkProperties, mScore, new NetworkMisc()) {
                 @Override
                 public void unwanted() { mDisconnected.open(); }
 
@@ -3336,6 +3345,68 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertException(() -> { mCm.startUsingNetworkFeature(TYPE_NONE, ""); }, unsupported);
         assertException(() -> { mCm.stopUsingNetworkFeature(TYPE_NONE, ""); }, unsupported);
         assertException(() -> { mCm.requestRouteToHostAddress(TYPE_NONE, null); }, unsupported);
+    }
+
+    @SmallTest
+    public void testLinkPropertiesEnsuresDirectlyConnectedRoutes() {
+        final NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(networkRequest, networkCallback);
+
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan0");
+        LinkAddress myIpv4Address = new LinkAddress("192.168.12.3/24");
+        RouteInfo myIpv4DefaultRoute = new RouteInfo((IpPrefix) null,
+                NetworkUtils.numericToInetAddress("192.168.12.1"), lp.getInterfaceName());
+        lp.addLinkAddress(myIpv4Address);
+        lp.addRoute(myIpv4DefaultRoute);
+
+        // Verify direct routes are added when network agent is first registered in
+        // ConnectivityService.
+        MockNetworkAgent networkAgent = new MockNetworkAgent(TRANSPORT_WIFI, lp);
+        networkAgent.connect(true);
+        networkCallback.expectCallback(CallbackState.AVAILABLE, networkAgent);
+        networkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, networkAgent);
+        CallbackInfo cbi = networkCallback.expectCallback(CallbackState.LINK_PROPERTIES,
+                networkAgent);
+        networkCallback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, networkAgent);
+        networkCallback.assertNoCallback();
+        checkDirectlyConnectedRoutes(cbi.arg, Arrays.asList(myIpv4Address),
+                Arrays.asList(myIpv4DefaultRoute));
+        checkDirectlyConnectedRoutes(mCm.getLinkProperties(networkAgent.getNetwork()),
+                Arrays.asList(myIpv4Address), Arrays.asList(myIpv4DefaultRoute));
+
+        // Verify direct routes are added during subsequent link properties updates.
+        LinkProperties newLp = new LinkProperties(lp);
+        LinkAddress myIpv6Address1 = new LinkAddress("fe80::cafe/64");
+        LinkAddress myIpv6Address2 = new LinkAddress("2001:db8::2/64");
+        newLp.addLinkAddress(myIpv6Address1);
+        newLp.addLinkAddress(myIpv6Address2);
+        networkAgent.sendLinkProperties(newLp);
+        cbi = networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, networkAgent);
+        networkCallback.assertNoCallback();
+        checkDirectlyConnectedRoutes(cbi.arg,
+                Arrays.asList(myIpv4Address, myIpv6Address1, myIpv6Address2),
+                Arrays.asList(myIpv4DefaultRoute));
+        mCm.unregisterNetworkCallback(networkCallback);
+    }
+
+    private void checkDirectlyConnectedRoutes(Object callbackObj,
+            Collection<LinkAddress> linkAddresses, Collection<RouteInfo> otherRoutes) {
+        assertTrue(callbackObj instanceof LinkProperties);
+        LinkProperties lp = (LinkProperties) callbackObj;
+
+        Set<RouteInfo> expectedRoutes = new ArraySet<>();
+        expectedRoutes.addAll(otherRoutes);
+        for (LinkAddress address : linkAddresses) {
+            RouteInfo localRoute = new RouteInfo(address, null, lp.getInterfaceName());
+            // Duplicates in linkAddresses are considered failures
+            assertTrue(expectedRoutes.add(localRoute));
+        }
+        List<RouteInfo> observedRoutes = lp.getRoutes();
+        assertEquals(expectedRoutes.size(), observedRoutes.size());
+        assertTrue(observedRoutes.containsAll(expectedRoutes));
     }
 
     private static <T> void assertEmpty(T[] ts) {
