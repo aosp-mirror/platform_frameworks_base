@@ -718,6 +718,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Cycles do not exist because they are illegal and screened for during installation.
      *
      * May be null if no splits are installed, or if no dependencies exist between them.
+     *
+     * NOTE: Any change to the way split dependencies are stored must update the logic that
+     *       creates the class loader context for dexopt (DexoptUtils#getClassLoaderContexts).
+     *
      * @hide
      */
     public SparseArray<int[]> splitDependencies;
