@@ -233,6 +233,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mTextColor = 0;
     int mStatusBarColor = 0;
     int mNavigationBarColor = 0;
+    int mNavigationBarDividerColor = 0;
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
@@ -2432,6 +2433,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (!mForcedNavigationBarColor) {
             mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+            mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
+                    0x00000000);
         }
 
         WindowManager.LayoutParams params = getAttributes();
