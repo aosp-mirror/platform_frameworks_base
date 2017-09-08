@@ -1055,7 +1055,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         WindowManager.LayoutParams attrs = mWindow.getAttributes();
         int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
 
-        if (!mWindow.mIsFloating && ActivityManager.isHighEndGfx()) {
+        if (!mWindow.mIsFloating) {
             boolean disallowAnimate = !isLaidOut();
             disallowAnimate |= ((mLastWindowFlags ^ attrs.flags)
                     & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
