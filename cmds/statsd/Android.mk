@@ -89,6 +89,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
 LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
+    tests/indexed_priority_queue_test.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \
     tests/LogReader_test.cpp \

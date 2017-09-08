@@ -59,8 +59,7 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
     }
     std::lock_guard<std::mutex> lock(mLock);
     if (DEBUG) ALOGD("Removing alarm with time %u", alarm->timestampSec);
-    // TODO: make priority queue able to have items removed from it !!!
-    // mPq.remove(alarm);
+    mPq.remove(alarm);
     if (mPq.empty()) {
         if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
         mRegisteredAlarmTimeSec = 0;

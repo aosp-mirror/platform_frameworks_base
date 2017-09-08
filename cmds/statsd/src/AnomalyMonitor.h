@@ -17,6 +17,7 @@
 #ifndef ANOMALY_MONITOR_H
 #define ANOMALY_MONITOR_H
 
+#include <indexed_priority_queue.h>
 #include <android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 
@@ -40,11 +41,10 @@ struct AnomalyAlarm : public RefBase {
 
     const uint32_t timestampSec;
 
-    /** AnomalyAlarm a is higher priority than b if its timestamp is sooner. */
-    struct Comparator {
-        bool operator()(sp<const AnomalyAlarm> a, sp<const AnomalyAlarm> b) const
-        {
-            return (a->timestampSec > b->timestampSec);
+    /** AnomalyAlarm a is smaller (higher priority) than b if its timestamp is sooner. */
+    struct SmallerTimestamp {
+        bool operator()(sp<const AnomalyAlarm> a, sp<const AnomalyAlarm> b) const {
+            return (a->timestampSec < b->timestampSec);
         }
     };
 };
@@ -98,10 +98,7 @@ class AnomalyMonitor {
     /**
      * Priority queue of alarms, prioritized by soonest alarm.timestampSec.
      */
-    // TODO: use a priority queue from which elements can be removed
-    //       Can I use the one in toolchain/gcc/gcc-4.9/include/fibheap.h?
-    std::priority_queue<sp<const AnomalyAlarm>, std::vector<sp<const AnomalyAlarm>>,
-                        AnomalyAlarm::Comparator> mPq;
+    indexed_priority_queue<AnomalyAlarm, AnomalyAlarm::SmallerTimestamp> mPq;
 
     /**
      * Binder interface for communicating with StatsCompanionService.
