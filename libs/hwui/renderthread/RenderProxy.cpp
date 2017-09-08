@@ -551,20 +551,8 @@ void RenderProxy::drawRenderNode(RenderNode* node) {
     staticPostAndWait(task);
 }
 
-CREATE_BRIDGE5(setContentDrawBounds, CanvasContext* context, int left, int top,
-        int right, int bottom) {
-    args->context->setContentDrawBounds(args->left, args->top, args->right, args->bottom);
-    return nullptr;
-}
-
 void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom) {
-    SETUP_TASK(setContentDrawBounds);
-    args->context = mContext;
-    args->left = left;
-    args->top = top;
-    args->right = right;
-    args->bottom = bottom;
-    staticPostAndWait(task);
+    mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
 }
 
 CREATE_BRIDGE1(serializeDisplayListTree, CanvasContext* context) {
