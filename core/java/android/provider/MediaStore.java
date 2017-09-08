@@ -81,6 +81,13 @@ public final class MediaStore {
     public static final String UNHIDE_CALL = "unhide";
 
     /**
+     * The method name used by the media scanner service to reload all localized ringtone titles due
+     * to a locale change.
+     * @hide
+     */
+    public static final String RETRANSLATE_CALL = "update_titles";
+
+    /**
      * This is for internal use by the media scanner only.
      * Name of the (optional) Uri parameter that determines whether to skip deleting
      * the file pointed to by the _data column, when deleting the database entry.
@@ -1358,6 +1365,18 @@ public final class MediaStore {
              * @hide
              */
             public static final String GENRE = "genre";
+
+            /**
+             * The resource URI of a localized title, if any
+             * <P>Type: TEXT</P>
+             * Conforms to this pattern:
+             *   Scheme: {@link ContentResolver.SCHEME_ANDROID_RESOURCE}
+             *   Authority: Package Name of ringtone title provider
+             *   First Path Segment: Type of resource (must be "string")
+             *   Second Path Segment: Resource ID of title
+             * @hide
+             */
+            public static final String TITLE_RESOURCE_URI = "title_resource_uri";
         }
 
         /**
