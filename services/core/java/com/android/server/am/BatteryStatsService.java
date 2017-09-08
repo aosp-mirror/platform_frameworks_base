@@ -52,6 +52,7 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
+import android.util.StatsLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -281,12 +282,26 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     void noteProcessStart(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessStartLocked(name, uid);
+
+            // TODO: remove this once we figure out properly where and how
+            // PROCESS_EVENT = 1112
+            // EVENT SUBTYPE: START = 1
+            // KEY_NAME: 1
+            // KEY_UID: 2
+            StatsLog.writeArray(1112, 1, 1, name, 2, uid);
         }
     }
 
     void noteProcessCrash(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessCrashLocked(name, uid);
+
+            // TODO: remove this once we figure out properly where and how
+            // PROCESS_EVENT = 1112
+            // EVENT SUBTYPE: CRASH = 2
+            // KEY_NAME: 1
+            // KEY_UID: 2
+            StatsLog.writeArray(1112, 2, 1, name, 2, uid);
         }
     }
 
