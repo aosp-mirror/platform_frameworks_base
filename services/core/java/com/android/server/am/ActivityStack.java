@@ -2994,13 +2994,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Ensure the task/activity being brought forward is not the assistant
             return false;
         }
-        final boolean isFullscreen = toFrontTask != null
-                ? toFrontTask.containsOnlyFullscreenActivities()
-                : toFrontActivity.fullscreen;
-        if (!isFullscreen) {
-            // Ensure the task/activity being brought forward is fullscreen
-            return false;
-        }
         return true;
     }
 
