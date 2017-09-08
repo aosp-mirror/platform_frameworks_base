@@ -149,7 +149,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /** Returns true if this container is currently in split-screen windowing mode. */
     public boolean inSplitScreenWindowingMode() {
-        @WindowConfiguration.WindowingMode int windowingMode =
+        /*@WindowConfiguration.WindowingMode*/ int windowingMode =
                 mFullConfiguration.windowConfiguration.getWindowingMode();
 
         return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
@@ -158,7 +158,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /** Returns true if this container is currently in split-screen secondary windowing mode. */
     public boolean inSplitScreenSecondaryWindowingMode() {
-        @WindowConfiguration.WindowingMode int windowingMode =
+        /*@WindowConfiguration.WindowingMode*/ int windowingMode =
                 mFullConfiguration.windowConfiguration.getWindowingMode();
 
         return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
