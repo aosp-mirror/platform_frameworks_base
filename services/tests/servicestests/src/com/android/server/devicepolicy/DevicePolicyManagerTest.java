@@ -3421,6 +3421,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Even if the caller is the managed profile, the current user is the user 0
         when(getServices().iactivityManager.getCurrentUser())
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+        // Get mock reason string since we throw an IAE with empty string input.
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe)).
+                thenReturn("Just a test string.");
 
         dpm.wipeData(0);
         verify(getServices().userManagerInternal).removeUserEvenWhenDisallowed(
@@ -3440,6 +3443,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
                 UserHandle.of(MANAGED_PROFILE_USER_ID)))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe)).
+                thenReturn("Just a test string.");
+
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         // The PO is not allowed to remove the profile if the user restriction was set on the
         // profile by the system
@@ -3453,6 +3459,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserManager.DISALLOW_FACTORY_RESET,
                 UserHandle.SYSTEM))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe)).
+                thenReturn("Just a test string.");
 
         dpm.wipeData(0);
         verify(getServices().recoverySystem).rebootWipeUserData(
@@ -3466,6 +3474,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             UserManager.DISALLOW_FACTORY_RESET,
             UserHandle.SYSTEM))
             .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe)).
+                thenReturn("Just a test string.");
 
         dpm.wipeData(WIPE_EUICC);
         verify(getServices().recoverySystem).rebootWipeUserData(
@@ -3479,6 +3489,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserManager.DISALLOW_FACTORY_RESET,
                 UserHandle.SYSTEM))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
+        when(mContext.getResources().getString(R.string.work_profile_deleted_description_dpm_wipe)).
+                thenReturn("Just a test string.");
         // The DO is not allowed to wipe the device if the user restriction was set
         // by the system
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
