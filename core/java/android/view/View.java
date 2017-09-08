@@ -4193,6 +4193,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sCanFocusZeroSized;
 
+    /**
+     * Always assign focus if a focusable View is available.
+     */
+    private static boolean sAlwaysAssignFocus;
+
     private String mTransitionName;
 
     static class TintInfo {
@@ -4809,6 +4814,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sThrowOnInvalidFloatProperties = targetSdkVersion >= Build.VERSION_CODES.P;
 
             sCanFocusZeroSized = targetSdkVersion < Build.VERSION_CODES.P;
+
+            sAlwaysAssignFocus = targetSdkVersion < Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }
@@ -7000,8 +7007,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Called when this view wants to give up focus. If focus is cleared
      * {@link #onFocusChanged(boolean, int, android.graphics.Rect)} is called.
      * <p>
-     * <strong>Note:</strong> When a View clears focus the framework is trying
-     * to give focus to the first focusable View from the top. Hence, if this
+     * <strong>Note:</strong> When not in touch-mode, the framework will try to give focus
+     * to the first focusable View from the top after focus is cleared. Hence, if this
      * View is the first from the top that can take focus, then all callbacks
      * related to clearing focus will be invoked after which the framework will
      * give focus to this view.
@@ -7012,7 +7019,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             System.out.println(this + " clearFocus()");
         }
 
-        clearFocusInternal(null, true, true);
+        final boolean refocus = sAlwaysAssignFocus || !isInTouchMode();
+        clearFocusInternal(null, true, refocus);
     }
 
     /**
