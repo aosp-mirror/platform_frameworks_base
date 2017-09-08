@@ -677,36 +677,33 @@ public class NetworkStats implements Parcelable {
             entry.tag = left.tag[i];
             entry.metered = left.metered[i];
             entry.roaming = left.roaming[i];
+            entry.rxBytes = left.rxBytes[i];
+            entry.rxPackets = left.rxPackets[i];
+            entry.txBytes = left.txBytes[i];
+            entry.txPackets = left.txPackets[i];
+            entry.operations = left.operations[i];
 
             // find remote row that matches, and subtract
             final int j = right.findIndexHinted(entry.iface, entry.uid, entry.set, entry.tag,
                     entry.metered, entry.roaming, i);
-            if (j == -1) {
-                // newly appearing row, return entire value
-                entry.rxBytes = left.rxBytes[i];
-                entry.rxPackets = left.rxPackets[i];
-                entry.txBytes = left.txBytes[i];
-                entry.txPackets = left.txPackets[i];
-                entry.operations = left.operations[i];
-            } else {
-                // existing row, subtract remote value
-                entry.rxBytes = left.rxBytes[i] - right.rxBytes[j];
-                entry.rxPackets = left.rxPackets[i] - right.rxPackets[j];
-                entry.txBytes = left.txBytes[i] - right.txBytes[j];
-                entry.txPackets = left.txPackets[i] - right.txPackets[j];
-                entry.operations = left.operations[i] - right.operations[j];
+            if (j != -1) {
+                // Found matching row, subtract remote value.
+                entry.rxBytes -= right.rxBytes[j];
+                entry.rxPackets -= right.rxPackets[j];
+                entry.txBytes -= right.txBytes[j];
+                entry.txPackets -= right.txPackets[j];
+                entry.operations -= right.operations[j];
+            }
 
-                if (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0
-                        || entry.txPackets < 0 || entry.operations < 0) {
-                    if (observer != null) {
-                        observer.foundNonMonotonic(left, i, right, j, cookie);
-                    }
-                    entry.rxBytes = Math.max(entry.rxBytes, 0);
-                    entry.rxPackets = Math.max(entry.rxPackets, 0);
-                    entry.txBytes = Math.max(entry.txBytes, 0);
-                    entry.txPackets = Math.max(entry.txPackets, 0);
-                    entry.operations = Math.max(entry.operations, 0);
+            if (entry.isNegative()) {
+                if (observer != null) {
+                    observer.foundNonMonotonic(left, i, right, j, cookie);
                 }
+                entry.rxBytes = Math.max(entry.rxBytes, 0);
+                entry.rxPackets = Math.max(entry.rxPackets, 0);
+                entry.txBytes = Math.max(entry.txBytes, 0);
+                entry.txPackets = Math.max(entry.txPackets, 0);
+                entry.operations = Math.max(entry.operations, 0);
             }
 
             result.addValues(entry);
