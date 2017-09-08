@@ -53,6 +53,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String TAG = "BatteryStats";
 
     private static final boolean LOCAL_LOGV = false;
+    /** Fetching RPM stats is too slow to do each time screen changes, so disable it. */
+    protected static final boolean SCREEN_OFF_RPM_STATS_ENABLED = false;
 
     /** @hide */
     public static final String SERVICE_NAME = "batterystats";
@@ -214,7 +216,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 25:
      *   - Package wakeup alarms are now on screen-off timebase
      * New in version 26:
-     *   - Resource power manager (rpm) states
+     *   - Resource power manager (rpm) states [but screenOffRpm is disabled from working properly]
      */
     static final String CHECKIN_VERSION = "26";
 
@@ -3338,8 +3340,14 @@ public abstract class BatteryStats implements Parcelable {
                         ? (screenOffTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : 0;
                 int screenOffCount = screenOffTimer != null
                         ? screenOffTimer.getCountLocked(which) : 0;
-                dumpLine(pw, 0 /* uid */, category, RESOURCE_POWER_MANAGER_DATA,
-                        "\"" + ent.getKey() + "\"", timeMs, count, screenOffTimeMs, screenOffCount);
+                if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                    dumpLine(pw, 0 /* uid */, category, RESOURCE_POWER_MANAGER_DATA,
+                            "\"" + ent.getKey() + "\"", timeMs, count, screenOffTimeMs,
+                            screenOffCount);
+                } else {
+                    dumpLine(pw, 0 /* uid */, category, RESOURCE_POWER_MANAGER_DATA,
+                            "\"" + ent.getKey() + "\"", timeMs, count);
+                }
             }
         }
 
@@ -4629,18 +4637,20 @@ public abstract class BatteryStats implements Parcelable {
             }
             pw.println();
         }
-        final Map<String, ? extends Timer> screenOffRpmStats = getScreenOffRpmStats();
-        if (screenOffRpmStats.size() > 0) {
-            pw.print(prefix);
-            pw.println("  Resource Power Manager Stats for when screen was off");
+        if (SCREEN_OFF_RPM_STATS_ENABLED) {
+            final Map<String, ? extends Timer> screenOffRpmStats = getScreenOffRpmStats();
             if (screenOffRpmStats.size() > 0) {
-                for (Map.Entry<String, ? extends Timer> ent : screenOffRpmStats.entrySet()) {
-                    final String timerName = ent.getKey();
-                    final Timer timer = ent.getValue();
-                    printTimer(pw, sb, timer, rawRealtime, which, prefix, timerName);
+                pw.print(prefix);
+                pw.println("  Resource Power Manager Stats for when screen was off");
+                if (screenOffRpmStats.size() > 0) {
+                    for (Map.Entry<String, ? extends Timer> ent : screenOffRpmStats.entrySet()) {
+                        final String timerName = ent.getKey();
+                        final Timer timer = ent.getValue();
+                        printTimer(pw, sb, timer, rawRealtime, which, prefix, timerName);
+                    }
                 }
+                pw.println();
             }
-            pw.println();
         }
 
         final long[] cpuFreqs = getCpuFreqs();

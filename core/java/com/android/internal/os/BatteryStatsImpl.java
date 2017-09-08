@@ -626,6 +626,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mRpmStats;
     }
 
+    // TODO: Note: screenOffRpmStats has been disabled via SCREEN_OFF_RPM_STATS_ENABLED.
     @Override
     public Map<String, ? extends Timer> getScreenOffRpmStats() {
         return mScreenOffRpmStats;
@@ -3559,7 +3560,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 updateKernelWakelocksLocked();
                 updateBatteryPropertiesLocked();
             }
-            updateRpmStatsLocked(); // if either OnBattery or OnBatteryScreenOff timebase changes.
+            // This if{} is only necessary due to SCREEN_OFF_RPM_STATS_ENABLED, which exists because
+            // updateRpmStatsLocked is too slow to run each screen change. When the speed is
+            // improved, remove the surrounding if{}.
+            if (SCREEN_OFF_RPM_STATS_ENABLED || updateOnBatteryTimeBase) {
+                updateRpmStatsLocked(); // if either OnBattery or OnBatteryScreenOff timebase changes.
+            }
             if (DEBUG_ENERGY_CPU) {
                 Slog.d(TAG, "Updating cpu time because screen is now " + (screenOff ? "off" : "on")
                         + " and battery is " + (unplugged ? "on" : "off"));
@@ -10254,7 +10260,9 @@ public class BatteryStatsImpl extends BatteryStats {
             final long pTimeUs = pstate.getValue().mTimeMs * 1000;
             final int pCount = pstate.getValue().mCount;
             getRpmTimerLocked(pName).update(pTimeUs, pCount);
-            getScreenOffRpmTimerLocked(pName).update(pTimeUs, pCount);
+            if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                getScreenOffRpmTimerLocked(pName).update(pTimeUs, pCount);
+            }
 
             // Update values for each voter of this platform state.
             for (Map.Entry<String, RpmStats.PowerStateElement> voter
@@ -10263,7 +10271,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 final long vTimeUs = voter.getValue().mTimeMs * 1000;
                 final int vCount = voter.getValue().mCount;
                 getRpmTimerLocked(vName).update(vTimeUs, vCount);
-                getScreenOffRpmTimerLocked(vName).update(vTimeUs, vCount);
+                if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                    getScreenOffRpmTimerLocked(vName).update(vTimeUs, vCount);
+                }
             }
         }
 
@@ -10277,7 +10287,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 final long timeUs = sstate.getValue().mTimeMs * 1000;
                 final int count = sstate.getValue().mCount;
                 getRpmTimerLocked(name).update(timeUs, count);
-                getScreenOffRpmTimerLocked(name).update(timeUs, count);
+                if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                    getScreenOffRpmTimerLocked(name).update(timeUs, count);
+                }
             }
         }
     }
