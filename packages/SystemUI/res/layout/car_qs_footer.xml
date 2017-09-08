@@ -46,6 +46,15 @@
             android:scaleType="centerInside"/>
     </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
+    <TextView android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/car_qs_footer_user_name_text_size"
+        android:textColor="@color/qs_user_detail_name"
+        android:gravity="start|center_vertical"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/multi_user_switch" />
+
     <com.android.systemui.statusbar.phone.SettingsButton
         android:id="@+id/settings_button"
         android:layout_alignParentEnd="true"
