@@ -335,6 +335,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
+    static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
 
     /**
      * These are the system UI flags that, when changing, can cause the layout
