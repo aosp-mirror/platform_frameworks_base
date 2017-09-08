@@ -34,8 +34,9 @@ import java.util.Random;
 public class NewDatabasePerformanceTests {
     private static final String TAG = "NewDatabasePerformanceTests";
 
-    // Edit this to change the test run times.  The original is 100.
-    private static final int SIZE_MULTIPLIER = 100;
+    private static final int DATASET_SIZE = 100; // Size of dataset to use for testing
+    private static final int FAST_OP_MULTIPLIER = 25;
+    private static final int FAST_OP_COUNT = FAST_OP_MULTIPLIER * DATASET_SIZE;
 
     public static class PerformanceBase extends TestCase
     implements PerformanceTestCase {
@@ -50,14 +51,19 @@ public class NewDatabasePerformanceTests {
             if (mDatabaseFile.exists()) {
                 mDatabaseFile.delete();
             }
-            mDatabase =
-                    SQLiteDatabase.openOrCreateDatabase(mDatabaseFile.getPath(),
-                            null);
+            mDatabase = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile.getPath(), null);
             assertTrue(mDatabase != null);
             mDatabase.setVersion(CURRENT_DATABASE_VERSION);
+            mDatabase.beginTransactionNonExclusive();
+            prepareForTest();
+            mDatabase.setTransactionSuccessful();
+            mDatabase.endTransaction();
             mSetupFinishedTime = System.currentTimeMillis();
             Log.i(TAG, "Setup for " + getClass().getSimpleName() + " took "
                     + (mSetupFinishedTime - setupStarted) + " ms");
+        }
+
+        protected void prepareForTest() {
         }
 
         public void tearDown() {
@@ -76,7 +82,7 @@ public class NewDatabasePerformanceTests {
             return 0;
         }
 
-        public String numberName(int number) {
+        String numberName(int number) {
             String result = "";
 
             if (number >= 1000) {
@@ -106,36 +112,50 @@ public class NewDatabasePerformanceTests {
 
             return result;
         }
+
+        void checkCursor(Cursor c) {
+            c.getColumnCount();
+            c.close();
+        }
+    }
+
+    /**
+     * Test CREATE SIZE tables with 1 row.
+     */
+    public static class CreateTable100 extends PerformanceBase {
+        public void testRun() {
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                String t = "t" + i;
+                mDatabase.execSQL("CREATE TABLE " + t + "(a INTEGER, b INTEGER, c VARCHAR(100))");
+                mDatabase.execSQL("INSERT INTO " + t + " VALUES(" + i + "," + i + ",'"
+                        + numberName(i) + "')");
+            }
+        }
     }
 
     /**
      * Test 100 inserts.
      */
-
     public static class Insert100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-
-        private String[] statements = new String[SIZE];
+        private String[] mStatements = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
-                statements[i] =
+                mStatements[i] =
                         "INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                                 + numberName(r) + "')";
             }
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase.execSQL(statements[i]);
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mDatabase.execSQL(mStatements[i]);
             }
         }
     }
@@ -145,30 +165,25 @@ public class NewDatabasePerformanceTests {
      */
 
     public static class InsertIndexed100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-
-        private String[] statements = new String[SIZE];
+        private String[] mStatements = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
-                statements[i] =
-                        "INSERT INTO t1 VALUES(" + i + "," + r + ",'"
-                                + numberName(r) + "')";
+                mStatements[i] = "INSERT INTO t1 VALUES(" + i + "," + r + ",'"
+                        + numberName(r) + "')";
             }
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1c ON t1(c)");
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase.execSQL(statements[i]);
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mDatabase.execSQL(mStatements[i]);
             }
         }
     }
@@ -176,41 +191,35 @@ public class NewDatabasePerformanceTests {
     /**
      * 100 SELECTs without an index
      */
-
     public static class Select100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"count(*)", "avg(b)"};
 
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
             mDatabase
             .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] = "b >= " + lower + " AND b < " + upper;
+                mWhere[i] = "b >= " + lower + " AND b < " + upper;
             }
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase
-                            .query("t1", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t1", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null));
             }
         }
     }
@@ -219,37 +228,32 @@ public class NewDatabasePerformanceTests {
      * 100 SELECTs on a string comparison
      */
     public static class SelectStringComparison100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"count(*)", "avg(b)"};
 
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
             mDatabase
             .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
-                where[i] = "c LIKE '" + numberName(i) + "'";
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mWhere[i] = "c LIKE '" + numberName(i) + "'";
             }
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase
-                            .query("t1", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t1", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null));
             }
         }
     }
@@ -258,40 +262,35 @@ public class NewDatabasePerformanceTests {
      * 100 SELECTs with an index
      */
     public static class SelectIndex100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
+        private static final int TABLE_SIZE = 100;
         private static final String[] COLUMNS = {"count(*)", "avg(b)"};
 
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[TABLE_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1b ON t1(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < TABLE_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < TABLE_SIZE; i++) {
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] = "b >= " + lower + " AND b < " + upper;
+                mWhere[i] = "b >= " + lower + " AND b < " + upper;
             }
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase
-                            .query("t1", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t1", COLUMNS, mWhere[i % TABLE_SIZE], null, null, null, null));
             }
         }
     }
@@ -300,27 +299,22 @@ public class NewDatabasePerformanceTests {
      *  INNER JOIN without an index
      */
     public static class InnerJoin100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"t1.a"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
-            mDatabase
-            .execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t2 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -328,9 +322,9 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                mDatabase.query("t1 INNER JOIN t2 ON t1.b = t2.b", COLUMNS, null,
-                        null, null, null, null);
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase.query("t1 INNER JOIN t2 ON t1.b = t2.b", COLUMNS, null,
+                        null, null, null, null));
             }
         }
     }
@@ -340,29 +334,24 @@ public class NewDatabasePerformanceTests {
      */
 
     public static class InnerJoinOneSide100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"t1.a"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
-            mDatabase
-            .execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
 
             mDatabase.execSQL("CREATE INDEX i1b ON t1(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t2 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -370,9 +359,9 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                mDatabase.query("t1 INNER JOIN t2 ON t1.b = t2.b", COLUMNS, null,
-                        null, null, null, null);
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase.query("t1 INNER JOIN t2 ON t1.b = t2.b", COLUMNS, null,
+                        null, null, null, null));
             }
         }
     }
@@ -381,29 +370,24 @@ public class NewDatabasePerformanceTests {
      *  INNER JOIN without an index on one side
      */
     public static class InnerJoinNoIndex100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"t1.a"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
-            mDatabase
-            .execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
 
             mDatabase.execSQL("CREATE INDEX i1b ON t1(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t2 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -411,9 +395,10 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                mDatabase.query("t1 INNER JOIN t2 ON t1.c = t2.c", COLUMNS, null,
-                        null, null, null, null);
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t1 INNER JOIN t2 ON t1.c = t2.c", COLUMNS, null, null, null, null,
+                                null));
             }
         }
     }
@@ -422,49 +407,44 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs with subqueries. Subquery is using an index
      */
     public static class SelectSubQIndex100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"t1.a"};
 
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
-            mDatabase
-            .execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100))");
 
             mDatabase.execSQL("CREATE INDEX i2b ON t2(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t2 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] =
+                mWhere[i] =
                         "t1.b IN (SELECT t2.b FROM t2 WHERE t2.b >= " + lower
                         + " AND t2.b < " + upper + ")";
             }
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase
-                .query("t1", COLUMNS, where[i], null, null, null, null);
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t1", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null));
             }
         }
     }
@@ -473,38 +453,32 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs on string comparison with Index
      */
     public static class SelectIndexStringComparison100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"count(*)", "avg(b)"};
 
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i3c ON t1(c)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
-                where[i] = "c LIKE '" + numberName(i) + "'";
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mWhere[i] = "c LIKE '" + numberName(i) + "'";
             }
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase
-                            .query("t1", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t1", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null));
             }
         }
     }
@@ -513,19 +487,15 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs on integer
      */
     public static class SelectInteger100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"b"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -534,10 +504,8 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase.query("t1", COLUMNS, null, null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase.query("t1", COLUMNS, null, null, null, null, null));
             }
         }
     }
@@ -546,19 +514,16 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs on String
      */
     public static class SelectString100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"c"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
             mDatabase
             .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -566,10 +531,8 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase.query("t1", COLUMNS, null, null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                mDatabase.query("t1", COLUMNS, null, null, null, null, null);
             }
         }
     }
@@ -578,20 +541,17 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs on integer with index
      */
     public static class SelectIntegerIndex100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"b"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
             mDatabase
             .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1b on t1(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -600,10 +560,8 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase.query("t1", COLUMNS, null, null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                mDatabase.query("t1", COLUMNS, null, null, null, null, null);
             }
         }
     }
@@ -612,20 +570,16 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs on String with index
      */
     public static class SelectIndexString100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"c"};
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1c ON t1(c)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -633,10 +587,8 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase.query("t1", COLUMNS, null, null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase.query("t1", COLUMNS, null, null, null, null, null));
             }
         }
 
@@ -646,40 +598,33 @@ public class NewDatabasePerformanceTests {
      *  100 SELECTs on String with starts with
      */
     public static class SelectStringStartsWith100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"c"};
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1c ON t1(c)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
-                where[i] = "c LIKE '" + numberName(r).substring(0, 1) + "*'";
+                mWhere[i] = "c LIKE '" + numberName(r).substring(0, 1) + "*'";
 
             }
 
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase
-                            .query("t1", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                mDatabase.query("t1", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null);
             }
         }
     }
@@ -688,18 +633,15 @@ public class NewDatabasePerformanceTests {
      *  100 Deletes on an indexed table
      */
     public static class DeleteIndexed100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i3c ON t1(c)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -708,7 +650,7 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 mDatabase.delete("t1", null, null);
             }
         }
@@ -718,17 +660,13 @@ public class NewDatabasePerformanceTests {
      *  100 Deletes
      */
     public static class Delete100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
@@ -737,7 +675,7 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 mDatabase.delete("t1", null, null);
             }
         }
@@ -747,33 +685,30 @@ public class NewDatabasePerformanceTests {
      *  100 DELETE's without an index with where clause
      */
     public static class DeleteWhere100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] = "b >= " + lower + " AND b < " + upper;
+                mWhere[i] = "b >= " + lower + " AND b < " + upper;
             }
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase.delete("t1", where[i], null);
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mDatabase.delete("t1", mWhere[i], null);
             }
         }
     }
@@ -782,34 +717,31 @@ public class NewDatabasePerformanceTests {
      * 100 DELETE's with an index with where clause
      */
     public static class DeleteIndexWhere100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1b ON t1(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] = "b >= " + lower + " AND b < " + upper;
+                mWhere[i] = "b >= " + lower + " AND b < " + upper;
             }
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase.delete("t1", where[i], null);
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mDatabase.delete("t1", mWhere[i], null);
             }
         }
     }
@@ -818,30 +750,26 @@ public class NewDatabasePerformanceTests {
      * 100 update's with an index with where clause
      */
     public static class UpdateIndexWhere100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private String[] where = new String[SIZE];
-        ContentValues[] mValues = new ContentValues[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
+        ContentValues[] mValues = new ContentValues[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i1b ON t1(b)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
-
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] = "b >= " + lower + " AND b < " + upper;
+                mWhere[i] = "b >= " + lower + " AND b < " + upper;
                 ContentValues b = new ContentValues(1);
                 b.put("b", upper);
                 mValues[i] = b;
@@ -850,8 +778,8 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase.update("t1", mValues[i], where[i], null);
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mDatabase.update("t1", mValues[i], mWhere[i], null);
             }
         }
     }
@@ -860,29 +788,26 @@ public class NewDatabasePerformanceTests {
      * 100 update's without an index with where clause
      */
     public static class UpdateWhere100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private String[] where = new String[SIZE];
-        ContentValues[] mValues = new ContentValues[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
+        ContentValues[] mValues = new ContentValues[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t1 VALUES(" + i + "," + r + ",'"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
 
                 int lower = i * 100;
                 int upper = (i + 10) * 100;
-                where[i] = "b >= " + lower + " AND b < " + upper;
+                mWhere[i] = "b >= " + lower + " AND b < " + upper;
                 ContentValues b = new ContentValues(1);
                 b.put("b", upper);
                 mValues[i] = b;
@@ -890,8 +815,8 @@ public class NewDatabasePerformanceTests {
         }
 
         public void testRun() {
-            for (int i = 0; i < SIZE; i++) {
-                mDatabase.update("t1", mValues[i], where[i], null);
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mDatabase.update("t1", mValues[i], mWhere[i], null);
             }
         }
     }
@@ -900,36 +825,31 @@ public class NewDatabasePerformanceTests {
      * 100 selects for a String - contains 'e'
      */
     public static class SelectStringContains100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"t3.a"};
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t3(a VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t3(a VARCHAR(100))");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t3 VALUES('"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
-                where[i] = "a LIKE '*e*'";
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mWhere[i] = "a LIKE '*e*'";
 
             }
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase.query("t3", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t3", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null));
             }
         }
     }
@@ -938,37 +858,32 @@ public class NewDatabasePerformanceTests {
      * 100 selects for a String - contains 'e'-indexed table
      */
     public static class SelectStringIndexedContains100 extends PerformanceBase {
-        private static final int SIZE = SIZE_MULTIPLIER;
-        private static final int REPEAT_COUNT = 10;
         private static final String[] COLUMNS = {"t3.a"};
-        private String[] where = new String[SIZE];
+        private String[] mWhere = new String[DATASET_SIZE];
 
         @Override
-        public void setUp() {
-            super.setUp();
+        protected void prepareForTest() {
             Random random = new Random(42);
 
-            mDatabase
-            .execSQL("CREATE TABLE t3(a VARCHAR(100))");
+            mDatabase.execSQL("CREATE TABLE t3(a VARCHAR(100))");
             mDatabase.execSQL("CREATE INDEX i3a ON t3(a)");
 
-            for (int i = 0; i < SIZE; i++) {
+            for (int i = 0; i < DATASET_SIZE; i++) {
                 int r = random.nextInt(100000);
                 mDatabase.execSQL("INSERT INTO t3 VALUES('"
                         + numberName(r) + "')");
             }
 
-            for (int i = 0; i < SIZE; i++) {
-                where[i] = "a LIKE '*e*'";
+            for (int i = 0; i < DATASET_SIZE; i++) {
+                mWhere[i] = "a LIKE '*e*'";
 
             }
         }
 
         public void testRun() {
-            for (int iter = 0; iter < REPEAT_COUNT; iter++) {
-                for (int i = 0; i < SIZE; i++) {
-                    mDatabase.query("t3", COLUMNS, where[i], null, null, null, null);
-                }
+            for (int i = 0; i < FAST_OP_COUNT; i++) {
+                checkCursor(mDatabase
+                        .query("t3", COLUMNS, mWhere[i % DATASET_SIZE], null, null, null, null));
             }
         }
     }

@@ -26,8 +26,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -114,7 +114,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
     private ServiceListener mServiceListener;
 
-    private IBluetoothInputHost mService;
+    private volatile IBluetoothInputHost mService;
 
     private BluetoothAdapter mAdapter;
 
@@ -195,24 +195,18 @@ public final class BluetoothInputHost implements BluetoothProfile {
         }
     };
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected()");
-
             mService = IBluetoothInputHost.Stub.asInterface(service);
-
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.INPUT_HOST,
                     BluetoothInputHost.this);
             }
         }
-
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "onServiceDisconnected()");
-
             mService = null;
-
             if (mServiceListener != null) {
                 mServiceListener.onServiceDisconnected(BluetoothProfile.INPUT_HOST);
             }
@@ -283,9 +277,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public List<BluetoothDevice> getConnectedDevices() {
         Log.v(TAG, "getConnectedDevices()");
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                return mService.getConnectedDevices();
+                return service.getConnectedDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -302,9 +297,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         Log.v(TAG, "getDevicesMatchingConnectionStates(): states=" + Arrays.toString(states));
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                return mService.getDevicesMatchingConnectionStates(states);
+                return service.getDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -321,9 +317,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public int getConnectionState(BluetoothDevice device) {
         Log.v(TAG, "getConnectionState(): device=" + device);
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                return mService.getConnectionState(device);
+                return service.getConnectionState(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -363,13 +360,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
             return false;
         }
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
                 BluetoothHidDeviceAppConfiguration config =
-                    new BluetoothHidDeviceAppConfiguration();
+                        new BluetoothHidDeviceAppConfiguration();
                 BluetoothHidDeviceCallbackWrapper cbw =
-                    new BluetoothHidDeviceCallbackWrapper(callback);
-                result = mService.registerApp(config, sdp, inQos, outQos, cbw);
+                        new BluetoothHidDeviceCallbackWrapper(callback);
+                result = service.registerApp(config, sdp, inQos, outQos, cbw);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -397,9 +395,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.unregisterApp(config);
+                result = service.unregisterApp(config);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -421,9 +420,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public boolean sendReport(BluetoothDevice device, int id, byte[] data) {
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.sendReport(device, id, data);
+                result = service.sendReport(device, id, data);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -448,9 +448,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.replyReport(device, type, id, data);
+                result = service.replyReport(device, type, id, data);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -473,9 +474,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.reportError(device, error);
+                result = service.reportError(device, error);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -496,9 +498,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.unplug(device);
+                result = service.unplug(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -520,9 +523,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.connect(device);
+                result = service.connect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -543,9 +547,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.disconnect(device);
+                result = service.disconnect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }

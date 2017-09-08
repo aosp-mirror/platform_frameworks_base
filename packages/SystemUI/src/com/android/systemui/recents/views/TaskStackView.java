@@ -2396,10 +2396,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     private void updateStackActionButtonVisibility() {
+        if (Recents.getConfiguration().isLowRamDevice) {
+            return;
+        }
+
         // Always show the button in grid layout.
         if (useGridLayout() ||
                 (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
-                        mStack.getTaskCount() > 0 && !Recents.getConfiguration().isLowRamDevice)) {
+                        mStack.getTaskCount() > 0)) {
             EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
         } else {
             EventBus.getDefault().send(new HideStackActionButtonEvent());

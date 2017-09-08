@@ -205,6 +205,10 @@ public class RecentsView extends FrameLayout {
                         mStackButtonShadowDistance.x, mStackButtonShadowDistance.y,
                         mStackButtonShadowColor);
             }
+            if (Recents.getConfiguration().isLowRamDevice) {
+                int bgColor = Utils.getColorAttr(mContext, R.attr.clearAllBackgroundColor);
+                mStackActionButton.setBackgroundColor(bgColor);
+            }
         }
 
         // Let's also require dark status and nav bars if the text is dark
@@ -955,8 +959,8 @@ public class RecentsView extends FrameLayout {
         int left, top;
         if (Recents.getConfiguration().isLowRamDevice) {
             Rect windowRect = Recents.getSystemServices().getWindowRect();
-            left = (windowRect.width() - mSystemInsets.left - mSystemInsets.right
-                    - mStackActionButton.getMeasuredWidth()) / 2;
+            int spaceLeft = windowRect.width() - mSystemInsets.left - mSystemInsets.right;
+            left = (spaceLeft - mStackActionButton.getMeasuredWidth()) / 2 + mSystemInsets.left;
             top = windowRect.height() - (mStackActionButton.getMeasuredHeight()
                     + mSystemInsets.bottom + mStackActionButton.getPaddingBottom() / 2);
         } else {
