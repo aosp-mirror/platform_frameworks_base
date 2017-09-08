@@ -976,9 +976,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
                 mService.logSaveShown(id, mClientState);
                 final IAutoFillManagerClient client = getClient();
-                mPendingSaveUi = new PendingUi(mActivityToken);
+                mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo,
-                        valueFinder, mPackageName, this, mPendingSaveUi, id, client);
+                        valueFinder, mPackageName, this, mPendingSaveUi);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -1732,7 +1732,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mDestroyed) {
             return null;
         }
-        mUi.destroyAll(id, getClient(), this);
+        mUi.destroyAll(mPendingSaveUi, this);
         mUi.clearCallback(this);
         mDestroyed = true;
         mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_FINISHED, mPackageName);
@@ -1748,7 +1748,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mPendingSaveUi = null;
         removeSelfLocked();
-        mUi.destroyAll(id, getClient(), this);
+        mUi.destroyAll(mPendingSaveUi, this);
     }
 
     /**
