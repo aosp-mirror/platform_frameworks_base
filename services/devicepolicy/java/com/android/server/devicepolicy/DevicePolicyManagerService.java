@@ -4106,6 +4106,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
+        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
+        if (requiredPasswordQuality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+            // A special case is when there is no required password quality, then we just return
+            // true since any password would be sufficient. This is for the scenario when a work
+            // profile is first created so there is no information about the current password but
+            // it should be considered sufficient as there is no password requirement either.
+            // This is useful since it short-circuits the password checkpoint for FDE device below.
+            return true;
+        }
+
         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
                 && !policy.mPasswordStateHasBeenSetSinceBoot) {
             // Before user enters their password for the first time after a reboot, return the
@@ -4116,7 +4126,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return policy.mPasswordValidAtLastCheckpoint;
         }
 
-        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
         if (policy.mActivePasswordMetrics.quality < requiredPasswordQuality) {
             return false;
         }
