@@ -330,6 +330,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
     }
 
+    @Override
+    public void setFakeShadowIntensity(float shadowIntensity, float outlineAlpha, int shadowYEnd,
+            int outlineTranslation) {
+        if (!mHasItemsInStableShelf) {
+            shadowIntensity = 0.0f;
+        }
+        super.setFakeShadowIntensity(shadowIntensity, outlineAlpha, shadowYEnd, outlineTranslation);
+    }
+
     /**
      * @return the icon amount how much this notification is in the shelf;
      */
