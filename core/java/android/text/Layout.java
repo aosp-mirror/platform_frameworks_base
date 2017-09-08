@@ -1732,14 +1732,12 @@ public abstract class Layout {
                     float left = Math.min(h1, h2);
                     float right = Math.max(h1, h2);
 
-                    final boolean isRtl = (dirs.mDirections[i + 1] & RUN_RTL_FLAG) != 0;
-                    if (isRtl) {
-                        consumer.accept(left, top, right, bottom,
-                                TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
-                    } else {
-                        consumer.accept(left, top, right, bottom,
-                                TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT);
-                    }
+                    final @TextSelectionLayout int layout =
+                            ((dirs.mDirections[i + 1] & RUN_RTL_FLAG) != 0)
+                                    ? TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT
+                                    : TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT;
+
+                    consumer.accept(left, top, right, bottom, layout);
                 }
             }
         }
