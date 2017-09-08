@@ -31,6 +31,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.android.egg.R;
 import com.android.internal.logging.MetricsLogger;
 
+import static com.android.egg.neko.NekoLand.CHAN_ID;
+
 public class Cat extends Drawable {
     public static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
 
@@ -218,6 +220,7 @@ public class Cat extends Drawable {
                 .setContentText(getName())
                 .setContentIntent(PendingIntent.getActivity(context, 0, intent, 0))
                 .setAutoCancel(true)
+                .setChannel(CHAN_ID)
                 .setVibrate(PURR)
                 .addExtras(extras);
     }
