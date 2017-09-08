@@ -428,15 +428,6 @@ public class TileUtils {
                     if (metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)) {
                         int layoutId = metaData.getInt(META_DATA_PREFERENCE_CUSTOM_VIEW);
                         remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
-                        if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
-                            String uriString = metaData.getString(
-                                    META_DATA_PREFERENCE_SUMMARY_URI);
-                            String overrideSummary = getTextFromUri(context, uriString, providerMap,
-                                    META_DATA_PREFERENCE_SUMMARY);
-                            if (overrideSummary != null) {
-                                remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
-                            }
-                        }
                     }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
@@ -541,6 +532,30 @@ public class TileUtils {
         } catch (RemoteException e) {
             return null;
         }
+    }
+
+    public static void updateTileUsingSummaryUri(Context context, Tile tile) {
+        if (tile == null || tile.metaData == null ||
+            !tile.metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+            return;
+        }
+
+        final Map<String, IContentProvider> providerMap = new HashMap<>();
+
+        final String uriString = tile.metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI);
+        final Bundle bundle = getBundleFromUri(context, uriString, providerMap);
+        final String overrideSummary = getString(bundle, META_DATA_PREFERENCE_SUMMARY);
+        final String overrideTitle = getString(bundle, META_DATA_PREFERENCE_TITLE);
+        if (overrideSummary != null) {
+            tile.remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
+        }
+        if (overrideTitle != null) {
+            tile.remoteViews.setTextViewText(android.R.id.title, overrideTitle);
+        }
+    }
+
+    private static String getString(Bundle bundle, String key) {
+        return bundle == null ? null : bundle.getString(key);
     }
 
     private static IContentProvider getProviderFromUri(Context context, Uri uri,
