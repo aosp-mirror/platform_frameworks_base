@@ -21,10 +21,12 @@ import static com.android.internal.util.BitUtils.uint16;
 import android.hardware.tetheroffload.control.V1_0.IOffloadControl;
 import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
+import android.hardware.tetheroffload.control.V1_0.NetworkProtocol;
 import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.net.util.SharedLog;
+import android.system.OsConstants;
 
 import java.util.ArrayList;
 
@@ -327,10 +329,21 @@ public class OffloadHardwareInterface {
         public void updateTimeout(NatTimeoutUpdate params) {
             handler.post(() -> {
                     controlCb.onNatTimeoutUpdate(
-                        params.proto,
+                        networkProtocolToOsConstant(params.proto),
                         params.src.addr, uint16(params.src.port),
                         params.dst.addr, uint16(params.dst.port));
             });
+        }
+    }
+
+    private static int networkProtocolToOsConstant(int proto) {
+        switch (proto) {
+            case NetworkProtocol.TCP: return OsConstants.IPPROTO_TCP;
+            case NetworkProtocol.UDP: return OsConstants.IPPROTO_UDP;
+            default:
+                // The caller checks this value and will log an error. Just make
+                // sure it won't collide with valid OsContants.IPPROTO_* values.
+                return -Math.abs(proto);
         }
     }
 
