@@ -103,6 +103,10 @@ public class TaskWindowContainerController
         }
     }
 
+    public void positionChildAtTop(AppWindowContainerController childController) {
+        positionChildAt(childController, POSITION_TOP);
+    }
+
     public void positionChildAt(AppWindowContainerController childController, int position) {
         synchronized(mService.mWindowMap) {
             final AppWindowToken aToken = childController.mContainer;
