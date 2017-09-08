@@ -22,10 +22,12 @@ import static com.android.systemui.statusbar.phone.NotificationIconContainer.OVE
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.systemui.Interpolators;
@@ -53,6 +55,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             SystemProperties.getBoolean("debug.icon_opening_animations", true);
     private static final boolean ICON_ANMATIONS_WHILE_SCROLLING
             = SystemProperties.getBoolean("debug.icon_scroll_animations", true);
+    private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private ViewInvertHelper mViewInvertHelper;
     private boolean mDark;
     private NotificationIconContainer mShelfIcons;
@@ -305,10 +308,57 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
+        for (int i = 0; i < mHostLayout.getChildCount(); i++) {
+            View child = mHostLayout.getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)
+                    || child.getVisibility() == GONE) {
+                continue;
+            }
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            updateIconClipAmount(row);
+            updateContinuousClipping(row);
+        }
         boolean hideBackground = numViewsInShelf < 1.0f;
         setHideBackground(hideBackground || backgroundForceHidden);
         if (mNotGoneIndex == -1) {
             mNotGoneIndex = notGoneIndex;
+        }
+    }
+
+    private void updateIconClipAmount(ExpandableNotificationRow row) {
+        float maxTop = row.getTranslationY();
+        StatusBarIconView icon = row.getEntry().expandedIcon;
+        float shelfIconPosition = getTranslationY() + icon.getTop() + icon.getTranslationY();
+        if (shelfIconPosition < maxTop) {
+            int top = (int) (maxTop - shelfIconPosition);
+            Rect clipRect = new Rect(0, top, icon.getWidth(), Math.max(top, icon.getHeight()));
+            icon.setClipBounds(clipRect);
+        } else {
+            icon.setClipBounds(null);
+        }
+    }
+
+    private void updateContinuousClipping(final ExpandableNotificationRow row) {
+        StatusBarIconView icon = row.getEntry().expandedIcon;
+        boolean needsContinuousClipping = ViewState.isAnimatingY(icon);
+        boolean isContinuousClipping = icon.getTag(TAG_CONTINUOUS_CLIPPING) != null;
+        if (needsContinuousClipping && !isContinuousClipping) {
+            ViewTreeObserver.OnPreDrawListener predrawListener =
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            boolean animatingY = ViewState.isAnimatingY(icon);
+                            if (!animatingY || !icon.isAttachedToWindow()) {
+                                icon.getViewTreeObserver().removeOnPreDrawListener(this);
+                                icon.setTag(TAG_CONTINUOUS_CLIPPING, null);
+                                return true;
+                            }
+                            updateIconClipAmount(row);
+                            return true;
+                        }
+                    };
+            icon.getViewTreeObserver().addOnPreDrawListener(predrawListener);
+            icon.setTag(TAG_CONTINUOUS_CLIPPING, predrawListener);
         }
     }
 
