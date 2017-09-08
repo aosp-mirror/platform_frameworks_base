@@ -289,7 +289,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
         if (mFillsParent
-                || !StackId.isResizeableByDockedStack(mStackId)
+                || !inSplitScreenSecondaryWindowingMode()
                 || mDisplayContent == null
                 || mDisplayContent.getDockedStackLocked() != null) {
             return true;
@@ -684,7 +684,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         Rect bounds = null;
         final TaskStack dockedStack = dc.getDockedStackIgnoringVisibility();
         if (mStackId == DOCKED_STACK_ID
-                || (dockedStack != null && StackId.isResizeableByDockedStack(mStackId)
+                || (dockedStack != null && inSplitScreenSecondaryWindowingMode()
                         && !dockedStack.fillsParent())) {
             // The existence of a docked stack affects the size of other static stack created since
             // the docked stack occupies a dedicated region on screen, but only if the dock stack is
@@ -756,8 +756,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             return;
         }
 
-        if ((mStackId != DOCKED_STACK_ID && !StackId.isResizeableByDockedStack(mStackId))
-                || mDisplayContent == null) {
+        if (!inSplitScreenWindowingMode() || mDisplayContent == null) {
             outStackBounds.set(mBounds);
             return;
         }
@@ -1324,8 +1323,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return getDockSide(mBounds);
     }
 
-    int getDockSide(Rect bounds) {
-        if (mStackId != DOCKED_STACK_ID && !StackId.isResizeableByDockedStack(mStackId)) {
+    private int getDockSide(Rect bounds) {
+        if (!inSplitScreenWindowingMode()) {
             return DOCKED_INVALID;
         }
         if (mDisplayContent == null) {
