@@ -253,6 +253,7 @@ public final class SmartSelectionEventTracker {
     private static void debugLog(LogMaker log) {
         if (!DEBUG_LOG_ENABLED) return;
 
+        final String tag = Objects.toString(log.getTaggedData(TAG), "tag");
         final int index = Integer.parseInt(Objects.toString(log.getTaggedData(INDEX), ZERO));
 
         final String event;
@@ -291,7 +292,6 @@ public final class SmartSelectionEventTracker {
                 event = "RESET";
                 break;
             case SelectionEvent.EventType.SELECTION_STARTED:
-                final String tag = Objects.toString(log.getTaggedData(TAG), "tag");
                 String sessionId = Objects.toString(log.getTaggedData(SESSION_ID), "");
                 sessionId = sessionId.substring(sessionId.lastIndexOf("-") + 1);
                 Log.d(LOG_TAG, String.format("New selection session: %s(%s)", tag, sessionId));
@@ -326,8 +326,8 @@ public final class SmartSelectionEventTracker {
         final String entity = Objects.toString(
                 log.getTaggedData(ENTITY_TYPE), TextClassifier.TYPE_UNKNOWN);
 
-        Log.d(LOG_TAG, String.format("%2d: %s, context=%d,%d - old=%d,%d [%s]",
-                index, event, eventStart, eventEnd, smartStart, smartEnd, entity));
+        Log.d(LOG_TAG, String.format("%2d: %s, context=%d,%d - old=%d,%d [%s] (%s)",
+                index, event, eventStart, eventEnd, smartStart, smartEnd, entity, tag));
     }
 
     /**
