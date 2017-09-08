@@ -338,8 +338,7 @@ public class RecentsView extends FrameLayout {
             Task task = mTaskStackView.getFocusedTask();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
-                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
-                        INVALID_STACK_ID, false));
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null, false));
 
                 if (logEvent != 0) {
                     MetricsLogger.action(getContext(), logEvent,
@@ -363,27 +362,8 @@ public class RecentsView extends FrameLayout {
             Task task = getStack().getLaunchTarget();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
-                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
-                        INVALID_STACK_ID, false));
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null, false));
                 return true;
-            }
-        }
-        return false;
-    }
-
-    /** Launches a given task. */
-    public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
-        if (mTaskStackView != null) {
-            // Iterate the stack views and try and find the given task.
-            List<TaskView> taskViews = mTaskStackView.getTaskViews();
-            int taskViewCount = taskViews.size();
-            for (int j = 0; j < taskViewCount; j++) {
-                TaskView tv = taskViews.get(j);
-                if (tv.getTask() == task) {
-                    EventBus.getDefault().send(new LaunchTaskEvent(tv, task, taskBounds,
-                            destinationStack, false));
-                    return true;
-                }
             }
         }
         return false;
@@ -570,7 +550,8 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(LaunchTaskEvent event) {
         mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
-                event.taskView, event.screenPinningRequested, event.targetTaskStack);
+                event.taskView, event.screenPinningRequested, event.targetWindowingMode,
+                event.targetActivityType);
         if (Recents.getConfiguration().isLowRamDevice) {
             hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, false /* translate */);
         }

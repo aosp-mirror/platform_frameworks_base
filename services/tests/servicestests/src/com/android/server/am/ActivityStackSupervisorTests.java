@@ -17,7 +17,10 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -60,7 +63,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void testRestoringInvalidTask() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
         TaskRecord task = service.mStackSupervisor.anyTaskForIdLocked(0 /*taskId*/,
-                MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, 0 /*stackId*/);
+                MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null);
         assertNull(task);
     }
 

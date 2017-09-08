@@ -20,6 +20,7 @@ import static android.app.ActivityManager.START_ASSISTANT_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_ASSISTANT_NOT_ACTIVE_SESSION;
 import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
@@ -222,8 +223,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             }
             intent = new Intent(intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchStackId(StackId.ASSISTANT_STACK_ID);
+            final ActivityOptions options = ActivityOptions.makeBasic();
+            options.setLaunchActivityType(ACTIVITY_TYPE_ASSISTANT);
             return mAm.startAssistantActivity(mComponent.getPackageName(), callingPid, callingUid,
                     intent, resolvedType, options.toBundle(), mUser);
         } catch (RemoteException e) {

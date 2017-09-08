@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents.events.activity;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import android.graphics.Rect;
 
 import com.android.systemui.recents.events.EventBus;
@@ -30,15 +33,23 @@ public class LaunchTaskEvent extends EventBus.Event {
     public final TaskView taskView;
     public final Task task;
     public final Rect targetTaskBounds;
-    public final int targetTaskStack;
+    public final int targetWindowingMode;
+    public final int targetActivityType;
     public final boolean screenPinningRequested;
 
-    public LaunchTaskEvent(TaskView taskView, Task task, Rect targetTaskBounds, int targetTaskStack,
+    public LaunchTaskEvent(TaskView taskView, Task task, Rect targetTaskBounds,
             boolean screenPinningRequested) {
+        this(taskView, task, targetTaskBounds, screenPinningRequested,
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED);
+    }
+
+    public LaunchTaskEvent(TaskView taskView, Task task, Rect targetTaskBounds,
+            boolean screenPinningRequested, int windowingMode, int activityType) {
         this.taskView = taskView;
         this.task = task;
         this.targetTaskBounds = targetTaskBounds;
-        this.targetTaskStack = targetTaskStack;
+        this.targetWindowingMode = windowingMode;
+        this.targetActivityType = activityType;
         this.screenPinningRequested = screenPinningRequested;
     }
 

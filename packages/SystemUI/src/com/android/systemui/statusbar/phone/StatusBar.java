@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
@@ -37,7 +38,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
@@ -5932,7 +5932,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean superOnClickHandler(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
             return super.onClickHandler(view, pendingIntent, fillInIntent,
-                    StackId.FULLSCREEN_WORKSPACE_STACK_ID);
+                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
         }
 
         private boolean handleRemoteInput(View view, PendingIntent pendingIntent, Intent fillInIntent) {
@@ -7149,10 +7149,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected Bundle getActivityOptions() {
-        // Anything launched from the notification shade should always go into the
-        // fullscreen stack.
-        ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchStackId(StackId.FULLSCREEN_WORKSPACE_STACK_ID);
+        // Anything launched from the notification shade should always go into the secondary
+        // split-screen windowing mode.
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
         return options.toBundle();
     }
 

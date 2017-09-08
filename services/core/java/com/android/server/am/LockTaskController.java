@@ -25,6 +25,7 @@ import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.StatusBarManager.DISABLE_RECENT;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.content.Context.STATUS_BAR_SERVICE;
 import static android.os.UserHandle.USER_ALL;
@@ -431,8 +432,8 @@ public class LockTaskController {
             mSupervisor.resumeFocusedStackTopActivityLocked();
             mWindowManager.executeAppTransition();
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
-            mSupervisor.handleNonResizableTaskIfNeeded(task, INVALID_STACK_ID, DEFAULT_DISPLAY,
-                    task.getStackId(), true /* forceNonResizable */);
+            mSupervisor.handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
+                    DEFAULT_DISPLAY, task.getStackId(), true /* forceNonResizable */);
         }
     }
 

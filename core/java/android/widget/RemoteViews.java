@@ -16,9 +16,10 @@
 
 package android.widget;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -324,11 +325,11 @@ public class RemoteViews implements Parcelable, Filter {
 
         public boolean onClickHandler(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
-            return onClickHandler(view, pendingIntent, fillInIntent, StackId.INVALID_STACK_ID);
+            return onClickHandler(view, pendingIntent, fillInIntent, WINDOWING_MODE_UNDEFINED);
         }
 
         public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                Intent fillInIntent, int launchStackId) {
+                Intent fillInIntent, int windowingMode) {
             try {
                 // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                 Context context = view.getContext();
@@ -339,8 +340,8 @@ public class RemoteViews implements Parcelable, Filter {
                     opts = ActivityOptions.makeBasic();
                 }
 
-                if (launchStackId != StackId.INVALID_STACK_ID) {
-                    opts.setLaunchStackId(launchStackId);
+                if (windowingMode != WINDOWING_MODE_UNDEFINED) {
+                    opts.setLaunchWindowingMode(windowingMode);
                 }
                 context.startIntentSender(
                         pendingIntent.getIntentSender(), fillInIntent,
