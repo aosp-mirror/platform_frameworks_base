@@ -63,7 +63,8 @@ android_library {
         "SystemUI-tags",
         "SystemUI-proto",
         "dagger2-2.19",
-        "jsr330"
+        "jsr330",
+        "org.lineageos.platform.internal",
     ],
     manifest: "AndroidManifest.xml",
 
@@ -121,7 +122,8 @@ android_library {
         "testables",
         "truth-prebuilt",
         "dagger2-2.19",
-        "jsr330"
+        "jsr330",
+        "org.lineageos.platform.internal",
     ],
     libs: [
         "android.test.runner",
