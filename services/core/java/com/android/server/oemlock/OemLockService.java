@@ -149,8 +149,12 @@ public class OemLockService extends SystemService {
 
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!canUserAllowOemUnlock()) {
-                    throw new SecurityException("User cannot allow OEM unlock");
+                if (!isOemUnlockAllowedByAdmin()) {
+                    throw new SecurityException("Admin does not allow OEM unlock");
+                }
+
+                if (!mOemLock.isOemUnlockAllowedByCarrier()) {
+                    throw new SecurityException("Carrier does not allow OEM unlock");
                 }
 
                 mOemLock.setOemUnlockAllowedByDevice(allowedByUser);
@@ -166,18 +170,6 @@ public class OemLockService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return mOemLock.isOemUnlockAllowedByDevice();
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public boolean canUserAllowOemUnlock() {
-            enforceOemUnlockReadPermission();
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                return isOemUnlockAllowedByAdmin() && mOemLock.isOemUnlockAllowedByCarrier();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
