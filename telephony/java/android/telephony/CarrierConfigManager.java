@@ -1565,6 +1565,14 @@ public class CarrierConfigManager {
     public static final String KEY_CONVERT_CDMA_CALLER_ID_MMI_CODES_WHILE_ROAMING_ON_3GPP_BOOL =
             "convert_cdma_caller_id_mmi_codes_while_roaming_on_3gpp_bool";
 
+    /**
+     * Flag specifying whether IMS registration state menu is shown in Status Info setting,
+     * default to false.
+     * @hide
+     */
+    public static final String KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL =
+            "show_ims_registration_status_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1831,6 +1839,7 @@ public class CarrierConfigManager {
                 false);
         sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
     }
 
     /**
