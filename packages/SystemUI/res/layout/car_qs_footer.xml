@@ -18,23 +18,24 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/qs_footer_height"
+    android:layout_height="@dimen/car_qs_footer_height"
     android:baselineAligned="false"
     android:clickable="false"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingBottom="16dp"
-    android:paddingTop="16dp"
-    android:paddingEnd="32dp"
-    android:paddingStart="32dp"
+    android:paddingBottom="@dimen/car_qs_footer_padding_bottom"
+    android:paddingTop="@dimen/car_qs_footer_padding_top"
+    android:paddingEnd="@dimen/car_qs_footer_padding_end"
+    android:paddingStart="@dimen/car_qs_footer_padding_start"
     android:gravity="center_vertical">
 
     <com.android.systemui.statusbar.phone.MultiUserSwitch
         android:id="@+id/multi_user_switch"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/car_qs_footer_icon_width"
+        android:layout_height="@dimen/car_qs_footer_icon_height"
+        android:layout_marginRight="@dimen/car_qs_footer_user_switch_margin_right"
         android:background="@drawable/ripple_drawable"
         android:focusable="true">
 
@@ -43,14 +44,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:scaleType="centerInside"/>
+            android:scaleType="fitCenter"/>
     </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
     <TextView android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="@dimen/car_qs_footer_user_name_text_size"
-        android:textColor="@color/qs_user_detail_name"
+        android:textColor="@color/car_qs_footer_user_name_color"
         android:gravity="start|center_vertical"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/multi_user_switch" />
@@ -59,8 +60,8 @@
         android:id="@+id/settings_button"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/car_qs_footer_icon_width"
+        android:layout_height="@dimen/car_qs_footer_icon_height"
         android:background="@drawable/ripple_drawable"
         android:contentDescription="@string/accessibility_quick_settings_settings"
         android:scaleType="centerCrop"
