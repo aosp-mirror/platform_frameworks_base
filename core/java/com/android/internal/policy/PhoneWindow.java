@@ -2438,7 +2438,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         // Non-floating windows on high end devices must put up decor beneath the system bars and
         // therefore must know about visibility changes of those.
-        if (!mIsFloating && ActivityManager.isHighEndGfx()) {
+        if (!mIsFloating) {
             if (!targetPreL && a.getBoolean(
                     R.styleable.Window_windowDrawsSystemBarBackgrounds,
                     false)) {
