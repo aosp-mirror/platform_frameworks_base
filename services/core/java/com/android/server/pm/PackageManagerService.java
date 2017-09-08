@@ -10137,6 +10137,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         assertPackageIsValid(pkg, policyFlags, scanFlags);
 
+        if (Build.IS_DEBUGGABLE &&
+                pkg.isPrivilegedApp() &&
+                !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
+            PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
+        }
+
         // Initialize package source and resource directories
         final File scanFile = new File(pkg.codePath);
         final File destCodeFile = new File(pkg.applicationInfo.getCodePath());
