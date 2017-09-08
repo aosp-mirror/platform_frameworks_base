@@ -351,7 +351,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mPrepared = prepared;
-        mSealed = sealed;
+
+        if (sealed) {
+            synchronized (mLock) {
+                try {
+                    sealAndValidateLocked();
+                } catch (PackageManagerException | IOException e) {
+                    destroyInternal();
+                    throw new IllegalArgumentException(e);
+                }
+            }
+        }
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -667,11 +677,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
         Preconditions.checkNotNull(statusReceiver);
 
-        // Cache package manager data without the lock held
-        final PackageInfo installedPkgInfo = mPm.getPackageInfo(
-                params.appPackageName, PackageManager.GET_SIGNATURES
-                        | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
-
         final boolean wasSealed;
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -696,7 +701,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             wasSealed = mSealed;
             if (!mSealed) {
                 try {
-                    sealAndValidateLocked(installedPkgInfo);
+                    sealAndValidateLocked();
+                } catch (IOException e) {
+                    throw new IllegalArgumentException(e);
                 } catch (PackageManagerException e) {
                     // Do now throw an exception here to stay compatible with O and older
                     destroyInternal();
@@ -730,18 +737,33 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *
      * <p>The session will be sealed after calling this method even if it failed.
      *
-     * @param pkgInfo The package info for {@link #params}.packagename
+     * @throws PackageManagerException if the session was sealed but something went wrong. If the
+     *                                 session was sealed this is the only possible exception.
      */
-    private void sealAndValidateLocked(@Nullable PackageInfo pkgInfo)
-            throws PackageManagerException {
+    private void sealAndValidateLocked() throws PackageManagerException, IOException {
         assertNoWriteFileTransfersOpenLocked();
+        assertPreparedAndNotDestroyedLocked("sealing of session");
+
+        final PackageInfo pkgInfo = mPm.getPackageInfo(
+                params.appPackageName, PackageManager.GET_SIGNATURES
+                        | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
+
+        resolveStageDirLocked();
 
         mSealed = true;
 
         // Verify that stage looks sane with respect to existing application.
         // This currently only ensures packageName, versionCode, and certificate
         // consistency.
-        validateInstallLocked(pkgInfo);
+        try {
+            validateInstallLocked(pkgInfo);
+        } catch (PackageManagerException e) {
+            throw e;
+        } catch (Throwable e) {
+            // Convert all exceptions into package manager exceptions as only those are handled
+            // in the code above
+            throw new PackageManagerException(e);
+        }
 
         // Read transfers from the original owner stay open, but as the session's data
         // cannot be modified anymore, there is no leak of information.
@@ -762,11 +784,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     + "the " + Manifest.permission.INSTALL_PACKAGES + " permission");
         }
 
-        // Cache package manager data without the lock held
-        final PackageInfo installedPkgInfo = mPm.getPackageInfo(
-                params.appPackageName, PackageManager.GET_SIGNATURES
-                        | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
-
         // Only install flags that can be verified by the app the session is transferred to are
         // allowed. The parameters can be read via PackageInstaller.SessionInfo.
         if (!params.areHiddenOptionsSet()) {
@@ -778,8 +795,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotSealedLocked("transfer");
 
             try {
-                sealAndValidateLocked(installedPkgInfo);
+                sealAndValidateLocked();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             } catch (PackageManagerException e) {
+                // Session is sealed but could not be verified, we need to destroy it
+                destroyInternal();
+                dispatchSessionFinished(e.error, ExceptionUtils.getCompleteMessage(e), null);
+
                 throw new IllegalArgumentException("Package is not valid", e);
             }
 
@@ -1539,6 +1562,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     void write(@NonNull XmlSerializer out, @NonNull File sessionsDir) throws IOException {
         synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+
             out.startTag(null, TAG_SESSION);
 
             writeIntAttribute(out, ATTR_SESSION_ID, sessionId);
