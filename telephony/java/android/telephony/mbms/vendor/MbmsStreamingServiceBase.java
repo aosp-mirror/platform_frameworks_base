@@ -17,23 +17,29 @@
 package android.telephony.mbms.vendor;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.mbms.IMbmsStreamingManagerCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsStreamingManagerCallback;
+import android.telephony.mbms.StreamingService;
+import android.telephony.mbms.StreamingServiceCallback;
+import android.telephony.mbms.StreamingServiceInfo;
 
 import java.util.List;
 
 /**
  * @hide
- * TODO: future systemapi
  */
+//@SystemApi
 public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
      *
-     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}, which
+     * May throw an {@link IllegalArgumentException} or a {@link SecurityException}, which
      * will be intercepted and passed to the app as
      * {@link android.telephony.mbms.MbmsException.InitializationErrors#ERROR_UNABLE_TO_INITIALIZE}
      *
@@ -41,14 +47,59 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * or {@link MbmsException#SUCCESS}. Non-successful error codes will be passed to the app via
      * {@link IMbmsStreamingManagerCallback#error(int, String)}.
      *
-     * @param listener The callback to use to communicate with the app.
+     * @param callback The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
      */
-    @Override
-    public int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+    public int initialize(MbmsStreamingManagerCallback callback, int subscriptionId)
             throws RemoteException {
         return 0;
     }
+
+    /**
+     * Actual AIDL implementation that hides the callback AIDL from the middleware.
+     * @hide
+     */
+    @Override
+    public final int initialize(final IMbmsStreamingManagerCallback callback,
+            final int subscriptionId) throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        callback.asBinder().linkToDeath(new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                onAppCallbackDied(uid, subscriptionId);
+            }
+        }, 0);
+
+        return initialize(new MbmsStreamingManagerCallback() {
+            @Override
+            public void onError(int errorCode, String message) {
+                try {
+                    callback.error(errorCode, message);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+
+            @Override
+            public void onStreamingServicesUpdated(List<StreamingServiceInfo> services) {
+                try {
+                    callback.streamingServicesUpdated(services);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+
+            @Override
+            public void onMiddlewareReady() {
+                try {
+                    callback.middlewareReady();
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+        }, subscriptionId);
+    }
+
 
     /**
      * Registers serviceClasses of interest with the appName/subId key.
@@ -82,13 +133,77 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      *
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
-     * @param listener The listener object on which the app wishes to receive updates.
+     * @param callback The callback object on which the app wishes to receive updates.
      * @return Any error in {@link android.telephony.mbms.MbmsException.GeneralErrors}
+     */
+    public int startStreaming(int subscriptionId, String serviceId,
+            StreamingServiceCallback callback) throws RemoteException {
+        return 0;
+    }
+
+    /**
+     * Actual AIDL implementation of startStreaming that hides the callback AIDL from the
+     * middleware.
+     * @hide
      */
     @Override
     public int startStreaming(int subscriptionId, String serviceId,
-            IStreamingServiceCallback listener) throws RemoteException {
-        return 0;
+            IStreamingServiceCallback callback) throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        callback.asBinder().linkToDeath(new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                onAppCallbackDied(uid, subscriptionId);
+            }
+        }, 0);
+
+        return startStreaming(subscriptionId, serviceId, new StreamingServiceCallback() {
+            @Override
+            public void onError(int errorCode, String message) {
+                try {
+                    callback.error(errorCode, message);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+
+            @Override
+            public void onStreamStateUpdated(@StreamingService.StreamingState int state,
+                    @StreamingService.StreamingStateChangeReason int reason) {
+                try {
+                    callback.streamStateUpdated(state, reason);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+
+            @Override
+            public void onMediaDescriptionUpdated() {
+                try {
+                    callback.mediaDescriptionUpdated();
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+
+            @Override
+            public void onBroadcastSignalStrengthUpdated(int signalStrength) {
+                try {
+                    callback.broadcastSignalStrengthUpdated(signalStrength);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+
+            @Override
+            public void onStreamMethodUpdated(int methodType) {
+                try {
+                    callback.streamMethodUpdated(methodType);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }
+        });
     }
 
     /**
@@ -152,5 +267,13 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      */
     @Override
     public void dispose(int subscriptionId) throws RemoteException {
+    }
+
+    /**
+     * Indicates that the app identified by the given UID and subscription ID has died.
+     * @param uid the UID of the app, as returned by {@link Binder#getCallingUid()}.
+     * @param subscriptionId The subscription ID the app is using.
+     */
+    public void onAppCallbackDied(int uid, int subscriptionId) {
     }
 }
