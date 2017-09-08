@@ -162,6 +162,38 @@ StatsService::doLoadConfig(FILE* in)
 }
 
 Status
+StatsService::informAnomalyAlarmFired()
+{
+    ALOGD("StatsService::informAnomalyAlarmFired was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                "Only system uid can call informAnomalyAlarmFired");
+    }
+
+    ALOGD("StatsService::informAnomalyAlarmFired succeeded");
+    // TODO: check through all counters/timers and see if an anomaly has indeed occurred.
+
+    return Status::ok();
+}
+
+Status
+StatsService::informPollAlarmFired()
+{
+    ALOGD("StatsService::informPollAlarmFired was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                "Only system uid can call informPollAlarmFired");
+    }
+
+    ALOGD("StatsService::informPollAlarmFired succeeded");
+    // TODO: determine what services to poll and poll (or ask StatsCompanionService to poll) them.
+
+    return Status::ok();
+}
+
+Status
 StatsService::systemRunning()
 {
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {

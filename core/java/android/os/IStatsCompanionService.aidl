@@ -20,7 +20,7 @@ package android.os;
   * Binder interface to communicate with the Java-based statistics service helper.
   * {@hide}
   */
-interface IStatsCompanionService {
+oneway interface IStatsCompanionService {
     /**
     * Register an alarm for anomaly detection to fire at the given timestamp (ms since epoch).
     * If anomaly alarm had already been registered, it will be replaced with the new timestamp.
@@ -28,6 +28,7 @@ interface IStatsCompanionService {
     * alarm is inexact.
     */
     void setAnomalyAlarm(long timestampMs);
+
     /** Cancel any anomaly detection alarm. */
     void cancelAnomalyAlarm();
 
@@ -39,6 +40,7 @@ interface IStatsCompanionService {
       * and alarm is inexact.
       */
     void setPollingAlarms(long timestampMs, long intervalMs);
+
     /** Cancel any repeating polling alarm. */
     void cancelPollingAlarms();
 }

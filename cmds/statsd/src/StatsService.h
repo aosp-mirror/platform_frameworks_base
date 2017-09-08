@@ -49,6 +49,10 @@ public:
 
     virtual Status systemRunning();
 
+    virtual Status informAnomalyAlarmFired();
+
+    virtual Status informPollAlarmFired();
+
     virtual status_t setProcessor(const sp<StatsLogProcessor>& main_processor);
 
 private:
