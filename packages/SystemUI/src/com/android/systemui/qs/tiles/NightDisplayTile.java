@@ -95,7 +95,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     }
 
     @Override
-    protected void setListening(boolean listening) {
+    protected void handleSetListening(boolean listening) {
         mIsListening = listening;
         if (listening) {
             mController.setListener(this);
