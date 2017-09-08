@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.IntentSender;
+import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
@@ -244,8 +245,8 @@ public final class AutoFillUI {
     /**
      * Shows the UI asking the user to save for autofill.
      */
-    public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-            @NonNull ValueFinder valueFinder, @NonNull String packageName,
+    public void showSaveUi(@NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
+            @NonNull SaveInfo info,@NonNull ValueFinder valueFinder, @NonNull String packageName,
             @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi) {
         if (sVerbose) Slog.v(TAG, "showSaveUi() for " + packageName + ": " + info);
         int numIds = 0;
@@ -261,8 +262,8 @@ public final class AutoFillUI {
                 return;
             }
             hideAllUiThread(callback);
-            mSaveUi = new SaveUi(mContext, pendingSaveUi, providerLabel, info, valueFinder,
-                    mOverlayControl, new SaveUi.OnSaveListener() {
+            mSaveUi = new SaveUi(mContext, pendingSaveUi, serviceLabel, serviceIcon, info,
+                    valueFinder, mOverlayControl, new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
                     log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
