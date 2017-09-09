@@ -47,7 +47,7 @@ class UiAutomationManager {
     private int mUiAutomationFlags;
 
     private IBinder mUiAutomationServiceOwner;
-    private final DeathRecipient mUiAutomationSerivceOwnerDeathRecipient =
+    private final DeathRecipient mUiAutomationServiceOwnerDeathRecipient =
             new DeathRecipient() {
                 @Override
                 public void binderDied() {
@@ -85,7 +85,7 @@ class UiAutomationManager {
         }
 
         try {
-            owner.linkToDeath(mUiAutomationSerivceOwnerDeathRecipient, 0);
+            owner.linkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
         } catch (RemoteException re) {
             Slog.e(LOG_TAG, "Couldn't register for the death of a UiTestAutomationService!", re);
             return;
@@ -165,12 +165,14 @@ class UiAutomationManager {
         mUiAutomationService = null;
         mUiAutomationFlags = 0;
         if (mUiAutomationServiceOwner != null) {
-            mUiAutomationServiceOwner.unlinkToDeath(mUiAutomationSerivceOwnerDeathRecipient, 0);
+            mUiAutomationServiceOwner.unlinkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
             mUiAutomationServiceOwner = null;
         }
     }
 
     private class UiAutomationService extends AccessibilityClientConnection {
+        private final Handler mMainHandler;
+
         UiAutomationService(Context context, AccessibilityServiceInfo accessibilityServiceInfo,
                 int id, Handler mainHandler, Object lock,
                 AccessibilityManagerService.SecurityPolicy securityPolicy,
@@ -178,15 +180,26 @@ class UiAutomationManager {
                 GlobalActionPerformer globalActionPerfomer) {
             super(context, COMPONENT_NAME, accessibilityServiceInfo, id, mainHandler, lock,
                     securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer);
+            mMainHandler = mainHandler;
         }
 
         void connectServiceUnknownThread() {
             // This needs to be done on the main thread
-            mEventDispatchHandler.post(() -> {
+            mMainHandler.post(() -> {
                 try {
-                    mService = mServiceInterface.asBinder();
-                    mService.linkToDeath(this, 0);
-                    mServiceInterface.init(this, mId, mOverlayWindowToken);
+                    final IAccessibilityServiceClient serviceInterface;
+                    final IBinder service;
+                    synchronized (mLock) {
+                        serviceInterface = mServiceInterface;
+                        mService = (serviceInterface == null) ? null : mServiceInterface.asBinder();
+                        service = mService;
+                    }
+                    // If the serviceInterface is null, the UiAutomation has been shut down on
+                    // another thread.
+                    if (serviceInterface != null) {
+                        service.linkToDeath(this, 0);
+                        serviceInterface.init(this, mId, mOverlayWindowToken);
+                    }
                 } catch (RemoteException re) {
                     Slog.w(LOG_TAG, "Error initialized connection", re);
                     destroyUiAutomationService();
