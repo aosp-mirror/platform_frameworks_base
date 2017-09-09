@@ -228,7 +228,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MAX_WORK_RESCHEDULE_COUNT = "max_work_reschedule_count";
         private static final String KEY_MIN_LINEAR_BACKOFF_TIME = "min_linear_backoff_time";
         private static final String KEY_MIN_EXP_BACKOFF_TIME = "min_exp_backoff_time";
-        private static final String KEY_BG_JOBS_RESTRICTED = "bg_jobs_restricted";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -244,7 +243,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_BG_MODERATE_JOB_COUNT = 4;
         private static final int DEFAULT_BG_LOW_JOB_COUNT = 1;
         private static final int DEFAULT_BG_CRITICAL_JOB_COUNT = 1;
-        private static final boolean DEFAULT_BG_JOBS_RESTRICTED = false;
         private static final int DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT = Integer.MAX_VALUE;
         private static final int DEFAULT_MAX_WORK_RESCHEDULE_COUNT = Integer.MAX_VALUE;
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
@@ -338,11 +336,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
          */
         long MIN_EXP_BACKOFF_TIME = DEFAULT_MIN_EXP_BACKOFF_TIME;
 
-        /**
-         * Runtime switch for throttling background jobs
-         */
-        boolean BACKGROUND_JOBS_RESTRICTED = DEFAULT_BG_JOBS_RESTRICTED;
-
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -421,12 +414,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         DEFAULT_MIN_LINEAR_BACKOFF_TIME);
                 MIN_EXP_BACKOFF_TIME = mParser.getLong(KEY_MIN_EXP_BACKOFF_TIME,
                         DEFAULT_MIN_EXP_BACKOFF_TIME);
-                final boolean bgJobsRestricted = mParser.getBoolean(KEY_BG_JOBS_RESTRICTED,
-                        DEFAULT_BG_JOBS_RESTRICTED);
-                if (bgJobsRestricted != BACKGROUND_JOBS_RESTRICTED) {
-                    mBackgroundJobsController.enableRestrictionsLocked(
-                            BACKGROUND_JOBS_RESTRICTED = bgJobsRestricted);
-                }
             }
         }
 
@@ -486,9 +473,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             pw.print("    "); pw.print(KEY_MIN_EXP_BACKOFF_TIME); pw.print("=");
             pw.print(MIN_EXP_BACKOFF_TIME); pw.println();
-
-            pw.print("    "); pw.print(KEY_BG_JOBS_RESTRICTED); pw.print("=");
-            pw.print(BACKGROUND_JOBS_RESTRICTED); pw.println();
         }
     }
 
