@@ -39,14 +39,9 @@ cc_defaults {
         windows: {
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
-            static_libs: ["libz"],
         },
         darwin: {
             cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
-            host_ldlibs: ["-lz"],
-        },
-        linux: {
-            host_ldlibs: ["-lz"],
         },
     },
     static_libs: [
@@ -59,6 +54,7 @@ cc_defaults {
         "libpng",
         "libbase",
         "libprotobuf-cpp-lite",
+        "libz",
     ],
     group_static_libs: true,
 }
