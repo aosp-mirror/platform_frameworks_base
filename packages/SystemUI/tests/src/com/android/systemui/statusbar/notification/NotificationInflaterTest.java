@@ -184,7 +184,9 @@ public class NotificationInflaterTest extends SysuiTestCase {
         countDownLatch.await();
     }
 
+    /* Cancelling requires us to be on the UI thread otherwise we might have a race */
     @Test
+    @UiThreadTest
     public void testSupersedesExistingTask() throws Exception {
         mNotificationInflater.inflateNotificationViews();
         mNotificationInflater.setIsLowPriority(true);
