@@ -19,7 +19,9 @@ package com.android.server.accessibility;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -29,7 +31,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.view.WindowManagerInternal;
@@ -38,6 +39,7 @@ import android.view.accessibility.AccessibilityEvent;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -48,6 +50,8 @@ public class UiAutomationManagerTest {
     static final int SERVICE_ID = 42;
 
     final UiAutomationManager mUiAutomationManager = new UiAutomationManager();
+
+    MessageCapturingHandler mMessageCapturingHandler;
 
     @Mock AccessibilityManagerService.UserState mMockUserState;
     @Mock Context mMockContext;
@@ -68,7 +72,6 @@ public class UiAutomationManagerTest {
         }
     }
 
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -80,6 +83,8 @@ public class UiAutomationManagerTest {
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
         when(mMockAccessibilityServiceClient.asBinder()).thenReturn(mMockServiceAsBinder);
+
+        mMessageCapturingHandler = new MessageCapturingHandler(null);
     }
 
     @Test
@@ -146,10 +151,20 @@ public class UiAutomationManagerTest {
         assertEquals(0, mUiAutomationManager.getRequestedEventMaskLocked());
     }
 
+    @Test
+    public void uiAutomationBinderDiesBeforeConnecting_shouldNotCrash() throws Exception {
+        register(0);
+        ArgumentCaptor<IBinder.DeathRecipient> captor = ArgumentCaptor.forClass(
+                IBinder.DeathRecipient.class);
+        verify(mMockOwner).linkToDeath(captor.capture(), anyInt());
+        captor.getValue().binderDied();
+        mMessageCapturingHandler.sendAllMessages();
+    }
+
     private void register(int flags) {
         mUiAutomationManager.registerUiTestAutomationServiceLocked(mMockOwner,
                 mMockAccessibilityServiceClient, mMockContext, mMockServiceInfo, SERVICE_ID,
-                new Handler(), new Object(), mMockSecurityPolicy, mMockSystemSupport,
+                mMessageCapturingHandler, new Object(), mMockSecurityPolicy, mMockSystemSupport,
                 mMockWindowManagerInternal, mMockGlobalActionPerformer, flags);
     }
 
