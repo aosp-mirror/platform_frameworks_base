@@ -4305,6 +4305,12 @@ message MetricsEvent {
     // OS: O MR
     ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1096;
 
+    // FIELD - Whether smart suggestion ranking was enabled or not
+    // Type: int encoded boolean
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    FIELD_SETTINGS_SMART_SUGGESTIONS_ENABLED = 1097;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
