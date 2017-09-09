@@ -624,7 +624,7 @@ final class AutofillManagerServiceImpl {
 
     void destroySessionsLocked() {
         if (mSessions.size() == 0) {
-            mUi.destroyAll(AutofillManager.NO_SESSION, null, null);
+            mUi.destroyAll(null, null);
             return;
         }
         while (mSessions.size() > 0) {
