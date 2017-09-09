@@ -123,7 +123,7 @@ final class SaveUi {
     SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
            @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
            @NonNull ValueFinder valueFinder, @NonNull OverlayControl overlayControl,
-           @NonNull IAutoFillManagerClient client, @NonNull OnSaveListener listener) {
+           @NonNull OnSaveListener listener) {
         mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
@@ -206,7 +206,7 @@ final class SaveUi {
                             final IBinder token = mPendingUi.getToken();
                             intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
                             try {
-                                client.startIntentSender(pendingIntent.getIntentSender(),
+                                pendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
                                         intent);
                                 mPendingUi.setState(PendingUi.STATE_PENDING);
                                 if (sDebug) {
@@ -318,13 +318,14 @@ final class SaveUi {
         mOverlayControl.hideOverlays();
    }
 
-    void hide() {
+    PendingUi hide() {
         if (sVerbose) Slog.v(TAG, "Hiding save dialog.");
         try {
             mDialog.hide();
         } finally {
             mOverlayControl.showOverlays();
         }
+        return mPendingUi;
     }
 
     void destroy() {
