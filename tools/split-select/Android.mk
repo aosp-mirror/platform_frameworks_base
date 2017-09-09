@@ -40,7 +40,6 @@ testSources := \
     TestRules.cpp
 
 cIncludes := \
-    external/zlib \
     frameworks/base/tools
 
 hostStaticLibs := \
@@ -52,17 +51,10 @@ hostStaticLibs := \
     libcutils \
     libexpat \
     libziparchive \
-    libbase
+    libbase \
+    libz
 
 cFlags := -Wall -Werror
-
-hostLdLibs_linux := -lrt -ldl -lpthread
-
-# Statically link libz for MinGW (Win SDK under Linux),
-# and dynamically link for all others.
-hostStaticLibs_windows := libz
-hostLdLibs_darwin := -lz
-hostLdLibs_linux += -lz
 
 
 # ==========================================================
@@ -91,9 +83,6 @@ LOCAL_SRC_FILES := $(testSources)
 
 LOCAL_C_INCLUDES := $(cIncludes)
 LOCAL_STATIC_LIBRARIES := libsplit-select $(hostStaticLibs)
-LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
-LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
-LOCAL_LDLIBS_linux := $(hostLdLibs_linux)
 LOCAL_CFLAGS := $(cFlags)
 
 include $(BUILD_HOST_NATIVE_TEST)
@@ -109,9 +98,6 @@ LOCAL_SRC_FILES := $(main)
 
 LOCAL_C_INCLUDES := $(cIncludes)
 LOCAL_STATIC_LIBRARIES := libsplit-select $(hostStaticLibs)
-LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
-LOCAL_LDLIBS_darwin := $(hostLdLibs_darwin)
-LOCAL_LDLIBS_linux := $(hostLdLibs_linux)
 LOCAL_CFLAGS := $(cFlags)
 
 include $(BUILD_HOST_EXECUTABLE)

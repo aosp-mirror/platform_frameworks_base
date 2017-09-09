@@ -62,19 +62,10 @@ aaptHostStaticLibs := \
     libcutils \
     libexpat \
     libziparchive \
-    libbase
+    libbase \
+    libz
 
-aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER_FROM_FILE)\"
-aaptCFlags += -Wall -Werror
-
-aaptHostLdLibs_linux := -lrt -ldl -lpthread
-
-# Statically link libz for MinGW (Win SDK under Linux),
-# and dynamically link for all others.
-aaptHostStaticLibs_windows := libz
-aaptHostLdLibs_linux += -lz
-aaptHostLdLibs_darwin := -lz
-
+aaptCFlags := -Wall -Werror
 
 # ==========================================================
 # Build the host static library: libaapt
@@ -84,11 +75,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libaapt
 LOCAL_MODULE_HOST_OS := darwin linux windows
 LOCAL_CFLAGS := -Wno-format-y2k -DSTATIC_ANDROIDFW_FOR_TOOLS $(aaptCFlags)
-LOCAL_CPPFLAGS := $(aaptCppFlags)
 LOCAL_CFLAGS_darwin := -D_DARWIN_UNLIMITED_STREAMS
 LOCAL_SRC_FILES := $(aaptSources)
 LOCAL_STATIC_LIBRARIES := $(aaptHostStaticLibs)
-LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -99,13 +88,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := aapt
 LOCAL_MODULE_HOST_OS := darwin linux windows
-LOCAL_CFLAGS := $(aaptCFlags)
-LOCAL_CPPFLAGS := $(aaptCppFlags)
-LOCAL_LDLIBS_darwin := $(aaptHostLdLibs_darwin)
-LOCAL_LDLIBS_linux := $(aaptHostLdLibs_linux)
+LOCAL_CFLAGS := -DAAPT_VERSION=\"$(BUILD_NUMBER_FROM_FILE)\" $(aaptCFlags)
 LOCAL_SRC_FILES := $(aaptMain)
 LOCAL_STATIC_LIBRARIES := libaapt $(aaptHostStaticLibs)
-LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 
 include $(BUILD_HOST_EXECUTABLE)
 
@@ -117,13 +102,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := libaapt_tests
 LOCAL_CFLAGS := $(aaptCFlags)
-LOCAL_CPPFLAGS := $(aaptCppFlags)
-LOCAL_LDLIBS_darwin := $(aaptHostLdLibs_darwin)
-LOCAL_LDLIBS_linux := $(aaptHostLdLibs_linux)
 LOCAL_SRC_FILES := $(aaptTests)
-LOCAL_C_INCLUDES := $(LOCAL_PATH)
 LOCAL_STATIC_LIBRARIES := libaapt $(aaptHostStaticLibs)
-LOCAL_STATIC_LIBRARIES_windows := $(aaptHostStaticLibs_windows)
 
 include $(BUILD_HOST_NATIVE_TEST)
 
