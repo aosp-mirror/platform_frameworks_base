@@ -401,7 +401,9 @@ public class DeviceIdleController extends SystemService
     private final BroadcastReceiver mInteractivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateInteractivityLocked();
+            synchronized (DeviceIdleController.this) {
+                updateInteractivityLocked();
+            }
         }
     };
 
