@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.webkit.CacheManager.CacheResult;
 import android.webkit.PluginData;
 import android.webkit.UrlInterceptHandler;
@@ -121,6 +122,7 @@ public final class UrlInterceptRegistry {
      * deprecated, so is this class.
      */
     @Deprecated
+    @Nullable
     public static synchronized CacheResult getSurrogate(
             String url, Map<String, String> headers) {
         if (urlInterceptDisabled()) {
@@ -149,6 +151,7 @@ public final class UrlInterceptRegistry {
      * deprecated, so is this class.
      */
     @Deprecated
+    @Nullable
     public static synchronized PluginData getPluginData(
             String url, Map<String, String> headers) {
         if (urlInterceptDisabled()) {

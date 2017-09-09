@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -87,10 +88,12 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mMatchesFound = false;
     }
 
-    /*
-     * Set the WebView to search.  Must be non null.
+    /**
+     * Set the WebView to search.
+     *
+     * @param webView an implementation of WebView
      */
-    public void setWebView(WebView webView) {
+    public void setWebView(@NonNull WebView webView) {
         if (null == webView) {
             throw new AssertionError("WebView supplied to "
                     + "FindActionModeCallback cannot be null");

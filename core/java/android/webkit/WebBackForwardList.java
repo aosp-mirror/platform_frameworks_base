@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
+
 import java.io.Serializable;
 
 /**
@@ -29,6 +31,7 @@ public abstract class WebBackForwardList implements Cloneable, Serializable {
      * empty.
      * @return The current history item.
      */
+    @Nullable
     public abstract WebHistoryItem getCurrentItem();
 
     /**
