@@ -24,7 +24,7 @@ toolSources = [
 ]
 
 cc_defaults {
-    name: "aapt_defaults",
+    name: "aapt2_defaults",
     cflags: [
         "-Wall",
         "-Werror",
@@ -149,7 +149,7 @@ cc_library_host_static {
     proto: {
         export_proto_headers: true,
     },
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
 
 // ==========================================================
@@ -159,7 +159,7 @@ cc_library_host_shared {
     name: "libaapt2_jni",
     srcs: toolSources + ["jni/aapt2_jni.cpp"],
     static_libs: ["libaapt2"],
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
 
 // ==========================================================
@@ -176,7 +176,7 @@ cc_test_host {
         "libaapt2",
         "libgmock",
     ],
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
 
 // ==========================================================
@@ -186,5 +186,5 @@ cc_binary_host {
     name: "aapt2",
     srcs: ["Main.cpp"] + toolSources,
     static_libs: ["libaapt2"],
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
