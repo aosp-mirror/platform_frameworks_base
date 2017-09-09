@@ -144,7 +144,7 @@ public class StreamingService {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
             mParentSession.onStreamingServiceStopped(this);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return null;
         }
     }
@@ -172,7 +172,7 @@ public class StreamingService {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         } finally {
             mParentSession.onStreamingServiceStopped(this);
         }

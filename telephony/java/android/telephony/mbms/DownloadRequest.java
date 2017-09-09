@@ -56,12 +56,10 @@ public final class DownloadRequest implements Parcelable {
 
     /** @hide */
     private static class OpaqueDataContainer implements Serializable {
-        private final String destinationUri;
         private final String appIntent;
         private final int version;
 
-        public OpaqueDataContainer(String destinationUri, String appIntent, int version) {
-            this.destinationUri = destinationUri;
+        public OpaqueDataContainer(String appIntent, int version) {
             this.appIntent = appIntent;
             this.version = version;
         }
@@ -70,7 +68,6 @@ public final class DownloadRequest implements Parcelable {
     public static class Builder {
         private String fileServiceId;
         private Uri source;
-        private Uri dest;
         private int subscriptionId;
         private String appIntent;
         private int version = CURRENT_VERSION;
@@ -101,21 +98,6 @@ public final class DownloadRequest implements Parcelable {
          */
         public Builder setSource(Uri source) {
             this.source = source;
-            return this;
-        }
-
-        /**
-         * Sets the destination URI for the download request to be built. The middleware should
-         * not set this directly.
-         * @param dest A URI obtained from {@link Uri#fromFile(File)}, denoting the requested
-         *             final destination of the download.
-         */
-        public Builder setDest(Uri dest) {
-            if (dest.toString().length() > MAX_DESTINATION_URI_SIZE) {
-                throw new IllegalArgumentException("Destination uri must not exceed length " +
-                        MAX_DESTINATION_URI_SIZE);
-            }
-            this.dest = dest;
             return this;
         }
 
@@ -160,7 +142,6 @@ public final class DownloadRequest implements Parcelable {
                 OpaqueDataContainer dataContainer = (OpaqueDataContainer) stream.readObject();
                 version = dataContainer.version;
                 appIntent = dataContainer.appIntent;
-                dest = Uri.parse(dataContainer.destinationUri);
             } catch (IOException e) {
                 // Really should never happen
                 Log.e(LOG_TAG, "Got IOException trying to parse opaque data");
@@ -173,24 +154,21 @@ public final class DownloadRequest implements Parcelable {
         }
 
         public DownloadRequest build() {
-            return new DownloadRequest(fileServiceId, source, dest,
-                    subscriptionId, appIntent, version);
+            return new DownloadRequest(fileServiceId, source, subscriptionId, appIntent, version);
         }
     }
 
     private final String fileServiceId;
     private final Uri sourceUri;
-    private final Uri destinationUri;
     private final int subscriptionId;
     private final String serializedResultIntentForApp;
     private final int version;
 
     private DownloadRequest(String fileServiceId,
-            Uri source, Uri dest,
-            int sub, String appIntent, int version) {
+            Uri source, int sub,
+            String appIntent, int version) {
         this.fileServiceId = fileServiceId;
         sourceUri = source;
-        destinationUri = dest;
         subscriptionId = sub;
         serializedResultIntentForApp = appIntent;
         this.version = version;
@@ -203,7 +181,6 @@ public final class DownloadRequest implements Parcelable {
     private DownloadRequest(DownloadRequest dr) {
         fileServiceId = dr.fileServiceId;
         sourceUri = dr.sourceUri;
-        destinationUri = dr.destinationUri;
         subscriptionId = dr.subscriptionId;
         serializedResultIntentForApp = dr.serializedResultIntentForApp;
         version = dr.version;
@@ -212,7 +189,6 @@ public final class DownloadRequest implements Parcelable {
     private DownloadRequest(Parcel in) {
         fileServiceId = in.readString();
         sourceUri = in.readParcelable(getClass().getClassLoader());
-        destinationUri = in.readParcelable(getClass().getClassLoader());
         subscriptionId = in.readInt();
         serializedResultIntentForApp = in.readString();
         version = in.readInt();
@@ -225,7 +201,6 @@ public final class DownloadRequest implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(fileServiceId);
         out.writeParcelable(sourceUri, flags);
-        out.writeParcelable(destinationUri, flags);
         out.writeInt(subscriptionId);
         out.writeString(serializedResultIntentForApp);
         out.writeInt(version);
@@ -243,14 +218,6 @@ public final class DownloadRequest implements Parcelable {
      */
     public Uri getSourceUri() {
         return sourceUri;
-    }
-
-    /**
-     * For use by the client app only.
-     * @return The URI of the final destination of the download.
-     */
-    public Uri getDestinationUri() {
-        return destinationUri;
     }
 
     /**
@@ -286,7 +253,7 @@ public final class DownloadRequest implements Parcelable {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream stream = new ObjectOutputStream(byteArrayOutputStream);
             OpaqueDataContainer container = new OpaqueDataContainer(
-                    destinationUri.toString(), serializedResultIntentForApp, version);
+                    serializedResultIntentForApp, version);
             stream.writeObject(container);
             stream.flush();
             return byteArrayOutputStream.toByteArray();
@@ -352,7 +319,6 @@ public final class DownloadRequest implements Parcelable {
         if (version >= 1) {
             // Hash the source URI, destination URI, and the app intent
             digest.update(sourceUri.toString().getBytes(StandardCharsets.UTF_8));
-            digest.update(destinationUri.toString().getBytes(StandardCharsets.UTF_8));
             digest.update(serializedResultIntentForApp.getBytes(StandardCharsets.UTF_8));
         }
         // Add updates for future versions here
@@ -373,13 +339,12 @@ public final class DownloadRequest implements Parcelable {
                 version == request.version &&
                 Objects.equals(fileServiceId, request.fileServiceId) &&
                 Objects.equals(sourceUri, request.sourceUri) &&
-                Objects.equals(destinationUri, request.destinationUri) &&
                 Objects.equals(serializedResultIntentForApp, request.serializedResultIntentForApp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileServiceId, sourceUri, destinationUri,
+        return Objects.hash(fileServiceId, sourceUri,
                 subscriptionId, serializedResultIntentForApp, version);
     }
 }

@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.telephony.MbmsDownloadSession;
-import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.MbmsDownloadReceiver;
 
 import java.io.File;
@@ -42,7 +41,7 @@ public class VendorUtils {
      * failed. Mandatory extras are
      * {@link MbmsDownloadSession#EXTRA_MBMS_DOWNLOAD_RESULT}
      * {@link MbmsDownloadSession#EXTRA_MBMS_FILE_INFO}
-     * {@link #EXTRA_REQUEST}
+     * {@link MbmsDownloadSession#EXTRA_MBMS_DOWNLOAD_REQUEST}
      * {@link #EXTRA_TEMP_LIST}
      * {@link #EXTRA_FINAL_URI}
      */
@@ -120,12 +119,6 @@ public class VendorUtils {
      */
     public static final String EXTRA_TEMP_FILES_IN_USE =
             "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
-
-    /**
-     * Extra containing the {@link DownloadRequest} for which the download result or file
-     * descriptor request is for. Must not be null.
-     */
-    public static final String EXTRA_REQUEST = "android.telephony.mbms.extra.REQUEST";
 
     /**
      * Extra containing a single {@link Uri} indicating the path to the temp file in which the

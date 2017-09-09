@@ -24,7 +24,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.mbms.IMbmsStreamingSessionCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
-import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsErrors;
 import android.telephony.mbms.MbmsStreamingSessionCallback;
 import android.telephony.mbms.StreamingService;
 import android.telephony.mbms.StreamingServiceCallback;
@@ -44,10 +44,10 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      *
      * May throw an {@link IllegalArgumentException} or a {@link SecurityException}, which
      * will be intercepted and passed to the app as
-     * {@link android.telephony.mbms.MbmsException.InitializationErrors#ERROR_UNABLE_TO_INITIALIZE}
+     * {@link MbmsErrors.InitializationErrors#ERROR_UNABLE_TO_INITIALIZE}
      *
-     * May return any value from {@link android.telephony.mbms.MbmsException.InitializationErrors}
-     * or {@link MbmsException#SUCCESS}. Non-successful error codes will be passed to the app via
+     * May return any value from {@link MbmsErrors.InitializationErrors}
+     * or {@link MbmsErrors#SUCCESS}. Non-successful error codes will be passed to the app via
      * {@link IMbmsStreamingSessionCallback#onError(int, String)}.
      *
      * @param callback The callback to use to communicate with the app.
@@ -118,8 +118,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param serviceClasses The service classes that the app wishes to get info on. The strings
      *                       may contain arbitrary data as negotiated between the app and the
      *                       carrier.
-     * @return {@link MbmsException#SUCCESS} or any of the errors in
-     * {@link android.telephony.mbms.MbmsException.GeneralErrors}
+     * @return {@link MbmsErrors#SUCCESS} or any of the errors in
+     * {@link MbmsErrors.GeneralErrors}
      */
     @Override
     public int requestUpdateStreamingServices(int subscriptionId,
@@ -137,7 +137,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
      * @param callback The callback object on which the app wishes to receive updates.
-     * @return Any error in {@link android.telephony.mbms.MbmsException.GeneralErrors}
+     * @return Any error in {@link MbmsErrors.GeneralErrors}
      */
     public int startStreaming(int subscriptionId, String serviceId,
             StreamingServiceCallback callback) throws RemoteException {
