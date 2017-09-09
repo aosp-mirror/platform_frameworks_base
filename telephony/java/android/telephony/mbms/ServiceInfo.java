@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -127,13 +128,13 @@ public class ServiceInfo {
      * provided {@link Locale}.
      * @param locale The {@link Locale} in which you want the name of the service. This must be a
      *               value from the list returned by {@link #getLocales()} -- an
-     *               {@link IllegalArgumentException} may be thrown otherwise.
+     *               {@link java.util.NoSuchElementException} may be thrown otherwise.
      * @return The {@link CharSequence} providing the name of the service in the given
      *         {@link Locale}
      */
     public @NonNull CharSequence getNameForLocale(@NonNull Locale locale) {
         if (!names.containsKey(locale)) {
-            throw new IllegalArgumentException("Locale not supported");
+            throw new NoSuchElementException("Locale not supported");
         }
         return names.get(locale);
     }
