@@ -69,6 +69,7 @@ public class KeyguardBouncer {
                 }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
+    private int mStatusBarHeight;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
@@ -128,7 +129,9 @@ public class KeyguardBouncer {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.onResume();
             showPromptReason(mBouncerPromptReason);
-            if (mKeyguardView.getHeight() != 0) {
+            // We might still be collapsed and the view didn't have time to layout yet or still
+            // be small, let's wait on the predraw to do the animation in that case.
+            if (mKeyguardView.getHeight() != 0 && mKeyguardView.getHeight() != mStatusBarHeight) {
                 mKeyguardView.startAppearAnimation();
             } else {
                 mKeyguardView.getViewTreeObserver().addOnPreDrawListener(
@@ -251,6 +254,8 @@ public class KeyguardBouncer {
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mCallback);
         mContainer.addView(mRoot, mContainer.getChildCount());
+        mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
+                com.android.systemui.R.dimen.status_bar_height);
         mRoot.setVisibility(View.INVISIBLE);
         mRoot.dispatchApplyWindowInsets(mRoot.getRootWindowInsets());
     }
