@@ -44,7 +44,7 @@ import android.view.View;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -1245,10 +1245,10 @@ public final class AutofillManager {
                 }
             }
 
-            final LogMaker log = new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_DATASET_APPLIED);
-            log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount);
-            log.addTaggedData(MetricsProto.MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED,
-                    numApplied);
+            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_DATASET_APPLIED)
+                    .setPackageName(mContext.getPackageName())
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, numApplied);
             mMetricsLogger.write(log);
         }
     }

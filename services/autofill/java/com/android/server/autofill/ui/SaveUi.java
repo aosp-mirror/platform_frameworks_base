@@ -20,6 +20,7 @@ import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -53,6 +55,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
@@ -111,6 +115,7 @@ final class SaveUi {
     }
 
     private final Handler mHandler = UiThread.getHandler();
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     private final @NonNull Dialog mDialog;
 
@@ -121,16 +126,21 @@ final class SaveUi {
     private final CharSequence mTitle;
     private final CharSequence mSubTitle;
     private final PendingUi mPendingUi;
+    private final String mServicePackageName;
+    private final String mPackageName;
 
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
+           @Nullable String servicePackageName, @NonNull String packageName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener) {
         mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
+        mServicePackageName = servicePackageName;
+        mPackageName = packageName;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
@@ -181,6 +191,8 @@ final class SaveUi {
         ScrollView subtitleContainer = null;
         final CustomDescription customDescription = info.getCustomDescription();
         if (customDescription != null) {
+            writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION, type);
+
             mSubTitle = null;
             if (sDebug) Slog.d(TAG, "Using custom description");
 
@@ -190,40 +202,35 @@ final class SaveUi {
                     @Override
                     public boolean onClickHandler(View view, PendingIntent pendingIntent,
                             Intent intent) {
+                        final LogMaker log =
+                                newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
                         // We need to hide the Save UI before launching the pending intent, and
                         // restore back it once the activity is finished, and that's achieved by
                         // adding a custom extra in the activity intent.
-                        if (pendingIntent != null) {
-                            if (intent == null) {
-                                Slog.w(TAG,
-                                        "remote view on custom description does not have intent");
-                                return false;
-                            }
-                            if (!pendingIntent.isActivity()) {
-                                Slog.w(TAG, "ignoring custom description pending intent that's not "
-                                        + "for an activity: " + pendingIntent);
-                                return false;
-                            }
-                            if (sVerbose) {
-                                Slog.v(TAG,
-                                        "Intercepting custom description intent: " + intent);
-                            }
-                            final IBinder token = mPendingUi.getToken();
-                            intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-                            try {
-                                pendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
-                                        intent);
-                                mPendingUi.setState(PendingUi.STATE_PENDING);
-                                if (sDebug) {
-                                    Slog.d(TAG, "hiding UI until restored with token " + token);
-                                }
-                                hide();
-                            } catch (RemoteException e) {
-                                Slog.w(TAG, "error triggering pending intent: " + intent);
-                                return false;
-                            }
+                        final boolean isValid = isValidLink(pendingIntent, intent);
+                        if (!isValid) {
+                            log.setType(MetricsEvent.TYPE_UNKNOWN);
+                            mMetricsLogger.write(log);
+                            return false;
                         }
-                        return true;
+                        if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
+                        final IBinder token = mPendingUi.getToken();
+                        intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+                        try {
+                            pendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
+                                    intent);
+                            mPendingUi.setState(PendingUi.STATE_PENDING);
+                            if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+                            hide();
+                            log.setType(MetricsEvent.TYPE_OPEN);
+                            mMetricsLogger.write(log);
+                            return true;
+                        } catch (RemoteException e) {
+                            Slog.w(TAG, "error triggering pending intent: " + intent);
+                            log.setType(MetricsEvent.TYPE_FAILURE);
+                            mMetricsLogger.write(log);
+                            return false;
+                        }
                     }
                 };
 
@@ -241,6 +248,7 @@ final class SaveUi {
         } else {
             mSubTitle = info.getDescription();
             if (mSubTitle != null) {
+                writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_SUBTITLE, type);
                 subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
                 final TextView subtitleView = new TextView(context);
                 subtitleView.setText(mSubTitle);
@@ -313,6 +321,37 @@ final class SaveUi {
         }
     }
 
+    private static boolean isValidLink(PendingIntent pendingIntent, Intent intent) {
+        if (pendingIntent == null) {
+            Slog.w(TAG, "isValidLink(): custom description without pending intent");
+            return false;
+        }
+        if (!pendingIntent.isActivity()) {
+            Slog.w(TAG, "isValidLink(): pending intent not for activity");
+            return false;
+        }
+        if (intent == null) {
+            Slog.w(TAG, "isValidLink(): no intent");
+            return false;
+        }
+        return true;
+    }
+
+    private LogMaker newLogMaker(int category, int saveType) {
+        return newLogMaker(category)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
+    }
+
+    private LogMaker newLogMaker(int category) {
+        return new LogMaker(category)
+                .setPackageName(mPackageName)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, mServicePackageName);
+    }
+
+    private void writeLog(int category, int saveType) {
+        mMetricsLogger.write(newLogMaker(category, saveType));
+    }
+
     /**
      * Update the pending UI, if any.
      *
@@ -326,17 +365,25 @@ final class SaveUi {
                     + mPendingUi.getToken());
             return;
         }
-        switch (operation) {
-            case AutofillManager.PENDING_UI_OPERATION_RESTORE:
-                if (sDebug) Slog.d(TAG, "Restoring save dialog for " + token);
-                show();
-                break;
-            case AutofillManager.PENDING_UI_OPERATION_CANCEL:
-                if (sDebug) Slog.d(TAG, "Cancelling pending save dialog for " + token);
-                hide();
-                break;
-            default:
-                Slog.w(TAG, "restore(): invalid operation " + operation);
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_PENDING_SAVE_UI_OPERATION);
+        try {
+            switch (operation) {
+                case AutofillManager.PENDING_UI_OPERATION_RESTORE:
+                    if (sDebug) Slog.d(TAG, "Restoring save dialog for " + token);
+                    log.setType(MetricsEvent.TYPE_OPEN);
+                    show();
+                    break;
+                case AutofillManager.PENDING_UI_OPERATION_CANCEL:
+                    log.setType(MetricsEvent.TYPE_DISMISS);
+                    if (sDebug) Slog.d(TAG, "Cancelling pending save dialog for " + token);
+                    hide();
+                    break;
+                default:
+                    log.setType(MetricsEvent.TYPE_FAILURE);
+                    Slog.w(TAG, "restore(): invalid operation " + operation);
+            }
+        } finally {
+            mMetricsLogger.write(log);
         }
         mPendingUi.setState(PendingUi.STATE_FINISHED);
     }
@@ -385,6 +432,8 @@ final class SaveUi {
         pw.print(prefix); pw.print("title: "); pw.println(mTitle);
         pw.print(prefix); pw.print("subtitle: "); pw.println(mSubTitle);
         pw.print(prefix); pw.print("pendingUi: "); pw.println(mPendingUi);
+        pw.print(prefix); pw.print("service: "); pw.println(mServicePackageName);
+        pw.print(prefix); pw.print("app: "); pw.println(mPackageName);
 
         final View view = mDialog.getWindow().getDecorView();
         final int[] loc = view.getLocationOnScreen();
