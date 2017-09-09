@@ -1159,6 +1159,7 @@ android.icu.impl.ICUService
 android.icu.impl.ICUService$CacheEntry
 android.icu.impl.ICUService$Factory
 android.icu.impl.ICUService$Key
+android.icu.impl.IDNA2003
 android.icu.impl.LocaleIDParser
 android.icu.impl.LocaleIDs
 android.icu.impl.Norm2AllModes
@@ -1254,6 +1255,7 @@ android.icu.impl.locale.BaseLocale$Key
 android.icu.impl.locale.LocaleObjectCache
 android.icu.impl.locale.LocaleObjectCache$CacheEntry
 android.icu.impl.locale.LocaleSyntaxException
+android.icu.impl.number.Parse
 android.icu.lang.UCharacter
 android.icu.lang.UCharacterEnums$ECharacterCategory
 android.icu.lang.UCharacterEnums$ECharacterDirection
@@ -1468,6 +1470,7 @@ android.media.IRingtonePlayer
 android.media.IRingtonePlayer$Stub
 android.media.IRingtonePlayer$Stub$Proxy
 android.media.Image
+android.media.ImageReader
 android.media.JetPlayer
 android.media.MediaCodec$BufferInfo
 android.media.MediaCodec$BufferMap
@@ -1478,9 +1481,11 @@ android.media.MediaCodecInfo$AudioCapabilities
 android.media.MediaCodecInfo$CodecProfileLevel
 android.media.MediaCodecInfo$Feature
 android.media.MediaCodecInfo$VideoCapabilities
+android.media.MediaCodecList
 android.media.MediaFormat
 android.media.MediaMetadata$1
 android.media.MediaMetadata$Builder
+android.media.MediaPlayer
 android.media.MediaPlayer$1
 android.media.MediaPlayer$2
 android.media.MediaPlayer$EventHandler
@@ -1511,6 +1516,7 @@ android.media.PlayerBase$IPlayerWrapper
 android.media.PlayerBase$PlayerIdCard$1
 android.media.RemoteDisplay
 android.media.Ringtone$MyOnCompletionListener
+android.media.SoundPool
 android.media.SubtitleController$Listener
 android.media.ToneGenerator
 android.media.Utils
@@ -2050,6 +2056,7 @@ android.text.FontConfig$Font
 android.text.GetChars
 android.text.GraphicsOperations
 android.text.Html
+android.text.Html$HtmlParser
 android.text.HtmlToSpannedConverter$Href
 android.text.Hyphenator
 android.text.Hyphenator$HyphenationData
@@ -2099,6 +2106,7 @@ android.text.TextUtils$SimpleStringSplitter
 android.text.TextUtils$StringSplitter
 android.text.TextUtils$TruncateAt
 android.text.TextWatcher
+android.text.format.Formatter
 android.text.format.Time$TimeCalculator
 android.text.method.AllCapsTransformationMethod
 android.text.method.ArrowKeyMovementMethod
@@ -4501,6 +4509,7 @@ org.ccil.cowan.tagsoup.AttributesImpl
 org.ccil.cowan.tagsoup.AutoDetector
 org.ccil.cowan.tagsoup.Element
 org.ccil.cowan.tagsoup.ElementType
+org.ccil.cowan.tagsoup.HTMLScanner
 org.ccil.cowan.tagsoup.HTMLSchema
 org.ccil.cowan.tagsoup.Parser$1
 org.ccil.cowan.tagsoup.ScanHandler
