@@ -387,8 +387,10 @@ final class RemoteFillService implements DeathRecipient {
                 @Override
                 public void executeMessage(Message message) {
                     if (mDestroyed) {
-                        Slog.w(LOG_TAG, "Not handling " + message + " as service for "
-                                + mComponentName + " is already destroyed");
+                        if (sVerbose) {
+                            Slog.v(LOG_TAG, "Not handling " + message + " as service for "
+                                    + mComponentName + " is already destroyed");
+                        }
                         return;
                     }
                     switch (message.what) {
@@ -574,6 +576,13 @@ final class RemoteFillService implements DeathRecipient {
 
         @Override
         public void run() {
+            synchronized (mLock) {
+                if (isCancelledLocked()) {
+                    // TODO(b/653742740): we should probably return here, but for now we're justing
+                    // logging to confirm this is the problem if it happens again.
+                    Slog.e(LOG_TAG, "run() called after canceled: " + mRequest);
+                }
+            }
             final RemoteFillService remoteService = getService();
             if (remoteService != null) {
                 try {
