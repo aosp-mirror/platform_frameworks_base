@@ -116,7 +116,6 @@ public class BackgroundRestrictionsTest {
         intentFilter.addAction(ACTION_JOB_STARTED);
         intentFilter.addAction(ACTION_JOB_STOPPED);
         mContext.registerReceiver(mJobStateChangeReceiver, intentFilter);
-        setGlobalSwitch(true);
         setAppOpsModeAllowed(true);
         setPowerWhiteListed(false);
     }
@@ -129,16 +128,6 @@ public class BackgroundRestrictionsTest {
         mContext.startActivity(scheduleJobIntent);
         Thread.sleep(TestJobActivity.JOB_MINIMUM_LATENCY);
         assertTrue("Job did not start after scheduling", awaitJobStart(DEFAULT_WAIT_TIMEOUT));
-    }
-
-    @Test
-    public void testGlobalSwitch() throws Exception {
-        setGlobalSwitch(false); // Job should not stop now.
-        scheduleAndAssertJobStarted();
-        setAppOpsModeAllowed(false);
-        mIActivityManager.makePackageIdle(TEST_APP_PACKAGE, UserHandle.USER_CURRENT);
-        assertFalse("Job stopped even when feature switch is off",
-                awaitJobStop(DEFAULT_WAIT_TIMEOUT));
     }
 
     @Test
@@ -163,14 +152,8 @@ public class BackgroundRestrictionsTest {
         cancelJobsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(cancelJobsIntent);
         mContext.unregisterReceiver(mJobStateChangeReceiver);
-        setGlobalSwitch(false);
         setAppOpsModeAllowed(true);
         setPowerWhiteListed(false);
-    }
-
-    private void setGlobalSwitch(boolean enabled) {
-        Settings.Global.putString(mContext.getContentResolver(),
-                Settings.Global.JOB_SCHEDULER_CONSTANTS, "bg_jobs_restricted=" + enabled);
     }
 
     private void setPowerWhiteListed(boolean whitelist) throws RemoteException {

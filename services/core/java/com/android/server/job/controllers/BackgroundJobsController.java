@@ -48,14 +48,12 @@ public final class BackgroundJobsController extends StateController {
     private static final Object sCreationLock = new Object();
     private static volatile BackgroundJobsController sController;
 
-    /* Runtime switch to keep feature under wraps */
-    private boolean mEnableSwitch;
     private final JobSchedulerService mJobSchedulerService;
     private final IAppOpsService mAppOpsService;
     private final IDeviceIdleController mDeviceIdleController;
 
     private final SparseBooleanArray mForegroundUids;
-    private int[] mPowerWhitelistedAppIds;
+    private int[] mPowerWhitelistedUserAppIds;
     private int[] mTempWhitelistedAppIds;
     /**
      * Only tracks jobs for which source package app op RUN_ANY_IN_BACKGROUND is not ALLOWED.
@@ -81,7 +79,8 @@ public final class BackgroundJobsController extends StateController {
                 try {
                     switch (intent.getAction()) {
                         case PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED:
-                            mPowerWhitelistedAppIds = mDeviceIdleController.getAppIdWhitelist();
+                            mPowerWhitelistedUserAppIds =
+                                    mDeviceIdleController.getAppIdUserWhitelist();
                             break;
                         case PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED:
                             mTempWhitelistedAppIds = mDeviceIdleController.getAppIdTempWhitelist();
@@ -110,7 +109,7 @@ public final class BackgroundJobsController extends StateController {
         try {
             mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, null,
                     new AppOpsWatcher());
-            mPowerWhitelistedAppIds = mDeviceIdleController.getAppIdWhitelist();
+            mPowerWhitelistedUserAppIds = mDeviceIdleController.getAppIdUserWhitelist();
             mTempWhitelistedAppIds = mDeviceIdleController.getAppIdTempWhitelist();
         } catch (RemoteException rexc) {
             // Shouldn't happen as they are in the same process.
@@ -121,8 +120,6 @@ public final class BackgroundJobsController extends StateController {
         powerWhitelistFilter.addAction(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
         context.registerReceiverAsUser(mDozeWhitelistReceiver, UserHandle.ALL, powerWhitelistFilter,
                 null, null);
-
-        mEnableSwitch = false;
     }
 
     @Override
@@ -170,7 +167,6 @@ public final class BackgroundJobsController extends StateController {
 
     @Override
     public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
-        pw.println("Background restrictions: global switch = " + mEnableSwitch);
         pw.print("Foreground uids: [");
         for (int i = 0; i < mForegroundUids.size(); i++) {
             if (mForegroundUids.valueAt(i)) pw.print(mForegroundUids.keyAt(i) + " ");
@@ -204,14 +200,6 @@ public final class BackgroundJobsController extends StateController {
                 }
             }
         });
-    }
-
-    public void enableRestrictionsLocked(boolean enable) {
-        mEnableSwitch = enable;
-        Slog.d(LOG_TAG, "Background jobs restrictions switch changed to " + mEnableSwitch);
-        if (checkAllTrackedJobsLocked()) {
-            mStateChangedListener.onControllerStateChanged();
-        }
     }
 
     void startTrackingJobLocked(JobStatus jobStatus) {
@@ -255,11 +243,11 @@ public final class BackgroundJobsController extends StateController {
 
     boolean isWhitelistedLocked(int uid) {
         return ArrayUtils.contains(mTempWhitelistedAppIds, UserHandle.getAppId(uid))
-                || ArrayUtils.contains(mPowerWhitelistedAppIds, UserHandle.getAppId(uid));
+                || ArrayUtils.contains(mPowerWhitelistedUserAppIds, UserHandle.getAppId(uid));
     }
 
     boolean canRunJobLocked(int uid) {
-        return !mEnableSwitch || mForegroundUids.get(uid) || isWhitelistedLocked(uid);
+        return mForegroundUids.get(uid) || isWhitelistedLocked(uid);
     }
 
     private final class AppOpsWatcher extends IAppOpsCallback.Stub {

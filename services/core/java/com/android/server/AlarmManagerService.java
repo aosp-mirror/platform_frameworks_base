@@ -245,8 +245,6 @@ class AlarmManagerService extends SystemService {
 
         private static final long DEFAULT_LISTENER_TIMEOUT = 5 * 1000;
 
-        private static final boolean DEFAULT_BACKGROUND_RESTRICTIONS_ENABLED = false;
-
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
 
@@ -265,8 +263,6 @@ class AlarmManagerService extends SystemService {
 
         // Direct alarm listener callback timeout
         public long LISTENER_TIMEOUT = DEFAULT_LISTENER_TIMEOUT;
-
-        public boolean BACKGROUND_ALARMS_BLOCKED = DEFAULT_BACKGROUND_RESTRICTIONS_ENABLED;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -326,21 +322,6 @@ class AlarmManagerService extends SystemService {
                         DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION);
                 LISTENER_TIMEOUT = mParser.getLong(KEY_LISTENER_TIMEOUT,
                         DEFAULT_LISTENER_TIMEOUT);
-                BACKGROUND_ALARMS_BLOCKED = mParser.getBoolean(KEY_BG_RESTRICTIONS_ENABLED,
-                        DEFAULT_BACKGROUND_RESTRICTIONS_ENABLED);
-                if (!BACKGROUND_ALARMS_BLOCKED) {
-                    // TODO: remove this code and constant when feature is turned on
-                    // deliver all blocked alarms
-                    final ArrayList<Alarm> allBlockedAlarms = new ArrayList<>();
-                    for (int i = mPendingBackgroundAlarms.size() - 1; i >=0; i--) {
-                        allBlockedAlarms.addAll(mPendingBackgroundAlarms.valueAt(i));
-                    }
-                    mPendingBackgroundAlarms = new SparseArray<>();
-                    deliverPendingBackgroundAlarmsLocked(allBlockedAlarms,
-                            SystemClock.elapsedRealtime());
-                } else if (DEBUG_BG_LIMIT) {
-                    Slog.d(TAG, "Background limiting enabled");
-                }
 
                 updateAllowWhileIdleMinTimeLocked();
                 updateAllowWhileIdleWhitelistDurationLocked();
@@ -2392,9 +2373,6 @@ class AlarmManagerService extends SystemService {
     }
 
     private boolean isBackgroundRestricted(Alarm alarm) {
-        if (!mConstants.BACKGROUND_ALARMS_BLOCKED) {
-            return false;
-        }
         if (alarm.alarmClock != null) {
             // Don't block alarm clocks
             return false;
