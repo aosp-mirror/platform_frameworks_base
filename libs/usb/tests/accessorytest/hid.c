@@ -139,7 +139,7 @@ static void open_hid(const char* name)
 
     fprintf(stderr, "opened /dev/%s\n", name);
     pthread_t th;
-    pthread_create(&th, NULL, hid_thread, (void *)fd);
+    pthread_create(&th, NULL, hid_thread, (void *)(uintptr_t)fd);
 }
 
 static void* inotify_thread(void* arg)
