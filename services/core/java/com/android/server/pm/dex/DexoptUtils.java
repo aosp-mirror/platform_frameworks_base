@@ -35,7 +35,9 @@ public final class DexoptUtils {
     /**
      * Creates the class loader context dependencies for each of the application code paths.
      * The returned array contains the class loader contexts that needs to be passed to dexopt in
-     * order to ensure correct optimizations.
+     * order to ensure correct optimizations. "Code" paths with no actual code, as specified by
+     * {@param pathsWithCode}, are ignored and will have null as their context in the returned array
+     * (configuration splits are an example of paths without code).
      *
      * A class loader context describes how the class loader chain should be built by dex2oat
      * in order to ensure that classes are resolved during compilation as they would be resolved
@@ -60,7 +62,8 @@ public final class DexoptUtils {
      * {@link android.app.LoadedApk#makePaths(
      * android.app.ActivityThread, boolean, ApplicationInfo, List, List)}.
      */
-    public static String[] getClassLoaderContexts(ApplicationInfo info, String[] sharedLibraries) {
+    public static String[] getClassLoaderContexts(ApplicationInfo info,
+            String[] sharedLibraries, boolean[] pathsWithCode) {
         // The base class loader context contains only the shared library.
         String sharedLibrariesClassPath = encodeClasspath(sharedLibraries);
         String baseApkContextClassLoader = encodeClassLoader(
@@ -86,7 +89,7 @@ public final class DexoptUtils {
         // Index 0 is the class loaded context for the base apk.
         // Index `i` is the class loader context encoding for split `i`.
         String[] classLoaderContexts = new String[/*base apk*/ 1 + splitRelativeCodePaths.length];
-        classLoaderContexts[0] = baseApkContextClassLoader;
+        classLoaderContexts[0] = pathsWithCode[0] ? baseApkContextClassLoader : null;
 
         if (!info.requestsIsolatedSplitLoading() || info.splitDependencies == null) {
             // If the app didn't request for the splits to be loaded in isolation or if it does not
@@ -94,7 +97,15 @@ public final class DexoptUtils {
             // apk class loader (in the order of their definition).
             String classpath = sharedLibrariesAndBaseClassPath;
             for (int i = 1; i < classLoaderContexts.length; i++) {
-                classLoaderContexts[i] = encodeClassLoader(classpath, info.classLoaderName);
+                classLoaderContexts[i] = pathsWithCode[i]
+                        ? encodeClassLoader(classpath, info.classLoaderName) : null;
+                // Note that the splits with no code are not removed from the classpath computation.
+                // i.e. split_n might get the split_n-1 in its classpath dependency even
+                // if split_n-1 has no code.
+                // The splits with no code do not matter for the runtime which ignores
+                // apks without code when doing the classpath checks. As such we could actually
+                // filter them but we don't do it in order to keep consistency with how the apps
+                // are loaded.
                 classpath = encodeClasspath(classpath, splitRelativeCodePaths[i - 1]);
             }
         } else {
@@ -116,9 +127,17 @@ public final class DexoptUtils {
             String splitDependencyOnBase = encodeClassLoader(
                     sharedLibrariesAndBaseClassPath, info.classLoaderName);
             SparseArray<int[]> splitDependencies = info.splitDependencies;
+
+            // Note that not all splits have dependencies (e.g. configuration splits)
+            // The splits without dependencies will have classLoaderContexts[config_split_index]
+            // set to null after this step.
             for (int i = 1; i < splitDependencies.size(); i++) {
-                getParentDependencies(splitDependencies.keyAt(i), splitClassLoaderEncodingCache,
-                        splitDependencies, classLoaderContexts, splitDependencyOnBase);
+                int splitIndex = splitDependencies.keyAt(i);
+                if (pathsWithCode[splitIndex]) {
+                    // Compute the class loader context only for the splits with code.
+                    getParentDependencies(splitIndex, splitClassLoaderEncodingCache,
+                            splitDependencies, classLoaderContexts, splitDependencyOnBase);
+                }
             }
 
             // At this point classLoaderContexts contains only the parent dependencies.
@@ -126,8 +145,17 @@ public final class DexoptUtils {
             // come first in the context.
             for (int i = 1; i < classLoaderContexts.length; i++) {
                 String splitClassLoader = encodeClassLoader("", info.splitClassLoaderNames[i - 1]);
-                classLoaderContexts[i] = encodeClassLoaderChain(
-                        splitClassLoader, classLoaderContexts[i]);
+                if (pathsWithCode[i]) {
+                    // If classLoaderContexts[i] is null it means that the split does not have
+                    // any dependency. In this case its context equals its declared class loader.
+                    classLoaderContexts[i] = classLoaderContexts[i] == null
+                            ? splitClassLoader
+                            : encodeClassLoaderChain(splitClassLoader, classLoaderContexts[i]);
+                } else {
+                    // This is a split without code, it has no dependency and it is not compiled.
+                    // Its context will be null.
+                    classLoaderContexts[i] = null;
+                }
             }
         }
 

@@ -137,7 +137,7 @@ JMediaCodec::JMediaCodec(
     mLooper->start(
             false,      // runOnCallingThread
             true,       // canCallJava
-            PRIORITY_FOREGROUND);
+            ANDROID_PRIORITY_VIDEO);
 
     if (nameIsType) {
         mCodec = MediaCodec::CreateByType(mLooper, name, encoder, &mInitStatus);
