@@ -51,6 +51,7 @@ cc_library {
 }
 
 subdirs = [
+    "cmds/*",
     "core/jni",
     "libs/*",
     "media/*",
