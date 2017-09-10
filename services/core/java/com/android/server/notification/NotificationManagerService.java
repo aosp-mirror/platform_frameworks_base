@@ -1460,8 +1460,18 @@ public class NotificationManagerService extends SystemService {
         if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
             // cancel
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
                     null);
+            if (isUidSystemOrPhone(uid)) {
+                int[] profileIds = mUserProfiles.getCurrentProfileIds();
+                int N = profileIds.length;
+                for (int i = 0; i < N; i++) {
+                    int profileId = profileIds[i];
+                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
+                            profileId, REASON_CHANNEL_BANNED,
+                            null);
+                }
+            }
         }
         mRankingHelper.updateNotificationChannel(pkg, uid, channel);
 

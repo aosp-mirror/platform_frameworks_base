@@ -92,7 +92,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (listening) {
             mController.addCallback(mSignalCallback);
         } else {
@@ -183,8 +183,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
 
-        state.icon = new SignalIcon(cb.mobileSignalIconId);
-        if (cb.airplaneModeEnabled) {
+        if (cb.noSim) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_sim);
+        } else {
+            state.icon = new SignalIcon(cb.mobileSignalIconId);
+        }
+
+        if (cb.airplaneModeEnabled | cb.noSim) {
             state.state = Tile.STATE_INACTIVE;
         } else {
             state.state = Tile.STATE_ACTIVE;

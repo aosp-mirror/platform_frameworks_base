@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -193,8 +192,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     }
 
     private void updateClockVisibility() {
-        int visibility = (mClockVisibleByPolicy && mClockVisibleByUser)
-                ? View.VISIBLE : View.GONE;
+        boolean visible = mClockVisibleByPolicy && mClockVisibleByUser;
+        Dependency.get(IconLogger.class).onIconVisibility("clock", visible);
+        int visibility = visible ? View.VISIBLE : View.GONE;
         setVisibility(visibility);
     }
 

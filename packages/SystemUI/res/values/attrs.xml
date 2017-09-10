@@ -34,6 +34,7 @@
         <attr name="recentItemLayout" format="reference" />
         <!-- Style for the "Clear all" button. -->
         <attr name="clearAllStyle" format="reference" />
+        <attr name="clearAllBackgroundColor" format="reference" />
     </declare-styleable>
     <declare-styleable name="DeadZone">
         <attr name="minSize" format="dimension" />

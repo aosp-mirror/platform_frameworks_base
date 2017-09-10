@@ -1,0 +1,30 @@
+//
+// Copyright 2010 The Android Open Source Project
+//
+// Keymap validation tool.
+//
+
+cc_binary_host {
+    name: "validatekeymaps",
+
+    srcs: ["Main.cpp"],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+
+    static_libs: [
+        "libinput",
+        "libutils",
+        "libcutils",
+        "liblog",
+    ],
+
+    // This tool is prebuilt if we're doing an app-only build.
+    product_variables: {
+        unbundled_build: {
+          enabled: false,
+        },
+    },
+}

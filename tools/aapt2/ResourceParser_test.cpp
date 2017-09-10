@@ -790,4 +790,49 @@ TEST_F(ResourceParserTest, ParsePlatformIndependentNewline) {
   ASSERT_TRUE(TestParse(R"(<string name="foo">%1$s %n %2$s</string>)"));
 }
 
+TEST_F(ResourceParserTest, ParseOverlayableTagWithSystemPolicy) {
+  std::string input = R"(
+      <overlayable policy="illegal_policy">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item type="attr" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item type="bad_type" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(<overlayable policy="system" />)";
+  EXPECT_TRUE(TestParse(input));
+
+  input = R"(<overlayable />)";
+  EXPECT_TRUE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item type="string" name="foo" />
+        <item type="dimen" name="foo" />
+      </overlayable>)";
+  ASSERT_TRUE(TestParse(input));
+
+  input = R"(
+      <overlayable>
+        <item type="string" name="bar" />
+      </overlayable>)";
+  ASSERT_TRUE(TestParse(input));
+}
+
 }  // namespace aapt

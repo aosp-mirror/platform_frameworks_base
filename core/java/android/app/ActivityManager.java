@@ -20,10 +20,11 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.Manifest;
@@ -739,28 +740,6 @@ public class ActivityManager {
         }
 
         /**
-         * Returns true if Stack size is affected by the docked stack changing size.
-         * @hide
-         */
-        // TODO: Figure-out a way to remove.
-        public static boolean isResizeableByDockedStack(int stackId) {
-            return isStaticStack(stackId) && stackId != DOCKED_STACK_ID
-                    && stackId != PINNED_STACK_ID && stackId != ASSISTANT_STACK_ID;
-        }
-
-        /**
-         * Returns true if the size of tasks in the input stack are affected by the docked stack
-         * changing size.
-         * @hide
-         */
-        // TODO: What is the difference between this method and the one above??
-        public static boolean isTaskResizeableByDockedStack(int stackId) {
-            return isStaticStack(stackId) && stackId != FREEFORM_WORKSPACE_STACK_ID
-                    && stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID
-                    && stackId != ASSISTANT_STACK_ID;
-        }
-
-        /**
          * Returns true if the input stack is affected by drag resizing.
          * @hide
          */
@@ -879,12 +858,15 @@ public class ActivityManager {
         /** Returns the windowing mode that should be used for this input stack id.
          * @hide */
         // TODO: To be removed once we are not using stack id for stuff...
-        public static int getWindowingModeForStackId(int stackId) {
+        public static int getWindowingModeForStackId(int stackId, boolean inSplitScreenMode) {
             final int windowingMode;
             switch (stackId) {
                 case FULLSCREEN_WORKSPACE_STACK_ID:
                 case HOME_STACK_ID:
                 case RECENTS_STACK_ID:
+                    windowingMode = inSplitScreenMode
+                            ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY : WINDOWING_MODE_FULLSCREEN;
+                    break;
                 case ASSISTANT_STACK_ID:
                     windowingMode = WINDOWING_MODE_FULLSCREEN;
                     break;
@@ -892,7 +874,7 @@ public class ActivityManager {
                     windowingMode = WINDOWING_MODE_PINNED;
                     break;
                 case DOCKED_STACK_ID:
-                    windowingMode = WINDOWING_MODE_DOCKED;
+                    windowingMode = WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
                     break;
                 case FREEFORM_WORKSPACE_STACK_ID:
                     windowingMode = WINDOWING_MODE_FREEFORM;

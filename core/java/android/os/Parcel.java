@@ -2555,9 +2555,6 @@ public final class Parcel {
      * Read into the given List items String objects that were written with
      * {@link #writeStringList} at the current dataPosition().
      *
-     * @return A newly created ArrayList containing strings with the same data
-     *         as those that were previously written.
-     *
      * @see #writeStringList
      */
     public final void readStringList(List<String> list) {

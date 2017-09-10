@@ -482,7 +482,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // TODO: Not needed once we are no longer using stack ids as the override config. can be passed
     // in.
     private void updateOverrideConfiguration() {
-        final int windowingMode = getWindowingModeForStackId(mStackId);
+        final int windowingMode = getWindowingModeForStackId(
+                mStackId, mStackSupervisor.getStack(DOCKED_STACK_ID) != null);
         if (windowingMode != WINDOWING_MODE_UNDEFINED) {
             setWindowingMode(windowingMode);
         }
@@ -1221,6 +1222,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still waiting to pause " + mPausingActivity);
+            shouldSleep = false;
+        } else if (mLastPausedActivity == topActivity()) {
+            // Our top activity is currently paused, we need to ensure we move it to the stopped
+            // state.
+            stopActivityLocked(mLastPausedActivity);
             shouldSleep = false;
         }
 
@@ -2992,13 +2998,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 : toFrontActivity.getStackId();
         if (targetStackId == ASSISTANT_STACK_ID) {
             // Ensure the task/activity being brought forward is not the assistant
-            return false;
-        }
-        final boolean isFullscreen = toFrontTask != null
-                ? toFrontTask.containsOnlyFullscreenActivities()
-                : toFrontActivity.fullscreen;
-        if (!isFullscreen) {
-            // Ensure the task/activity being brought forward is fullscreen
             return false;
         }
         return true;

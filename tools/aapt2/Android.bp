@@ -24,7 +24,7 @@ toolSources = [
 ]
 
 cc_defaults {
-    name: "aapt_defaults",
+    name: "aapt2_defaults",
     cflags: [
         "-Wall",
         "-Werror",
@@ -39,14 +39,9 @@ cc_defaults {
         windows: {
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
-            static_libs: ["libz"],
         },
         darwin: {
             cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
-            host_ldlibs: ["-lz"],
-        },
-        linux: {
-            host_ldlibs: ["-lz"],
         },
     },
     static_libs: [
@@ -59,6 +54,7 @@ cc_defaults {
         "libpng",
         "libbase",
         "libprotobuf-cpp-lite",
+        "libz",
     ],
     group_static_libs: true,
 }
@@ -149,7 +145,7 @@ cc_library_host_static {
     proto: {
         export_proto_headers: true,
     },
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
 
 // ==========================================================
@@ -159,7 +155,7 @@ cc_library_host_shared {
     name: "libaapt2_jni",
     srcs: toolSources + ["jni/aapt2_jni.cpp"],
     static_libs: ["libaapt2"],
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
 
 // ==========================================================
@@ -176,7 +172,7 @@ cc_test_host {
         "libaapt2",
         "libgmock",
     ],
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }
 
 // ==========================================================
@@ -186,5 +182,5 @@ cc_binary_host {
     name: "aapt2",
     srcs: ["Main.cpp"] + toolSources,
     static_libs: ["libaapt2"],
-    defaults: ["aapt_defaults"],
+    defaults: ["aapt2_defaults"],
 }

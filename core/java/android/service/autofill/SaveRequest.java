@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -36,16 +37,18 @@ import java.util.List;
 public final class SaveRequest implements Parcelable {
     private final @NonNull ArrayList<FillContext> mFillContexts;
     private final @Nullable Bundle mClientState;
+    private final @Nullable ArrayList<String> mDatasetIds;
 
     /** @hide */
     public SaveRequest(@NonNull ArrayList<FillContext> fillContexts,
-            @Nullable Bundle clientState) {
+            @Nullable Bundle clientState, @Nullable ArrayList<String> datasetIds) {
         mFillContexts = Preconditions.checkNotNull(fillContexts, "fillContexts");
         mClientState = clientState;
+        mDatasetIds = datasetIds;
     }
 
     private SaveRequest(@NonNull Parcel parcel) {
-        this(parcel.readTypedArrayList(null), parcel.readBundle());
+        this(parcel.readTypedArrayList(null), parcel.readBundle(), parcel.createStringArrayList());
     }
 
     /**
@@ -66,6 +69,14 @@ public final class SaveRequest implements Parcelable {
         return mClientState;
     }
 
+    /**
+     * Gets the ids of the datasets selected by the user, in the order in which they were selected.
+     */
+    @Nullable
+    public List<String> getDatasetIds() {
+        return mDatasetIds;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -75,6 +86,7 @@ public final class SaveRequest implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeTypedArrayList(mFillContexts, flags);
         parcel.writeBundle(mClientState);
+        parcel.writeStringList(mDatasetIds);
     }
 
     public static final Creator<SaveRequest> CREATOR =

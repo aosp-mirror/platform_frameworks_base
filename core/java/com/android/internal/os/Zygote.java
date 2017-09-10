@@ -16,14 +16,12 @@
 
 package com.android.internal.os;
 
-
+import android.os.IVold;
 import android.os.Trace;
-import dalvik.system.ZygoteHooks;
 import android.system.ErrnoException;
 import android.system.Os;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import dalvik.system.ZygoteHooks;
 
 /** @hide */
 public final class Zygote {
@@ -52,13 +50,13 @@ public final class Zygote {
     public static final int DEBUG_JAVA_DEBUGGABLE = 1 << 8;
 
     /** No external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_NONE = 0;
+    public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_DEFAULT = 1;
+    public static final int MOUNT_EXTERNAL_DEFAULT = IVold.REMOUNT_MODE_DEFAULT;
     /** Read-only external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_READ = 2;
+    public static final int MOUNT_EXTERNAL_READ = IVold.REMOUNT_MODE_READ;
     /** Read-write external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_WRITE = 3;
+    public static final int MOUNT_EXTERNAL_WRITE = IVold.REMOUNT_MODE_WRITE;
 
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 

@@ -3527,6 +3527,7 @@ message MetricsEvent {
     NOTIFICATION_SNOOZED_CRITERIA = 832;
 
     // FIELD - The context (source) from which an action is performed
+    // For QS, this is a boolean of whether the panel is expanded
     FIELD_CONTEXT = 833;
 
     // ACTION: Settings advanced button is expanded
@@ -4287,10 +4288,28 @@ message MetricsEvent {
     // OS: O MR
     APPLICATIONS_STORAGE_PHOTOS = 1092;
 
+    // ACTION: Logged when the status bar icons change.
+    // OS: O MR
+    STATUS_BAR_ICONS_CHANGED = 1093;
+
+    // FIELD: Bitfield indicating which icons are shown.
+    // OS: O MR
+    FIELD_STATUS_ICONS = 1094;
+
+    // FIELD: Number of status icons currently shown.
+    // OS: O MR
+    FIELD_NUM_STATUS_ICONS = 1095;
+
     // ACTION: Logged when user tries to pair a Bluetooth device without name from Settings app
     // CATEGORY: SETTINGS
     // OS: O MR
-    ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1093;
+    ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1096;
+
+    // FIELD - Whether smart suggestion ranking was enabled or not
+    // Type: int encoded boolean
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    FIELD_SETTINGS_SMART_SUGGESTIONS_ENABLED = 1097;
 
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 

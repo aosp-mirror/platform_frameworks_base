@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import android.app.Notification;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Pair;
@@ -49,7 +50,7 @@ public class MessageCapturingHandler extends Handler {
     public void sendOneMessage() {
         Message message = timedMessages.remove(0).first;
         removeMessages(message.what, message.obj);
-        mCallback.handleMessage(message);
+        dispatchMessage(message);
         removeStaleMessages();
     }
 
@@ -62,7 +63,7 @@ public class MessageCapturingHandler extends Handler {
     public void sendLastMessage() {
         Message message = timedMessages.remove(timedMessages.size() - 1).first;
         removeMessages(message.what, message.obj);
-        mCallback.handleMessage(message);
+        dispatchMessage(message);
         removeStaleMessages();
     }
 
@@ -78,5 +79,13 @@ public class MessageCapturingHandler extends Handler {
                 timedMessages.remove(i--);
             }
         }
+    }
+
+    public void dispatchMessage(Message m) {
+        if (mCallback != null) {
+            mCallback.handleMessage(m);
+            return;
+        }
+        super.dispatchMessage(m);
     }
 }

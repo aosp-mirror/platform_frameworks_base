@@ -57,7 +57,7 @@ class TimestampedScoredNetwork implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mScore, flags);
+        mScore.writeToParcel(dest, flags);
         dest.writeLong(mUpdatedTimestampMillis);
     }
 

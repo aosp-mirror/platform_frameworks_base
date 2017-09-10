@@ -198,15 +198,22 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Sets the id for the dataset so its usage history can be retrieved later.
+         * Sets the id for the dataset so its usage can be tracked.
          *
-         * <p>The id of the last selected dataset can be read from
-         * {@link AutofillService#getFillEventHistory()}. If the id is not set it will not be clear
-         * if a dataset was selected as {@link AutofillService#getFillEventHistory()} uses
-         * {@code null} to indicate that no dataset was selected.
+         * <p>Dataset usage can be tracked for 2 purposes:
+         *
+         * <ul>
+         *   <li>For statistical purposes, the service can call
+         * {@link AutofillService#getFillEventHistory()} when handling {@link
+         * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+         * calls.
+         *   <li>For normal autofill workflow, the service can call
+         *   {@link SaveRequest#getDatasetIds()} when handling
+         *   {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} calls.
+         * </ul>
          *
          * @param id id for this dataset or {@code null} to unset.
-
+         *
          * @return This builder.
          */
         public @NonNull Builder setId(@Nullable String id) {

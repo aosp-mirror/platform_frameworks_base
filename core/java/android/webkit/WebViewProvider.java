@@ -19,16 +19,16 @@ package android.webkit;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.content.res.Configuration;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.http.SslCertificate;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -73,7 +73,8 @@ public interface WebViewProvider {
      * Initialize this WebViewProvider instance. Called after the WebView has fully constructed.
      * @param javaScriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
-     * @param privateBrowsing If true the web view will be initialized in private / incognito mode.
+     * @param privateBrowsing If {@code true} the web view will be initialized in private /
+     * incognito mode.
      */
     public void init(Map<String, Object> javaScriptInterfaces,
             boolean privateBrowsing);

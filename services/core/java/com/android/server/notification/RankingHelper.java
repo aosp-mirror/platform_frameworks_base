@@ -1220,7 +1220,7 @@ public class RankingHelper implements RankingConfig {
             changed |= oldValue != newValue;
         }
         if (changed) {
-            mRankingHandler.requestSort();
+            updateConfig();
         }
     }
 

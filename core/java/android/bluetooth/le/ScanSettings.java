@@ -35,7 +35,7 @@ public final class ScanSettings implements Parcelable {
 
     /**
      * Perform Bluetooth LE scan in low power mode. This is the default scan mode as it consumes the
-     * least power.
+     * least power. This mode is enforced if the scanning application is not in foreground.
      */
     public static final int SCAN_MODE_LOW_POWER = 0;
 

@@ -54,7 +54,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
         super.setUp();
         final Configuration overrideConfig = new Configuration();
         overrideConfig.windowConfiguration.setWindowingMode(
-                getWindowingModeForStackId(PINNED_STACK_ID));
+                getWindowingModeForStackId(PINNED_STACK_ID, false /* inSplitScreenMode */));
         mPinnedStack = new StackWindowController(PINNED_STACK_ID, null,
                 mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
         mPinnedStack.onOverrideConfigurationChanged(overrideConfig);

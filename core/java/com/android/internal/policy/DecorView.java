@@ -1058,7 +1058,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         WindowManager.LayoutParams attrs = mWindow.getAttributes();
         int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
 
-        if (!mWindow.mIsFloating && ActivityManager.isHighEndGfx()) {
+        if (!mWindow.mIsFloating) {
             boolean disallowAnimate = !isLaidOut();
             disallowAnimate |= ((mLastWindowFlags ^ attrs.flags)
                     & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
@@ -1311,11 +1311,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 v.setTag(new Pair<>(verticalBar, seascape));
             } else {
                 final LayerDrawable d = (LayerDrawable) v.getBackground();
-                final InsetDrawable inset = ((InsetDrawable) d.getDrawable(0));
-                ((ColorDrawable) inset.getDrawable()).setColor(dividerColor);
-                ((ColorDrawable) d.getDrawable(1)).setColor(color);
+                final InsetDrawable inset = ((InsetDrawable) d.getDrawable(1));
+                ((ColorDrawable) inset.getDrawable()).setColor(color);
+                ((ColorDrawable) d.getDrawable(0)).setColor(dividerColor);
             }
         } else {
+            v.setTag(null);
             v.setBackgroundColor(color);
         }
     }

@@ -421,9 +421,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
-        final DisplayContent displayContent = mStack.getDisplayContent();
+        final DisplayContent displayContent = getDisplayContent();
         return mFillsParent
-                || !StackId.isTaskResizeableByDockedStack(mStack.mStackId)
+                || !inSplitScreenSecondaryWindowingMode()
                 || displayContent == null
                 || displayContent.getDockedStackIgnoringVisibility() != null;
     }

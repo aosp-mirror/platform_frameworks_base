@@ -534,10 +534,10 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an dataset authentication was selected.
      */
-    void setDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
+    void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
             @Nullable Bundle clientState) {
         synchronized (mLock) {
-            if (isValidEventLocked("setDatasetAuthenticationSelected()", sessionId)) {
+            if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
                                 clientState));
@@ -548,9 +548,9 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill selection when an save Ui is shown.
      */
-    void setSaveShown(int sessionId, @Nullable Bundle clientState) {
+    void logSaveShown(int sessionId, @Nullable Bundle clientState) {
         synchronized (mLock) {
-            if (isValidEventLocked("setSaveShown()", sessionId)) {
+            if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState));
             }
         }
@@ -559,10 +559,10 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when a dataset was selected.
      */
-    void setDatasetSelected(@Nullable String selectedDataset, int sessionId,
+    void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
             @Nullable Bundle clientState) {
         synchronized (mLock) {
-            if (isValidEventLocked("setDatasetSelected()", sessionId)) {
+            if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState));
             }
@@ -629,7 +629,7 @@ final class AutofillManagerServiceImpl {
 
     void destroySessionsLocked() {
         if (mSessions.size() == 0) {
-            mUi.destroyAll(AutofillManager.NO_SESSION, null, null);
+            mUi.destroyAll(null, null);
             return;
         }
         while (mSessions.size() > 0) {

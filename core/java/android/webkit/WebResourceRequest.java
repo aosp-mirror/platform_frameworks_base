@@ -34,7 +34,7 @@ public interface WebResourceRequest {
     /**
      * Gets whether the request was made for the main frame.
      *
-     * @return whether the request was made for the main frame. Will be false for iframes,
+     * @return whether the request was made for the main frame. Will be {@code false} for iframes,
      *         for example.
      */
     boolean isForMainFrame();
@@ -48,8 +48,9 @@ public interface WebResourceRequest {
 
     /**
      * Gets whether a gesture (such as a click) was associated with the request.
-     * For security reasons in certain situations this method may return false even though the
-     * sequence of events which caused the request to be created was initiated by a user gesture.
+     * For security reasons in certain situations this method may return {@code false} even though
+     * the sequence of events which caused the request to be created was initiated by a user
+     * gesture.
      *
      * @return whether a gesture was associated with the request.
      */

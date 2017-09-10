@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityThread.isSystem;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -55,19 +57,26 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Always on-top (always visible). of other siblings in its parent container.
      * @hide */
     public static final int WINDOWING_MODE_PINNED = 2;
-    /** Occupies a dedicated region of the screen or its parent container.
+    /** The primary container driving the screen to be in split-screen mode.
      * @hide */
-    public static final int WINDOWING_MODE_DOCKED = 3;
+    public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY = 3;
+    /**
+     * The containers adjacent to the {@link #WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} container in
+     * split-screen mode.
+     * @hide
+     */
+    public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY = 4;
     /** Can be freely resized within its parent container.
      * @hide */
-    public static final int WINDOWING_MODE_FREEFORM = 4;
+    public static final int WINDOWING_MODE_FREEFORM = 5;
 
     /** @hide */
     @IntDef({
             WINDOWING_MODE_UNDEFINED,
             WINDOWING_MODE_FULLSCREEN,
             WINDOWING_MODE_PINNED,
-            WINDOWING_MODE_DOCKED,
+            WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
             WINDOWING_MODE_FREEFORM,
     })
     public @interface WindowingMode {}
@@ -215,7 +224,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (mActivityType == activityType) {
             return;
         }
-        if (mActivityType != ACTIVITY_TYPE_UNDEFINED
+
+        // Error check within system server that we are not changing activity type which can be
+        // dangerous. It is okay for things to change in the application process as it doesn't
+        // affect how other things is the system is managed.
+        if (isSystem()
+                && mActivityType != ACTIVITY_TYPE_UNDEFINED
                 && activityType != ACTIVITY_TYPE_UNDEFINED) {
             throw new IllegalStateException("Can't change activity type once set: " + this
                     + " activityType=" + activityTypeToString(activityType));
@@ -462,12 +476,26 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mWindowingMode == WINDOWING_MODE_PINNED;
     }
 
+    /**
+     * Returns true if this container can be put in either
+     * {@link #WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} or
+     * {@link #WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} windowing modes based on its current state.
+     * @hide
+     */
+    public boolean supportSplitScreenWindowingMode() {
+        if (mActivityType == ACTIVITY_TYPE_ASSISTANT) {
+            return false;
+        }
+        return mWindowingMode != WINDOWING_MODE_FREEFORM && mWindowingMode != WINDOWING_MODE_PINNED;
+    }
+
     private static String windowingModeToString(@WindowingMode int windowingMode) {
         switch (windowingMode) {
             case WINDOWING_MODE_UNDEFINED: return "undefined";
             case WINDOWING_MODE_FULLSCREEN: return "fullscreen";
             case WINDOWING_MODE_PINNED: return "pinned";
-            case WINDOWING_MODE_DOCKED: return "docked";
+            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY: return "split-screen-primary";
+            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY: return "split-screen-secondary";
             case WINDOWING_MODE_FREEFORM: return "freeform";
         }
         return String.valueOf(windowingMode);

@@ -110,7 +110,7 @@ LogReader::connect_and_read()
             /* no pid restriction */ 0);
 
     // Open the buffer(s)
-    eventLogger = android_logger_open(loggers, LOG_ID_EVENTS);
+    eventLogger = android_logger_open(loggers, LOG_ID_STATS);
 
     // Read forever
     if (eventLogger) {

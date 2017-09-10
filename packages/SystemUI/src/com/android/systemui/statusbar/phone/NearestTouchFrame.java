@@ -87,7 +87,8 @@ public class NearestTouchFrame extends FrameLayout {
             if (mTouchingChild != null) {
                 event.offsetLocation(mTouchingChild.getWidth() / 2 - event.getX(),
                         mTouchingChild.getHeight() / 2 - event.getY());
-                return mTouchingChild.dispatchTouchEvent(event);
+                return mTouchingChild.getVisibility() == VISIBLE
+                        && mTouchingChild.dispatchTouchEvent(event);
             }
         }
         return super.onTouchEvent(event);

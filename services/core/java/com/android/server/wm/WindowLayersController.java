@@ -101,7 +101,7 @@ class WindowLayersController {
             mHighestLayerInImeTargetBaseLayer = Math.max(mHighestLayerInImeTargetBaseLayer,
                     w.mWinAnimator.mAnimLayer);
         }
-        if (w.getAppToken() != null && StackId.isResizeableByDockedStack(w.getStackId())) {
+        if (w.getAppToken() != null && w.inSplitScreenSecondaryWindowingMode()) {
             mHighestDockedAffectedLayer = Math.max(mHighestDockedAffectedLayer,
                     w.mWinAnimator.mAnimLayer);
         }

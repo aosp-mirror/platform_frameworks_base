@@ -222,7 +222,7 @@ public final class WebViewFactory {
     }
 
     /**
-     * Returns true if the signatures match, false otherwise
+     * Returns {@code true} if the signatures match, {@code false} otherwise
      */
     private static boolean signaturesEquals(Signature[] s1, Signature[] s2) {
         if (s1 == null) {

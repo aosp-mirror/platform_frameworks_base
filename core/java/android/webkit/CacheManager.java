@@ -230,7 +230,7 @@ public final class CacheManager {
      * {@link CacheManager.CacheResult#getLocalPath CacheManager.CacheResult.getLocalPath()}.
      *
      * @return the base directory of the cache
-     * @deprecated This method no longer has any effect and always returns null.
+     * @deprecated This method no longer has any effect and always returns {@code null}.
      */
     @Deprecated
     public static File getCacheFileBaseDir() {
@@ -240,8 +240,8 @@ public final class CacheManager {
     /**
      * Gets whether the HTTP cache is disabled.
      *
-     * @return true if the HTTP cache is disabled
-     * @deprecated This method no longer has any effect and always returns false.
+     * @return {@code true} if the HTTP cache is disabled
+     * @deprecated This method no longer has any effect and always returns {@code false}.
      */
     @Deprecated
     public static boolean cacheDisabled() {
@@ -249,12 +249,12 @@ public final class CacheManager {
     }
 
     /**
-     * Starts a cache transaction. Returns true if this is the only running
+     * Starts a cache transaction. Returns {@code true} if this is the only running
      * transaction. Otherwise, this transaction is nested inside currently
-     * running transactions and false is returned.
+     * running transactions and {@code false} is returned.
      *
-     * @return true if this is the only running transaction
-     * @deprecated This method no longer has any effect and always returns false.
+     * @return {@code true} if this is the only running transaction
+     * @deprecated This method no longer has any effect and always returns {@code false}.
      */
     @Deprecated
     public static boolean startCacheTransaction() {
@@ -265,8 +265,8 @@ public final class CacheManager {
      * Ends the innermost cache transaction and returns whether this was the
      * only running transaction.
      *
-     * @return true if this was the only running transaction
-     * @deprecated This method no longer has any effect and always returns false.
+     * @return {@code true} if this was the only running transaction
+     * @deprecated This method no longer has any effect and always returns {@code false}.
      */
     @Deprecated
     public static boolean endCacheTransaction() {
@@ -274,7 +274,7 @@ public final class CacheManager {
     }
 
     /**
-     * Gets the cache entry for the specified URL, or null if none is found.
+     * Gets the cache entry for the specified URL, or {@code null} if none is found.
      * If a non-null value is provided for the HTTP headers map, and the cache
      * entry needs validation, appropriate headers will be added to the map.
      * The input stream of the CacheEntry object should be closed by the caller
@@ -284,7 +284,7 @@ public final class CacheManager {
      * @param headers a map from HTTP header name to value, to be populated
      *                for the returned cache entry
      * @return the cache entry for the specified URL
-     * @deprecated This method no longer has any effect and always returns null.
+     * @deprecated This method no longer has any effect and always returns {@code null}.
      */
     @Deprecated
     public static CacheResult getCacheFile(String url,

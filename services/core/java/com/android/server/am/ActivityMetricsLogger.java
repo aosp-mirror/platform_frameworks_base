@@ -6,10 +6,12 @@ import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
-import static android.app.WindowConfiguration.WINDOWING_MODE_DOCKED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_BIND_APPLICATION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_CALLING_PACKAGE_NAME;
@@ -111,31 +113,34 @@ class ActivityMetricsLogger {
         }
         mLastLogTimeSecs = now;
 
-        ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
-        if (stack != null && stack.shouldBeVisible(null) != STACK_INVISIBLE) {
-            mWindowState = WINDOW_STATE_SIDE_BY_SIDE;
+        mWindowState = WINDOW_STATE_INVALID;
+        ActivityStack stack = mSupervisor.getFocusedStack();
+        if (stack.isActivityTypeAssistant()) {
+            mWindowState = WINDOW_STATE_ASSISTANT;
             return;
         }
-        mWindowState = WINDOW_STATE_INVALID;
-        stack = mSupervisor.getFocusedStack();
+
         int windowingMode = stack.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_PINNED) {
             stack = mSupervisor.findStackBehind(stack);
             windowingMode = stack.getWindowingMode();
         }
-        if (StackId.isHomeOrRecentsStack(stack.mStackId)
-                || windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            mWindowState = WINDOW_STATE_STANDARD;
-        } else if (windowingMode == WINDOWING_MODE_DOCKED) {
-            Slog.wtf(TAG, "Docked stack shouldn't be the focused stack, because it reported not"
-                    + " being visible.");
-            mWindowState = WINDOW_STATE_INVALID;
-        } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
-            mWindowState = WINDOW_STATE_FREEFORM;
-        } else if (stack.mStackId == ASSISTANT_STACK_ID) {
-            mWindowState = WINDOW_STATE_ASSISTANT;
-        } else if (StackId.isStaticStack(stack.mStackId)) {
-            throw new IllegalStateException("Unknown stack=" + stack);
+        switch (windowingMode) {
+            case WINDOWING_MODE_FULLSCREEN:
+                mWindowState = WINDOW_STATE_STANDARD;
+                break;
+            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
+                mWindowState = WINDOW_STATE_SIDE_BY_SIDE;
+                break;
+            case WINDOW_STATE_FREEFORM:
+                mWindowState = WINDOW_STATE_FREEFORM;
+                break;
+            default:
+                if (windowingMode != WINDOWING_MODE_UNDEFINED) {
+                    throw new IllegalStateException("Unknown windowing mode for stack=" + stack
+                            + " windowingMode=" + windowingMode);
+                }
         }
     }
 
