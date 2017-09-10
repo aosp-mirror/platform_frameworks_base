@@ -1,0 +1,115 @@
+//
+// Copyright (C) 2014 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// ==========================================================
+// Setup some common variables for the different build
+// targets here.
+// ==========================================================
+
+cc_defaults {
+    name: "aapt_defaults",
+
+    static_libs: [
+        "libandroidfw",
+        "libpng",
+        "libutils",
+        "liblog",
+        "libcutils",
+        "libexpat",
+        "libziparchive",
+        "libbase",
+        "libz",
+    ],
+    group_static_libs: true,
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+
+    // This tool is prebuilt if we're doing an app-only build.
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+        unbundled_build: {
+            enabled: false,
+        },
+    },
+}
+
+// ==========================================================
+// Build the host static library: libaapt
+// ==========================================================
+cc_library_host_static {
+    name: "libaapt",
+    defaults: ["aapt_defaults"],
+    target: {
+        darwin: {
+            cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
+        },
+    },
+    cflags: [
+        "-Wno-format-y2k",
+        "-DSTATIC_ANDROIDFW_FOR_TOOLS",
+    ],
+
+    srcs: [
+        "AaptAssets.cpp",
+        "AaptConfig.cpp",
+        "AaptUtil.cpp",
+        "AaptXml.cpp",
+        "ApkBuilder.cpp",
+        "Command.cpp",
+        "CrunchCache.cpp",
+        "FileFinder.cpp",
+        "Images.cpp",
+        "Package.cpp",
+        "pseudolocalize.cpp",
+        "Resource.cpp",
+        "ResourceFilter.cpp",
+        "ResourceIdCache.cpp",
+        "ResourceTable.cpp",
+        "SourcePos.cpp",
+        "StringPool.cpp",
+        "WorkQueue.cpp",
+        "XMLNode.cpp",
+        "ZipEntry.cpp",
+        "ZipFile.cpp",
+    ],
+}
+
+// ==========================================================
+// Build the host tests: libaapt_tests
+// ==========================================================
+cc_test_host {
+    name: "libaapt_tests",
+    defaults: ["aapt_defaults"],
+    srcs: [
+        "tests/AaptConfig_test.cpp",
+        "tests/AaptGroupEntry_test.cpp",
+        "tests/Pseudolocales_test.cpp",
+        "tests/ResourceFilter_test.cpp",
+        "tests/ResourceTable_test.cpp",
+    ],
+    static_libs: ["libaapt"],
+}

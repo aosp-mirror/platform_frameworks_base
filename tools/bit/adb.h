@@ -17,7 +17,7 @@
 #ifndef ADB_H
 #define ADB_H
 
-#include "instrumentation_data.pb.h"
+#include "proto/instrumentation_data.pb.h"
 
 #include <string>
 

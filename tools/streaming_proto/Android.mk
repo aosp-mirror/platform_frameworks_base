@@ -16,19 +16,6 @@
 LOCAL_PATH:= $(call my-dir)
 
 # ==========================================================
-# Build the host executable: protoc-gen-javastream
-# ==========================================================
-include $(CLEAR_VARS)
-LOCAL_MODULE := protoc-gen-javastream
-LOCAL_SRC_FILES := \
-    Errors.cpp \
-    string_utils.cpp \
-    main.cpp
-LOCAL_SHARED_LIBRARIES := \
-    libprotoc
-include $(BUILD_HOST_EXECUTABLE)
-
-# ==========================================================
 # Build the java test
 # ==========================================================
 include $(CLEAR_VARS)
