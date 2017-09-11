@@ -85,6 +85,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     public static final int MODE_DISMISS_BOUNCER = 6;
 
     /**
+     * Mode in which fingerprint wakes and unlocks the device from a dream.
+     */
+    public static final int MODE_WAKE_AND_UNLOCK_FROM_DREAM = 7;
+
+    /**
      * How much faster we collapse the lockscreen when authenticating with fingerprint.
      */
     private static final float FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR = 1.1f;
@@ -230,16 +235,19 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 }
                 Trace.endSection();
                 break;
+            case MODE_WAKE_AND_UNLOCK_FROM_DREAM:
             case MODE_WAKE_AND_UNLOCK_PULSING:
             case MODE_WAKE_AND_UNLOCK:
                 if (mMode == MODE_WAKE_AND_UNLOCK_PULSING) {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
                     mStatusBar.updateMediaMetaData(false /* metaDataChanged */,
                             true /* allowEnterAnimation */);
-                } else {
+                } else if (mMode == MODE_WAKE_AND_UNLOCK){
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK");
-
                     mDozeScrimController.abortDoze();
+                } else {
+                    Trace.beginSection("MODE_WAKE_AND_UNLOCK_FROM_DREAM");
+                    mUpdateMonitor.awakenFromDream();
                 }
                 mStatusBarWindowManager.setStatusBarFocusable(false);
                 mKeyguardViewMediator.onWakeAndUnlocking();
@@ -299,6 +307,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     private int calculateMode() {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithFingerprintAllowed();
+        boolean deviceDreaming = mUpdateMonitor.isDreaming();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
@@ -310,6 +319,9 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             } else {
                 return MODE_SHOW_BOUNCER;
             }
+        }
+        if (unlockingAllowed && deviceDreaming) {
+            return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
         if (mStatusBarKeyguardViewManager.isShowing()) {
             if (mStatusBarKeyguardViewManager.isBouncerShowing() && unlockingAllowed) {
