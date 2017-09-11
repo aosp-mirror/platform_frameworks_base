@@ -25,7 +25,6 @@ package android.webkit;
  * <p>
  * If reporting is enabled, all reports will be sent according to the privacy policy referenced by
  * {@link android.webkit.WebView#getSafeBrowsingPrivacyPolicyUrl()}.
- * </p>
  */
 public abstract class SafeBrowsingResponse {
 

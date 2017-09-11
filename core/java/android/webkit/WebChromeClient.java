@@ -289,7 +289,7 @@ public class WebChromeClient {
      * (API level > {@link android.os.Build.VERSION_CODES#M})
      * this method is only called for requests originating from secure
      * origins such as https. On non-secure origins geolocation requests
-     * are automatically denied.</p>
+     * are automatically denied.
      *
      * @param origin The origin of the web content attempting to use the
      *               Geolocation API.

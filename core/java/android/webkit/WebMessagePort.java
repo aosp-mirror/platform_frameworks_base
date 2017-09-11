@@ -22,30 +22,30 @@ import android.os.Handler;
 /**
  * <p>The Java representation of the
  * <a href="https://html.spec.whatwg.org/multipage/comms.html#messageport">
- * HTML5 message ports.</a> </p>
+ * HTML5 message ports.</a>
  *
  * <p>A Message port represents one endpoint of a Message Channel. In Android
  * webview, there is no separate Message Channel object. When a message channel
  * is created, both ports are tangled to each other and started, and then
  * returned in a MessagePort array, see {@link WebView#createWebMessageChannel}
- * for creating a message channel. </p>
+ * for creating a message channel.
  *
  * <p>When a message port is first created or received via transfer, it does not
  * have a WebMessageCallback to receive web messages. The messages are queued until
- * a WebMessageCallback is set. </p>
+ * a WebMessageCallback is set.
  *
  * <p>A message port should be closed when it is not used by the embedder application
  * anymore. A closed port cannot be transferred or cannot be reopened to send
- * messages. Close can be called multiple times. </p>
+ * messages. Close can be called multiple times.
  *
  * <p>When a port is transferred to JS, it cannot be used to send or receive messages
  * at the Java side anymore. Different from HTML5 Spec, a port cannot be transferred
  * if one of these has ever happened: i. a message callback was set, ii. a message was
  * posted on it. A transferred port cannot be closed by the application, since
- * the ownership is also transferred. </p>
+ * the ownership is also transferred.
  *
  * <p>It is possible to transfer both ports of a channel to JS, for example for
- * communication between subframes.</p>
+ * communication between subframes.
  */
 public abstract class WebMessagePort {
 
