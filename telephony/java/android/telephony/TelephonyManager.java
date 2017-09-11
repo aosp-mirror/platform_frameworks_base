@@ -1667,6 +1667,10 @@ public class TelephonyManager {
         }
     }
 
+    /*
+     * When adding a network type to the list below, make sure to add the correct icon to
+     * MobileSignalController.mapIconSets().
+     */
     /** Network type is unknown */
     public static final int NETWORK_TYPE_UNKNOWN = 0;
     /** Current network is GPRS */
