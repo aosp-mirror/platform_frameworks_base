@@ -357,8 +357,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
-    private static final float DRAG_SHADOW_ALPHA_TRANSPARENT = .7071f;
-
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})
@@ -752,6 +750,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mAllowTheaterModeWakeFromLayout;
 
     TaskPositioner mTaskPositioner;
+    final DragDropController mDragDropController = new DragDropController();
     DragState mDragState = null;
 
     // For frozen screen animations.
@@ -4637,73 +4636,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // -------------------------------------------------------------
-    // Drag and drop
-    // -------------------------------------------------------------
-
-    IBinder prepareDragSurface(IWindow window, SurfaceSession session,
-            int flags, int width, int height, Surface outSurface) {
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "prepare drag surface: w=" + width + " h=" + height
-                    + " flags=" + Integer.toHexString(flags) + " win=" + window
-                    + " asbinder=" + window.asBinder());
-        }
-
-        final int callerPid = Binder.getCallingPid();
-        final int callerUid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        IBinder token = null;
-
-        try {
-            synchronized (mWindowMap) {
-                try {
-                    if (mDragState == null) {
-                        // TODO(multi-display): support other displays
-                        final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                        final Display display = displayContent.getDisplay();
-
-                        SurfaceControl surface = new SurfaceControl(session, "drag surface",
-                                width, height, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
-                        surface.setLayerStack(display.getLayerStack());
-                        float alpha = 1;
-                        if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {
-                            alpha = DRAG_SHADOW_ALPHA_TRANSPARENT;
-                        }
-                        surface.setAlpha(alpha);
-
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  DRAG "
-                                + surface + ": CREATE");
-                        outSurface.copyFrom(surface);
-                        final IBinder winBinder = window.asBinder();
-                        token = new Binder();
-                        mDragState = new DragState(this, token, surface, flags, winBinder);
-                        mDragState.mPid = callerPid;
-                        mDragState.mUid = callerUid;
-                        mDragState.mOriginalAlpha = alpha;
-                        token = mDragState.mToken = new Binder();
-
-                        // 5 second timeout for this window to actually begin the drag
-                        mH.removeMessages(H.DRAG_START_TIMEOUT, winBinder);
-                        Message msg = mH.obtainMessage(H.DRAG_START_TIMEOUT, winBinder);
-                        mH.sendMessageDelayed(msg, 5000);
-                    } else {
-                        Slog.w(TAG_WM, "Drag already in progress");
-                    }
-                } catch (OutOfResourcesException e) {
-                    Slog.e(TAG_WM, "Can't allocate drag surface w=" + width + " h=" + height, e);
-                    if (mDragState != null) {
-                        mDragState.reset();
-                        mDragState = null;
-                    }
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-
-        return token;
-    }
-
-    // -------------------------------------------------------------
     // Input Events and Focus Management
     // -------------------------------------------------------------
 
@@ -4866,6 +4798,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_WINDOWS_CHANGE = 19;
         public static final int DRAG_START_TIMEOUT = 20;
         public static final int DRAG_END_TIMEOUT = 21;
+
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
         public static final int BOOT_TIMEOUT = 23;
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
@@ -5120,47 +5053,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case DRAG_START_TIMEOUT: {
-                    IBinder win = (IBinder)msg.obj;
-                    if (DEBUG_DRAG) {
-                        Slog.w(TAG_WM, "Timeout starting drag by win " + win);
-                    }
-                    synchronized (mWindowMap) {
-                        // !!! TODO: ANR the app that has failed to start the drag in time
-                        if (mDragState != null) {
-                            mDragState.unregister();
-                            mDragState.reset();
-                            mDragState = null;
-                        }
-                    }
-                    break;
-                }
-
-                case DRAG_END_TIMEOUT: {
-                    IBinder win = (IBinder)msg.obj;
-                    if (DEBUG_DRAG) {
-                        Slog.w(TAG_WM, "Timeout ending drag to win " + win);
-                    }
-                    synchronized (mWindowMap) {
-                        // !!! TODO: ANR the drag-receiving app
-                        if (mDragState != null) {
-                            mDragState.mDragResult = false;
-                            mDragState.endDragLw();
-                        }
-                    }
-                    break;
-                }
-
+                case DRAG_START_TIMEOUT:
+                case DRAG_END_TIMEOUT:
                 case TEAR_DOWN_DRAG_AND_DROP_INPUT: {
-                    if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag ending; tearing down input channel");
-                    DragState.InputInterceptor interceptor = (DragState.InputInterceptor) msg.obj;
-                    if (interceptor != null) {
-                        synchronized (mWindowMap) {
-                            interceptor.tearDown();
-                        }
-                    }
+                    mDragDropController.handleMessage(WindowManagerService.this, msg);
+                    break;
                 }
-                break;
 
                 case REPORT_HARD_KEYBOARD_STATUS_CHANGE: {
                     notifyHardKeyboardStatusChange();
