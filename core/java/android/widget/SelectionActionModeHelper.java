@@ -43,9 +43,11 @@ import com.android.internal.util.Preconditions;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -232,7 +234,7 @@ public final class SelectionActionModeHelper {
             return;
         }
 
-        final List<RectF> selectionRectangles =
+        final List<SmartSelectSprite.RectangleWithTextSelectionLayout> selectionRectangles =
                 convertSelectionToRectangles(layout, result.mStart, result.mEnd);
 
         final PointF touchPoint = new PointF(
@@ -240,7 +242,8 @@ public final class SelectionActionModeHelper {
                 mEditor.getLastUpPositionY());
 
         final PointF animationStartPoint =
-                movePointInsideNearestRectangle(touchPoint, selectionRectangles);
+                movePointInsideNearestRectangle(touchPoint, selectionRectangles,
+                        SmartSelectSprite.RectangleWithTextSelectionLayout::getRectangle);
 
         mSmartSelectSprite.startAnimation(
                 animationStartPoint,
@@ -248,38 +251,57 @@ public final class SelectionActionModeHelper {
                 onAnimationEndCallback);
     }
 
-    private List<RectF> convertSelectionToRectangles(final Layout layout, final int start,
-            final int end) {
-        final List<RectF> result = new ArrayList<>();
-        layout.getSelection(start, end, (left, top, right, bottom, textSelectionLayout) ->
-                mergeRectangleIntoList(result, new RectF(left, top, right, bottom)));
+    private List<SmartSelectSprite.RectangleWithTextSelectionLayout> convertSelectionToRectangles(
+            final Layout layout, final int start, final int end) {
+        final List<SmartSelectSprite.RectangleWithTextSelectionLayout> result = new ArrayList<>();
 
-        result.sort(SmartSelectSprite.RECTANGLE_COMPARATOR);
+        final Layout.SelectionRectangleConsumer consumer =
+                (left, top, right, bottom, textSelectionLayout) -> mergeRectangleIntoList(
+                        result,
+                        new RectF(left, top, right, bottom),
+                        SmartSelectSprite.RectangleWithTextSelectionLayout::getRectangle,
+                        r -> new SmartSelectSprite.RectangleWithTextSelectionLayout(r,
+                                textSelectionLayout)
+                );
+
+        layout.getSelection(start, end, consumer);
+
+        result.sort(Comparator.comparing(
+                SmartSelectSprite.RectangleWithTextSelectionLayout::getRectangle,
+                SmartSelectSprite.RECTANGLE_COMPARATOR));
+
         return result;
     }
 
     /**
-     * Merges a {@link RectF} into an existing list of rectangles. While merging, this method
-     * makes sure that:
+     * Merges a {@link RectF} into an existing list of any objects which contain a rectangle.
+     * While merging, this method makes sure that:
      *
      * <ol>
      * <li>No rectangle is redundant (contained within a bigger rectangle)</li>
      * <li>Rectangles of the same height and vertical position that intersect get merged</li>
      * </ol>
      *
-     * @param list      the list of rectangles to merge the new rectangle in
+     * @param list      the list of rectangles (or other rectangle containers) to merge the new
+     *                  rectangle into
      * @param candidate the {@link RectF} to merge into the list
+     * @param extractor a function that can extract a {@link RectF} from an element of the given
+     *                  list
+     * @param packer    a function that can wrap the resulting {@link RectF} into an element that
+     *                  the list contains
      * @hide
      */
     @VisibleForTesting
-    public static void mergeRectangleIntoList(List<RectF> list, RectF candidate) {
+    public static <T> void mergeRectangleIntoList(final List<T> list,
+            final RectF candidate, final Function<T, RectF> extractor,
+            final Function<RectF, T> packer) {
         if (candidate.isEmpty()) {
             return;
         }
 
         final int elementCount = list.size();
         for (int index = 0; index < elementCount; ++index) {
-            final RectF existingRectangle = list.get(index);
+            final RectF existingRectangle = extractor.apply(list.get(index));
             if (existingRectangle.contains(candidate)) {
                 return;
             }
@@ -302,26 +324,27 @@ public final class SelectionActionModeHelper {
         }
 
         for (int index = elementCount - 1; index >= 0; --index) {
-            if (list.get(index).isEmpty()) {
+            final RectF rectangle = extractor.apply(list.get(index));
+            if (rectangle.isEmpty()) {
                 list.remove(index);
             }
         }
 
-        list.add(candidate);
+        list.add(packer.apply(candidate));
     }
 
 
     /** @hide */
     @VisibleForTesting
-    public static PointF movePointInsideNearestRectangle(final PointF point,
-            final List<RectF> rectangles) {
+    public static <T> PointF movePointInsideNearestRectangle(final PointF point,
+            final List<T> list, final Function<T, RectF> extractor) {
         float bestX = -1;
         float bestY = -1;
         double bestDistance = Double.MAX_VALUE;
 
-        final int elementCount = rectangles.size();
+        final int elementCount = list.size();
         for (int index = 0; index < elementCount; ++index) {
-            final RectF rectangle = rectangles.get(index);
+            final RectF rectangle = extractor.apply(list.get(index));
             final float candidateY = rectangle.centerY();
             final float candidateX;
 
