@@ -162,8 +162,8 @@ public:
     void addRenderNode(RenderNode* node, bool placeFront);
     void removeRenderNode(RenderNode* node);
 
-    void setContentDrawBounds(int left, int top, int right, int bottom) {
-        mContentDrawBounds.set(left, top, right, bottom);
+    void setContentDrawBounds(const Rect& bounds) {
+        mContentDrawBounds = bounds;
     }
 
     RenderState& getRenderState() {
