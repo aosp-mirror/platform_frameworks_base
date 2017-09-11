@@ -6872,7 +6872,6 @@ public class TelephonyManager {
      * Get the most recent SignalStrength information reported by the modem. Due
      * to power saving this information may not always be current.
      * @return the most recent cached signal strength info from the modem
-     * @hide
      */
     @Nullable
     public SignalStrength getSignalStrength() {
