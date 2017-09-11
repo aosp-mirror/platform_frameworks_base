@@ -312,6 +312,9 @@ static Maybe<std::string> ParseUnicodeCodepoint(const char** start,
   return result_utf8;
 }
 
+StringBuilder::StringBuilder(bool preserve_spaces) : preserve_spaces_(preserve_spaces) {
+}
+
 StringBuilder& StringBuilder::Append(const StringPiece& str) {
   if (!error_.empty()) {
     return *this;
@@ -368,14 +371,12 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
       }
       last_char_was_escape_ = false;
       start = current + 1;
-    } else if (*current == '"') {
+    } else if (!preserve_spaces_ && *current == '"') {
       if (!quote_ && trailing_space_) {
-        // We found an opening quote, and we have
-        // trailing space, so we should append that
+        // We found an opening quote, and we have trailing space, so we should append that
         // space now.
         if (trailing_space_) {
-          // We had trailing whitespace, so
-          // replace with a single space.
+          // We had trailing whitespace, so replace with a single space.
           if (!str_.empty()) {
             str_ += ' ';
           }
@@ -385,7 +386,7 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
       quote_ = !quote_;
       str_.append(start, current - start);
       start = current + 1;
-    } else if (*current == '\'' && !quote_) {
+    } else if (!preserve_spaces_ && *current == '\'' && !quote_) {
       // This should be escaped.
       error_ = "unescaped apostrophe";
       return *this;
@@ -402,7 +403,7 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
       str_.append(start, current - start);
       start = current + 1;
       last_char_was_escape_ = true;
-    } else if (!quote_) {
+    } else if (!preserve_spaces_ && !quote_) {
       // This is not quoted text, so look for whitespace.
       if (isspace(*current)) {
         // We found whitespace, see if we have seen some

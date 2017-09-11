@@ -257,9 +257,11 @@ class XmlFlattenerVisitor : public xml::Visitor {
 
       // Process plain strings to make sure they get properly escaped.
       StringPiece raw_value = xml_attr->value;
-      util::StringBuilder str_builder;
+
+      util::StringBuilder str_builder(true /*preserve_spaces*/);
+      str_builder.Append(xml_attr->value);
+
       if (!options_.keep_raw_values) {
-        str_builder.Append(xml_attr->value);
         raw_value = str_builder.ToString();
       }
 
