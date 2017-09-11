@@ -323,11 +323,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 new DexoptOptions(pkg.packageName, compilationReason,
                         DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
-        mPackageManagerService.getDexManager().dexoptSecondaryDex(
-                new DexoptOptions(pkg.packageName, compilationReason,
-                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                                DexoptOptions.DEXOPT_BOOT_COMPLETE));
-
         return commands;
     }
 
