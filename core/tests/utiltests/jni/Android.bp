@@ -17,7 +17,6 @@ cc_library_shared {
     shared_libs: [
         "libcutils",
     ],
-    clang: true,
     stl: "libc++",
     srcs: [
         "registration.cpp",
