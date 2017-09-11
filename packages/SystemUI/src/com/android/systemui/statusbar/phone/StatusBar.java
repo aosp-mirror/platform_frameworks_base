@@ -1125,7 +1125,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        mLightBarController = new LightBarController(context);
+        mLightBarController = Dependency.get(LightBarController.class);
         if (mNavigationBar != null) {
             mNavigationBar.setLightBarController(mLightBarController);
         }
