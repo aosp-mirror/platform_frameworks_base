@@ -569,6 +569,7 @@ class WebViewUpdater {
             PackageInfo systemUserPackageInfo =
                     userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo();
             if (systemUserPackageInfo == null) {
+                pw.println(String.format("    %s is NOT installed.", provider.packageName));
                 continue;
             }
 
