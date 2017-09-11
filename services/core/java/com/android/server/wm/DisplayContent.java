@@ -1915,9 +1915,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mDimLayerController.close();
-            if (mDisplayId == DEFAULT_DISPLAY && mService.canDispatchPointerEvents()) {
-                mService.unregisterPointerEventListener(mTapDetector);
-                mService.unregisterPointerEventListener(mService.mMousePositionTracker);
+            if (mService.canDispatchPointerEvents()) {
+                if (mTapDetector != null) {
+                    mService.unregisterPointerEventListener(mTapDetector);
+                }
+                if (mDisplayId == DEFAULT_DISPLAY && mService.mMousePositionTracker != null) {
+                    mService.unregisterPointerEventListener(mService.mMousePositionTracker);
+                }
             }
         } finally {
             mRemovingDisplay = false;

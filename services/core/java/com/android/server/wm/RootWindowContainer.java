@@ -249,13 +249,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
             // Tap Listeners are supported for:
             // 1. All physical displays (multi-display).
-            // 2. VirtualDisplays that support virtual touch input. (Only VR for now)
-            // TODO(multi-display): Support VirtualDisplays with no virtual touch input.
-            if ((display.getType() != Display.TYPE_VIRTUAL
-                    || (display.getType() == Display.TYPE_VIRTUAL
-                        // Only VR VirtualDisplays
-                        && displayId == mService.mVr2dDisplayId))
-                    && mService.canDispatchPointerEvents()) {
+            // 2. VirtualDisplays on VR, AA (and everything else).
+            if (mService.canDispatchPointerEvents()) {
                 if (DEBUG_DISPLAY) {
                     Slog.d(TAG,
                             "Registering PointerEventListener for DisplayId: " + displayId);
