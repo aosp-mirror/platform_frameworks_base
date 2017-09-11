@@ -57,7 +57,6 @@ import android.view.animation.Interpolator;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
-import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
 
 import java.util.ArrayList;
 
@@ -151,8 +150,8 @@ class DragState {
             mServerChannel = channels[0];
             mClientChannel = channels[1];
             mService.mInputManager.registerInputChannel(mServerChannel, null);
-            mInputEventReceiver = mService.new DragInputEventReceiver(mClientChannel,
-                    mService.mH.getLooper());
+            mInputEventReceiver = new DragInputEventReceiver(mClientChannel,
+                    mService.mH.getLooper(), mDragDropController, mService);
 
             mDragApplicationHandle = new InputApplicationHandle(null);
             mDragApplicationHandle.name = "drag";
