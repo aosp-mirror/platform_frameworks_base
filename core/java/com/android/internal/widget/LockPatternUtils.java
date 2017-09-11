@@ -1614,7 +1614,8 @@ public class LockPatternUtils {
                         STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW,
                         SOME_AUTH_REQUIRED_AFTER_USER_REQUEST,
                         STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
-                        STRONG_AUTH_REQUIRED_AFTER_TIMEOUT})
+                        STRONG_AUTH_REQUIRED_AFTER_TIMEOUT,
+                        STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StrongAuthFlags {}
 
@@ -1649,6 +1650,11 @@ public class LockPatternUtils {
          * a device admin.
          */
         public static final int STRONG_AUTH_REQUIRED_AFTER_TIMEOUT = 0x10;
+
+        /**
+         * Strong authentication is required because the user has triggered lockdown.
+         */
+        public static final int STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN = 0x20;
 
         /**
          * Strong auth flags that do not prevent fingerprint from being accepted as auth.

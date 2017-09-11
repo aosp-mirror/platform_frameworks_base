@@ -7120,6 +7120,11 @@ public final class Settings {
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
         /**
+         * Whether the Lockdown button should be shown in the power menu.
+         * @hide
+         */
+        public static final String LOCKDOWN_IN_POWER_MENU = "lockdown_in_power_menu";
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -7221,6 +7226,7 @@ public final class Settings {
             SCREENSAVER_COMPONENTS,
             SCREENSAVER_ACTIVATE_ON_DOCK,
             SCREENSAVER_ACTIVATE_ON_SLEEP,
+            LOCKDOWN_IN_POWER_MENU,
         };
 
         /** @hide */
