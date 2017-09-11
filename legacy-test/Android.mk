@@ -94,11 +94,10 @@ LOCAL_MODULE := legacy.test.stubs
 
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
 
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 # Make sure to run droiddoc first to generate the stub source files.
-$(full_classes_compiled_jar) : $(legacy_test_api_gen_stamp)
-$(full_classes_jack) : $(legacy_test_api_gen_stamp)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(legacy_test_api_gen_stamp)
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Archive a copy of the classes.jar in SDK build.
 $(call dist-for-goals,sdk win_sdk,$(full_classes_jar):legacy.test.stubs.jar)
