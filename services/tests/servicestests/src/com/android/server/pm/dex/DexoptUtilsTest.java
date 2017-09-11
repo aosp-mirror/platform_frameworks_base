@@ -16,10 +16,14 @@
 
 package com.android.server.pm.dex;
 
+import com.android.server.pm.PackageDexOptimizer;
+
+import static com.android.server.pm.PackageDexOptimizer.SKIP_SHARED_LIBRARY_CHECK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.pm.ApplicationInfo;
 import android.support.test.filters.SmallTest;
@@ -368,5 +372,50 @@ public class DexoptUtilsTest {
             gotException = true;
         }
         assertTrue(gotException);
+    }
+
+    @Test
+    public void testEncodeClassLoader() {
+        assertEquals(SKIP_SHARED_LIBRARY_CHECK, DexoptUtils.encodeClassLoader(
+                SKIP_SHARED_LIBRARY_CHECK, "dalvik.system.PathClassLoader"));
+        assertEquals(SKIP_SHARED_LIBRARY_CHECK, DexoptUtils.encodeClassLoader(
+                SKIP_SHARED_LIBRARY_CHECK, "dalvik.system.DexClassLoader"));
+        assertEquals(SKIP_SHARED_LIBRARY_CHECK, DexoptUtils.encodeClassLoader(
+                SKIP_SHARED_LIBRARY_CHECK, "dalvik.system.DelegateLastClassLoader"));
+        assertEquals("PCL[xyz]", DexoptUtils.encodeClassLoader("xyz",
+                "dalvik.system.PathClassLoader"));
+        assertEquals("PCL[xyz]", DexoptUtils.encodeClassLoader("xyz",
+                "dalvik.system.DexClassLoader"));
+        assertEquals("DLC[xyz]", DexoptUtils.encodeClassLoader("xyz",
+                "dalvik.system.DelegateLastClassLoader"));
+        assertEquals("PCL[xyz]", DexoptUtils.encodeClassLoader("xyz", null));
+        assertEquals("abc[xyz]", DexoptUtils.encodeClassLoader("xyz", "abc"));
+
+        try {
+            DexoptUtils.encodeClassLoader(null, "abc");
+            fail(); // Exception should be caught.
+        } catch (NullPointerException expected) {}
+    }
+
+    @Test
+    public void testEncodeClassLoaderChain() {
+        assertEquals(SKIP_SHARED_LIBRARY_CHECK, DexoptUtils.encodeClassLoaderChain(
+                SKIP_SHARED_LIBRARY_CHECK, "PCL[a]"));
+        assertEquals(SKIP_SHARED_LIBRARY_CHECK, DexoptUtils.encodeClassLoaderChain("PCL[a]",
+                SKIP_SHARED_LIBRARY_CHECK));
+        assertEquals("PCL[a];DLC[b]", DexoptUtils.encodeClassLoaderChain("PCL[a]",
+                "DLC[b]"));
+        assertEquals(SKIP_SHARED_LIBRARY_CHECK, DexoptUtils.encodeClassLoaderChain("PCL[a]",
+                SKIP_SHARED_LIBRARY_CHECK));
+
+        try {
+            DexoptUtils.encodeClassLoaderChain("a", null);
+            fail(); // exception is expected
+        } catch (NullPointerException expected) {}
+
+        try {
+            DexoptUtils.encodeClassLoaderChain(null, "b");
+            fail(); // exception is expected
+        } catch (NullPointerException expected) {}
     }
 }
