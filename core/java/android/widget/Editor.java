@@ -1262,7 +1262,8 @@ public class Editor {
         }
     }
 
-    void sendOnTextChanged(int start, int after) {
+    void sendOnTextChanged(int start, int before, int after) {
+        getSelectionActionModeHelper().onTextChanged(start, start + before);
         updateSpellCheckSpans(start, start + after, false);
 
         // Flip flag to indicate the word iterator needs to have the text reset.
