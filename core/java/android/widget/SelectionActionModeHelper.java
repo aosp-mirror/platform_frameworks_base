@@ -56,7 +56,7 @@ import java.util.function.Supplier;
  */
 @UiThread
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-final class SelectionActionModeHelper {
+public final class SelectionActionModeHelper {
 
     /**
      * Maximum time (in milliseconds) to wait for a result before timing out.
@@ -262,16 +262,65 @@ final class SelectionActionModeHelper {
     private List<RectF> convertSelectionToRectangles(final Layout layout, final int start,
             final int end) {
         final List<RectF> result = new ArrayList<>();
-        // TODO filter out invalid rectangles
-        // getSelection might give us overlapping and zero-dimension rectangles which will interfere
-        // with the Smart Select animation
         layout.getSelection(start, end, (left, top, right, bottom, textSelectionLayout) ->
-                result.add(new RectF(left, top, right, bottom)));
+                mergeRectangleIntoList(result, new RectF(left, top, right, bottom)));
 
         result.sort(SmartSelectSprite.RECTANGLE_COMPARATOR);
-
         return result;
     }
+
+    /**
+     * Merges a {@link RectF} into an existing list of rectangles. While merging, this method
+     * makes sure that:
+     *
+     * <ol>
+     * <li>No rectangle is redundant (contained within a bigger rectangle)</li>
+     * <li>Rectangles of the same height and vertical position that intersect get merged</li>
+     * </ol>
+     *
+     * @param list      the list of rectangles to merge the new rectangle in
+     * @param candidate the {@link RectF} to merge into the list
+     * @hide
+     */
+    @VisibleForTesting
+    public static void mergeRectangleIntoList(List<RectF> list, RectF candidate) {
+        if (candidate.isEmpty()) {
+            return;
+        }
+
+        final int elementCount = list.size();
+        for (int index = 0; index < elementCount; ++index) {
+            final RectF existingRectangle = list.get(index);
+            if (existingRectangle.contains(candidate)) {
+                return;
+            }
+            if (candidate.contains(existingRectangle)) {
+                existingRectangle.setEmpty();
+                continue;
+            }
+
+            final boolean rectanglesContinueEachOther = candidate.left == existingRectangle.right
+                    || candidate.right == existingRectangle.left;
+            final boolean canMerge = candidate.top == existingRectangle.top
+                    && candidate.bottom == existingRectangle.bottom
+                    && (RectF.intersects(candidate, existingRectangle)
+                    || rectanglesContinueEachOther);
+
+            if (canMerge) {
+                candidate.union(existingRectangle);
+                existingRectangle.setEmpty();
+            }
+        }
+
+        for (int index = elementCount - 1; index >= 0; --index) {
+            if (list.get(index).isEmpty()) {
+                list.remove(index);
+            }
+        }
+
+        list.add(candidate);
+    }
+
 
     /** @hide */
     @VisibleForTesting
@@ -281,7 +330,9 @@ final class SelectionActionModeHelper {
         float bestY = -1;
         double bestDistance = Double.MAX_VALUE;
 
-        for (final RectF rectangle : rectangles) {
+        final int elementCount = rectangles.size();
+        for (int index = 0; index < elementCount; ++index) {
+            final RectF rectangle = rectangles.get(index);
             final float candidateY = rectangle.centerY();
             final float candidateX;
 

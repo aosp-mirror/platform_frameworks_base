@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -109,5 +110,155 @@ public final class SelectionActionModeHelperTest {
         assertEquals(expectedPointX, adjustedPoint.x, 0.0f);
         assertEquals(expectedPointY, adjustedPoint.y, 0.0f);
     }
+
+    @Test
+    public void testMergeRectangleIntoList_addThreeDisjointRectangles() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(10, 10, 11, 11),
+                        new RectF(20, 20, 21, 21)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(10, 10, 11, 11),
+                        new RectF(20, 20, 21, 21)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addAnEmptyRectangle() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 0, 0)
+                },
+                new RectF[] {
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addAContainedRectangle() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 10, 10),
+                        new RectF(9, 0, 10, 10)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 10, 10)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addARectangleThatContainsExistingRectangles() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(1, 0, 2, 1),
+                        new RectF(0, 0, 2, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 2, 1)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addRectangleThatIntersectsAndHasTheSameHeightOnRight() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(0.5f, 0, 1.5f, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 1.5f, 1)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addRectangleThatIntersectsAndHasTheSameHeightOnLeft() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0.5f, 0, 1.5f, 1),
+                        new RectF(0, 0, 1, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 1.5f, 1)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addRectangleThatExpandsToTheRight() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(1, 0, 1.5f, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 1.5f, 1)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_addRectangleThatExpandsToTheLeft() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(1, 0, 1.5f, 1),
+                        new RectF(0, 0, 1, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 1.5f, 1)
+                }
+        );
+    }
+
+
+    @Test
+    public void testMergeRectangleIntoList_addRectangleMadeObsoleteByMultipleExistingRectangles() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(0.5f, 0, 1.5f, 1),
+                        new RectF(0.25f, 0, 1.25f, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 1.5f, 1)
+                }
+        );
+    }
+
+    @Test
+    public void testMergeRectangleIntoList_threeRectanglesThatTouchEachOther() {
+        testExpandRectangleList(
+                new RectF[] {
+                        new RectF(0, 0, 1, 1),
+                        new RectF(1, 0, 2, 1),
+                        new RectF(2, 0, 3, 1)
+                },
+                new RectF[] {
+                        new RectF(0, 0, 3, 1)
+                }
+        );
+    }
+
+
+    private void testExpandRectangleList(final RectF[] inputRectangles,
+            final RectF[] outputRectangles) {
+        final List<RectF> expectedOutput = Arrays.asList(outputRectangles);
+
+        final List<RectF> result = new ArrayList<>();
+        final int size = inputRectangles.length;
+        for (int index = 0; index < size; ++index) {
+            SelectionActionModeHelper.mergeRectangleIntoList(result, inputRectangles[index]);
+        }
+
+        assertEquals(expectedOutput, result);
+    }
+
 
 }
