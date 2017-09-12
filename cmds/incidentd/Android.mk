@@ -23,10 +23,13 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := incidentd
 
 LOCAL_SRC_FILES := \
+        src/EncodedBuffer.cpp \
         src/FdBuffer.cpp \
         src/IncidentService.cpp \
+        src/Privacy.cpp \
         src/Reporter.cpp \
         src/Section.cpp \
+        src/io_util.cpp \
         src/main.cpp \
         src/protobuf.cpp \
         src/report_directory.cpp
@@ -69,7 +72,9 @@ LOCAL_GENERATED_SOURCES += $(GEN)
 gen_src_dir:=
 GEN:=
 
+ifeq ($(BUILD_WITH_INCIDENTD_RC), true)
 LOCAL_INIT_RC := incidentd.rc
+endif
 
 include $(BUILD_EXECUTABLE)
 
@@ -88,12 +93,16 @@ LOCAL_CFLAGS := -Werror -Wall -Wno-unused-variable -Wunused-parameter
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
 
 LOCAL_SRC_FILES := \
+    src/EncodedBuffer.cpp \
     src/FdBuffer.cpp \
+    src/Privacy.cpp \
     src/Reporter.cpp \
     src/Section.cpp \
+    src/io_util.cpp \
     src/protobuf.cpp \
     src/report_directory.cpp \
     tests/section_list.cpp \
+    tests/EncodedBuffer_test.cpp \
     tests/FdBuffer_test.cpp \
     tests/Reporter_test.cpp \
     tests/Section_test.cpp \

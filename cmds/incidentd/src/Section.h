@@ -17,7 +17,7 @@
 #ifndef SECTIONS_H
 #define SECTIONS_H
 
-#include "FdBuffer.h"
+#include "Reporter.h"
 
 #include <stdarg.h>
 #include <utils/String8.h>
@@ -42,8 +42,6 @@ public:
     virtual ~Section();
 
     virtual status_t Execute(ReportRequestSet* requests) const = 0;
-
-    status_t WriteHeader(ReportRequestSet* requests, size_t size) const;
 };
 
 /**

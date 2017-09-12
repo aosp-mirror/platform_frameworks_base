@@ -17,6 +17,7 @@
 #define LOG_TAG "incidentd"
 
 #include "FdBuffer.h"
+#include "io_util.h"
 
 #include <cutils/log.h>
 #include <utils/SystemClock.h>
@@ -239,25 +240,26 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
 }
 
 size_t
-FdBuffer::size()
+FdBuffer::size() const
 {
     if (mBuffers.empty()) return 0;
     return ((mBuffers.size() - 1) * BUFFER_SIZE) + mCurrentWritten;
 }
 
 status_t
-FdBuffer::write(ReportRequestSet* reporter)
+FdBuffer::flush(int fd) const
 {
-    const int N = mBuffers.size() - 1;
-    for (int i=0; i<N; i++) {
-        reporter->write(mBuffers[i], BUFFER_SIZE);
+    size_t i=0;
+    status_t err = NO_ERROR;
+    for (i=0; i<mBuffers.size()-1; i++) {
+        err = write_all(fd, mBuffers[i], BUFFER_SIZE);
+        if (err != NO_ERROR) return err;
     }
-    reporter->write(mBuffers[N], mCurrentWritten);
-    return NO_ERROR;
+    return write_all(fd, mBuffers[i], mCurrentWritten);
 }
 
 FdBuffer::iterator
-FdBuffer::end()
+FdBuffer::end() const
 {
     if (mBuffers.empty() || mCurrentWritten < 0) return begin();
     if (mCurrentWritten == BUFFER_SIZE)
@@ -279,7 +281,7 @@ FdBuffer::iterator::operator+(size_t offset)
 }
 
 size_t
-FdBuffer::iterator::bytesRead()
+FdBuffer::iterator::bytesRead() const
 {
     return mIndex * BUFFER_SIZE + mOffset;
 }

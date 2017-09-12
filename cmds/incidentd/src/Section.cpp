@@ -16,8 +16,14 @@
 
 #define LOG_TAG "incidentd"
 
+#include "EncodedBuffer.h"
+#include "FdBuffer.h"
+#include "Privacy.h"
 #include "Section.h"
+
+#include "io_util.h"
 #include "protobuf.h"
+#include "section_list.h"
 
 #include <private/android_filesystem_config.h>
 #include <binder/IServiceManager.h>
@@ -66,6 +72,7 @@ forkAndExecuteIncidentHelper(const int id, const char* name, Fpipe& p2cPipe, Fpi
     return pid;
 }
 
+// ================================================================================
 static status_t killChild(pid_t pid) {
     int status;
     kill(pid, SIGKILL);
@@ -87,6 +94,72 @@ static status_t waitForChild(pid_t pid) {
 }
 
 // ================================================================================
+static const Privacy*
+GetPrivacyOfSection(int id)
+{
+    if (id < 0) return NULL;
+    int i=0;
+    while (PRIVACY_POLICY_LIST[i] != NULL) {
+        const Privacy* p = PRIVACY_POLICY_LIST[i];
+        if (p->field_id == (uint32_t)id) return p;
+        if (p->field_id > (uint32_t)id) return NULL;
+        i++;
+    }
+    return NULL;
+}
+
+static status_t
+WriteToRequest(const int id, const int fd, EncodedBuffer& buffer, const PrivacySpec& spec)
+{
+    if (fd < 0) return EBADF;
+    status_t err = NO_ERROR;
+    uint8_t buf[20];
+
+    buffer.clear(); // clear before strip
+    err = buffer.strip(spec); // TODO: don't have to strip again if the spec is the same.
+    if (err != NO_ERROR || buffer.size() == 0) return err;
+    uint8_t *p = write_length_delimited_tag_header(buf, id, buffer.size());
+    err = write_all(fd, buf, p-buf);
+    if (err == NO_ERROR) {
+        err = buffer.flush(fd);
+        ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id, buffer.size(), fd, spec.dest);
+    }
+    return err;
+}
+
+static status_t
+WriteToReportRequests(const int id, const FdBuffer& buffer, ReportRequestSet* requests)
+{
+    status_t err = EBADF;
+    EncodedBuffer encodedBuffer(buffer, GetPrivacyOfSection(id));
+    int writeable = 0;
+
+    // The streaming ones
+    for (ReportRequestSet::iterator it = requests->begin(); it != requests->end(); it++) {
+        sp<ReportRequest> request = *it;
+        PrivacySpec spec; // TODO: this should be derived from each request.
+        err = WriteToRequest(id, request->fd, encodedBuffer, spec);
+        if (err != NO_ERROR) {
+            request->err = err;
+        } else {
+            writeable++;
+        }
+    }
+
+    // The dropbox file
+    if (requests->mainFd() >= 0) {
+        err = WriteToRequest(id, requests->mainFd(), encodedBuffer, get_default_dropbox_spec());
+        if (err != NO_ERROR) {
+            requests->setMainFd(-1);
+        } else {
+            writeable++;
+        }
+    }
+    // only returns error if there is no fd to write to.
+    return writeable > 0 ? NO_ERROR : err;
+}
+
+// ================================================================================
 Section::Section(int i, const int64_t timeoutMs)
     :id(i), timeoutMs(timeoutMs)
 {
@@ -94,15 +167,6 @@ Section::Section(int i, const int64_t timeoutMs)
 
 Section::~Section()
 {
-}
-
-status_t
-Section::WriteHeader(ReportRequestSet* requests, size_t size) const
-{
-    ssize_t amt;
-    uint8_t buf[20];
-    uint8_t* p = write_length_delimited_tag_header(buf, this->id, size);
-    return requests->write(buf, p-buf);
 }
 
 // ================================================================================
@@ -113,7 +177,9 @@ FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
 
 FileSection::~FileSection() {}
 
-status_t FileSection::Execute(ReportRequestSet* requests) const {
+status_t
+FileSection::Execute(ReportRequestSet* requests) const
+{
     // read from mFilename first, make sure the file is available
     // add O_CLOEXEC to make sure it is closed when exec incident helper
     int fd = open(mFilename, O_RDONLY | O_CLOEXEC);
@@ -155,8 +221,7 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
 
     ALOGD("FileSection '%s' wrote %zd bytes in %d ms", this->name.string(), buffer.size(),
             (int)buffer.durationMs());
-    WriteHeader(requests, buffer.size());
-    status_t err = buffer.write(requests);
+    status_t err = WriteToReportRequests(this->id, buffer, requests);
     if (err != NO_ERROR) {
         ALOGW("FileSection '%s' failed writing: %s", this->name.string(), strerror(-err));
         return err;
@@ -313,8 +378,7 @@ WorkerThreadSection::Execute(ReportRequestSet* requests) const
     // Write the data that was collected
     ALOGD("WorkerThreadSection '%s' wrote %zd bytes in %d ms", name.string(), buffer.size(),
             (int)buffer.durationMs());
-    WriteHeader(requests, buffer.size());
-    err = buffer.write(requests);
+    err = WriteToReportRequests(this->id, buffer, requests);
     if (err != NO_ERROR) {
         ALOGW("WorkerThreadSection '%s' failed writing: '%s'", this->name.string(), strerror(-err));
         return err;
@@ -324,7 +388,8 @@ WorkerThreadSection::Execute(ReportRequestSet* requests) const
 }
 
 // ================================================================================
-void CommandSection::init(const char* command, va_list args)
+void
+CommandSection::init(const char* command, va_list args)
 {
     va_list copied_args;
     int numOfArgs = 0;
@@ -429,8 +494,7 @@ CommandSection::Execute(ReportRequestSet* requests) const
 
     ALOGD("CommandSection '%s' wrote %zd bytes in %d ms", this->name.string(), buffer.size(),
             (int)buffer.durationMs());
-    WriteHeader(requests, buffer.size());
-    status_t err = buffer.write(requests);
+    status_t err = WriteToReportRequests(this->id, buffer, requests);
     if (err != NO_ERROR) {
         ALOGW("CommandSection '%s' failed writing: %s", this->name.string(), strerror(-err));
         return err;

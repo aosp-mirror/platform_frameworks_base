@@ -17,6 +17,7 @@
 #define LOG_TAG "incidentd"
 
 #include "Reporter.h"
+#include "io_util.h"
 #include "protobuf.h"
 
 #include "report_directory.h"
@@ -38,20 +39,6 @@
 static const char* INCIDENT_DIRECTORY = "/data/misc/incidents/";
 
 // ================================================================================
-static status_t write_all(int fd, uint8_t const* buf, size_t size)
-{
-    while (size > 0) {
-        ssize_t amt = ::write(fd, buf, size);
-        if (amt < 0) {
-            return -errno;
-        }
-        size -= amt;
-        buf += amt;
-    }
-    return NO_ERROR;
-}
-
-// ================================================================================
 ReportRequest::ReportRequest(const IncidentReportArgs& a,
             const sp<IIncidentReportStatusListener> &l, int f)
     :args(a),
@@ -69,7 +56,6 @@ ReportRequest::~ReportRequest()
 ReportRequestSet::ReportRequestSet()
     :mRequests(),
      mSections(),
-     mWritableCount(0),
      mMainFd(-1)
 {
 }
@@ -84,45 +70,12 @@ ReportRequestSet::add(const sp<ReportRequest>& request)
 {
     mRequests.push_back(request);
     mSections.merge(request->args);
-    mWritableCount++;
 }
 
 void
 ReportRequestSet::setMainFd(int fd)
 {
     mMainFd = fd;
-    mWritableCount++;
-}
-
-status_t
-ReportRequestSet::write(uint8_t const* buf, size_t size)
-{
-    status_t err = EBADF;
-
-    // The streaming ones
-    int const N = mRequests.size();
-    for (int i=N-1; i>=0; i--) {
-        sp<ReportRequest> request = mRequests[i];
-        if (request->fd >= 0 && request->err == NO_ERROR) {
-            err = write_all(request->fd, buf, size);
-            if (err != NO_ERROR) {
-                request->err = err;
-                mWritableCount--;
-            }
-        }
-    }
-
-    // The dropbox file
-    if (mMainFd >= 0) {
-        err = write_all(mMainFd, buf, size);
-        if (err != NO_ERROR) {
-            mMainFd = -1;
-            mWritableCount--;
-        }
-    }
-
-    // Return an error only when there are no FDs to write.
-    return mWritableCount > 0 ? NO_ERROR : err;
 }
 
 bool
