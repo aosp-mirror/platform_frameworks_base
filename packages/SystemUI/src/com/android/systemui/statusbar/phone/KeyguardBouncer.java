@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -247,12 +248,16 @@ public class KeyguardBouncer {
         removeView();
         mHandler.removeCallbacks(mRemoveViewRunnable);
         mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
-        mKeyguardView = (KeyguardHostView) mRoot.findViewById(R.id.keyguard_host_view);
+        mKeyguardView = mRoot.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mCallback);
         mContainer.addView(mRoot, mContainer.getChildCount());
         mRoot.setVisibility(View.INVISIBLE);
-        mRoot.dispatchApplyWindowInsets(mRoot.getRootWindowInsets());
+
+        final WindowInsets rootInsets = mRoot.getRootWindowInsets();
+        if (rootInsets != null) {
+            mRoot.dispatchApplyWindowInsets(rootInsets);
+        }
     }
 
     protected void removeView() {
