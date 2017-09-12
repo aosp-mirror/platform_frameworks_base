@@ -1150,7 +1150,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB cho MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Đã kết nối với phụ kiện USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Nhấn để biết thêm tùy chọn."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Gỡ lỗi USB đã được kết nối"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Đã kết nối gỡ lỗi USB"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Nhấn để vô hiệu hóa gỡ lỗi USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Đang thu thập báo cáo lỗi…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Chia sẻ báo cáo lỗi?"</string>
@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Hãy thử lại sau"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Xem toàn màn hình"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt xuống từ trên cùng."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Xong"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Thanh trượt giờ hình tròn"</string>
@@ -1569,7 +1569,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Được cập nhật bởi quản trị viên của bạn"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Đã bị xóa bởi quản trị viên của bạn"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu. Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví như, hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

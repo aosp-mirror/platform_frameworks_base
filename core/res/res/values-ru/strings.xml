@@ -201,7 +201,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Подготовка обновлений…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Обработка обновлений…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Перезагрузка…"</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Сброс настроек"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Сбросить к заводским настройкам"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Перезагрузка…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
@@ -217,7 +217,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Настройки телевизора"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Выключить"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Экстренный вызов"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
@@ -299,7 +299,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Приложение получит доступ к сообщениям широковещательных SMS-служб, которые в некоторых странах используются для информирования населения об экстренных ситуациях. Вредоносные программы могут помешать работе устройства, на которое поступают такие сообщения."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Просмотр фидов пользователя"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Приложение сможет получать сведения о синхронизируемых в настоящее время фидах."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"отправка и просмотр SMS-сообщений"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"Отправка и просмотр SMS-сообщений"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Приложение сможет отправлять SMS. Учтите, что вредоносные программы смогут отправлять сообщения без уведомления, что может привести к непредвиденным расходам."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"Просмотр SMS и MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Приложение сможет просматривать SMS-сообщения, сохраненные на устройстве или SIM-карте, независимо от содержания или настроек конфиденциальности."</string>
@@ -436,7 +436,7 @@
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Доступ к настройкам Bluetooth на телевизоре, установка соединений с сопряженными устройствами и принятие запросов на подключение."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Приложение сможет просматривать конфигурацию Bluetooth на телефоне, а также запрашивать и подтверждать соединение с другими устройствами."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Управление NFC-модулем"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя связь малого радиуса действия."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление сканером отпечатков"</string>
@@ -456,7 +456,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Операция с отпечатком отменена."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Слишком много попыток. Повторите позже."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторите попытку."</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Отпечаток <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок отпечатка пальца"</string>
@@ -1178,7 +1178,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта добавлена"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Перезагрузите устройство, чтобы подключиться к мобильной сети."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапустить"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Чтобы SIM-карта работала корректно, установите и запустите приложение оператора."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"СКАЧАТЬ"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ СЕЙЧАС"</string>
@@ -1741,7 +1741,7 @@
     <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Сбросить настройки устройства?"</string>
     <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Нажмите здесь, чтобы сбросить настройки"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Запуск деморежима…"</string>
-    <string name="demo_restarting_message" msgid="952118052531642451">"Сброс настроек…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Сброс данных…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Сбросить настройки устройства?"</string>
     <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Все изменения будут утеряны. Деморежим будет перезапущен через <xliff:g id="TIMEOUT">%1$s</xliff:g> сек."</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Отмена"</string>

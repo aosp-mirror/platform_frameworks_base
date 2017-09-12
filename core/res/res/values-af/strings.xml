@@ -81,7 +81,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Drierigtingbel"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Verwerping van ongewenste, irriterende oproepe"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Oproepnommer-lewering"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Moenie steur nie"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Moenie Steur Nie"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Beller-ID se verstek is beperk. Volgende oproep: beperk"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Beller-ID se verstek is beperk. Volgende oproep: nie beperk nie"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Beller-ID se verstek is nie beperk nie. Volgende oproep: beperk"</string>
@@ -261,15 +261,15 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"foonoproepe te maak en te bestuur"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Liggaamsensors"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang te verkry tot sensordata oor jou lewenstekens"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Haal venster-inhoud op"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Venster-inhoud ophaal"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Skakel Verken deur raak aan"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Verken deur raak aanskakel"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Items waarop getik word, sal hardop gesê word en die skerm kan met behulp van gebare verken word."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Skakel verbeterde webtoeganklikheid aan"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbeterde webtoeganklikheid aanskakel"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skripte kan geïnstalleer word om program-inhoud meer toeganklik te maak."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Neem teks wat jy tik waar"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Teks wat jy tik waarneem"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Beheer vertoonskermvergroting"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Vertoonskermvergroting beheer"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Beheer die vertoonskerm se zoemvlak en posisionering."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Voer gebare uit"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan tik, swiep, knyp en ander gebare uitvoer."</string>
@@ -512,8 +512,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dit laat die houer toe om aan die top-koppelvlak van \'n diensverskaffer-boodskapdiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"verbind aan diensverskafferdienste"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Laat die houer toe om aan diensverskafferdienste te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"verkry toegang tot Moenie steur nie"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Laat die program toe om Moenie steur nie-opstelling te lees en skryf."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"verkry toegang tot Moenie Steur Nie"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>
@@ -1607,10 +1607,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Totdat jy dit afskakel"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat jy Moenie steur nie afskakel"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat jy Moenie Steur Nie afskakel"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Vou in"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Moenie steur nie"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Moenie Steur Nie"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Staantyd"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeksaand"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Naweek"</string>

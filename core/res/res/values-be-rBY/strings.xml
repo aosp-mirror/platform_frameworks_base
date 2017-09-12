@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="byteShort" msgid="8340973892742019101">"б"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Кб"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Мб"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
@@ -235,7 +235,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Бязгучны рэжым"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Гук выкл."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Гук уключаны"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Рэжым \"У самалёце\""</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Рэжым палёту"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Уключаны рэжым \"У самалёце\""</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Рэжым \"У самалёце\" адключаны"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Налады"</string>
@@ -267,14 +267,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"рабіць тэлефонныя выклікі і кіраваць імі"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Датчыкі цела"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"атрымліваць з датчыка даныя асноўных фізіялагічных паказчыкаў"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымайце змесцiва акна"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Вывучыце змесцiва акна, з якiм вы працуеце."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключыце Explore by Touch"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымліваць змесціва вакна"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Аналізаваць змесціва актыўнага вакна."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключаць Азнаямленне дотыкам"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Элементы, да якіх дакрануліся, будуць агучаны, а экранам можна даследаваць пры дапамозе жэстаў."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Уключыце паляпшэнне вэб-даступнасці"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Сцэнарыi могуць быць усталяваны, каб зрабіць змесцiва прыкладання больш даступным."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Глядзiце, што набiраеце"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Уключае ў сябе асабістыя дадзеныя, такія як нумары крэдытных карт і паролі."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Уключаць спецыяльныя магчымасці для інтэрнэту"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могуць усталёўвацца скрыпты, каб зрабіць змесціва праграмы больш даступным."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Праглядаць тэкст, які вы набіраеце"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"У тым ліку асабістыя даныя, такія як нумары крэдытных карт і паролі."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Кіраваць павелічэннем дысплэя"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Кіраваць маштабам дысплэя і пазіцыянаваннем."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Выконваць жэсты"</string>
@@ -1038,7 +1038,7 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Выберыце дзеянне"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Выберыце прыкладанне для USB-прылады"</string>
     <string name="noApplications" msgid="2991814273936504689">"Няма прыкладанняў, якія могуць выконваць гэты працэс."</string>
-    <string name="aerr_application" msgid="250320989337856518">"Праграма <xliff:g id="APPLICATION">%1$s</xliff:g> спынілася"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g>: збой у рабоце"</string>
     <string name="aerr_process" msgid="6201597323218674729">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> спыніўся"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> шматразова спыняе працу"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> шматразова спыняе працу"</string>

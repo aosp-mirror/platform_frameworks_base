@@ -71,8 +71,8 @@
     <string name="ClirMmi" msgid="7784673673446833091">"本機號碼"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"連接線識別功能"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"連接線識別限制"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"來電轉接"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"來電待接"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"來電轉駁"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"來電等候"</string>
     <string name="BaMmi" msgid="455193067926770581">"通話限制"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"密碼更改"</string>
     <string name="PinMmi" msgid="3113117780361190304">"更改 PIN"</string>
@@ -88,7 +88,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"預設顯示來電號碼，下一通電話也繼續顯示。"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供此服務。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您無法更改來電顯示設定。"</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"已封鎖數據傳輸服務。"</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"已封鎖數據服務。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"已封鎖緊急服務。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"已封鎖語音服務。"</string>
     <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"已封鎖所有語音服務。"</string>
@@ -96,7 +96,7 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已封鎖語音/數據服務。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/SMS 服務。"</string>
-    <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 模式 (FULL)"</string>
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 完整模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"對方曾要求 TTY 模式 (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"對方曾要求 TTY 模式 (VCO)"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"對方曾要求 TTY 模式 (OFF)"</string>
@@ -655,7 +655,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"姊妹"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"配偶"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"自訂"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"家用"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"住宅"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"公司"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"找不到可以查看這位聯絡人的應用程式。"</string>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」不斷停止運作"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"「<xliff:g id="PROCESS">%1$s</xliff:g>」不斷停止運作"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"再次開啟應用程式"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"傳送意見反映"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"傳送意見"</string>
     <string name="aerr_close" msgid="2991640326563991340">"關閉"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"忽略直至裝置重新啟動"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"等一下"</string>
@@ -1381,7 +1381,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃瞄…"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃描…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在連線..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可用"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"無法使用"</string>
@@ -1568,41 +1568,41 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式雖可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"為延長電池壽命，省電模式會降低裝置效能，並限制震動、位置資訊服務及大部分背景數據傳輸。如電郵、短訊及其他使用同步功能的應用程式沒有開啟，便不會自動更新。\n\n裝置充電時，省電模式會自動關閉。"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 分鐘 (直至<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 分鐘 (直至<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">需時 %1$d 小時 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 小時 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 小時 (直至<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 小時 (直至<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">需時 %1$d 小時 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">需時 1 小時 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d 小時 (直至<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 小時 (直至<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">需時 %d 分鐘</item>
-      <item quantity="one">需時 1 分鐘</item>
+      <item quantity="other">%d 分鐘</item>
+      <item quantity="one">1 分鐘</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="other">需時 %d 分鐘</item>
-      <item quantity="one">需時 1 分鐘</item>
+      <item quantity="other">%d 分鐘</item>
+      <item quantity="one">1 分鐘</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">需時 %d 小時</item>
-      <item quantity="one">需時 1 小時</item>
+      <item quantity="other">%d 小時</item>
+      <item quantity="one">1 小時</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">需時 %d 小時</item>
-      <item quantity="one">需時 1 小時</item>
+      <item quantity="other">%d 小時</item>
+      <item quantity="one">1 小時</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"直至<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (下一次響鬧)"</string>

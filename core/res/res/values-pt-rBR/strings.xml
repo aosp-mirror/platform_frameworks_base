@@ -306,7 +306,7 @@
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"gerenciar proprietários de perfis e de dispositivos"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permitir que os apps definam os proprietários de perfis e de dispositivos."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar os apps em execução"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o app mova tarefas para o primeiro plano e o plano de fundo, sem sua intervenção."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o app mova tarefas para o primeiro e o segundo plano, sem sua intervenção."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ativar o modo carro"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que o app ative o modo Carro."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"fechar outros apps"</string>
@@ -980,7 +980,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"Enviar usando"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Enviar usando %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Enviar"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Selecione um app de Página inicial"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Selecione um app de início"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como Página inicial"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Capturar imagem"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Capturar imagem com"</string>
@@ -1256,7 +1256,7 @@
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toque para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Voltar"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Avançar"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"Ignorar"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Pular"</string>
     <string name="no_matches" msgid="8129421908915840737">"Não encontrado"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Localizar na página"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
@@ -1636,7 +1636,7 @@
     <string name="close_button_text" msgid="3937902162644062866">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionado</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
     </plurals>
     <string name="importance_from_user" msgid="7318955817386549931">"Você definiu a importância dessas notificações."</string>

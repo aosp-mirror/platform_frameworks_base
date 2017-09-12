@@ -269,8 +269,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"යෙදුම් අන්තර්ගතයට ප්‍රවේශ්‍යතාවය වැඩිවන ලෙස සකස් කිරීමට ඇතැම් විට ස්ක්‍රිප්ට් ස්ථාපනය කර ඇත."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ඔබ ටයිප් කළ පෙළ බලන්න"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ණයවරපත් අංක සහ මුරපද වැනි පුද්ගලික දත්ත ඇතුළත් වේ."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"සංදර්ශන විශාලන මට්ටම පාලනය කිරීම"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"සංදර්ශනයේ විශාලන මට්ටම සහ පිහිටීම පාලනය කිරීම."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"සංදර්ශනයේ විශාලනය පාලනය කරන්න"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"සංදර්ශනයේ විශාලන මට්ටම සහ පිහිටීම පාලනය කරන්න."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"අභින සිදු කරන්න"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"තට්ටු කිරීමට, ස්වයිප් කිරීමට, පින්ච් කිරීමට, සහ වෙනත් අභින සිදු කිරීමට හැකිය."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"තත්ව තීරුව අබල කරන්න හෝ වෙනස් කරන්න"</string>
@@ -457,13 +457,13 @@
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"සමමුහුර්ත කිරීම සක්‍රිය කරන්න සහ අක්‍රිය කරන්න"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුම සමඟ පුද්ගල යෙදුම සමමුහුර්ත කිරීම සක්‍රිය කිරීමට භාවිත කල හැක."</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ගිණුමක් සඳහා සමමුහුර්ත සැකසීම් විකරණය කිරීමට යෙදුමකට ඉඩ දෙයි. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත කිරීම සබල කිරීමට මෙය භාවිත කළ හැක."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීම"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"සමමුහුර්ත කිරීමේ සිදුවීම් ඉතිහාසය සහ කෙතරම් දත්ත සමමුහුර්ත වී ඇතිදැයි ඇතුලත් ගිණුම සඳහා සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ඔබගේ USB ආචයනය හි අන්තර්ගතය කියවන්න"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ඔබගේ SD කාඩ් පතෙහි අන්තර්ගතය කියවන්න"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"යෙදුමට ඔබගේ USB ආචයනය අන්තර්ගතය කියවීමට අවසර දෙන්න."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"යෙදුමට ඔබගේ SD කාඩ් පතින් අන්තර්ගත කියවීමට අවසර දෙන්න."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"යෙදුමට ඔබගේ SD කාඩ්පතේ අන්තර්ගතය කියවීමට ඉඩ දෙයි."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ඔබගේ USB ආචයනයේ අන්තර්ගත වෙනස් කිරීම හෝ මැකීම"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ඔබගේ SD පතේ අන්තර්ගත වෙනස් කිරීම හෝ මැකීම"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB ආචයනය වෙත ලිවීමට යෙදුමට අවසර දෙන්න."</string>
@@ -737,7 +737,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
     <skip />
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"විජටය එකතු කරන්න."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"විජටය එක් කරන්න."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"හිස්"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"අගුළු අරින ප්‍රදේශය විදහා ඇත."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"අගුළු අරින ප්‍රදේශය හැකිලී ඇත."</string>
@@ -950,7 +950,7 @@
     <string name="undo" msgid="7905788502491742328">"අස් කරන්න"</string>
     <string name="redo" msgid="7759464876566803888">"යළි කරන්න"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"පෙළ තේරීම"</string>
-    <string name="addToDictionary" msgid="4352161534510057874">"ශබ්ද කෝෂයට එකතු කරන්න"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"ශබ්ද කෝෂයට එක් කරන්න"</string>
     <string name="deleteText" msgid="6979668428458199034">"මකන්න"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ආදාන ක්‍රමය"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"පෙළ ක්‍රියාවන්"</string>
@@ -1095,9 +1095,9 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"සම්බන්ධතාවයට ඉඩ දෙන්නද?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"යෙදුම් %1$s ක් WiFi ජාලය %2$s වෙත සම්බන්ධ කිරීමට කැමතියි"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"යෙදුම"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ඍජු Wi-Fi"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ඍජු Wi-Fi ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ඍජු Wi-Fi ආරම්භ කළ නොහැක."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct ආරම්භ කළ නොහැක."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ක්‍රියාත්මකයි"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"සැකසීම් සඳහා තට්ටු කරන්න"</string>
     <string name="accept" msgid="1645267259272829559">"පිළිගන්න"</string>
@@ -1284,7 +1284,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"මැකීම් අස් කරන්න"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"දැනට කිසිවක් නොකරන්න"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ගිණුමක් තෝරන්න"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"ගිණුමක් එකතු කරන්න"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"ගිණුමක් එක් කරන්න"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"ගිණුමක් එක් කරන්න"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"වැඩි කරන්න"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"අඩු කරන්න"</string>
@@ -1570,7 +1570,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ඔබගේ පරිපාලක විසින් ස්ථාපනය කරන ලද"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊ-තැපැල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව ක්‍රියාත්මක වේ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ක්‍රියාත්මක කරන්න"</string>

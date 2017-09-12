@@ -264,15 +264,15 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упућује телефонске позиве и управља њима"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Сензори за тело"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"приступа подацима сензора о виталним функцијама"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преузима садржај прозора"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"да преузима садржај прозора"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Проверава садржај прозора са којим остварујете интеракцију."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Укључи Истраживања додиром"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"да укључи Истраживања додиром"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ставке које додирнете ће бити изговорене наглас, а можете да се крећете по екрану покретима."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Укључи побољшану приступачност веба"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"да укључи побољшану приступачност веба"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могу да се инсталирају скрипте да би садржај апликација био приступачнији."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Прати текст који уносите"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"да прати текст који уносите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Обухвата личне податке као што су бројеви кредитних картица и лозинке."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Управљај увећањем приказа"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"да управља увећањем приказа"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Управља нивоом зумирања приказа и одређивањем положаја."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Обављање покрета"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Може да додирује, листа, скупља приказ и обавља друге покрете."</string>
@@ -371,7 +371,7 @@
     <string name="permlab_sim_communication" msgid="2935852302216852065">"слање команди на SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Омогућава апликацији да шаље команде SIM картици. То је веома опасно."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимање фотографија и видео снимака"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Дозвољава апликацији да снима слике и видео снимке камером. Ова дозвола омогућава апликацији да у било ком тренутку користи камеру без ваше потврде."</string>
+    <string name="permdesc_camera" msgid="8497216524735535009">"Дозвољава апликацији да снима слике и видео камером. Ова дозвола омогућава апликацији да у било ком тренутку користи камеру без ваше потврде."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"контрола вибрације"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно позивање бројева телефона"</string>
@@ -806,7 +806,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавање говорне поште"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Дозвољава апликацији да додаје поруке у пријемно сандуче говорне поште."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"измена дозвола за географске локације Прегледача"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозвољава апликацији да измени дозволе Прегледача за утврђивање географске локације. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Дозвољава апликацији да измени дозволе Прегледача за утврђивање географске локације. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб-сајтовима."</string>
     <string name="save_password_message" msgid="767344687139195790">"Желите ли да прегледач запамти ову лозинку?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сада"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запамти"</string>
@@ -1017,7 +1017,7 @@
     <string name="noApplications" msgid="2991814273936504689">"Ниједна апликација не може да обавља ову радњу."</string>
     <string name="aerr_application" msgid="250320989337856518">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> је заустављена"</string>
     <string name="aerr_process" msgid="6201597323218674729">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> је заустављен"</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> се стално зауставља"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> се стално зауставља(ју)"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> се стално зауставља"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Поново отвори апликацију"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Пошаљите повратне информације"</string>
@@ -1175,7 +1175,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB за MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Повезано са USB додатком"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Додирните за још опција."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је успостављено"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је омогућено"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Додирните да бисте онемогућили отклањање грешака са USB-а."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Извештај о грешци се генерише…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Желите ли да поделите извештај о грешци?"</string>
@@ -1204,7 +1204,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Уређај <xliff:g id="NAME">%s</xliff:g> је уклоњен; уметните нови"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> се још увек избацује…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Не уклањајте"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"Подеси"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Активирај"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Избаци"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Истражи"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> недостаје"</string>
@@ -1273,7 +1273,7 @@
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Додирните да бисте подесили"</string>
     <string name="upload_file" msgid="2897957172366730416">"Одабери датотеку"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Није изабрана ниједна датотека"</string>
-    <string name="reset" msgid="2448168080964209908">"Поново постави"</string>
+    <string name="reset" msgid="2448168080964209908">"Ресетуј"</string>
     <string name="submit" msgid="1602335572089911941">"Пошаљи"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим рада у аутомобилу је омогућен"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Додирните да бисте изашли из режима рада у аутомобилу."</string>
@@ -1307,7 +1307,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Избриши ставке"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Опозови брисања"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Не ради ништа за сада"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Избор налога"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Изаберите налог"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Додај налог"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Додај налог"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Повећавање"</string>
@@ -1595,7 +1595,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Инсталирао је ваш администратор"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избрисао је ваш адмиистратор"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију можда неће да се ажурирају ако их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију неће се ажурирати док их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Укључити Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Укључи"</string>

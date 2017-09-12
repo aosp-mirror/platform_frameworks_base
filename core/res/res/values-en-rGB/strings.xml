@@ -240,7 +240,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contents hidden"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Contents hidden by policy"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android system"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Switch to Personal"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Switch to Work"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
@@ -259,7 +259,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"take pictures and record video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telephone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"make and manage phone calls"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Body Sensors"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Body sensors"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"access sensor data about your vital signs"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Retrieve window content"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspect the content of a window that you\'re interacting with."</string>
@@ -549,8 +549,8 @@
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
     <item msgid="7897544654242874543">"Work"</item>
-    <item msgid="1103601433382158155">"Work Fax"</item>
-    <item msgid="1735177144948329370">"Home Fax"</item>
+    <item msgid="1103601433382158155">"Work fax"</item>
+    <item msgid="1735177144948329370">"Home fax"</item>
     <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Other"</item>
     <item msgid="9192514806975898961">"Custom"</item>
@@ -593,7 +593,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobile"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Work"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Work Fax"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Home Fax"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Home fax"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Other"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Callback"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installed by your administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Updated by your administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Deleted by your administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services and most background data. Email, messaging and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Turn on"</string>
@@ -1607,7 +1607,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (next alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Until you turn this off"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Until you turn off Do Not Disturb"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Until you turn off Do not disturb"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Collapse"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Do not disturb"</string>

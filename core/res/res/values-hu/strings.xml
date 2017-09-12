@@ -214,7 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonbeállítások"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Képernyő lezárása"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Kikapcsolás"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Vészhívás"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Segélyhívás"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Programhiba bejelentése"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Hibajelentés készítése"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ezzel információt fog gyűjteni az eszköz jelenlegi állapotáról, amelyet a rendszer e-mailben fog elküldeni. Kérjük, legyen türelemmel, amíg a hibajelentés elkészül, és küldhető állapotba kerül."</string>
@@ -674,7 +674,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Rajzolja le a mintát a feloldáshoz"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Vészhívás"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Segélyhívás"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Hívás folytatása"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Helyes!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Próbálja újra"</string>

@@ -71,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"Nummerpresentatör för utgående samtal"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Visning av uppkopplat nummer"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Blockera visning av uppkopplat nummer"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Vidarebefordra samtal"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Vidarekoppla samtal"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Samtal väntar"</string>
     <string name="BaMmi" msgid="455193067926770581">"Samtalsspärr"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Byt lösenord"</string>
@@ -263,7 +263,7 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by Touch"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by touch"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Objekt som användaren trycker på läses upp högt och skärmen kan utforskas med hjälp av rörelser."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktivera förbättrad webbtillgänglighet"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skript kan installeras för att göra appens innehåll tillgängligare."</string>
@@ -822,9 +822,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Ta bort frågan"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Skicka fråga"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Röstsökning"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Aktivera Explore by Touch?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by Touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med surfplattan."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by Touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med telefonen."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Aktivera Explore by touch?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med surfplattan."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med telefonen."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"för 1 månad sedan"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"För mer än en månad sedan"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1094,7 +1094,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vill ansluta till Wi-Fi-nätverket %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi direkt"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Starta direkt Wi-Fi-användning. Detta inaktiverar Wi-Fi-användning med klient/trådlös surfzon."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Starta direkt Wi-Fi-användning. Detta inaktiverar Wi-Fi-användning med klient/surfzon."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Det gick inte att starta Wi-Fi direkt."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct är aktiverat"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Tryck för inställningar"</string>
@@ -1159,7 +1159,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"DELA"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"AVVISA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Byt tangentbord"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Ha kvar den på skärmen när det fysiska tangentbordet används"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Ha kvar det på skärmen när det fysiska tangentbordet används"</string>
     <string name="hardware" msgid="194658061510127999">"Visa virtuellt tangentbord"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfigurera fysiskt tangentbord"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tryck om du vill välja språk och layout"</string>
@@ -1174,7 +1174,7 @@
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> stöds inte"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Enheten har inte stöd för <xliff:g id="NAME">%s</xliff:g>. Tryck här om du vill konfigurera i ett format som stöds."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> togs bort oväntat"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Montera bort <xliff:g id="NAME">%s</xliff:g> före borttagningen för att undvika dataförlust"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Avmontera <xliff:g id="NAME">%s</xliff:g> före borttagningen för att undvika dataförlust"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Ditt <xliff:g id="NAME">%s</xliff:g> har tagits bort"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> togs bort. Mata in ett nytt"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Ditt <xliff:g id="NAME">%s</xliff:g> matas fortfarande ut …"</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ändra bakgrund"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Meddelandelyssnare"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Lyssnare för virtuell verklighet"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Lyssnare för VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Leverantör"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Rankningstjänst för aviseringar"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN är aktiverat"</string>
@@ -1252,7 +1252,7 @@
     <string name="submit" msgid="1602335572089911941">"Skicka"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Billäge aktiverat"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Tryck om du vill avsluta billäge."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfpunkt aktiverad"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Internetdelning eller surfzon aktiverad"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Tryck om du vill konfigurera."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Tillbaka"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Nästa"</string>
@@ -1315,7 +1315,7 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skärmlåsfunktion. Tryck och dra."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att svepa."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut mikrofonlurar om du vill att lösenordet ska läsas upp."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut ett headset för att få lösenordet uppläst."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Visa startsidan"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigera uppåt"</string>
@@ -1400,7 +1400,7 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ange PIN-kod för SIM-kortet"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ange PIN-kod"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Ange lösenord"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet är nu inaktiverat. Ange PUK-koden om du vill fortsätta. Kontakta operatören om du vill få mer information."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet är nu inaktiverat. Ange PUK-koden för att fortsätta. Kontakta operatören om du vill ha mer information."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ange önskad PIN-kod"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekräfta önskad PIN-kod"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Låser upp SIM-kort …"</string>

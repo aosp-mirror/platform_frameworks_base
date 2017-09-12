@@ -240,7 +240,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Përmbajtjet janë të fshehura"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Përmbajtja është e fshehur për shkak të politikës"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modaliteti i sigurisë"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Sistemi \"android\""</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Sistemi Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Ndryshoje te \"Personale\""</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Ndryshoje te \"Puna\""</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktet"</string>
@@ -1045,7 +1045,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories së procesit me <xliff:g id="SIZE">%2$s</xliff:g>. Mundësohet stivimi e skedarëve fiktivë në mënyrë që t\'i ndani me zhvilluesit e tyre. Bëni kujdes pasi stiva e skedarëve fiktivë mund të përmbajë ndonjë informacion tëndin personal ku aplikacioni ka qasje."</string>
     <string name="sendText" msgid="5209874571959469142">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumi i ziles"</string>
-    <string name="volume_music" msgid="5421651157138628171">"volumi i klipit \"media\""</string>
+    <string name="volume_music" msgid="5421651157138628171">"Volumi i medias"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Luajtje përmes \"bluetooth-it\""</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Zilja \"në heshjte\" u caktua"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volumi i telefonatës"</string>
@@ -1056,7 +1056,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volumi i \"bluetooth-it\""</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volumi i ziles"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumi i telefonatës"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"volumi i klipit \"media\""</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumi i medias"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumi i njoftimeve"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zile e paracaktuar."</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Zilja e paracaktuar (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"U instalua nga administratori yt"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"U fshi nga administratori yt"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Email-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivizo"</string>
