@@ -109,6 +109,10 @@ public class OffloadHardwareInterface {
                 mLog.e("tethering offload control not supported: " + e);
                 return false;
             }
+            if (mOffloadControl == null) {
+                mLog.e("tethering IOffloadControl.getService() returned null");
+                return false;
+            }
         }
 
         final String logmsg = String.format("initOffloadControl(%s)",
