@@ -254,6 +254,14 @@ public class ManagedServicesTest extends NotificationTestCase {
             loadXml(service);
 
             verifyExpectedApprovedEntries(service);
+
+            int[] invalidUsers = new int[] {98, 99};
+            for (int invalidUser : invalidUsers) {
+                assertFalse("service type " + service.mApprovalLevel + ":"
+                                + invalidUser + " is allowed for user " + invalidUser,
+                        service.isPackageOrComponentAllowed(
+                                String.valueOf(invalidUser), invalidUser));
+            }
         }
     }
 
@@ -616,6 +624,14 @@ public class ManagedServicesTest extends NotificationTestCase {
             xml.append(getXmlEntry(
                     mExpectedSecondary.get(service.mApprovalLevel).get(userId), userId, false));
         }
+        xml.append("<" + ManagedServices.TAG_MANAGED_SERVICES + " "
+                        + ManagedServices.ATT_USER_ID + "=\"99\" "
+                        + ManagedServices.ATT_IS_PRIMARY + "=\"true\" "
+                        + ManagedServices.ATT_APPROVED_LIST + "=\"99\" />\n");
+        xml.append("<" + ManagedServices.TAG_MANAGED_SERVICES + " "
+                + ManagedServices.ATT_USER_ID + "=\"98\" "
+                + ManagedServices.ATT_IS_PRIMARY + "=\"false\" "
+                + ManagedServices.ATT_APPROVED_LIST + "=\"98\" />\n");
         xml.append("</" + service.getConfig().xmlTag + ">");
 
         XmlPullParser parser = Xml.newPullParser();
