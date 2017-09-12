@@ -3830,44 +3830,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                     uid = 0;
                 }
             }
-            int artFlags = 0;
+            int debugFlags = 0;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                artFlags |= Zygote.DEBUG_ENABLE_JDWP;
-                artFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
+                debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                debugFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.
-                artFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 ||
                 mSafeMode == true) {
-                artFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
+                debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
-                artFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             String genDebugInfoProperty = SystemProperties.get("debug.generate-debug-info");
             if ("true".equals(genDebugInfoProperty)) {
-                artFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
+                debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
             }
             if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
-                artFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
+                debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
             }
             if ("1".equals(SystemProperties.get("debug.assert"))) {
-                artFlags |= Zygote.DEBUG_ENABLE_ASSERT;
+                debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
             if (mNativeDebuggingApp != null && mNativeDebuggingApp.equals(app.processName)) {
                 // Enable all debug flags required by the native debugger.
-                artFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything
-                artFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO; // Generate debug info
-                artFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;   // Disbale optimizations
+                debugFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything
+                debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO; // Generate debug info
+                debugFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;   // Disbale optimizations
                 mNativeDebuggingApp = null;
-            }
-            if (app.info.isPrivilegedApp() &&
-                    !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
-              artFlags |= Zygote.DISABLE_VERIFIER;
-              artFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
             String invokeWith = null;
@@ -3916,12 +3911,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessStartResult startResult;
             if (hostingType.equals("webview_service")) {
                 startResult = startWebView(entryPoint,
-                        app.processName, uid, uid, gids, artFlags, mountExternal,
+                        app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, entryPointArgs);
             } else {
                 startResult = Process.start(entryPoint,
-                        app.processName, uid, uid, gids, artFlags, mountExternal,
+                        app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, entryPointArgs);
             }

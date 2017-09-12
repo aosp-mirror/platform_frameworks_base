@@ -20,11 +20,9 @@ import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Log;
 import android.util.Slog;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.Preconditions;
-
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -175,7 +173,7 @@ public class ZygoteProcess {
      *
      * When invokeWith is not null, the process will be started as a fresh app
      * and not a zygote fork. Note that this is only allowed for uid 0 or when
-     * artFlags contains DEBUG_ENABLE_DEBUGGER.
+     * debugFlags contains DEBUG_ENABLE_DEBUGGER.
      *
      * @param processClass The class to use as the process's main entry
      *                     point.
@@ -183,7 +181,7 @@ public class ZygoteProcess {
      * @param uid The user-id under which the process will run.
      * @param gid The group-id under which the process will run.
      * @param gids Additional group-ids associated with the process.
-     * @param artFlags Additional flags.
+     * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
      * @param seInfo null-ok SELinux information for the new process.
      * @param abi non-null the ABI this app should be started with.
@@ -198,7 +196,7 @@ public class ZygoteProcess {
     public final Process.ProcessStartResult start(final String processClass,
                                                   final String niceName,
                                                   int uid, int gid, int[] gids,
-                                                  int artFlags, int mountExternal,
+                                                  int debugFlags, int mountExternal,
                                                   int targetSdkVersion,
                                                   String seInfo,
                                                   String abi,
@@ -208,7 +206,7 @@ public class ZygoteProcess {
                                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
-                    artFlags, mountExternal, targetSdkVersion, seInfo,
+                    debugFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
@@ -319,7 +317,7 @@ public class ZygoteProcess {
      * @param gid a POSIX gid that the new process shuold setgid() to
      * @param gids null-ok; a list of supplementary group IDs that the
      * new process should setgroup() to.
-     * @param artFlags Additional flags.
+     * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
      * @param seInfo null-ok SELinux information for the new process.
      * @param abi the ABI the process should use.
@@ -333,7 +331,7 @@ public class ZygoteProcess {
                                                       final String niceName,
                                                       final int uid, final int gid,
                                                       final int[] gids,
-                                                      int artFlags, int mountExternal,
+                                                      int debugFlags, int mountExternal,
                                                       int targetSdkVersion,
                                                       String seInfo,
                                                       String abi,
@@ -349,7 +347,33 @@ public class ZygoteProcess {
         argsForZygote.add("--runtime-args");
         argsForZygote.add("--setuid=" + uid);
         argsForZygote.add("--setgid=" + gid);
-        argsForZygote.add("--art-flags=" + artFlags);
+        if ((debugFlags & Zygote.DEBUG_ENABLE_JNI_LOGGING) != 0) {
+            argsForZygote.add("--enable-jni-logging");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_SAFEMODE) != 0) {
+            argsForZygote.add("--enable-safemode");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_JDWP) != 0) {
+            argsForZygote.add("--enable-jdwp");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
+            argsForZygote.add("--enable-checkjni");
+        }
+        if ((debugFlags & Zygote.DEBUG_GENERATE_DEBUG_INFO) != 0) {
+            argsForZygote.add("--generate-debug-info");
+        }
+        if ((debugFlags & Zygote.DEBUG_ALWAYS_JIT) != 0) {
+            argsForZygote.add("--always-jit");
+        }
+        if ((debugFlags & Zygote.DEBUG_NATIVE_DEBUGGABLE) != 0) {
+            argsForZygote.add("--native-debuggable");
+        }
+        if ((debugFlags & Zygote.DEBUG_JAVA_DEBUGGABLE) != 0) {
+            argsForZygote.add("--java-debuggable");
+        }
+        if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
+            argsForZygote.add("--enable-assert");
+        }
         if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
             argsForZygote.add("--mount-external-default");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {

@@ -660,7 +660,7 @@ public class ZygoteInit {
             pid = Zygote.forkSystemServer(
                     parsedArgs.uid, parsedArgs.gid,
                     parsedArgs.gids,
-                    parsedArgs.artFlags,
+                    parsedArgs.debugFlags,
                     null,
                     parsedArgs.permittedCapabilities,
                     parsedArgs.effectiveCapabilities);

@@ -220,9 +220,9 @@ class ZygoteConnection {
         fd = null;
 
         pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
-                parsedArgs.artFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                parsedArgs.niceName, fdsToClose, fdsToIgnore,
-                parsedArgs.instructionSet, parsedArgs.appDataDir);
+                parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+                parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.instructionSet,
+                parsedArgs.appDataDir);
 
         try {
             if (pid == 0) {
@@ -349,9 +349,11 @@ class ZygoteConnection {
         int[] gids;
 
         /**
-         * From --art-flags.
+         * From --enable-jdwp, --enable-checkjni, --enable-assert,
+         * --enable-safemode, --generate-debug-info, --enable-jni-logging,
+         * --java-debuggable, and --native-debuggable.
          */
-        int artFlags;
+        int debugFlags;
 
         /** From --mount-external */
         int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
@@ -467,11 +469,26 @@ class ZygoteConnection {
                     targetSdkVersionSpecified = true;
                     targetSdkVersion = Integer.parseInt(
                             arg.substring(arg.indexOf('=') + 1));
+                } else if (arg.equals("--enable-jdwp")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                } else if (arg.equals("--enable-safemode")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
+                } else if (arg.equals("--enable-checkjni")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                } else if (arg.equals("--generate-debug-info")) {
+                    debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
+                } else if (arg.equals("--always-jit")) {
+                    debugFlags |= Zygote.DEBUG_ALWAYS_JIT;
+                } else if (arg.equals("--native-debuggable")) {
+                    debugFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;
+                } else if (arg.equals("--java-debuggable")) {
+                    debugFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
+                } else if (arg.equals("--enable-jni-logging")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
+                } else if (arg.equals("--enable-assert")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
                 } else if (arg.equals("--runtime-args")) {
                     seenRuntimeArgs = true;
-                } else if (arg.startsWith("--art-flags=")) {
-                    artFlags = Integer.parseInt(
-                            arg.substring(arg.indexOf('=') + 1));
                 } else if (arg.startsWith("--seinfo=")) {
                     if (seInfoSpecified) {
                         throw new IllegalArgumentException(
@@ -687,7 +704,7 @@ class ZygoteConnection {
      */
     public static void applyDebuggerSystemProperty(Arguments args) {
         if (RoSystemProperties.DEBUGGABLE) {
-            args.artFlags |= Zygote.DEBUG_ENABLE_JDWP;
+            args.debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
         }
     }
 
@@ -709,7 +726,7 @@ class ZygoteConnection {
         int peerUid = peer.getUid();
 
         if (args.invokeWith != null && peerUid != 0 &&
-            (args.artFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
+            (args.debugFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
             throw new ZygoteSecurityException("Peer is permitted to specify an"
                     + "explicit invoke-with wrapper command only for debuggable"
                     + "applications.");
