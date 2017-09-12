@@ -6809,6 +6809,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setOnExpandClickListener(this);
         row.setRemoteViewClickHandler(mOnClickHandler);
         row.setInflationCallback(this);
+        row.setSecureStateProvider(this::isKeyguardCurrentlySecure);
 
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic
