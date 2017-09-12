@@ -530,13 +530,13 @@ class StorageManagerService extends IStorageManager.Stub
 
     class ObbState implements IBinder.DeathRecipient {
         public ObbState(String rawPath, String canonicalPath, int callingUid,
-                IObbActionListener token, int nonce) {
+                IObbActionListener token, int nonce, String volId) {
             this.rawPath = rawPath;
             this.canonicalPath = canonicalPath;
-
             this.ownerGid = UserHandle.getSharedAppGid(callingUid);
             this.token = token;
             this.nonce = nonce;
+            this.volId = volId;
         }
 
         final String rawPath;
@@ -549,6 +549,8 @@ class StorageManagerService extends IStorageManager.Stub
 
         // Identifier to pass back to the token
         final int nonce;
+
+        String volId;
 
         public IBinder getBinder() {
             return token.asBinder();
@@ -576,6 +578,7 @@ class StorageManagerService extends IStorageManager.Stub
             sb.append(",ownerGid=").append(ownerGid);
             sb.append(",token=").append(token);
             sb.append(",binder=").append(getBinder());
+            sb.append(",volId=").append(volId);
             sb.append('}');
             return sb.toString();
         }
@@ -686,6 +689,7 @@ class StorageManagerService extends IStorageManager.Stub
                     try {
                         if (ENABLE_BINDER) {
                             mVold.shutdown();
+                            success = true;
                         } else {
                             success = mConnector.execute("volume", "shutdown").isClassOk();
                         }
@@ -2087,9 +2091,13 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         try {
-            mConnector.execute("fstrim", cmd);
-        } catch (NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Failed to run fstrim: " + e);
+            if (ENABLE_BINDER) {
+                mVold.fstrim(flags);
+            } else {
+                mConnector.execute("fstrim", cmd);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -2651,6 +2659,10 @@ class StorageManagerService extends IStorageManager.Stub
             return null;
         }
 
+        if (ENABLE_BINDER) {
+            return findVolumeByIdOrThrow(state.volId).getPath().getAbsolutePath();
+        }
+
         final NativeDaemonEvent event;
         try {
             event = mConnector.execute("obb", "path", state.canonicalPath);
@@ -2682,7 +2694,8 @@ class StorageManagerService extends IStorageManager.Stub
         Preconditions.checkNotNull(token, "token cannot be null");
 
         final int callingUid = Binder.getCallingUid();
-        final ObbState obbState = new ObbState(rawPath, canonicalPath, callingUid, token, nonce);
+        final ObbState obbState = new ObbState(rawPath, canonicalPath,
+                callingUid, token, nonce, null);
         final ObbAction action = new MountObbAction(obbState, key, callingUid);
         mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
@@ -2702,8 +2715,8 @@ class StorageManagerService extends IStorageManager.Stub
         if (existingState != null) {
             // TODO: separate state object from request data
             final int callingUid = Binder.getCallingUid();
-            final ObbState newState = new ObbState(
-                    rawPath, existingState.canonicalPath, callingUid, token, nonce);
+            final ObbState newState = new ObbState(rawPath, existingState.canonicalPath,
+                    callingUid, token, nonce, existingState.volId);
             final ObbAction action = new UnmountObbAction(newState, force);
             mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
@@ -3167,20 +3180,33 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public ParcelFileDescriptor open() throws NativeDaemonConnectorException {
-            final NativeDaemonEvent event = StorageManagerService.this.mConnector.execute(
-                    "appfuse", "mount", uid, Process.myPid(), mountId);
-            opened = true;
-            if (event.getFileDescriptors() == null ||
-                event.getFileDescriptors().length == 0) {
-                throw new NativeDaemonConnectorException("Cannot obtain device FD");
+            if (ENABLE_BINDER) {
+                try {
+                    return new ParcelFileDescriptor(
+                            mVold.mountAppFuse(uid, Process.myPid(), mountId));
+                } catch (Exception e) {
+                    throw new NativeDaemonConnectorException("Failed to mount", e);
+                }
+            } else {
+                final NativeDaemonEvent event = mConnector.execute(
+                        "appfuse", "mount", uid, Process.myPid(), mountId);
+                opened = true;
+                if (event.getFileDescriptors() == null ||
+                    event.getFileDescriptors().length == 0) {
+                    throw new NativeDaemonConnectorException("Cannot obtain device FD");
+                }
+                return new ParcelFileDescriptor(event.getFileDescriptors()[0]);
             }
-            return new ParcelFileDescriptor(event.getFileDescriptors()[0]);
         }
 
         @Override
         public void close() throws Exception {
             if (opened) {
-                mConnector.execute("appfuse", "unmount", uid, Process.myPid(), mountId);
+                if (ENABLE_BINDER) {
+                    mVold.unmountAppFuse(uid, Process.myPid(), mountId);
+                } else {
+                    mConnector.execute("appfuse", "unmount", uid, Process.myPid(), mountId);
+                }
                 opened = false;
             }
         }
@@ -3848,8 +3874,10 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             final String hashedKey;
+            final String binderKey;
             if (mKey == null) {
                 hashedKey = "none";
+                binderKey = "";
             } else {
                 try {
                     SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -3859,6 +3887,7 @@ class StorageManagerService extends IStorageManager.Stub
                     SecretKey key = factory.generateSecret(ks);
                     BigInteger bi = new BigInteger(key.getEncoded());
                     hashedKey = bi.toString(16);
+                    binderKey = hashedKey;
                 } catch (NoSuchAlgorithmException e) {
                     Slog.e(TAG, "Could not load PBKDF2 algorithm", e);
                     sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
@@ -3872,13 +3901,22 @@ class StorageManagerService extends IStorageManager.Stub
 
             int rc = StorageResultCode.OperationSucceeded;
             try {
-                mConnector.execute("obb", "mount", mObbState.canonicalPath, new SensitiveArg(hashedKey),
-                        mObbState.ownerGid);
+                if (ENABLE_BINDER) {
+                    mObbState.volId = mVold.createObb(mObbState.canonicalPath, binderKey,
+                            mObbState.ownerGid);
+                    mVold.mount(mObbState.volId, 0, -1);
+                } else {
+                    mConnector.execute("obb", "mount", mObbState.canonicalPath,
+                            new SensitiveArg(hashedKey), mObbState.ownerGid);
+                }
             } catch (NativeDaemonConnectorException e) {
                 int code = e.getCode();
                 if (code != VoldResponseCode.OpFailedStorageBusy) {
                     rc = StorageResultCode.OperationFailedInternalError;
                 }
+            } catch (Exception e) {
+                Slog.w(TAG, e);
+                rc = StorageResultCode.OperationFailedInternalError;
             }
 
             if (rc == StorageResultCode.OperationSucceeded) {
@@ -3944,11 +3982,17 @@ class StorageManagerService extends IStorageManager.Stub
 
             int rc = StorageResultCode.OperationSucceeded;
             try {
-                final Command cmd = new Command("obb", "unmount", mObbState.canonicalPath);
-                if (mForceUnmount) {
-                    cmd.appendArg("force");
+                if (ENABLE_BINDER) {
+                    mVold.unmount(mObbState.volId);
+                    mVold.destroyObb(mObbState.volId);
+                    mObbState.volId = null;
+                } else {
+                    final Command cmd = new Command("obb", "unmount", mObbState.canonicalPath);
+                    if (mForceUnmount) {
+                        cmd.appendArg("force");
+                    }
+                    mConnector.execute(cmd);
                 }
-                mConnector.execute(cmd);
             } catch (NativeDaemonConnectorException e) {
                 int code = e.getCode();
                 if (code == VoldResponseCode.OpFailedStorageBusy) {
@@ -3959,6 +4003,9 @@ class StorageManagerService extends IStorageManager.Stub
                 } else {
                     rc = StorageResultCode.OperationFailedInternalError;
                 }
+            } catch (Exception e) {
+                Slog.w(TAG, e);
+                rc = StorageResultCode.OperationFailedInternalError;
             }
 
             if (rc == StorageResultCode.OperationSucceeded) {
