@@ -113,7 +113,7 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     hidl_handle h1(handleFromFileDescriptor(std::move(fd1))),
                 h2(handleFromFileDescriptor(std::move(fd2)));
 
-    bool rval;
+    bool rval(false);
     hidl_string msg;
     const auto status = configInterface->setHandles(h1, h2,
             [&rval, &msg](bool success, const hidl_string& errMsg) {
@@ -123,6 +123,8 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     if (!status.isOk() || !rval) {
         ALOGE("IOffloadConfig::setHandles() error: '%s' / '%s'",
               status.description().c_str(), msg.c_str());
+        // If status is somehow not ok, make sure rval captures this too.
+        rval = false;
     }
 
     return rval;
