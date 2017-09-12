@@ -33,7 +33,7 @@ class TimestampedScoredNetwork implements Parcelable {
     }
 
     protected TimestampedScoredNetwork(Parcel in) {
-        mScore = ScoredNetwork.CREATOR.createFromParcel(in);
+        mScore = in.readParcelable(ScoredNetwork.class.getClassLoader());
         mUpdatedTimestampMillis = in.readLong();
     }
 
