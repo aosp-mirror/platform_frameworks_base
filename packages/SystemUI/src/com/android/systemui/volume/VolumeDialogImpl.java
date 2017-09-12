@@ -75,6 +75,7 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -514,6 +515,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         if (mSafetyWarning != null) return 5000;
         if (mExpanded || mExpandButtonAnimationRunning) return 5000;
         if (mActiveStream == AudioManager.STREAM_MUSIC) return 1500;
+        if (mZenFooter.shouldShowIntroduction()) {
+            return 6000;
+        }
         return 3000;
     }
 
