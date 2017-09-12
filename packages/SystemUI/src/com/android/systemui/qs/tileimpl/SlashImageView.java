@@ -48,6 +48,7 @@ public class SlashImageView extends ImageView {
             mSlash = null;
             super.setImageDrawable(null);
         } else if (mSlash == null) {
+            setImageLevel(drawable.getLevel());
             super.setImageDrawable(drawable);
         } else {
             mSlash.setAnimationEnabled(mAnimationEnabled);
