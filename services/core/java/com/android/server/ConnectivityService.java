@@ -4641,7 +4641,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Ignore updates for disconnected networks
             return;
         }
-
+        // newLp is already a defensive copy.
+        newLp.ensureDirectlyConnectedRoutes();
         if (VDBG) {
             log("Update of LinkProperties for " + nai.name() +
                     "; created=" + nai.created +
@@ -4651,8 +4652,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (nai) {
             nai.linkProperties = newLp;
         }
-        // msg.obj is already a defensive copy.
-        nai.linkProperties.ensureDirectlyConnectedRoutes();
         if (nai.everConnected) {
             updateLinkProperties(nai, oldLp);
         }
