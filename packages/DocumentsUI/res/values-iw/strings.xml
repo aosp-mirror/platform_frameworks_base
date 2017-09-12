@@ -24,12 +24,12 @@
     <string name="menu_grid" msgid="6878021334497835259">"תצוגת רשת"</string>
     <string name="menu_list" msgid="7279285939892417279">"תצוגת רשימה"</string>
     <string name="menu_sort" msgid="7677740407158414452">"מיין לפי"</string>
-    <string name="menu_search" msgid="3816712084502856974">"חפש"</string>
+    <string name="menu_search" msgid="3816712084502856974">"חיפוש"</string>
     <string name="menu_settings" msgid="8239065133341597825">"הגדרות אחסון"</string>
     <string name="menu_open" msgid="432922957274920903">"פתח"</string>
-    <string name="menu_save" msgid="2394743337684426338">"שמור"</string>
+    <string name="menu_save" msgid="2394743337684426338">"שמירה"</string>
     <string name="menu_share" msgid="3075149983979628146">"שתף"</string>
-    <string name="menu_delete" msgid="8138799623850614177">"מחק"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"מחיקה"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"בחר הכל"</string>
     <string name="menu_copy" msgid="3612326052677229148">"העתק אל…"</string>
     <string name="menu_move" msgid="1828090633118079817">"העבר אל…"</string>
@@ -86,7 +86,7 @@
       <item quantity="other">מוחק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
       <item quantity="one"> מוחק קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
     </plurals>
-    <string name="undo" msgid="7905788502491742328">"בטל"</string>
+    <string name="undo" msgid="7905788502491742328">"ביטול"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"מתכונן להעתקה..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"מתכונן להעברה…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"מתכונן למחיקה…"</string>
@@ -127,9 +127,9 @@
     <string name="open_external_dialog_request" msgid="5789329484285817629">"האם להעניק לאפליקציה <xliff:g id="APPNAME"><b>^1</b></xliff:g> גישה לספריה <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> באחסון <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"האם להעניק לאפליקציה <xliff:g id="APPNAME"><b>^1</b></xliff:g> גישה אל ספריית <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"האם להעניק לאפליקציה <xliff:g id="APPNAME"><b>^1</b></xliff:g> גישה לנתונים שלך, כולל תמונות וסרטונים, השמורים ב<xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
-    <string name="never_ask_again" msgid="4295278542972859268">"אל תשאל שוב"</string>
-    <string name="allow" msgid="7225948811296386551">"אפשר"</string>
-    <string name="deny" msgid="2081879885755434506">"דחה"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"ראיתי פעם אחת, זה מספיק"</string>
+    <string name="allow" msgid="7225948811296386551">"כן, זה בסדר"</string>
+    <string name="deny" msgid="2081879885755434506">"לא, אין מצב"</string>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> נבחרו</item>
       <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> נבחרו</item>

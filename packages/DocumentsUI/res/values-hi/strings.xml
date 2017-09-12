@@ -19,17 +19,17 @@
     <string name="app_label" msgid="1551050262492398204">"फ़ाइल"</string>
     <string name="downloads_label" msgid="959113951084633612">"डाउनलोड"</string>
     <string name="title_open" msgid="4353228937663917801">"यहां से खोलें"</string>
-    <string name="title_save" msgid="2433679664882857999">"यहां सहेजें"</string>
+    <string name="title_save" msgid="2433679664882857999">"यहां सेव करें"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"नया फ़ोल्डर"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ग्रिड दृश्य"</string>
     <string name="menu_list" msgid="7279285939892417279">"सूची दृश्य"</string>
     <string name="menu_sort" msgid="7677740407158414452">"इससे क्रमित करें"</string>
-    <string name="menu_search" msgid="3816712084502856974">"खोजें"</string>
+    <string name="menu_search" msgid="3816712084502856974">"सर्च करें"</string>
     <string name="menu_settings" msgid="8239065133341597825">"मेमोरी सेटिंग"</string>
     <string name="menu_open" msgid="432922957274920903">"खोलें"</string>
     <string name="menu_save" msgid="2394743337684426338">"जोड़ें"</string>
     <string name="menu_share" msgid="3075149983979628146">"साझा करें"</string>
-    <string name="menu_delete" msgid="8138799623850614177">"हटाएं"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"मिटाएं"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"सभी चुनें"</string>
     <string name="menu_copy" msgid="3612326052677229148">"इनकी कॉपी बनाएं..."</string>
     <string name="menu_move" msgid="1828090633118079817">"इसमें ले जाएं…"</string>
@@ -46,7 +46,7 @@
     <string name="button_dismiss" msgid="3714065566893946085">"ख़ारिज करें"</string>
     <string name="button_retry" msgid="4392027584153752797">"पुनः प्रयास करें"</string>
     <string name="sort_name" msgid="9183560467917256779">"नाम के अनुसार"</string>
-    <string name="sort_date" msgid="586080032956151448">"बदलाव के दिनांक के अनुसार"</string>
+    <string name="sort_date" msgid="586080032956151448">"बदलाव की तारीख के अनुसार"</string>
     <string name="sort_size" msgid="3350681319735474741">"आकार के अनुसार"</string>
     <string name="drawer_open" msgid="4545466532430226949">"रूट दिखाएं"</string>
     <string name="drawer_close" msgid="7602734368552123318">"रूट छिपाएं"</string>
@@ -106,13 +106,13 @@
       <item quantity="one">क्‍लिपबोर्ड पर <xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी बनाई गई.</item>
       <item quantity="other">क्‍लिपबोर्ड पर <xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी बनाई गई.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"चयनित फ़ाइलों को इस स्‍थान में नहीं चिपकाया जा सकता."</string>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"चुनी हुई फ़ाइलों को इस स्‍थान में नहीं चिपकाया जा सकता."</string>
     <string name="menu_rename" msgid="7678802479104285353">"नाम बदलें"</string>
     <string name="rename_error" msgid="4203041674883412606">"दस्‍तावेज़ का नाम बदलना विफल रहा"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"कुछ फ़ाइलें रूपांतरित हो गई थीं"</string>
-    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="STORAGE"><i>^3</i></xliff:g> पर <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> निर्देशिका का एक्सेस दें?"</string>
-    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> निर्देशिका का एक्सेस प्रदान करें?"</string>
-    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="STORAGE"><i>^2</i></xliff:g> पर मौजूद फ़ोटो और वीडियो सहित, अपने डेटा का एक्सेस प्रदान करें?"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="STORAGE"><i>^3</i></xliff:g> पर <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> डिक्शनरी तक पहुंचने दें?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> डिक्शनरी तक पहुंचने दें?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="STORAGE"><i>^2</i></xliff:g> पर मौजूद फ़ोटो और वीडियो के साथ, अपने डेटा तक पहुंचने दें?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"फिर से ना पूछें"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दें"</string>
     <string name="deny" msgid="2081879885755434506">"अस्वीकारें"</string>
@@ -124,19 +124,19 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम</item>
     </plurals>
-    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\" को हटाएं?"</string>
-    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" फ़ोल्डर और उसकी सामग्रियां हटाएं?"</string>
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\" को मिटाना चाहते हैं?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"फ़ोल्डर \"<xliff:g id="NAME">%1$s</xliff:g>\" और उसकी सामग्रियों को मिटाना चाहते हैं?"</string>
     <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें हटाएं?</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें हटाएं?</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें मिटाएं?</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें मिटाएं?</item>
     </plurals>
     <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ोल्डर और उनकी सामग्री हटाएं?</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ोल्डर और उनकी सामग्री हटाएं?</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ोल्डर और उनकी सामग्री मिटाएं?</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ोल्डर और उनकी सामग्री मिटाएं?</item>
     </plurals>
     <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम हटाएं?</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम हटाएं?</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम मिटाएं?</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम मिटाएं?</item>
     </plurals>
     <string name="too_many_selected" msgid="6781456208116966753">"क्षमा करें, आप एक बार में केवल 1000 अाइटम तक चुन सकते हैं"</string>
     <string name="too_many_in_select_all" msgid="8281987479885307456">"केवल 1000 आइटम चुने जा सकते हैं"</string>

@@ -19,15 +19,15 @@
     <string name="app_label" msgid="1551050262492398204">"फायली"</string>
     <string name="downloads_label" msgid="959113951084633612">"डाउनलोड"</string>
     <string name="title_open" msgid="4353228937663917801">"वरून उघडा"</string>
-    <string name="title_save" msgid="2433679664882857999">"येथे जतन करा"</string>
+    <string name="title_save" msgid="2433679664882857999">"येथे सेव्ह करा"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"नवीन फोल्डर"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ग्रिड दृश्य"</string>
     <string name="menu_list" msgid="7279285939892417279">"सूची"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"नुसार क्रमवारी लावा"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"यानुसार क्रमवारी लावा"</string>
     <string name="menu_search" msgid="3816712084502856974">"शोध"</string>
     <string name="menu_settings" msgid="8239065133341597825">"संचयन सेटिंग्ज"</string>
     <string name="menu_open" msgid="432922957274920903">"उघडा"</string>
-    <string name="menu_save" msgid="2394743337684426338">"जतन करा"</string>
+    <string name="menu_save" msgid="2394743337684426338">"सेव्ह करा"</string>
     <string name="menu_share" msgid="3075149983979628146">"सामायिक करा"</string>
     <string name="menu_delete" msgid="8138799623850614177">"हटवा"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"सर्व निवडा"</string>
@@ -36,8 +36,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"नवीन विंडो"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"कॉपी करा"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"पेस्ट करा"</string>
-    <string name="menu_advanced_show" msgid="4693652895715631401">"अंतर्गत संचयन दर्शवा"</string>
-    <string name="menu_advanced_hide" msgid="4218809952721972589">"अंतर्गत संचयन लपवा"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"अंतर्गत स्टोरेज दाखवा"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"अंतर्गत स्टोरेज लपवा"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"फाईल आकार दर्शवा"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"फाईल आकार लपवा"</string>
     <string name="button_select" msgid="527196987259139214">"निवडा"</string>

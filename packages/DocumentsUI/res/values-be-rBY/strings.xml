@@ -36,7 +36,7 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Новае акно"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Капіраваць"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Уставіць"</string>
-    <string name="menu_advanced_show" msgid="4693652895715631401">"Паказаць унутр. сховішча"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Унутранае сховішча"</string>
     <string name="menu_advanced_hide" msgid="4218809952721972589">"Схаваць унутр. сховішча"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Паказаць памеры файлаў"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Схаваць памеры файлаў"</string>

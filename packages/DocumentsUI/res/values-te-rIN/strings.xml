@@ -24,7 +24,7 @@
     <string name="menu_grid" msgid="6878021334497835259">"గ్రిడ్ వీక్షణ"</string>
     <string name="menu_list" msgid="7279285939892417279">"జాబితా వీక్షణ"</string>
     <string name="menu_sort" msgid="7677740407158414452">"ఇలా క్రమబద్ధీకరించు"</string>
-    <string name="menu_search" msgid="3816712084502856974">"శోధించు"</string>
+    <string name="menu_search" msgid="3816712084502856974">"వెతుకు"</string>
     <string name="menu_settings" msgid="8239065133341597825">"నిల్వ సెట్టింగ్‌లు"</string>
     <string name="menu_open" msgid="432922957274920903">"తెరువు"</string>
     <string name="menu_save" msgid="2394743337684426338">"సేవ్ చేయి"</string>
@@ -121,7 +121,7 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఎంచుకోబడింది</item>
     </plurals>
     <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> అంశాలు</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> వస్తువులు</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> అంశం</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\"ని తొలగించాలా?"</string>
