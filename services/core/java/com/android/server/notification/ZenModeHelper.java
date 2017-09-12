@@ -737,6 +737,9 @@ public class ZenModeHelper {
             mConfig = config;
             mHandler.postApplyConfig(config, reason, setRingerMode);
             return true;
+        } catch (SecurityException e) {
+            Log.wtf(TAG, "Invalid rule in config", e);
+            return false;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
