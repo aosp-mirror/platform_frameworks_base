@@ -22,9 +22,9 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Впишете PIN-код"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Внеси ПУК и нов PIN код за СИМ картичката"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"ПУК код за СИМ картичка"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Нов PIN код за СИМ картичка"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Внеси ПУК и нов PIN код за SIM картичката"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"ПУК код за SIM картичка"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Нов PIN код за SIM картичка"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Допрете за да впишете лозинка"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Впишете ја лозинката за да се отклучи"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Впишете PIN за да се отклучи"</string>
@@ -36,19 +36,19 @@
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Поврзи го полначот."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Притисни „Мени“ да се отклучи."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Мрежата е заклучена"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Нема СИМ картичка"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Во таблетот нема СИМ картичка."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Во телефонот нема СИМ картичка."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Вметни СИМ картичка."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Нема СИМ картичка или не може да прочита. Вметни СИМ картичка."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Неупотреблива СИМ картичка."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Вашата СИМ картичка е трајно оневозможена.\nКонтактирајте со вашиот оператор за безжична мрежа за друга СИМ картичка."</string>
-    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"СИМ картичката е заклучена."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"СИМ картичката е заклучена со ПУК."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"СИМ картичката се отклучува..."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"Нема SIM картичка"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"Во таблетот нема SIM картичка."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"Во телефонот нема SIM картичка."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Вметни SIM картичка."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Нема SIM картичка или не може да прочита. Вметни SIM картичка."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Неупотреблива SIM картичка."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Вашата SIM картичка е трајно оневозможена.\nКонтактирајте со вашиот оператор за безжична мрежа за друга SIM картичка."</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM картичката е заклучена."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM картичката е заклучена со ПУК."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM картичката се отклучува..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Поле за PIN"</string>
-    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Поле за PIN на СИМ"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Поле за ПУК на СИМ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Поле за PIN на SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Поле за ПУК на SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Следниот аларм е поставен за <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Копче „Избриши“"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Копче „Внеси“"</string>
@@ -58,18 +58,18 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Погрешен PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Употреби ја својата шема"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Внеси PIN на СИМ картичка"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Внесете PIN на СИМ за „<xliff:g id="CARRIER">%1$s</xliff:g>“"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Внеси PIN на SIM картичка"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Внесете PIN на SIM за „<xliff:g id="CARRIER">%1$s</xliff:g>“"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Внеси PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Внеси лозинка"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"СИМ картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"СИМ-картичката „<xliff:g id="CARRIER">%1$s</xliff:g>“ е сега оневозможена. Внесете ПУК за да продолжите. Контактирајте со давателот на услугата за детали."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM-картичката „<xliff:g id="CARRIER">%1$s</xliff:g>“ е сега оневозможена. Внесете ПУК за да продолжите. Контактирајте со давателот на услугата за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Внеси посакуван PIN код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Потврди го саканиот PIN код"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"СИМ картичката се отклучува..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM картичката се отклучува..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Внесете PIN кој содржи 4-8 броеви."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"ПУК кодот треба да содржи 8 или повеќе броеви."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат СИМ картичката."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат SIM картичката."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодовите не се совпаѓаат"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Премногу обиди со шема"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Погрешно сте го впишале вашиот PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
@@ -89,21 +89,21 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER">%d</xliff:g> пати. Работниот профил ќе се отстрани, со што ќе се избришат сите податоци на профилот."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Погрешно сте ја употребиле вашата шема на отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. По <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни обиди, ќе побараат од вас да го отклучите таблетот со користење сметка на е-пошта.\n\n Обидете се повторно за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Погрешно сте ја употребиле вашата шема на отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. По <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни обиди, ќе побараат од вас да го отклучите телефонот со користење сметка на е-пошта.\n\n Обидете се повторно за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунди."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"PIN кодот за СИМ картичката е неточен. Контактирате со вашиот оператор да го отклучи уредот."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"PIN кодот за SIM картичката е неточен. Контактирате со вашиот оператор да го отклучи уредот."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">Погрешен PIN-код за СИМ, ви преостанува уште <xliff:g id="NUMBER_1">%d</xliff:g> обид.</item>
-      <item quantity="other">Погрешен PIN-код за СИМ, ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди.</item>
+      <item quantity="one">Погрешен PIN-код за SIM, ви преостанува уште <xliff:g id="NUMBER_1">%d</xliff:g> обид.</item>
+      <item quantity="other">Погрешен PIN-код за SIM, ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SMS картичката е неупотреблива. Контактирајте со вашиот оператор."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="one">Погрешен ПУК-код за СИМ, ви преостанува уште <xliff:g id="NUMBER_1">%d</xliff:g> обид пред СИМ-картичката да стане трајно неупотреблива.</item>
-      <item quantity="other">Погрешен ПУК-код за СИМ, ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди пред СИМ-картичката да стане трајно неупотреблива.</item>
+      <item quantity="one">Погрешен ПУК-код за SIM, ви преостанува уште <xliff:g id="NUMBER_1">%d</xliff:g> обид пред SIM-картичката да стане трајно неупотреблива.</item>
+      <item quantity="other">Погрешен ПУК-код за SIM, ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди пред SIM-картичката да стане трајно неупотреблива.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"СИМ картичката не се отклучи со PIN кодот!"</string>
-    <string name="kg_password_puk_failed" msgid="2838824369502455984">"СИМ картичката не се отклучи со ПУК кодот!"</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM картичката не се отклучи со PIN кодот!"</string>
+    <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM картичката не се отклучи со ПУК кодот!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Кодот е прифатен!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Нема услуга."</string>
-    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Префрли метод на внесување"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Смени метод на внесување"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Режим на работа во авион"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Потребна е шема по рестартирање на уредот"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Потребен е PIN-код по рестартирање на уредот"</string>

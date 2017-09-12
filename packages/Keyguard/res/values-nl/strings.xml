@@ -44,7 +44,7 @@
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Onbruikbare simkaart."</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Je simkaart is permanent uitgeschakeld.\n Neem contact op met je mobiele serviceprovider voor een nieuwe simkaart."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Simkaart is vergrendeld."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Simkaart is vergrendeld met PUK-code."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Simkaart is vergrendeld met pukcode."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Simkaart ontgrendelen…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Gebied voor pincode"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Gebied voor sim-pincode"</string>
@@ -62,14 +62,14 @@
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Voer de pincode in voor de simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\'"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Pincode opgeven"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Wachtwoord invoeren"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"De simkaart is nu uitgeschakeld. Geef de PUK-code op om door te gaan. Neem contact op met de provider voor informatie."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"Simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\' is nu uitgeschakeld. Voer de PUK-code in om door te gaan. Neem contact op met je provider voor meer informatie."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Neem contact op met de provider voor informatie."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"Simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\' is nu uitgeschakeld. Voer de pukcode in om door te gaan. Neem contact op met je provider voor meer informatie."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Gewenste pincode opgeven"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Gewenste pincode bevestigen"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Simkaart ontgrendelen..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Voer een pincode van 4 tot 8 cijfers in."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"De PUK-code is minimaal acht nummers lang."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Geef de juiste PUK-code opnieuw op. Bij herhaalde pogingen wordt de simkaart permanent uitgeschakeld."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"De pukcode is minimaal acht nummers lang."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Geef de juiste pukcode opnieuw op. Bij herhaalde pogingen wordt de simkaart permanent uitgeschakeld."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pincodes komen niet overeen"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogingen"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Je hebt je pincode <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>

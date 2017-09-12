@@ -104,7 +104,7 @@
     <string name="kg_pin_accepted" msgid="1448241673570020097">"ကုဒ်နံပါတ်ကို လက်ခံလိုက်ပါသည်"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ဆားဗစ် မရှိပါ"</string>
     <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ထည့်သွင်းမှုနည်းလမ်းကို ပြောင်းလဲပါ"</string>
-    <string name="airplane_mode" msgid="3122107900897202805">"လေယာဉ်ပေါ်သုံးစနစ်"</string>
+    <string name="airplane_mode" msgid="3122107900897202805">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ကိရိယာကို ပြန်ဖွင့်လျှင် ပုံစံ လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ကိရိယာကို ပြန်ဖွင့်လျှင် PIN လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"ကိရိယာကို ပြန်ဖွင့်လျှင် စကားဝှက် လိုအပ်ပါသည်"</string>

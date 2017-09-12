@@ -62,8 +62,8 @@
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Unesite SIM PIN za \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Unesite PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Unesite lozinku"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM je sada onemogućen. Unesite PUK kôd da nastavite. Obratite se operateru za detalje."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM operator \"<xliff:g id="CARRIER">%1$s</xliff:g>\" je sada isključen. Unesite PUK kôd da nastavite. Za više detalja obratite se operateru."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM je sada onemogućen. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM operator \"<xliff:g id="CARRIER">%1$s</xliff:g>\" je sada isključen. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Unesite željeni PIN kôd"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrdi željeni PIN kôd"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Otključavanje SIM kartice…"</string>
@@ -105,7 +105,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Korištenje PUK-a za SIM nije uspjelo!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kôd je prihvaćen"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nema usluge."</string>
-    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Promijeni način unosa"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Promjena načina unosa"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Način rada u avionu"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Potreban je uzorak nakon ponovnog pokretanja uređaja"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Potreban je PIN nakon ponovnog pokretanja uređaja"</string>

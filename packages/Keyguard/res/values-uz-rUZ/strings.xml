@@ -39,8 +39,8 @@
     <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"SIM karta yo‘q"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"SIM karta yo‘q."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"SIM karta yo‘q."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Telefonga SIM kartani joylashtiring."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM karta qo‘yilmagan yoki o‘qib bo‘lmayapti. SIM kartani joylashtiring."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Telefonga SIM karta soling."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM karta solinmagan yoki u yaroqsiz. SIM karta soling."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM kartadan foydalanib bo‘lmaydi."</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"SIM kartangiz butunlay o‘chirilgan.\n Boshqa SIM karta olish uchun aloqa operatori bilan bog‘laning."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM karta qulflangan."</string>
@@ -53,7 +53,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"O‘chirish"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Kiritish"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Grafik kalit esimdan chiqdi"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit noto‘g‘ri"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit xato"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parol noto‘g‘ri"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
@@ -89,10 +89,10 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Siz telefonni qulfdan chiqarish uchun <xliff:g id="NUMBER">%d</xliff:g> marta noto‘g‘ri urinish qildingiz. Endi, ishchi profil o‘chirib tashlanadi va undagi barcha ma’lumotlar ham o‘chib ketadi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz grafik kalitni  <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM karta PIN kodi noto‘g‘ri. Qurilma qulfini ochish uchun aloqa operatoringiz bilan bog‘laning."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun aloqa operatoringizga murojaat qiling."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">SIM kartaning PIN kodi noto‘g‘ri. Sizda yana <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish qoldi.</item>
-      <item quantity="one">SIM kartaning PIN kodi noto‘g‘ri. Qurilmani qulfdan chiqarish uchun sizda yana <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish qoldi.</item>
+      <item quantity="other">SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun sizda yana <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish qoldi.</item>
+      <item quantity="one">SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun sizda yana <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish qoldi.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartadan foydalanib bo‘lmaydi. Aloqa operatoringiz bilan bog‘laning."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">

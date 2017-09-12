@@ -52,12 +52,12 @@
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"पुढील अलार्म <xliff:g id="ALARM">%1$s</xliff:g> साठी सेट केला"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटवा"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"प्रविष्ट करा"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"नमुना विसरलात"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा नमुना"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"पॅटर्न विसरलात"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा पॅटर्न"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा संकेतशब्द"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"चुकीचा पिन"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"आपला नमुना काढा"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"तुमचा पॅटर्न काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम पिन प्रविष्ट करा"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन प्रविष्ट करा"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"पिन प्रविष्ट करा"</string>
@@ -69,12 +69,12 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"सिम कार्ड अनलॉक करत आहे…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 ते 8 अंक असलेला पिन टाइप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड 8 अंकी किंवा त्यापेक्षा अधिकचा असावा."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"योग्य PUK कोड पुन्हा-प्रविष्ट करा. परत प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"योग्य PUK कोड पुन्हा एंटर करा. परत प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड जुळत नाहीत"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बरेच नमुना प्रयत्न"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बरेच पॅटर्न प्रयत्न"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"आपण अनलॉक करण्याचा <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टॅबलेट चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा टॅबलेट रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा फोन रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"आपण टॅबलेट अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. हा टॅबलेट रीसेट केला जाईल, जो त्याचा सर्व डेटा हटवेल."</string>
@@ -87,12 +87,12 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"आपण टॅबलेट अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला टॅबलेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"सिम पिन कोड चुकीचा आहे आपण आता आपले डिव्‍हाइस अनलॉक करण्‍यासाठी आपल्‍या वाहकाशी संपर्क साधावा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुमच्याला ईमेल खाते वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुमच्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डीव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">सिम पिन चुकीचा आहे, आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न उर्वरित आहे.</item>
-      <item quantity="other">सिम पिन चुकीचा आहे, आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न उर्वरित आहेत.</item>
+      <item quantity="one">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
+      <item quantity="other">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"सिम निरुपयोगी आहे. आपल्या वाहकाशी संपर्क साधा."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
@@ -105,28 +105,28 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"सेवा नाही."</string>
     <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"इनपुट पद्धत स्विच करा"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"विमान मोड"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"डिव्‍हाइस रीस्टार्ट झाल्यावर नमुना आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"डिव्‍हाइस रीस्टार्ट झाल्यावर पिन आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"डिव्‍हाइस रीस्टार्ट झाल्यावर संकतेशब्द आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"अतिरिक्त सुरक्षिततेसाठी नमुना आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"डीव्हाइस रीस्टार्ट झाल्यावर पॅटर्न आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"डीव्हाइस रीस्टार्ट झाल्यावर पिन आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"डीव्हाइस रीस्टार्ट झाल्यावर पासवर्ड आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"अतिरिक्त सुरक्षिततेसाठी पॅटर्न आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"अतिरिक्त सुरक्षिततेसाठी पिन आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"अतिरिक्त सुरक्षिततेसाठी संकेतशब्द आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"आपण प्रोफाईल स्विच करता तेव्‍हा नमुना आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"तुम्ही प्रोफाईल स्विच करता तेव्‍हा पॅटर्न आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"आपण प्रोफाईल स्विच करता तेव्‍हा पिन आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"आपण प्रोफाईल स्विच करता तेव्‍हा संकेतशब्द आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"डिव्हाइस प्रशासकाने डिव्हाइस लॉक केले"</string>
-    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"डिव्हाइस व्यक्तिचलितरित्या लॉक केले होते"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"डीव्हाइस प्रशासकाने डीव्हाइस लॉक केले"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"डीव्हाइस मॅन्युअली लॉक केले होते"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="one">डिव्‍हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. नमुन्याची पुष्टी करा.</item>
-      <item quantity="other">डिव्‍हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. नमुन्याची पुष्टी करा.</item>
+      <item quantity="one">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
+      <item quantity="other">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="one">डिव्‍हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पिन ची पुष्टी करा.</item>
-      <item quantity="other">डिव्‍हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पिन ची पुष्टी करा.</item>
+      <item quantity="one">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पिन ची खात्री करा.</item>
+      <item quantity="other">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पिन ची खात्री करा.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="one">डिव्‍हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. संकेतशब्दाची पुष्टी करा.</item>
-      <item quantity="other">डिव्‍हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. संकेतशब्दाची पुष्टी करा.</item>
+      <item quantity="one">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
+      <item quantity="other">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ओळखले नाही"</string>
 </resources>
