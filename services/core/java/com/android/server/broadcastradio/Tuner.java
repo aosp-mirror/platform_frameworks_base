@@ -77,6 +77,8 @@ class Tuner extends ITuner.Stub {
             @NonNull RadioManager.BandConfig config);
     private native RadioManager.BandConfig nativeGetConfiguration(long nativeContext, int region);
 
+    private native void nativeSetMuted(long nativeContext, boolean mute);
+
     private native void nativeStep(long nativeContext, boolean directionDown, boolean skipSubChannel);
     private native void nativeScan(long nativeContext, boolean directionDown, boolean skipSubChannel);
     private native void nativeTune(long nativeContext, @NonNull ProgramSelector selector);
@@ -148,8 +150,7 @@ class Tuner extends ITuner.Stub {
             if (mIsMuted == mute) return;
             mIsMuted = mute;
 
-            // TODO(b/62713378): notifify audio policy manager of media activity on radio audio
-            // device. This task is pulled directly from previous implementation of native service.
+            nativeSetMuted(mNativeContext, mute);
         }
     }
 
