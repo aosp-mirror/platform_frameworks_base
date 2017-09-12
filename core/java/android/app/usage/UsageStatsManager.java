@@ -172,9 +172,6 @@ public final class UsageStatsManager {
     /**
      * Query for events in the given time range. Events are only kept by the system for a few
      * days.
-     * <p />
-     * <b>NOTE:</b> The last few minutes of the event log will be truncated to prevent abuse
-     * by applications.
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
      * @param endTime The exclusive end of the range of events to include in the results.
