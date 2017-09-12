@@ -195,13 +195,13 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Vliegtuigmodus aan."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Vliegtuigmodus afgeskakel."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Vliegtuigmodus aangeskakel."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Moenie steur nie aan, net prioriteit."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Moenie steur nie; volkome stilte."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\'Moenie steur nie\' is aan, net wekkers."</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Moenie steur nie."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Moenie steur nie af."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Moenie steur nie is afgeskakel."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Moenie steur nie is aangeskakel."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Moenie Steur Nie aan, net prioriteit."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Moenie Steur Nie; volkome stilte."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\'Moenie Steur Nie\' is aan, net wekkers."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Moenie Steur Nie."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Moenie Steur Nie af."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Moenie Steur Nie is afgeskakel."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Moenie Steur Nie is aangeskakel."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth af."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth aan."</string>
@@ -262,7 +262,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Nageregkas"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Sluimerskerm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Moenie steur nie"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Moenie Steur Nie"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Net prioriteit"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Net wekkers"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Volkome stilte"</string>
@@ -393,7 +393,7 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Verwyder gebruiker?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Alle programme en data van hierdie gebruiker sal uitgevee word."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Verwyder"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Batteryspaarder is aan"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterybespaarder is aan"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Verminder werkverrigting en agtergronddata"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Skakel batterybespaarder af"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sal alles begin vasvang wat op jou skerm gewys word."</string>
@@ -570,7 +570,7 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Wys saam met volumekontroles"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Moenie steur nie"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Moenie Steur Nie"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Volumeknoppieskortpad"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Verlaat \'moenie steur nie\' met volume op"</string>
     <string name="battery" msgid="7498329822413202973">"Battery"</string>

@@ -192,7 +192,7 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi désactivé"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi activé."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Signal mobile : <xliff:g id="SIGNAL">%1$s</xliff:g>, <xliff:g id="TYPE">%2$s</xliff:g>, <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batterie : <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Pile : <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Mode Avion : désactivé"</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Mode Avion : activé"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Le mode Avion est désactivé."</string>
@@ -265,8 +265,8 @@
     <string name="start_dreams" msgid="5640361424498338327">"Écran de veille"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne pas déranger"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priorités seulement"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmes uniquement"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Prioritaires seulement"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmes seulement"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Aucune interruption"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
@@ -344,10 +344,10 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Chargée dans <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"N\'est pas en charge"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Le réseau peut\nêtre surveillé."</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Recherche"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faire glisser le doigt vers le haut : <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser votre doigt vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni par les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez quand même faire des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
@@ -361,7 +361,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Aucune interruption"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priorités seulement"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes uniquement"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes seulement"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorités\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>

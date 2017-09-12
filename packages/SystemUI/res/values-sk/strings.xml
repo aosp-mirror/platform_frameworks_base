@@ -45,7 +45,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Zapnúť"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Zapnúť šetrič batérie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavenia"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi‑Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Automatické otočenie obrazovky"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"STLMIŤ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
@@ -57,7 +57,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k periférnemu zariadeniu USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Chcete pri pripojení tohto zariadenia USB otvoriť aplikáciu <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Chcete pri pripojení tohto periférneho zariadenia USB otvoriť aplikáciu <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"S týmto zariad. USB nefunguje žiadna nainštal. aplikácia. Viac informácií na <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"S týmto zariad. USB nefunguje žiadna nainštal. aplikácia. Ďalšie informácie na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Periférne zariadenie USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Zobraziť"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Pre toto zariadenie USB použiť ako predvolené"</string>
@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povoliť z tohto počítača"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladenie cez USB nie je povolené"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Používateľ, ktorý je práve prihlásený na tomto zariadení, nemôže zapnúť ladenie USB. Ak chcete použiť túto funkciu, prepnite na používateľa s oprávneniami správcu."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Používateľ, ktorý je práve prihlásený na tomto zariadení, nemôže zapnúť ladenie cez USB. Ak chcete použiť túto funkciu, prepnite na používateľa s oprávneniami správcu."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Prebieha ukladanie snímky obrazovky..."</string>
@@ -151,7 +151,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi‑Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Žiadna SIM karta."</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobilné dáta"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobilné dáta sú zapnuté"</string>
@@ -191,8 +191,8 @@
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Zavrieť"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Používateľ: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Pripojenie Wi-Fi je vypnuté."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Pripojenie Wi-Fi je zapnuté."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Pripojenie Wi‑Fi je vypnuté."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Pripojenie Wi‑Fi je zapnuté."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobil: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batéria: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Režim v lietadle je vypnutý."</string>
@@ -231,8 +231,8 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilný hotspot je vypnutý."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilný hotspot je zapnutý."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Prenášanie bolo zastavené."</string>
-    <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Pracovný režim – vyp."</string>
-    <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Pracovný režim – zap."</string>
+    <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Pracovný režim vypnutý"</string>
+    <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Pracovný režim zapnutý"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Pracovný režim je vypnutý."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Pracovný režim je zapnutý."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Šetrič dát bol vypnutý."</string>
@@ -242,10 +242,10 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dátové prenosy 4G sú pozastavené"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilné dáta sú pozastavené"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dáta sú pozastavené"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dosiahli ste nastavený limit dát. Už nepoužívate mobilné dátové pripojenie.\n\nAk ho však obnovíte, môžu vám byť účtované poplatky za spotrebu dát."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Znova spustiť"</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dosiahli ste nastavený dátový limit. Už nepoužívate mobilné dátové pripojenie.\n\nAk ho znovu zapnete, môžu vám byť účtované poplatky za spotrebu dát."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Znova zapnúť"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi‑Fi: pripojené"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Vyhľadávanie satelitov GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavená pomocou GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Žiadosti o polohu sú aktívne"</string>
@@ -294,12 +294,12 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ja"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"Používateľ"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Nový používateľ"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi‑Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nepripojené"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Žiadna sieť"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Sieť Wi-Fi je vypnutá"</string>
-    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je zapnuté"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"K dispozícii nie sú žiadne siete Wi-Fi"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Sieť Wi‑Fi je vypnutá"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi‑Fi je zapnuté"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"K dispozícii nie sú žiadne siete Wi‑Fi"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Prenos"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Prenáša sa"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nepomenované zariadenie"</string>
@@ -307,13 +307,13 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Nie sú k dispozícii žiadne zariadenia"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Jas"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Invertovať farby"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverzia farieb"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Režim korekcie farieb"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Ďalšie nastavenia"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Hotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Pripojené"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Pripája sa..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Zdieľanie dátového pripojenia"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Zdieľané pripojenie"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Upozornenia"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Baterka"</string>
@@ -351,9 +351,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhľadávanie"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prejdite prstom nahor: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prejdite prstom doľava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Nebudú vás rušiť zvuky ani vibrácie s výnimkou budíkov, pripomenutí, udalostí a volajúcich, ktoré špecifikujete."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Nebudú vás rušiť zvuky ani vibrácie s výnimkou budíkov, pripomenutí, udalostí a vybraných volajúcich."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prispôsobiť"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Zablokujú sa tým VŠETKY zvuky a vibrácie vrátane zvukov budíkov, hudby, videí a hier. Stále však budete môcť telefonovať."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Budú zablokované všetky zvuky a vibrácie vrátane budíkov, hudby, videí a hier. Stále však budete môcť telefonovať."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Zablokujú sa tým VŠETKY zvuky a vibrácie vrátane zvukov budíkov, hudby, videí a hier."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Menej naliehavé upozornenia sa nachádzajú nižšie"</string>
@@ -651,7 +651,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Otvoriť rýchle nastavenia"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Zavrieť rýchle nastavenia"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Budík bol nastavený."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prihlásený/-á ako <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prihlásený používateľ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Žiadny internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Otvoriť podrobnosti"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otvoriť nastavenia <xliff:g id="ID_1">%s</xliff:g>"</string>

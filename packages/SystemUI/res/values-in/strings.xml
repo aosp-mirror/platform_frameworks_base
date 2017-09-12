@@ -67,19 +67,19 @@
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Pengguna yang saat ini masuk ke perangkat ini tidak dapat mengaktifkan debug USB. Untuk menggunakan fitur ini, beralih ke pengguna Admin."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Perbesar utk mengisi layar"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rentangkn utk mngisi layar"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Menyimpan tangkapan layar..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Menyimpan tangkapan layar..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Tangkapan layar sedang disimpan."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Tangkapan layar diambil."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Ketuk untuk melihat tangkapan layar."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Tidak dapat mengambil tangkapan layar."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Terjadi masalah saat menyimpan tangkapan layar."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Tidak dapat menyimpan tangkapan layar karena ruang penyimpanan terbatas."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Mengambil tangkapan layar tidak diizinkan oleh aplikasi atau organisasi."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Menyimpan screenshot..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Menyimpan screenshot..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot sedang disimpan."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot diambil."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Ketuk untuk melihat screenshot."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Tidak dapat mengambil screenshot."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Terjadi masalah saat menyimpan screenshot."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Mengambil screenshot tidak diizinkan oleh aplikasi atau organisasi."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsi transfer file USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pasang sebagai pemutar media (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Pasang sebagai kamera (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Pasang apl Transfer File Android untuk Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instal apl Transfer File Android untuk Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Kembali"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Utama"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Data Seluler"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Data Seluler Aktif"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Data Seluler Nonaktif"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Penambatan bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode pesawat."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Tidak ada kartu SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Jaringan operator berubah."</string>
@@ -294,7 +294,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Mati"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi Aktif"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Tidak ada jaringan Wi-Fi yang tersedia"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmisi"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Melakukan transmisi"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Perangkat tanpa nama"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Siap melakukan transmisi"</string>
@@ -351,7 +351,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"SEMUA suara dan getaran, termasuk dari alarm, musik, video, dan game akan diblokir."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifikasi kurang darurat di bawah"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Ketuk lagi untuk membuka"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Tap lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Gesek ke atas untuk membuka kunci"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Gesek dari ikon untuk telepon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Gesek dari ikon untuk mengaktifkan bantuan suara"</string>

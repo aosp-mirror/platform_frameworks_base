@@ -325,7 +325,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"No recent items"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"You\'ve cleared everything"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Application Info"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen-pinning"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Could not start <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> is disabled in safe-mode."</string>
@@ -485,7 +485,7 @@
     <string name="tuner_warning_title" msgid="7094689930793031682">"Fun for some but not for all"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner gives you extra ways to tweak and customise the Android user interface. These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
-    <string name="got_it" msgid="2239653834387972602">"Understood"</string>
+    <string name="got_it" msgid="2239653834387972602">"Got it"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Congrats! System UI Tuner has been added to Settings"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Remove from settings"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Remove System UI Tuner from Settings and stop using all of its features?"</string>
@@ -558,7 +558,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Back"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notifications"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Keyboard Shortcuts"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Keyboard shortcuts"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Switch input method"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Applications"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assist"</string>

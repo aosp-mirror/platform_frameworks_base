@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"ממשק משתמש של המערכת"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"נקה"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ניקוי"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"הסר מהרשימה"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"פרטי אפליקציה"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"המסכים האחרונים מופיעים כאן"</string>
@@ -86,7 +86,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"בית"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"תפריט"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"סקירה"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"חפש"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"חיפוש"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"מצלמה"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"טלפון"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"מסייע קולי"</string>
@@ -129,7 +129,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"אתרנט מנותק."</string>
     <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"אתרנט מחובר."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"אין אות."</string>
-    <string name="accessibility_not_connected" msgid="6395326276213402883">"לא מחובר."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"אין חיבור."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"אפס פסים."</string>
     <string name="accessibility_one_bar" msgid="1685730113192081895">"פס אחד."</string>
     <string name="accessibility_two_bars" msgid="6437363648385206679">"שני פסים."</string>
@@ -240,7 +240,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏השימוש בנתוני 4G מושהה"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"השימוש בנתונים סלולריים מושהה"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"השימוש בנתונים מושהה"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"הגעת למגבלת הנתונים שהגדרת. אתה כבר לא משתמש בנתונים סלולריים.\n\nאם תמשיך, ייתכנו חיובים לשימוש בנתונים."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"הגעת למגבלת הנתונים שהגדרת. החבילה הסלולרית שלך כבר לא בשימוש.\n\nהמשך הגלישה עשוי להיות כרוך בחיוב נוסף על השימוש בנתונים."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"המשך"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi מחובר"</string>
@@ -293,7 +293,7 @@
     <string name="quick_settings_user_title" msgid="4467690427642392403">"משתמש"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"משתמש חדש"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"לא מחובר"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"אין חיבור"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"אין רשת"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi כבוי"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi פועל"</string>
@@ -305,7 +305,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"אין מכשירים זמינים"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"בהירות"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"הפוך צבעים"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"היפוך צבעים"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"מצב תיקון צבע"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"הגדרות נוספות"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"בוצע"</string>
@@ -330,7 +330,7 @@
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"מחקת הכול"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"מידע על האפליקציה"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"הצמדת מסך"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"חפש"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"חיפוש"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"לא ניתן היה להפעיל את <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> מושבת במצב בטוח."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"נקה הכל"</string>
@@ -349,9 +349,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"חיפוש"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"הסט למעלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"הסט שמאלה כדי להציג <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"צלילים ורטט לא יופעלו, פרט להתראות, תזכורות, אירועים ומתקשרים שתציין."</string>
-    <string name="zen_priority_customize_button" msgid="7948043278226955063">"התאם אישית"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"פעולה זו מבטלת את כל הצלילים והרטט, כולל צלילים ורטט שמקורם בהתראות, מוזיקה, סרטונים ומשחקים. תוכל עדיין להתקשר."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"צלילים ורטט לא יופעלו, פרט להתראות, תזכורות, אירועים ואנשים מסוימים שמתקשרים אליך, אם יש כאלה שציינת."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"התאמה אישית"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"פעולה זו מבטלת את כל הצלילים והרטט, כולל צלילים ורטט שמקורם בהתראות, מוזיקה, סרטונים ומשחקים. בכל מקרה, עדיין אפשר להתקשר."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"פעולה זו מבטלת את כל הצלילים והרטט, כולל בהתראות, מוזיקה, סרטונים ומשחקים."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"הודעות בדחיפות נמוכה יותר בהמשך"</string>
@@ -374,17 +374,17 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"החלף משתמש. המשתמש הנוכחי הוא <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"משתמש נוכחי <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"הצג פרופיל"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"הוסף משתמש"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"הוספת משתמש"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"משתמש חדש"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"אורח"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"הוסף אורח"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"הוספת אורח"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"הסר אורח"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"להסיר אורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"כל האפליקציות והנתונים בפעילות זו באתר יימחקו."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"הסר"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"האם ברצונך להמשיך בפעילות באתר?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"התחל מחדש"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ברצוני להתחיל מחדש"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"כן, המשך"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"משתמש אורח"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"הסר את המשתמש האורח כדי למחוק אפליקציות ונתונים"</string>
@@ -442,8 +442,8 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"יופיע מחדש בפעם הבאה שתפעיל את האפשרות בהגדרות."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"הסתר"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> מנסה לפעול בתור תיבת הדו-שיח של עוצמת הקול."</string>
-    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"התר"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"דחה"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"כן, זה בסדר"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"לא, אין מצב"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> הוא תיבת הדו-שיח של עוצמת הקול"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"הקש כדי לשחזר את המקור."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"אתה משתמש בפרופיל העבודה שלך"</string>
@@ -490,7 +490,7 @@
     <string name="tuner_warning" msgid="8730648121973575701">"‏System UI Tuner מספק לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
     <string name="got_it" msgid="2239653834387972602">"הבנתי"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! System UI Tuner נוסף ל\'הגדרות\'"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! ה-System UI Tuner נוסף ל\'הגדרות\'"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"הסר מההגדרות"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"‏האם להסיר את System UI Tuner ולהפסיק להשתמש בכל התכונות שלו?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"האפליקציה אינה מותקנת במכשיר"</string>
@@ -559,7 +559,7 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"מקלדת נומרית <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"מערכת"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"דף הבית"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"אחרונים"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"מהזמן האחרון"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"הקודם"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"הודעות"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"מקשי קיצור במקלדת"</string>
@@ -595,7 +595,7 @@
     <string name="menu_ime" msgid="4943221416525250684">"מחליף תפריט / מקלדת"</string>
     <string name="select_button" msgid="1597989540662710653">"בחירת לחצן להוספה"</string>
     <string name="add_button" msgid="4134946063432258161">"הוסף לחצן"</string>
-    <string name="save" msgid="2311877285724540644">"שמור"</string>
+    <string name="save" msgid="2311877285724540644">"שמירה"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
     <string name="no_home_title" msgid="1563808595146071549">"לחצן הבית לא נמצא"</string>
     <string name="no_home_message" msgid="5408485011659260911">"לחצן הבית נדרש כדי לנווט במכשיר הזה. הוסף לחצן בית לפני השמירה."</string>
@@ -607,9 +607,9 @@
     <string name="keycode_description" msgid="1403795192716828949">"לחצנים של קוד מפתח מאפשרים להוסיף מקשי מקלדת לסרגל הניווט. בעת הלחיצה הם מדמים את מקש המקלדת שנבחר. תחילה יש לבחור את המקש ללחצן, ולאחר מכן יש לבחור תמונה שתוצג בלחצן."</string>
     <string name="select_keycode" msgid="7413765103381924584">"בחירת לחצן מקלדת"</string>
     <string name="preview" msgid="9077832302472282938">"תצוגה מקדימה"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"גרור כדי להוסיף משבצות"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ניתן לגרור כדי להוסיף או להסיר משבצות"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"גרור לכאן כדי להסיר"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"ערוך"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"עריכה"</string>
     <string name="tuner_time" msgid="6572217313285536011">"שעה"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"הצג שעות, דקות ושניות"</item>

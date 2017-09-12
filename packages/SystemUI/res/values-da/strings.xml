@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"System-UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Appinfo"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dine seneste skærme vises her"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Luk de seneste apps"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -67,15 +67,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere USB-fejlretning. Skift til en administratorbruger for at bruge denne funktion."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom til fuld skærm"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stræk til fuld skærm"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer skærmbillede..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer skærmbillede..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Skærmbilledet gemmes."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er gemt."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tryk for at se dit skærmbillede."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Skærmbilledet kunne ikke tages."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Der opstod et problem ved lagringen af skærmbilledet."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Skærmbilledet kan ikke gemmes pga. begrænset lagerplads."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Appen eller din organisation tillader ikke, at du tager skærmbilleder."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer screenshot..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer screenshot..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshottet gemmes."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshottet er gemt."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tryk for at se dit screenshot."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshottet kunne ikke tages."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Der opstod et problem ved lagringen af screenshottet."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Screenshottet kan ikke gemmes pga. begrænset lagerplads."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Appen eller din organisation tillader ikke, at du tager screenshots."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Muligheder for USB-filoverførsel"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Isæt som en medieafspiller (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Isæt som et kamera (PTP)"</string>
@@ -251,14 +251,14 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> underretning mere i gruppen.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> underretninger mere i gruppen.</item>
     </plurals>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Underretningsindstillinger"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Indstillinger for underretninger"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Indstillinger for <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående retning."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående format."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Skærmen roteres nu automatisk."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i liggende tilstand."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i stående tilstand."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i liggende format."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i stående format."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessertcase"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Pauseskærm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>

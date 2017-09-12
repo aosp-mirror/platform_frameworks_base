@@ -35,8 +35,8 @@
     <string name="battery_low_title" msgid="6456385927409742437">"Батеријата е слаба"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>. Вклучен е штедачот на батерија."</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Полначот на УСБ меморијата не е поддржан.\nКористете го само полначот доставен со уредот."</string>
-    <string name="invalid_charger_title" msgid="3515740382572798460">"Полнењето преку УСБ не е поддржано."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Полначот на USB меморијата не е поддржан.\nКористете го само полначот доставен со уредот."</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"Полнењето преку USB не е поддржано."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Користете го само доставениот полнач."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Поставки"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Дали да се вклучи штедачот на батерија?"</string>
@@ -51,20 +51,20 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Поврзан е Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Постави методи на внес."</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Физичка тастатура"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Дозволи апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> да пристапи кон УСБ уредот?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Дозволи апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> да пристапи кон УСБ додатокот?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> кога е поврзан овој УСБ уред?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> кога е поврзан овој УСБ додаток?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Нема инсталирано апликации што работат со овој УСБ додаток. Дознајте повеќе за овој додаток на <xliff:g id="URL">%1$s</xliff:g>"</string>
-    <string name="title_usb_accessory" msgid="4966265263465181372">"УСБ додаток"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Дозволи апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> да пристапи кон USB уредот?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Дозволи апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> да пристапи кон USB додатокот?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> кога е поврзан овој USB уред?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Отвори <xliff:g id="ACTIVITY">%1$s</xliff:g> кога е поврзан овој USB додаток?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Нема инсталирано апликации што работат со овој USB додаток. Дознајте повеќе за овој додаток на <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB додаток"</string>
     <string name="label_view" msgid="6304565553218192990">"Прикажи"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Користи го стандардно за овој УСБ уред"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Користи го стандардно за овој приклучок за УСБ"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Овозможи отстранување грешки на УСБ?"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Користи го стандардно за овој USB уред"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Користи го стандардно за овој приклучок за USB"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Овозможи отстранување грешки на USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Клучниот отпечаток на RSA на компјутерот е:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Секогаш дозволувај од овој компјутер"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Отстранувањето грешки на УСБ не е дозволено"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Корисникот што моментално е најавен на уредов не може да вклучи отстранување грешки на УСБ. За да ја користите функцијата, префрлете се на корисникот Администратор."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Отстранувањето грешки на USB не е дозволено"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Корисникот што моментално е најавен на уредов не може да вклучи отстранување грешки на USB. За да ја користите функцијата, префрлете се на корисникот Администратор."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Зумирај да се исполни екранот"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растегни да се исполни екранот"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сликата на екранот се зачувува..."</string>
@@ -76,7 +76,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Се појави проблем при зачувување на сликата од екранот."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Сликата од екранот не може да се зачува поради ограничена меморија."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Апликацијата или вашата организација не дозволува создавање слики од екранот."</string>
-    <string name="usb_preference_title" msgid="6551050377388882787">"Пренос на датотека со УСБ"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"Пренос на датотека со USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Монтирај како мултимедијален плеер (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Монтирај како фотоапарат (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Инсталирај Android апл. „Пренос на датот.“ за Mac"</string>
@@ -150,13 +150,13 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Роаминг"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема СИМ картичка."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема SIM картичка."</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобилен интернет"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Вклучени се мобилните податоци"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилните податоци се исклучени"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Се поврзува со Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим на работа во авион."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема СИМ-картичка"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема SIM-картичка"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Променување на мрежата на операторот."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Отвори ги деталите за батеријата"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерија <xliff:g id="NUMBER">%d</xliff:g> проценти."</string>
@@ -535,8 +535,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Стрелка налево"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Стрелка надесно"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Центар"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Картичка"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Празно место"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Внеси"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Бришење наназад"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Пушти/Паузирај"</string>
@@ -605,7 +605,7 @@
     <string name="preview" msgid="9077832302472282938">"Преглед"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Повлечете за додавање плочки"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Повлечете тука за да се отстрани"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"Уреди"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Измени"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Време"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Прикажи часови, минути и секунди"</item>

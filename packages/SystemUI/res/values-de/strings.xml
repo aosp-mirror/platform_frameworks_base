@@ -159,7 +159,9 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Keine SIM-Karte"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netzwerk des Mobilfunkanbieters wird gewechselt"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Akkudetails öffnen"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Akku bei <xliff:g id="NUMBER">%d</xliff:g> Prozent."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
     <skip />
@@ -295,8 +297,8 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Kein Netz"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN aus"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WLAN an"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Keine WLAN-Netzwerke verfügbar"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Übertragen"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Keine WLANs verfügbar"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Streamen"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Wird übertragen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unbenanntes Gerät"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Startklar"</string>
@@ -331,7 +333,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ist im abgesicherten Modus deaktiviert."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Alle löschen"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Alle schließen"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Das Teilen des Bildschirms wird in dieser App nicht unterstützt"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Hierher ziehen, um den Bildschirm zu teilen"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Geteilte Schaltfläche – horizontal"</string>
@@ -572,9 +574,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Einschließlich Lautstärkeregler anzeigen"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Bitte nicht stören"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Tastenkombination für Lautstärketasten"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"\"Bitte nicht stören\" bei \"Lauter\" deaktivieren"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"\"Nicht stören\" bei \"Lauter\" deaktivieren"</string>
     <string name="battery" msgid="7498329822413202973">"Akku"</string>
     <string name="clock" msgid="7416090374234785905">"Uhr"</string>
     <string name="headset" msgid="4534219457597457353">"Headset"</string>

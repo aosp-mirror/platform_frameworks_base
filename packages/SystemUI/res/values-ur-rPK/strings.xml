@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"سیلولر ڈیٹا"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"سیلولر ڈیٹا آن ہے"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"سیلولر ڈیٹا آف ہے"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"بلوٹوتھ مربوط کرنا۔"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"بلوٹوتھ ٹیتھرنگ۔"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ہوائی جہاز وضع۔"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏کوئی SIM کارڈ نہیں ہے۔"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"کیریئر نیٹ ورک تبدیل ہو رہا ہے۔"</string>
@@ -301,13 +301,13 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"کوئی آلات دستیاب نہیں ہیں"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"چمکیلا پن"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"رنگ تبدیل کریں"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"رنگ پلٹیں"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"رنگ کی اصلاح کی وضع"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"مزید ترتیبات"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ہو گیا"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"مربوط"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"مربوط ہو رہا ہے…"</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"مربوط کرنا"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ٹیتھرنگ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ہاٹ اسپاٹ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"اطلاعات"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"فلیش لائٹ"</string>

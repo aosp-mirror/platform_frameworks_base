@@ -152,9 +152,9 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nema SIM kartice."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Podaci za mobilne uređaje"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Podaci za mobilne uređaje su uključeni"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Podaci za mobilne uređaje su isključeni"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobilni podaci"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobilni podaci su uključeni"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobilni podaci su isključeni"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth privezivanje."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim rada u avionu."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nema SIM kartice."</string>
@@ -313,7 +313,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Obaveštenja"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampa"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Podaci za mobilne uređaje"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobilni podaci"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Potrošnja podataka"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Preostala količina podataka"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Preko ograničenja"</string>
@@ -391,7 +391,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Odjavite aktuelnog korisnika"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ODJAVI KORISNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Dodajete novog korisnika?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Kada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Kada dodate novog korisnika, ta osoba treba da podesi svoj prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Želite li da uklonite korisnika?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Sve aplikacije i podaci ovog korisnika će biti izbrisani."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Ukloni"</string>
@@ -427,7 +427,7 @@
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Brže dobijajte obaveštenja"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Pregledajte ih pre otključavanja"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ne, hvala"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"Podesi"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Aktiviraj"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Prekini odmah"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširi"</string>
@@ -537,8 +537,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Taster sa strelicom nalevo"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Taster sa strelicom nadesno"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Taster sa centralnom strelicom"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulator"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Taster za razmak"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Razmak"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Taster za brisanje unazad"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Taster za reprodukciju/pauziranje"</string>
@@ -567,7 +567,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Pregledač"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontakti"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Imejl"</string>
-    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"Razmena trenutnih poruka"</string>
+    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"Trenutne poruke"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Muzika"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendar"</string>
@@ -594,7 +594,7 @@
     <string name="select_button" msgid="1597989540662710653">"Izaberite dugme za dodavanje"</string>
     <string name="add_button" msgid="4134946063432258161">"Dodaj dugme"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
-    <string name="reset" msgid="2448168080964209908">"Ponovo postavi"</string>
+    <string name="reset" msgid="2448168080964209908">"Resetuj"</string>
     <string name="no_home_title" msgid="1563808595146071549">"Nismo pronašli dugme Početna"</string>
     <string name="no_home_message" msgid="5408485011659260911">"Dugme Početna je neophodno za navigaciju na ovom uređaju. Dodajte dugme Početna pre nego što sačuvate izmene."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Prilagodi širinu dugmeta"</string>

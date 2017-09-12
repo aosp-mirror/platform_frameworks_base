@@ -149,7 +149,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"រ៉ូ​មីង"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"ទិន្នន័យចល័ត"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ទិន្នន័យចល័តបានបើក"</string>
@@ -294,7 +294,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ខាស"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ភ្ជាប់"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ត្រៀម​រួចរាល់​ដើម្បី​ចាត់​ថ្នាក់"</string>
@@ -338,16 +338,16 @@
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម​​"</string>
-    <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុងសាក​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"រុញ​ទៅ​ឆ្វេង​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"អ្នកនឹងមិនរំខានដោយសម្លេង និងរំញ័រឡើយ លើកលែងតែសម្លេងរោទិ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅដែលអ្នកបានបញ្ជាក់ប៉ុណ្ណោះ។"</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"អ្នកនឹងគ្មានការរំខានដោយសារសំឡេង និងភាពរំញ័រឡើយ លើកលែងតែសំឡេងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបានបញ្ជាក់ប៉ុណ្ណោះ។"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ប្ដូរតាមបំណង"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"វារារាំងសំឡេង និងរំញ័រទាំងអស់ ដោយរួមបញ្ចូលទាំងសំឡេងរោទិ៍ តន្ត្រី វីដេអូ និងហ្គេម។ អ្នកនឹងនៅតែអាចធ្វើការហៅទូរស័ព្ទបានដដែល។"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"វារារាំងសំឡេង និងរំញ័រទាំងអស់ ដោយរួមបញ្ចូលទាំងសំឡេងរោទ៍ តន្ត្រី វីដេអូ និងហ្គេម។ អ្នកនឹងនៅតែអាចធ្វើការហៅទូរសព្ទបានដដែល។"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"វារារាំងសំឡេង និងរំញ័រទាំងអស់ដែលចេញពីម៉ោងរោទិ៍ តន្ត្រី វីដេអូ និងហ្គេម។"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ការ​ជូន​ដំណឹង​​មិន​សូវ​បន្ទាន់​ខាង​ក្រោម"</string>

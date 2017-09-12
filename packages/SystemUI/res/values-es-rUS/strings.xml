@@ -572,9 +572,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendario"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Mostrar con controles de volumen"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"No interrumpir"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"No molestar"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Combinación de teclas de botones de volumen"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Desactivar el modo No interrumpir al subir el volumen"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Desactivar el modo No molestar al subir el volumen"</string>
     <string name="battery" msgid="7498329822413202973">"Batería"</string>
     <string name="clock" msgid="7416090374234785905">"Reloj"</string>
     <string name="headset" msgid="4534219457597457353">"Auriculares"</string>
@@ -605,7 +605,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"Los botones de las claves de código permiten agregar las teclas del teclado a la Barra de navegación. Al presionarlas, emulan la tecla seleccionada. Primero, debes elegir la tecla para el botón y, luego, asignarle una imagen."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Selecciona un botón del teclado"</string>
     <string name="preview" msgid="9077832302472282938">"Vista previa"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastra los mosaicos para agregarlos"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastra los íconos para agregarlos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra aquí para quitar"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>

@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Interf sist"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do app"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Inform. do app"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Suas telas recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar apps recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">

@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Батареянын кубатын үнөмдөгүчтү иштетүү"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Жөндөөлөр"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi‑Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Экранды авто-тегеретүү"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Экрандын авто-айлануусу"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ҮНСҮЗ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АВТО"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Эскертмелер"</string>
@@ -151,12 +151,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM карта жок."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобилдик дайындар"</string>
-    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Мобилдик дайындар күйгүзүлгөн"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилдик дайындарды өткөрүү өчүрүлгөн"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобилдик Интернет"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Мобилдик Интернет күйгүзүлгөн"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилдик Интернет өчүрүлгөн"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-карта жок"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM карта жок"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Оператор тармагы өзгөртүлүүдө."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Батареянын чоо-жайын ачуу"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
@@ -190,12 +190,12 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi өчүрүлдү."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi күйгүзүлдү."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Мобилдик түйүн <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Батарей: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Батарея: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Учак режими өчүк."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Учак режими күйүк."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Учак режими өчүрүлдү."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Учак режими күйгүзүлдү."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Тынчымды алба деген күйүк, артыкчылыктуулар гана."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Тынчымды алба режими иштетилген. Шашылыш эскертмелер гана көрүнөт."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Тынчымды албагыла, жымжырт болсун."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Тынчымды алба деген күйүк, ойготкучтар гана."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Тынчымды алба."</string>
@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дайындары тындырылды"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Уюлдук дайындар тындырылды"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Дайындар тындырылды"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Трафик сиз койгон чекке жетти. Эми мобилдик дайындарды колдоно албайсыз.\n\nЭгер улантсаңыз, мобилдик дайындарды колдонгонуңуз үчүн акы алынышы мүмкүн."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Трафик белгиленген чекке жетти. Эми мобилдик Интернетти пайдалана албайсыз.\n\nЭгер улантсаңыз, дайындарды мобилдик тармак аркылуу өткөргөндүгүңүз үчүн кошумча акы төлөшүңүз мүмкүн."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Улантуу"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Интернет байланыш жок"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi байланышта"</string>
@@ -263,7 +263,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Көшөгө"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Тынчымды алба"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Артыкчылык гана"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Шашылыш эскертмелер гана"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкучтар гана"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Тымтырс"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -272,7 +272,7 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Жупташкан түзмөктөр жок"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Жарыктыгы"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматтык бурулуу"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Экранды авто-тегеретүү"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Экрандын авто-айлануусу"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> деп коюлду"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Буруу аракети кулпуланган"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Тигинен"</string>
@@ -283,7 +283,7 @@
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Медиа түзмөгү"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Куткаруучуларга чалуу гана"</string>
-    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Тууралоолор"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Жөндөөлөр"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Убакыт"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Мен"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"Колдонуучу"</string>
@@ -311,8 +311,8 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Туташуу чекити"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Эскертмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Дайындарды өткөрүү"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын колдонулушу"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобилдик Интернет"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын өткөрүлүшү"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Калган дайындар"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Чектен ашты"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> колдонулду"</string>
@@ -345,10 +345,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Издөө"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үчүн жогору жылмыштырыңыз."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үчүн солго жылмыштырыңыз."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Көрсөтүлгөн эскертүүлөрдөн, эскерткичтерден, окуялардан жана чалуучулардан тышкары башка үндөр жана дирилдөөлөр тынчыңызды албайт."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Эскертүүлөрдөн, жылнаамадагы иш-чараларды эстеткичтерден жана белгиленген байланыштардын чалууларынан тышкары башка үндөр жана дирилдөөлөр тынчыңызды албайт."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Ыңгайлаштыруу"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү сыяктуу нерселердин баары өчүрүлөт. Бирок телефон чала бересиз."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү сыяктуу нерселердин БААРЫ өчүрүлөт."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү өчүрүлөт. Бирок телефон менен сүйлөшө бересиз."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Ушуну менен эскертүүлөрдүн, музыканын, видеолордун жана оюндардын үндөрү жана дирилдөөлөрү өчүрүлөт."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
@@ -358,7 +358,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү серпип камерага өтүңүз"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Артыкчылык гана"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Шашылыш эскертмелер гана"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкучтар гана"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Тым-\nтырс"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Артыкчылыктуу\nгана"</string>

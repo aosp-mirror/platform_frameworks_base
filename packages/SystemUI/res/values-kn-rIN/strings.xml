@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ಪಟ್ಟಿಯಿಂದ ತೆಗೆದುಹಾಕು"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಪರದೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸು"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="one">ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ %d ಪರದೆಗಳು</item>
       <item quantity="other">ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ %d ಪರದೆಗಳು</item>
@@ -40,7 +40,7 @@
     <string name="invalid_charger_text" msgid="5474997287953892710">"ಒದಗಿಸಿರುವ ಚಾರ್ಜರ್ ಮಾತ್ರ ಬಳಸಿ."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ಬ್ಯಾಟರಿ ಉಳಿತಾಯವನ್ನು ಆನ್ ಮಾಡುವುದೇ?"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ಆನ್ ಮಾಡು"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ಆನ್‌ ಮಾಡಿ"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ಬ್ಯಾಟರಿ ಉಳಿತಾಯವನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ವೈ-ಫೈ"</string>
@@ -172,7 +172,7 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_work_mode" msgid="2478631941714607225">"ಕೆಲಸದ ಮೋಡ್"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ವಜಾಗೊಳಿಸು."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ವಜಾಗೊಳಿಸಿ."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ವಜಾಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"ಇತ್ತೀಚಿನ ಎಲ್ಲಾ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ ತೆರೆಯಿರಿ."</string>
@@ -244,7 +244,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ವೈ-ಫೈ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ಸ್ಥಾನವನ್ನು GPS ಮೂಲಕ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
-    <string name="accessibility_location_active" msgid="2427290146138169014">"ಸ್ಥಾನ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"ಸ್ಥಳ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -255,10 +255,10 @@
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ಪರದೆಯನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋರ್ಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ಪರದೆಯು ಈಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ಪರದೆಯು ಇದೀಗ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋರ್ಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ಇಥರ್ನೆಟ್"</string>
@@ -275,11 +275,11 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> ಗೆ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ತಿರುಗುವಿಕೆ ಲಾಕ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋಟ್ರೇಟ್"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"ಸ್ಥಾನ"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ಸ್ಥಾನ ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ಸ್ಥಳ"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ಮಾಧ್ಯಮ ಸಾಧನ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"ತುರ್ತು ಕರೆಗಳು ಮಾತ್ರ"</string>
@@ -347,8 +347,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಎಡಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"ಅಲಾರಮ್‌ಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಮತ್ತು ನೀವು ಸೂಚಿಸುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ, ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳಿಂದ ನಿಮಗೆ ತೊಂದರೆ ಆಗುವುದಿಲ್ಲ."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ಕಸ್ಟಮೈಸ್ ಮಾಡು"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಆಟಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ. ನಿಮಗೆ ಈಗಲೂ ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಆಟಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಗೇಮ್‌ಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ. ನಿಮಗೆ ಈಗಲೂ ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಗೇಮ್‌ಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ಕೆಳಗೆ ಕಡಿಮೆ ಅವಸರದ ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
@@ -410,7 +410,7 @@
     <string name="monitoring_title" msgid="169206259253048106">"ನೆಟ್‌ವರ್ಕ್‌ ಪರಿವೀಕ್ಷಣೆ"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ಸಂಪರ್ಕಕಡಿತಗೊಳಿಸಿ"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ನಿಮ್ಮ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ಅವರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ.\n\nನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ಕಾರ್ಪೊರೇಟ್ ಪ್ರವೇಶ, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಾಗೂ ನಿಮ್ಮ ಸಾಧನದೊಂದಿಗೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳ ಮಾಹಿತಿಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುವ ಮತ್ತು ನಿರ್ವಹಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೊಂದಿದ್ದಾರೆ."</string>
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ನಿಮ್ಮ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nಅವರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ. ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ಕಾರ್ಪೊರೇಟ್ ಪ್ರವೇಶ, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಾಗೂ ನಿಮ್ಮ ಸಾಧನದೊಂದಿಗೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳ ಮಾಹಿತಿಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುವ ಮತ್ತು ನಿರ್ವಹಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೊಂದಿದ್ದಾರೆ."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"ನೀವು VPN ಸಂಪರ್ಕ ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿ ನೀಡಿರುವಿರಿ.\n\nಈ ಅಪ್ಲಿಕೇಶನ್ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ನಿಮ್ಮ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ಅವರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ.\n\nನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ಕಾರ್ಪೊರೇಟ್ ಪ್ರವೇಶ, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಾಗೂ ನಿಮ್ಮ ಸಾಧನದೊಂದಿಗೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳ ಮಾಹಿತಿಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಮತ್ತು ನಿರ್ವಹಿಸಬಹುದು.\n\nನೀವು VPN ಗೆ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿರುವಿರಿ, ಅದು ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ನಿರ್ವಹಿಸಬಹುದು.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ಮೂಲಕ ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ.\n\nನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೊಂದಿದ್ದಾರೆ.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.\n\nನಿಮ್ಮ ವೈಯಕ್ತಿಕ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದಾದ VPN ಗೆ ಕೂಡಾ ನೀವು ಸಂಪರ್ಕಗೊಂಡಿರುವಿರಿ."</string>
@@ -438,8 +438,8 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅದನ್ನು ಆನ್ ಮಾಡಿದಾಗ ಅದು ಮರುಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ಮರೆಮಾಡಿ"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಲು ಬಯಸುತ್ತದೆ."</string>
-    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ಅನುಮತಿಸು"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ನಿರಾಕರಿಸು"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ಅನುಮತಿಸಿ"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ನಿರಾಕರಿಸಿ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಿದೆ"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"ಮೂಲಕ್ಕೆ ಮರುಸ್ಥಾಪಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ನೀವು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
@@ -455,12 +455,12 @@
     <item msgid="150349973435223405"></item>
     <item msgid="6761963760295549099"></item>
   </string-array>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಣಗಳನ್ನು ತೋರಿಸಲಾಗಿದೆ. ವಜಾಗೊಳಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಣಗಳನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ಎಂಬೆಡ್ ಮಾಡಲಾದ ಬ್ಯಾಟರಿ ಶೇಕಡಾ ತೋರಿಸಿ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ಚಾರ್ಜ್ ಮಾಡದಿರುವಾಗ ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಒಳಗೆ ಬ್ಯಾಟರಿ ಮಟ್ಟದ ಶೇಕಡಾವನ್ನು ತೋರಿಸಿ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
@@ -483,12 +483,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
     <string name="got_it" msgid="2239653834387972602">"ಅರ್ಥವಾಯಿತು"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"ಅಭಿನಂದನೆಗಳು! ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"ಅಭಿನಂದನೆಗಳು! ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್ ತೆಗೆದುಹಾಕುವುದೇ ಮತ್ತು ಅದರ ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಬಳಸುವುದನ್ನು ನಿಲ್ಲಿಸುವುದೇ?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ಗಡಿಯಾರದ ಸೆಕೆಂಡುಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಲ್ಲಿ ಗಡಿಯಾರ ಸೆಕೆಂಡುಗಳನ್ನು ತೋರಿಸು. ಇದಕ್ಕೆ ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯು ಪರಿಣಾಮಬೀರಬಹುದು."</string>
@@ -497,7 +497,7 @@
     <string name="experimental" msgid="6198182315536726162">"ಪ್ರಾಯೋಗಿಕ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡುವುದೇ?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಅನ್ನು ಟ್ಯಾಬ್ಲೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು, ನೀವು ಮೊದಲು ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ."</string>
-    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ಆನ್ ಮಾಡು"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ಆನ್‌ ಮಾಡಿ"</string>
     <string name="show_silently" msgid="6841966539811264192">"ಸ್ಥಬ್ಧವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="block" msgid="2734508760962682611">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"ಮೌನವಾಗಿಸಬೇಡಿ"</string>
@@ -629,9 +629,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"50% ಮೇಲಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"30% ಮೇಲಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"ಕೆಳಗಿನ ಪೂರ್ಣ ಪರದೆ"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ಸ್ಥಾನ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. ಎಡಿಟ್ ಮಾಡಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ಸ್ಥಳ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. ಎಡಿಟ್ ಮಾಡಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ಸೇರಿಸಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ಸ್ಥಾನ <xliff:g id="POSITION">%1$d</xliff:g>. ಆಯ್ಕೆಮಾಡಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ಸ್ಥಳ <xliff:g id="POSITION">%1$d</xliff:g>. ಆಯ್ಕೆಮಾಡಲು ಡಬಲ್ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ಸರಿಸಿ"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ತೆಗೆದುಹಾಕಿ"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="POSITION">%2$d</xliff:g> ಸ್ಥಾನಕ್ಕೆ <xliff:g id="TILE_NAME">%1$s</xliff:g> ಸೇರಿಸಲಾಗಿದೆ"</string>

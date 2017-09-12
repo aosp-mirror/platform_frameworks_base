@@ -351,7 +351,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ez letiltja az ÖSSZES hanghatást és rezgést, beleértve az ébresztések, zeneszámok, videók és játékok hangjait is."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson rá ismét a megnyitáshoz"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Húzza felfelé az ujját a feloldáshoz"</string>
     <string name="phone_hint" msgid="4872890986869209950">"A telefonhoz csúsztasson az ikonról"</string>
     <string name="voice_hint" msgid="8939888732119726665">"A hangsegéd eléréséhez csúsztassa ujját az ikonról"</string>
@@ -554,7 +554,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numerikus: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Rendszer"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Otthon"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Kezdőoldal"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Legutóbbiak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Vissza"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Értesítések"</string>

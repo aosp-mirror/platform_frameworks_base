@@ -224,8 +224,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Ficklampan har aktiverats."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Färginverteringen har inaktiverats."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Färginverteringen har aktiverats."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Den mobila trådlösa surfzonen har inaktiverats."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Den mobila trådlösa surfzonen har aktiverats."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Den mobila surfzonen har inaktiverats."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Den mobila surfzonen har aktiverats."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Castningen av skärmen har stoppats."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Arbetsläget är inaktiverat."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Arbetsläget aktiverat."</string>
@@ -308,7 +308,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Ansluten"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Ansluter ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Internetdelning"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Trådlös surfzon"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Surfzon"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Aviseringar"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Ficklampa"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobildata"</string>
@@ -480,7 +480,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Snabbinställningar, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Trådlös surfzon"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Surfzon"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Jobbprofil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Kul för vissa, inte för alla"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Du kan använda inställningarna för systemgränssnitt för att justera användargränssnittet i Android. Dessa experimentfunktioner kan när som helst ändras, sluta fungera eller försvinna. Använd med försiktighet."</string>
@@ -629,7 +629,7 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Övre 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Övre 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Helskärm på nedre skärm"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Position <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tryck snabbt två gånger om du vill redigera positionen."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Position <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tryck snabbt två gånger för att redigera positionen."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Lägg till genom att trycka snabbt två gånger."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Position <xliff:g id="POSITION">%1$d</xliff:g>. Välj den genom att trycka snabbt två gånger."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Flytta <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>

@@ -156,7 +156,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Komórkowa transmisja danych"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Komórkowa transmisja danych włączona"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Komórkowa transmisja danych jest wyłączona"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Powiązanie Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Thethering przez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Tryb samolotowy."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Brak karty SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Zmiana sieci operatora."</string>
@@ -312,7 +312,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Połączono"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Łączę..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Powiązanie"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Punkt dostępu"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Powiadomienia"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Latarka"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Transmisja danych komórkowych"</string>
@@ -351,7 +351,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Przesuń w lewo: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Urządzenie nie będzie odtwarzać dźwięków ani włączać wibracji, z wyjątkiem wybranych przez Ciebie alarmów, przypomnień, wydarzeń i kontaktów."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Dostosuj"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"To zablokuje WSZYSTKIE dźwięki i wibracje, w tym alarmy, muzykę, filmy i gry. Nadal będzie można wykonywać połączenia."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"To zablokuje WSZYSTKIE dźwięki i wibracje, w tym alarmy, muzykę, filmy i gry. Nadal będzie można wykonywać połączenia."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"To zablokuje WSZYSTKIE dźwięki i wibracje – w tym alarmy, muzykę, filmy i gry."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Poniżej widać mniej pilne powiadomienia"</string>

@@ -96,7 +96,7 @@
     <string name="phone_label" msgid="2320074140205331708">"otvori telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otvori glasovnu pomoć"</string>
     <string name="camera_label" msgid="7261107956054836961">"otvori kameru"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Izaberite novi raspored zadataka"</string>
+    <string name="recents_caption_resize" msgid="3517056471774958200">"Odaberite novi raspored zadataka"</string>
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Dugme za uvećavanje u slučaju nekompatibilnosti."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Uvećani prikaz manjeg ekrana na većem ekranu."</string>
@@ -239,9 +239,9 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G prijenos podataka je pauzirano"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilni podaci su pauzirani"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Prijenos podataka je pauziran"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dostigli ste ograničenje za prijenos podataka koje ste postavili. Više ne koristite mobilne podatke.\n\nUkoliko nastavite koristiti mobilne podatke, mogući su troškovi za prijenos podataka."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dostigli ste ograničenje za prijenos podataka koje ste postavili. Više ne koristite mobilne podatke.\n\nUkoliko nastavite koristiti mobilne podatke, mogu nastati troškovi prijenosa podataka."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Nastavi"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internet veze"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Niste povezani na internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi veza aktivna"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Traženje GPS signala"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija utvrđena GPS signalom"</string>
@@ -265,7 +265,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Čuvar ekrana"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne ometaj"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetni prekidi"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetno"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Samo alarmi"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Potpuna tišina"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -296,10 +296,10 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi isključen"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi uključen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nema dostupnih Wi-Fi mreža"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Prebacivanje"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emitiranje"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Prebacivanje"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Neimenovani uređaj"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Spreman za prebacivanje"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Spreman za emitiranje"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Nema dostupnih uređaja"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Osvjetljenje"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
@@ -344,10 +344,10 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Do kraja punjenja preostalo <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ne puni se"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Mreža može \n biti nadzirana"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Traži"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Pretraživanje"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Povucite gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Povucite lijevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Zvukovi i vibracije vas neće uznemiravati, osim alarma, podsjetnika, događaja i pozivalaca koje odredite."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivalaca koje odredite."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, videozapise i igre. I dalje ćete moći obavljati pozive."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, video zapise i igre."</string>
@@ -360,7 +360,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Prevucite od ikone da otvorite kameru"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Potpuna tišina. Ovo će utišati i čitače ekrana."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Potpuna tišina"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetni prekidi"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetno"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Samo alarmi"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Potpuna\ntišina"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Samo\nprioritetni prekidi"</string>
@@ -434,7 +434,7 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skupi"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je prikačen"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"Ovim ekran ostaje prikazan dok ga ne otkačite. Da biste ga otkačili dodirnite i držite Nazad."</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"Jasno mi je"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"Razumijem"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Pojavit će se sljedeći put kada opciju uključite u postavkama."</string>
@@ -443,7 +443,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Dozvoli"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odbij"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je dijaloški okvir za jačinu zvuka"</string>
-    <string name="volumeui_notification_text" msgid="8819536904234337445">"Dodirnite za povrat originala."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Dodirnite za vraćanje originala."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Koristite svoj profil za posao"</string>
   <string-array name="volume_stream_titles">
     <item msgid="5841843895402729630">"Pozovi"</item>
@@ -489,7 +489,7 @@
     <string name="tuner_warning_title" msgid="7094689930793031682">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Podešavač za korisničko sučelje sistema vam omogućava dodatne načine da podesite i prilagodite Androidovo sučelje. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
-    <string name="got_it" msgid="2239653834387972602">"Jasno mi je"</string>
+    <string name="got_it" msgid="2239653834387972602">"Razumijem"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Čestitamo! Podešavač za korisničko sučelje sistema je dodan u Postavke"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ukloni iz Postavki"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Želite li ukloniti Podešavač za korisničko sučelje sistema iz Postavki i prestati koristiti sve njegove funkcije?"</string>
@@ -527,7 +527,7 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrole <xliff:g id="APP_NAME">%1$s</xliff:g> obavještenja"</string>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Upotreba baterije"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Potrošnja baterije"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ušteda baterije je isključena prilikom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ušteda baterije"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Ograničava rad i prijenos podataka u pozadini"</string>
@@ -562,8 +562,8 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nedavni ekrani"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Nazad"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Obavještenja"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Skracenice tastature"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Promijeni način unosa"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Prečice tastature"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Promjena načina unosa"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplikacije"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Pomoć"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Preglednik"</string>
@@ -586,7 +586,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Ušteda podataka je uključena"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Ušteda podataka je isključena"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Uključeno"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"Isključi"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Isključeno"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigaciona traka"</string>
     <string name="start" msgid="6873794757232879664">"Početak"</string>
     <string name="center" msgid="4327473927066010960">"Sredina"</string>
@@ -596,7 +596,7 @@
     <string name="select_button" msgid="1597989540662710653">"Odaberite dugme koje želite dodati"</string>
     <string name="add_button" msgid="4134946063432258161">"Dodaj dugme"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
-    <string name="reset" msgid="2448168080964209908">"Ponovno pokretanje"</string>
+    <string name="reset" msgid="2448168080964209908">"Vraćanje na zadano"</string>
     <string name="no_home_title" msgid="1563808595146071549">"Dugme za početak nije pronađeno."</string>
     <string name="no_home_message" msgid="5408485011659260911">"Dugme za početak je neophodno za navigaciju ovim uređajem. Dodajte dugme za početak prije pohranjivanja."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Podesite širinu dugmeta"</string>
@@ -607,7 +607,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"Dugmad za kodiranje tipki omogućavaju da se tipke sa tipkovnice dodaju u navigacionu traku. Kada se pritisnu, oni oponašaju izabranu tipku tastature. Kao prvo, tipka mora biti izabrana za dugme, a nakon toga se bira slika koja će biti prikazana na njemu."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Odaberite dugme na tastaturi"</string>
     <string name="preview" msgid="9077832302472282938">"Pregledaj"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Povucite da dodate polja"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Prevucite da dodate pločice"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Prevucite ovdje za uklanjanje"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Uredi"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vrijeme"</string>

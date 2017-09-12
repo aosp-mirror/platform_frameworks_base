@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobiilne andmeside"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobiilne andmeside on sees"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobiilne andmeside on välja lülitatud"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothi jagamine."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Jagamine Bluetoothiga."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lennurežiim."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-kaarti pole."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Operaatori võrku muudetakse."</string>
@@ -193,10 +193,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"WiFi on sisse lülitatud."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobiili <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Aku: <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Lennukirežiim on väljas."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Lennukirežiim on sees."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Lennukirežiim on välja lülitatud."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Lennukirežiim on sisse lülitatud."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Lennurežiim on väljas."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Lennurežiim on sees."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Lennurežiim on välja lülitatud."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Lennurežiim on sisse lülitatud."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Funktsioon Mitte segada on sisse lülitatud (ainult prioriteetsed)."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Funktsioon Mitte segada on sisse lülitatud, täielik vaikus."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Funktsioon Mitte segada on sisse lülitatud (ainult alarmid)."</string>
@@ -226,8 +226,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Taskulamp on sisse lülitatud."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Värvi ümberpööramine on välja lülitatud."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Värvi ümberpööramine on sisse lülitatud."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobiilside leviala on välja lülitatud."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiilside leviala on sisse lülitatud."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobiilside kuumkoht on välja lülitatud."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiilside kuumkoht on sisse lülitatud."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekraanikuva ülekandmine on peatatud."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Töörežiim on väljas."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Töörežiim on sees."</string>
@@ -266,7 +266,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Mitte segada"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Ainult prioriteetsed"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ainult alarmid"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ainult äratused"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Täielik vaikus"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> seadet)"</string>
@@ -310,7 +310,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Ühendatud"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Ühenduse loomine ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Jagamine"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Leviala"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Kuumkoht"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Märguanded"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Taskulamp"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiilne andmeside"</string>
@@ -326,7 +326,7 @@
     <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Öövalgus on väljas, puudutage sisselülitamiseks"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Hiljutisi üksusi pole"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Olete kõik ära kustutanud"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduste teave"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduse teave"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ekraanikuva kinnitamine"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"otsing"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Rakendust <xliff:g id="APP">%s</xliff:g> ei saanud käivitada."</string>
@@ -361,7 +361,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Täielik vaikus. See vaigistab ka ekraanilugejad."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Täielik vaikus"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Ainult prioriteetsed"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult alarmid"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult äratused"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Täielik\nvaikus"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Ainult\nprioriteetsed"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ainult\nalarmid"</string>
@@ -372,7 +372,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Kasutaja vahetamine, praegune kasutaja: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Praegune kasutaja <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Kuva profiil"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"Kasutaja lisamine"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Lisa kasutaja"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Uus kasutaja"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Külaline"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Lisa külaline"</string>
@@ -474,7 +474,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Äratus"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Tööprofiil"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Lennukirežiim"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Lennurežiim"</string>
     <string name="add_tile" msgid="2995389510240786221">"Paani lisamine"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Paani ülekandmine"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Kuulete järgmist äratust kell <xliff:g id="WHEN">%1$s</xliff:g> vaid siis, kui lülitate selle enne seda välja"</string>
@@ -482,7 +482,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"kell <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"kell <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Kiirseaded, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Leviala"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Kuumkoht"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Tööprofiil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Kõik ei pruugi sellest rõõmu tunda"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Süsteemi kasutajaliidese tuuner pakub täiendavaid võimalusi Androidi kasutajaliidese muutmiseks ja kohandamiseks. Need katselised funktsioonid võivad muutuda, rikki minna või tulevastest versioonidest kaduda. Olge jätkamisel ettevaatlik."</string>

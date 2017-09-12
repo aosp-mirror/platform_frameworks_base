@@ -34,7 +34,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacións"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Queda pouca batería"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante. A función aforro de batería está activada."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante. A función de aforro da batería está activada."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Non compatible coa carga por USB.\nUtiliza só o cargador proporcionado."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Non se admite a carga mediante USB."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utiliza soamente o cargador fornecido."</string>
@@ -43,12 +43,12 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activar"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar o aforro de batería"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configuración"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Xirar pantalla automaticamente"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"APAGAR"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificacións"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ancorado"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Conexión compartida por Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclado físico"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda ao dispositivo USB?"</string>
@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Datos móbiles"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Datos móbiles activados"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Os datos móbiles están desactivados"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoraxe de Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conexión compartida por Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Non hai tarxeta SIM"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambio de rede do operador."</string>
@@ -226,8 +226,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Activouse a lanterna."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Desactivouse a inversión da cor."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Activouse a inversión da cor."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Desactivouse a zona interactiva móbil."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Activouse a zona interactiva móbil."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Desactivouse a zona wifi móbil."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Activouse a zona wifi móbil."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Detívose a emisión en pantalla."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Modo de traballo desactivado."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Modo de traballo activado."</string>
@@ -248,7 +248,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Localización establecida polo GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de localización activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Eliminar todas as notificacións."</string>
-    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"<xliff:g id="NUMBER">%s</xliff:g> máis"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificacións máis no grupo.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación máis no grupo.</item>
@@ -273,7 +273,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivado"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Non hai dispositivos sincronizados dispoñibles"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotación automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Xirar automaticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Xirar a pantalla automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Definido como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotación bloqueada"</string>
@@ -309,7 +309,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Feito"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Conectado"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Ancoraxe á rede"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Conexión compartida"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona wifi"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificacións"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lanterna"</string>
@@ -347,7 +347,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Buscar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Pasa o dedo cara arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Pasa o dedo cara a esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas, recordatorios, eventos de emisores de chamada especificados."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas, recordatorios, eventos e os emisores de chamada especificados."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizar"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Esta acción bloquea TODOS os sons e vibracións, incluídos os das alarmas, música, vídeos e xogos. Aínda podes facer chamadas de teléfono."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Esta acción bloquea TODOS os sons e vibracións, incluídos os das alarmas, música, vídeos e xogos."</string>
@@ -526,7 +526,7 @@
     <string name="notification_done" msgid="5279426047273930175">"Feito"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controis de notificacións de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso de batería"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A función aforro de batería non está dispoñible durante a carga"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A función de aforro da batería non está dispoñible durante a carga"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Aforro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -561,7 +561,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Volver"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notificacións"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Atallos de teclado"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Cambiar de método de entrada"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Cambiar de método de introdución"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplicacións"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Asistente"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Navegador"</string>

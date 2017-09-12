@@ -232,14 +232,14 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Način rada uključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Način rada isključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Način rada uključen."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Ušteda podataka isključena."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Ušteda podataka uključena."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Štednja podatkovnog prometa isključena."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Štednja podatkovnog prometa uključena."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Svjetlina zaslona"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G – 3G podaci pauzirani"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G podaci pauzirani"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilni podaci pauzirani"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Podaci su pauzirani"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dosegnuto je vaše ograničenje podataka. Više ne upotrebljavate mobilne podatke.\n\nAko nastavite, moguća je naplata za potrošnju podataka."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dosegnuli ste postavljeno ograničenje za podatkovni promet. Više ne upotrebljavate mobilni podatkovni promet.\n\nAko nastavite, moguća je naplata za potrošeni podatkovni promet."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Nastavi"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internetske veze"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
@@ -303,7 +303,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Nema dostupnih uređaja"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Svjetlina"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATSKI"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Zamijeni boje"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Zamjena boja"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Način korekcije boje"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Više  postavki"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Gotovo"</string>
@@ -572,17 +572,17 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendar"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Prikaži s kontrolama glasnoće"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ne uznemiravaj"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ne ometaj"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Prečac tipki za glasnoću"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Zaustavi \"Ne uznemiravaj\" kada je zvuk pojačan"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Zaustavi \"Ne ometaj\" kada je zvuk pojačan"</string>
     <string name="battery" msgid="7498329822413202973">"Baterija"</string>
     <string name="clock" msgid="7416090374234785905">"Sat"</string>
     <string name="headset" msgid="4534219457597457353">"Slušalice"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Slušalice su povezane"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Slušalice su povezane"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Ušteda podataka"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Ušteda podataka je uključena"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Ušteda podataka je isključena"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Štednja podatkovnog prometa"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Štednja podatkovnog prometa je uključena"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Štednja podatkovnog prometa je isključena"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Uključeno"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Isključeno"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigacijska traka"</string>

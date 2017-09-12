@@ -271,7 +271,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"블루투스"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"블루투스(<xliff:g id="NUMBER">%d</xliff:g>개의 기기)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"블루투스 사용 안함"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"페어링된 기기가 없습니다."</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"페어링된 기기가 없습니다"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"밝기"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"자동 회전"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"화면 자동 회전"</string>
@@ -488,7 +488,7 @@
     <string name="tuner_warning" msgid="8730648121973575701">"시스템 UI 튜너를 사용하면 Android 사용자 인터페이스를 변경 및 맞춤설정할 수 있습니다. 이러한 실험실 기능은 향후 출시 버전에서는 변경되거나 다운되거나 사라질 수 있습니다. 신중하게 진행하시기 바랍니다."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"이러한 실험실 기능은 향후 출시 버전에서는 변경되거나 다운되거나 사라질 수 있습니다. 신중하게 진행하시기 바랍니다."</string>
     <string name="got_it" msgid="2239653834387972602">"확인"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"축하합니다. 시스템 UI 튜너가 설정에 추가되었습니다."</string>
+    <string name="tuner_toast" msgid="603429811084428439">"시스템 UI 튜너가 설정에 추가되었습니다"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"설정에서 삭제"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"시스템 UI 튜너를 설정에서 삭제하고 모든 관련 기능의 사용을 중지하시겠습니까?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"기기에 애플리케이션이 설치되어 있지 않습니다."</string>
@@ -606,7 +606,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"키보드 버튼 선택"</string>
     <string name="preview" msgid="9077832302472282938">"미리보기"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"드래그하여 타일 추가"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"삭제하려면 여기를 드래그"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"여기로 드래그하여 삭제"</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>
     <string name="tuner_time" msgid="6572217313285536011">"시간"</string>
   <string-array name="clock_options">

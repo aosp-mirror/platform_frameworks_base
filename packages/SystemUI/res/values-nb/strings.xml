@@ -293,7 +293,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ingen nettverk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi er av"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi er på"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ingen Wi-Fi-nettverk er tilgjengelige"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ingen tilgjengelige Wi-Fi-nettverk"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Enhet uten navn"</string>
@@ -599,11 +599,11 @@
     <string name="clipboard" msgid="1313879395099896312">"Utklippstavle"</string>
     <string name="clipboard_description" msgid="3819919243940546364">"Med Clipboard-funksjonen kan elementer dras direkte til utklippstavlen. Hvis det finnes elementer på utklippstavlen, kan de også dras ut derfra."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Spesialtilpasset navigasjonsknapp"</string>
-    <string name="keycode" msgid="7335281375728356499">"Nøkkelkode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Du kan bruke nøkkelkodeknapper for å legge tastaturtaster direkte på navigasjonsraden. Når du trykker på disse knappene, fungerer de på samme måte som de valgte tastaturtastene. Du må først velge hvilken tast hver knapp skal fungere som, og deretter et bilde som vises på knappen."</string>
+    <string name="keycode" msgid="7335281375728356499">"Tastkode"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Du kan bruke tastkodeknapper for å legge tastaturtaster direkte på navigasjonsraden. Når du trykker på disse knappene, fungerer de på samme måte som de valgte tastaturtastene. Du må først velge hvilken tast hver knapp skal fungere som, og deretter et bilde som vises på knappen."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Velg tastaturtast"</string>
     <string name="preview" msgid="9077832302472282938">"Forhåndsvisning"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til fliser"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til felt"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Dra hit for å fjerne"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Endre"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Tid"</string>

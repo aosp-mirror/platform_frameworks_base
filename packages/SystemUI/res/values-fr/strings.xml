@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"Interface du système"</string>
+    <string name="app_label" msgid="7164937344850004466">"L\'interface"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer de la liste"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Infos application"</string>
@@ -296,7 +296,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi désactivé"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi activé"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Aucun réseau Wi-Fi disponible"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Diffuser"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Caster"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Diffusion"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Appareil sans nom"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Prêt à caster"</string>
@@ -347,7 +347,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faites glisser vers le haut pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez dérangé par aucune sonnerie ni aucune vibration, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous avez spécifiés."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez toujours passer des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
@@ -503,7 +503,7 @@
     <string name="show_silently" msgid="6841966539811264192">"Afficher les notifications en mode silencieux"</string>
     <string name="block" msgid="2734508760962682611">"Bloquer toutes les notifications"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Ne pas activer le mode silencieux"</string>
-    <string name="do_not_silence_block" msgid="4070647971382232311">"Ne pas activer le mode silencieux ni bloquer"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Ne pas bloquer les notifications"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Commandes de gestion des notifications"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Activé"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Désactivé"</string>

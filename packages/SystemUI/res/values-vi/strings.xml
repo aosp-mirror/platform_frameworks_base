@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Dữ liệu di động"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Dữ liệu di động đang bật"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Dữ liệu di động bị tắt"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Truy cập Internet qua Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Chia sẻ kết nối Internet qua Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Chế độ trên máy bay."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Không có thẻ SIM nào."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Thay đổi mạng của nhà cung cấp dịch vụ."</string>
@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Đã tạm dừng dữ liệu 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Đã tạm dừng dữ liệu di động"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Đã tạm dừng dữ liệu"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Đã đạt đến giới hạn dữ liệu mà bạn đặt. Bạn hiện không còn sử dụng dữ liệu di động.\n\nNếu tiếp tục, bạn có thể bị tính phí khi sử dụng dữ liệu."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dữ liệu đã đạt đến mức giới hạn mà bạn đã đặt. Bạn hiện không sử dụng dữ liệu di động nữa.\n\nNếu tiếp tục, bạn có thể bị tính phí sử dụng dữ liệu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Tiếp tục"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
