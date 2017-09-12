@@ -78,6 +78,13 @@ import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.am.proto.ActivityStackProto.BOUNDS;
+import static com.android.server.am.proto.ActivityStackProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.proto.ActivityStackProto.DISPLAY_ID;
+import static com.android.server.am.proto.ActivityStackProto.FULLSCREEN;
+import static com.android.server.am.proto.ActivityStackProto.ID;
+import static com.android.server.am.proto.ActivityStackProto.RESUMED_ACTIVITY;
+import static com.android.server.am.proto.ActivityStackProto.TASKS;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_NONE;
@@ -86,6 +93,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN_BEHIND;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_BACK;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.app.Activity;
@@ -122,6 +130,7 @@ import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -5356,5 +5365,24 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     boolean shouldSleepOrShutDownActivities() {
         return shouldSleepActivities() || mService.isShuttingDownLocked();
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        proto.write(ID, mStackId);
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            task.writeToProto(proto, TASKS);
+        }
+        if (mResumedActivity != null) {
+            mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
+        }
+        proto.write(DISPLAY_ID, mDisplayId);
+        if (mBounds != null) {
+            mBounds.writeToProto(proto, BOUNDS);
+        }
+        proto.write(FULLSCREEN, mFullscreen);
+        proto.end(token);
     }
 }

@@ -145,7 +145,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
@@ -163,7 +162,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_URI_PERMISSION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
@@ -177,6 +175,7 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
+import static com.android.server.am.proto.ActivityManagerServiceProto.ACTIVITIES;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
 import static com.android.server.wm.AppTransition.TRANSIT_NONE;
@@ -349,6 +348,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14801,6 +14801,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpCheckinFormat = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
+        boolean useProto = false;
         String dumpPackage = null;
 
         int opti = 0;
@@ -14834,12 +14835,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
+            } else if ("--proto".equals(opt)) {
+                useProto = true;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
         }
 
         long origId = Binder.clearCallingIdentity();
+
+        if (useProto) {
+            //TODO: Options when dumping proto
+            final ProtoOutputStream proto = new ProtoOutputStream(fd);
+            synchronized (this) {
+                writeActivitiesToProtoLocked(proto);
+            }
+            proto.flush();
+            Binder.restoreCallingIdentity(origId);
+            return;
+        }
+
         boolean more = false;
         // Is the caller requesting to dump a particular piece of data?
         if (opti < args.length) {
@@ -15181,6 +15196,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         Binder.restoreCallingIdentity(origId);
+    }
+
+    private void writeActivitiesToProtoLocked(ProtoOutputStream proto) {
+        mStackSupervisor.writeToProto(proto, ACTIVITIES);
     }
 
     private void dumpLastANRLocked(PrintWriter pw) {
