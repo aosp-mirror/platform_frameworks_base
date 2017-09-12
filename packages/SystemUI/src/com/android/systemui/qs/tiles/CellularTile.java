@@ -112,6 +112,9 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick() {
+        if (getState().state == Tile.STATE_UNAVAILABLE) {
+            return;
+        }
         if (mDataController.isMobileDataEnabled()) {
             if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
                 mActivityStarter.postQSRunnableDismissingKeyguard(this::showDisableDialog);
@@ -190,7 +193,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
 
         if (cb.airplaneModeEnabled | cb.noSim) {
-            state.state = Tile.STATE_INACTIVE;
+            state.state = Tile.STATE_UNAVAILABLE;
         } else {
             state.state = Tile.STATE_ACTIVE;
         }

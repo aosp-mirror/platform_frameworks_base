@@ -1678,6 +1678,10 @@ public class TelephonyManager {
         }
     }
 
+    /*
+     * When adding a network type to the list below, make sure to add the correct icon to
+     * MobileSignalController.mapIconSets().
+     */
     /** Network type is unknown */
     public static final int NETWORK_TYPE_UNKNOWN = 0;
     /** Current network is GPRS */
@@ -6832,7 +6836,6 @@ public class TelephonyManager {
      * Get the most recent SignalStrength information reported by the modem. Due
      * to power saving this information may not always be current.
      * @return the most recent cached signal strength info from the modem
-     * @hide
      */
     @Nullable
     public SignalStrength getSignalStrength() {

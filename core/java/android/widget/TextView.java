@@ -10942,6 +10942,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean performLongClick() {
         boolean handled = false;
+        boolean performedHapticFeedback = false;
 
         if (mEditor != null) {
             mEditor.mIsBeingLongClicked = true;
@@ -10949,6 +10950,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (super.performLongClick()) {
             handled = true;
+            performedHapticFeedback = true;
         }
 
         if (mEditor != null) {
@@ -10957,7 +10959,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (handled) {
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (!performedHapticFeedback) {
+              performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            }
             if (mEditor != null) mEditor.mDiscardNextActionUp = true;
         } else {
             MetricsLogger.action(

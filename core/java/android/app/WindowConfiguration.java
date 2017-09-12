@@ -473,7 +473,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean hasMovementAnimations() {
-        return mWindowingMode == WINDOWING_MODE_PINNED;
+        return mWindowingMode != WINDOWING_MODE_PINNED;
     }
 
     /**

@@ -1006,9 +1006,12 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         final int numElements = mTransitioningViews == null ? 0 : mTransitioningViews.size();
         for (int i = 0; i < numElements; i++) {
             final View view = mTransitioningViews.get(i);
-            view.setTransitionVisibility(visiblity);
             if (invalidate) {
-                view.invalidate();
+                // Allow the view to be invalidated by the visibility change
+                view.setVisibility(visiblity);
+            } else {
+                // Don't invalidate the view with the visibility change
+                view.setTransitionVisibility(visiblity);
             }
         }
     }

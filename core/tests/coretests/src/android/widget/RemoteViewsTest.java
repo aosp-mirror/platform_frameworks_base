@@ -16,6 +16,10 @@
 
 package android.widget;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -35,10 +39,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -336,7 +336,9 @@ public class RemoteViewsTest {
             parent.addView(R.id.layout, views);
             views = parent;
         }
+        // Both clone and parcel/unparcel work,
         views.clone();
+        parcelAndRecreate(views);
 
         views = new RemoteViews(mPackage, R.layout.remote_views_test);
         for (int i = 0; i < 11; i++) {
@@ -344,8 +346,10 @@ public class RemoteViewsTest {
             parent.addView(R.id.layout, views);
             views = parent;
         }
-        exception.expect(IllegalArgumentException.class);
+        // Clone works but parcel/unparcel fails
         views.clone();
+        exception.expect(IllegalArgumentException.class);
+        parcelAndRecreate(views);
     }
 
     @Test
@@ -355,15 +359,27 @@ public class RemoteViewsTest {
             views = new RemoteViews(views,
                     new RemoteViews(mPackage, R.layout.remote_views_test));
         }
+        // Both clone and parcel/unparcel work,
         views.clone();
+        parcelAndRecreate(views);
 
         views = new RemoteViews(mPackage, R.layout.remote_views_test);
         for (int i = 0; i < 11; i++) {
-            RemoteViews parent = new RemoteViews(mPackage, R.layout.remote_views_test);
-            parent.addView(R.id.layout, views);
-            views = parent;
+            views = new RemoteViews(views,
+                    new RemoteViews(mPackage, R.layout.remote_views_test));
         }
-        exception.expect(IllegalArgumentException.class);
+        // Clone works but parcel/unparcel fails
         views.clone();
+        exception.expect(IllegalArgumentException.class);
+        parcelAndRecreate(views);
+    }
+
+    private void parcelAndRecreate(RemoteViews views) {
+        Parcel p = Parcel.obtain();
+        views.writeToParcel(p, 0);
+        p.setDataPosition(0);
+
+        RemoteViews.CREATOR.createFromParcel(p);
+        p.recycle();
     }
 }

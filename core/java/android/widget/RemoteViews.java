@@ -144,11 +144,6 @@ public class RemoteViews implements Parcelable, Filter {
     private ArrayList<Action> mActions;
 
     /**
-     * A class to keep track of memory usage by this RemoteViews
-     */
-    private MemoryUsageCounter mMemoryUsageCounter;
-
-    /**
      * Maps bitmaps to unique indicies to avoid Bitmap duplication.
      */
     private BitmapCache mBitmapCache;
@@ -294,7 +289,6 @@ public class RemoteViews implements Parcelable, Filter {
         public String asyncMethodName;
     }
 
-
     /**
      * This annotation indicates that a subclass of View is allowed to be used
      * with the {@link RemoteViews} mechanism.
@@ -386,14 +380,6 @@ public class RemoteViews implements Parcelable, Filter {
             return 0;
         }
 
-        /**
-         * Overridden by each class to report on it's own memory usage
-         */
-        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
-            // We currently only calculate Bitmap memory usage, so by default,
-            // don't do anything here
-        }
-
         public void setBitmapCache(BitmapCache bitmapCache) {
             // Do nothing
         }
@@ -466,7 +452,7 @@ public class RemoteViews implements Parcelable, Filter {
         // We first copy the new RemoteViews, as the process of merging modifies the way the actions
         // reference the bitmap cache. We don't want to modify the object as it may need to
         // be merged and applied multiple times.
-        RemoteViews copy = newRv.clone();
+        RemoteViews copy = new RemoteViews(newRv);
 
         HashMap<String, Action> map = new HashMap<String, Action>();
         if (mActions == null) {
@@ -500,7 +486,6 @@ public class RemoteViews implements Parcelable, Filter {
         // Because pruning can remove the need for bitmaps, we reconstruct the bitmap cache
         mBitmapCache = new BitmapCache();
         setBitmapCache(mBitmapCache);
-        recalculateMemoryUsage();
     }
 
     private static class RemoteViewsContextWrapper extends ContextWrapper {
@@ -1162,15 +1147,17 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private static class BitmapCache {
+
         ArrayList<Bitmap> mBitmaps;
+        int mBitmapMemory = -1;
 
         public BitmapCache() {
-            mBitmaps = new ArrayList<Bitmap>();
+            mBitmaps = new ArrayList<>();
         }
 
         public BitmapCache(Parcel source) {
             int count = source.readInt();
-            mBitmaps = new ArrayList<Bitmap>();
+            mBitmaps = new ArrayList<>(count);
             for (int i = 0; i < count; i++) {
                 Bitmap b = Bitmap.CREATOR.createFromParcel(source);
                 mBitmaps.add(b);
@@ -1185,6 +1172,7 @@ public class RemoteViews implements Parcelable, Filter {
                     return mBitmaps.indexOf(b);
                 } else {
                     mBitmaps.add(b);
+                    mBitmapMemory = -1;
                     return (mBitmaps.size() - 1);
                 }
             }
@@ -1206,28 +1194,15 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        public void assimilate(BitmapCache bitmapCache) {
-            ArrayList<Bitmap> bitmapsToBeAdded = bitmapCache.mBitmaps;
-            int count = bitmapsToBeAdded.size();
-            for (int i = 0; i < count; i++) {
-                Bitmap b = bitmapsToBeAdded.get(i);
-                if (!mBitmaps.contains(b)) {
-                    mBitmaps.add(b);
+        public int getBitmapMemory() {
+            if (mBitmapMemory < 0) {
+                mBitmapMemory = 0;
+                int count = mBitmaps.size();
+                for (int i = 0; i < count; i++) {
+                    mBitmapMemory += mBitmaps.get(i).getAllocationByteCount();
                 }
             }
-        }
-
-        public void addBitmapMemory(MemoryUsageCounter memoryCounter) {
-            for (int i = 0; i < mBitmaps.size(); i++) {
-                memoryCounter.addBitmapMemory(mBitmaps.get(i));
-            }
-        }
-
-        @Override
-        protected BitmapCache clone() {
-            BitmapCache bitmapCache = new BitmapCache();
-            bitmapCache.mBitmaps.addAll(mBitmaps);
-            return bitmapCache;
+            return mBitmapMemory;
         }
     }
 
@@ -1429,37 +1404,17 @@ public class RemoteViews implements Parcelable, Filter {
                 case CHAR_SEQUENCE:
                     TextUtils.writeToParcel((CharSequence)this.value, out, flags);
                     break;
-                case URI:
-                    out.writeInt(this.value != null ? 1 : 0);
-                    if (this.value != null) {
-                        ((Uri)this.value).writeToParcel(out, flags);
-                    }
-                    break;
-                case BITMAP:
-                    out.writeInt(this.value != null ? 1 : 0);
-                    if (this.value != null) {
-                        ((Bitmap)this.value).writeToParcel(out, flags);
-                    }
-                    break;
                 case BUNDLE:
                     out.writeBundle((Bundle) this.value);
                     break;
+                case URI:
+                case BITMAP:
                 case INTENT:
-                    out.writeInt(this.value != null ? 1 : 0);
-                    if (this.value != null) {
-                        ((Intent)this.value).writeToParcel(out, flags);
-                    }
-                    break;
                 case COLOR_STATE_LIST:
-                    out.writeInt(this.value != null ? 1 : 0);
-                    if (this.value != null) {
-                        ((ColorStateList)this.value).writeToParcel(out, flags);
-                    }
-                    break;
                 case ICON:
                     out.writeInt(this.value != null ? 1 : 0);
                     if (this.value != null) {
-                        ((Icon)this.value).writeToParcel(out, flags);
+                        ((Parcelable) this.value).writeToParcel(out, flags);
                     }
                     break;
                 default:
@@ -1595,7 +1550,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private void configureRemoteViewsAsChild(RemoteViews rv) {
-        mBitmapCache.assimilate(rv.mBitmapCache);
         rv.setBitmapCache(mBitmapCache);
         rv.setNotRoot();
     }
@@ -1690,11 +1644,6 @@ public class RemoteViews implements Parcelable, Filter {
                     targetVg.addView(task.mResult, mIndex);
                 }
             };
-        }
-
-        @Override
-        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
-            counter.increment(mNestedViews.estimateMemoryUsage());
         }
 
         @Override
@@ -2302,30 +2251,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Simple class used to keep track of memory usage in a RemoteViews.
-     *
-     */
-    private class MemoryUsageCounter {
-        public void clear() {
-            mMemoryUsage = 0;
-        }
-
-        public void increment(int numBytes) {
-            mMemoryUsage += numBytes;
-        }
-
-        public int getMemoryUsage() {
-            return mMemoryUsage;
-        }
-
-        public void addBitmapMemory(Bitmap b) {
-            increment(b.getAllocationByteCount());
-        }
-
-        int mMemoryUsage;
-    }
-
-    /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
      *
@@ -2363,9 +2288,6 @@ public class RemoteViews implements Parcelable, Filter {
         mApplication = application;
         mLayoutId = layoutId;
         mBitmapCache = new BitmapCache();
-        // setup the memory usage statistics
-        mMemoryUsageCounter = new MemoryUsageCounter();
-        recalculateMemoryUsage();
     }
 
     private boolean hasLandscapeAndPortraitLayouts() {
@@ -2393,14 +2315,49 @@ public class RemoteViews implements Parcelable, Filter {
         mLandscape = landscape;
         mPortrait = portrait;
 
-        // setup the memory usage statistics
-        mMemoryUsageCounter = new MemoryUsageCounter();
-
         mBitmapCache = new BitmapCache();
         configureRemoteViewsAsChild(landscape);
         configureRemoteViewsAsChild(portrait);
+    }
 
-        recalculateMemoryUsage();
+    /**
+     * Creates a copy of another RemoteViews.
+     */
+    public RemoteViews(RemoteViews src) {
+        mBitmapCache = src.mBitmapCache;
+        mApplication = src.mApplication;
+        mIsRoot = src.mIsRoot;
+        mLayoutId = src.mLayoutId;
+        mIsWidgetCollectionChild = src.mIsWidgetCollectionChild;
+        mReapplyDisallowed = src.mReapplyDisallowed;
+
+        if (src.hasLandscapeAndPortraitLayouts()) {
+            mLandscape = new RemoteViews(src.mLandscape);
+            mPortrait = new RemoteViews(src.mPortrait);
+
+        }
+
+        if (src.mActions != null) {
+            mActions = new ArrayList<>();
+
+            Parcel p = Parcel.obtain();
+            int count = src.mActions.size();
+            for (int i = 0; i < count; i++) {
+                p.setDataPosition(0);
+                Action a = src.mActions.get(i);
+                a.writeToParcel(
+                        p, a.hasSameAppInfo(mApplication) ? PARCELABLE_ELIDE_DUPLICATES : 0);
+                p.setDataPosition(0);
+                // Since src is already in memory, we do not care about stack overflow as it has
+                // already been read once.
+                mActions.add(getActionFromParcel(p, 0));
+            }
+            p.recycle();
+        }
+
+        // Now that everything is initialized and duplicated, setting a new BitmapCache will
+        // re-initialize the cache.
+        setBitmapCache(new BitmapCache());
     }
 
     /**
@@ -2437,71 +2394,9 @@ public class RemoteViews implements Parcelable, Filter {
 
             int count = parcel.readInt();
             if (count > 0) {
-                mActions = new ArrayList<Action>(count);
-                for (int i=0; i<count; i++) {
-                    int tag = parcel.readInt();
-                    switch (tag) {
-                        case SET_ON_CLICK_PENDING_INTENT_TAG:
-                            mActions.add(new SetOnClickPendingIntent(parcel));
-                            break;
-                        case SET_DRAWABLE_PARAMETERS_TAG:
-                            mActions.add(new SetDrawableParameters(parcel));
-                            break;
-                        case REFLECTION_ACTION_TAG:
-                            mActions.add(new ReflectionAction(parcel));
-                            break;
-                        case VIEW_GROUP_ACTION_ADD_TAG:
-                            mActions.add(new ViewGroupActionAdd(parcel, mBitmapCache, mApplication,
-                                    depth));
-                            break;
-                        case VIEW_GROUP_ACTION_REMOVE_TAG:
-                            mActions.add(new ViewGroupActionRemove(parcel));
-                            break;
-                        case SET_REFLECTION_ACTION_WITHOUT_PARAMS_TAG:
-                            mActions.add(new ReflectionActionWithoutParams(parcel));
-                            break;
-                        case SET_EMPTY_VIEW_ACTION_TAG:
-                            mActions.add(new SetEmptyView(parcel));
-                            break;
-                        case SET_PENDING_INTENT_TEMPLATE_TAG:
-                            mActions.add(new SetPendingIntentTemplate(parcel));
-                            break;
-                        case SET_ON_CLICK_FILL_IN_INTENT_TAG:
-                            mActions.add(new SetOnClickFillInIntent(parcel));
-                            break;
-                        case SET_REMOTE_VIEW_ADAPTER_INTENT_TAG:
-                            mActions.add(new SetRemoteViewsAdapterIntent(parcel));
-                            break;
-                        case TEXT_VIEW_DRAWABLE_ACTION_TAG:
-                            mActions.add(new TextViewDrawableAction(parcel));
-                            break;
-                        case TEXT_VIEW_SIZE_ACTION_TAG:
-                            mActions.add(new TextViewSizeAction(parcel));
-                            break;
-                        case VIEW_PADDING_ACTION_TAG:
-                            mActions.add(new ViewPaddingAction(parcel));
-                            break;
-                        case BITMAP_REFLECTION_ACTION_TAG:
-                            mActions.add(new BitmapReflectionAction(parcel));
-                            break;
-                        case SET_REMOTE_VIEW_ADAPTER_LIST_TAG:
-                            mActions.add(new SetRemoteViewsAdapterList(parcel));
-                            break;
-                        case TEXT_VIEW_DRAWABLE_COLOR_FILTER_ACTION_TAG:
-                            mActions.add(new TextViewDrawableColorFilterAction(parcel));
-                            break;
-                        case SET_REMOTE_INPUTS_ACTION_TAG:
-                            mActions.add(new SetRemoteInputsAction(parcel));
-                            break;
-                        case LAYOUT_PARAM_ACTION_TAG:
-                            mActions.add(new LayoutParamAction(parcel));
-                            break;
-                        case OVERRIDE_TEXT_COLORS_TAG:
-                            mActions.add(new OverrideTextColorsAction(parcel));
-                            break;
-                        default:
-                            throw new ActionException("Tag " + tag + " not found");
-                    }
+                mActions = new ArrayList<>(count);
+                for (int i = 0; i < count; i++) {
+                    mActions.add(getActionFromParcel(parcel, depth));
                 }
             }
         } else {
@@ -2512,40 +2407,69 @@ public class RemoteViews implements Parcelable, Filter {
             mLayoutId = mPortrait.getLayoutId();
         }
         mReapplyDisallowed = parcel.readInt() == 0;
-
-        // setup the memory usage statistics
-        mMemoryUsageCounter = new MemoryUsageCounter();
-        recalculateMemoryUsage();
     }
+
+    private Action getActionFromParcel(Parcel parcel, int depth) {
+        int tag = parcel.readInt();
+        switch (tag) {
+            case SET_ON_CLICK_PENDING_INTENT_TAG:
+                return new SetOnClickPendingIntent(parcel);
+            case SET_DRAWABLE_PARAMETERS_TAG:
+                return new SetDrawableParameters(parcel);
+            case REFLECTION_ACTION_TAG:
+                return new ReflectionAction(parcel);
+            case VIEW_GROUP_ACTION_ADD_TAG:
+                return new ViewGroupActionAdd(parcel, mBitmapCache, mApplication, depth);
+            case VIEW_GROUP_ACTION_REMOVE_TAG:
+                return new ViewGroupActionRemove(parcel);
+            case SET_REFLECTION_ACTION_WITHOUT_PARAMS_TAG:
+                return new ReflectionActionWithoutParams(parcel);
+            case SET_EMPTY_VIEW_ACTION_TAG:
+                return new SetEmptyView(parcel);
+            case SET_PENDING_INTENT_TEMPLATE_TAG:
+                return new SetPendingIntentTemplate(parcel);
+            case SET_ON_CLICK_FILL_IN_INTENT_TAG:
+                return new SetOnClickFillInIntent(parcel);
+            case SET_REMOTE_VIEW_ADAPTER_INTENT_TAG:
+                return new SetRemoteViewsAdapterIntent(parcel);
+            case TEXT_VIEW_DRAWABLE_ACTION_TAG:
+                return new TextViewDrawableAction(parcel);
+            case TEXT_VIEW_SIZE_ACTION_TAG:
+                return new TextViewSizeAction(parcel);
+            case VIEW_PADDING_ACTION_TAG:
+                return new ViewPaddingAction(parcel);
+            case BITMAP_REFLECTION_ACTION_TAG:
+                return new BitmapReflectionAction(parcel);
+            case SET_REMOTE_VIEW_ADAPTER_LIST_TAG:
+                return new SetRemoteViewsAdapterList(parcel);
+            case TEXT_VIEW_DRAWABLE_COLOR_FILTER_ACTION_TAG:
+                return new TextViewDrawableColorFilterAction(parcel);
+            case SET_REMOTE_INPUTS_ACTION_TAG:
+                return new SetRemoteInputsAction(parcel);
+            case LAYOUT_PARAM_ACTION_TAG:
+                return new LayoutParamAction(parcel);
+            case OVERRIDE_TEXT_COLORS_TAG:
+                return new OverrideTextColorsAction(parcel);
+            default:
+                throw new ActionException("Tag " + tag + " not found");
+        }
+    };
 
     /**
      * Returns a deep copy of the RemoteViews object. The RemoteView may not be
      * attached to another RemoteView -- it must be the root of a hierarchy.
      *
+     * @deprecated use {@link #RemoteViews(RemoteViews)} instead.
      * @throws IllegalStateException if this is not the root of a RemoteView
      *         hierarchy
      */
     @Override
+    @Deprecated
     public RemoteViews clone() {
-        synchronized (this) {
-            Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
-                    + "May only clone the root of a RemoteView hierarchy.");
+        Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
+                + "May only clone the root of a RemoteView hierarchy.");
 
-            Parcel p = Parcel.obtain();
-
-            // Do not parcel the Bitmap cache - doing so creates an expensive copy of all bitmaps.
-            // Instead pretend we're not owning the cache while parceling.
-            mIsRoot = false;
-            writeToParcel(p, PARCELABLE_ELIDE_DUPLICATES);
-            p.setDataPosition(0);
-            mIsRoot = true;
-
-            RemoteViews rv = new RemoteViews(p, mBitmapCache.clone(), mApplication, 0);
-            rv.mIsRoot = true;
-
-            p.recycle();
-            return rv;
-        }
+        return new RemoteViews(this);
     }
 
     public String getPackage() {
@@ -2575,30 +2499,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Updates the memory usage statistics.
-     */
-    private void recalculateMemoryUsage() {
-        mMemoryUsageCounter.clear();
-
-        if (!hasLandscapeAndPortraitLayouts()) {
-            // Accumulate the memory usage for each action
-            if (mActions != null) {
-                final int count = mActions.size();
-                for (int i= 0; i < count; ++i) {
-                    mActions.get(i).updateMemoryUsageEstimate(mMemoryUsageCounter);
-                }
-            }
-            if (mIsRoot) {
-                mBitmapCache.addBitmapMemory(mMemoryUsageCounter);
-            }
-        } else {
-            mMemoryUsageCounter.increment(mLandscape.estimateMemoryUsage());
-            mMemoryUsageCounter.increment(mPortrait.estimateMemoryUsage());
-            mBitmapCache.addBitmapMemory(mMemoryUsageCounter);
-        }
-    }
-
-    /**
      * Recursively sets BitmapCache in the hierarchy and update the bitmap ids.
      */
     private void setBitmapCache(BitmapCache bitmapCache) {
@@ -2621,7 +2521,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     /** @hide */
     public int estimateMemoryUsage() {
-        return mMemoryUsageCounter.getMemoryUsage();
+        return mBitmapCache.getBitmapMemory();
     }
 
     /**
@@ -2636,12 +2536,9 @@ public class RemoteViews implements Parcelable, Filter {
                     " portrait layouts individually before constructing the combined layout.");
         }
         if (mActions == null) {
-            mActions = new ArrayList<Action>();
+            mActions = new ArrayList<>();
         }
         mActions.add(a);
-
-        // update the memory usage stats
-        a.updateMemoryUsageEstimate(mMemoryUsageCounter);
     }
 
     /**
