@@ -9314,6 +9314,9 @@ public final class Settings {
          */
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
 
+        /** @hide */
+        public static final String BATTERY_SAVER_USE_RED_BAR = "battery_saver_use_red_bar";
+
         /**
          * Battery anomaly detection specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
