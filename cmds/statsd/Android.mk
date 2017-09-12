@@ -50,6 +50,8 @@ LOCAL_SRC_FILES := \
     src/stats_log.proto \
     src/statsd_config.proto \
     src/stats_constants.proto \
+    src/DropboxReader.cpp \
+
 
 LOCAL_CFLAGS += \
     -Wall \
@@ -83,6 +85,7 @@ LOCAL_SHARED_LIBRARIES := \
         libselinux \
         libutils \
         libservices \
+        libandroidfw \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
