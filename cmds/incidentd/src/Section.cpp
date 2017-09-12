@@ -27,6 +27,7 @@
 
 #include <private/android_filesystem_config.h>
 #include <binder/IServiceManager.h>
+#include <map>
 #include <mutex>
 #include <wait.h>
 #include <unistd.h>
@@ -38,7 +39,7 @@ const struct timespec WAIT_INTERVAL_NS = {0, 200 * 1000 * 1000};
 const char* INCIDENT_HELPER = "/system/bin/incident_helper";
 
 static pid_t
-forkAndExecuteIncidentHelper(const int id, const char* name, Fpipe& p2cPipe, Fpipe& c2pPipe)
+fork_execute_incident_helper(const int id, const char* name, Fpipe& p2cPipe, Fpipe& c2pPipe)
 {
     const char* ihArgs[] { INCIDENT_HELPER, "-s", String8::format("%d", id).string(), NULL };
 
@@ -73,14 +74,14 @@ forkAndExecuteIncidentHelper(const int id, const char* name, Fpipe& p2cPipe, Fpi
 }
 
 // ================================================================================
-static status_t killChild(pid_t pid) {
+static status_t kill_child(pid_t pid) {
     int status;
     kill(pid, SIGKILL);
     if (waitpid(pid, &status, 0) == -1) return -1;
     return WIFEXITED(status) == 0 ? NO_ERROR : -WEXITSTATUS(status);
 }
 
-static status_t waitForChild(pid_t pid) {
+static status_t wait_child(pid_t pid) {
     int status;
     bool died = false;
     // wait for child to report status up to 1 seconds
@@ -89,13 +90,12 @@ static status_t waitForChild(pid_t pid) {
         // sleep for 0.2 second
         nanosleep(&WAIT_INTERVAL_NS, NULL);
     }
-    if (!died) return killChild(pid);
+    if (!died) return kill_child(pid);
     return WIFEXITED(status) == 0 ? NO_ERROR : -WEXITSTATUS(status);
 }
-
 // ================================================================================
 static const Privacy*
-GetPrivacyOfSection(int id)
+get_privacy_of_section(int id)
 {
     if (id < 0) return NULL;
     int i=0;
@@ -108,60 +108,74 @@ GetPrivacyOfSection(int id)
     return NULL;
 }
 
+// ================================================================================
 static status_t
-WriteToRequest(const int id, const int fd, EncodedBuffer& buffer, const PrivacySpec& spec)
+write_section_header(int fd, int sectionId, size_t size)
 {
-    if (fd < 0) return EBADF;
-    status_t err = NO_ERROR;
     uint8_t buf[20];
-
-    buffer.clear(); // clear before strip
-    err = buffer.strip(spec); // TODO: don't have to strip again if the spec is the same.
-    if (err != NO_ERROR || buffer.size() == 0) return err;
-    uint8_t *p = write_length_delimited_tag_header(buf, id, buffer.size());
-    err = write_all(fd, buf, p-buf);
-    if (err == NO_ERROR) {
-        err = buffer.flush(fd);
-        ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id, buffer.size(), fd, spec.dest);
-    }
-    return err;
+    uint8_t *p = write_length_delimited_tag_header(buf, sectionId, size);
+    return write_all(fd, buf, p-buf);
 }
 
 static status_t
-WriteToReportRequests(const int id, const FdBuffer& buffer, ReportRequestSet* requests)
+write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* requests)
 {
-    status_t err = EBADF;
-    EncodedBuffer encodedBuffer(buffer, GetPrivacyOfSection(id));
+    status_t err = -EBADF;
+    EncodedBuffer encodedBuffer(buffer, get_privacy_of_section(id));
     int writeable = 0;
 
-    // The streaming ones
+    // The streaming ones, group requests by spec in order to save unnecessary strip operations
+    map<PrivacySpec, vector<sp<ReportRequest>>> requestsBySpec;
     for (ReportRequestSet::iterator it = requests->begin(); it != requests->end(); it++) {
         sp<ReportRequest> request = *it;
-        PrivacySpec spec; // TODO: this should be derived from each request.
-        err = WriteToRequest(id, request->fd, encodedBuffer, spec);
-        if (err != NO_ERROR) {
-            request->err = err;
-        } else {
-            writeable++;
+        if (!request->ok() || !request->args.containsSection(id)) {
+            continue;  // skip invalid request
         }
+        PrivacySpec spec = new_spec_from_args(request->args.dest());
+        requestsBySpec[spec].push_back(request);
+    }
+
+    for (map<PrivacySpec, vector<sp<ReportRequest>>>::iterator mit = requestsBySpec.begin(); mit != requestsBySpec.end(); mit++) {
+        PrivacySpec spec = mit->first;
+        err = encodedBuffer.strip(spec);
+        if (err != NO_ERROR) return err; // it means the encodedBuffer data is corrupted.
+        if (encodedBuffer.size() == 0) continue;
+
+        for (vector<sp<ReportRequest>>::iterator it = mit->second.begin(); it != mit->second.end(); it++) {
+            sp<ReportRequest> request = *it;
+            err = write_section_header(request->fd, id, encodedBuffer.size());
+            if (err != NO_ERROR) { request->err = err; continue; }
+            err = encodedBuffer.flush(request->fd);
+            if (err != NO_ERROR) { request->err = err; continue; }
+            writeable++;
+            ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id, encodedBuffer.size(), request->fd, spec.dest);
+        }
+        encodedBuffer.clear();
     }
 
     // The dropbox file
     if (requests->mainFd() >= 0) {
-        err = WriteToRequest(id, requests->mainFd(), encodedBuffer, get_default_dropbox_spec());
-        if (err != NO_ERROR) {
-            requests->setMainFd(-1);
-        } else {
-            writeable++;
-        }
+        err = encodedBuffer.strip(get_default_dropbox_spec());
+        if (err != NO_ERROR) return err; // the buffer data is corrupted.
+        if (encodedBuffer.size() == 0) goto DONE;
+
+        err = write_section_header(requests->mainFd(), id, encodedBuffer.size());
+        if (err != NO_ERROR) { requests->setMainFd(-1); goto DONE; }
+        err = encodedBuffer.flush(requests->mainFd());
+        if (err != NO_ERROR) { requests->setMainFd(-1); goto DONE; }
+        writeable++;
+        ALOGD("Section %d flushed %zu bytes to dropbox %d", id, encodedBuffer.size(), requests->mainFd());
     }
+
+DONE:
     // only returns error if there is no fd to write to.
     return writeable > 0 ? NO_ERROR : err;
 }
 
 // ================================================================================
 Section::Section(int i, const int64_t timeoutMs)
-    :id(i), timeoutMs(timeoutMs)
+    :id(i),
+     timeoutMs(timeoutMs)
 {
 }
 
@@ -170,8 +184,41 @@ Section::~Section()
 }
 
 // ================================================================================
+HeaderSection::HeaderSection()
+    :Section(FIELD_ID_INCIDENT_HEADER, 0)
+{
+}
+
+HeaderSection::~HeaderSection()
+{
+}
+
+status_t
+HeaderSection::Execute(ReportRequestSet* requests) const
+{
+    for (ReportRequestSet::iterator it=requests->begin(); it!=requests->end(); it++) {
+        const sp<ReportRequest> request = *it;
+        const vector<vector<int8_t>>& headers = request->args.headers();
+
+        for (vector<vector<int8_t>>::const_iterator buf=headers.begin(); buf!=headers.end(); buf++) {
+            if (buf->empty()) continue;
+
+            // So the idea is only requests with negative fd are written to dropbox file.
+            int fd = request->fd >= 0 ? request->fd : requests->mainFd();
+            write_section_header(fd, FIELD_ID_INCIDENT_HEADER, buf->size());
+            write_all(fd, (uint8_t const*)buf->data(), buf->size());
+            // If there was an error now, there will be an error later and we will remove
+            // it from the list then.
+        }
+    }
+    return NO_ERROR;
+}
+
+// ================================================================================
 FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
-        : Section(id, timeoutMs), mFilename(filename) {
+    :Section(id, timeoutMs),
+     mFilename(filename)
+{
     name = filename;
 }
 
@@ -197,7 +244,7 @@ FileSection::Execute(ReportRequestSet* requests) const
         return -errno;
     }
 
-    pid_t pid = forkAndExecuteIncidentHelper(this->id, this->name.string(), p2cPipe, c2pPipe);
+    pid_t pid = fork_execute_incident_helper(this->id, this->name.string(), p2cPipe, c2pPipe);
     if (pid == -1) {
         ALOGW("FileSection '%s' failed to fork", this->name.string());
         return -errno;
@@ -209,11 +256,11 @@ FileSection::Execute(ReportRequestSet* requests) const
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s, kill: %s",
             this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false",
-            strerror(-killChild(pid)));
+            strerror(-kill_child(pid)));
         return readStatus;
     }
 
-    status_t ihStatus = waitForChild(pid);
+    status_t ihStatus = wait_child(pid);
     if (ihStatus != NO_ERROR) {
         ALOGW("FileSection '%s' abnormal child process: %s", this->name.string(), strerror(-ihStatus));
         return ihStatus;
@@ -221,7 +268,7 @@ FileSection::Execute(ReportRequestSet* requests) const
 
     ALOGD("FileSection '%s' wrote %zd bytes in %d ms", this->name.string(), buffer.size(),
             (int)buffer.durationMs());
-    status_t err = WriteToReportRequests(this->id, buffer, requests);
+    status_t err = write_report_requests(this->id, buffer, requests);
     if (err != NO_ERROR) {
         ALOGW("FileSection '%s' failed writing: %s", this->name.string(), strerror(-err));
         return err;
@@ -378,7 +425,7 @@ WorkerThreadSection::Execute(ReportRequestSet* requests) const
     // Write the data that was collected
     ALOGD("WorkerThreadSection '%s' wrote %zd bytes in %d ms", name.string(), buffer.size(),
             (int)buffer.durationMs());
-    err = WriteToReportRequests(this->id, buffer, requests);
+    err = write_report_requests(this->id, buffer, requests);
     if (err != NO_ERROR) {
         ALOGW("WorkerThreadSection '%s' failed writing: '%s'", this->name.string(), strerror(-err));
         return err;
@@ -415,7 +462,7 @@ CommandSection::init(const char* command, va_list args)
 }
 
 CommandSection::CommandSection(int id, const int64_t timeoutMs, const char* command, ...)
-        : Section(id, timeoutMs)
+    :Section(id, timeoutMs)
 {
     va_list args;
     va_start(args, command);
@@ -424,7 +471,7 @@ CommandSection::CommandSection(int id, const int64_t timeoutMs, const char* comm
 }
 
 CommandSection::CommandSection(int id, const char* command, ...)
-        : Section(id)
+    :Section(id)
 {
     va_list args;
     va_start(args, command);
@@ -466,7 +513,7 @@ CommandSection::Execute(ReportRequestSet* requests) const
         ALOGW("CommandSection '%s' failed in executing command: %s", this->name.string(), strerror(errno));
         _exit(err); // exit with command error code
     }
-    pid_t ihPid = forkAndExecuteIncidentHelper(this->id, this->name.string(), cmdPipe, ihPipe);
+    pid_t ihPid = fork_execute_incident_helper(this->id, this->name.string(), cmdPipe, ihPipe);
     if (ihPid == -1) {
         ALOGW("CommandSection '%s' failed to fork", this->name.string());
         return -errno;
@@ -478,14 +525,14 @@ CommandSection::Execute(ReportRequestSet* requests) const
         ALOGW("CommandSection '%s' failed to read data from incident helper: %s, "
             "timedout: %s, kill command: %s, kill incident helper: %s",
             this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false",
-            strerror(-killChild(cmdPid)), strerror(-killChild(ihPid)));
+            strerror(-kill_child(cmdPid)), strerror(-kill_child(ihPid)));
         return readStatus;
     }
 
     // TODO: wait for command here has one trade-off: the failed status of command won't be detected until
     //       buffer timeout, but it has advatage on starting the data stream earlier.
-    status_t cmdStatus = waitForChild(cmdPid);
-    status_t ihStatus  = waitForChild(ihPid);
+    status_t cmdStatus = wait_child(cmdPid);
+    status_t ihStatus  = wait_child(ihPid);
     if (cmdStatus != NO_ERROR || ihStatus != NO_ERROR) {
         ALOGW("CommandSection '%s' abnormal child processes, return status: command: %s, incident helper: %s",
             this->name.string(), strerror(-cmdStatus), strerror(-ihStatus));
@@ -494,7 +541,7 @@ CommandSection::Execute(ReportRequestSet* requests) const
 
     ALOGD("CommandSection '%s' wrote %zd bytes in %d ms", this->name.string(), buffer.size(),
             (int)buffer.durationMs());
-    status_t err = WriteToReportRequests(this->id, buffer, requests);
+    status_t err = write_report_requests(this->id, buffer, requests);
     if (err != NO_ERROR) {
         ALOGW("CommandSection '%s' failed writing: %s", this->name.string(), strerror(-err));
         return err;

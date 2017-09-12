@@ -70,7 +70,6 @@ write_field_or_skip(FdBuffer::iterator &iterator, vector<uint8_t> &buf, uint8_t 
     if (skip) {
         iterator += bytesToWrite;
     } else {
-        buf.reserve(bytesToWrite);
         for (size_t i=0; i<bytesToWrite; i++) {
             buf.push_back(*iterator);
             iterator++;
@@ -193,3 +192,4 @@ EncodedBuffer::flush(int fd)
     }
     return NO_ERROR;
 }
+

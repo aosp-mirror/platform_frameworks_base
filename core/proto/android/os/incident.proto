@@ -31,21 +31,11 @@ import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/power.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 
 package android.os;
-
-message IncidentHeaderProto {
-    enum Cause {
-        CAUSE_UNKNOWN = 0;
-        CAUSE_USER = 1;
-        CAUSE_ANR = 2;
-        CAUSE_CRASH = 3;
-    }
-
-    Cause cause = 1;
-}
 
 // privacy field options must not be set at this level because all
 // the sections are able to be controlled and configured by section ids.

@@ -17,8 +17,6 @@
 #define LOG_TAG "incidentd"
 
 #include "Reporter.h"
-#include "io_util.h"
-#include "protobuf.h"
 
 #include "report_directory.h"
 #include "section_list.h"
@@ -50,6 +48,12 @@ ReportRequest::ReportRequest(const IncidentReportArgs& a,
 
 ReportRequest::~ReportRequest()
 {
+}
+
+bool
+ReportRequest::ok()
+{
+    return fd >= 0 && err == NO_ERROR;
 }
 
 // ================================================================================
@@ -117,6 +121,7 @@ Reporter::runReport()
     status_t err = NO_ERROR;
     bool needMainFd = false;
     int mainFd = -1;
+    HeaderSection headers;
 
     // See if we need the main file
     for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
@@ -129,7 +134,7 @@ Reporter::runReport()
         // Create the directory
         if (!isTest) err = create_directory(mIncidentDirectory);
         if (err != NO_ERROR) {
-            goto done;
+            goto DONE;
         }
 
         // If there are too many files in the directory (for whatever reason),
@@ -140,7 +145,7 @@ Reporter::runReport()
         // Open the file.
         err = create_file(&mainFd);
         if (err != NO_ERROR) {
-            goto done;
+            goto DONE;
         }
 
         // Add to the set
@@ -155,24 +160,7 @@ Reporter::runReport()
     }
 
     // Write the incident headers
-    for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
-        const sp<ReportRequest> request = (*it);
-        const vector<vector<int8_t>>& headers = request->args.headers();
-
-        for (vector<vector<int8_t>>::const_iterator buf=headers.begin(); buf!=headers.end();
-                buf++) {
-            int fd = request->fd >= 0 ? request->fd : mainFd;
-
-            uint8_t buffer[20];
-            uint8_t* p = write_length_delimited_tag_header(buffer, FIELD_ID_INCIDENT_HEADER,
-                    buf->size());
-            write_all(fd, buffer, p-buffer);
-
-            write_all(fd, (uint8_t const*)buf->data(), buf->size());
-            // If there was an error now, there will be an error later and we will remove
-            // it from the list then.
-        }
-    }
+    headers.Execute(&batch);
 
     // For each of the report fields, see if we need it, and if so, execute the command
     // and report to those that care that we're doing it.
@@ -193,7 +181,7 @@ Reporter::runReport()
             if (err != NO_ERROR) {
                 ALOGW("Incident section %s (%d) failed. Stopping report.",
                         (*section)->name.string(), id);
-                goto done;
+                goto DONE;
             }
 
             // Notify listener of starting
@@ -207,7 +195,7 @@ Reporter::runReport()
         }
     }
 
-done:
+DONE:
     // Close the file.
     if (mainFd >= 0) {
         close(mainFd);

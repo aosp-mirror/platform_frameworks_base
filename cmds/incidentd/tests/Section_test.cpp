@@ -33,12 +33,66 @@ const string STRING_FIELD_2 = "\x12\vwhatthefuck";
 const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff"; // -1
 
 using namespace android::base;
+using namespace android::binder;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::internal::CaptureStdout;
 using ::testing::internal::GetCapturedStdout;
 
 // NOTICE: this test requires /system/bin/incident_helper is installed.
+
+class SimpleListener : public IIncidentReportStatusListener
+{
+public:
+    SimpleListener() {};
+    virtual ~SimpleListener() {};
+
+    virtual Status onReportStarted() { return Status::ok(); };
+    virtual Status onReportSectionStatus(int /*section*/, int /*status*/) { return Status::ok(); };
+    virtual Status onReportFinished() { return Status::ok(); };
+    virtual Status onReportFailed() { return Status::ok(); };
+
+protected:
+    virtual IBinder* onAsBinder() override { return nullptr; };
+};
+
+TEST(SectionTest, HeaderSection) {
+    TemporaryFile output2;
+    HeaderSection hs;
+    ReportRequestSet requests;
+
+    IncidentReportArgs args1, args2;
+    args1.addSection(1);
+    args1.addSection(2);
+    args2.setAll(true);
+
+    vector<int8_t> head1;
+    head1.push_back('a');
+    head1.push_back('x');
+    head1.push_back('e');
+
+    vector<int8_t> head2;
+    head2.push_back('p');
+    head2.push_back('u');
+    head2.push_back('p');
+
+    args1.addHeader(head1);
+    args1.addHeader(head2);
+    args2.addHeader(head2);
+
+    requests.add(new ReportRequest(args1, new SimpleListener(), -1));
+    requests.add(new ReportRequest(args2, new SimpleListener(), output2.fd));
+    requests.setMainFd(STDOUT_FILENO);
+
+    string content;
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, hs.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x3" "axe\n\x03pup"));
+
+    EXPECT_TRUE(ReadFileToString(output2.path, &content));
+    EXPECT_THAT(content, StrEq("\n\x03pup"));
+}
+
 TEST(SectionTest, FileSection) {
     TemporaryFile tf;
     FileSection fs(REVERSE_PARSER, tf.path);
@@ -126,4 +180,118 @@ TEST(SectionTest, TestFilterPiiTaggedFields) {
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
     EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
+}
+
+TEST(SectionTest, TestBadFdRequest) {
+    TemporaryFile input;
+    FileSection fs(NOOP_PARSER, input.path);
+    ReportRequestSet requests;
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+
+    IncidentReportArgs args;
+    args.setAll(true);
+    args.setDest(0);
+    sp<ReportRequest> badFdRequest = new ReportRequest(args, new SimpleListener(), 1234567);
+    requests.add(badFdRequest);
+    requests.setMainFd(STDOUT_FILENO);
+
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
+    EXPECT_EQ(badFdRequest->err, -EBADF);
+}
+
+TEST(SectionTest, TestBadRequests) {
+    TemporaryFile input;
+    FileSection fs(NOOP_PARSER, input.path);
+    ReportRequestSet requests;
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+
+    IncidentReportArgs args;
+    args.setAll(true);
+    args.setDest(0);
+    requests.add(new ReportRequest(args, new SimpleListener(), -1));
+    EXPECT_EQ(fs.Execute(&requests), -EBADF);
+}
+
+TEST(SectionTest, TestMultipleRequests) {
+    TemporaryFile input, output1, output2, output3;
+    FileSection fs(NOOP_PARSER, input.path);
+    ReportRequestSet requests;
+
+    ASSERT_TRUE(input.fd != -1);
+    ASSERT_TRUE(output1.fd != -1);
+    ASSERT_TRUE(output2.fd != -1);
+    ASSERT_TRUE(output3.fd != -1);
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+
+    IncidentReportArgs args1, args2, args3;
+    args1.setAll(true);
+    args1.setDest(0); // LOCAL
+    args2.setAll(true); // default to explicit
+    sp<SimpleListener> l = new SimpleListener();
+    requests.add(new ReportRequest(args1, l, output1.fd));
+    requests.add(new ReportRequest(args2, l, output2.fd));
+    requests.add(new ReportRequest(args3, l, output3.fd));
+    requests.setMainFd(STDOUT_FILENO);
+
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
+
+    string content, expect;
+    expect = VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3;
+    char c = (char) expect.size();
+    EXPECT_TRUE(ReadFileToString(output1.path, &content));
+    EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
+
+    expect = STRING_FIELD_2 + FIX64_FIELD_3;
+    c = (char) expect.size();
+    EXPECT_TRUE(ReadFileToString(output2.path, &content));
+    EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
+
+    // because args3 doesn't set section, so it should receive nothing
+    EXPECT_TRUE(ReadFileToString(output3.path, &content));
+    EXPECT_THAT(content, StrEq(""));
+}
+
+TEST(SectionTest, TestMultipleRequestsBySpec) {
+    TemporaryFile input, output1, output2, output3;
+    FileSection fs(NOOP_PARSER, input.path);
+    ReportRequestSet requests;
+
+    ASSERT_TRUE(input.fd != -1);
+    ASSERT_TRUE(output1.fd != -1);
+    ASSERT_TRUE(output2.fd != -1);
+    ASSERT_TRUE(output3.fd != -1);
+
+    ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path, false));
+
+    IncidentReportArgs args1, args2, args3, args4;
+    args1.setAll(true);
+    args2.setAll(true);
+    args4.setAll(true);
+    sp<SimpleListener> l = new SimpleListener();
+    requests.add(new ReportRequest(args1, l, output1.fd));
+    requests.add(new ReportRequest(args2, l, output2.fd));
+    requests.add(new ReportRequest(args3, l, output3.fd));
+    requests.setMainFd(STDOUT_FILENO);
+
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, fs.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\x02\r" + STRING_FIELD_2));
+
+    string content, expect;
+    expect = STRING_FIELD_2 + FIX64_FIELD_3;
+    char c = (char) expect.size();
+
+    // output1 and output2 are the same
+    EXPECT_TRUE(ReadFileToString(output1.path, &content));
+    EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
+    EXPECT_TRUE(ReadFileToString(output2.path, &content));
+    EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
+
+    // because args3 doesn't set section, so it should receive nothing
+    EXPECT_TRUE(ReadFileToString(output3.path, &content));
+    EXPECT_THAT(content, StrEq(""));
 }

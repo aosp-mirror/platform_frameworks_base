@@ -40,6 +40,8 @@ struct ReportRequest : public virtual RefBase
     ReportRequest(const IncidentReportArgs& args,
             const sp<IIncidentReportStatusListener> &listener, int fd);
     virtual ~ReportRequest();
+
+    bool ok(); // returns true if the request is ok for write.
 };
 
 // ================================================================================
