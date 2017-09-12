@@ -122,10 +122,8 @@ final class SelectionActionModeHelper {
                 SelectionEvent.ActionType.DRAG, mTextClassification);
     }
 
-    public void onTypeOverSelection() {
-        mSelectionTracker.onSelectionAction(
-                mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
-                SelectionEvent.ActionType.OVERTYPE, mTextClassification);
+    public void onTextChanged(int start, int end) {
+        mSelectionTracker.onTextChanged(start, end, mTextClassification);
     }
 
     public boolean resetSelection(int textIndex) {
@@ -217,7 +215,6 @@ final class SelectionActionModeHelper {
         private int mOriginalEnd;
         private int mSelectionStart;
         private int mSelectionEnd;
-        private boolean mSelectionStarted;
         private boolean mAllowReset;
 
         SelectionTracker(TextView textView) {
@@ -230,9 +227,8 @@ final class SelectionActionModeHelper {
          */
         public void onOriginalSelection(
                 CharSequence text, int selectionStart, int selectionEnd, boolean editableText) {
-            mOriginalStart = selectionStart;
-            mOriginalEnd = selectionEnd;
-            mSelectionStarted = true;
+            mOriginalStart = mSelectionStart = selectionStart;
+            mOriginalEnd = mSelectionEnd = selectionEnd;
             mAllowReset = false;
             maybeInvalidateLogger();
             mLogger.logSelectionStarted(text, selectionStart);
@@ -242,7 +238,7 @@ final class SelectionActionModeHelper {
          * Called when selection action mode is started and the results come from a classifier.
          */
         public void onSmartSelection(SelectionResult result) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
                 mSelectionStart = result.mStart;
                 mSelectionEnd = result.mEnd;
                 mAllowReset = mSelectionStart != mOriginalStart || mSelectionEnd != mOriginalEnd;
@@ -257,7 +253,9 @@ final class SelectionActionModeHelper {
         public void onSelectionUpdated(
                 int selectionStart, int selectionEnd,
                 @Nullable TextClassification classification) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
+                mSelectionStart = selectionStart;
+                mSelectionEnd = selectionEnd;
                 mAllowReset = false;
                 mLogger.logSelectionModified(selectionStart, selectionEnd, classification, null);
             }
@@ -268,10 +266,13 @@ final class SelectionActionModeHelper {
          */
         public void onSelectionDestroyed() {
             mAllowReset = false;
-            mSelectionStarted = false;
-            mLogger.logSelectionAction(
-                    mSelectionStart, mSelectionEnd,
-                    SelectionEvent.ActionType.ABANDON, null /* classification */);
+            // Wait a few ms to see if the selection was destroyed because of a text change event.
+            mTextView.postDelayed(() -> {
+                mLogger.logSelectionAction(
+                        mSelectionStart, mSelectionEnd,
+                        SelectionEvent.ActionType.ABANDON, null /* classification */);
+                mSelectionStart = mSelectionEnd = -1;
+            }, 100 /* ms */);
         }
 
         /**
@@ -281,7 +282,7 @@ final class SelectionActionModeHelper {
                 int selectionStart, int selectionEnd,
                 @SelectionEvent.ActionType int action,
                 @Nullable TextClassification classification) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
                 mAllowReset = false;
                 mLogger.logSelectionAction(selectionStart, selectionEnd, action, classification);
             }
@@ -295,13 +296,15 @@ final class SelectionActionModeHelper {
          */
         public boolean resetSelection(int textIndex, Editor editor) {
             final TextView textView = editor.getTextView();
-            if (mSelectionStarted
+            if (isSelectionStarted()
                     && mAllowReset
                     && textIndex >= mSelectionStart && textIndex <= mSelectionEnd
                     && textView.getText() instanceof Spannable) {
                 mAllowReset = false;
                 boolean selected = editor.selectCurrentWord();
                 if (selected) {
+                    mSelectionStart = editor.getTextView().getSelectionStart();
+                    mSelectionEnd = editor.getTextView().getSelectionEnd();
                     mLogger.logSelectionAction(
                             textView.getSelectionStart(), textView.getSelectionEnd(),
                             SelectionEvent.ActionType.RESET, null /* classification */);
@@ -311,10 +314,20 @@ final class SelectionActionModeHelper {
             return false;
         }
 
+        public void onTextChanged(int start, int end, TextClassification classification) {
+            if (isSelectionStarted() && start == mSelectionStart && end == mSelectionEnd) {
+                onSelectionAction(start, end, SelectionEvent.ActionType.OVERTYPE, classification);
+            }
+        }
+
         private void maybeInvalidateLogger() {
             if (mLogger.isEditTextLogger() != mTextView.isTextEditable()) {
                 mLogger = new SelectionMetricsLogger(mTextView);
             }
+        }
+
+        private boolean isSelectionStarted() {
+            return mSelectionStart >= 0 && mSelectionEnd >= 0 && mSelectionStart != mSelectionEnd;
         }
     }
 
