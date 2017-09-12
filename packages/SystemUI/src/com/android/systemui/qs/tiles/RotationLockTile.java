@@ -62,7 +62,7 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
         return new BooleanState();
     }
 
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (mController == null) return;
         if (listening) {
             mController.addCallback(mCallback);

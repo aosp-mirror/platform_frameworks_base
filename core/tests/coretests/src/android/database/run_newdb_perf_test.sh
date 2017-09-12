@@ -17,8 +17,11 @@ make -j44 FrameworksCoreTests
 adb install -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
 adb logcat -c
 
-echo "Running benchmark 5 times"
-for i in {1..5}
+# by default run 5 times
+RUN_N=${1:-5}
+echo "Running benchmark $RUN_N times"
+
+for (( i=0; i<$RUN_N; i++ ))
 do
     adb  shell am instrument -e class 'android.database.NewDatabasePerformanceTestSuite' -w 'com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner'
 done

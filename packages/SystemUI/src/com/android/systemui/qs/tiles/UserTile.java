@@ -69,7 +69,7 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (listening) {
             mUserInfoController.addCallback(this);
         } else {

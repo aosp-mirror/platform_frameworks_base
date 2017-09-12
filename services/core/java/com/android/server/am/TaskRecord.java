@@ -1112,19 +1112,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return intent != null ? intent : affinityIntent;
     }
 
-    /**
-     * @return Whether there are only fullscreen activities in this task.
-     */
-    boolean containsOnlyFullscreenActivities() {
-        for (int i = 0; i < mActivities.size(); i++) {
-            final ActivityRecord r = mActivities.get(i);
-            if (!r.finishing && !r.fullscreen) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /** Returns the first non-finishing activity from the root. */
     ActivityRecord getRootActivity() {
         for (int i = 0; i < mActivities.size(); i++) {

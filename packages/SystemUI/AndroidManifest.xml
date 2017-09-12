@@ -318,15 +318,20 @@
             android:exported="false">
         </activity>
 
+        <!-- Springboard for launching the share activity -->
+        <receiver android:name=".screenshot.GlobalScreenshot$ShareReceiver"
+            android:process=":screenshot"
+            android:exported="false" />
+
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
-                  android:process=":screenshot"
-                  android:exported="false" />
+            android:process=":screenshot"
+            android:exported="false" />
 
         <!-- Callback for deleting screenshot notification -->
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
-                  android:process=":screenshot"
-                  android:exported="false" />
+            android:process=":screenshot"
+            android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"

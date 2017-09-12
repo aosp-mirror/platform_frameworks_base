@@ -114,7 +114,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mIcon = mView.findViewById(com.android.internal.R.id.icon);
         mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
-        mExpandButton.setLabeledBy(mRow);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mColor = resolveColor(mExpandButton);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);

@@ -233,6 +233,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mTextColor = 0;
     int mStatusBarColor = 0;
     int mNavigationBarColor = 0;
+    int mNavigationBarDividerColor = 0;
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
@@ -2432,13 +2433,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (!mForcedNavigationBarColor) {
             mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+            mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
+                    0x00000000);
         }
 
         WindowManager.LayoutParams params = getAttributes();
 
         // Non-floating windows on high end devices must put up decor beneath the system bars and
         // therefore must know about visibility changes of those.
-        if (!mIsFloating && ActivityManager.isHighEndGfx()) {
+        if (!mIsFloating) {
             if (!targetPreL && a.getBoolean(
                     R.styleable.Window_windowDrawsSystemBarBackgrounds,
                     false)) {
@@ -2452,6 +2455,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
             decor.setSystemUiVisibility(
                     decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
+        if (a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)) {
+            decor.setSystemUiVisibility(
+                    decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
 
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion

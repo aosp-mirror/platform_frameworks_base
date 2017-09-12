@@ -51,6 +51,7 @@ import com.android.internal.os.SomeArgs;
  *       Settings screen).
  * </ol>
  *
+ * <a name="BasicUsage"></a>
  * <h3>Basic usage</h3>
  *
  * <p>The basic autofill process is defined by the workflow below:
@@ -122,12 +123,14 @@ import com.android.internal.os.SomeArgs;
  * each {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} received - if it
  * doesn't, the request will eventually time out and be discarded by the Android System.
  *
+ * <a name="SavingUserData"></a>
  * <h3>Saving user data</h3>
  *
  * <p>If the service is also interested on saving the data filled by the user, it must set a
  * {@link SaveInfo} object in the {@link FillResponse}. See {@link SaveInfo} for more details and
  * examples.
  *
+ * <a name="UserAuthentication"></a>
  * <h3>User authentication</h3>
  *
  * <p>The service can provide an extra degree of security by requiring the user to authenticate
@@ -164,6 +167,7 @@ import com.android.internal.os.SomeArgs;
  * credentials in "vaults": the first response would contain fake datasets with the vault names,
  * and the subsequent response would contain the app credentials stored in that vault.
  *
+ * <a name="DataPartioning"></a>
  * <h3>Data partitioning</h3>
  *
  * <p>The autofillable views in a screen should be grouped in logical groups called "partitions".
@@ -243,6 +247,7 @@ import com.android.internal.os.SomeArgs;
  * <p>When the service returns multiple {@link FillResponse}, the last one overrides the previous;
  * that's why the {@link SaveInfo} in the 2nd request above has the info for both partitions.
  *
+ * <a name="PackageVerification"></a>
  * <h3>Package verification</h3>
  *
  * <p>When autofilling app-specific data (like username and password), the service must verify
@@ -270,9 +275,16 @@ import com.android.internal.os.SomeArgs;
  *   }
  *   return hash.toString();
  * }
- *
  * </pre>
  *
+ * <p>If the service did not store the signing certificates data the first time the data was saved
+ * &mdash; for example, because the data was created by a previous version of the app that did not
+ * use the Autofill Framework &mdash; the service should warn the user that the authenticity of the
+ * app cannot be confirmed (see an example on how to show such warning in the
+ * <a href="#WebSecurityDisclaimer">Web security</a> section below), and if the user agrees,
+ * then the service could save the data from the signing ceriticates for future use.
+ *
+ * <a name="IgnoringViews"></a>
  * <h3>Ignoring views</h3>
  *
  * <p>If the service find views that cannot be autofilled (for example, a text field representing
@@ -281,6 +293,7 @@ import com.android.internal.os.SomeArgs;
  * a new {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} when these views are
  * focused.
  *
+ * <a name="WebSecurity"></a>
  * <h3>Web security</h3>
  *
  * <p>When handling autofill requests that represent web pages (typically
@@ -313,6 +326,7 @@ import com.android.internal.os.SomeArgs;
  * }
  * </pre>
  *
+ * <a name="WebSecurityDisclaimer"></a>
  * <p>If the association between the web domain and app package cannot be verified through the steps
  * above, but the service thinks that it is appropriate to fill persisted credentials that are
  * stored for the web domain, the service should warn the user about the potential data

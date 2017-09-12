@@ -25,6 +25,7 @@ import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -77,12 +78,18 @@ public class DownloadRequest implements Parcelable {
         private String appIntent;
         private int version = CURRENT_VERSION;
 
+        /**
+         * Sets the service from which the download request to be built will download from.
+         * @param serviceInfo
+         * @return
+         */
         public Builder setServiceInfo(FileServiceInfo serviceInfo) {
             fileServiceId = serviceInfo.getServiceId();
             return this;
         }
 
         /**
+         * Set the service ID for the download request. For use by the middleware only.
          * @hide
          * TODO: systemapi
          */
@@ -91,11 +98,23 @@ public class DownloadRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the source URI for the download request to be built.
+         * @param source
+         * @return
+         */
         public Builder setSource(Uri source) {
             this.source = source;
             return this;
         }
 
+        /**
+         * Sets the destination URI for the download request to be built. The middleware should
+         * not set this directly.
+         * @param dest A URI obtained from {@link Uri#fromFile(File)}, denoting the requested
+         *             final destination of the download.
+         * @return
+         */
         public Builder setDest(Uri dest) {
             if (dest.toString().length() > MAX_DESTINATION_URI_SIZE) {
                 throw new IllegalArgumentException("Destination uri must not exceed length " +
@@ -105,11 +124,25 @@ public class DownloadRequest implements Parcelable {
             return this;
         }
 
-        public Builder setSubscriptionId(int sub) {
-            this.subscriptionId = sub;
+        /**
+         * Set the subscription ID on which the file(s) should be downloaded.
+         * @param subscriptionId
+         * @return
+         */
+        public Builder setSubscriptionId(int subscriptionId) {
+            this.subscriptionId = subscriptionId;
             return this;
         }
 
+        /**
+         * Set the {@link Intent} that should be sent when the download completes or fails. This
+         * should be an intent with a explicit {@link android.content.ComponentName} targeted to a
+         * {@link android.content.BroadcastReceiver} in the app's package.
+         *
+         * The middleware should not use this method.
+         * @param intent
+         * @return
+         */
         public Builder setAppIntent(Intent intent) {
             this.appIntent = intent.toUri(0);
             if (this.appIntent.length() > MAX_APP_INTENT_SIZE) {
@@ -120,7 +153,12 @@ public class DownloadRequest implements Parcelable {
         }
 
         /**
-         * For use by middleware only
+         * For use by the middleware to set the byte array of opaque data. The opaque data
+         * includes information about the download request that is used by the client app and the
+         * manager code, but is irrelevant to the middleware.
+         * @param data A byte array, the contents of which should have been originally obtained
+         *             from {@link DownloadRequest#getOpaqueData()}.
+         * @return
          * TODO: systemapi
          * @hide
          */
@@ -201,22 +239,40 @@ public class DownloadRequest implements Parcelable {
         out.writeInt(version);
     }
 
+    /**
+     * @return The ID of the file service to download from.
+     */
     public String getFileServiceId() {
         return fileServiceId;
     }
 
+    /**
+     * @return The source URI to download from
+     */
     public Uri getSourceUri() {
         return sourceUri;
     }
 
+    /**
+     * For use by the client app only.
+     * @return The URI of the final destination of the download.
+     */
     public Uri getDestinationUri() {
         return destinationUri;
     }
 
+    /**
+     * @return The subscription ID on which to perform MBMS operations.
+     */
     public int getSubscriptionId() {
         return subscriptionId;
     }
 
+    /**
+     * For internal use -- returns the intent to send to the app after download completion or
+     * failure.
+     * @hide
+     */
     public Intent getIntentForApp() {
         try {
             return Intent.parseUri(serializedResultIntentForApp, 0);
@@ -226,6 +282,10 @@ public class DownloadRequest implements Parcelable {
     }
 
     /**
+     * For use by the middleware only. The byte array returned from this method should be
+     * persisted and sent back to the app upon download completion or failure by passing it into
+     * {@link Builder#setOpaqueData(byte[])}.
+     * @return A byte array of opaque data to persist.
      * @hide
      * TODO: systemapi
      */

@@ -148,10 +148,12 @@ public final class FillResponse implements Parcelable {
          * {@link android.view.autofill.AutofillManager#EXTRA_ASSIST_STRUCTURE screen
          * content} and your {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE
          * client state}. Once you complete your authentication flow you should set the
-         * {@link Activity} result to {@link android.app.Activity#RESULT_OK} and provide the fully
-         * populated {@link FillResponse response} by setting it to the
-         * {@link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra.
-         * For example, if you provided an empty {@link FillResponse resppnse} because the
+         * {@link Activity} result to {@link android.app.Activity#RESULT_OK} and set the
+         * {@link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra
+         * with the fully populated {@link FillResponse response} (or {@code null} if the screen
+         * cannot be autofilled).
+         *
+         * <p>For example, if you provided an empty {@link FillResponse response} because the
          * user's data was locked and marked that the response needs an authentication then
          * in the response returned if authentication succeeds you need to provide all
          * available data sets some of which may need to be further authenticated, for

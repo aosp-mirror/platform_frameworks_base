@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -44,6 +45,7 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
     private UserInfoController mUserInfoController;
 
     private MultiUserSwitch mMultiUserSwitch;
+    private TextView mUserName;
     private ImageView mMultiUserAvatar;
     private UserGridView mUserGridView;
 
@@ -56,6 +58,7 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
         super.onFinishInflate();
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
+        mUserName = findViewById(R.id.user_name);
 
         mUserInfoController = Dependency.get(UserInfoController.class);
 
@@ -89,6 +92,7 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
     @Override
     public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
         mMultiUserAvatar.setImageDrawable(picture);
+        mUserName.setText(name);
     }
 
     @Override

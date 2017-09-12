@@ -147,8 +147,13 @@ public class PackageDexOptimizer {
         // Get the class loader context dependencies.
         // For each code path in the package, this array contains the class loader context that
         // needs to be passed to dexopt in order to ensure correct optimizations.
+        boolean[] pathsWithCode = new boolean[paths.size()];
+        pathsWithCode[0] = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        for (int i = 1; i < paths.size(); i++) {
+            pathsWithCode[i] = (pkg.splitFlags[i - 1] & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        }
         String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
-                pkg.applicationInfo, sharedLibraries);
+                pkg.applicationInfo, sharedLibraries, pathsWithCode);
 
         // Sanity check that we do not call dexopt with inconsistent data.
         if (paths.size() != classLoaderContexts.length) {
@@ -164,10 +169,15 @@ public class PackageDexOptimizer {
         int result = DEX_OPT_SKIPPED;
         for (int i = 0; i < paths.size(); i++) {
             // Skip paths that have no code.
-            if ((i == 0 && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) ||
-                    (i != 0 && (pkg.splitFlags[i - 1] & ApplicationInfo.FLAG_HAS_CODE) == 0)) {
+            if (!pathsWithCode[i]) {
                 continue;
             }
+            if (classLoaderContexts[i] == null) {
+                throw new IllegalStateException("Inconsistent information in the "
+                        + "package structure. A split is marked to contain code "
+                        + "but has no dependency listed. Index=" + i + " path=" + paths.get(i));
+            }
+
             // Append shared libraries with split dependencies for this split.
             String path = paths.get(i);
             if (options.getSplitName() != null) {

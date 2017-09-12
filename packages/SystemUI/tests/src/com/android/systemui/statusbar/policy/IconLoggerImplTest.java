@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import static java.lang.Thread.sleep;
 
 import android.metrics.LogMaker;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.MessageHandler;
@@ -48,6 +49,7 @@ import org.mockito.ArgumentMatcher;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@SmallTest
 public class IconLoggerImplTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;

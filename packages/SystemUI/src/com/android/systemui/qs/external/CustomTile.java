@@ -31,6 +31,7 @@ import android.provider.Settings;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
@@ -50,6 +51,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
+
+    private static final long CUSTOM_STALE_TIMEOUT = DateUtils.HOUR_IN_MILLIS;
 
     private static final boolean DEBUG = false;
 
@@ -81,6 +84,11 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
         mUser = ActivityManager.getCurrentUser();
+    }
+
+    @Override
+    protected long getStaleTimeout() {
+        return CUSTOM_STALE_TIMEOUT + DateUtils.MINUTE_IN_MILLIS * mHost.indexOf(getTileSpec());
     }
 
     private void setTileIcon() {
@@ -186,7 +194,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
         try {

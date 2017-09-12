@@ -76,7 +76,7 @@ public class IntentTile extends QSTileImpl<State> {
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
     }
 
     @Override

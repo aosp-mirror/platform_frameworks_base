@@ -46,22 +46,35 @@ public class DexoptUtilsTest {
     private static final String DELEGATE_LAST_CLASS_LOADER_NAME =
             DelegateLastClassLoader.class.getName();
 
-    private ApplicationInfo createMockApplicationInfo(String baseClassLoader, boolean addSplits,
+    private static class TestData {
+        ApplicationInfo info;
+        boolean[] pathsWithCode;
+    }
+
+    private TestData createMockApplicationInfo(String baseClassLoader, boolean addSplits,
             boolean addSplitDependencies) {
         ApplicationInfo ai = new ApplicationInfo();
         String codeDir = "/data/app/mock.android.com";
         ai.setBaseCodePath(codeDir + "/base.dex");
         ai.classLoaderName = baseClassLoader;
         ai.privateFlags = ai.privateFlags | ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING;
+        boolean[] pathsWithCode;
+        if (!addSplits) {
+            pathsWithCode = new boolean[] {true};
+        } else {
+            pathsWithCode = new boolean[9];
+            Arrays.fill(pathsWithCode, true);
+            pathsWithCode[7] = false;  // config split
 
-        if (addSplits) {
             ai.setSplitCodePaths(new String[]{
                     codeDir + "/base-1.dex",
                     codeDir + "/base-2.dex",
                     codeDir + "/base-3.dex",
                     codeDir + "/base-4.dex",
                     codeDir + "/base-5.dex",
-                    codeDir + "/base-6.dex"});
+                    codeDir + "/base-6.dex",
+                    codeDir + "/config-split-7.dex",
+                    codeDir + "/feature-no-deps.dex"});
 
             ai.splitClassLoaderNames = new String[]{
                     DELEGATE_LAST_CLASS_LOADER_NAME,
@@ -69,7 +82,9 @@ public class DexoptUtilsTest {
                     PATH_CLASS_LOADER_NAME,
                     DEX_CLASS_LOADER_NAME,
                     PATH_CLASS_LOADER_NAME,
-                    null};  // A null class loader name should default to PathClassLoader.
+                    null,   // A null class loader name should default to PathClassLoader.
+                    null,   // The config split gets a null class loader.
+                    null};  // The feature split with no dependency and no specified class loader.
             if (addSplitDependencies) {
                 ai.splitDependencies = new SparseArray<>(ai.splitClassLoaderNames.length + 1);
                 ai.splitDependencies.put(0, new int[] {-1}); // base has no dependency
@@ -79,18 +94,24 @@ public class DexoptUtilsTest {
                 ai.splitDependencies.put(4, new int[] {0}); // split 4 depends on base
                 ai.splitDependencies.put(5, new int[] {0}); // split 5 depends on base
                 ai.splitDependencies.put(6, new int[] {5}); // split 6 depends on 5
+                // Do not add the config split to the dependency list.
+                // Do not add the feature split with no dependency to the dependency list.
             }
         }
-        return ai;
+        TestData data = new TestData();
+        data.info = ai;
+        data.pathsWithCode = pathsWithCode;
+        return data;
     }
 
     @Test
     public void testSplitChain() {
-        ApplicationInfo ai = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, true);
+        TestData data = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, true);
         String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, sharedLibrary);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
 
-        assertEquals(7, contexts.length);
+        assertEquals(9, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
         assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]",
                 contexts[1]);
@@ -99,15 +120,18 @@ public class DexoptUtilsTest {
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
         assertEquals("PCL[];PCL[base-5.dex];PCL[a.dex:b.dex:base.dex]", contexts[6]);
+        assertEquals(null, contexts[7]);  // config split
+        assertEquals("PCL[]", contexts[8]);  // feature split with no dependency
     }
 
     @Test
     public void testSplitChainNoSplitDependencies() {
-        ApplicationInfo ai = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, false);
+        TestData data = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, false);
         String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, sharedLibrary);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
 
-        assertEquals(7, contexts.length);
+        assertEquals(9, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
         assertEquals("PCL[a.dex:b.dex:base.dex]", contexts[1]);
         assertEquals("PCL[a.dex:b.dex:base.dex:base-1.dex]", contexts[2]);
@@ -119,15 +143,21 @@ public class DexoptUtilsTest {
         assertEquals(
                 "PCL[a.dex:b.dex:base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex:base-5.dex]",
                 contexts[6]);
+        assertEquals(null, contexts[7]);  // config split
+        assertEquals(
+                "PCL[a.dex:b.dex:base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex:base-5.dex:base-6.dex:config-split-7.dex]",
+                contexts[8]);  // feature split with no dependency
     }
 
     @Test
     public void testSplitChainNoIsolationNoSharedLibrary() {
-        ApplicationInfo ai = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, true);
-        ai.privateFlags = ai.privateFlags & (~ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING);
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, null);
+        TestData data = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, true);
+        data.info.privateFlags = data.info.privateFlags
+                & (~ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, null, data.pathsWithCode);
 
-        assertEquals(7, contexts.length);
+        assertEquals(9, contexts.length);
         assertEquals("PCL[]", contexts[0]);
         assertEquals("PCL[base.dex]", contexts[1]);
         assertEquals("PCL[base.dex:base-1.dex]", contexts[2]);
@@ -137,14 +167,20 @@ public class DexoptUtilsTest {
         assertEquals(
                 "PCL[base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex:base-5.dex]",
                 contexts[6]);
+        assertEquals(null, contexts[7]);  // config split
+        assertEquals(
+                "PCL[base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex:base-5.dex:base-6.dex:config-split-7.dex]",
+                contexts[8]);  // feature split with no dependency
     }
+
     @Test
     public void testSplitChainNoSharedLibraries() {
-        ApplicationInfo ai = createMockApplicationInfo(
+        TestData data = createMockApplicationInfo(
                 DELEGATE_LAST_CLASS_LOADER_NAME, true, true);
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, null);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, null, data.pathsWithCode);
 
-        assertEquals(7, contexts.length);
+        assertEquals(9, contexts.length);
         assertEquals("DLC[]", contexts[0]);
         assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];DLC[base.dex]", contexts[1]);
         assertEquals("DLC[];PCL[base-4.dex];DLC[base.dex]", contexts[2]);
@@ -152,16 +188,19 @@ public class DexoptUtilsTest {
         assertEquals("PCL[];DLC[base.dex]", contexts[4]);
         assertEquals("PCL[];DLC[base.dex]", contexts[5]);
         assertEquals("PCL[];PCL[base-5.dex];DLC[base.dex]", contexts[6]);
+        assertEquals(null, contexts[7]);  // config split
+        assertEquals("PCL[]", contexts[8]);  // feature split with no dependency
     }
 
     @Test
     public void testSplitChainWithNullPrimaryClassLoader() {
         // A null classLoaderName should mean PathClassLoader.
-        ApplicationInfo ai = createMockApplicationInfo(null, true, true);
+        TestData data = createMockApplicationInfo(null, true, true);
         String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, sharedLibrary);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
 
-        assertEquals(7, contexts.length);
+        assertEquals(9, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
         assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
         assertEquals("DLC[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
@@ -169,13 +208,16 @@ public class DexoptUtilsTest {
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
         assertEquals("PCL[];PCL[base-5.dex];PCL[a.dex:b.dex:base.dex]", contexts[6]);
+        assertEquals(null, contexts[7]);  // config split
+        assertEquals("PCL[]", contexts[8]);  // feature split with no dependency
     }
 
     @Test
     public void tesNoSplits() {
-        ApplicationInfo ai = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, false, false);
+        TestData data = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, false, false);
         String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, sharedLibrary);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
@@ -183,9 +225,10 @@ public class DexoptUtilsTest {
 
     @Test
     public void tesNoSplitsNullClassLoaderName() {
-        ApplicationInfo ai = createMockApplicationInfo(null, false, false);
+        TestData data = createMockApplicationInfo(null, false, false);
         String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, sharedLibrary);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
@@ -193,10 +236,11 @@ public class DexoptUtilsTest {
 
     @Test
     public void tesNoSplitDelegateLast() {
-        ApplicationInfo ai = createMockApplicationInfo(
+        TestData data = createMockApplicationInfo(
                 DELEGATE_LAST_CLASS_LOADER_NAME, false, false);
         String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, sharedLibrary);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
         assertEquals("DLC[a.dex:b.dex]", contexts[0]);
@@ -204,8 +248,9 @@ public class DexoptUtilsTest {
 
     @Test
     public void tesNoSplitsNoSharedLibraries() {
-        ApplicationInfo ai = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, false, false);
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, null);
+        TestData data = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, false, false);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, null, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
         assertEquals("PCL[]", contexts[0]);
@@ -213,12 +258,52 @@ public class DexoptUtilsTest {
 
     @Test
     public void tesNoSplitDelegateLastNoSharedLibraries() {
-        ApplicationInfo ai = createMockApplicationInfo(
+        TestData data = createMockApplicationInfo(
                 DELEGATE_LAST_CLASS_LOADER_NAME, false, false);
-        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, null);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, null, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
         assertEquals("DLC[]", contexts[0]);
+    }
+
+    @Test
+    public void testContextWithNoCode() {
+        TestData data = createMockApplicationInfo(null, true, false);
+        Arrays.fill(data.pathsWithCode, false);
+
+        String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
+
+        assertEquals(9, contexts.length);
+        assertEquals(null, contexts[0]);
+        assertEquals(null, contexts[1]);
+        assertEquals(null, contexts[2]);
+        assertEquals(null, contexts[3]);
+        assertEquals(null, contexts[4]);
+        assertEquals(null, contexts[5]);
+        assertEquals(null, contexts[6]);
+        assertEquals(null, contexts[7]);
+    }
+
+    @Test
+    public void testContextBaseNoCode() {
+        TestData data = createMockApplicationInfo(null, true, true);
+        data.pathsWithCode[0] = false;
+        String[] sharedLibrary = new String[] {"a.dex", "b.dex"};
+        String[] contexts = DexoptUtils.getClassLoaderContexts(
+                data.info, sharedLibrary, data.pathsWithCode);
+
+        assertEquals(9, contexts.length);
+        assertEquals(null, contexts[0]);
+        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
+        assertEquals("DLC[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
+        assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[3]);
+        assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
+        assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
+        assertEquals("PCL[];PCL[base-5.dex];PCL[a.dex:b.dex:base.dex]", contexts[6]);
+        assertEquals(null, contexts[7]);
     }
 
     @Test
