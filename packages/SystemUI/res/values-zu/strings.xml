@@ -101,11 +101,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Sondeza kancane esikrinini esikhudlwana"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ixhunyiwe"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"i-Bluetooth ayixhunywanga."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Ayikho ibhetri."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Ibha eyodwa yebhetri"</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Amabha amabili ebhetri"</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Amabha amathathu ebhetri"</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Ibhetri igcwele."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Ayikho ibhethri."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Ibha eyodwa yebhethri"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Amabha amabili ebhethri"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Amabha amathathu ebhethri"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Ibhethri igcwele."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Ayikho ifoni."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Ibha eyodwa yefoni"</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Amabha amabilil efoni."</string>
@@ -159,7 +159,7 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Alikho ikhadi le-SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Iguqula inethiwekhi yenkampani yenethiwekhi."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Vula imininingwane yebhethri"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhetri"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhethri"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Ibhethri liyashaja, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> iphesenti."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Izilungiselelo zesistimu"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Izaziso"</string>

@@ -467,7 +467,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"充電していないときには電池残量の割合をステータスバーアイコンに表示する"</string>
     <string name="quick_settings" msgid="10042998191725428">"クイック設定"</string>
     <string name="status_bar" msgid="4877645476959324760">"ステータスバー"</string>
-    <string name="overview" msgid="4018602013895926956">"概要"</string>
+    <string name="overview" msgid="4018602013895926956">"最近"</string>
     <string name="demo_mode" msgid="2389163018533514619">"デモモード"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"デモモードを有効にする"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"デモモードを表示"</string>

@@ -229,7 +229,7 @@
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Інверсія колеру адключаецца."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Інверсія колеру ўключаецца."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Мабільны хот-спот выключаецца."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мабільны хот-спот ўключаецца."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мабільная кропка доступу ўключаная."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Трансляцыя экрана спынена."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Рэжым працы выкл."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Рэжым працы ўкл."</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Падлучана"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Падлучэнне..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Мадэм"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Хот-спот"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Кропка доступу"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Апавяшчэнні"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Ліхтарык"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мабільная перадача даных"</string>
@@ -486,7 +486,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Хуткія налады, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Хот-спот"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Кропка доступу"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Працоўны профіль"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Цікава для некаторых, але не для ўсіх"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Наладка сістэмнага інтэрфейсу карыстальніка дае вам дадатковыя спосабы наладжвання і дапасоўвання карыстальніцкага інтэрфейсу Android. Гэтыя эксперыментальныя функцыі могуць змяніцца, перастаць працаваць або знікнуць у будучых версіях. Карыстайцеся з асцярожнасцю."</string>

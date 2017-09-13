@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Interf sist"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do app"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Inform. do app"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Suas telas recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar apps recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Ativar a economia de bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configurações"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Girar automaticamente a tela"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Girar tela automaticamente"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"MUDO"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificações"</string>
@@ -211,10 +211,10 @@
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth conectado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"O Bluetooth foi desativado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"O Bluetooth foi ativado."</string>
-    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Relatório de Localização desativado."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Relatório de Localização ativado."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"O Relatório de Localização foi desativado."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"O Relatório de Localização foi ativado."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Relatório de localização desativado."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Relatório de localização ativado."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"O Relatório de localização foi desativado."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"O Relatório de localização foi ativado."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarme definido para <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Fechar painel."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Mais tempo."</string>
@@ -265,7 +265,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Protetor de tela"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Não perturbe"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Só prioridade"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Somente prioridade"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Somente alarmes"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Silêncio total"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -273,7 +273,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desativado"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Não há dispositivos pareados disponíveis"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brilho"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotação automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Girar automaticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Girar tela automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Definir como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotação bloqueada"</string>
@@ -360,7 +360,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Deslize a partir do ícone da câmera"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Silêncio total. Isso também silenciará os leitores de tela."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silêncio total"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Só prioridade"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Somente prioridade"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Somente alarmes"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silêncio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Somente\nprioridade"</string>

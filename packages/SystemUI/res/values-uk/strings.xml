@@ -156,7 +156,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобільний трафік"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Мобільний трафік увімкнено"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобільний трафік вимкнено"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Прив’язка Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим польоту."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Немає SIM-карти."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Змінення мережі оператора."</string>
@@ -598,7 +598,7 @@
     <string name="select_button" msgid="1597989540662710653">"Виберіть, яку кнопку додати"</string>
     <string name="add_button" msgid="4134946063432258161">"Додати кнопку"</string>
     <string name="save" msgid="2311877285724540644">"Зберегти"</string>
-    <string name="reset" msgid="2448168080964209908">"Віднов."</string>
+    <string name="reset" msgid="2448168080964209908">"Скинути"</string>
     <string name="no_home_title" msgid="1563808595146071549">"Немає кнопки \"Головний екран\""</string>
     <string name="no_home_message" msgid="5408485011659260911">"Для навігації пристроєм потрібна кнопка \"Головний екран\". Перш ніж зберегти, додайте цю кнопку."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Змінити ширину кнопки"</string>

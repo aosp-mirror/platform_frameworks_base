@@ -185,7 +185,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Уведомление закрыто"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Панель уведомлений"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Быстрые настройки"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Заблокированный экран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Экран блокировки."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Настройки"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Обзор."</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Закрыть"</string>
@@ -275,7 +275,7 @@
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth выкл."</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Нет доступных подключенных устройств"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Нет доступных сопряженных устройств"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркость"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоповорот"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Автоповорот экрана"</string>
@@ -395,7 +395,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Выход от имени пользователя"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ВЫЙТИ ОТ ИМЕНИ ПОЛЬЗОВАТЕЛЯ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Добавить пользователя?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Когда вы добавите пользователя, ему потребуется настроить профиль.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Удалить аккаунт?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Все приложения и данные этого пользователя будут удалены."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Удалить"</string>
@@ -575,7 +575,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Календарь"</string>
-    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Показывать при нажатии кнопок регулировки громкости"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Показывать с регуляторами громкости"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Не беспокоить"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Кнопки регулировки громкости"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Отключать режим \"Не беспокоить\" при увеличении громкости"</string>

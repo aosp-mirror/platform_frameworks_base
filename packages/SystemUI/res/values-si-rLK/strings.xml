@@ -388,7 +388,7 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"පරිශීලකයා වරන්න"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"වත්මන් පරිශීලක වරන්න"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"පරිශීලකයා වරන්න"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"අලුත් පරිශීලකයෙක් එකතු කරන්නද?"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"අලුත් පරිශීලකයෙක් එක් කරන්නද?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ඔබ අලුත් පරිශීලකයෙක් එකතු කරන විට, එම පුද්ගලයා ඔහුගේ වැඩ කරන ඉඩ සකසා ගත යුතුය.\n\nසියළුම අනෙක් පරිශීලකයින් සඳහා ඕනෑම පරිශීලකයෙකුට යාවත්කාලීන කළ හැක."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"පරිශීලකයා ඉවත් කරන්නද?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"මෙම පරිශීලකයාගේ සියලු යෙදුම් සහ දත්ත මකනු ඇත."</string>

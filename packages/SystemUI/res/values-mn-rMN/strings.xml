@@ -419,7 +419,7 @@
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION">%2$s</xliff:g>-тэй холбогдсон бөгөөд таны  имэйл, апп, вэбсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон бөгөөд таны имэйл, апп, вэбсайт зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой.\n\nМөн та <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны сүлжээний хувийн үйл ажиллагааг хянаж чадна."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Таны төхөөрөмжийг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг.\n\n Танай админ төхөөрөмж, төхөөрөмжийн байршилтай холбоотой өгөгдлийг холбох, тохиргоог өөрчлөх болон хяналт тавих боломжтой.\n\nТа <xliff:g id="APPLICATION">%2$s</xliff:g>-тай холбогдсон бөгөөд ингэснээр таны имэйл,апп, аюулгүй вэбсайт зэрэг сүлжээний үйл ажиллагаагаа хянах боломжтой.\n\n Дэлгэрэнгүй мэдээлэл авахыг хүсвэл админтайгаа холбогдоно уу."</string>
-    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар нээх хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Үгүй"</string>
@@ -489,7 +489,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Баяр хүргэе! Системийн UI Tохируулагчийг тохиргоонд нэмлээ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Тохиргооноос устгах"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Системийн UI Тохируулагчийг тохиргооноос устгаж, үүнтэй холбоотой бүх тохиргоог ашиглахаа болих уу?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"Апп-ыг таны төхөөрөмжид суулгаагүй байна"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"Аппыг таны төхөөрөмжид суулгаагүй байна"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Цагийн секундыг харуулах"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Статус талбарт цагийн секундыг харуулах. Энэ нь тэжээлийн цэнэгт нөлөөлж болно."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Түргэн тохиргоог дахин засварлах"</string>

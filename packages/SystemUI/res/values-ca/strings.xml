@@ -62,7 +62,7 @@
     <string name="always_use_accessory" msgid="1210954576979621596">"Utilitza de manera predet. per a l\'accessori USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="303335496705863070">"Dóna sempre permís des d\'aquest equip"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració USB. Per utilitzar aquesta funció, cal canviar a l\'usuari administrador."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
@@ -83,7 +83,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Enrere"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Pàgina d\'inici"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"Visió general"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"Aplicacions recents"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Cerca"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Càmera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telèfon"</string>
@@ -183,7 +183,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuració ràpida"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla de bloqueig"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Configuració"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Visió general"</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Aplicacions recents."</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Tanca"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Usuari <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -195,20 +195,20 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"El Mode d\'avió està activat."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"S\'ha desactivat el Mode d\'avió."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"S\'ha activat el Mode d\'avió."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"El mode No molesteu està activat (només amb prioritat)."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"El mode No molesteu està activat; silenci total."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"El mode No molesteu està activat (només alarmes)."</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mode No molesteu."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"El mode No molesteu està desactivat."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"S\'ha desactivat el mode No molesteu."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"S\'ha activat el mode No molesteu."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Mode No molestis activat (només amb prioritat)."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"El mode No molestis està activat; silenci total."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"El mode No molestis està activat (només alarmes)."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mode No molestis."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"El mode No molestis està desactivat."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"S\'ha desactivat el mode No molestis."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"S\'ha activat el mode No molestis."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"El Bluetooth està desactivat."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"El Bluetooth està activat."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth desactivat."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth activat."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"S\'està connectant el Bluetooth."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"El Bluetooth està connectat."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"El Bluetooth està desactivat."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"El Bluetooth està activat."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth connectat."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth desactivat."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth activat."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Informes d\'ubicació desactivats"</string>
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Informes d\'ubicació activats"</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Els informes d\'ubicació estan desactivats."</string>
@@ -262,14 +262,14 @@
     <string name="dessert_case" msgid="1295161776223959221">"Capsa de postres"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Estalvi de pantalla"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"No molesteu"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"No molestis"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Només amb prioritat"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Només alarmes"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Silenci total"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositius)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivat"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"No hi ha dispositius vinculats  disponibles."</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"No hi ha dispositius vinculats  disponibles"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Gira automàticament"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Gira la pantalla automàticament"</string>
@@ -277,7 +277,7 @@
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotació bloquejada"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertical"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Horitzontal"</string>
-    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mètode d\'entrada"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mètode d\'introducció"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Ubicació"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Ubicació desactivada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositiu multimèdia"</string>
@@ -345,9 +345,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Llisca cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels que produeixin les alarmes, els recordatoris, els esdeveniments i les trucades de les persones que especifiquis."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels sons de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Tot i això, encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
@@ -367,7 +367,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Càrrega ràpida (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Càrrega lenta (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Canvia d\'usuari"</string>
-    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia l\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia d\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Mostra el perfil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Afegeix un usuari"</string>
@@ -422,7 +422,7 @@
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. Aquest perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat professional a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nA més, estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que també pot supervisar la teva activitat personal a la xarxa."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el dispositiu.\n\nL\'administrador pot supervisar i gestionar el següent: configuració, accés corporatiu, aplicacions i dades associades amb el dispositiu, inclosa la informació d\'ubicació.\n\nEstàs connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar l\'activitat a la xarxa, com ara els correus, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositiu continuarà bloquejat fins que no el desbloquegis manualment."</string>
-    <string name="hidden_notifications_title" msgid="7139628534207443290">"Obtén notificacions més ràpidament"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Rep notificacions més ràpidament"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Mostra-les abans de desbloquejar"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configura"</string>
@@ -465,7 +465,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra el percentatge del nivell de bateria dins de la icona de la barra d\'estat quan no s\'estigui carregant"</string>
     <string name="quick_settings" msgid="10042998191725428">"Configuració ràpida"</string>
     <string name="status_bar" msgid="4877645476959324760">"Barra d\'estat"</string>
-    <string name="overview" msgid="4018602013895926956">"Visió general"</string>
+    <string name="overview" msgid="4018602013895926956">"Aplicacions recents"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Mode de demostració"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Activa el mode de demostració"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Mostra el mode de demostració"</string>
@@ -570,9 +570,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendari"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Mostra amb els controls de volum"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"No molesteu"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"No molestis"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Drecera per als botons de volum"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Desactiva el mode No molesteu apujant el volum"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Desactiva el mode No molestis apujant el volum"</string>
     <string name="battery" msgid="7498329822413202973">"Bateria"</string>
     <string name="clock" msgid="7416090374234785905">"Rellotge"</string>
     <string name="headset" msgid="4534219457597457353">"Auriculars"</string>

@@ -301,7 +301,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"​ບໍ່​ມີ​ອຸ​ປະ​ກອນ​ທີ່​ສາ​ມາດ​ໃຊ້​ໄດ້"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ຄວາມແຈ້ງ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ອັດຕະໂນມັດ"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"​ສະ​ລັບ​ສີ"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"ສະຫຼັບສີ"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"ໂໝດການແກ້ໄຂສີ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ແລ້ວໆ"</string>
@@ -347,7 +347,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"ເລື່ອນໄປທາງຊ້າຍເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"ທ່ານ​ຈະ​ບໍ່​ຖືກ​ລົບ​ກວນ​ຈາກ​ສຽງ ແລະ​ການ​ສັ່ນ, ຍົກ​ເວັ້ນ​ຈາກ​ໂມງ​ປຸກ, ການ​ເຕືອນ, ເຫດ​ການ, ແລະ​ຜູ້​ໂທ​ທີ່​ທ່ານ​ລະ​ບຸ."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ປັບແຕ່ງ"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ອັນ​ນີ້ບ​ລັອກ​ທຸກ​ສຽງ ແລະ​ການ​ສັ່ນ, ລວມ​ທັງ​ຈາກ​ໂມງ​ປຸກ, ເພງ, ວິ​ດີ​ໂອ, ແລະ​ເກມ. ທ່ານ​ຍັງ​ຈະ​ສາ​ມາດ​ໂທ​ລະ​ສັບ​ໄດ້."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ນີ້ຈະເປັນການປິດສຽງ ແລະ ການສັ່ນທັງໝົດ ຮວມທັງສຽງໂມງປຸກ, ເພງ, ວິດີໂອ ແລະ ເກມນຳ. ແຕ່ທ່ານຍັງສາມາດໂທລະສັບໄດ້ປົກກະຕິ."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ອັນ​ນີ້ບ​ລັອກ​ທຸກ​ສຽງ ແລະ​ການ​ສັ່ນ, ລວມ​ທັງ​ຈາກ​ໂມງ​ປຸກ, ເພງ, ວິ​ດີ​ໂອ, ແລະ​ເກມ."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ການ​ແຈ້ງເຕືອນ​ທີ່​ສຳຄັນ​ໜ້ອຍ​ກວ່າ​ຢູ່​ດ້ານ​ລຸ່ມ"</string>

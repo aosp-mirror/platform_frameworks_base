@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"UI ya Mfumo"</string>
+    <string name="app_label" msgid="7164937344850004466">"Kiolesura"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Futa"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Ondoa kwenye orodha"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Taarifa za programu-matumizi"</string>
@@ -77,7 +77,7 @@
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Shirika au programu yako haikuruhusu upige picha za skrini."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezaji cha maudhui (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nyuma"</string>
@@ -153,9 +153,9 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Data ya Simu za Mkononi"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Imewasha Data ya Simu za Mkononi"</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Data ya simu za mkononi Imezimwa"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Data ya mtandao wa simu Imezimwa"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Shiriki intaneti kwa Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Hali ya ndege."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Hali ya ndegeni."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Hakuna SIM kadi."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mabadiliko ya mtandao wa mtoa huduma."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Fungua maelezo ya betri"</string>
@@ -213,7 +213,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Programu ya kuonyesha mahali ulipo imewashwa."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Programu ya Kuonyesha mahali ulipo imezimwa."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Programu ya Kuonyesha mahali ulipo imewashwa."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Kengele imewekwa <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Kengele imewashwa na italia <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Funga paneli."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Muda zaidi."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Muda kidogo"</string>
@@ -280,7 +280,7 @@
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mbinu ya uingizaji"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Kutambua Eneo"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Kitambua eneo kimezimwa"</string>
-    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha midia"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha faili"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Simu za Dharura Pekee"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Mipangilio"</string>
@@ -346,8 +346,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"Sogeza juu kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Sogeza kushoto kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na wapigaji simu utakaobainisha."</string>
-    <string name="zen_priority_customize_button" msgid="7948043278226955063">"Badilisha kukufaa"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa na pamoja na ile inayotokana na kengele, muziki, video na michezo. Bado utaweza kupiga simu."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"Badilisha upendavyo"</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa ni pamoja na ile inayotokana na kengele, muziki, video na michezo. Bado utaweza kupiga simu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa ni pamoja na ile inayotokana na kengele, muziki, video na michezo."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>+"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizo za dharura sana ziko hapo chini"</string>
@@ -373,7 +373,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Mtumiaji mpya"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza aliyealikwa"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Data na programu zote katika kipindi hiki zitafutwa."</string>
@@ -389,7 +389,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Mwondoe mtumiaji wa sasa"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ONDOA MTUMIAJI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Mtumiaji mpya unayemwongeza anahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya watumiaji wengine wote."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Je, ungependa kuondoa mtumiaji?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Programu na data yote ya mtumiaji huyu itafutwa."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Ondoa"</string>
@@ -460,7 +460,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gonga ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Inaonyesha %s ya vidhibiti vya sauti. Telezesha kidole juu ili uondoe."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Imeficha vidhibiti vya sauti"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Kipokea Ishara cha SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Kirekebishi cha kiolesura cha mfumo"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Onyesha asilimia ya betri iliyopachikwa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Onyesha asilimia ya kiwango cha betri ndani ya aikoni ya sehemu ya arifa inapokuwa haichaji"</string>
     <string name="quick_settings" msgid="10042998191725428">"Mipangilio ya Haraka"</string>
@@ -483,12 +483,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Mtandao-hewa"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Wasifu wa kazini"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Kinafurahisha kwa baadhi ya watu lakini si wote"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Kipokea Ishara cha System UI kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika, au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Kirekebishi cha kiolesura cha mfumo kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika, au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
     <string name="got_it" msgid="2239653834387972602">"Nimeelewa"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kipokea Ishara cha System UI kimeongezwa kwenye Mipangilio"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kirekebishi cha kiolesura cha mfumo kimeongezwa kwenye mipangilio"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ondoa kwenye Mipangilio"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kipokea ishara cha SystemUI kwenye Mipangilio na uache kutumia vipengele vyake vyote?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kirekebishi cha kiolesura cha mfumo kwenye mipangilio na uache kutumia vipengele vyake vyote?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Programu haijasakinishwa kwenye kifaa chako"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Onyesha sekunde za saa"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Onyesha sekunde za saa katika sehemu ya arifa. Inaweza kuathiri muda wa matumizi ya betri."</string>
@@ -535,8 +535,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Kushoto"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Kulia"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Katikati"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Sogeza"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Nafasi"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Nafasinyuma"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Cheza/Sitisha"</string>
@@ -559,9 +559,9 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Nyuma"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Arifa"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Mikato ya Kibodi"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Badilisha mbinu ya kuingiza data"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Kubadili mbinu ya kuingiza data"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Programu"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Programu ya maagizo ya sauti"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Programu ya usaidizi"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Kivinjari"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Anwani"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Barua pepe"</string>

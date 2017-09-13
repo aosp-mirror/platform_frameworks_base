@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Nivel de batería bajo"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. La función de ahorro de energía está activada."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. La función de ahorro de batería está activada."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"No se admite la carga por USB.\nUtiliza solo el cargador proporcionado."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"No se admite la carga por USB."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utiliza solo el cargador proporcionado."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ajustes"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"¿Activar ahorro de batería?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activar"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar ahorro de energía"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar ahorro de batería"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ajustes"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Girar pantalla automáticamente"</string>
@@ -133,8 +133,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Dos barras"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Tres barras"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Señal al máximo"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Sí"</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"No"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Activado"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivado"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Conectado"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Conectando."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Datos móviles"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Datos móviles activados"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Datos móviles desactivados"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir por Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir conexión por Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hay tarjeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Cambiando red de operador."</string>
@@ -211,10 +211,10 @@
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth conectado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth desactivado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth activado."</string>
-    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Informes de Ubicación desactivados."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Informes de Ubicación activados."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Informes de Ubicación desactivados."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Informes de Ubicación activados."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Informes de ubicación desactivados."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Informes de ubicación activados."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Informes de ubicación desactivados."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Informes de ubicación activados."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"La alarma sonará a la(s) <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Cerrar panel."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Más tiempo."</string>
@@ -244,7 +244,7 @@
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reanudar"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sin conexión a Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Con conexión Wi-Fi"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando señal GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ubicación definida por GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
@@ -309,7 +309,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Listo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Conectado"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Compartir Internet"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Compartir conexión"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona Wi-Fi"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificaciones"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Linterna"</string>
@@ -396,7 +396,7 @@
     <string name="user_remove_user_message" msgid="1453218013959498039">"Se eliminarán todas las aplicaciones y todos los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Quitar"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ahorro de batería activado"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y el envío de datos en segundo plano"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactivar ahorro de batería"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> empezará a capturar todo lo que aparezca en la pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No volver a mostrar"</string>
@@ -441,7 +441,7 @@
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> quiere ser el cuadro de diálogo de volumen."</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Permitir"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Rechazar"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Denegar"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> es el cuadro de diálogo de volumen"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Toca para restaurar el original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estás usando tu perfil de trabajo"</string>
@@ -505,8 +505,8 @@
     <string name="do_not_silence" msgid="6878060322594892441">"No silenciar"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"No silenciar ni bloquear"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Controles de energía de las notificaciones"</string>
-    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Sí"</string>
-    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"No"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Activado"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desactivado"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Los controles de energía de las notificaciones permiten establecer un nivel de importancia de 0 a 5 para las notificaciones de las aplicaciones. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones \n- Permitir interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 4"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 3"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n\n"<b>"Nivel 2"</b>" \n- Evitar interrumpir en el modo de pantalla completa\n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n\n"<b>"Nivel 1"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n- Ocultar de la pantalla de bloqueo y de la barra de estado \n- Mostrar en la parte inferior de la lista de notificaciones \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la aplicación"</string>
     <string name="user_unspecified_importance" msgid="361613856933432117">"Importancia: Automático"</string>
     <string name="blocked_importance" msgid="5035073235408414397">"Importancia: Nivel 0"</string>
@@ -528,7 +528,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso de la batería"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ahorro de batería no disponible mientras se carga el dispositivo"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ahorro de batería"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce el rendimiento y las conexiones automáticas"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Inicio"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Atrás"</string>
@@ -583,8 +583,8 @@
     <string name="data_saver" msgid="5037565123367048522">"Ahorro de datos"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Ahorro de datos activado"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Ahorro de datos desactivado"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"Sí"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"No"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Activado"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Desactivado"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
     <string name="start" msgid="6873794757232879664">"Inicio"</string>
     <string name="center" msgid="4327473927066010960">"Centro"</string>

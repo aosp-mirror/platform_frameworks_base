@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"ဆဲလ်လူလာ ဒေတာ"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ဆဲလ်လူလာ ဒေတာ ဖွင့်ထားသည်"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ဆဲလ်လူလာဒေတာပိတ်ထားသည်"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ဝန်ဆောင်မှုဌာန ကွန်ရက် ပြောင်းလဲနေစဉ်။"</string>
@@ -258,7 +258,7 @@
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ဖန်သားပြင် အနေအထားက ဒေါင်လိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ယခုတော့ မျက်နှာပြင်သည် အလိုအလျောက် လည်နေမည်။"</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"မျက်နှာပြင် အနေအထားကို ဘေးတိုက် အဖြစ် သော့ချထားသည်။"</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"မျက်နှာပြင် အနေအထားကို ထောင်လိုက် အဖြစ် သော့ချထားသည်။"</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"မျက်နှာပြင်အနေအထားကို ထောင်လိုက်အဖြစ် ပုံသေသတ်မှတ်ထားသည်။"</string>
     <string name="dessert_case" msgid="1295161776223959221">"မုန့်ထည့်သော ပုံး"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ဖန်သားပြင်အသုံးပြုမှု ချွေတာမှုစနစ်"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"အီသာနက်"</string>
@@ -293,7 +293,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ကွန်ရက်မရှိပါ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ဝိုင်ဖိုင်ပိတ်ရန်"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ကိုဖွင့်ပါ"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ဝိုင်ဖိုင်ကွန်ရက် မရနိုင်ပါ"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi ကွန်ရက် မရှိပါ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"အမည်မတပ် ကိရိယာ"</string>
@@ -304,13 +304,13 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"အရောင်များ ပြောင်းပြန်လုပ်ရန်"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"အရောင် မှန်ကန်စေခြင်း အခြေအနေ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"နောက်ထပ် ဆက်တင်များ"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"လုပ်ပြီး"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"ပြီးပါပြီ"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"ချိတ်ဆက်ထား"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"ဆက်သွယ်နေ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"တွဲချီပေးခြင်း"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ဟော့စပေါ့"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"အကြောင်းကြားချက်များ"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ဖလက်ရှမီး"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ဖလက်ရှ်မီး"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"ဆဲလ်လူလာ ဒေတာ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ဒေတာ သုံးစွဲမှု"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ကျန်ရှိ ဒေတာ"</string>
@@ -370,10 +370,10 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"အသုံးပြုသူကို ပြောင်းရန်၊ လက်ရှိ အသုံးပြုသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"လတ်တလော သုံးစွဲသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ပရိုဖိုင်ကို ပြရန်"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"သုံးသူ ထပ်ထည့်ရန်"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"အသုံးပြုသူ ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"အသုံးပြုသူ အသစ်"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ဧည့်သည်"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"ဧည့်သည့်ကို ထည့်ပေးရန်"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"ဧည့်သည့် ထည့်ရန်"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"ဧည့်သည်ကို ဖယ်ထုတ်လိုက်ရမလား?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ဒီချိတ်ဆက်မှု ထဲက အက်ပ်များ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
@@ -432,7 +432,7 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ခေါက်သိမ်းရန်..."</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' ကိုထိပြီး ဖိထားပါ။"</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"အဲဒါ ရပါပြီ"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"ရပါပြီ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"မလိုတော့ပါ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"နောက်တစ်ကြိမ်သင် ချိန်ညှိချက်များဖွင့်လျှင် ၎င်းပေါ်လာပါမည်။"</string>
@@ -536,7 +536,7 @@
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"ညာ"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"ဌာန"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"တဘ်"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"နေရာခြားပါ"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter ခလုတ်"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"နောက်ပြန်ဖျက်ပါ"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"ဖွင့်ပါ/ခဏရပ်ပါ"</string>

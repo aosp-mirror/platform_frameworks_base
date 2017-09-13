@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"მობილური ინტერნეტი"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"მობილური ინტერნეტი ჩართულია"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"მობილური ინტერნეტი გამორთულია"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ის ჩართვა"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ტეტერინგის ჩართვა"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"თვითმფრინავის რეჟიმი"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ბარათი არ არის."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ოპერატორის ქსელის შეცვლა"</string>
@@ -307,7 +307,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"დასრულდა"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"დაკავშირებულია"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"დაკავშირება..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"მოდემის რეჟიმი"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ტეტერინგი"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"წვდომის წერტილი"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"შეტყობინებები"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ფანარი"</string>
@@ -603,7 +603,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"კლავიშის კოდის ტიპის ღილაკების მეშვეობით ნავიგაციის ზოლში კლავიატურის კლავიშების დამატება არის შესაძლებელი. მათზე დაჭერისას არჩეული კლავიატურის კლავიშის ემულაცია ხდება. პირველ რიგში, ღილაკისთვის უნდა აირჩეს კლავიში, ხოლო შემდეგ სურათი, რომელიც ღილაკზე უნდა იყოს ნაჩვენები."</string>
     <string name="select_keycode" msgid="7413765103381924584">"აირჩიეთ კლავიატურის ღილაკი"</string>
     <string name="preview" msgid="9077832302472282938">"გადახედვა"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ფილების დასამატებლად, გადაიტანეთ ჩავლებით"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ფაილების დასამატებლად, გადაიტანეთ ჩავლებით"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ამოსაშლელად, ჩავლებით გადმოიტანეთ აქ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"რედაქტირება"</string>
     <string name="tuner_time" msgid="6572217313285536011">"დრო"</string>

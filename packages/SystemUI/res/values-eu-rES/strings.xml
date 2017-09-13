@@ -296,7 +296,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Igorpena"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Igortzeko prest"</string>
@@ -347,7 +347,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Bilatu"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lerratu gora hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lerratu ezkerrera hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Soinuek eta dardarek ez zaituzte eragotziko, zehazten dituzun alarmek, abisuek, gertaerek eta deitzaileek izan ezik."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Soinuek eta dardarek ez zaituzte oztoporik egingo, zehazten dituzun alarmek, abisuek, gertaerek eta deitzaileek izan ezik."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pertsonalizatu"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak."</string>
@@ -395,7 +395,7 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Erabiltzailea kendu nahi duzu?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Erabiltzailearen aplikazio eta datu guztiak ezabatuko dira."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Kendu"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Bateria aurrezlea aktibatuta dago"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Bateria-aurrezlea aktibatuta dago"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Errendimendua eta atzeko planoko datuak murrizten ditu"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desaktibatu bateria aurrezteko aukera"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak pantailan bistaratzen den guztia grabatuko du."</string>
@@ -595,8 +595,8 @@
     <string name="add_button" msgid="4134946063432258161">"Gehitu botoia"</string>
     <string name="save" msgid="2311877285724540644">"Gorde"</string>
     <string name="reset" msgid="2448168080964209908">"Berrezarri"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Ez da aurkitu hasiera-botoirik"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Hasiera-botoia behar da gailuan ibiltzeko. Gorde aurretik, gehi ezazu bat."</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Ez da aurkitu Hasiera botoirik"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Hasiera botoia behar da gailuan ibiltzeko. Gorde aurretik, gehi ezazu bat."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Doitu botoiaren zabalera"</string>
     <string name="clipboard" msgid="1313879395099896312">"Arbela"</string>
     <string name="clipboard_description" msgid="3819919243940546364">"Arbelari esker, elementuak arbelera zuzenean arrasta daitezke. Elementuak arbelean daudenean, handik zuzenean atera daitezke."</string>
