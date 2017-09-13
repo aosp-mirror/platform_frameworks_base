@@ -2709,6 +2709,8 @@
     <string name="yes">OK</string>
     <!-- Preference framework strings. -->
     <string name="no">Cancel</string>
+    <!-- Preference framework strings. -->
+    <string name="close">CLOSE</string>
     <!-- This is the generic "attention" string to be used in attention dialogs.  Typically
          combined with setIconAttribute(android.R.attr.alertDialogIcon)
          (or setIcon(android.R.drawable.ic_dialog_alert) on legacy versions of the platform) -->
@@ -2840,6 +2842,11 @@
     <string name="screen_compat_mode_show">Always show</string>
     <!-- [CHAR LIMIT=200] Compat mode dialog: hint to re-enable compat mode dialog. -->
     <string name="screen_compat_mode_hint">Re-enable this in System settings &gt; Apps &gt; Downloaded.</string>
+
+    <!-- Text of the alert that is displayed when a top application is killed by lmk. -->
+    <string name="top_app_killed_title">App isn\'t responding</string>
+    <!-- Top app killed by lmk dialog message. -->
+    <string name="top_app_killed_message"><xliff:g id="app_name">%1$s</xliff:g> may be using too much memory.</string>
 
     <!-- [CHAR LIMIT=200] Unsupported display size dialog: message. Refers to "Display size" setting. -->
     <string name="unsupported_display_size_message"><xliff:g id="app_name">%1$s</xliff:g> does not support the current Display size setting and may behave unexpectedly.</string>
