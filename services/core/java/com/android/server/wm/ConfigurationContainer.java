@@ -24,9 +24,14 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static com.android.server.wm.proto.ConfigurationContainerProto.FULL_CONFIGURATION;
+import static com.android.server.wm.proto.ConfigurationContainerProto.MERGED_OVERRIDE_CONFIGURATION;
+import static com.android.server.wm.proto.ConfigurationContainerProto.OVERRIDE_CONFIGURATION;
 
+import android.annotation.CallSuper;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.ArrayList;
 
@@ -250,6 +255,24 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             // Update merged override configuration of this container and all its children.
             onMergedOverrideConfigurationChanged();
         }
+    }
+
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition is at
+     * {@link com.android.server.wm.proto.ConfigurationContainerProto}.
+     *
+     * @param protoOutputStream Stream to write the ConfigurationContainer object to.
+     * @param fieldId           Field Id of the ConfigurationContainer as defined in the parent
+     *                          message.
+     * @hide
+     */
+    @CallSuper
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        mOverrideConfiguration.writeToProto(protoOutputStream, OVERRIDE_CONFIGURATION);
+        mFullConfiguration.writeToProto(protoOutputStream, FULL_CONFIGURATION);
+        mMergedOverrideConfiguration.writeToProto(protoOutputStream, MERGED_OVERRIDE_CONFIGURATION);
+        protoOutputStream.end(token);
     }
 
     abstract protected int getChildCount();

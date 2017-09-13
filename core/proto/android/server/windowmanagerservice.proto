@@ -16,6 +16,7 @@
 
 syntax = "proto3";
 
+import "frameworks/base/core/proto/android/content/configuration.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
@@ -26,17 +27,23 @@ option java_multiple_files = true;
 
 message WindowManagerServiceProto {
   WindowManagerPolicyProto policy = 1;
-  /* window manager hierarchy structure */
+  /* window hierarchy root */
+  RootWindowContainerProto root_window_container = 2;
+  IdentifierProto focused_window = 3;
+  string focused_app = 4;
+  IdentifierProto input_method_window = 5;
+  bool display_frozen = 6;
+  int32 rotation = 7;
+  int32 last_orientation = 8;
+  AppTransitionProto app_transition = 9;
+}
+
+/* represents DisplayContent */
+message RootWindowContainerProto {
+  WindowContainerProto window_container = 1;
   repeated DisplayProto displays = 2;
   /* window references in top down z order */
   repeated IdentifierProto windows = 3;
-  IdentifierProto focused_window = 4;
-  string focused_app = 5;
-  IdentifierProto input_method_window = 6;
-  bool display_frozen = 7;
-  int32 rotation = 8;
-  int32 last_orientation = 9;
-  AppTransitionProto app_transition = 10;
 }
 
 /* represents PhoneWindowManager */
@@ -81,18 +88,19 @@ message AppTransitionProto {
 
 /* represents DisplayContent */
 message DisplayProto {
-  int32 id = 1;
-  repeated StackProto stacks = 2;
-  DockedStackDividerControllerProto docked_stack_divider_controller = 3;
-  PinnedStackControllerProto pinned_stack_controller = 4;
+  WindowContainerProto window_container = 1;
+  int32 id = 2;
+  repeated StackProto stacks = 3;
+  DockedStackDividerControllerProto docked_stack_divider_controller = 4;
+  PinnedStackControllerProto pinned_stack_controller = 5;
   /* non app windows */
-  repeated WindowTokenProto above_app_windows = 5;
-  repeated WindowTokenProto below_app_windows = 6;
-  repeated WindowTokenProto ime_windows = 7;
-  int32 dpi = 8;
-  .android.view.DisplayInfoProto display_info = 9;
-  int32 rotation = 10;
-  ScreenRotationAnimationProto screen_rotation_animation = 11;
+  repeated WindowTokenProto above_app_windows = 6;
+  repeated WindowTokenProto below_app_windows = 7;
+  repeated WindowTokenProto ime_windows = 8;
+  int32 dpi = 9;
+  .android.view.DisplayInfoProto display_info = 10;
+  int32 rotation = 11;
+  ScreenRotationAnimationProto screen_rotation_animation = 12;
 }
 
 
@@ -109,20 +117,22 @@ message PinnedStackControllerProto {
 
 /* represents TaskStack */
 message StackProto {
-  int32 id = 1;
-  repeated TaskProto tasks = 2;
-  bool fills_parent = 3;
-  .android.graphics.RectProto bounds = 4;
-  bool animation_background_surface_is_dimming = 5;
+  WindowContainerProto window_container = 1;
+  int32 id = 2;
+  repeated TaskProto tasks = 3;
+  bool fills_parent = 4;
+  .android.graphics.RectProto bounds = 5;
+  bool animation_background_surface_is_dimming = 6;
 }
 
 /* represents Task */
 message TaskProto {
-  int32 id = 1;
-  repeated AppWindowTokenProto app_window_tokens = 2;
-  bool fills_parent = 3;
-  .android.graphics.RectProto bounds = 4;
-  .android.graphics.RectProto temp_inset_bounds = 5;
+  WindowContainerProto window_container = 1;
+  int32 id = 2;
+  repeated AppWindowTokenProto app_window_tokens = 3;
+  bool fills_parent = 4;
+  .android.graphics.RectProto bounds = 5;
+  .android.graphics.RectProto temp_inset_bounds = 6;
 }
 
 /* represents AppWindowToken */
@@ -134,26 +144,28 @@ message AppWindowTokenProto {
 
 /* represents WindowToken */
 message WindowTokenProto {
-  int32 hash_code = 1;
-  repeated WindowStateProto windows = 2;
+  WindowContainerProto window_container = 1;
+  int32 hash_code = 2;
+  repeated WindowStateProto windows = 3;
 }
 
 /* represents WindowState */
 message WindowStateProto {
-  IdentifierProto identifier = 1;
-  int32 display_id = 2;
-  int32 stack_id = 3;
-  .android.view.WindowLayoutParamsProto attributes = 4;
-  .android.graphics.RectProto given_content_insets = 5;
-  .android.graphics.RectProto frame = 6;
-  .android.graphics.RectProto containing_frame = 7;
-  .android.graphics.RectProto parent_frame = 8;
-  .android.graphics.RectProto content_frame = 9;
-  .android.graphics.RectProto content_insets = 10;
-  .android.graphics.RectProto surface_insets = 11;
-  WindowStateAnimatorProto animator = 12;
-  bool animating_exit = 13;
-  repeated WindowStateProto child_windows = 14;
+  WindowContainerProto window_container = 1;
+  IdentifierProto identifier = 2;
+  int32 display_id = 3;
+  int32 stack_id = 4;
+  .android.view.WindowLayoutParamsProto attributes = 5;
+  .android.graphics.RectProto given_content_insets = 6;
+  .android.graphics.RectProto frame = 7;
+  .android.graphics.RectProto containing_frame = 8;
+  .android.graphics.RectProto parent_frame = 9;
+  .android.graphics.RectProto content_frame = 10;
+  .android.graphics.RectProto content_insets = 11;
+  .android.graphics.RectProto surface_insets = 12;
+  WindowStateAnimatorProto animator = 13;
+  bool animating_exit = 14;
+  repeated WindowStateProto child_windows = 15;
 }
 
 message IdentifierProto {
@@ -178,4 +190,17 @@ message WindowSurfaceControllerProto {
 message ScreenRotationAnimationProto {
   bool started = 1;
   bool animation_running = 2;
+}
+
+/* represents WindowContainer */
+message WindowContainerProto {
+  ConfigurationContainerProto configuration_container = 1;
+  int32 orientation = 2;
+}
+
+/* represents ConfigurationContainer */
+message ConfigurationContainerProto {
+  .android.content.ConfigurationProto override_configuration = 1;
+  .android.content.ConfigurationProto full_configuration = 2;
+  .android.content.ConfigurationProto merged_override_configuration = 3;
 }

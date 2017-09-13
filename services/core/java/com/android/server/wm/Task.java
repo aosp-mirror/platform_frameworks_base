@@ -34,7 +34,9 @@ import static com.android.server.wm.proto.TaskProto.BOUNDS;
 import static com.android.server.wm.proto.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.proto.TaskProto.ID;
 import static com.android.server.wm.proto.TaskProto.TEMP_INSET_BOUNDS;
+import static com.android.server.wm.proto.TaskProto.WINDOW_CONTAINER;
 
+import android.annotation.CallSuper;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
 import android.content.pm.ActivityInfo;
@@ -735,8 +737,11 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return "Task=" + mTaskId;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    @CallSuper
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        super.writeToProto(proto, WINDOW_CONTAINER);
         proto.write(ID, mTaskId);
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken appWindowToken = mChildren.get(i);
