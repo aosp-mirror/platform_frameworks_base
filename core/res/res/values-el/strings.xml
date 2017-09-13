@@ -54,7 +54,7 @@
     <string name="serviceErased" msgid="1288584695297200972">"Η διαγραφή ήταν επιτυχής."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Λανθασμένος κωδικός πρόσβασης."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"Το MMI ολοκληρώθηκε."</string>
-    <string name="badPin" msgid="9015277645546710014">"Ο παλιός αριθμός PIN που πληκτρολογήσατε είναι λάθος."</string>
+    <string name="badPin" msgid="9015277645546710014">"Το παλιό PIN που πληκτρολογήσατε είναι λάθος."</string>
     <string name="badPuk" msgid="5487257647081132201">"Ο κωδικός PUK που πληκτρολογήσατε είναι λάθος."</string>
     <string name="mismatchPin" msgid="609379054496863419">"Οι αριθμοί PIN που πληκτρολογήσατε δεν ταιριάζουν."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Πληκτρολογήστε έναν αριθμό PIN μεγέθους 4 έως 8 αριθμών."</string>
