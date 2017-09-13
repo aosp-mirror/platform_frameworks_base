@@ -42,7 +42,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private static final boolean VDBG = false;
 
     private IBluetoothGatt mService;
-    private BluetoothGattCallback mCallback;
+    private volatile BluetoothGattCallback mCallback;
     private Handler mHandler;
     private int mClientIf;
     private BluetoothDevice mDevice;
@@ -164,8 +164,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                         runOrQueueCallback(new Runnable() {
                             @Override
                             public void run() {
-                                if (mCallback != null) {
-                                    mCallback.onConnectionStateChange(BluetoothGatt.this,
+                                final BluetoothGattCallback callback = mCallback;
+                                if (callback != null) {
+                                    callback.onConnectionStateChange(BluetoothGatt.this,
                                             GATT_FAILURE,
                                             BluetoothProfile.STATE_DISCONNECTED);
                                 }
@@ -203,8 +204,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onPhyUpdate(BluetoothGatt.this, txPhy, rxPhy, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onPhyUpdate(BluetoothGatt.this, txPhy, rxPhy, status);
                             }
                         }
                     });
@@ -227,8 +229,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onPhyRead(BluetoothGatt.this, txPhy, rxPhy, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onPhyRead(BluetoothGatt.this, txPhy, rxPhy, status);
                             }
                         }
                     });
@@ -254,8 +257,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onConnectionStateChange(BluetoothGatt.this, status,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onConnectionStateChange(BluetoothGatt.this, status,
                                         profileState);
                             }
                         }
@@ -320,8 +324,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onServicesDiscovered(BluetoothGatt.this, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onServicesDiscovered(BluetoothGatt.this, status);
                             }
                         }
                     });
@@ -374,9 +379,10 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
                                 if (status == 0) characteristic.setValue(value);
-                                mCallback.onCharacteristicRead(BluetoothGatt.this, characteristic,
+                                callback.onCharacteristicRead(BluetoothGatt.this, characteristic,
                                         status);
                             }
                         }
@@ -428,8 +434,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onCharacteristicWrite(BluetoothGatt.this, characteristic,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onCharacteristicWrite(BluetoothGatt.this, characteristic,
                                         status);
                             }
                         }
@@ -456,9 +463,10 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
                                 characteristic.setValue(value);
-                                mCallback.onCharacteristicChanged(BluetoothGatt.this,
+                                callback.onCharacteristicChanged(BluetoothGatt.this,
                                         characteristic);
                             }
                         }
@@ -507,9 +515,10 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
                                 if (status == 0) descriptor.setValue(value);
-                                mCallback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
+                                callback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
                             }
                         }
                     });
@@ -557,8 +566,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
                             }
                         }
                     });
@@ -585,8 +595,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onReliableWriteCompleted(BluetoothGatt.this, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onReliableWriteCompleted(BluetoothGatt.this, status);
                             }
                         }
                     });
@@ -608,8 +619,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onReadRemoteRssi(BluetoothGatt.this, rssi, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onReadRemoteRssi(BluetoothGatt.this, rssi, status);
                             }
                         }
                     });
@@ -632,8 +644,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onMtuChanged(BluetoothGatt.this, mtu, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onMtuChanged(BluetoothGatt.this, mtu, status);
                             }
                         }
                     });
@@ -658,8 +671,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onConnectionUpdated(BluetoothGatt.this, interval, latency,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onConnectionUpdated(BluetoothGatt.this, interval, latency,
                                         timeout, status);
                             }
                         }
