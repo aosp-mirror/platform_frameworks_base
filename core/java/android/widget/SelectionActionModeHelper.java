@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.LocaleList;
 import android.text.Selection;
@@ -41,6 +40,7 @@ import java.text.BreakIterator;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * Helper class for starting selection action mode
@@ -70,8 +70,7 @@ final class SelectionActionModeHelper {
         mTextClassificationHelper = new TextClassificationHelper(
                 mTextView.getTextClassifier(), mTextView.getText(),
                 0, 1, mTextView.getTextLocales());
-        mSelectionTracker =
-                new SelectionTracker(mTextView.getContext(), mTextView.isTextEditable());
+        mSelectionTracker = new SelectionTracker(mTextView);
     }
 
     public void startActionModeAsync(boolean adjustSelection) {
@@ -123,10 +122,8 @@ final class SelectionActionModeHelper {
                 SelectionEvent.ActionType.DRAG, mTextClassification);
     }
 
-    public void onTypeOverSelection() {
-        mSelectionTracker.onSelectionAction(
-                mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
-                SelectionEvent.ActionType.OVERTYPE, mTextClassification);
+    public void onTextChanged(int start, int end) {
+        mSelectionTracker.onTextChanged(start, end, mTextClassification);
     }
 
     public boolean resetSelection(int textIndex) {
@@ -211,19 +208,18 @@ final class SelectionActionModeHelper {
      */
     private static final class SelectionTracker {
 
-        private final Context mContext;
+        private final TextView mTextView;
         private SelectionMetricsLogger mLogger;
 
         private int mOriginalStart;
         private int mOriginalEnd;
         private int mSelectionStart;
         private int mSelectionEnd;
-        private boolean mSelectionStarted;
         private boolean mAllowReset;
 
-        SelectionTracker(Context context, boolean editable) {
-            mContext = Preconditions.checkNotNull(context);
-            mLogger = new SelectionMetricsLogger(context, editable);
+        SelectionTracker(TextView textView) {
+            mTextView = Preconditions.checkNotNull(textView);
+            mLogger = new SelectionMetricsLogger(textView);
         }
 
         /**
@@ -231,11 +227,10 @@ final class SelectionActionModeHelper {
          */
         public void onOriginalSelection(
                 CharSequence text, int selectionStart, int selectionEnd, boolean editableText) {
-            mOriginalStart = selectionStart;
-            mOriginalEnd = selectionEnd;
-            mSelectionStarted = true;
+            mOriginalStart = mSelectionStart = selectionStart;
+            mOriginalEnd = mSelectionEnd = selectionEnd;
             mAllowReset = false;
-            maybeInvalidateLogger(editableText);
+            maybeInvalidateLogger();
             mLogger.logSelectionStarted(text, selectionStart);
         }
 
@@ -243,7 +238,7 @@ final class SelectionActionModeHelper {
          * Called when selection action mode is started and the results come from a classifier.
          */
         public void onSmartSelection(SelectionResult result) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
                 mSelectionStart = result.mStart;
                 mSelectionEnd = result.mEnd;
                 mAllowReset = mSelectionStart != mOriginalStart || mSelectionEnd != mOriginalEnd;
@@ -258,7 +253,9 @@ final class SelectionActionModeHelper {
         public void onSelectionUpdated(
                 int selectionStart, int selectionEnd,
                 @Nullable TextClassification classification) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
+                mSelectionStart = selectionStart;
+                mSelectionEnd = selectionEnd;
                 mAllowReset = false;
                 mLogger.logSelectionModified(selectionStart, selectionEnd, classification, null);
             }
@@ -269,10 +266,13 @@ final class SelectionActionModeHelper {
          */
         public void onSelectionDestroyed() {
             mAllowReset = false;
-            mSelectionStarted = false;
-            mLogger.logSelectionAction(
-                    mSelectionStart, mSelectionEnd,
-                    SelectionEvent.ActionType.ABANDON, null /* classification */);
+            // Wait a few ms to see if the selection was destroyed because of a text change event.
+            mTextView.postDelayed(() -> {
+                mLogger.logSelectionAction(
+                        mSelectionStart, mSelectionEnd,
+                        SelectionEvent.ActionType.ABANDON, null /* classification */);
+                mSelectionStart = mSelectionEnd = -1;
+            }, 100 /* ms */);
         }
 
         /**
@@ -282,7 +282,7 @@ final class SelectionActionModeHelper {
                 int selectionStart, int selectionEnd,
                 @SelectionEvent.ActionType int action,
                 @Nullable TextClassification classification) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
                 mAllowReset = false;
                 mLogger.logSelectionAction(selectionStart, selectionEnd, action, classification);
             }
@@ -296,13 +296,15 @@ final class SelectionActionModeHelper {
          */
         public boolean resetSelection(int textIndex, Editor editor) {
             final TextView textView = editor.getTextView();
-            if (mSelectionStarted
+            if (isSelectionStarted()
                     && mAllowReset
                     && textIndex >= mSelectionStart && textIndex <= mSelectionEnd
                     && textView.getText() instanceof Spannable) {
                 mAllowReset = false;
                 boolean selected = editor.selectCurrentWord();
                 if (selected) {
+                    mSelectionStart = editor.getTextView().getSelectionStart();
+                    mSelectionEnd = editor.getTextView().getSelectionEnd();
                     mLogger.logSelectionAction(
                             textView.getSelectionStart(), textView.getSelectionEnd(),
                             SelectionEvent.ActionType.RESET, null /* classification */);
@@ -312,10 +314,20 @@ final class SelectionActionModeHelper {
             return false;
         }
 
-        private void maybeInvalidateLogger(boolean editableText) {
-            if (mLogger.isEditTextLogger() != editableText) {
-                mLogger = new SelectionMetricsLogger(mContext, editableText);
+        public void onTextChanged(int start, int end, TextClassification classification) {
+            if (isSelectionStarted() && start == mSelectionStart && end == mSelectionEnd) {
+                onSelectionAction(start, end, SelectionEvent.ActionType.OVERTYPE, classification);
             }
+        }
+
+        private void maybeInvalidateLogger() {
+            if (mLogger.isEditTextLogger() != mTextView.isTextEditable()) {
+                mLogger = new SelectionMetricsLogger(mTextView);
+            }
+        }
+
+        private boolean isSelectionStarted() {
+            return mSelectionStart >= 0 && mSelectionEnd >= 0 && mSelectionStart != mSelectionEnd;
         }
     }
 
@@ -336,20 +348,22 @@ final class SelectionActionModeHelper {
     private static final class SelectionMetricsLogger {
 
         private static final String LOG_TAG = "SelectionMetricsLogger";
+        private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
 
         private final SmartSelectionEventTracker mDelegate;
         private final boolean mEditTextLogger;
-        private final BreakIterator mWordIterator = BreakIterator.getWordInstance();
+        private final BreakIterator mWordIterator;
         private int mStartIndex;
-        private int mEndIndex;
         private String mText;
 
-        SelectionMetricsLogger(Context context, boolean editable) {
-            final @SmartSelectionEventTracker.WidgetType int widgetType = editable
+        SelectionMetricsLogger(TextView textView) {
+            Preconditions.checkNotNull(textView);
+            final @SmartSelectionEventTracker.WidgetType int widgetType = textView.isTextEditable()
                     ? SmartSelectionEventTracker.WidgetType.EDITTEXT
                     : SmartSelectionEventTracker.WidgetType.TEXTVIEW;
-            mDelegate = new SmartSelectionEventTracker(context, widgetType);
-            mEditTextLogger = editable;
+            mDelegate = new SmartSelectionEventTracker(textView.getContext(), widgetType);
+            mEditTextLogger = textView.isTextEditable();
+            mWordIterator = BreakIterator.getWordInstance(textView.getTextLocale());
         }
 
         public void logSelectionStarted(CharSequence text, int index) {
@@ -361,7 +375,6 @@ final class SelectionActionModeHelper {
                 }
                 mWordIterator.setText(mText);
                 mStartIndex = index;
-                mEndIndex = mWordIterator.following(index);
                 mDelegate.logEvent(SelectionEvent.selectionStarted(0));
             } catch (Exception e) {
                 // Avoid crashes due to logging.
@@ -424,12 +437,15 @@ final class SelectionActionModeHelper {
             } else if (start < mStartIndex) {
                 wordIndices[0] = -countWordsForward(start);
             } else {  // start > mStartIndex
-                if (mStartIndex < start && start < mEndIndex) {
-                    // If the new selection did not move past the original word,
-                    // assume it has not moved.
-                    wordIndices[0] = 0;
-                } else {
-                    wordIndices[0] = countWordsBackward(start);
+                wordIndices[0] = countWordsBackward(start);
+
+                // For the selection start index, avoid counting a partial word backwards.
+                if (!mWordIterator.isBoundary(start)
+                        && !isWhitespace(
+                                mWordIterator.preceding(start),
+                                mWordIterator.following(start))) {
+                    // We counted a partial word. Remove it.
+                    wordIndices[0]--;
                 }
             }
 
@@ -473,7 +489,7 @@ final class SelectionActionModeHelper {
         }
 
         private boolean isWhitespace(int start, int end) {
-            return mText.substring(start, end).trim().isEmpty();
+            return PATTERN_WHITESPACE.matcher(mText.substring(start, end)).matches();
         }
     }
 

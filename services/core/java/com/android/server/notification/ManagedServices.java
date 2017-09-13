@@ -99,6 +99,7 @@ abstract public class ManagedServices {
     protected final Object mMutex;
     private final UserProfiles mUserProfiles;
     private final IPackageManager mPm;
+    private final UserManager mUm;
     private final Config mConfig;
 
     // contains connections to all connected services, including app services
@@ -138,6 +139,7 @@ abstract public class ManagedServices {
         mPm = pm;
         mConfig = getConfig();
         mApprovalLevel = APPROVAL_BY_COMPONENT;
+        mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
     }
 
     abstract protected Config getConfig();
@@ -296,7 +298,9 @@ abstract public class ManagedServices {
                     final int userId = XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
                     final boolean isPrimary =
                             XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
-                    addApprovedList(approved, userId, isPrimary);
+                    if (mUm.getUserInfo(userId) != null) {
+                        addApprovedList(approved, userId, isPrimary);
+                    }
                     mUseXml = true;
                 }
             }
@@ -494,7 +498,7 @@ abstract public class ManagedServices {
             return info;
         }
         throw new SecurityException("Disallowed call from unknown " + getCaption() + ": "
-                + service);
+                + service + " " + service.getClass());
     }
 
     public void unregisterService(IInterface service, int userid) {

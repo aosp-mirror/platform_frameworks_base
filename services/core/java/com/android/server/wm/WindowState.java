@@ -1484,7 +1484,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // TODO: Another visibility method that was added late in the release to minimize risk.
     @Override
     public boolean canAffectSystemUiFlags() {
-        final boolean shown = mWinAnimator.getShown() && mWinAnimator.mShownAlpha > 0f;
+        final boolean shown = mWinAnimator.getShown();
 
         // We only consider the app to be exiting when the animation has started. After the app
         // transition is executed the windows are marked exiting before the new windows have been
@@ -1498,7 +1498,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final boolean exiting = exitingSelf || mDestroying || appExiting;
         final boolean translucent = mAttrs.alpha == 0.0f;
-        return shown && !exiting && !translucent;
+
+        // If we are entering with a dummy animation, avoid affecting SystemUI flags until the
+        // transition is starting.
+        final boolean enteringWithDummyAnimation =
+                mWinAnimator.isDummyAnimation() && mWinAnimator.mShownAlpha == 0f;
+        return shown && !exiting && !translucent && !enteringWithDummyAnimation;
     }
 
     /**

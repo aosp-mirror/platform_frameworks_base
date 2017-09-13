@@ -53,8 +53,6 @@ protected:
     virtual ~JHwParcel();
 
 private:
-    jobject mObject;
-
     hardware::Parcel *mParcel;
     bool mOwnsParcel;
 

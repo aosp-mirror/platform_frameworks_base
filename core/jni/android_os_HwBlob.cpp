@@ -83,12 +83,6 @@ JHwBlob::JHwBlob(JNIEnv *env, jobject thiz, size_t size)
       mSize(size),
       mOwnsBuffer(true),
       mHandle(0) {
-    jclass clazz = env->GetObjectClass(thiz);
-    CHECK(clazz != NULL);
-
-    mClass = (jclass)env->NewGlobalRef(clazz);
-    mObject = env->NewWeakGlobalRef(thiz);
-
     if (size > 0) {
         mBuffer = malloc(size);
     }
@@ -99,14 +93,6 @@ JHwBlob::~JHwBlob() {
         free(mBuffer);
         mBuffer = nullptr;
     }
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-    env->DeleteWeakGlobalRef(mObject);
-    mObject = NULL;
-
-    env->DeleteGlobalRef(mClass);
-    mClass = NULL;
 }
 
 void JHwBlob::setTo(const void *ptr, size_t handle) {
