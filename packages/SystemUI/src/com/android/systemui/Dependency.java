@@ -348,7 +348,8 @@ public class Dependency extends SystemUI {
         @SuppressWarnings("unchecked")
         DependencyProvider<T> provider = mProviders.get(cls);
         if (provider == null) {
-            throw new IllegalArgumentException("Unsupported dependency " + cls);
+            throw new IllegalArgumentException("Unsupported dependency " + cls
+                    + ". " + mProviders.size() + " providers known.");
         }
         return provider.createDependency();
     }
