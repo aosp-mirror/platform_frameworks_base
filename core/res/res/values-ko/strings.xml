@@ -265,7 +265,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS 메시지 전송 및 보기"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"저장용량"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일 액세스"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오 녹음"</string>
