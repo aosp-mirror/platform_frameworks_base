@@ -16,6 +16,7 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
@@ -37,7 +38,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
- * A Parcelable class describing a pending Cell-Broadcast download request
+ * Describes a request to download files over cell-broadcast. Instances of this class should be
+ * created by the app when requesting a download, and instances of this class will be passed back
+ * to the app when the middleware updates the status of the download.
  * @hide
  */
 public class DownloadRequest implements Parcelable {
@@ -91,8 +94,8 @@ public class DownloadRequest implements Parcelable {
         /**
          * Set the service ID for the download request. For use by the middleware only.
          * @hide
-         * TODO: systemapi
          */
+        //@SystemApi
         public Builder setServiceId(String serviceId) {
             fileServiceId = serviceId;
             return this;
@@ -159,9 +162,9 @@ public class DownloadRequest implements Parcelable {
          * @param data A byte array, the contents of which should have been originally obtained
          *             from {@link DownloadRequest#getOpaqueData()}.
          * @return
-         * TODO: systemapi
          * @hide
          */
+        //@SystemApi
         public Builder setOpaqueData(byte[] data) {
             try {
                 ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(data));
@@ -287,8 +290,8 @@ public class DownloadRequest implements Parcelable {
      * {@link Builder#setOpaqueData(byte[])}.
      * @return A byte array of opaque data to persist.
      * @hide
-     * TODO: systemapi
      */
+    //@SystemApi
     public byte[] getOpaqueData() {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

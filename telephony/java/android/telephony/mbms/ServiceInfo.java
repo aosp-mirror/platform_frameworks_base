@@ -31,7 +31,7 @@ import java.util.Set;
 
 /**
  * Describes a cell-broadcast service. This class should not be instantiated directly -- use
- * {@link StreamingServiceInfo} or FileServiceInfo TODO: add link once that's unhidden
+ * {@link StreamingServiceInfo} or TODO link FileServiceInfo
  */
 public class ServiceInfo {
     // arbitrary limit on the number of locale -> name pairs we support

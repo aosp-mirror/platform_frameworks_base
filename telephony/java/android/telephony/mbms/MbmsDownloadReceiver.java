@@ -16,6 +16,7 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,7 +26,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.MbmsDownloadManager;
-import android.telephony.mbms.vendor.VendorIntents;
+import android.telephony.mbms.vendor.VendorUtils;
 import android.util.Log;
 
 import java.io.File;
@@ -42,45 +43,66 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
+ * The {@link BroadcastReceiver} responsible for handling intents sent from the middleware. Apps
+ * that wish to download using MBMS APIs should declare this class in their AndroidManifest.xml as
+ * follows:
+<pre>{@code
+<receiver
+    android:name="android.telephony.mbms.MbmsDownloadReceiver"
+    android:permission="android.permission.SEND_EMBMS_INTENTS"
+    android:enabled="true"
+    android:exported="true">
+</receiver>}</pre>
  * @hide
  */
 public class MbmsDownloadReceiver extends BroadcastReceiver {
+    /** @hide */
     public static final String DOWNLOAD_TOKEN_SUFFIX = ".download_token";
+    /** @hide */
     public static final String MBMS_FILE_PROVIDER_META_DATA_KEY = "mbms-file-provider-authority";
 
     /**
-     * TODO: @SystemApi all these result codes
      * Indicates that the requested operation completed without error.
+     * @hide
      */
+    //@SystemApi
     public static final int RESULT_OK = 0;
 
     /**
      * Indicates that the intent sent had an invalid action. This will be the result if
      * {@link Intent#getAction()} returns anything other than
-     * {@link VendorIntents#ACTION_DOWNLOAD_RESULT_INTERNAL},
-     * {@link VendorIntents#ACTION_FILE_DESCRIPTOR_REQUEST}, or
-     * {@link VendorIntents#ACTION_CLEANUP}.
+     * {@link VendorUtils#ACTION_DOWNLOAD_RESULT_INTERNAL},
+     * {@link VendorUtils#ACTION_FILE_DESCRIPTOR_REQUEST}, or
+     * {@link VendorUtils#ACTION_CLEANUP}.
      * This is a fatal result code and no result extras should be expected.
+     * @hide
      */
+    //@SystemApi
     public static final int RESULT_INVALID_ACTION = 1;
 
     /**
      * Indicates that the intent was missing some required extras.
      * This is a fatal result code and no result extras should be expected.
+     * @hide
      */
+    //@SystemApi
     public static final int RESULT_MALFORMED_INTENT = 2;
 
     /**
-     * Indicates that the supplied value for {@link VendorIntents#EXTRA_TEMP_FILE_ROOT}
+     * Indicates that the supplied value for {@link VendorUtils#EXTRA_TEMP_FILE_ROOT}
      * does not match what the app has stored.
      * This is a fatal result code and no result extras should be expected.
+     * @hide
      */
+    //@SystemApi
     public static final int RESULT_BAD_TEMP_FILE_ROOT = 3;
 
     /**
      * Indicates that the manager was unable to move the completed download to its final location.
      * This is a fatal result code and no result extras should be expected.
+     * @hide
      */
+    //@SystemApi
     public static final int RESULT_DOWNLOAD_FINALIZATION_ERROR = 4;
 
     /**
@@ -88,35 +110,37 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * descriptors.
      * This is a non-fatal result code -- some file descriptors may still be generated, but there
      * is no guarantee that they will be the same number as requested.
+     * @hide
      */
+    //@SystemApi
     public static final int RESULT_TEMP_FILE_GENERATION_ERROR = 5;
 
     private static final String LOG_TAG = "MbmsDownloadReceiver";
     private static final String TEMP_FILE_SUFFIX = ".embms.temp";
     private static final int MAX_TEMP_FILE_RETRIES = 5;
 
-
     private String mFileProviderAuthorityCache = null;
     private String mMiddlewarePackageNameCache = null;
 
+    /** @hide */
     @Override
     public void onReceive(Context context, Intent intent) {
         if (!verifyIntentContents(context, intent)) {
             setResultCode(RESULT_MALFORMED_INTENT);
             return;
         }
-        if (!Objects.equals(intent.getStringExtra(VendorIntents.EXTRA_TEMP_FILE_ROOT),
+        if (!Objects.equals(intent.getStringExtra(VendorUtils.EXTRA_TEMP_FILE_ROOT),
                 MbmsTempFileProvider.getEmbmsTempFileDir(context).getPath())) {
             setResultCode(RESULT_BAD_TEMP_FILE_ROOT);
             return;
         }
 
-        if (VendorIntents.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
+        if (VendorUtils.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
             moveDownloadedFile(context, intent);
             cleanupPostMove(context, intent);
-        } else if (VendorIntents.ACTION_FILE_DESCRIPTOR_REQUEST.equals(intent.getAction())) {
+        } else if (VendorUtils.ACTION_FILE_DESCRIPTOR_REQUEST.equals(intent.getAction())) {
             generateTempFiles(context, intent);
-        } else if (VendorIntents.ACTION_CLEANUP.equals(intent.getAction())) {
+        } else if (VendorUtils.ACTION_CLEANUP.equals(intent.getAction())) {
             cleanupTempFiles(context, intent);
         } else {
             setResultCode(RESULT_INVALID_ACTION);
@@ -124,16 +148,16 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private boolean verifyIntentContents(Context context, Intent intent) {
-        if (VendorIntents.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
+        if (VendorUtils.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
             if (!intent.hasExtra(MbmsDownloadManager.EXTRA_RESULT)) {
                 Log.w(LOG_TAG, "Download result did not include a result code. Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorIntents.EXTRA_REQUEST)) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_REQUEST)) {
                 Log.w(LOG_TAG, "Download result did not include the associated request. Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorIntents.EXTRA_TEMP_FILE_ROOT)) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_TEMP_FILE_ROOT)) {
                 Log.w(LOG_TAG, "Download result did not include the temp file root. Ignoring.");
                 return false;
             }
@@ -142,12 +166,12 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                         "Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorIntents.EXTRA_FINAL_URI)) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_FINAL_URI)) {
                 Log.w(LOG_TAG, "Download result did not include the path to the final " +
                         "temp file. Ignoring.");
                 return false;
             }
-            DownloadRequest request = intent.getParcelableExtra(VendorIntents.EXTRA_REQUEST);
+            DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
             String expectedTokenFileName = request.getHash() + DOWNLOAD_TOKEN_SUFFIX;
             File expectedTokenFile = new File(
                     MbmsUtils.getEmbmsTempFileDirForService(context, request.getFileServiceId()),
@@ -157,27 +181,27 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                         "Expected " + expectedTokenFile);
                 return false;
             }
-        } else if (VendorIntents.ACTION_FILE_DESCRIPTOR_REQUEST.equals(intent.getAction())) {
-            if (!intent.hasExtra(VendorIntents.EXTRA_SERVICE_INFO)) {
-                Log.w(LOG_TAG, "Temp file request did not include the associated service info." +
+        } else if (VendorUtils.ACTION_FILE_DESCRIPTOR_REQUEST.equals(intent.getAction())) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_SERVICE_ID)) {
+                Log.w(LOG_TAG, "Temp file request did not include the associated service id." +
                         " Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorIntents.EXTRA_TEMP_FILE_ROOT)) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_TEMP_FILE_ROOT)) {
                 Log.w(LOG_TAG, "Download result did not include the temp file root. Ignoring.");
                 return false;
             }
-        } else if (VendorIntents.ACTION_CLEANUP.equals(intent.getAction())) {
-            if (!intent.hasExtra(VendorIntents.EXTRA_SERVICE_INFO)) {
-                Log.w(LOG_TAG, "Cleanup request did not include the associated service info." +
+        } else if (VendorUtils.ACTION_CLEANUP.equals(intent.getAction())) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_SERVICE_ID)) {
+                Log.w(LOG_TAG, "Cleanup request did not include the associated service id." +
                         " Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorIntents.EXTRA_TEMP_FILE_ROOT)) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_TEMP_FILE_ROOT)) {
                 Log.w(LOG_TAG, "Cleanup request did not include the temp file root. Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorIntents.EXTRA_TEMP_FILES_IN_USE)) {
+            if (!intent.hasExtra(VendorUtils.EXTRA_TEMP_FILES_IN_USE)) {
                 Log.w(LOG_TAG, "Cleanup request did not include the list of temp files in use. " +
                         "Ignoring.");
                 return false;
@@ -187,7 +211,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void moveDownloadedFile(Context context, Intent intent) {
-        DownloadRequest request = intent.getParcelableExtra(VendorIntents.EXTRA_REQUEST);
+        DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
         Intent intentForApp = request.getIntentForApp();
 
         int result = intent.getIntExtra(MbmsDownloadManager.EXTRA_RESULT,
@@ -201,7 +225,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         Uri destinationUri = request.getDestinationUri();
-        Uri finalTempFile = intent.getParcelableExtra(VendorIntents.EXTRA_FINAL_URI);
+        Uri finalTempFile = intent.getParcelableExtra(VendorUtils.EXTRA_FINAL_URI);
         if (!verifyTempFilePath(context, request.getFileServiceId(), finalTempFile)) {
             Log.w(LOG_TAG, "Download result specified an invalid temp file " + finalTempFile);
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
@@ -226,13 +250,13 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void cleanupPostMove(Context context, Intent intent) {
-        DownloadRequest request = intent.getParcelableExtra(VendorIntents.EXTRA_REQUEST);
+        DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
         if (request == null) {
             Log.w(LOG_TAG, "Intent does not include a DownloadRequest. Ignoring.");
             return;
         }
 
-        List<Uri> tempFiles = intent.getParcelableExtra(VendorIntents.EXTRA_TEMP_LIST);
+        List<Uri> tempFiles = intent.getParcelableExtra(VendorUtils.EXTRA_TEMP_LIST);
         if (tempFiles == null) {
             return;
         }
@@ -246,16 +270,15 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void generateTempFiles(Context context, Intent intent) {
-        FileServiceInfo serviceInfo =
-                intent.getParcelableExtra(VendorIntents.EXTRA_SERVICE_INFO);
-        if (serviceInfo == null) {
-            Log.w(LOG_TAG, "Temp file request did not include the associated service info. " +
+        String serviceId = intent.getStringExtra(VendorUtils.EXTRA_SERVICE_ID);
+        if (serviceId == null) {
+            Log.w(LOG_TAG, "Temp file request did not include the associated service id. " +
                     "Ignoring.");
             setResultCode(RESULT_MALFORMED_INTENT);
             return;
         }
-        int fdCount = intent.getIntExtra(VendorIntents.EXTRA_FD_COUNT, 0);
-        List<Uri> pausedList = intent.getParcelableExtra(VendorIntents.EXTRA_PAUSED_LIST);
+        int fdCount = intent.getIntExtra(VendorUtils.EXTRA_FD_COUNT, 0);
+        List<Uri> pausedList = intent.getParcelableExtra(VendorUtils.EXTRA_PAUSED_LIST);
 
         if (fdCount == 0 && (pausedList == null || pausedList.size() == 0)) {
             Log.i(LOG_TAG, "No temp files actually requested. Ending.");
@@ -265,22 +288,20 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         ArrayList<UriPathPair> freshTempFiles =
-                generateFreshTempFiles(context, serviceInfo, fdCount);
+                generateFreshTempFiles(context, serviceId, fdCount);
         ArrayList<UriPathPair> pausedFiles =
-                generateUrisForPausedFiles(context, serviceInfo, pausedList);
+                generateUrisForPausedFiles(context, serviceId, pausedList);
 
         Bundle result = new Bundle();
-        result.putParcelableArrayList(VendorIntents.EXTRA_FREE_URI_LIST, freshTempFiles);
-        result.putParcelableArrayList(VendorIntents.EXTRA_PAUSED_URI_LIST, pausedFiles);
+        result.putParcelableArrayList(VendorUtils.EXTRA_FREE_URI_LIST, freshTempFiles);
+        result.putParcelableArrayList(VendorUtils.EXTRA_PAUSED_URI_LIST, pausedFiles);
         setResultCode(RESULT_OK);
         setResultExtras(result);
     }
 
-    private ArrayList<UriPathPair> generateFreshTempFiles(Context context,
-            FileServiceInfo serviceInfo,
+    private ArrayList<UriPathPair> generateFreshTempFiles(Context context, String serviceId,
             int freshFdCount) {
-        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
-                serviceInfo.getServiceId());
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceId);
         if (!tempFileDir.exists()) {
             tempFileDir.mkdirs();
         }
@@ -324,14 +345,14 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private ArrayList<UriPathPair> generateUrisForPausedFiles(Context context,
-            FileServiceInfo serviceInfo, List<Uri> pausedFiles) {
+            String serviceId, List<Uri> pausedFiles) {
         if (pausedFiles == null) {
             return new ArrayList<>(0);
         }
         ArrayList<UriPathPair> result = new ArrayList<>(pausedFiles.size());
 
         for (Uri fileUri : pausedFiles) {
-            if (!verifyTempFilePath(context, serviceInfo.getServiceId(), fileUri)) {
+            if (!verifyTempFilePath(context, serviceId, fileUri)) {
                 Log.w(LOG_TAG, "Supplied file " + fileUri + " is not a valid temp file to resume");
                 setResultCode(RESULT_TEMP_FILE_GENERATION_ERROR);
                 continue;
@@ -353,12 +374,10 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void cleanupTempFiles(Context context, Intent intent) {
-        FileServiceInfo serviceInfo =
-                intent.getParcelableExtra(VendorIntents.EXTRA_SERVICE_INFO);
-        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
-                serviceInfo.getServiceId());
+        String serviceId = intent.getStringExtra(VendorUtils.EXTRA_SERVICE_ID);
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceId);
         final List<Uri> filesInUse =
-                intent.getParcelableArrayListExtra(VendorIntents.EXTRA_TEMP_FILES_IN_USE);
+                intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_FILES_IN_USE);
         File[] filesToDelete = tempFileDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
