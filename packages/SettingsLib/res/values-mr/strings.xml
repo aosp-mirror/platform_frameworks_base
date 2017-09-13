@@ -66,7 +66,7 @@
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"मीडिया ऑडिओ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"फोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फाइल स्थानांतरण"</string>
-    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"इनपुट डीव्हाइस"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"इनपुट डिव्हाइस"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"इंटरनेट अॅक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क सामायिकरण"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"संपर्क सामायिकरणासाठी वापरा"</string>
@@ -182,7 +182,7 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM अनलॉक करणे"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"बूटलोडर अनलॉक करण्यासाठी अनुमती द्या"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM अनलॉक करण्यास अनुमती द्यायची?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"चेतावणी: हे सेटिंग चालू असताना या डीव्हाइस वर डीव्हाइस संरक्षण वैशिष्ट्ये काम करणार नाहीत."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"चेतावणी: हे सेटिंग चालू असताना या डिव्हाइस वर डिव्हाइस संरक्षण वैशिष्ट्ये काम करणार नाहीत."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"बनावट स्थान अॅप निवडा"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"कोणताही बनावट स्थान अॅप सेट केला नाही"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"बनावट स्थान अॅप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -227,10 +227,10 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"जरी वाय-फाय चालू असले तरीही, मोबाईल डेटा नेहमी चालू ठेवा (नेटवर्क जलदरीत्या स्विच करण्यासाठी)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"उपलब्ध असल्यास टेदरिंग हार्डवेअर प्रवेग वापरा"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB डीबग करण्यास अनुमती द्यायची?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB डीबग करण्याचा हेतू फक्त विकास उद्देशांसाठी आहे. याचा वापर तुमचा कॉंप्युटर आणि तुमचे डीव्हाइस यांच्या दरम्यान डेटा कॉपी करण्यासाठी करा, सूचनेशिवाय तुमच्या डीव्हाइस वर अॅप्स इंस्टॉल करा आणि लॉग डेटा वाचा."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB डीबग करण्याचा हेतू फक्त विकास उद्देशांसाठी आहे. याचा वापर तुमचा कॉंप्युटर आणि तुमचे डिव्हाइस यांच्या दरम्यान डेटा कॉपी करण्यासाठी करा, सूचनेशिवाय तुमच्या डिव्हाइस वर अॅप्स इंस्टॉल करा आणि लॉग डेटा वाचा."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"आपण पूर्वी अॉथोराइझ केलेल्या सर्व संगणकांवरुन USB डीबग करण्यासाठी अॅक्सेस रीव्होक करायचा?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डीव्हाइस आणि त्यावरील अॅप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील अॅप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वर अॅप्स पडताळून पाहा"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
@@ -386,7 +386,7 @@
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"पुढील"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"संकेतशब्द आवश्यक"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"सक्रिय इनपुट पद्धती"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टीम भाषा वापरा"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम भाषा वापरा"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> साठी सेटिंग्ज उघडण्यात अयशस्वी"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ही इनपुट पद्धत संकेतशब्द आणि क्रेडिट कार्ड नंबर यासह, आपण टाइप करता तो सर्व मजकूर संकलित करण्यात सक्षम होऊ शकते. ही <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अॅपवरून येते. ही इनपुट पद्धत वापरायची?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"टीप: रीबूट केल्यानंतर, तुम्ही आपला फोन अनलॉक करे पर्यंत हे अॅप सुरू होऊ शकत नाही"</string>
