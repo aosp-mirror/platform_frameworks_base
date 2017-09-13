@@ -23,8 +23,8 @@
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Harap tunggu..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Laporan bug akan segera muncul di ponsel"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Ketuk untuk membagikan laporan bug"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa tangkapan layar atau menunggu tangkapan layar selesai"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa tangkapan layar atau menunggu tangkapan layar selesai"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Laporan bug berisi data dari berbagai file log sistem, yang mungkin mencakup data yang dianggap sensitif (seperti data penggunaan aplikasi dan lokasi). Hanya bagikan laporan bug dengan aplikasi dan orang yang Anda percaya."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Jangan tampilkan lagi"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Laporan bug"</string>
@@ -32,9 +32,9 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Tidak dapat menambahkan detail laporan bug ke file zip"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"tanpa nama"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detail"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Tangkapan layar"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Tangkapan layar berhasil diambil."</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Tangkapan layar tidak dapat diambil."</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Screenshot"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Screenshot berhasil diambil."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Screenshot tidak dapat diambil."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detail laporan bug <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Nama file"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"Judul bug"</string>
