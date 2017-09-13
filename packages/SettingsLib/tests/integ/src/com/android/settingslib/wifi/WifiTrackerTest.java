@@ -106,14 +106,29 @@ public class WifiTrackerTest {
     private static final byte SCORE_2 = 15;
     private static final int BADGE_2 = AccessPoint.Speed.FAST;
 
-    private static final int CONNECTED_NETWORK_ID = 123;
+    // TODO(b/65594609): Convert mutable Data objects to instance variables / builder pattern
+    private static final int NETWORK_ID_1 = 123;
     private static final int CONNECTED_RSSI = -50;
     private static final WifiInfo CONNECTED_AP_1_INFO = new WifiInfo();
     static {
         CONNECTED_AP_1_INFO.setSSID(WifiSsid.createFromAsciiEncoded(SSID_1));
         CONNECTED_AP_1_INFO.setBSSID(BSSID_1);
-        CONNECTED_AP_1_INFO.setNetworkId(CONNECTED_NETWORK_ID);
+        CONNECTED_AP_1_INFO.setNetworkId(NETWORK_ID_1);
         CONNECTED_AP_1_INFO.setRssi(CONNECTED_RSSI);
+    }
+    private static final WifiConfiguration CONFIGURATION_1 = new WifiConfiguration();
+    static {
+        CONFIGURATION_1.SSID = SSID_1;
+        CONFIGURATION_1.BSSID = BSSID_1;
+        CONFIGURATION_1.networkId = NETWORK_ID_1;
+    }
+
+    private static final int NETWORK_ID_2 = 2;
+    private static final WifiConfiguration CONFIGURATION_2 = new WifiConfiguration();
+    static {
+        CONFIGURATION_2.SSID = SSID_2;
+        CONFIGURATION_2.BSSID = BSSID_2;
+        CONFIGURATION_2.networkId = NETWORK_ID_2;
     }
 
     @Captor ArgumentCaptor<WifiNetworkScoreCache> mScoreCacheCaptor;
@@ -160,6 +175,8 @@ public class WifiTrackerTest {
         when(mockWifiManager.isWifiEnabled()).thenReturn(true);
         when(mockWifiManager.getScanResults())
                 .thenReturn(Arrays.asList(buildScanResult1(), buildScanResult2()));
+        when(mockWifiManager.getConfiguredNetworks())
+                .thenReturn(Arrays.asList(CONFIGURATION_1, CONFIGURATION_2));
 
 
         when(mockCurve1.lookupScore(RSSI_1)).thenReturn(SCORE_1);
@@ -331,8 +348,7 @@ public class WifiTrackerTest {
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = SSID_1;
         configuration.BSSID = BSSID_1;
-        configuration.networkId = CONNECTED_NETWORK_ID;
-        when(mockWifiManager.getConfiguredNetworks()).thenReturn(Arrays.asList(configuration));
+        configuration.networkId = NETWORK_ID_1;
 
         NetworkInfo networkInfo = new NetworkInfo(
                 ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
@@ -361,6 +377,24 @@ public class WifiTrackerTest {
         });
         assertTrue("Latch timed out while waiting for MainHandler",
                 mainLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+    }
+
+    private void switchToNetwork2(WifiTracker tracker) throws InterruptedException {
+        NetworkInfo networkInfo = new NetworkInfo(
+                ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "connecting", "test");
+
+        WifiInfo info = new WifiInfo();
+        info.setSSID(WifiSsid.createFromAsciiEncoded(SSID_2));
+        info.setBSSID(BSSID_2);
+        info.setRssi(CONNECTED_RSSI);
+        info.setNetworkId(NETWORK_ID_2);
+        when(mockWifiManager.getConnectionInfo()).thenReturn(info);
+
+        Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, networkInfo);
+        tracker.mReceiver.onReceive(mContext, intent);
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
     }
 
     @Test
@@ -720,12 +754,6 @@ public class WifiTrackerTest {
 
         when(mockWifiManager.getConnectionInfo()).thenReturn(CONNECTED_AP_1_INFO);
 
-        WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = SSID_1;
-        configuration.BSSID = BSSID_1;
-        configuration.networkId = CONNECTED_NETWORK_ID;
-        when(mockWifiManager.getConfiguredNetworks()).thenReturn(Arrays.asList(configuration));
-
         NetworkInfo networkInfo = new NetworkInfo(
                 ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
         networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "connected", "test");
@@ -878,5 +906,18 @@ public class WifiTrackerTest {
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
         assertThat(tracker.isConnected()).isFalse();
         verify(mockWifiListener, times(2)).onConnectedChanged();
+    }
+
+    @Test
+    public void updateNetworkInfoWithNewConnectedNetwork_switchesNetworks() throws Exception {
+        WifiTracker tracker = createTrackerWithScanResultsAndAccessPoint1Connected();
+
+        switchToNetwork2(tracker);
+
+        List<AccessPoint> aps = tracker.getAccessPoints();
+        assertThat(aps.get(0).getSsidStr()).isEqualTo(SSID_2);
+
+        assertThat(aps.get(0).isReachable()).isTrue();
+        assertThat(aps.get(1).isReachable()).isTrue();
     }
 }

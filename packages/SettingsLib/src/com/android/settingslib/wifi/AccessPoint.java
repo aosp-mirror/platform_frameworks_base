@@ -134,7 +134,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private final Map<String, TimestampedScoredNetwork> mScoredNetworkCache = new HashMap<>();
 
     /** Maximum age of scan results to hold onto while actively scanning. **/
-    private static final long MAX_SCAN_RESULT_AGE_MILLIS = 15000;
+    private static final long MAX_SCAN_RESULT_AGE_MILLIS = 25000;
 
     static final String KEY_NETWORKINFO = "key_networkinfo";
     static final String KEY_WIFIINFO = "key_wifiinfo";
@@ -423,6 +423,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
             builder.append(",speed=").append(mSpeed);
         }
         builder.append(",metered=").append(isMetered());
+
+        if (WifiTracker.sVerboseLogging) {
+            builder.append(",rssi=").append(mRssi);
+            builder.append(",scan cache size=").append(mScanResultCache.size());
+        }
 
         return builder.append(')').toString();
     }
@@ -933,6 +938,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         evictOldScanResults();
 
         // TODO: sort list by RSSI or age
+        long nowMs = SystemClock.elapsedRealtime();
         for (ScanResult result : mScanResultCache.values()) {
             if (result.frequency >= LOWER_FREQ_5GHZ
                     && result.frequency <= HIGHER_FREQ_5GHZ) {
@@ -943,7 +949,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     maxRssi5 = result.level;
                 }
                 if (num5 <= maxDisplayedScans) {
-                    scans5GHz.append(verboseScanResultSummary(result, bssid));
+                    scans5GHz.append(verboseScanResultSummary(result, bssid, nowMs));
                 }
             } else if (result.frequency >= LOWER_FREQ_24GHZ
                     && result.frequency <= HIGHER_FREQ_24GHZ) {
@@ -954,7 +960,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     maxRssi24 = result.level;
                 }
                 if (num24 <= maxDisplayedScans) {
-                    scans24GHz.append(verboseScanResultSummary(result, bssid));
+                    scans24GHz.append(verboseScanResultSummary(result, bssid, nowMs));
                 }
             }
         }
@@ -982,7 +988,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     @VisibleForTesting
-    /* package */ String verboseScanResultSummary(ScanResult result, String bssid) {
+    /* package */ String verboseScanResultSummary(ScanResult result, String bssid, long nowMs) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(" \n{").append(result.BSSID);
         if (result.BSSID.equals(bssid)) {
@@ -995,6 +1001,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             stringBuilder.append(",")
                     .append(getSpeedLabel(speed));
         }
+        int ageSeconds = (int) (nowMs - result.timestamp / 1000) / 1000;
+        stringBuilder.append(",").append(ageSeconds).append("s");
         stringBuilder.append("}");
         return stringBuilder.toString();
     }
@@ -1189,6 +1197,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /** Attempt to update the AccessPoint and return true if an update occurred. */
     public boolean update(
             @Nullable WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
+
         boolean updated = false;
         final int oldLevel = getLevel();
         if (info != null && isInfoForThisAccessPoint(config, info)) {
@@ -1220,6 +1229,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mAccessPointListener.onLevelChanged(this);
             }
         }
+
         return updated;
     }
 
