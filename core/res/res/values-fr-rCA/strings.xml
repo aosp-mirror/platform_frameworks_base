@@ -230,7 +230,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Paramètres"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Assist. vocale"</string>
-    <string name="global_action_lockdown" msgid="8751542514724332873">"Verrouiller"</string>
+    <!-- no translation found for global_action_lockdown (2277328351790053477) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Nouvelle notification"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Clavier virtuel"</string>
@@ -849,9 +850,9 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"espace"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"entrée"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"suppr"</string>
-    <string name="search_go" msgid="8298016669822141719">"Recherche"</string>
+    <string name="search_go" msgid="8298016669822141719">"Rechercher"</string>
     <string name="search_hint" msgid="1733947260773056054">"Recherche en cours..."</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"Recherche"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"Rechercher"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Requête de recherche"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Effacer la requête"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Envoyer la requête"</string>
@@ -1262,7 +1263,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Appuyer deux fois pour régler le zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Impossible d\'ajouter le widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Aller"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"Recherche"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"Rechercher"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Envoyer"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Suivante"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Terminé"</string>
