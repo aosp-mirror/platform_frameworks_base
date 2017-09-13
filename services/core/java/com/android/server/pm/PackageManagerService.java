@@ -22294,11 +22294,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         }
 
-        // If we did not grant default permissions, we preload from this the
-        // default permission exceptions lazily to ensure we don't hit the
-        // disk on a new user creation.
         if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
+            // If we did not grant default permissions, we preload from this the
+            // default permission exceptions lazily to ensure we don't hit the
+            // disk on a new user creation.
             mDefaultPermissionPolicy.scheduleReadDefaultPermissionExceptions();
+        } else {
+            // Since we granted default permissions above, we need an update
+            // pass to apply those changes.
+            synchronized (mPackages) {
+                updatePermissionsLPw(null, null, StorageManager.UUID_PRIVATE_INTERNAL,
+                        UPDATE_PERMISSIONS_ALL);
+            }
         }
 
         // Kick off any messages waiting for system ready

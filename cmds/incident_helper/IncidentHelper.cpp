@@ -61,6 +61,21 @@ SetTableField(::google::protobuf::Message* message, string field_name, string fi
 }
 
 // ================================================================================
+status_t NoopParser::Parse(const int in, const int out) const
+{
+    string content;
+    if (!ReadFdToString(in, &content)) {
+        fprintf(stderr, "[%s]Failed to read data from incidentd\n", this->name.string());
+        return -1;
+    }
+    if (!WriteStringToFd(content, out)) {
+        fprintf(stderr, "[%s]Failed to write data to incidentd\n", this->name.string());
+        return -1;
+    }
+    return NO_ERROR;
+}
+
+// ================================================================================
 status_t ReverseParser::Parse(const int in, const int out) const
 {
     string content;

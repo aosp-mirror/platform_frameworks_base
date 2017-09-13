@@ -40,6 +40,8 @@ struct ReportRequest : public virtual RefBase
     ReportRequest(const IncidentReportArgs& args,
             const sp<IIncidentReportStatusListener> &listener, int fd);
     virtual ~ReportRequest();
+
+    bool ok(); // returns true if the request is ok for write.
 };
 
 // ================================================================================
@@ -52,21 +54,16 @@ public:
     void add(const sp<ReportRequest>& request);
     void setMainFd(int fd);
 
-    // Write to all of the fds for the requests. If a write fails, it stops
-    // writing to that fd and returns NO_ERROR. When we are out of fds to write
-    // to it returns an error.
-    status_t write(uint8_t const* buf, size_t size);
-
     typedef vector<sp<ReportRequest>>::iterator iterator;
 
     iterator begin() { return mRequests.begin(); }
     iterator end() { return mRequests.end(); }
 
+    int mainFd() { return mMainFd; }
     bool containsSection(int id);
 private:
     vector<sp<ReportRequest>> mRequests;
     IncidentReportArgs mSections;
-    int mWritableCount;
     int mMainFd;
 };
 

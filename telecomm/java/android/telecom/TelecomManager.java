@@ -1345,10 +1345,8 @@ public class TelecomManager {
 
     /**
      * Returns whether TTY is supported on this device.
-     *
-     * @hide
      */
-    @SystemApi
+
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE

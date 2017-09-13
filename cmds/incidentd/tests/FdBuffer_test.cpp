@@ -15,10 +15,11 @@
 #define LOG_TAG "incidentd"
 
 #include "FdBuffer.h"
+#include "io_util.h"
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
-#include <gmock/gmock.h>
+#include <fcntl.h>
 #include <gtest/gtest.h>
 #include <signal.h>
 #include <string.h>
@@ -30,10 +31,7 @@ const std::string HEAD = "[OK]";
 
 using namespace android;
 using namespace android::base;
-using ::testing::StrEq;
 using ::testing::Test;
-using ::testing::internal::CaptureStdout;
-using ::testing::internal::GetCapturedStdout;
 
 class FdBufferTest : public Test {
 public:
@@ -50,12 +48,13 @@ public:
     }
 
     void AssertBufferContent(const char* expected) {
-        ReportRequestSet requests;
-        requests.setMainFd(STDOUT_FILENO);
-
-        CaptureStdout();
-        ASSERT_EQ(NO_ERROR, buffer.write(&requests));
-        EXPECT_THAT(GetCapturedStdout(), StrEq(expected));
+        int i=0;
+        FdBuffer::iterator it = buffer.begin();
+        while (expected[i] != '\0') {
+            ASSERT_EQ(*it, expected[i++]);
+            it++;
+        }
+        ASSERT_EQ(it, buffer.end());
     }
 
     bool DoDataStream(int rFd, int wFd) {
@@ -97,6 +96,16 @@ TEST_F(FdBufferTest, IterateEmpty) {
     EXPECT_EQ(it, buffer.end());
     it += 1;
     EXPECT_TRUE(it.outOfBound());
+}
+
+TEST_F(FdBufferTest, IteratorSnapshot) {
+    FdBuffer::iterator it = buffer.begin();
+    it += 4;
+    FdBuffer::iterator snapshot = it.snapshot();
+    it += 5;
+    EXPECT_TRUE(snapshot != it);
+    EXPECT_EQ(it - snapshot, 5);
+    EXPECT_EQ(snapshot - it, -5);
 }
 
 TEST_F(FdBufferTest, ReadAndIterate) {
@@ -227,7 +236,7 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
 TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
     const std::string testFile = kTestDataPath + "morethan4MB.txt";
     size_t fourMB = (size_t) 4 * 1024 * 1024;
-    int fd = open(testFile.c_str(), O_RDONLY);
+    int fd = open(testFile.c_str(), O_RDONLY | O_CLOEXEC);
     ASSERT_NE(fd, -1);
     int pid = fork();
     ASSERT_TRUE(pid != -1);

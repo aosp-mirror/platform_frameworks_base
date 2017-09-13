@@ -17,7 +17,6 @@
 #define LOG_TAG "incidentd"
 
 #include "Reporter.h"
-#include "protobuf.h"
 
 #include "report_directory.h"
 #include "section_list.h"
@@ -38,20 +37,6 @@
 static const char* INCIDENT_DIRECTORY = "/data/misc/incidents/";
 
 // ================================================================================
-static status_t write_all(int fd, uint8_t const* buf, size_t size)
-{
-    while (size > 0) {
-        ssize_t amt = ::write(fd, buf, size);
-        if (amt < 0) {
-            return -errno;
-        }
-        size -= amt;
-        buf += amt;
-    }
-    return NO_ERROR;
-}
-
-// ================================================================================
 ReportRequest::ReportRequest(const IncidentReportArgs& a,
             const sp<IIncidentReportStatusListener> &l, int f)
     :args(a),
@@ -65,11 +50,16 @@ ReportRequest::~ReportRequest()
 {
 }
 
+bool
+ReportRequest::ok()
+{
+    return fd >= 0 && err == NO_ERROR;
+}
+
 // ================================================================================
 ReportRequestSet::ReportRequestSet()
     :mRequests(),
      mSections(),
-     mWritableCount(0),
      mMainFd(-1)
 {
 }
@@ -84,45 +74,12 @@ ReportRequestSet::add(const sp<ReportRequest>& request)
 {
     mRequests.push_back(request);
     mSections.merge(request->args);
-    mWritableCount++;
 }
 
 void
 ReportRequestSet::setMainFd(int fd)
 {
     mMainFd = fd;
-    mWritableCount++;
-}
-
-status_t
-ReportRequestSet::write(uint8_t const* buf, size_t size)
-{
-    status_t err = EBADF;
-
-    // The streaming ones
-    int const N = mRequests.size();
-    for (int i=N-1; i>=0; i--) {
-        sp<ReportRequest> request = mRequests[i];
-        if (request->fd >= 0 && request->err == NO_ERROR) {
-            err = write_all(request->fd, buf, size);
-            if (err != NO_ERROR) {
-                request->err = err;
-                mWritableCount--;
-            }
-        }
-    }
-
-    // The dropbox file
-    if (mMainFd >= 0) {
-        err = write_all(mMainFd, buf, size);
-        if (err != NO_ERROR) {
-            mMainFd = -1;
-            mWritableCount--;
-        }
-    }
-
-    // Return an error only when there are no FDs to write.
-    return mWritableCount > 0 ? NO_ERROR : err;
 }
 
 bool
@@ -164,6 +121,7 @@ Reporter::runReport()
     status_t err = NO_ERROR;
     bool needMainFd = false;
     int mainFd = -1;
+    HeaderSection headers;
 
     // See if we need the main file
     for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
@@ -176,7 +134,7 @@ Reporter::runReport()
         // Create the directory
         if (!isTest) err = create_directory(mIncidentDirectory);
         if (err != NO_ERROR) {
-            goto done;
+            goto DONE;
         }
 
         // If there are too many files in the directory (for whatever reason),
@@ -187,7 +145,7 @@ Reporter::runReport()
         // Open the file.
         err = create_file(&mainFd);
         if (err != NO_ERROR) {
-            goto done;
+            goto DONE;
         }
 
         // Add to the set
@@ -202,24 +160,7 @@ Reporter::runReport()
     }
 
     // Write the incident headers
-    for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
-        const sp<ReportRequest> request = (*it);
-        const vector<vector<int8_t>>& headers = request->args.headers();
-
-        for (vector<vector<int8_t>>::const_iterator buf=headers.begin(); buf!=headers.end();
-                buf++) {
-            int fd = request->fd >= 0 ? request->fd : mainFd;
-
-            uint8_t buffer[20];
-            uint8_t* p = write_length_delimited_tag_header(buffer, FIELD_ID_INCIDENT_HEADER,
-                    buf->size());
-            write_all(fd, buffer, p-buffer);
-
-            write_all(fd, (uint8_t const*)buf->data(), buf->size());
-            // If there was an error now, there will be an error later and we will remove
-            // it from the list then.
-        }
-    }
+    headers.Execute(&batch);
 
     // For each of the report fields, see if we need it, and if so, execute the command
     // and report to those that care that we're doing it.
@@ -240,7 +181,7 @@ Reporter::runReport()
             if (err != NO_ERROR) {
                 ALOGW("Incident section %s (%d) failed. Stopping report.",
                         (*section)->name.string(), id);
-                goto done;
+                goto DONE;
             }
 
             // Notify listener of starting
@@ -254,7 +195,7 @@ Reporter::runReport()
         }
     }
 
-done:
+DONE:
     // Close the file.
     if (mainFd >= 0) {
         close(mainFd);

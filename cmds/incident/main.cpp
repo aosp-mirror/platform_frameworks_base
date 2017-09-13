@@ -25,6 +25,7 @@
 #include <binder/IServiceManager.h>
 #include <utils/Looper.h>
 
+#include <cstring>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -144,6 +145,16 @@ find_section(const char* name)
 }
 
 // ================================================================================
+static int
+get_dest(const char* arg)
+{
+    if (strcmp(arg, "LOCAL") == 0) return 0;
+    if (strcmp(arg, "EXPLICIT") == 0) return 1;
+    if (strcmp(arg, "AUTOMATIC") == 0) return 2;
+    return -1; // return the default value
+}
+
+// ================================================================================
 static void
 usage(FILE* out)
 {
@@ -155,6 +166,7 @@ usage(FILE* out)
     fprintf(out, "  -b           (default) print the report to stdout (in proto format)\n");
     fprintf(out, "  -d           send the report into dropbox\n");
     fprintf(out, "  -l           list available sections\n");
+    fprintf(out, "  -p           privacy spec, LOCAL, EXPLICIT or AUTOMATIC\n");
     fprintf(out, "\n");
     fprintf(out, "  SECTION     the field numbers of the incident report fields to include\n");
     fprintf(out, "\n");
@@ -166,10 +178,11 @@ main(int argc, char** argv)
     Status status;
     IncidentReportArgs args;
     enum { DEST_DROPBOX, DEST_STDOUT } destination = DEST_STDOUT;
+    int dest = -1; // default
 
     // Parse the args
     int opt;
-    while ((opt = getopt(argc, argv, "bhdl")) != -1) {
+    while ((opt = getopt(argc, argv, "bhdlp:")) != -1) {
         switch (opt) {
             case 'h':
                 usage(stdout);
@@ -182,6 +195,9 @@ main(int argc, char** argv)
                 break;
             case 'd':
                 destination = DEST_DROPBOX;
+                break;
+            case 'p':
+                dest = get_dest(optarg);
                 break;
             default:
                 usage(stderr);
@@ -210,8 +226,7 @@ main(int argc, char** argv)
             }
         }
     }
-
-
+    args.setDest(dest);
 
     // Start the thread pool.
     sp<ProcessState> ps(ProcessState::self());

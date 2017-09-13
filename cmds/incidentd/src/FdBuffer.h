@@ -17,8 +17,6 @@
 #ifndef FD_BUFFER_H
 #define FD_BUFFER_H
 
-#include "Reporter.h"
-
 #include <utils/Errors.h>
 
 #include <vector>
@@ -55,7 +53,7 @@ public:
     /**
      * Whether we timed out.
      */
-    bool timedOut() { return mTimedOut; }
+    bool timedOut() const { return mTimedOut; }
 
     /**
      * If more than 4 MB is read, we truncate the data and return success.
@@ -65,23 +63,22 @@ public:
      * happens, truncated() will return true so it can be marked. If the data is
      * exactly 4 MB, truncated is still set. Sorry.
      */
-    bool truncated() { return mTruncated; }
+    bool truncated() const { return mTruncated; }
 
     /**
      * How much data was read.
      */
-    size_t size();
+    size_t size() const;
 
     /**
-     * [Deprecated] Write the data that we recorded to the fd given.
-     * TODO: remove it once the iterator api is working
+     * Flush all the data to given file descriptor;
      */
-    status_t write(ReportRequestSet* requests);
+    status_t flush(int fd) const;
 
     /**
      * How long the read took in milliseconds.
      */
-    int64_t durationMs() { return mFinishTime - mStartTime; }
+    int64_t durationMs() const { return mFinishTime - mStartTime; }
 
     /**
      * Read data stored in FdBuffer
@@ -89,30 +86,31 @@ public:
     class iterator;
     friend class iterator;
     class iterator : public std::iterator<std::random_access_iterator_tag, uint8_t> {
+    public:
+        iterator(const FdBuffer& buffer, ssize_t index, ssize_t offset);
+        iterator& operator=(iterator& other) const;
+        iterator& operator+(size_t offset);
+        iterator& operator+=(size_t offset);
+        iterator& operator++();
+        iterator operator++(int);
+        bool operator==(iterator other) const;
+        bool operator!=(iterator other) const;
+        int operator-(iterator other) const;
+        reference operator*() const;
+
+        // return the snapshot of the current iterator
+        iterator snapshot() const;
+        // how many bytes are read
+        size_t bytesRead() const;
+        // random access could make the iterator out of bound
+        bool outOfBound() const;
     private:
-        FdBuffer& mFdBuffer;
+        const FdBuffer& mFdBuffer;
         size_t mIndex;
         size_t mOffset;
-    public:
-        explicit iterator(FdBuffer& buffer, ssize_t index, ssize_t offset)
-                : mFdBuffer(buffer), mIndex(index), mOffset(offset) {}
-        iterator& operator=(iterator& other) { return other; }
-        iterator& operator+(size_t offset); // this is implemented in .cpp
-        iterator& operator+=(size_t offset) { return *this + offset; }
-        iterator& operator++() { return *this + 1; }
-        iterator operator++(int) { return *this + 1; }
-        bool operator==(iterator other) const {
-            return mIndex == other.mIndex && mOffset == other.mOffset;
-        }
-        bool operator!=(iterator other) const { return !(*this == other); }
-        reference operator*() const { return mFdBuffer.mBuffers[mIndex][mOffset]; }
-
-        // random access could make the iterator out of bound
-        size_t bytesRead();
-        bool outOfBound() { return bytesRead() > mFdBuffer.size(); };
     };
-    iterator begin() { return iterator(*this, 0, 0); }
-    iterator end();
+    iterator begin() const;
+    iterator end() const;
 
 private:
     vector<uint8_t*> mBuffers;
@@ -122,20 +120,5 @@ private:
     bool mTimedOut;
     bool mTruncated;
 };
-
-class Fpipe {
-public:
-    Fpipe() {}
-    bool close() { return !(::close(mFds[0]) || ::close(mFds[1])); }
-    ~Fpipe() { close(); }
-
-    inline bool init() { return pipe(mFds) != -1; }
-    inline int readFd() const { return mFds[0]; }
-    inline int writeFd() const { return mFds[1]; }
-
-private:
-    int mFds[2];
-};
-
 
 #endif // FD_BUFFER_H

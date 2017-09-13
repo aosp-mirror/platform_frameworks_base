@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -48,6 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * Helper class for starting selection action mode
@@ -56,7 +56,7 @@ import java.util.function.Supplier;
  */
 @UiThread
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-final class SelectionActionModeHelper {
+public final class SelectionActionModeHelper {
 
     /**
      * Maximum time (in milliseconds) to wait for a result before timing out.
@@ -85,8 +85,7 @@ final class SelectionActionModeHelper {
         mTextClassificationHelper = new TextClassificationHelper(
                 mTextView.getTextClassifier(), mTextView.getText(),
                 0, 1, mTextView.getTextLocales());
-        mSelectionTracker =
-                new SelectionTracker(mTextView.getContext(), mTextView.isTextEditable());
+        mSelectionTracker = new SelectionTracker(mTextView);
 
         if (SMART_SELECT_ANIMATION_ENABLED) {
             mSmartSelectSprite = new SmartSelectSprite(mTextView.getContext(),
@@ -147,10 +146,8 @@ final class SelectionActionModeHelper {
                 SelectionEvent.ActionType.DRAG, mTextClassification);
     }
 
-    public void onTypeOverSelection() {
-        mSelectionTracker.onSelectionAction(
-                mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
-                SelectionEvent.ActionType.OVERTYPE, mTextClassification);
+    public void onTextChanged(int start, int end) {
+        mSelectionTracker.onTextChanged(start, end, mTextClassification);
     }
 
     public boolean resetSelection(int textIndex) {
@@ -235,17 +232,6 @@ final class SelectionActionModeHelper {
         final List<RectF> selectionRectangles =
                 convertSelectionToRectangles(layout, result.mStart, result.mEnd);
 
-        /*
-         * Do not run the Smart Select animation when there are multiple lines involved, as this
-         * behavior is currently broken.
-         *
-         * TODO fix Smart Select Animation when the selection spans multiple lines
-         */
-        if (selectionRectangles.size() != 1) {
-            onAnimationEndCallback.run();
-            return;
-        }
-
         final PointF touchPoint = new PointF(
                 mEditor.getLastUpPositionX(),
                 mEditor.getLastUpPositionY());
@@ -262,16 +248,65 @@ final class SelectionActionModeHelper {
     private List<RectF> convertSelectionToRectangles(final Layout layout, final int start,
             final int end) {
         final List<RectF> result = new ArrayList<>();
-        // TODO filter out invalid rectangles
-        // getSelection might give us overlapping and zero-dimension rectangles which will interfere
-        // with the Smart Select animation
         layout.getSelection(start, end, (left, top, right, bottom, textSelectionLayout) ->
-                result.add(new RectF(left, top, right, bottom)));
+                mergeRectangleIntoList(result, new RectF(left, top, right, bottom)));
 
         result.sort(SmartSelectSprite.RECTANGLE_COMPARATOR);
-
         return result;
     }
+
+    /**
+     * Merges a {@link RectF} into an existing list of rectangles. While merging, this method
+     * makes sure that:
+     *
+     * <ol>
+     * <li>No rectangle is redundant (contained within a bigger rectangle)</li>
+     * <li>Rectangles of the same height and vertical position that intersect get merged</li>
+     * </ol>
+     *
+     * @param list      the list of rectangles to merge the new rectangle in
+     * @param candidate the {@link RectF} to merge into the list
+     * @hide
+     */
+    @VisibleForTesting
+    public static void mergeRectangleIntoList(List<RectF> list, RectF candidate) {
+        if (candidate.isEmpty()) {
+            return;
+        }
+
+        final int elementCount = list.size();
+        for (int index = 0; index < elementCount; ++index) {
+            final RectF existingRectangle = list.get(index);
+            if (existingRectangle.contains(candidate)) {
+                return;
+            }
+            if (candidate.contains(existingRectangle)) {
+                existingRectangle.setEmpty();
+                continue;
+            }
+
+            final boolean rectanglesContinueEachOther = candidate.left == existingRectangle.right
+                    || candidate.right == existingRectangle.left;
+            final boolean canMerge = candidate.top == existingRectangle.top
+                    && candidate.bottom == existingRectangle.bottom
+                    && (RectF.intersects(candidate, existingRectangle)
+                    || rectanglesContinueEachOther);
+
+            if (canMerge) {
+                candidate.union(existingRectangle);
+                existingRectangle.setEmpty();
+            }
+        }
+
+        for (int index = elementCount - 1; index >= 0; --index) {
+            if (list.get(index).isEmpty()) {
+                list.remove(index);
+            }
+        }
+
+        list.add(candidate);
+    }
+
 
     /** @hide */
     @VisibleForTesting
@@ -281,7 +316,9 @@ final class SelectionActionModeHelper {
         float bestY = -1;
         double bestDistance = Double.MAX_VALUE;
 
-        for (final RectF rectangle : rectangles) {
+        final int elementCount = rectangles.size();
+        for (int index = 0; index < elementCount; ++index) {
+            final RectF rectangle = rectangles.get(index);
             final float candidateY = rectangle.centerY();
             final float candidateX;
 
@@ -337,19 +374,18 @@ final class SelectionActionModeHelper {
      */
     private static final class SelectionTracker {
 
-        private final Context mContext;
+        private final TextView mTextView;
         private SelectionMetricsLogger mLogger;
 
         private int mOriginalStart;
         private int mOriginalEnd;
         private int mSelectionStart;
         private int mSelectionEnd;
-        private boolean mSelectionStarted;
         private boolean mAllowReset;
 
-        SelectionTracker(Context context, boolean editable) {
-            mContext = Preconditions.checkNotNull(context);
-            mLogger = new SelectionMetricsLogger(context, editable);
+        SelectionTracker(TextView textView) {
+            mTextView = Preconditions.checkNotNull(textView);
+            mLogger = new SelectionMetricsLogger(textView);
         }
 
         /**
@@ -357,11 +393,10 @@ final class SelectionActionModeHelper {
          */
         public void onOriginalSelection(
                 CharSequence text, int selectionStart, int selectionEnd, boolean editableText) {
-            mOriginalStart = selectionStart;
-            mOriginalEnd = selectionEnd;
-            mSelectionStarted = true;
+            mOriginalStart = mSelectionStart = selectionStart;
+            mOriginalEnd = mSelectionEnd = selectionEnd;
             mAllowReset = false;
-            maybeInvalidateLogger(editableText);
+            maybeInvalidateLogger();
             mLogger.logSelectionStarted(text, selectionStart);
         }
 
@@ -369,7 +404,7 @@ final class SelectionActionModeHelper {
          * Called when selection action mode is started and the results come from a classifier.
          */
         public void onSmartSelection(SelectionResult result) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
                 mSelectionStart = result.mStart;
                 mSelectionEnd = result.mEnd;
                 mAllowReset = mSelectionStart != mOriginalStart || mSelectionEnd != mOriginalEnd;
@@ -384,7 +419,9 @@ final class SelectionActionModeHelper {
         public void onSelectionUpdated(
                 int selectionStart, int selectionEnd,
                 @Nullable TextClassification classification) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
+                mSelectionStart = selectionStart;
+                mSelectionEnd = selectionEnd;
                 mAllowReset = false;
                 mLogger.logSelectionModified(selectionStart, selectionEnd, classification, null);
             }
@@ -395,10 +432,13 @@ final class SelectionActionModeHelper {
          */
         public void onSelectionDestroyed() {
             mAllowReset = false;
-            mSelectionStarted = false;
-            mLogger.logSelectionAction(
-                    mSelectionStart, mSelectionEnd,
-                    SelectionEvent.ActionType.ABANDON, null /* classification */);
+            // Wait a few ms to see if the selection was destroyed because of a text change event.
+            mTextView.postDelayed(() -> {
+                mLogger.logSelectionAction(
+                        mSelectionStart, mSelectionEnd,
+                        SelectionEvent.ActionType.ABANDON, null /* classification */);
+                mSelectionStart = mSelectionEnd = -1;
+            }, 100 /* ms */);
         }
 
         /**
@@ -408,7 +448,7 @@ final class SelectionActionModeHelper {
                 int selectionStart, int selectionEnd,
                 @SelectionEvent.ActionType int action,
                 @Nullable TextClassification classification) {
-            if (mSelectionStarted) {
+            if (isSelectionStarted()) {
                 mAllowReset = false;
                 mLogger.logSelectionAction(selectionStart, selectionEnd, action, classification);
             }
@@ -422,13 +462,15 @@ final class SelectionActionModeHelper {
          */
         public boolean resetSelection(int textIndex, Editor editor) {
             final TextView textView = editor.getTextView();
-            if (mSelectionStarted
+            if (isSelectionStarted()
                     && mAllowReset
                     && textIndex >= mSelectionStart && textIndex <= mSelectionEnd
                     && textView.getText() instanceof Spannable) {
                 mAllowReset = false;
                 boolean selected = editor.selectCurrentWord();
                 if (selected) {
+                    mSelectionStart = editor.getTextView().getSelectionStart();
+                    mSelectionEnd = editor.getTextView().getSelectionEnd();
                     mLogger.logSelectionAction(
                             textView.getSelectionStart(), textView.getSelectionEnd(),
                             SelectionEvent.ActionType.RESET, null /* classification */);
@@ -438,10 +480,20 @@ final class SelectionActionModeHelper {
             return false;
         }
 
-        private void maybeInvalidateLogger(boolean editableText) {
-            if (mLogger.isEditTextLogger() != editableText) {
-                mLogger = new SelectionMetricsLogger(mContext, editableText);
+        public void onTextChanged(int start, int end, TextClassification classification) {
+            if (isSelectionStarted() && start == mSelectionStart && end == mSelectionEnd) {
+                onSelectionAction(start, end, SelectionEvent.ActionType.OVERTYPE, classification);
             }
+        }
+
+        private void maybeInvalidateLogger() {
+            if (mLogger.isEditTextLogger() != mTextView.isTextEditable()) {
+                mLogger = new SelectionMetricsLogger(mTextView);
+            }
+        }
+
+        private boolean isSelectionStarted() {
+            return mSelectionStart >= 0 && mSelectionEnd >= 0 && mSelectionStart != mSelectionEnd;
         }
     }
 
@@ -462,20 +514,22 @@ final class SelectionActionModeHelper {
     private static final class SelectionMetricsLogger {
 
         private static final String LOG_TAG = "SelectionMetricsLogger";
+        private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
 
         private final SmartSelectionEventTracker mDelegate;
         private final boolean mEditTextLogger;
-        private final BreakIterator mWordIterator = BreakIterator.getWordInstance();
+        private final BreakIterator mWordIterator;
         private int mStartIndex;
-        private int mEndIndex;
         private String mText;
 
-        SelectionMetricsLogger(Context context, boolean editable) {
-            final @SmartSelectionEventTracker.WidgetType int widgetType = editable
+        SelectionMetricsLogger(TextView textView) {
+            Preconditions.checkNotNull(textView);
+            final @SmartSelectionEventTracker.WidgetType int widgetType = textView.isTextEditable()
                     ? SmartSelectionEventTracker.WidgetType.EDITTEXT
                     : SmartSelectionEventTracker.WidgetType.TEXTVIEW;
-            mDelegate = new SmartSelectionEventTracker(context, widgetType);
-            mEditTextLogger = editable;
+            mDelegate = new SmartSelectionEventTracker(textView.getContext(), widgetType);
+            mEditTextLogger = textView.isTextEditable();
+            mWordIterator = BreakIterator.getWordInstance(textView.getTextLocale());
         }
 
         public void logSelectionStarted(CharSequence text, int index) {
@@ -487,7 +541,6 @@ final class SelectionActionModeHelper {
                 }
                 mWordIterator.setText(mText);
                 mStartIndex = index;
-                mEndIndex = mWordIterator.following(index);
                 mDelegate.logEvent(SelectionEvent.selectionStarted(0));
             } catch (Exception e) {
                 // Avoid crashes due to logging.
@@ -550,12 +603,15 @@ final class SelectionActionModeHelper {
             } else if (start < mStartIndex) {
                 wordIndices[0] = -countWordsForward(start);
             } else {  // start > mStartIndex
-                if (mStartIndex < start && start < mEndIndex) {
-                    // If the new selection did not move past the original word,
-                    // assume it has not moved.
-                    wordIndices[0] = 0;
-                } else {
-                    wordIndices[0] = countWordsBackward(start);
+                wordIndices[0] = countWordsBackward(start);
+
+                // For the selection start index, avoid counting a partial word backwards.
+                if (!mWordIterator.isBoundary(start)
+                        && !isWhitespace(
+                        mWordIterator.preceding(start),
+                        mWordIterator.following(start))) {
+                    // We counted a partial word. Remove it.
+                    wordIndices[0]--;
                 }
             }
 
@@ -599,7 +655,7 @@ final class SelectionActionModeHelper {
         }
 
         private boolean isWhitespace(int start, int end) {
-            return mText.substring(start, end).trim().isEmpty();
+            return PATTERN_WHITESPACE.matcher(mText.substring(start, end)).matches();
         }
     }
 

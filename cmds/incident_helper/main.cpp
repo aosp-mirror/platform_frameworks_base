@@ -41,9 +41,11 @@ static TextParserBase* selectParser(int section) {
         case -1:
             return new TimeoutParser();
         case 0:
+            return new NoopParser();
+        case 1: // 1 is reserved for incident header so it won't be section id
             return new ReverseParser();
 /* ========================================================================= */
-        // IDs larger than 0 are reserved in incident.proto
+        // IDs larger than 1 are section ids reserved in incident.proto
         case 2000:
             return new ProcrankParser();
         case 2002:

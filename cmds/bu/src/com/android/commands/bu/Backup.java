@@ -136,7 +136,9 @@ public final class Backup {
             if (fd != null) {
                 try {
                     fd.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    Log.e(TAG, "IO error closing output for backup: " + e.getMessage());
+                }
             }
         }
     }

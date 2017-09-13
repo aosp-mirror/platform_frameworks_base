@@ -41,6 +41,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IVold;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -219,9 +220,9 @@ public class StorageManager {
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
     /** {@hide} */
-    public static final int FSTRIM_FLAG_DEEP = 1 << 0;
+    public static final int FSTRIM_FLAG_DEEP = IVold.FSTRIM_FLAG_DEEP_TRIM;
     /** {@hide} */
-    public static final int FSTRIM_FLAG_BENCHMARK = 1 << 1;
+    public static final int FSTRIM_FLAG_BENCHMARK = IVold.FSTRIM_FLAG_BENCHMARK_AFTER;
 
     /** @hide The volume is not encrypted. */
     public static final int ENCRYPTION_STATE_NONE = 1;

@@ -76,8 +76,7 @@ public:
     };
 
 protected:
-    IBinder* onAsBinder() override { return nullptr; };
-
+    virtual IBinder* onAsBinder() override { return nullptr; };
 };
 
 class ReporterTest : public Test {
@@ -127,29 +126,7 @@ TEST_F(ReporterTest, IncidentReportArgs) {
 
 TEST_F(ReporterTest, ReportRequestSetEmpty) {
     requests.setMainFd(STDOUT_FILENO);
-
-    CaptureStdout();
-    requests.write((uint8_t *) "abcdef", 6);
-    EXPECT_THAT(GetCapturedStdout(), StrEq("abcdef"));
-}
-
-TEST_F(ReporterTest, WriteToStreamFdAndMainFd) {
-    TemporaryFile tf;
-    IncidentReportArgs args;
-    sp<ReportRequest> r = new ReportRequest(args, l, tf.fd);
-
-    requests.add(r);
-    requests.setMainFd(STDOUT_FILENO);
-
-    const char* data = "abcdef";
-
-    CaptureStdout();
-    requests.write((uint8_t *) data, 6);
-    EXPECT_THAT(GetCapturedStdout(), StrEq(data));
-
-    string content;
-    ASSERT_TRUE(ReadFileToString(tf.path, &content));
-    EXPECT_THAT(content, StrEq(data));
+    ASSERT_EQ(requests.mainFd(), STDOUT_FILENO);
 }
 
 TEST_F(ReporterTest, RunReportEmpty) {

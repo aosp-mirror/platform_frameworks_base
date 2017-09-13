@@ -35,6 +35,7 @@ public final class IncidentReportArgs implements Parcelable {
     private final IntArray mSections = new IntArray();
     private final ArrayList<byte[]> mHeaders = new ArrayList<byte[]>();
     private boolean mAll;
+    private int mDest;
 
     /**
      * Construct an incident report args with no fields.
@@ -69,6 +70,8 @@ public final class IncidentReportArgs implements Parcelable {
         for (int i=0; i<N; i++) {
             out.writeByteArray(mHeaders.get(i));
         }
+
+        out.writeInt(mDest);
     }
 
     public void readFromParcel(Parcel in) {
@@ -85,6 +88,8 @@ public final class IncidentReportArgs implements Parcelable {
         for (int i=0; i<N; i++) {
             mHeaders.add(in.createByteArray());
         }
+
+        mDest = in.readInt();
     }
 
     public static final Parcelable.Creator<IncidentReportArgs> CREATOR
@@ -118,7 +123,8 @@ public final class IncidentReportArgs implements Parcelable {
         }
         sb.append(", ");
         sb.append(mHeaders.size());
-        sb.append(" headers)");
+        sb.append(" headers), ");
+        sb.append("Dest enum value: ").append(mDest);
         return sb.toString();
     }
 
@@ -130,6 +136,14 @@ public final class IncidentReportArgs implements Parcelable {
         if (all) {
             mSections.clear();
         }
+    }
+
+    /**
+     * Set this incident report privacy policy spec.
+     * @hide
+     */
+    public void setPrivacyPolicy(int dest) {
+        mDest = dest;
     }
 
     /**

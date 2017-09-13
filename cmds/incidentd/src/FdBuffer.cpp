@@ -17,6 +17,7 @@
 #define LOG_TAG "incidentd"
 
 #include "FdBuffer.h"
+#include "io_util.h"
 
 #include <cutils/log.h>
 #include <utils/SystemClock.h>
@@ -239,25 +240,32 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
 }
 
 size_t
-FdBuffer::size()
+FdBuffer::size() const
 {
     if (mBuffers.empty()) return 0;
     return ((mBuffers.size() - 1) * BUFFER_SIZE) + mCurrentWritten;
 }
 
 status_t
-FdBuffer::write(ReportRequestSet* reporter)
+FdBuffer::flush(int fd) const
 {
-    const int N = mBuffers.size() - 1;
-    for (int i=0; i<N; i++) {
-        reporter->write(mBuffers[i], BUFFER_SIZE);
+    size_t i=0;
+    status_t err = NO_ERROR;
+    for (i=0; i<mBuffers.size()-1; i++) {
+        err = write_all(fd, mBuffers[i], BUFFER_SIZE);
+        if (err != NO_ERROR) return err;
     }
-    reporter->write(mBuffers[N], mCurrentWritten);
-    return NO_ERROR;
+    return write_all(fd, mBuffers[i], mCurrentWritten);
 }
 
 FdBuffer::iterator
-FdBuffer::end()
+FdBuffer::begin() const
+{
+    return iterator(*this, 0, 0);
+}
+
+FdBuffer::iterator
+FdBuffer::end() const
 {
     if (mBuffers.empty() || mCurrentWritten < 0) return begin();
     if (mCurrentWritten == BUFFER_SIZE)
@@ -265,6 +273,17 @@ FdBuffer::end()
         return FdBuffer::iterator(*this, mBuffers.size(), 0);
     return FdBuffer::iterator(*this, mBuffers.size() - 1, mCurrentWritten);
 }
+
+// ===============================================================================
+FdBuffer::iterator::iterator(const FdBuffer& buffer, ssize_t index, ssize_t offset)
+        : mFdBuffer(buffer),
+          mIndex(index),
+          mOffset(offset)
+{
+}
+
+FdBuffer::iterator&
+FdBuffer::iterator::operator=(iterator& other) const { return other; }
 
 FdBuffer::iterator&
 FdBuffer::iterator::operator+(size_t offset)
@@ -278,8 +297,50 @@ FdBuffer::iterator::operator+(size_t offset)
     return *this;
 }
 
+FdBuffer::iterator&
+FdBuffer::iterator::operator+=(size_t offset) { return *this + offset; }
+
+FdBuffer::iterator&
+FdBuffer::iterator::operator++() { return *this + 1; }
+
+FdBuffer::iterator
+FdBuffer::iterator::operator++(int) { return *this + 1; }
+
+bool
+FdBuffer::iterator::operator==(iterator other) const
+{
+    return mIndex == other.mIndex && mOffset == other.mOffset;
+}
+
+bool
+FdBuffer::iterator::operator!=(iterator other) const { return !(*this == other); }
+
+int
+FdBuffer::iterator::operator-(iterator other) const
+{
+    return (int)bytesRead() - (int)other.bytesRead();
+}
+
+FdBuffer::iterator::reference
+FdBuffer::iterator::operator*() const
+{
+    return mFdBuffer.mBuffers[mIndex][mOffset];
+}
+
+FdBuffer::iterator
+FdBuffer::iterator::snapshot() const
+{
+    return FdBuffer::iterator(mFdBuffer, mIndex, mOffset);
+}
+
 size_t
-FdBuffer::iterator::bytesRead()
+FdBuffer::iterator::bytesRead() const
 {
     return mIndex * BUFFER_SIZE + mOffset;
+}
+
+bool
+FdBuffer::iterator::outOfBound() const
+{
+    return bytesRead() > mFdBuffer.size();
 }
