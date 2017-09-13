@@ -24,10 +24,10 @@
     <string name="restore_confirm_text" msgid="7499866728030461776">"Solicitouse unha restauración de todos os datos desde un ordenador de escritorio conectado. Queres permitir esta operación?\n\nSe non o solicitaches ti, non permitas que se realice. Substituiranse todos os datos que conteña o dispositivo."</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restaurar os meus datos"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Non restaurar"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Insire o contrasinal de copia de seguranza actual a continuación:"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Insire o contrasinal da copia de seguranza actual a continuación:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Insire o contrasinal de encriptación do teu dispositivo a continuación."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Insire o contrasinal de encriptación do dispositivo a continuación. Tamén se usará para encriptar o arquivo de copia de seguranza."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Insire un contrasinal para encriptar os datos da copia de seguranza completa. Se queda en branco este campo, usarase o contrasinal de copia de seguranza actual."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Insire un contrasinal para encriptar os datos da copia de seguranza completa. Se queda en branco este campo, usarase o contrasinal da copia de seguranza actual."</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se queres encriptar os datos da copia de seguranza completa, insire un contrasinal a continuación:"</string>
     <string name="backup_enc_password_required" msgid="7889652203371654149">"Como o teu dispositivo está cifrado, debes cifrar a túa copia de seguranza. Introduce un contrasinal a continuación:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se os datos de restauración están encriptados, insire o contrasinal a continuación:"</string>
