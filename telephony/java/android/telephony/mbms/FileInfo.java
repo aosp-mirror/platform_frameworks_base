@@ -16,26 +16,19 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A Parcelable class Cell-Broadcast downloadable file information.
+ * Describes a single file that is available over MBMS.
  * @hide
  */
 public class FileInfo implements Parcelable {
 
-    /**
-     * The URI into the carriers infrastructure which points to this file.
-     * This is used internally but is also one of the few pieces of data about the content that is
-     * exposed and may be needed for disambiguation by the application.
-     */
     private final Uri uri;
 
-    /**
-     * The mime type of the content.
-     */
     private final String mimeType;
 
     public static final Parcelable.Creator<FileInfo> CREATOR =
@@ -53,8 +46,8 @@ public class FileInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: systemapi
      */
+    //@SystemApi
     public FileInfo(Uri uri, String mimeType) {
         this.uri = uri;
         this.mimeType = mimeType;
@@ -76,10 +69,17 @@ public class FileInfo implements Parcelable {
         return 0;
     }
 
+    /**
+     * @return The URI in the carrier's infrastructure which points to this file. Apps should
+     * negotiate the contents of this URI separately with the carrier.
+     */
     public Uri getUri() {
         return uri;
     }
 
+    /**
+     * @return The MIME type of the file.
+     */
     public String getMimeType() {
         return mimeType;
     }
