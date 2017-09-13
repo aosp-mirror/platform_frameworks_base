@@ -754,6 +754,8 @@ public class KeyStore {
                 // None of the key's SIDs can ever be authenticated
                 return new KeyPermanentlyInvalidatedException();
             }
+            case UNINITIALIZED:
+                return new KeyPermanentlyInvalidatedException();
             default:
                 return new InvalidKeyException("Keystore operation failed", e);
         }
