@@ -30,7 +30,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"திறக்க, பின்னை உள்ளிடவும்"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"தவறான பின் குறியீடு."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"சார்ஜ் செய்யப்பட்டது"</string>
-    <string name="keyguard_plugged_in" msgid="9087497435553252863">"சார்ஜாகிறது"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"சார்ஜ் ஆகிறது"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"வேகமாக சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"மெதுவாக சார்ஜாகிறது"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"உங்கள் சார்ஜரை இணைக்கவும்."</string>

@@ -61,7 +61,7 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingresa el PIN de la tarjeta SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Ingresa el PIN de la tarjeta SIM para \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingresa el PIN."</string>
-    <string name="kg_password_instructions" msgid="5753646556186936819">"Ingresa tu contraseña."</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Escribe la contraseña."</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"La tarjeta SIM está inhabilitada. Para continuar, ingresa el código PUK. Si quieres obtener más información, ponte en contacto con el proveedor."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"La tarjeta SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" está inhabilitada. Para continuar, ingresa el código PUK. Para obtener más información, comunícate con el proveedor."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingresa el código PIN deseado"</string>
