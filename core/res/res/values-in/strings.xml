@@ -189,7 +189,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Hidupkan nirkabel"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Matikan nirkabel"</string>
     <string name="screen_lock" msgid="799094655496098153">"Kunci layar"</string>
-    <string name="power_off" msgid="4266614107412865048">"Matikan daya"</string>
+    <string name="power_off" msgid="4266614107412865048">"Matikan perangkat"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Pendering mati"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Pendering bergetar"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Pendering nyala"</string>
@@ -213,18 +213,18 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Opsi TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opsi telepon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Kunci layar"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Matikan daya"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Matikan perangkat"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Darurat"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpulkan informasi status perangkat Anda saat ini, untuk dikirimkan sebagai pesan email. Harap bersabar, mungkin perlu waktu untuk memulai laporan bug hingga siap dikirim."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Laporan interaktif"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gunakan ini di berbagai keadaan. Ini memungkinkan Anda melacak kemajuan laporan, memasukkan detail masalah selengkapnya, dan mengambil tangkapan layar. Mungkin menghilangkan beberapa bagian yang jarang digunakan dan yang perlu waktu lama untuk dilaporkan."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gunakan ini di berbagai keadaan. Ini memungkinkan Anda melacak kemajuan laporan, memasukkan detail masalah selengkapnya, dan mengambil screenshot. Mungkin menghilangkan beberapa bagian yang jarang digunakan dan yang perlu waktu lama untuk dilaporkan."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Laporan lengkap"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gunakan opsi ini untuk meminimalkan gangguan sistem jika perangkat tidak responsif atau terlalu lambat, atau jika Anda perlu semua bagian laporan. Tidak mengizinkan Anda memasukkan lebih banyak detail atau mengambil tangkapan layar tambahan."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Gunakan opsi ini untuk meminimalkan gangguan sistem jika perangkat tidak responsif atau terlalu lambat, atau jika Anda perlu semua bagian laporan. Tidak mengizinkan Anda memasukkan lebih banyak detail atau mengambil screenshot tambahan."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
-      <item quantity="other">Mengambil tangkapan layar untuk laporan bug dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik.</item>
-      <item quantity="one">Mengambil tangkapan layar untuk laporan bug dalam <xliff:g id="NUMBER_0">%d</xliff:g> detik.</item>
+      <item quantity="other">Mengambil screenshot untuk laporan bug dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik.</item>
+      <item quantity="one">Mengambil screenshot untuk laporan bug dalam <xliff:g id="NUMBER_0">%d</xliff:g> detik.</item>
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mode senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Suara MATI"</string>
@@ -266,7 +266,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Item yang diketuk akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan isyarat."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Mengaktifkan aksesibilitas web yang disempurnakan"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skrip mungkin dipasang agar konten aplikasi lebih dapat diakses."</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skrip mungkin dipasang agar konten aplikasi lebih mudah diakses."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Mengamati teks yang Anda ketik"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Mengontrol perbesaran layar"</string>
@@ -396,9 +396,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Mengizinkan aplikasi untuk mengubah zona waktu TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Mengizinkan apl mengubah zona waktu pada ponsel."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"cari akun pada perangkat"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh tablet. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda pasang."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh tablet. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Mengizinkan aplikasi untuk mendapatkan daftar akun yang dikenal oleh TV. Daftar ini mungkin meliputi akun yang dibuat oleh aplikasi yang telah dipasang."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda pasang."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda instal."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"lihat sambungan jaringan"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Memungkinkan aplikasi melihat informasi tentang sambungan jaringan, misalnya jaringan yang ada dan tersambung."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"dapatkan akses jaringan penuh"</string>
@@ -433,10 +433,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"nonaktifkan kunci layar Anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Memungkinkan aplikasi menonaktifkan kunci tombol dan keamanan sandi apa pun yang terkait. Misalnya, ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kelola perangkat keras sidik jari"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kelola hardware sidik jari"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Mengizinkan aplikasi memanggil metode untuk menambahkan dan menghapus template sidik jari untuk digunakan."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan perangkat keras sidik jari"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Mengizinkan aplikasi untuk menggunakan perangkat keras sidik jari untuk otentikasi"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan hardware sidik jari"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Mengizinkan aplikasi untuk menggunakan hardware sidik jari untuk otentikasi"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Tidak dapat memproses sidik jari. Coba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensor sidik jari kotor. Bersihkan dan coba lagi."</string>
@@ -444,7 +444,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Jari digerakkan terlalu lambat. Coba lagi."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Perangkat keras sidik jari tidak tersedia."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware sidik jari tidak tersedia."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Waktu sidik jari habis. Coba lagi."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operasi sidik jari dibatalkan."</string>
@@ -489,7 +489,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"mengubah penghitungan penggunaan jaringan"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Mengizinkan apl memodifikasi cara penggunaan jaringan diperhitungkan terhadap apl. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"mengakses pemberitahuan"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposkan oleh aplikasi lain."</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposting oleh aplikasi lain."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mengikat layanan pendengar pemberitahuan"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"mengikat ke layanan penyedia ketentuan"</string>
@@ -774,7 +774,7 @@
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari laman ini?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
-    <string name="autofill_this_form" msgid="4616758841157816676">"Isiotomatis"</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"IsiOtomatis"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Siapkan Pengisian Otomatis"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">"  "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
@@ -1127,8 +1127,8 @@
     <string name="sim_removed_message" msgid="5450336489923274918">"Jaringan seluler tidak akan tersedia sampai Anda memulai ulang dengan memasukkan kartu SIM yang valid."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Kartu SIM ditambahkan"</string>
-    <string name="sim_added_message" msgid="7797975656153714319">"Mulai ulang perangkat untuk mengakses jaringan seluler."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Mulai Ulang"</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Nyalakan ulang perangkat untuk mengakses jaringan seluler."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Nyalakan Ulang"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Agar SIM baru bekerja dengan baik, Anda harus memasang dan membuka aplikasi dari operator."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"DAPATKAN APLIKASI"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"LAIN KALI"</string>
@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tersambung ke aksesori USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Ketuk untuk opsi lainnya."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB terhubung"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Ketuk untuk menonaktifkan debug USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Tap untuk menonaktifkan debug USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Mengambil laporan bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bagikan laporan bug?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Membagikan laporan bug..."</string>
@@ -1206,7 +1206,7 @@
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Memungkinkan aplikasi menentukan rute keluaran media ke perangkat eksternal lainnya."</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"baca sesi pemasangan"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Memungkinkan aplikasi membaca sesi pemasangan. Tindakan ini memungkinkannya melihat detail tentang pemasangan paket aktif."</string>
-    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"minta pasang paket"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"minta instal paket"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Mengizinkan aplikasi meminta pemasangan paket."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Ketuk dua kali untuk kontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ubah wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Pendengar pemberitahuan"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Pemroses Realitas Maya"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Pemroses VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Penyedia ketentuan"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Layanan penentu peringkat notifikasi"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN diaktifkan"</string>
@@ -1315,7 +1315,7 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Berbagi dengan <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Gagang geser. Sentuh &amp; tahan."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Gesek untuk membuka kunci."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Pasang headset untuk mendengar tombol sandi yang diucapkan."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Instal headset untuk mendengar tombol sandi yang diucapkan."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Titik."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi ke beranda"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi naik"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Dipasang oleh administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Diperbarui oleh administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dihapus oleh administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran, layanan lokasi, dan kebanyakan data latar belakang. Email, perpesanan, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diperbarui kecuali jika dibuka.\n\nPenghemat baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran, layanan lokasi, dan sebagian besar data latar belakang. Email, pesan, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diperbarui kecuali jika dibuka.\n\nPenghemat baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
@@ -1607,7 +1607,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Hingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Hingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarm berikutnya)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hingga Anda menonaktifkan ini"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hingga Anda menonaktifkan status Jangan Ganggu"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hingga status Jangan Ganggu dinonaktifkan"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Ciutkan"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Jangan ganggu"</string>

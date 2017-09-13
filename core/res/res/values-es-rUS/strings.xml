@@ -346,7 +346,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite que la aplicación modifique el registro de llamadas de la TV, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite que la aplicación modifique el registro de llamadas del dispositivo, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"acceder a los sensores corporales (como los monitores de frecuencia cardíaca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la aplicación acceda a datos de sensores que controlan tu condición física, como el ritmo cardíaco."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la app acceda a datos de sensores que monitorean tu estado físico, como el ritmo cardíaco."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"leer eventos de calendario e información confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite que la aplicación consulte todos los eventos de calendario almacenados en la tablet, incluidos los de amigos y compañeros de trabajo. La aplicación puede utilizar este permiso para compartir o guardar datos del calendario del usuario sin tener en cuenta si son privados o confidenciales."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Permite que la aplicación lea todos los eventos de calendario almacenados en la TV, incluidos aquellos de amigos o colegas. Esta opción puede permitir que la aplicación comparta o guarde datos de calendario, independientemente de la confidencialidad o la privacidad."</string>
@@ -792,12 +792,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Circunscripción"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Área"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirato"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"leer tus marcadores web y el historial"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite que la aplicación consulte el historial de todas las URL visitadas por el navegador, y todos sus marcadores. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"escribir marcadores web e historial"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en la tablet. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en la TV. Esta opción puede permitir que la aplicación borre o modifique los datos del navegador. Ten en cuenta que este permiso no puede ser usado por navegadores de terceros ni otras aplicaciones con capacidades de navegación web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los marcadores del navegador almacenados en el dispositivo. La aplicación puede utilizar este permiso para borrar o modificar los datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"leer tus favoritos web y el historial"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite que la aplicación consulte el historial de todas las URL visitadas por el navegador, y todos sus favoritos. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"escribir favoritos web e historial"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en la tablet. La aplicación puede utilizar este permiso para borrar o modificar datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en la TV. Esta opción puede permitir que la aplicación borre o modifique los datos del navegador. Ten en cuenta que este permiso no puede ser usado por navegadores de terceros ni otras aplicaciones con capacidades de navegación web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que la aplicación modifique el historial o los favoritos del navegador almacenados en el dispositivo. La aplicación puede utilizar este permiso para borrar o modificar los datos del navegador. Nota: Este permiso no puede ser utilizado por navegadores externos ni otras aplicaciones que tengan funciones de navegación por Internet."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"programar una alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que la aplicación establezca una alarma en una aplicación de alarma instalada. Es posible que algunas aplicaciones de alarma no incluyan esta función."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"agregar correo de voz"</string>
@@ -818,7 +818,7 @@
     <string name="search_go" msgid="8298016669822141719">"Buscar"</string>
     <string name="search_hint" msgid="1733947260773056054">"Buscar…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Buscar"</string>
-    <string name="searchview_description_query" msgid="5911778593125355124">"Consulta de búsqueda"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"Búsqueda"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Eliminar la consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Búsqueda por voz"</string>
@@ -1143,7 +1143,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"No se requieren permisos"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"esto puede costarte dinero"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Este dispositivo se está cargando mediante USB"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Cargando este dispositivo por USB"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"El dispositivo conectado se está cargando mediante USB"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferir archivos"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferir fotos"</string>
@@ -1399,7 +1399,7 @@
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Dibuja tu patrón."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingresa el PIN de la tarjeta SIM."</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingresa el PIN."</string>
-    <string name="kg_password_instructions" msgid="5753646556186936819">"Ingresa tu contraseña."</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Escribe la contraseña."</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"La tarjeta SIM está inhabilitada. Para continuar, ingresa el código PUK. Si quieres obtener más información, ponte en contacto con el proveedor."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingresa el código PIN deseado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirmar código PIN deseado"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Lo instaló el administrador."</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Lo eliminó el administrador."</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, el ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización no puedan actualizarse, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Para mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que no puedan actualizarse el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, \"Reducir datos\" evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
@@ -1664,7 +1664,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Presiona para ver archivos"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fijar"</string>
     <string name="unpin_target" msgid="3556545602439143442">"No fijar"</string>
-    <string name="app_info" msgid="6856026610594615344">"Información de la app"</string>
+    <string name="app_info" msgid="6856026610594615344">"Información de apps"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"¿Deseas restablecer el dispositivo?"</string>
     <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Presiona para restablecer el dispositivo"</string>

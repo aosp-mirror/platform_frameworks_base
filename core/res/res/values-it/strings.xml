@@ -245,7 +245,7 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Passa al profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedere ai contatti"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"Posizione"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizzazione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
@@ -269,7 +269,7 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Potrebbero essere installati script per rendere più accessibili i contenuti delle app."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Osservare il testo digitato"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sono inclusi dati personali come numeri di carte di credito e password."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlla l\'ingrandimento del display"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controllare l\'ingrandimento del display"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlla il livello di zoom e la posizione del display."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Esegui gesti"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Consente di toccare, far scorrere, pizzicare ed eseguire altri gesti."</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Sfondo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambia sfondo"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Listener di notifica"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener realtà virtuale"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Provider condizioni"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servizio di classificazione delle notifiche"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN attiva"</string>
@@ -1322,7 +1322,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Altre opzioni"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Archivio condiviso interno"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Memoria condivisa interna"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Scheda SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Scheda SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Unità USB"</string>

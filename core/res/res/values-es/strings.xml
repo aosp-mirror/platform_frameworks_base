@@ -133,7 +133,7 @@
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Llamada Wi-Fi de %s"</item>
   </string-array>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"No"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferir datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
@@ -464,7 +464,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"consultar el contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permite que la aplicación lea el contenido del almacenamiento USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permite que la aplicación lea el contenido de la tarjeta SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"editar o borrar contenido de USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"editar o borrar contenido de almacenamiento USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar o eliminar el contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite escribir en el almacenamiento USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite que la aplicación escriba en la tarjeta SD."</string>
@@ -963,8 +963,8 @@
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
     <string name="loading" msgid="7933681260296021180">"Cargando..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
-    <string name="capital_off" msgid="6815870386972805832">"NO"</string>
+    <string name="capital_on" msgid="1544682755514494298">"ACTIVADO"</string>
+    <string name="capital_off" msgid="6815870386972805832">"DESACTIVADO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Completar acción con %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Completar acción"</string>
@@ -1045,7 +1045,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"El proceso <xliff:g id="PROC">%1$s</xliff:g> ha superado su límite de memoria de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de pila disponible que puedes compartir con su desarrollador (ten cuidado, ya que puede incluir información personal a la que tenga acceso la aplicación)."</string>
     <string name="sendText" msgid="5209874571959469142">"Selecciona una acción para el texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumen del timbre"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Volumen multimedia"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Volumen de multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Tono de silencio establecido"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volumen de la llamada"</string>
@@ -1056,7 +1056,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volumen de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volumen del tono"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumen de llamada"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen multimedia"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen de multimedia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumen de notificaciones"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Tono por defecto"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Toca para ver más opciones."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Toca para inhabilitar la depuración USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Toca para inhabilitar la depuración USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Creando informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
@@ -1159,7 +1159,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECHAZAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Debe seguir en pantalla mientras el teclado físico esté activo"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Sigue en pantalla mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura el teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca para seleccionar el idioma y el diseño"</string>
@@ -1252,7 +1252,7 @@
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Toca para salir del modo coche."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir Internet/Zona Wi-Fi activado"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir conexión/Zona Wi-Fi activada"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
@@ -1341,7 +1341,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Límite de datos móviles superado"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Conexiones automáticas restringidas"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Datos en segundo plano restringidos"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Toca para quitar la restricción."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalado por tu administrador"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por tu administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado por tu administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Para mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de los datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se muestren hasta que no las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>

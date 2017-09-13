@@ -58,12 +58,12 @@
     <string name="mismatchPin" msgid="609379054496863419">"Впишаните PIN-броеви не се совпаѓаат."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Внеси PIN од 4 до 8 броеви."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Внеси ПУК од 8 броеви или повеќе."</string>
-    <string name="needPuk" msgid="919668385956251611">"Вашата СИМ картичка е заклучена со ПУК код. Внесете го ПУК кодот за да се отклучи."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Внесете го ПУК2 кодот за да се одблокира СИМ картичката."</string>
+    <string name="needPuk" msgid="919668385956251611">"Вашата SIM картичка е заклучена со ПУК код. Внесете го ПУК кодот за да се отклучи."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Внесете го ПУК2 кодот за да се одблокира SIM картичката."</string>
     <string name="enablePin" msgid="209412020907207950">"Неуспешно, овозможи заклучување на SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="one">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обид пред СИМ-картичката да се заклучи.</item>
-      <item quantity="other">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди пред СИМ-картичката да се заклучи.</item>
+      <item quantity="one">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обид пред SIM-картичката да се заклучи.</item>
+      <item quantity="other">Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди пред SIM-картичката да се заклучи.</item>
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -82,10 +82,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Одбивање несакани вознемирувачки повици"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Испорака на повикувачки број"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Не вознемирувај"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, повикувачот со овој ИД е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, повикувачот со овој ИД е ограничен. Следен повик: не е ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, повикувачот со овој ИД не е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ИД не е ограничен. Следен повик: не е ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: не е ограничен"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: ограничен"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: не е ограничен"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Услугата за податоци е блокирана."</string>
@@ -196,9 +196,9 @@
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Системско ажурирање на Android"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Се подготвува ажурирањето…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Пакетот за ажурирање се обработува..."</string>
-    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Се престартува…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Се рестартира…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"Ресетирање фабрички податоци"</string>
-    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Се престартува…"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Се рестартира…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Се исклучува..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Вашиот таблет ќе се исклучи."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Вашиот телевизор ќе се исклучи."</string>
@@ -251,7 +251,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"испраќа и прикажува SMS-пораки"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Меморија"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Капацитет"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"пристапува до фотографии, аудио-видео и датотеки на уредот"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
@@ -261,16 +261,16 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упатува и управува со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"пристапува до податоците од сензорите за виталните знаци"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Врати содржина на прозорец"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Провери ја содржината на прозорецот со кој се комуницира."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преземе содржина на прозорец"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ја следи содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Допрените ставки ќе се изговорат на глас и екранот може да се истражува со движења."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Вклучи подобрена пристапност кон веб"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Вклучи подобрена пристапност кон интернет"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"За содржината на апликацијата да биде подостапна, може да се инсталираат скрипти."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Набљудувај го напишаниот текст"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Го следи напишаниот текст"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Опфаќа лични податоци како што се броеви на кредитни картички и лозинки."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Контролирајте го зголемувањето на екранот"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Контролирајте го нивото на зумирање и позиционирање на екранот."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Го контролира зголемувањето на екранот"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Го контролира нивото на зумирање и позиционирање на екранот."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Користете движења"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"оневозможи или измени статусна лента"</string>
@@ -296,9 +296,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"испрати и прикажи SMS-пораки"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Овозможува апликацијата да испраќа SMS пораки. Ова може да предизвика неочекувани трошоци. Злонамерните апликации може да ве чинат пари поради испраќање пораки без ваша потврда."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"прочитај ги своите текстуални пораки (SMS или MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Овозможува апликацијата да чита SMS пораки зачувани на вашиот таблет или на СИМ картичката. Ова овозможува апликацијата да ги прочита сите SMS пораки, без разлика на нивната содржината или доверливост."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Дозволува апликацијата да ги чита SMS пораките кои се складирани на вашиот телевизор или СИМ-картичка. Ова дозволува апликацијата да ги чита сите SMS пораки, без разлика на содржината или доверливоста."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Овозможува апликацијата да чита SMS пораки зачувани на вашиот телефон или на СИМ картичката. Ова овозможува апликацијата да ги прочита сите SMS пораки, без разлика на нивната содржина или доверливост."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Овозможува апликацијата да чита SMS пораки зачувани на вашиот таблет или на SIM картичката. Ова овозможува апликацијата да ги прочита сите SMS пораки, без разлика на нивната содржината или доверливост."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Дозволува апликацијата да ги чита SMS пораките кои се складирани на вашиот телевизор или SIM-картичка. Ова дозволува апликацијата да ги чита сите SMS пораки, без разлика на содржината или доверливоста."</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Овозможува апликацијата да чита SMS пораки зачувани на вашиот телефон или на SIM картичката. Ова овозможува апликацијата да ги прочита сите SMS пораки, без разлика на нивната содржина или доверливост."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"прими текстуални пораки (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Овозможува апликацијата да прима и да обработува WAP пораки. Оваа дозвола ја опфаќа способноста за следење или за бришење пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"обнови активни апликации"</string>
@@ -365,8 +365,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Овозможува апликацијата да ги менува глобалните аудио поставки, како што се јачината на звукот и кој звучник се користи за излез."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"снимај аудио"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Овозможува апликацијата да снима аудио со микрофонот. Оваа дозвола овозможува апликацијата да снима аудио во кое било време без ваша потврда."</string>
-    <string name="permlab_sim_communication" msgid="2935852302216852065">"испраќање наредби до СИМ-картичката"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Овозможува апликацијата да испраќа наредби до СИМ картичката. Ова е многу опасно."</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"испраќање наредби до SIM-картичката"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Овозможува апликацијата да испраќа наредби до SIM картичката. Ова е многу опасно."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимај слики и видеа"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Овозможува апликацијата да прави фотографии и да снима видеа со камерата. Оваа дозвола овозможува апликацијата да ја користи камерата во кое било време без ваша потврда."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"контролирај вибрации"</string>
@@ -460,18 +460,18 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Овозможува апликацијата да ги менува поставките за синхронизирање на сметка. На пример, ова може да се употреби да овозможи синхронизација на апликацијата „Луѓе“ со сметка."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"читај статистика за синхронизација"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Овозможува апликацијата да ја чита статистиката за синхронизација на сметка, вклучувајќи ја и историјата на синхронизирани настани и колку податоци се синхронизирани."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"прочитај ги содржините на твојата УСБ меморија"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"прочитај ги содржините на твојата USB меморија"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"прочитај ги содржините на твојата СД картичка"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Овозможува апликацијата да ги чита содржините од вашето УСБ."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Овозможува апликацијата да ги чита содржините од вашето USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Овозможува апликацијата да ги чита содржините од вашата СД картичка."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измени ги или избриши ги содржините на твојата УСБ меморија"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измени ги или избриши ги содржините на твојата USB меморија"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"измени ги или избриши ги содржините на твојата СД картичка"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозволува пишување на УСБ-склад."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозволува пишување на USB-склад."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволува апликацијата да пишува на СД-картичката."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"остварува/прима повици преку SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Дозволува апликацијата да остварува и прима повици преку SIP."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"регистрира нови телекомуникациски врски преку СИМ"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Дозволува апликацијата да регистрира нови телекомуникациски врски преку СИМ."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"регистрира нови телекомуникациски врски преку SIM"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Дозволува апликацијата да регистрира нови телекомуникациски врски преку SIM."</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"регистрира нови телекомуникациски врски"</string>
     <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Дозволува апликацијата да регистрира нови телекомуникациски врски."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"управува со телекомуникациски врски"</string>
@@ -614,7 +614,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Годишнина"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Други"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Приспособени"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Почетна страница"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Приватна е-пошта"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Работа"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Други"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобилен"</string>
@@ -681,14 +681,14 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Обидете се повторно"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Отклучи за сите функции и податоци"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Максималниот број обиди на отклучување со лице е надминат"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Нема СИМ картичка"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Во таблетот нема СИМ картичка."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Нема СИМ-картичка во телевизорот."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Во телефонот нема СИМ картичка."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Вметнете СИМ-картичка."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Нема СИМ-картичка или не може да се прочита. Вметнете СИМ-картичка."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Неупотреблива СИМ картичка."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Вашата СИМ-картичка е трајно оневозможена.\nКонтактирајте со давателот на услуги за безжична мрежа за друга СИМ-картичка."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Нема SIM картичка"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Во таблетот нема SIM картичка."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Нема SIM-картичка во телевизорот."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Во телефонот нема SIM картичка."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Вметнете SIM-картичка."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Нема SIM-картичка или не може да се прочита. Вметнете SIM-картичка."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Неупотреблива SIM картичка."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Вашата SIM-картичка е трајно оневозможена.\nКонтактирајте со давателот на услуги за безжична мрежа за друга SIM-картичка."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Претходна песна"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Следна песна"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Пауза"</string>
@@ -698,10 +698,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Брзо премотај напред"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Само повици за итни случаи"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Мрежата е заклучена"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"СИМ картичката е заклучена со ПУК код."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM картичката е заклучена со ПУК код."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Погледнете го Упатството за корисници или контактирајте со Грижа за корисници."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"СИМ картичката е заклучена."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"СИМ картичката се отклучува..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM картичката е заклучена."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM картичката се отклучува..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Погрешно сте ја употребиле вашата шема за отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Погрешно сте ја впишале вашата лозинка <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Погрешно сте го впишале вашиот PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
@@ -971,9 +971,9 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Отвори со"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отвори со %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Отвори"</string>
-    <string name="whichEditApplication" msgid="144727838241402655">"Уреди со"</string>
-    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Уреди со %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Уреди"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Измени со"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Измени со %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Измени"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Сподели со"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Сподели со %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Сподели"</string>
@@ -990,7 +990,7 @@
     <string name="use_a_different_app" msgid="8134926230585710243">"Користи различна апликација"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Избриши ги стандардните вредности во Системски поставки &gt; Апликации &gt; Преземено."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Избери дејство"</string>
-    <string name="chooseUsbActivity" msgid="6894748416073583509">"Изберете апликација за УСБ-уредот"</string>
+    <string name="chooseUsbActivity" msgid="6894748416073583509">"Изберете апликација за USB-уредот"</string>
     <string name="noApplications" msgid="2991814273936504689">"Нема апликации што можат да го извршат ова дејство."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> запре"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> запре"</string>
@@ -1008,7 +1008,7 @@
     <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> не реагира"</string>
     <string name="anr_process" msgid="6156880875555921105">"Процесот <xliff:g id="PROCESS">%1$s</xliff:g> не реагира"</string>
     <string name="force_close" msgid="8346072094521265605">"Во ред"</string>
-    <string name="report" msgid="4060218260984795706">"Извештај"</string>
+    <string name="report" msgid="4060218260984795706">"Пријави"</string>
     <string name="wait" msgid="7147118217226317732">"Почекај"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Страницата не реагира.\n\nДали сакате да ја затворите?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Пренасочена апликација"</string>
@@ -1045,7 +1045,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата на својот процес од <xliff:g id="SIZE">%2$s</xliff:g>. Достапна ви е слика од меморијата да ја споделите со неговиот програмер. Бидете внимателни: сликата од меморијата може да содржи кои било од вашите лични информации до кои апликацијата има пристап."</string>
     <string name="sendText" msgid="5209874571959469142">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Јачина на звук на ѕвонче"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Јачина на звук на медиуми"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Јачина на аудио/видео звук"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Се репродуцира преку Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="3941680041282788711">"Јачина на звук на дојдовен повик"</string>
@@ -1056,7 +1056,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Јачина на звук на повик"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Јачина на звук на медиуми"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Јачина на аудио/видео звук"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Јачина на звук на известување"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Стандардна мелодија (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1123,16 +1123,16 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Може да го променш ова подоцна во Поставувања &gt; Апликации"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Секогаш дозволувај"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Никогаш не дозволувај"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"СИМ картичката е отстранета"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"Мобилната мрежа ќе биде недостапна додека не рестартирате со вметната важечка СИМ-картичка."</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM картичката е отстранета"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Мобилната мрежа ќе биде недостапна додека не рестартирате со вметната важечка SIM-картичка."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"Додадена е СИМ картичка"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Додадена е SIM картичка"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Рестартирајте го уредот за да пристапите кон мобилна мрежа."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Рестартирај"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"За да работи правилно вашата нова СИМ-картичка, треба да ја инсталирате и да ја отворите апликацијата од операторот."</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"За да работи правилно вашата нова SIM-картичка, треба да ја инсталирате и да ја отворите апликацијата од операторот."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ПРЕЗЕМИ ЈА АПЛИКАЦИЈАТА"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ СЕГА"</string>
-    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Вметната е нова СИМ-картичка"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Вметната е нова SIM-картичка"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Допрете за да поставите"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Постави време"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Постави датум"</string>
@@ -1145,12 +1145,12 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Во ред"</string>
     <string name="usb_charging_notification_title" msgid="6895185153353640787">"Уредов се полни преку USB"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Прикачениот уред се напојува преку USB"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"УСБ за пренос на датотеки"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"УСБ за пренос на фотографии"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"УСБ за МИДИ"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Поврзан со УСБ додаток"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB за пренос на датотеки"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB за пренос на фотографии"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB за МИДИ"</string>
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Поврзан со USB додаток"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Допрете за повеќе опции."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку УСБ"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку USB"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Се зема извештајот за грешки…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели извештајот за грешки?"</string>
@@ -1264,7 +1264,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> од <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Готово"</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Бришење УСБ меморија..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Бришење USB меморија..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Бришење СД картичка..."</string>
     <string name="share" msgid="1778686618230011964">"Сподели"</string>
     <string name="find" msgid="4808270900322985960">"Пронајди"</string>
@@ -1327,10 +1327,10 @@
     <string name="storage_internal" msgid="3570990907910199483">"Внатрешно заедничко место за складирање"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"СД картичка"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> СД-картичка"</string>
-    <string name="storage_usb_drive" msgid="6261899683292244209">"УСБ-меморија"</string>
-    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> УСБ-меморија"</string>
-    <string name="storage_usb" msgid="3017954059538517278">"УСБ меморија"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Уреди"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB-меморија"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-меморија"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB меморија"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Измени"</string>
     <string name="data_usage_warning_title" msgid="3620440638180218181">"Известување за потрошен сообраќај"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Допрете за употреба и поставки."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Постигна лимит за 2G-3G податоци"</string>
@@ -1399,17 +1399,17 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Погрешен PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Обидете се повторно за <xliff:g id="NUMBER">%1$d</xliff:g> секунди."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Употреби ја својата шема"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Внеси PIN на СИМ картичка"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Внеси PIN на SIM картичка"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Внеси PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Внеси лозинка"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"СИМ картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Внеси посакуван PIN код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Потврди го саканиот PIN код"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"СИМ картичката се отклучува..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM картичката се отклучува..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Погрешен PIN код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Внесете PIN кој содржи 4-8 броеви."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"ПУК кодот треба да има 8 броеви."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат СИМ картичката."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат SIM картичката."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN кодовите не се совпаѓаат"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Премногу обиди со шема"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, најавете се со вашата сметка на Google."</string>
@@ -1629,9 +1629,9 @@
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Копче Прошири"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"вклучи/исклучи проширување"</string>
-    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Надворешна порта на УСБ за Android"</string>
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Надворешна порта на USB за Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Надворешна порта на УСБ"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Надворешна порта на USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Повеќе опции"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Затвори прелевање"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Зголеми"</string>

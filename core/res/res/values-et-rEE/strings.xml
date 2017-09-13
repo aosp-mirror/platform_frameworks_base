@@ -252,7 +252,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"saata ja vaadata SMS-sõnumeid"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Mäluruum"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"juurde pääseda seadmesse salvestatud fotodele, meediasisule ja failidele"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"juurdepääs seadmesse salvestatud fotodele, meediasisule ja failidele"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"heli salvestamine"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kaamera"</string>
@@ -262,7 +262,7 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kehaandurid"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"juurdepääs anduri andmetele teie eluliste näitajate kohta"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Akna sisu toomine"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tutvuge kasutatava akna sisuga."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kasutatava akna sisu kontrollimine."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Puudutusega sirvimise sisselülitamine"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Puudutatud üksuste nimed esitatakse häälega ja ekraani saab sirvida puudutustega."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Veebi täiustatud juurdepääsu sisselülitamine"</string>
@@ -270,7 +270,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sisestatud teksti jälgimine"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisaldab isiklikke andmeid, nt krediitkaardi numbreid ja paroole."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekraani suurenduse juhtimine"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Saate juhtida ekraani suumitaset ja asendit."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ekraani suumitaseme ja asendi juhtimine."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Liigutuste tegemine"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Saate puudutada, pühkida, sõrmi kokku-lahku liigutada ja teisi liigutusi teha."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"keela või muuda olekuriba"</string>
@@ -1050,7 +1050,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Valitud on hääletu märguanne"</string>
     <string name="volume_call" msgid="3941680041282788711">"Kõne helitugevus"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetoothi kõne helitugevus"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Alarmi helitugevus"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Äratuse helitugevus"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Teadistusheli"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Helitugevus"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetoothi maht"</string>
@@ -1094,7 +1094,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Rakendus %1$s soovib luua ühenduse WiFi-võrguga %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Rakendus"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WiFi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käivitage WiFi otseühendus. See lülitab välja WiFi kliendi/leviala."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käivitage WiFi otseühendus. See lülitab välja WiFi kliendi/kuumkoha."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"WiFi otseühenduse käivitamine ebaõnnestus."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"WiFi Direct on sees"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Puudutage seadete nägemiseks"</string>
@@ -1252,7 +1252,7 @@
     <string name="submit" msgid="1602335572089911941">"Saada"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Autorežiim lubatud"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Puudutage autorežiimist väljumiseks."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Jagamine või tööpunkt on aktiivne"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Jagamine või kuumkoht on aktiivne"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Puudutage seadistamiseks."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Tagasi"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Järgmine"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installis teie administraator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Värskendas administraator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kustutas teie administraator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Aku kestuse parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibratsiooni, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Aku kestuse parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibreerimist, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmeside mahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>

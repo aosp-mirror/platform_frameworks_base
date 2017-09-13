@@ -103,7 +103,7 @@
     <string name="serviceClassVoice" msgid="1258393812335258019">"အသံ"</string>
     <string name="serviceClassData" msgid="872456782077937893">"ဒေတာ"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"ဖက်စ်"</string>
-    <string name="serviceClassSMS" msgid="2015460373701527489">"စာတိုစနစ်"</string>
+    <string name="serviceClassSMS" msgid="2015460373701527489">"SMS စာတိုစနစ်"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Async"</string>
     <string name="serviceClassDataSync" msgid="7530000519646054776">"ထပ်တူ ကိုက်ညီခြင်း"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"Packet"</string>
@@ -246,10 +246,10 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"အဆက်အသွယ်များ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"သင့် အဆက်အသွယ်များအား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"တည်နေရာ"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူ"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူရန်"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ပြက္ခဒိန်"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
-    <string name="permgrouplab_sms" msgid="228308803364967808">"စာတိုစနစ်"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"သိုလှောင်မှုများ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
@@ -261,15 +261,15 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးမှာပါရှိသည်များကို ထုတ်ယူခြင်း"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင် အပြန်အလှန်လုပ်နေသော ဝင်းဒိုးမှာပါရှိသည်များကို သေချာစွာ ကြည့်ရှုစစ်ဆေးပါ"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ထိတို့ခြင်းဖြင့် ရှာဖွေပေးနိုင်တာကို ဖွင့်လိုက်ပါ"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"တို့လိုက်သည့်အရာများကို အသံထွက်ဖတ်ပေးပါလိမ့်မည်။ လက်ဟန်အမူအရာများကို အသုံးပြု၍ မျက်နှာပြင်ကို လေ့လာနိုင်ပါသည်။"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ပိုမိုကောင်းမွန်သော ဝဘ်ရယူသုံးစွဲနိုင်မှုကို ဖွင့်ရန်"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"အပလီကေးရှင်းကို ပိုမိုပြည့်စုံစေရန် စကရစ်များကို သွင်းနိုင်ပါတယ်"</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို သေချာစွာ စစ်ဆေးပါ"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"အရေးကြီးသော ကိုယ်ရေးအချက်အလက်များဖြစ်တဲ့ ခရက်ဒစ်ကဒ်နံပါတ်များနှင့် စကားဝှက်များ ပါဝင်ပါတယ်."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ပါ"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"အက်ပ်ကို လွယ်ကူစွာ ဝင်ရောက်အသုံးပြုနိုင်ရန်အတွက် စကရစ်ကို ထည့်သွင်းနိုင်သည်။"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါ။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
@@ -546,9 +546,9 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့အား ပိတ်ထားပါ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"ပင်မစာမျက်နှာ"</item>
+    <item msgid="8901098336658710359">"အိမ်"</item>
     <item msgid="869923650527136615">"မိုဘိုင်း"</item>
-    <item msgid="7897544654242874543">"အလုပ်အကိုင်"</item>
+    <item msgid="7897544654242874543">"အလုပ်"</item>
     <item msgid="1103601433382158155">"အလုပ်ဖက်စ်"</item>
     <item msgid="1735177144948329370">"အိမ်ဖက်စ်"</item>
     <item msgid="603878674477207394">"ပေဂျာ"</item>
@@ -556,25 +556,25 @@
     <item msgid="9192514806975898961">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"ပင်မစာမျက်နှာ"</item>
-    <item msgid="7084237356602625604">"အလုပ်အကိုင်"</item>
+    <item msgid="8073994352956129127">"အိမ်"</item>
+    <item msgid="7084237356602625604">"အလုပ်"</item>
     <item msgid="1112044410659011023">"တခြား"</item>
     <item msgid="2374913952870110618">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"ပင်မစာမျက်နှာ"</item>
-    <item msgid="5629153956045109251">"အလုပ်အကိုင်"</item>
+    <item msgid="6880257626740047286">"အိမ်"</item>
+    <item msgid="5629153956045109251">"အလုပ်"</item>
     <item msgid="4966604264500343469">"တခြား"</item>
     <item msgid="4932682847595299369">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"ပင်မစာမျက်နှာ"</item>
-    <item msgid="1359644565647383708">"အလုပ်အကိုင်"</item>
+    <item msgid="1738585194601476694">"အိမ်"</item>
+    <item msgid="1359644565647383708">"အလုပ်"</item>
     <item msgid="7868549401053615677">"တခြား"</item>
     <item msgid="3145118944639869809">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"အလုပ်အကိုင်"</item>
+    <item msgid="7546335612189115615">"အလုပ်"</item>
     <item msgid="4378074129049520373">"တခြား"</item>
     <item msgid="3455047468583965104">"မိမိစိတ်ကြိုက်"</item>
   </string-array>
@@ -591,7 +591,7 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"မိမိစိတ်ကြိုက်"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"အိမ်"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"မိုဘိုင်း"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"အလုပ်အကိုင်"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"အလုပ်"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"အလုပ်ဖက်စ်"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"အိမ်ဖက်စ်"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"ပေဂျာ"</string>
@@ -611,20 +611,20 @@
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"မိမိစိတ်ကြိုက်"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"မွေးနေ့"</string>
-    <string name="eventTypeAnniversary" msgid="3876779744518284000">"အထိမ်းအမှတ်"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"နှစ်ပတ်လည်နေ့"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"တခြား"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"မိမိစိတ်ကြိုက်"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"ပင်မစာမျက်နှာ"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"အိမ်"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"အလုပ်"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"တခြား"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"မိုဘိုင်း"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"မိမိစိတ်ကြိုက်"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"ပင်မစာမျက်နှာ"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"အလုပ်အကိုင်"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"အိမ်"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"အလုပ်"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"တခြား"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"မိမိစိတ်ကြိုက်"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"ပင်မစာမျက်နှာ"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"အလုပ်အကိုင်"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"အိမ်"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"အလုပ်"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"တခြား"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"မိမိစိတ်ကြိုက်"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -636,7 +636,7 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"အလုပ်အကိုင်"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"အလုပ်"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"တခြား"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"မိမိစိတ်ကြိုက်"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"မိမိစိတ်ကြိုက်"</string>
@@ -655,8 +655,8 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"ညီအမ"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"အိမ်ထောင်ဖက်"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"မိမိစိတ်ကြိုက်"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"ပင်မစာမျက်နှာ"</string>
-    <string name="sipAddressTypeWork" msgid="6920725730797099047">"အလုပ်အကိုင်"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"အိမ်"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"အလုပ်"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"တခြား"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"ဤအဆက်အသွယ်အား ကြည့်ရှုရန်  အပလီကေးရှင်းမတွေ့ပါ"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN ကုဒ် ရိုက်ထည့်ပါ"</string>
@@ -720,8 +720,8 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"အကြိမ်ရေ များစွာ ပုံဆွဲသော့ဖွင့်ရန် ကြိုးစားခြင်း"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"သော့ဖွင့်ရန် Google အကောင့်ဖြင့် ဝင်ပါ"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"သုံးစွဲသူ အမှတ် (အီးမေးလ်)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"လျို့ဝှက် နံပါတ်"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ဝင်ရန်"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"စကားဝှက်"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"လက်မှတ်ထိုးဝင်ရန်"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"အသုံးပြုသူအမည် သို့မဟုတ် လျို့ဝှက် နံပါတ် မှားယွင်းနေသည်"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"သုံးစွဲသူ အမည် သို့ စကားဝှင်ကို မေ့နေပါသလား။ \n"<b>"google.com/accounts/recovery"</b>" ကို သွားရောက်ပါ။"</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"စစ်ဆေးနေပါသည်…"</string>
@@ -807,7 +807,7 @@
     <string name="save_password_message" msgid="767344687139195790">"ဤလျှို့ဝှက်စကားဝှက်အား ဘရောင်ဇာကိုမှတ်ခိုင်းမည်လား"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ယခုမလုပ်ပါ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"မှတ်ထားရန်"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"ဘယ်တော့မှ"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"လုံးဝ မလုပ်ပါ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"သင့်ဆီမှာ ဒီစာမျက်နှာကို ဖွင့်ရန် ခွင့်ပြုချက် မရှိပါ။"</string>
     <string name="text_copied" msgid="4985729524670131385">"clipboardထံ စာသားအားကူးယူမည်"</string>
     <string name="more_item_label" msgid="4650918923083320495">"နောက်ထပ်"</string>
@@ -1131,7 +1131,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"သင့် SIM အသစ်ပုံမှန် အလုပ်လုပ်ရန်၊ သင်အသုံးပြုသည့် မိုဘိုင်းဝန်ဆောင်မှုမှ အက်ပ်တစ်ခုထည့်သွင်း၍ ဖွင့်ရန်လိုအပ်ပါသည်။"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"အက်ပ်ကို ရယူပါ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ယခုမဟုတ်သေးပါ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ယခုမလုပ်ပါ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM အသစ်ထည့်သွင်းလိုက်ပါသည်"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"၎င်းကိုတပ်ဆင်ရန် တို့ပါ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"အချိန်သတ်မှတ်ရန်"</string>
@@ -1160,7 +1160,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ငြင်းပယ်ပါ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>
     <string name="show_ime" msgid="2506087537466597099">"စက်၏ကီးဘုတ်ကိုအသုံးပြုနေစဉ် ၎င်းကိုမျက်နှာပြင်ပေါ်တွင် ထားပါ"</string>
-    <string name="hardware" msgid="194658061510127999">"ကီးဘုတ်အတုပြရန်"</string>
+    <string name="hardware" msgid="194658061510127999">"ပကတိအသွင်ကီးဘုတ်ပြရန်"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ရုပ်ပိုင်းဆိုင်ရာ အသွင်အပြင်ကို ပြင်ဆင်သတ်မှတ်ပါ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ဘာသာစကားနှင့် အသွင်အပြင်ရွေးချယ်ရန် တို့ပါ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1256,7 +1256,7 @@
     <string name="tethered_notification_message" msgid="2113628520792055377">"စနစ်ထည့်သွင်းရန် တို့ပါ။"</string>
     <string name="back_button_label" msgid="2300470004503343439">"နောက်သို့"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ရှေ့သို့"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"ကျော်"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"ကျော်ရန်"</string>
     <string name="no_matches" msgid="8129421908915840737">"ထပ်တူမတွေ့ရှိပါ"</string>
     <string name="find_on_page" msgid="1946799233822820384">"စာမျက်နှာတွင်ရှာဖွေရန်"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
@@ -1413,7 +1413,7 @@
     <string name="kg_login_instructions" msgid="1100551261265506448">"သော့ဖွင့်ရန် သင့်ရဲ့ Google အကောင့်ဖြင့် ဝင်ပါ"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"သုံးစွဲသူအမည် (အီးမေးလ်)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"စကားဝှက်"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"ဝင်ပါ"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"လက်မှတ်ထိုးဝင်ရန်"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"အသုံးပြုသူ အမည် သို့  စကားဝှက်မမှန်ကန်ပါ"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"သင် သုံးစွဲသူ အမည် သို့ စကားဝှက်အားမေ့နေပါသလား။\n"<b>"google.com/accounts/recovery"</b>" သို့ သွားရောက်ပါ"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"အကောင့်ကို စစ်ဆေးနေစဉ်..."</string>
@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေစဉ်"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန်၊ ထိပ်ဘက်မှ အောက်ဘက်သို့ ဆွဲချပါ။"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ရပါပြီ"</string>
     <string name="done_label" msgid="2093726099505892398">"ပြီးပါပြီ"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"နာရီရွေးချက်စရာ"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"သင့် အက်ဒမင်မှ သွင်းယူထား၏"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"သင့်စီမံခန့်ခွဲသူမှ အဆင့်မြှင့်ထားပါသည်။"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"သင့် အက်ဒမင်အား ဖျက်ရန်"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်၊ ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကို  လျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့်၊ နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်လုပ်ပေးရလေ့ရှိသည့် အီးမေးလ်၊ စာပို့ခြင်းနှင့်၊ အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အပ်ဒိတ်လုပ်မည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းအား အလိုအလျောက် ပိတ်ထားသည်။"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန် ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကိုလျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့် နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်ခ်လုပ်ပေးရလေ့ရှိသည့် အီးမေးလ်၊ စာပို့ခြင်းနှင့် အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အပ်ဒိတ်လုပ်မည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းကို အလိုအလျောက် ပိတ်ထားသည်။"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမရှိစေရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင် မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
@@ -1613,7 +1613,7 @@
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"မနှောင့်ယှက်ရ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊တနင်္ဂနွေ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>

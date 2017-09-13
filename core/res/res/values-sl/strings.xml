@@ -253,11 +253,11 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostop do stikov"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostop do lokacije te naprave"</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Google Koledar"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Koledar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostop do koledarja"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"pošiljanje in ogled sporočil SMS"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za shranjevanje"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Shramba"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostop do fotografij, predstavnosti in datotek v napravi"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snemanje zvoka"</string>
@@ -275,7 +275,7 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za boljšo dostopnost vsebine aplikacije je mogoče namestiti skripte."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Opazovati besedilo, ki ga natipkate"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Vključuje osebne podatke, kot so številke kreditnih kartic in gesla."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Nadziranje povečave prikaza"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Nadzirati povečave prikaza"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Nadziranje stopnje povečave in položaja prikaza."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvajanje potez"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mogoče je izvajanje dotikov, vlečenja, primikanja in razmikanja prstov ter drugih potez."</string>
@@ -1284,7 +1284,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ozadje"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Spreminjanje ozadja"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Poslušalec obvestil"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Poslušalec za navidezno resničnost"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Poslušalec za VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Ponudnik pogojev"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Storitev za določanje stopenj pomembnosti obvestil"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN aktiviran"</string>
@@ -1600,8 +1600,8 @@
       <item quantity="other">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Celozaslonski način"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete tako, da z vrha s prstom povlečete navzdol."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Vklopljen je celozaslonski način"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete ga tako, da z vrha s prstom povlečete navzdol."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumem"</string>
     <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Okrogli drsnik za ure"</string>

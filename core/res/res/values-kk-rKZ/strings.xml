@@ -617,7 +617,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"Үй"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Жұмыс"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Басқа"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"Ұялы"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Мобильдік"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Арнаулы"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Үй"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Жұмыс"</string>
@@ -1150,7 +1150,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI режиміне арналған USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB жабдығына қосылған"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Қосымша опциялар үшін түртіңіз."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB жөндеу қосылған"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB түзетуі қосылған"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB түзетуін өшіру үшін түртіңіз."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Қате туралы есеп алынуда…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Қате туралы есепті бөлісу керек пе?"</string>
@@ -1256,7 +1256,7 @@
     <string name="tethered_notification_message" msgid="2113628520792055377">"Реттеу үшін түртіңіз."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Артқа"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Келесі"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"Аттап өту"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Өткізіп жіберу"</string>
     <string name="no_matches" msgid="8129421908915840737">"Сәйкес табылмады"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Беттен табу"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
@@ -1335,7 +1335,7 @@
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G деректер шегіне жеттіңіз"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Ұялы деректер шегіне жеттіңіз"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi деректер шегіне жеттіңіз"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Циклдің қал. бөл. үшін дер. кід."</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Дерек тасымалы кідіртілді"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2Г-3Г дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Ш дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Ұялы деректер шегі асырылды"</string>
@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Кейінірек қайта әрекеттеніңіз."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Толық экранда көру"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Шығу үшін жоғарыдан төмен қарай жанап өтіңіз."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Шығу үшін жоғарыдан төмен қарай сипап өтіңіз."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Түсіндім"</string>
     <string name="done_label" msgid="2093726099505892398">"Дайын"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Сағаттар айналымының қозғалтқышы"</string>
@@ -1607,7 +1607,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін (келесі дабыл)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Сіз осыны өшіргенше"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Өшірмейінше мазаламау"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Мазаламау\" режимін өшіргенше"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Тасалау"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Мазаламау"</string>

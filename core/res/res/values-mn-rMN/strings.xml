@@ -185,7 +185,7 @@
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Телевиз сонголтууд"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Утасны сонголт"</string>
-    <string name="silent_mode" msgid="7167703389802618663">"Чимээгүй горим"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Дуугүй горим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Утасгүй холбоог асаах"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Утасгүй сүлжээг унтраах уу"</string>
     <string name="screen_lock" msgid="799094655496098153">"Дэлгэцний түгжээ"</string>
@@ -215,7 +215,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Дэлгэцний түгжээ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Унтраах"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Яаралтай тусламж"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээллэх"</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээлэх"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
@@ -226,7 +226,7 @@
       <item quantity="other">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_1">%d</xliff:g> секундад авна.</item>
       <item quantity="one">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_0">%d</xliff:g> секундад авна.</item>
     </plurals>
-    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Чимээгүй горим"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Дуугүй горим"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Дуу хаагдсан"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Дуу асав"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Нислэгийн горим"</string>
@@ -265,7 +265,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Хүрч танихыг асаах"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Товшсон зүйлсийг чангаар хэлэх ба дэлгэцийг дохио ашиглан таних боломжтой."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Сайжруулсан веб хандалтыг асаах"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Сайжруулсан вэб хандалтыг асаах"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Апп контентод илүү хялбар хандуулахын тулд скриптыг суулгана."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Бичсэн текстээ ажиглах"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредит картын дугаар болон нууц үг зэрэг хувийн датаг агуулж байна."</string>
@@ -280,9 +280,9 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"статус самбарыг нээх/хаах"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Апп нь статус самбарыг дэлгэх болон хаах боломжтой."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"товчлол суулгах"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Аппликешн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг нэмж чадна."</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг нэмж чадна."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"товчлолыг устгах"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Аппликешн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"гарсан дуудлагыг чиглэлийг өөрчлөх"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Гадагш дуудлага хийх үед залгасан дугаарыг харах, дуудлагыг өөр дугаар руу шилжүүлэх, таслах боломжтой болгоно."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"текст мессеж(SMS) хүлээж авах"</string>
@@ -312,7 +312,7 @@
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"бусад апп-г хаах"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Апп нь бусад апп-н арын процессыг дуусгах боломжтой. Энэ бусад апп-г зогсоох боломжийг олгоно."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"бусад апп-р зурах"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Апп нь бусад аппликешн эсвэл хэрэглэгчийн интерфейсын дээд талд зурах боломжтой. Эдгээр нь бүх аппликешны интерфейсыг ашиглахад саад болох эсвэл   бусад аппликешн дээр таны харж байгааг солих боломжтой."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Апп нь бусад аппликейшн эсвэл хэрэглэгчийн интерфейсын дээд талд зурах боломжтой. Эдгээр нь бүх аппликейшны интерфейсыг ашиглахад саад болох эсвэл   бусад аппликейшн дээр таны харж байгааг солих боломжтой."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"апп-г байнга ажиллуулах"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Апп нь өөрийн хэсгийн санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан таблетыг удаашруулах болно."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Апп-д өөрийн бүрэлдэхүүн хэсгийг санах ойд хадгалахыг зөвшөөрдөг. Энэ нь бусад аппликэйшнүүдийн ашиглах санах ойн хэмжээг хязгаарлахаас гадна, телевизийг удаашруулна."</string>
@@ -347,10 +347,10 @@
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"биеийн мэдрэгчид хандах (зүрхний хэмнэл шалгагч г.м)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Апп-т таны зүрхний цохилт гэх мэт биеийн байдлыг хянадаг мэдрэгчдийн датанд хандалт хийх боломж олгоно."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"календарийн хуваарийн нууц мэдээллийг унших"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Апп нь таны таблет дээр хадгалагдсан найзууд болон хамтран ажиллагсдын календарийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны календарийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"хуанлийн хуваарийн нууц мэдээллийг унших"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Апп нь таны таблет дээр хадгалагдсан найзууд болон хамтран ажиллагсдын хуанлийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны хуанлийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Апп-д таны найз, эсвэл хамтран ажиллагсдын гэх мэт таны телевиз дээр хадгалагдсан бүх хуанлийн үйл ажиллагааг уншихыг зөвшөөрдөг. Энэ нь апп-д таны хуанлийн өгөгдлийг нууцлалтай эсэхээс үл хамааран хадгалахыг зөвшөөрч болох юм."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Allows the app to read all calendar events stored on your phone, including those of friends or co-workers. This may allow the app to share or save your calendar data, regardless of confidentiality or sensitivity. Апп нь таны утсан дээр хадгалагдсан найзууд болон хамтран ажиллагсдын календарийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны календарийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Allows the app to read all calendar events stored on your phone, including those of friends or co-workers. This may allow the app to share or save your calendar data, regardless of confidentiality or sensitivity. Апп нь таны утсан дээр хадгалагдсан найзууд болон хамтран ажиллагсдын хуанлийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны хуанлийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"календарын хуваарийг нэмэх эсвэл өөрчлөх болон эзэмшигчид мэдэгдэлгүйгээр зочидруу имэйл илгээх"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Апп нь таблет дээр таны, найзууд, хамтран ажиллагсдын өөрчилж чадах үйл явдлуудыг нэмэх, хасах, солих боломжтой. Энэ нь апп-д, хуанли эзэмшигчээс ирсэн мэт харагдах мессежийг илгээх эсвэл эзэмшигчд нь мэдэгдэлгүйгээр үйл явдлуудыг өөрчлөх боломжийг олгоно."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Апп-д таны телевиз дээрээ өөрчилж болох найз эсвэл хамтран ажиллагсдын үйл явдлыг нэмэх, устгах, өөрчлөхийг зөвшөөрдөг. Энэ нь апп-д хуанлийн үйл явдлын эзэд явуулсан мэт харагдах зурвасыг илгээхийг зөвшөөрдөг бөгөөд тухайн эздэд мэдэгдэлгүйгээр үйл явдлыг өөрчлөхийг зөвшөөрдөг."</string>
@@ -358,7 +358,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"байршил нийлүүлэгчийн нэмэлт тушаалд хандах"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Апп нь байршил нийлүүлэгчийн нэмэлт тушаалд хандах боломжтой. Энэ нь апп-д GPS эсвэл бусад байршлын үйлчилгээний ажиллагаанд нөлөөлөх боломжийг олгоно."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"тодорхой байршилд хандах (GPS, сүлжээнд суурилсан)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Апп нь GPS эсвэл үүрэн цамхаг болон Wi-Fi зэрэг сүлжээний байршлын эх үүсвэрийг ашиглан таны тодорхой байршлыг авах боломжтой. Эдгээр байршлын үйлчилгээнүүд нь асаалттай байх шаардлагатай ба таны төхөөрөмж дээрх апп-ууд ашиглах боломжтой байх шаардлагатай. Апп-ууд энийг ашиглан таныг хаана байгааг тогтоох боломжтой ба батерей зарцуулалт нэмэгдэнэ."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Апп нь GPS эсвэл үүрэн цамхаг болон Wi-Fi зэрэг сүлжээний байршлын эх үүсвэрийг ашиглан таны тодорхой байршлыг авах боломжтой. Эдгээр байршлын үйлчилгээнүүд нь асаалттай байх шаардлагатай ба таны төхөөрөмж дээрх апп-ууд ашиглах боломжтой байх шаардлагатай. Аппууд энийг ашиглан таныг хаана байгааг тогтоох боломжтой ба батерей зарцуулалт нэмэгдэнэ."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ойролцоох байршилд хандах (сүлжээнд суурилсан)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Апп нь таны ойролцоох байршлыг оло боломжтой. Энэ байршил нь үүрэн цамхаг болон Wi-Fi зэрэг сүлжээний байршлын эх сурвалжийг ашигладаг байршлын үйлчилгээнээс олдоно. Эдгээр байршлын үйлчилгээнүүд нь таны төхөөрөмж дээр асаалттай байх шаардлагатай ба апп-д тэдгээрийг ашиглах боломжтой байх шаардлагатай. Апп-д тэдгээрийг ашиглан таны байршлыг ойролцоогоор олох боломжтой."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Аудио тохиргоо солих"</string>
@@ -396,9 +396,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Апп-д телевизийн цагийн бүсийг өөрчлөхийг зөвшөөрдөг."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Апп нь утасны цагийн бүсийг өөрчлөх боломжтой."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"төхөөрөмж дээрх акаунтыг олох"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликейшнүүдийг үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Телевизийн жагсаалтад байгаа акаунтуудын хаягийг апп-д авахыг зөвшөөрдөг. Энэ нь таны суулгасан бусад аппликэйшнүүдийн бий болгосон акаунтуудыг оруулж болно."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Апп нь утсанд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Апп нь утсанд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликейшнүүдийг үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"сүлжээний холболтыг үзэх"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Апп нь сүлжээ байгаа болон холбогдсон эсэх зэрэг сүлжээний холболтын талаарх мэдээллийг харах боломжтой."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"сүлжээнд бүрэн нэвтрэх"</string>
@@ -499,15 +499,15 @@
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"үүрэн компанийн нийлүүлсэн тохируулгын апп-г өдөөх"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Эзэмшигчид үүрэн компанийн нийлүүлсэн тохируулах апп-г өдөөх боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Сүлжээний байдлын талаар ажиглалтуудыг хүлээн авах"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Аппликешнд сүлжээний байдлын талаар ажиглалтуудыг хүлээн авахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Аппликейшнд сүлжээний байдлын талаар ажиглалтуудыг хүлээн авахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"оролтын төхөөрөмжийн калибрешныг өөрчлөх"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Мэдрэгчтэй дэлгэцний калибрешн параметрийг өөрчлөхийг апп-д зөвшөөрнө. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"хандалтын DRM сертификат"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Аппликешнд DRM сертификатыг ашиглах болон нийлүүлэхийг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Аппликейшнд DRM сертификатыг ашиглах болон нийлүүлэхийг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam дамжуулалтын төлөвийг авах"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Одоогийн Андройд Бийм дамжуулалтын мэдээллийг хүлээн авахыг аппликешнд зөвшөөрөх"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Одоогийн Андройд Бийм дамжуулалтын мэдээллийг хүлээн авахыг аппликейшнд зөвшөөрөх"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM сертификатыг устгах"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Аппликешнд DRM сертификатыг устгахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Аппликейшнд DRM сертификатыг устгахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"зөөгч зурвасын үйлчилгээнд холбох"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Эзэмшигчид зөөгч зурвасын үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"Үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбогдох"</string>
@@ -658,7 +658,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Гэрийн"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Ажлын"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Бусад"</string>
-    <string name="quick_contacts_not_available" msgid="746098007828579688">"Энэ харилцагчийг харах аппликешн олдсонгүй."</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Энэ харилцагчийг харах аппликейшн олдсонгүй."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN кодыг бичнэ үү"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK-г бичээд шинэ PIN код оруулна уу"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK код"</string>
@@ -792,18 +792,18 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Мөргөлч"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Хэсэг"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Эмират"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"өөрийн Веб хавчуурга болон түүхийг унших"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Апп нь Хөтчийн зочилж байсан бүх URL-н түүх болон Хөтчийн бүх хавчуургыг унших боломжтой. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадавхтай аппликешнүүдэд ашиглагдахгүй байх боломжтой."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"веб хавчуурга болон түүхийг бичих"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Апп нь таны таблет дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"өөрийн Вэб хавчуурга болон түүхийг унших"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Апп нь Хөтчийн зочилж байсан бүх URL-н түүх болон Хөтчийн бүх хавчуургыг унших боломжтой. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадавхтай аппликейшнүүдэд ашиглагдахгүй байх боломжтой."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"вэб хавчуурга болон түүхийг бичих"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Апп нь таны таблет дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликейшнд ажиллахгүй байх боломжтой."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Апп-д телевиз-д хадгалагдсан Вэб хөтчийн түүх, хавчуургыг өөрчлөхийг зөвшөөрдөг. Энэ нь апп-д Вэб хөтчийн датаг устгах эсвэо өөрчлөхийг зөвшөөрч болох юм. Жич: энэ зөвшөөрөл нь гуравдагч вэб хөтөч эсвэл вэб хайлт хийх чадвартай апп-ны хувьд үйлчлэхгүй."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликейшнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын вэб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
     <string name="save_password_message" msgid="767344687139195790">"Та хөтчид энэ нууц үгийг сануулах уу?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Одоо биш"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Санах"</string>
@@ -1001,7 +1001,7 @@
     <string name="aerr_close" msgid="2991640326563991340">"Хаах"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Төхөөрөмжийг дахин эхлүүлэх хүртэл дууг нь хаах"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Хүлээх"</string>
-    <string name="aerr_close_app" msgid="3269334853724920302">"Апп-ыг хаах"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Аппыг хаах"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> хариу өгөхгүй байна"</string>
     <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> хариу өгөхгүй байна"</string>
@@ -1092,7 +1092,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Интернет холболт муу байна."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Холболтыг зөвшөөрөх үү?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Програм %1$s нь Wifi сүлжээ %2$s-тай холбох хүсэлтэй байна"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Аппликешн"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Аппликейшн"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Шууд"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Шуудыг эхлүүлнэ үү. Энэ нь Wi-Fi клиент/холболтын цэг унтраана."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Шуудыг эхлүүлж чадсангүй."</string>
@@ -1203,9 +1203,9 @@
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Оруулаагүй байна"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Таарах активити олдсонгүй."</string>
     <string name="permlab_route_media_output" msgid="6243022988998972085">"медиа гаралтын чиглэл"</string>
-    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликешн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликейшн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"Суулгах харилцан үйлдлийг унших"</string>
-    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликейшн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"багц суулгахыг хүсэх"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Аппликейшн нь багц суулгахыг хүсэх боломжтой."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ханын зураг"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ханын зураг солих"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Мэдэгдэл сонсогч"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Виртуал Орчин (VR) сонсогч"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR сонсогч"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Нөхцөл нийлүүлэгч"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Мэдэгдлийг ангилах үйлчилгээ"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN идэвхтэй болов"</string>
@@ -1268,7 +1268,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD картыг цэвэрлэж байна…"</string>
     <string name="share" msgid="1778686618230011964">"Хуваалцах"</string>
     <string name="find" msgid="4808270900322985960">"Олох"</string>
-    <string name="websearch" msgid="4337157977400211589">"Веб хайлт"</string>
+    <string name="websearch" msgid="4337157977400211589">"Вэб хайлт"</string>
     <string name="find_next" msgid="5742124618942193978">"Дараагийнхыг хайх"</string>
     <string name="find_previous" msgid="2196723669388360506">"Өмнөхөөс олох"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g>-н байршлын хүсэлт"</string>
@@ -1441,7 +1441,7 @@
     <string name="owner_name" msgid="2716755460376028154">"Эзэмшигч"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Алдаа"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Энэ өөрчлөлтийг админ зөвшөөрөөгүй байна"</string>
-    <string name="app_not_found" msgid="3429141853498927379">"Энэ ажиллагааг зохицуулах аппликешн олдсонгүй."</string>
+    <string name="app_not_found" msgid="3429141853498927379">"Энэ ажиллагааг зохицуулах аппликейшн олдсонгүй."</string>
     <string name="revoke" msgid="5404479185228271586">"Цуцлах"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Таны админ суулгасан байна"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Танай админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Таны админ устгасан байна"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг юм. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтрах юм."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтарна."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч цөөн үйлдэл хийнэ. Жишээлбэл зураг харахын тулд та товших шаардлагатай болно."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Өгөгдөл хамгаалагчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>

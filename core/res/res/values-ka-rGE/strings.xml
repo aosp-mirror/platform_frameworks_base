@@ -262,7 +262,7 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"სხეულის სენსორები"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"თქვენი სასიცოცხლო ფუნქციების შესახებ სენსორის მონაცემებზე წვდომა"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ფანჯრის კონტენტის მოძიება"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"შეამოწმეთ იმ ფანჯრის კონტექტი, რომელშიც მუშაობთ."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"იმ ფანჯრის კონტენტის შემოწმება, რომელშიც მუშაობთ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"„შეხებით აღმოჩენის“ ჩართვა"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ერთეულები, რომლებსაც შეეხებით, წაიკითხება ხმამაღლა, ხოლო ეკრანის დათვალიერება ჟესტების მეშვეობით იქნება შესაძლებელი."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ვებზე გამარტივებული წვდომის დამატებითი შესაძლებლობების ჩართვა"</string>
@@ -1252,7 +1252,7 @@
     <string name="submit" msgid="1602335572089911941">"გაგზავნა"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"მანქანის რეჟიმი ჩართულია"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"შეეხეთ მანქანის რეჟიმიდან გამოსასვლელად."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ინტერნეტის მიერთება ან უსადენო ქსელი აქტიურია."</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"ტეტერინგი ან უსადენო ქსელი აქტიურია"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"შეეხეთ დასაყენებლად."</string>
     <string name="back_button_label" msgid="2300470004503343439">"უკან"</string>
     <string name="next_button_label" msgid="1080555104677992408">"მომდევნო"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"თქვენი ადმინისტრატორის მიერ დაყენებული"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის შესრულებას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელ-ფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპლიკაციების განახლება არ მოხდება მათ გახსნეამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ბატარეის მოქმედების ვადის გაუმჯობესებისათვის, ბატარეის დამზოგი ამცირებს თქვენი მოწყობილობის ფუნქციონალობას და ზღუდავს ვიბრაციას, ადგილმდებარეობის სერვისებს და ძირითად ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპების განახლება არ მოხდება მათ გახსნამდე.\n\nბატარეის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>

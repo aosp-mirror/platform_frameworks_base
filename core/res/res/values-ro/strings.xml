@@ -256,7 +256,7 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"trimită și să vadă mesajele SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
@@ -1175,7 +1175,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"Conexiune USB pentru MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectat la un accesoriu USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Atingeți pentru mai multe opțiuni."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Depanarea USB este conectată"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Remedierea erorilor prin USB este conectată"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Atingeți ca să dezactivați remedierea erorilor prin USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Se creează un raport de eroare…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Trimiteți raportul de eroare?"</string>
@@ -1259,7 +1259,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagine de fundal"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Schimbați imaginea de fundal"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviciu de citire a notificărilor"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Instrument de ascultare pentru Realitatea virtuală"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Instrument de ascultare pentru RV"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Furnizor de condiții"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Serviciul de clasificare a notificărilor"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activat"</string>

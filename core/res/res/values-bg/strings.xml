@@ -240,7 +240,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Скрито съдържание"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Съдържанието е скрито чрез правило"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасен режим"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Системно от Android"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Превключване към личния потребителски профил"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Превключване към служебния пoтребителски профил"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
@@ -250,15 +250,15 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"има достъп до календара ви"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"изпраща и преглежда SMS съобщения"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Съхранение"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"има достъп до снимките, мултимедията и файловете на устройството ви"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"да изпраща и преглежда SMS съобщения"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Хранилище"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"да има достъп до снимките, мултимедията и файловете на устройството ви"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записва звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"прави снимки и записва видеоклипове"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"да прави снимки и записва видеоклипове"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"извършва телефонни обаждания и да ги управлява"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"да извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Извличане на съдържанието от прозореца"</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Тапет"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Промяна на тапета"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Слушател на известия"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Приемател за виртуална реалност"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Приемател за VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Доставчик на условия"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Услуга за класифициране на известията"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN е активирана"</string>
@@ -1438,7 +1438,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Превключва се към <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
-    <string name="owner_name" msgid="2716755460376028154">"Собственик"</string>
+    <string name="owner_name" msgid="2716755460376028154">"собственик"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Тази промяна не е разрешена от администратора ви"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Няма намерено приложение за извършване на това действие"</string>
@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Опитайте отново по-късно"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Изглед на цял екран"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"За изход прекарайте пръст надолу от горната част."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"За изход плъзнете пръст надолу от горната част."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Разбрах"</string>
     <string name="done_label" msgid="2093726099505892398">"Готово"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Кръгов плъзгач за часовете"</string>

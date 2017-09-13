@@ -82,7 +82,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Trostrani poziv"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Odbijanje neželjenih i neugodnih poziva"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Isporuka pozivnog broja"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Ne uznemiravaj"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Ne ometaj"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Zadana postavka ID-a pozivatelja ima ograničenje. Sljedeći poziv: Ograničen"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Zadana postavka ID-a pozivatelja ima ograničenje. Sljedeći poziv: Nije ograničen"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Zadana postavka ID-a pozivatelja nema ograničenje. Sljedeći poziv: Ograničen"</string>
@@ -265,15 +265,15 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Biometrijski senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupiti podacima senzora o vašim vitalnim znakovima"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Dohvaćati sadržaj prozora"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Istražite sadržaj prozora koji upotrebljavate."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Pregledat će sadržaj prozora koji upotrebljavate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Uključiti značajku Istraži dodirom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Dodirnute stavke izgovorit će se naglas, a zaslon se može istraživati pokretima."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Uključiti poboljšanu pristupačnost weba"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Kako bi sadržaj aplikacije bio pristupačniji, mogu se instalirati skripte."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Pratiti tekst koji pišete"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Uključuje osobne podatke kao što su brojevi kreditnih kartica i zaporke."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrola uvećanja zaslona"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolira razinu zumiranja i položaj zaslona."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolirati uvećanje zaslona"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolirat će stupanj i mjesto zumiranja."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvođenje pokreta"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirnuti, prijeći prstom, spojiti prste i izvoditi druge pokrete."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
@@ -361,9 +361,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pristup dodatnim naredbama davatelja lokacije"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Omogućuje aplikaciji pristup dodatnim naredbama davatelja usluga lokacije. To može omogućiti aplikaciji ometanje rada GPS-a ili drugih izvora lokacije."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"pristupati preciznoj lokaciji (na temelju GPS-a i mreža)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Aplikacija može dobiti vašu preciznu lokaciju pomoću globalnog pozicijskog sustava (GPS-a) ili mrežnih izvora lokacije kao što su bazne stanice i Wi-Fi. Te lokacijske usluge moraju biti uključene i dostupne vašem uređaju da bi ih aplikacija mogla upotrebljavati. Aplikacije mogu upotrebljavati tu mogućnost kako bi utvrdile vašu lokaciju i mogu dodatno trošiti bateriju."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Aplikacija može dobiti vašu preciznu lokaciju pomoću globalnog pozicijskog sustava (GPS-a) ili mrežnih izvora lokacije kao što su bazne stanice i Wi-Fi. Te usluge lokacije moraju biti uključene i dostupne vašem uređaju da bi ih aplikacija mogla upotrebljavati. Aplikacije mogu upotrebljavati tu mogućnost kako bi utvrdile vašu lokaciju i mogu dodatno trošiti bateriju."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pristupati približnoj lokaciji (na temelju mreža)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Aplikacija može dobiti vašu približnu lokaciju. Tu lokaciju izvode lokacijske usluge pomoću mrežnih izvora lokacije kao što su bazne stanice i Wi-Fi. Te lokacijske usluge moraju biti uključene i dostupne vašem uređaju da bi ih aplikacija mogla upotrebljavati. Aplikacije mogu upotrebljavati tu mogućnost kako bi utvrdile vašu približnu lokaciju."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Aplikacija može dobiti vašu približnu lokaciju. Tu lokaciju izvode usluge lokacije pomoću mrežnih izvora lokacije kao što su bazne stanice i Wi-Fi. Te usluge lokacije moraju biti uključene i dostupne vašem uređaju da bi ih aplikacija mogla upotrebljavati. Aplikacije mogu upotrebljavati tu mogućnost kako bi utvrdile vašu približnu lokaciju."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
@@ -1175,8 +1175,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB za MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Spojen na USB pribor"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za otklanjanje pogrešaka USB-om"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje pogrešaka putem USB-a."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za otklanjanje pogrešaka putem USB-a"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste takvo otklanjanje onemogućili."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izrada izvješća o programskoj pogrešci…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite li podijeliti izvješće o programskoj pogrešci?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Dijeljenje izvješća o programskoj pogrešci…"</string>
@@ -1361,7 +1361,7 @@
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dost. ogr. 4G prijenosa podataka"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Dost. ogr. mob. prijenosa podat."</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dost. ogr. Wi-Fi prijenosa pod."</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Podaci su pauz. za ostatak cikl."</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Podaci su pauzirani do kraja ciklusa"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Prekoračeno ograničenje 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Prekoračeno je ograničenje 4G podataka"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Limit mobilnih podataka premašen"</string>
@@ -1574,7 +1574,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Pokušajte ponovo kasnije"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Gledanje preko cijelog zaslona"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Za izlaz prijeđite prstom prema od vrha prema dolje."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Za izlaz prijeđite prstom od vrha prema dolje."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Shvaćam"</string>
     <string name="done_label" msgid="2093726099505892398">"Gotovo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kružni klizač sati"</string>
@@ -1595,8 +1595,8 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalirao administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurira vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih radnji. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio podatkovni promet, Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1642,7 +1642,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sljedeći alarm)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dok ne isključite"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dok ne isključite \"Ne uznemiravaj\""</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dok ne isključite \"Ne ometaj\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sažmi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>

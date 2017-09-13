@@ -186,7 +186,7 @@
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"ಟಿವಿ ಆಯ್ಕೆಗಳು"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ಫೋನ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="silent_mode" msgid="7167703389802618663">"ಶಾಂತ ಮೋಡ್"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"ವೈರ್‌ಲೆಸ್ ಆನ್ ಮಾಡು"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"ವೈರ್‌ಲೆಸ್ ಆನ್‌ ಮಾಡಿ"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"ವೈರ್‌ಲೆಸ್ ಆಫ್ ಮಾಡು"</string>
     <string name="screen_lock" msgid="799094655496098153">"ಸ್ಕ್ರೀನ್ ಲಾಕ್"</string>
     <string name="power_off" msgid="4266614107412865048">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
@@ -221,7 +221,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ಪರಸ್ಪರ ಸಂವಹನ ವರದಿ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ಹೆಚ್ಚಿನ ಸಂದರ್ಭಗಳಲ್ಲಿ ಇದನ್ನು ಬಳಸಿ. ಇದು ವರದಿಯ ಪ್ರಗತಿಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಸಮಸ್ಯೆ ಕುರಿತು ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಮತ್ತು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ. ಇದು ವರದಿ ಮಾಡಲು ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುವಂತಹ ಕೆಲವು ಕಡಿಮೆ ಬಳಸಲಾದ ವಿಭಾಗಗಳನ್ನು ತ್ಯಜಿಸಬಹುದು."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"ಪೂರ್ಣ ವರದಿ"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಟ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"ನಿಮ್ಮ ಸಾಧನವು ಸ್ಪಂದಿಸುತ್ತಿಲ್ಲದಿರುವಾಗ ಅಥವಾ ತುಂಬಾ ನಿಧಾನವಾಗಿರುವಾಗ ಕನಿಷ್ಠ ಹಸ್ತಕ್ಷೇಪಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಎಲ್ಲಾ ವಿಭಾಗಗಳೂ ಅಗತ್ಯವಿರುವಾಗ ಈ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ. ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಲು ಅಥವಾ ಹೆಚ್ಚುವರಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
       <item quantity="other">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
@@ -246,7 +246,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳ ಪ್ರವೇಶಿಸಲು"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -261,15 +261,15 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ದೇಹ ಸೆನ್ಸರ್‌ಗಳು"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳುತ್ತದೆ"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಸಂವಹನ ನಡೆಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯವನ್ನು ಪರೀಕ್ಷಿಸಿ."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶಿಸುವ ಮೂಲಕ ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡಿ"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶ-ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡುತ್ತದೆ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ಟ್ಯಾಪ್ ಮಾಡಲಾದ ಐಟಂಗಳನ್ನು ಗಟ್ಟಿಯಾಗಿ ಹೇಳಲಾಗುತ್ತದೆ ಮತ್ತು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಪರದೆಯನ್ನು ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಮಾಡಬಹುದಾಗಿದೆ."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ವರ್ಧಿತ ವೆಬ್ ಪ್ರವೇಶಿಸುವಿಕೆ ಆನ್ ಆಗುವಿಕೆ"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ವರ್ಧಿತ ವೆಬ್ ಪ್ರವೇಶಿಸುವಿಕೆ ಆನ್ ಮಾಡುತ್ತದೆ"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ಅಪ್ಲಿಕೇಶನ್ ವಿಷಯ ಇನ್ನಷ್ಟು ಲಭ್ಯವಾಗುವಂತೆ ಮಾಡಲು ಸ್ಕ್ರಿಪ್ಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಬಹುದಾಗಿದೆ."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ನೀವು ಟೈಪ್ ಮಾಡುವ ಪಠ್ಯವನ್ನು ಗಮನಿಸುತ್ತದೆ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್‌ಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ಪ್ರದರ್ಶನದ ವರ್ಧಕವನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ಡಿಸ್‌ಪ್ಲೇ ವರ್ಧಕ ನಿಯಂತ್ರಿಸುತ್ತದೆ"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ಪ್ರದರ್ಶನದ ಝೂಮ್ ಮಟ್ಟ ಮತ್ತು ಸ್ಥಾನ ನಿರ್ಧಾರವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಿ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ಟ್ಯಾಪ್ ಮಾಡಬಹುದು, ಸ್ವೈಪ್ ಮಾಡಬಹುದು, ಪಿಂಚ್ ಮಾಡಬಹುದು ಮತ್ತು ಇತರ ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಬಹುದು."</string>
@@ -281,7 +281,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ವಿಸ್ತರಿಸಲು ಅಥವಾ ಸಂಕುಚಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ಬಳಕೆದಾರರ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಹೋಮ್‌ಸ್ಕ್ರೀನ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಅಸ್ಥಾಪಿಸಿ"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ಬಳಕೆದಾರರ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಹೋಮ್‌ಸ್ಕ್ರೀನ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ಹೊರಹೋಗುವ ಕರೆಗಳ ಮಾರ್ಗ ಬದಲಿಸಿ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ಬೇರೊಂದು ಸಂಖ್ಯೆಗೆ ಕರೆಯನ್ನು ಮರುನಿರ್ದೇಶಿಸಲು ಆಯ್ಕೆಯ ಜೊತೆಗೆ ಹೊರ ಹೋಗುವ ಕರೆಯ ಸಮಯದಲ್ಲಿ ಡಯಲ್‌ ಮಾಡಿದ ಸಂಖ್ಯೆಯನ್ನು ನೋಡಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
@@ -355,12 +355,12 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಸ್ನೇಹಿತರು ಅಥವಾ ಸಹೋದ್ಯೋಗಿಗಳ ಈವೆಂಟ್‌ಗಳೂ ಸೇರಿದಂತೆ, ನೀವು ಮಾರ್ಪಡಿಸಬಹುದಾದ ಈವೆಂಟ್‍‍ಗಳನ್ನು ಸೇರಿಸಲು, ತೆಗೆದುಹಾಕಲು, ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ಕ್ಯಾಲೆಂಡರ್‍ ಮಾಲೀಕರಿಂದ ಬಂದಿರುವಂತೆ ಗೋಚರಿಸುವ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಇಲ್ಲವೇ ಮಾಲೀಕರ ಗಮನಕ್ಕೆ ತರದೆಯೇ, ಈವೆಂಟ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"ನಿಮ್ಮ ಟಿವಿಯಲ್ಲಿ ಮಾರ್ಪಡಿಸಬಹುದಾದ ಸ್ನೇಹಿತರು ಅಥವಾ ಸಹದ್ಯೋಗಿಗಳು ಸೇರಿದಂತೆ ಸೇರಿಸಲು, ತೆಗೆದುಹಾಕಲು, ನಿಮ್ಮ ಟಿವಿಯಲ್ಲಿ ಮಾರ್ಪಡಿಸಬಹುದಾದ ಈವೆಂಟ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಕ್ಯಾಲೆಂಡರ್‌ನ ಮಾಲೀಕರಿಂದ ಬಂದಿರಬಹುದು ಎಂದು ಪರಿಗಣಿಸಲಾಗುವಂತಹ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಅಥವಾ ಮಾಲೀಕರ ಅರಿವಿಲ್ಲದೆಯೆ ಈವೆಂಟ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಇದು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ನಿಮ್ಮ ಫೋನ್‍‍ನಲ್ಲಿ ನಿಮ್ಮ ಸ್ನೇಹಿತರು ಅಥವಾ ಸಹೋದ್ಯೋಗಿಗಳ ಈವೆಂಟ್‌ಗಳೂ ಸೇರಿದಂತೆ, ನೀವು ಮಾರ್ಪಡಿಸಬಹುದಾದ ಈವೆಂಟ್‍‍ಗಳನ್ನು ಸೇರಿಸಲು, ತೆಗೆದುಹಾಕಲು, ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ಕ್ಯಾಲೆಂಡರ್‍ ಮಾಲೀಕರಿಂದ ಬಂದಿರುವಂತೆ ಗೋಚರಿಸುವ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಇಲ್ಲವೇ ಮಾಲೀಕರ ಗಮನಕ್ಕೆ ತರದೆಯೇ, ಈವೆಂಟ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ಹೆಚ್ಚುವರಿ ಸ್ಥಾನ ಪೂರೈಕೆದಾರರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ಹೆಚ್ಚಿನ ಸ್ಥಾನ ಪೂರೈಕೆದಾರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು GPS ಅಥವಾ ಇತರ ಸ್ಥಾನ ಮೂಲಗಳ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮಧ್ಯ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ಹೆಚ್ಚುವರಿ ಸ್ಥಳ ಪೂರೈಕೆದಾರರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ಹೆಚ್ಚಿನ ಸ್ಥಳ ಪೂರೈಕೆದಾರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು GPS ಅಥವಾ ಇತರ ಸ್ಥಳ ಮೂಲಗಳ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮಧ್ಯ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ನಿಖರ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ (GPS ಮತ್ತು ನೆಟ್‍ವರ್ಕ್-ಆಧಾರಿತ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ಗ್ಲೊಬಲ್ ಪೊಸಿಷನಿಂಗ್ ಸಿಸ್ಟಮ್ (GPS) ಅಥವಾ ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು ವೈ-ಫೈ ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಾನ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ನಿಖರವಾದ ಸ್ಥಾನವನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಾನ ಸೇವೆಗಳು ಆನ್ ಆಗಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವೆಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಇದನ್ನು ಬಳಸಬಹುದು ಮತ್ತು ಹೆಚ್ಚುವರಿ ಬ್ಯಾಟರಿ ಶಕ್ತಿಯನ್ನು ಬಳಸಬಹುದು."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ಗ್ಲೊಬಲ್ ಪೊಸಿಷನಿಂಗ್ ಸಿಸ್ಟಂ (GPS) ಅಥವಾ ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು ವೈ-ಫೈ ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಳ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ನಿಖರವಾದ ಸ್ಥಳವನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಳ ಸೇವೆಗಳು ಆನ್ ಆಗಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವೆಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಇದನ್ನು ಬಳಸಬಹುದು ಮತ್ತು ಹೆಚ್ಚುವರಿ ಬ್ಯಾಟರಿ ಶಕ್ತಿಯನ್ನು ಬಳಸಬಹುದು."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ (ನೆಟ್‌ವರ್ಕ್-ಆಧಾರಿತ)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ನಿಮ್ಮ ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಈ ಸ್ಥಳವನ್ನು ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು ವೈ-ಫೈ ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಾನದ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಸ್ಥಳದ ಸೇವೆಗಳ ಮೂಲಕ ಪಡೆಯಲಾಗಿದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಾನ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವು ನಿಖರವಾಗಿ ಎಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಇದನ್ನು ಬಳಸಬಹುದು."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ನಿಮ್ಮ ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಈ ಸ್ಥಳವನ್ನು ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು ವೈ-ಫೈ ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಳದ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಸ್ಥಳದ ಸೇವೆಗಳ ಮೂಲಕ ಪಡೆಯಲಾಗಿದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಳ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವು ನಿಖರವಾಗಿ ಎಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಇದನ್ನು ಬಳಸಬಹುದು."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ನಿಮ್ಮ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ವಾಲ್ಯೂಮ್ ರೀತಿಯ ಮತ್ತು ಔಟ್‍‍ಪುಟ್‍‍ಗಾಗಿ ಯಾವ ಸ್ಪೀಕರ್ ಬಳಸಬೇಕು ಎಂಬ ರೀತಿಯ ಜಾಗತಿಕ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
@@ -468,8 +468,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ನಿಮ್ಮ SD ಕಾರ್ಡ್‌ನ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD ಕಾರ್ಡ್‌ಗೆ ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_use_sip" msgid="2052499390128979920">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಿಮ್‌ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
     <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಿಮ್‌ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
@@ -681,7 +681,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ಎಲ್ಲ ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಡೇಟಾಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ಗರಿಷ್ಠ ಫೇಸ್ ಅನ್‍ಲಾಕ್ ಪ್ರಯತ್ನಗಳು ಮೀರಿವೆ"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ಯಾವುದೇ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"ಟಿವಿಯಲ್ಲಿ ಯಾವುದೇ ಸಿಮ್ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ಫೋನ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
@@ -693,7 +693,7 @@
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"ಮುಂದಿನ ಟ್ರ್ಯಾಕ್"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"ವಿರಾಮಗೊಳಿಸು"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"ಪ್ಲೇ ಮಾಡು"</string>
-    <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"ನಿಲ್ಲಿಸು"</string>
+    <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"ರಿವೈಂಡ್ ಮಾಡು"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"ವೇಗವಾಗಿ ಮುಂದಕ್ಕೆ"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"ತುರ್ತು ಕರೆಗಳು ಮಾತ್ರ"</string>
@@ -719,11 +719,11 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"ಖಾತೆ ಅನ್‌ಲಾಕ್"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"ಹಲವಾರು ಪ್ಯಾಟರ್ನ್ ಪ್ರಯತ್ನಗಳು"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"ಅನ್‍ಲಾಕ್ ಮಾಡಲು, ನಿಮ್ಮ Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ಬಳಕೆದಾರಹೆಸರು (ಇಮೇಲ್)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ಬಳಕೆದಾರರಹೆಸರು (ಇಮೇಲ್)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"ಪಾಸ್‌ವರ್ಡ್"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ಸೈನ್ ಇನ್ ಮಾಡು"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ಅಮಾನ್ಯ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"ನಿಮ್ಮ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ಸೈನ್‌ ಇನ್‌"</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ಅಮಾನ್ಯ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"ನಿಮ್ಮ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ಅನ್‌ಲಾಕ್"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"ಧ್ವನಿ ಆನ್ ಮಾಡಿ"</string>
@@ -814,7 +814,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ಮೆನು+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ಅಳಿಸು"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ಅಳಿಸಿ"</string>
     <string name="search_go" msgid="8298016669822141719">"ಹುಡುಕಿ"</string>
     <string name="search_hint" msgid="1733947260773056054">"ಹುಡುಕಿ…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"ಹುಡುಕಿ"</string>
@@ -942,14 +942,14 @@
     <string name="paste" msgid="5629880836805036433">"ಅಂಟಿಸಿ"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"ಸರಳ ಪಠ್ಯದಂತೆ ಅಂಟಿಸು"</string>
     <string name="replace" msgid="5781686059063148930">"ಸ್ಥಾನಾಂತರಿಸು..."</string>
-    <string name="delete" msgid="6098684844021697789">"ಅಳಿಸು"</string>
+    <string name="delete" msgid="6098684844021697789">"ಅಳಿಸಿ"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL ನಕಲಿಸು"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"ಪಠ್ಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="undo" msgid="7905788502491742328">"ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="redo" msgid="7759464876566803888">"ಪುನಃ ಮಾಡು"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ಪಠ್ಯದ ಆಯ್ಕೆ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"ನಿಘಂಟಿಗೆ ಸೇರಿಸಿ"</string>
-    <string name="deleteText" msgid="6979668428458199034">"ಅಳಿಸು"</string>
+    <string name="deleteText" msgid="6979668428458199034">"ಅಳಿಸಿ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
@@ -963,7 +963,7 @@
     <string name="no" msgid="5141531044935541497">"ರದ್ದುಮಾಡಿ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ಗಮನಿಸಿ"</string>
     <string name="loading" msgid="7933681260296021180">"ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"ಆನ್ ಮಾಡು"</string>
+    <string name="capital_on" msgid="1544682755514494298">"ಆನ್‌ ಮಾಡಿ"</string>
     <string name="capital_off" msgid="6815870386972805832">"ಆಫ್ ಮಾಡು"</string>
     <string name="whichApplication" msgid="4533185947064773386">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ಬಳಸಿಕೊಂಡು ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
@@ -980,7 +980,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ಕಳುಹಿಸು"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌  ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ಮುಖಪುಟ‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತೆ ತೆರೆಯಿರಿ"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸು"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸಿ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ಮುಚ್ಚು"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ಸಾಧನವು ಮರುಪ್ರಾರಂಭವಾಗುವವರೆಗೂ ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"ನಿರೀಕ್ಷಿಸು"</string>
@@ -1099,7 +1099,7 @@
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="accept" msgid="1645267259272829559">"ಸ್ವೀಕರಿಸು"</string>
-    <string name="decline" msgid="2112225451706137894">"ನಿರಾಕರಿಸು"</string>
+    <string name="decline" msgid="2112225451706137894">"ನಿರಾಕರಿಸಿ"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"ಆಹ್ವಾನವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"ಸಂಪರ್ಕಗೊಳ್ಳಲು ಆಹ್ವಾನ"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"ಇಂದ:"</string>
@@ -1112,8 +1112,8 @@
     <string name="select_character" msgid="3365550120617701745">"ಅಕ್ಷರವನ್ನು ಸೇರಿಸಿ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯ SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸುತ್ತಿದೆ. ಸಂದೇಶಗಳ ಕಳುಹಿಸುವಿಕೆಯನ್ನು ಮುಂದುವರಿಸುವಂತೆ ಈ ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಲು ನೀವು ಬಯಸುವಿರಾ?"</string>
-    <string name="sms_control_yes" msgid="3663725993855816807">"ಅನುಮತಿಸು"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"ನಿರಾಕರಿಸು"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"ಅನುಮತಿಸಿ"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"ನಿರಾಕರಿಸಿ"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ಗೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಬಯಸುತ್ತದೆ."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"ಇದು ನಿಮ್ಮ ಮೊಬೈಲ್ ಖಾತೆಯಲ್ಲಿ "<b>"ಶುಲ್ಕಗಳನ್ನು ವಿಧಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗಬಹುದು"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ಇದು ನಿಮ್ಮ ಮೊಬೈಲ್ ಖಾತೆಯಲ್ಲಿ ಶುಲ್ಕಗಳನ್ನು ವಿಧಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗುತ್ತದೆ."</b></string>
@@ -1121,7 +1121,7 @@
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ರದ್ದುಮಾಡಿ"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ನನ್ನ ಆಯ್ಕೆಯನ್ನು ನೆನಪಿಡು"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"ನೀವು ಇದನ್ನು ನಂತರದಲ್ಲಿ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ಯಾವಾಗಲೂ ಅನುಮತಿಸು"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ಎಂದಿಗೂ ಅನುಮತಿಸದಿರು"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"ಸಿಮ್‌ ಕಾರ್ಡ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"ನೀವು ಮಾನ್ಯವಾದ ಸಿಮ್‌ ಕಾರ್ಡ್ ಮರುಪ್ರಾರಂಭಿಸುವವರೆಗೆ ಸೆಲ್ಯುಲಾರ್ ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."</string>
@@ -1157,9 +1157,9 @@
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ಬಗ್ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ಈ ಸಾಧನದ ಸಮಸ್ಯೆ ನಿವಾರಿಸಲು ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು ಬಗ್ ವರದಿಯನ್ನು ವಿನಂತಿಸಿದ್ದಾರೆ. ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
-    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ನಿರಾಕರಿಸು"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ನಿರಾಕರಿಸಿ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ಕೀಬೋರ್ಡ್ ಬದಲಿಸಿ"</string>
-    <string name="show_ime" msgid="2506087537466597099">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್ ಸಕ್ರಿಯವಾಗಿರುವಾಗ ಅದನ್ನು ಪರದೆಯ ಮೇಲೆ ಇರಿಸಿಕೊಳ್ಳಿ"</string>
+    <string name="show_ime" msgid="2506087537466597099">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್ ಸಕ್ರಿಯವಾಗಿರುವಾಗ ಅದನ್ನು ಪರದೆಯ ಮೇಲಿರಿಸಿ"</string>
     <string name="hardware" msgid="194658061510127999">"ವರ್ಚ್ಯುಯಲ್ ಕೀಬೋರ್ಡ್ ತೋರಿಸು"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್ ಕಾನ್ಫಿಗರ್ ಮಾಡಿ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ಭಾಷೆ ಮತ್ತು ವಿನ್ಯಾಸವನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -1177,10 +1177,10 @@
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ಡೇಟಾ ನಷ್ಟವನ್ನು ತಪ್ಪಿಸಲು ತೆಗೆದುಹಾಕುವುದಕ್ಕೂ ಮುನ್ನ <xliff:g id="NAME">%s</xliff:g> ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ; ಹೊಸದನ್ನು ಸೇರಿಸಿ"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ಹೊಂದಿಸು"</string>
-    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಎಜೆಕ್ಟ್"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಇಜೆಕ್ಟ್"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ಎಕ್ಸ್‌ಪ್ಲೋರ್‌‌"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ಕಾಣೆಯಾಗಿದೆ"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"ಈ ಸಾಧನವನ್ನು ಮರುಸೇರಿಸಿ"</string>
@@ -1191,14 +1191,14 @@
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ಡೇಟಾ ಸರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ಮೂಲ ಸ್ಥಳದಲ್ಲಿ ಡೇಟಾ ಉಳಿದಿದೆ"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
-    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="ext_media_status_mounted" msgid="7253821726503179202">"ಸಿದ್ಧವಾಗಿದೆ"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"ಓದಲು ಮಾತ್ರ"</string>
     <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"ಅಪಾಯಕರವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"ದೋಷಪೂರಿತವಾಗಿದೆ"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"ಬೆಂಬಲಿತವಾಗಿಲ್ಲ"</string>
-    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"ಸ್ವರೂಪಗೊಳಿಸುವಿಕೆ..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ಸೇರಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಯ ಚಟುವಟಿಕೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ."</string>
@@ -1222,8 +1222,8 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"ಇದೀಗ ಮತ್ತು ಭವಿಷ್ಯದಲ್ಲಿ ಈ ಕೆಳಗಿನ ಒಂದು ಅಥವಾ ಹೆಚ್ಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಪ್ರವೇಶಿಸಲು ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿವೆ."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"ನೀವು ಈ ವಿನಂತಿಗೆ ಅನುಮತಿಸಲು ಬಯಸುವಿರಾ?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"ಪ್ರವೇಶದ ವಿನಂತಿ"</string>
-    <string name="allow" msgid="7225948811296386551">"ಅನುಮತಿಸು"</string>
-    <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸು"</string>
+    <string name="allow" msgid="7225948811296386551">"ಅನುಮತಿಸಿ"</string>
+    <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸಿ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ಅನುಮತಿ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ಖಾತೆಗಾಗಿ\n ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನ ಹೊರಗೆ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
@@ -1271,8 +1271,8 @@
     <string name="websearch" msgid="4337157977400211589">"ವೆಬ್ ಹುಡುಕಾಟ"</string>
     <string name="find_next" msgid="5742124618942193978">"ಮುಂದಿನದನ್ನು ಹುಡುಕಿ"</string>
     <string name="find_previous" msgid="2196723669388360506">"ಹಿಂದಿನದನ್ನು ಹುಡುಕಿ"</string>
-    <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> ಅವರಿಂದ ಸ್ಥಾನ ವಿನಂತಿ"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"ಸ್ಥಾನ ವಿನಂತಿ"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> ಅವರಿಂದ ಸ್ಥಳ ವಿನಂತಿ"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"ಸ್ಥಳ ವಿನಂತಿ"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ಅವರಿಂದ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"ಹೌದು"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"ಇಲ್ಲ"</string>
@@ -1281,7 +1281,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"ಐಟಂಗಳನ್ನು ಅಳಿಸಿ"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ಅಳಿಸುವಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"ಈಗ ಏನೂ ಮಾಡಬೇಡಿ"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"ಖಾತೆಯೊಂದನ್ನು ಆರಿಸು"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"ಖಾತೆ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="add_account_label" msgid="2935267344849993553">"ಒಂದು ಖಾತೆ ಸೇರಿಸಿ"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"ಖಾತೆ ಸೇರಿಸಿ"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"ಹೆಚ್ಚಿಸಿ"</string>
@@ -1304,7 +1304,7 @@
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"ಮುಂದಿನ ತಿಂಗಳು"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ರದ್ದುಮಾಡಿ"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ಅಳಿಸು"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ಅಳಿಸಿ"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ಮುಗಿದಿದೆ"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ಮೋಡ್ ಬದಲಾವಣೆ"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
@@ -1376,7 +1376,7 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ವಯರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"ಪಾತ್ರ"</string>
-    <string name="media_route_chooser_title" msgid="1751618554539087622">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಪಡಿಸಿ"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ಸಾಧನಕ್ಕೆ ಬಿತ್ತರಿಸುವ ಪರದೆ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ಸಾಧನಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -1411,11 +1411,11 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ಪಿನ್‌ ಕೋಡ್‍ಗಳು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ಹಲವಾರು ಪ್ಯಾಟರ್ನ್ ಪ್ರಯತ್ನಗಳು"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ಅನ್‍ಲಾಕ್ ಮಾಡಲು, ನಿಮ್ಮ Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"ಬಳಕೆದಾರಹೆಸರು (ಇಮೇಲ್)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"ಬಳಕೆದಾರರಹೆಸರು (ಇಮೇಲ್)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"ಅಮಾನ್ಯ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ನಿಮ್ಮ ಬಳಕೆದಾರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"ಅಮಾನ್ಯ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ನಿಮ್ಮ ಬಳಕೆದಾರರಹೆಸರು ಅಥವಾ ಪಾಸ್‍ವರ್ಡ್ ಮರೆತಿರುವಿರಾ?\n"<b>"google.com/accounts/recovery"</b>" ಗೆ ಭೇಟಿ ನೀಡಿ."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"ಖಾತೆಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"ನಿಮ್ಮ ಪಿನ್‌ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"ನಿಮ್ಮ ಪಾಸ್‍‍ವರ್ಡ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿರುವಿರಿ. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -1524,7 +1524,7 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ಅಪರಿಚಿತ ಪೋಟ್ರೇಟ್"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ಅಪರಿಚಿತ ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"ಅಪರಿಚಿತ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ರದ್ದುಮಾಡಲಾಗಿದೆ"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ವಿಷಯವನ್ನು ಬರೆಯುವಲ್ಲಿ ದೋಷ ಎದುರಾಗಿದೆ"</string>
@@ -1540,7 +1540,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ಹೊಸ ಪಿನ್‌ ದೃಢೀಕರಿಸಿ"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"ನಿರ್ಬಂಧಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಪಿನ್‌ ರಚಿಸಿ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"ಪಿನ್‌ ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಟ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಠ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</item>
@@ -1566,12 +1566,12 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳು"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಸ್ಥಾಪಿಸಲಾಗಿದೆ"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ನವೀಕರಿಸಲಾಗಿದೆ"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಲ್ಪಟ್ಟಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ನಿಮ್ಮ ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ನವೀಕರಣಗೊಳ್ಳುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವಿಕೆಯನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ಅಪ್‌ಡೇಟ್‌ ಆಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ಡೇಟಾ ಬಳಕೆ ಕಡಿಮೆ ಮಾಡುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಡೇಟಾ ಸೇವರ್ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೇಟಾ ಕಳುಹಿಸುವುದನ್ನು ಅಥವಾ ಸ್ವೀಕರಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ. ನೀವು ಪ್ರಸ್ತುತ ಬಳಸುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು ಆದರೆ ಪದೇ ಪದೇ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಇದರರ್ಥ, ಉದಾಹರಣೆಗೆ, ನೀವು ಅವುಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡುವವರೆಗೆ ಆ ಚಿತ್ರಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುವುದಿಲ್ಲ."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ಡೇಟಾ ಉಳಿಸುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡುವುದೇ?"</string>
-    <string name="data_saver_enable_button" msgid="7147735965247211818">"ಆನ್ ಮಾಡು"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"ಆನ್‌ ಮಾಡಿ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>
       <item quantity="other">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>
@@ -1652,7 +1652,7 @@
     <string name="locale_search_menu" msgid="2560710726687249178">"ಹುಡುಕಿ"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"ಕೆಲಸದ ಮೋಡ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಹಿನ್ನೆಲೆ ಸಿಂಕ್ ಮತ್ತು ಇತರ ಸಂಬಂಧಿತ ವೈಶಿಷ್ಟ್ಯಗಳು ಸೇರಿದಂತೆ ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌‌ ಕಾರ್ಯನಿರ್ವಹಿಸಲು ಅನುಮತಿಸಿ."</string>
-    <string name="work_mode_turn_on" msgid="2062544985670564875">"ಆನ್ ಮಾಡು"</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"ಆನ್‌ ಮಾಡಿ"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ನೀವು ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿರುವಿರಿ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ವೀಕ್ಷಿಸಲು SMS ಅಪ್ಲಿಕೇಶನ್ ತೆರೆಯಿರಿ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ಕೆಲವು ಕಾರ್ಯನಿರ್ವಹಣೆಗಳು ಸೀಮಿತವಾಗಿರಬಹುದು"</string>

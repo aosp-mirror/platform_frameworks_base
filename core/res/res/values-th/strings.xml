@@ -142,8 +142,8 @@
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> หลังผ่านไป <xliff:g id="TIME_DELAY">{2}</xliff:g> วินาที"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
-    <string name="fcComplete" msgid="3118848230966886575">"รหัสคุณลักษณะเสร็จสมบูรณ์"</string>
-    <string name="fcError" msgid="3327560126588500777">"พบปัญหาในการเชื่อมต่อหรือรหัสคุณลักษณะไม่ถูกต้อง"</string>
+    <string name="fcComplete" msgid="3118848230966886575">"รหัสฟีเจอร์เสร็จสมบูรณ์"</string>
+    <string name="fcError" msgid="3327560126588500777">"พบปัญหาในการเชื่อมต่อหรือรหัสฟีเจอร์ไม่ถูกต้อง"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ตกลง"</string>
     <string name="httpError" msgid="7956392511146698522">"เกิดข้อผิดพลาดของเครือข่าย"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"ไม่พบ URL"</string>
@@ -259,7 +259,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ถ่ายภาพและบันทึกวิดีโอ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"โทรและจัดการการโทร"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"เซ็นเซอร์สำหรับร่างกาย"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"เซ็นเซอร์ร่างกาย"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกข้อมูลเนื้อหาของหน้าต่าง"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
@@ -348,9 +348,9 @@
     <string name="permlab_bodySensors" msgid="4683341291818520277">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น ตัววัดอัตราการเต้นของหัวใจ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"อ่านกิจกรรมบนปฏิทินรวมถึงข้อมูลที่เป็นความลับ"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในแท็บเล็ตของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในแท็บเล็ตของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"อนุญาตให้แอปอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในทีวี รวมถึงกิจกรรมของเพื่อนๆ หรือเพื่อนร่วมงาน โดยอาจอนุญาตให้แอปแชร์หรือบันทึกข้อมูลปฏิทิน แม้ว่าจะเป็นข้อมูลลับหรือข้อมูลละเอียดอ่อน"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในโทรศัพท์ของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในโทรศัพท์ของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"เพิ่มหรือแก้ไขกิจกรรมบนปฏิทินและส่งอีเมลให้ผู้เข้าร่วมโดยที่เจ้าของไม่ทราบ"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"อนุญาตให้แอปพลิเคชันเพิ่ม ลบ เปลี่ยนกิจกรรมที่คุณสามารถเปลี่ยนแปลงในแท็บเล็ตได้ รวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย การอนุญาตนี้อาจทำให้แอปพลิเคชันสามารถส่งข้อความที่มาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยที่เจ้าของไม่ทราบ"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"อนุญาตให้แอปเพิ่ม นำออก เปลี่ยนแปลงกิจกรรมที่คุณสามารถแก้ไขได้บนทีวี ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงาน สิทธิ์นี้จะทำให้แอปสามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือแก้ไขกิจกรรมโดยที่เจ้าของไม่รู้ตัว"</string>
@@ -376,7 +376,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"เข้าถึงบริการโทร IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"อนุญาตให้แอปใช้บริการ IMS เพื่อโทรออกโดยคุณไม่ต้องดำเนินการใดๆ เลย"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"อ่านสถานะและข้อมูลระบุตัวตนของโทรศัพท์"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงคุณลักษณะโทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงฟีเจอร์โทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ป้องกันไม่ให้ทีวีเข้าสู่โหมดสลีป"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ป้องกันไม่ให้โทรศัพท์เข้าโหมดสลีป"</string>
@@ -543,8 +543,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ปิดใช้งานกล้องถ่ายรูป"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ปิดคุณลักษณะล็อกหน้าจอบางอย่าง"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ป้องกันการใช้คุณลักษณะบางอย่างของการล็อกหน้าจอ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ปิดฟีเจอร์ล็อกหน้าจอบางอย่าง"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ป้องกันการใช้ฟีเจอร์บางอย่างของการล็อกหน้าจอ"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -679,7 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ถูกต้อง!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ลองอีกครั้ง"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ลองอีกครั้ง"</string>
-    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ปลดล็อกคุณลักษณะและข้อมูลทั้งหมด"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ปลดล็อกฟีเจอร์และข้อมูลทั้งหมด"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"มีความพยายามที่จะใช้ Face Unlock เกินขีดจำกัด"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ไม่มีซิมการ์ด"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ไม่มีซิมการ์ดในแท็บเล็ต"</string>
@@ -799,7 +799,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"อนุญาตให้แอปแก้ไขประวัติของเบราว์เซอร์หรือบุ๊กมาร์กที่เก็บไว้ในทีวี ซึ่งอาจอนุญาตให้แอปลบหรือแก้ไขข้อมูลเบราว์เซอร์ หมายเหตุ: สิทธิ์นี้ไม่สามารถใช้ได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นที่สามารถท่องเว็บได้"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้ฟีเจอร์นี้"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
@@ -1075,7 +1075,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ลงชื่อเข้าใช้เครือข่าย"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ไม่สามารถเข้าถึงอินเทอร์เน็ต"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi เชื่อมต่ออินเทอร์เน็ตไม่ได้"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"แตะเพื่อดูตัวเลือก"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"เปลี่ยนเป็น <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"อุปกรณ์จะใช้ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> เมื่อ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ไม่สามารถเข้าถึงอินเทอร์เน็ต อาจมีค่าบริการ"</string>
@@ -1150,7 +1150,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB สำหรับ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"เชื่อมต่อกับอุปกรณ์เสริม USB แล้ว"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่องผ่าน USB แล้ว"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"แตะเพื่อปิดใช้การแก้ไขข้อบกพร่องของ USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"กำลังสร้างรายงานข้อบกพร่อง…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"แชร์รายงานข้อบกพร่องไหม"</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"วอลเปเปอร์"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"เปลี่ยนวอลเปเปอร์"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"ตัวฟังการแจ้งเตือน"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener ความเป็นจริงเสมือน"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR Listener"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"ผู้เสนอเงื่อนไข"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"บริการตัวจัดอันดับการแจ้งเตือน"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN เปิดใช้งานแล้ว"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ติดตั้งโดยผู้ดูแลระบบของคุณ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ลบโดยผู้ดูแลระบบของคุณ"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"เพื่อช่วยปรับปรุงอายุการใช้งานแบตเตอรี่ โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์และจำกัดการสั่น บริการตำแหน่ง และข้อมูลแบ็กกราวด์ส่วนใหญ่ สำหรับอีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์จะไม่อัปเดตหากคุณไม่เปิดขึ้นมา\n\nโหมดประหยัดแบตเตอรี่จะปิดโดยอัตโนมัติขณะชาร์จอุปกรณ์"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"เพื่อช่วยยืดอายุการใช้งานแบตเตอรี่ โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์และจำกัดการสั่น บริการตำแหน่ง และข้อมูลแบ็กกราวด์ส่วนใหญ่ สำหรับอีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์จะไม่อัปเดตหากคุณไม่เปิดขึ้นมา\n\nโหมดประหยัดแบตเตอรี่จะปิดโดยอัตโนมัติขณะชาร์จอุปกรณ์"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้แอปบางส่วนส่งหรือรับข้อมูลเครือข่ายมือถือในพื้นหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงข้อมูลเครือข่ายมือถือได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"เปิด"</string>
@@ -1651,7 +1651,7 @@
     <string name="region_picker_section_all" msgid="8966316787153001779">"ภูมิภาคทั้งหมด"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"โหมดทำงานปิดอยู่"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"อนุญาตให้โปรไฟล์งานทำงานได้ ซึ่งรวมถึงแอป การซิงค์ในพื้นหลัง และคุณลักษณะอื่นที่เกี่ยวข้อง"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"อนุญาตให้โปรไฟล์งานทำงานได้ ซึ่งรวมถึงแอป การซิงค์ในพื้นหลัง และฟีเจอร์อื่นที่เกี่ยวข้อง"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"คุณมีข้อความใหม่"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"เปิดแอป SMS เพื่อดู"</string>

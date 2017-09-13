@@ -257,7 +257,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS-ów"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć wewnętrzna"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagrywanie dźwięku"</string>
@@ -730,7 +730,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Zaloguj się"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Błędna nazwa użytkownika lub hasło."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Nie pamiętasz nazwy użytkownika lub hasła?\nOdwiedź stronę "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Sprawdzanie…"</string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Sprawdzam…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odblokuj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Włącz dźwięk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Wyłącz dźwięk"</string>
@@ -1008,9 +1008,9 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Anuluj"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Uwaga"</string>
-    <string name="loading" msgid="7933681260296021180">"Wczytywanie…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"Wł"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Wył"</string>
+    <string name="loading" msgid="7933681260296021180">"Wczytuję…"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Wł."</string>
+    <string name="capital_off" msgid="6815870386972805832">"Wył."</string>
     <string name="whichApplication" msgid="4533185947064773386">"Wykonaj czynność przez..."</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Wykonaj czynność w aplikacji %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Wykonaj działanie"</string>
@@ -1284,7 +1284,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Zmień tapetę"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Odbiornik powiadomień"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Odbiornik rzeczywistości wirtualnej"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Odbiornik VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Dostawca warunków"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Usługa rankingu powiadomień"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN aktywny"</string>
@@ -1412,7 +1412,7 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Zobacz wszystkie"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Wybierz działanie"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij przez:"</string>
-    <string name="sending" msgid="3245653681008218030">"Wysyłanie..."</string>
+    <string name="sending" msgid="3245653681008218030">"Wysyłam..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Odebrać połączenie?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Zawsze"</string>
@@ -1600,7 +1600,7 @@
       <item quantity="one">Spróbuj ponownie za sekundę</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Spróbuj ponownie później"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Widok na pełnym ekranie"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Włączony pełny ekran"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Aby wyjść, przesuń palcem z góry na dół."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Gotowe"</string>

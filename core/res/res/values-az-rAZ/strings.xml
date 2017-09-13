@@ -246,7 +246,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktlarınıza daxil olun"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Yer"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"bu cihazın məkanını əldə edin"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"cihazın yerini bilmək"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Təqvim"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"təqvimə daxil olun"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> dayandırılması davam edir"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> dayandırılması davam edir"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Tətbiqi yenidən açın"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Geri əlaqə göndərin"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Rəyinizi bildirin"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Bağla"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Cihaz yeniden başladılana kimi səssiz edin"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Gözləyin"</string>

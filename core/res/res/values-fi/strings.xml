@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Taustakuva"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Vaihda taustakuvaa"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Ilmoituskuuntelija"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Virtuaalitodellisuuden kuuntelija"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR-kuuntelija"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Ehtojen toimituspalvelu"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Ilmoitusten sijoituspalvelu"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN on aktivoitu"</string>
@@ -1366,7 +1366,7 @@
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Aina"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Vain kerran"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ei tue työprofiilia"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet-laite"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tabletti"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televisio"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Puhelin"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kuulokkeet"</string>
@@ -1606,7 +1606,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Kunnes kello on <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> asti (seuraava hälytys)"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Kunnes poistat tämän käytöstä"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Kunnes otat tämän pois päältä"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Kunnes poistat Varattu-tilan käytöstä."</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Kutista"</string>

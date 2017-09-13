@@ -81,7 +81,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Dreierkonferenz"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Ablehnung unerwünschter Anrufe"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Rufnummernübermittlung"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Bitte nicht stören"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Nicht stören"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Anrufer-ID ist standardmäßig beschränkt. Nächster Anruf: Beschränkt"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Anrufer-ID ist standardmäßig beschränkt. Nächster Anruf: Nicht beschränkt"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Beschränkt"</string>
@@ -246,7 +246,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"auf deine Kontakte zugreifen"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zuzugreifen"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zugreifen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -408,9 +408,9 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Tethering-Konnektivität ändern"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Ermöglicht der App, den Status der Tethering-Konnektivität zu ändern"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"WLAN-Verbindungen abrufen"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLANs abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLAN-Netzwerken abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"WLAN-Verbindungen herstellen und trennen"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ermöglicht der App, eine Verbindung zu WLAN-Zugriffspunkten herzustellen und solche zu trennen und Änderungen an der Gerätekonfiguration für WLAN-Netzwerke vorzunehmen."</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ermöglicht der App, eine Verbindung zu WLAN-Zugangspunkten herzustellen und solche zu trennen und Änderungen an der Gerätekonfiguration für WLANs vorzunehmen."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"WLAN-Multicast-Empfang zulassen"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Ermöglicht der App, Pakete zu empfangen, die mithilfe von Multicast-Adressen an sämtliche Geräte in einem WLAN versendet wurden, nicht nur an dein Tablet. Dies nicht mehr Leistung in Anspruch als der Nicht-Multicast-Modus."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Ermöglicht der App, Pakete zu empfangen, die mithilfe von Multicast-Adressen an sämtliche Geräte in einem WLAN gesendet wurden, nicht nur an deinen Fernseher. Dies nimmt mehr Leistung in Anspruch als der Nicht-Multicast-Modus."</string>
@@ -800,7 +800,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ermöglicht der App, den Browserverlauf und die Lesezeichen auf deinem Telefon zu ändern. Damit kann die App Browserdaten löschen und ändern. Hinweis: Diese Berechtigung kann nicht von Browsern von Drittanbietern oder anderen Apps mit Internetfunktionen erzwungen werden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"Wecker stellen"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ermöglicht der App, einen Alarm in einer installierten Wecker-App einzurichten. Einige Wecker-Apps implementieren diese Funktion möglicherweise nicht."</string>
-    <string name="permlab_addVoicemail" msgid="5525660026090959044">"Mailbox-Nachrichten hinzufügen"</string>
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"Mailboxnachrichten hinzufügen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ermöglicht der App, Nachrichten zu deinem Mailbox-Posteingang hinzuzufügen"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ermöglicht der App, die Geolokalisierungsberechtigungen des Browsers zu ändern. Schädliche Apps können so Standortinformationen an beliebige Websites senden."</string>
@@ -1064,14 +1064,14 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Klingeltöne"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Unbekannter Klingelton"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">WLAN-Netzwerke verfügbar</item>
-      <item quantity="one">WLAN-Netzwerk verfügbar</item>
+      <item quantity="other">WLANe verfügbar</item>
+      <item quantity="one">WLAN verfügbar</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Verfügbare WLAN-Netzwerke öffnen</item>
-      <item quantity="one">Verfügbares WLAN-Netzwerk öffnen</item>
+      <item quantity="other">Verfügbare WLANs öffnen</item>
+      <item quantity="one">Verfügbares WLAN öffnen</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN-Netzwerk anmelden"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN anmelden"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Im Netzwerk anmelden"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
@@ -1091,7 +1091,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" hat eine schlechte Internetverbindung."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Verbindung zulassen?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Die App \"%1$s\" möchte eine Verbindung zum WLAN-Netzwerk %2$s herstellen."</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Die App \"%1$s\" möchte eine Verbindung zum WLAN %2$s herstellen."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Eine App"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct-Betrieb starten. Hierdurch wird der WLAN-Client-/-Hotspot-Betrieb deaktiviert."</string>
@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Für weitere Optionen tippen."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging aktiviert"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Zum Deaktivieren von USB-Debugging tippen."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Zum Deaktivieren von USB-Debugging tippen"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Fehlerbericht wird abgerufen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Fehlerbericht teilen?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Fehlerbericht wird geteilt…"</string>
@@ -1375,7 +1375,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-Audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Kabellose Übertragung (WiDi)"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"Übertragen"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Streamen"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Mit Gerät verbinden"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Bildschirm auf Gerät übertragen"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Geräte werden gesucht…"</string>
@@ -1568,7 +1568,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Von deinem Administrator gelöscht"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>
