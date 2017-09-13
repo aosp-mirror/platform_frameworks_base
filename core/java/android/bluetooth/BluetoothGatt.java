@@ -371,12 +371,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                         return;
                     }
 
-                    if (status == 0) characteristic.setValue(value);
-
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
                             if (mCallback != null) {
+                                if (status == 0) characteristic.setValue(value);
                                 mCallback.onCharacteristicRead(BluetoothGatt.this, characteristic,
                                         status);
                             }
@@ -454,12 +453,11 @@ public final class BluetoothGatt implements BluetoothProfile {
                             handle);
                     if (characteristic == null) return;
 
-                    characteristic.setValue(value);
-
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
                             if (mCallback != null) {
+                                characteristic.setValue(value);
                                 mCallback.onCharacteristicChanged(BluetoothGatt.this,
                                         characteristic);
                             }
@@ -489,7 +487,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                     BluetoothGattDescriptor descriptor = getDescriptorById(mDevice, handle);
                     if (descriptor == null) return;
 
-                    if (status == 0) descriptor.setValue(value);
 
                     if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                             || status == GATT_INSUFFICIENT_ENCRYPTION)
@@ -511,6 +508,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                         @Override
                         public void run() {
                             if (mCallback != null) {
+                                if (status == 0) descriptor.setValue(value);
                                 mCallback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
                             }
                         }
