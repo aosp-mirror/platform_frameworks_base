@@ -48,13 +48,13 @@ import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static com.android.server.am.ActivityManagerService.CONTINUE_USER_SWITCH_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_LOCKED_BOOT_COMPLETE_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_COMPLETE_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
-import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
+import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
+import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
+import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
+import static com.android.server.am.UserController.REPORT_USER_SWITCH_MSG;
+import static com.android.server.am.UserController.SYSTEM_USER_CURRENT_MSG;
+import static com.android.server.am.UserController.SYSTEM_USER_START_MSG;
+import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -309,6 +309,7 @@ public class UserControllerTest extends AndroidTestCase {
     private static class TestInjector extends UserController.Injector {
         final Object lock = new Object();
         TestHandler handler;
+        TestHandler uiHandler;
         HandlerThread handlerThread;
         UserManagerService userManagerMock;
         UserManagerInternal userManagerInternalMock;
@@ -324,6 +325,7 @@ public class UserControllerTest extends AndroidTestCase {
             handlerThread = new HandlerThread(TAG);
             handlerThread.start();
             handler = new TestHandler(handlerThread.getLooper());
+            uiHandler = new TestHandler(handlerThread.getLooper());
             userManagerMock = mock(UserManagerService.class);
             userManagerInternalMock = mock(UserManagerInternal.class);
             windowManagerMock = mock(WindowManagerService.class);
@@ -337,8 +339,13 @@ public class UserControllerTest extends AndroidTestCase {
         }
 
         @Override
-        protected Handler getHandler() {
+        protected Handler getHandler(Handler.Callback callback) {
             return handler;
+        }
+
+        @Override
+        protected Handler getUiHandler(Handler.Callback callback) {
+            return uiHandler;
         }
 
         @Override
