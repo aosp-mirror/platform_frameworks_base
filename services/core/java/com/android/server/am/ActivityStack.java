@@ -1214,7 +1214,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Still waiting for something to pause; can't sleep yet.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still waiting to pause " + mPausingActivity);
             shouldSleep = false;
-        } else if (mLastPausedActivity == topActivity()) {
+        } else if (topActivity() != null && topActivity().state == ActivityState.PAUSED) {
             // Our top activity is currently paused, we need to ensure we move it to the stopped
             // state.
             stopActivityLocked(mLastPausedActivity);
