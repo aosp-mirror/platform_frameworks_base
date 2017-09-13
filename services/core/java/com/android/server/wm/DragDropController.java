@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.content.ClipData;
 import android.graphics.PixelFormat;
 import android.os.Binder;
@@ -35,6 +36,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.WindowManagerInternal.IDragDropCallback;
+import com.android.internal.util.Preconditions;
 import com.android.server.input.InputWindowHandle;
 
 /**
@@ -61,6 +64,7 @@ class DragDropController {
 
     private WindowManagerService mService;
     private final Handler mHandler;
+
     /**
      * Lock to preserve the order of state updates.
      * The lock is used to process drag and drop state updates in order without having the window
@@ -94,12 +98,24 @@ class DragDropController {
      */
     private final Object mWriteLock = new Object();
 
+    /**
+     * Callback which is used to sync drag state with the vendor-specific code.
+     */
+    @NonNull private IDragDropCallback mCallback = new IDragDropCallback() {};
+
     boolean dragDropActiveLocked() {
         return mDragState != null;
     }
 
     InputWindowHandle getInputWindowHandleLocked() {
         return mDragState.getInputWindowHandle();
+    }
+
+    void registerCallback(IDragDropCallback callback) {
+        Preconditions.checkNotNull(callback);
+        synchronized (mWriteLock) {
+            mCallback = callback;
+        }
     }
 
     DragDropController(WindowManagerService service, Looper looper) {
@@ -169,6 +185,10 @@ class DragDropController {
         }
 
         synchronized (mWriteLock) {
+            if (!mCallback.performDrag(window, dragToken, touchSource, touchX, touchY, thumbCenterX,
+                    thumbCenterY, data)) {
+                return false;
+            }
             synchronized (mService.mWindowMap) {
                 if (mDragState == null) {
                     Slog.w(TAG_WM, "No drag prepared");
@@ -251,6 +271,7 @@ class DragDropController {
         }
 
         synchronized (mWriteLock) {
+            mCallback.reportDropResult(window, consumed);
             synchronized (mService.mWindowMap) {
                 if (mDragState == null) {
                     // Most likely the drop recipient ANRed and we ended the drag
@@ -288,6 +309,7 @@ class DragDropController {
         }
 
         synchronized (mWriteLock) {
+            mCallback.cancelDragAndDrop(dragToken);
             synchronized (mService.mWindowMap) {
                 if (mDragState == null) {
                     Slog.w(TAG_WM, "cancelDragAndDrop() without prepareDrag()");

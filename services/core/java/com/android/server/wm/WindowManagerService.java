@@ -125,6 +125,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -7440,6 +7441,11 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (WindowManagerService.this) {
                 mVr2dDisplayId = vr2dDisplayId;
             }
+        }
+
+        @Override
+        public void registerDragDropControllerCallback(IDragDropCallback callback) {
+            mDragDropController.registerCallback(callback);
         }
     }
 
