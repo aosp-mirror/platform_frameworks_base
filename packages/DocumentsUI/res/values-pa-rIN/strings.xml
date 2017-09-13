@@ -21,7 +21,7 @@
     <string name="title_open" msgid="4353228937663917801">"ਤੋਂ ਖੋਲ੍ਹੋ"</string>
     <string name="title_save" msgid="2433679664882857999">"ਇਸ ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"ਨਵਾਂ ਫੋਲਡਰ"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"ਗ੍ਰਿਡ ਵਿਊ"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"ਗਰਿੱਡ ਦ੍ਰਿਸ਼"</string>
     <string name="menu_list" msgid="7279285939892417279">"ਸੂਚੀ ਦ੍ਰਿਸ਼"</string>
     <string name="menu_sort" msgid="7677740407158414452">"ਇਸ ਮੁਤਾਬਕ ਛਾਂਟੋ"</string>
     <string name="menu_search" msgid="3816712084502856974">"ਖੋਜੋ"</string>
@@ -81,7 +81,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਮਿਟਾ ਰਿਹਾ ਹੈ।</item>
     </plurals>
     <string name="undo" msgid="7905788502491742328">"ਅਣਕੀਤਾ ਕਰੋ"</string>
-    <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਕਰਨ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ਮੂਵ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"ਮਿਟਾਉਣ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
@@ -96,7 +96,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="6268189413228855582">"ਵੇਰਵਿਆਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"ਵੇਰਵਿਆਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="close" msgid="3043722427445528732">"ਬੰਦ ਕਰੋ"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"ਇਹ ਫ਼ਾਈਲਾਂ ਕਾਪੀ ਨਹੀਂ ਹੋਈਆਂ ਸਨ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"ਇਹ ਫ਼ਾਈਲਾਂ ਤਬਦੀਲ ਨਹੀਂ ਹੋਈਆਂ ਸਨ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -112,7 +112,7 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ਕੁਝ ਫ਼ਾਈਲਾਂ ਤਬਦੀਲ ਕੀਤੀਆਂ ਗਈਆਂ ਸਨ"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"ਕੀ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ਨੂੰ <xliff:g id="STORAGE"><i>^3</i></xliff:g> \'ਤੇ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> ਡਾਇਰੈਕਟਰੀ \'ਤੇ ਪਹੁੰਚ ਦੇਣੀ ਹੈ?"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"ਕੀ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ਨੂੰ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> ਡਾਇਰੈਕਟਰੀ \'ਤੇ ਪਹੁੰਚ ਦੇਣੀ ਹੈ?"</string>
-    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"ਕੀ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ਨੂੰ <xliff:g id="STORAGE"><i>^2</i></xliff:g> \'ਤੇ ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ ਸਮੇਤ, ਤੁਹਾਡੇ ਡੈਟੇ \'ਤੇ ਪਹੁੰਚ ਦੇਣੀ ਹੈ?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"ਕੀ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ਨੂੰ <xliff:g id="STORAGE"><i>^2</i></xliff:g> ਉੱਪਰ ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ ਸਮੇਤ ਤੁਹਾਡੇ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਦੇਣੀ ਹੈ?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"ਦੁਬਾਰਾ ਨਾ ਪੁੱਛੋ"</string>
     <string name="allow" msgid="7225948811296386551">"ਆਗਿਆ ਦਿਓ"</string>
     <string name="deny" msgid="2081879885755434506">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
