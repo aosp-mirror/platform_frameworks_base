@@ -107,7 +107,7 @@ public final class Zygote {
                   fdsToIgnore, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
-            Trace.setTracingEnabled(true, debugFlags);
+            Trace.setTracingEnabled(true, runtimeFlags);
 
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -157,7 +157,7 @@ public final class Zygote {
                 uid, gid, gids, runtimeFlags, rlimits, permittedCapabilities, effectiveCapabilities);
         // Enable tracing as soon as we enter the system_server.
         if (pid == 0) {
-            Trace.setTracingEnabled(true, debugFlags);
+            Trace.setTracingEnabled(true, runtimeFlags);
         }
         VM_HOOKS.postForkCommon();
         return pid;
