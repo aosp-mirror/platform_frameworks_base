@@ -139,6 +139,7 @@ cc_library_host_static {
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",
         "xml/XmlUtil.cpp",
+        "Configuration.proto",
         "Resources.proto",
         "ResourcesInternal.proto",
     ],

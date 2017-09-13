@@ -16,6 +16,7 @@
 
 syntax = "proto3";
 
+import "frameworks/base/tools/aapt2/Configuration.proto";
 import "frameworks/base/tools/aapt2/Resources.proto";
 
 package aapt.pb.internal;
@@ -38,7 +39,7 @@ message CompiledFile {
   string resource_name = 1;
 
   // The configuration for which the resource is defined.
-  aapt.pb.ConfigDescription config = 2;
+  aapt.pb.Configuration config = 2;
 
   // The filesystem path to where the source file originated.
   // Mainly used to display helpful error messages.

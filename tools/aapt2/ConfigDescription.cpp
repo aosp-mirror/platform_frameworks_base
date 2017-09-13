@@ -876,6 +876,12 @@ ConfigDescription ConfigDescription::CopyWithoutSdkVersion() const {
   return copy;
 }
 
+std::string ConfigDescription::GetBcp47LanguageTag(bool canonicalize) const {
+  char locale[RESTABLE_MAX_LOCALE_LEN];
+  getBcp47Locale(locale, canonicalize);
+  return std::string(locale);
+}
+
 bool ConfigDescription::Dominates(const ConfigDescription& o) const {
   if (*this == o) {
     return true;
