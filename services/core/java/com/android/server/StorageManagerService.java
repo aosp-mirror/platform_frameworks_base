@@ -57,6 +57,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IVold;
+import android.os.IVoldListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -1128,26 +1129,21 @@ class StorageManagerService extends IStorageManager.Stub
     @Override
     public boolean onEvent(int code, String raw, String[] cooked) {
         synchronized (mLock) {
-            return onEventLocked(code, raw, cooked);
+            try {
+                return onEventLocked(code, raw, cooked);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
         }
     }
 
-    private boolean onEventLocked(int code, String raw, String[] cooked) {
+    private boolean onEventLocked(int code, String raw, String[] cooked) throws RemoteException {
         switch (code) {
             case VoldResponseCode.DISK_CREATED: {
                 if (cooked.length != 3) break;
-                final String id = cooked[1];
-                int flags = Integer.parseInt(cooked[2]);
-                if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false)
-                        || mForceAdoptable) {
-                    flags |= DiskInfo.FLAG_ADOPTABLE;
-                }
-                // Adoptable storage isn't currently supported on FBE devices
-                if (StorageManager.isFileEncryptedNativeOnly()
-                        && !SystemProperties.getBoolean(StorageManager.PROP_ADOPTABLE_FBE, false)) {
-                    flags &= ~DiskInfo.FLAG_ADOPTABLE;
-                }
-                mDisks.put(id, new DiskInfo(id, flags));
+                final String diskId = cooked[1];
+                final int flags = Integer.parseInt(cooked[2]);
+                mListener.onDiskCreated(diskId, flags);
                 break;
             }
             case VoldResponseCode.DISK_SIZE_CHANGED: {
@@ -1171,10 +1167,8 @@ class StorageManagerService extends IStorageManager.Stub
             }
             case VoldResponseCode.DISK_SCANNED: {
                 if (cooked.length != 2) break;
-                final DiskInfo disk = mDisks.get(cooked[1]);
-                if (disk != null) {
-                    onDiskScannedLocked(disk);
-                }
+                final String diskId = cooked[1];
+                mListener.onDiskScanned(diskId);
                 break;
             }
             case VoldResponseCode.DISK_SYS_PATH_CHANGED: {
@@ -1187,34 +1181,24 @@ class StorageManagerService extends IStorageManager.Stub
             }
             case VoldResponseCode.DISK_DESTROYED: {
                 if (cooked.length != 2) break;
-                final DiskInfo disk = mDisks.remove(cooked[1]);
-                if (disk != null) {
-                    mCallbacks.notifyDiskDestroyed(disk);
-                }
+                final String diskId = cooked[1];
+                mListener.onDiskDestroyed(diskId);
                 break;
             }
 
             case VoldResponseCode.VOLUME_CREATED: {
-                final String id = cooked[1];
+                final String volId = cooked[1];
                 final int type = Integer.parseInt(cooked[2]);
                 final String diskId = TextUtils.nullIfEmpty(cooked[3]);
                 final String partGuid = TextUtils.nullIfEmpty(cooked[4]);
-
-                final DiskInfo disk = mDisks.get(diskId);
-                final VolumeInfo vol = new VolumeInfo(id, type, disk, partGuid);
-                mVolumes.put(id, vol);
-                onVolumeCreatedLocked(vol);
+                mListener.onVolumeCreated(volId, type, diskId, partGuid);
                 break;
             }
             case VoldResponseCode.VOLUME_STATE_CHANGED: {
                 if (cooked.length != 3) break;
-                final VolumeInfo vol = mVolumes.get(cooked[1]);
-                if (vol != null) {
-                    final int oldState = vol.state;
-                    final int newState = Integer.parseInt(cooked[2]);
-                    vol.state = newState;
-                    onVolumeStateChangedLocked(vol, oldState, newState);
-                }
+                final String volId = cooked[1];
+                final int state = Integer.parseInt(cooked[2]);
+                mListener.onVolumeStateChanged(volId, state);
                 break;
             }
             case VoldResponseCode.VOLUME_FS_TYPE_CHANGED: {
@@ -1247,23 +1231,22 @@ class StorageManagerService extends IStorageManager.Stub
             }
             case VoldResponseCode.VOLUME_PATH_CHANGED: {
                 if (cooked.length != 3) break;
-                final VolumeInfo vol = mVolumes.get(cooked[1]);
-                if (vol != null) {
-                    vol.path = cooked[2];
-                }
+                final String volId = cooked[1];
+                final String path = cooked[2];
+                mListener.onVolumePathChanged(volId, path);
                 break;
             }
             case VoldResponseCode.VOLUME_INTERNAL_PATH_CHANGED: {
                 if (cooked.length != 3) break;
-                final VolumeInfo vol = mVolumes.get(cooked[1]);
-                if (vol != null) {
-                    vol.internalPath = cooked[2];
-                }
+                final String volId = cooked[1];
+                final String internalPath = cooked[2];
+                mListener.onVolumeInternalPathChanged(volId, internalPath);
                 break;
             }
             case VoldResponseCode.VOLUME_DESTROYED: {
                 if (cooked.length != 2) break;
-                mVolumes.remove(cooked[1]);
+                final String volId = cooked[1];
+                mListener.onVolumeDestroyed(volId);
                 break;
             }
 
@@ -1319,6 +1302,120 @@ class StorageManagerService extends IStorageManager.Stub
 
         return true;
     }
+
+    private final IVoldListener mListener = new IVoldListener.Stub() {
+        @Override
+        public void onDiskCreated(String diskId, int flags) {
+            synchronized (mLock) {
+                if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false)
+                        || mForceAdoptable) {
+                    flags |= DiskInfo.FLAG_ADOPTABLE;
+                }
+                // Adoptable storage isn't currently supported on FBE devices
+                if (StorageManager.isFileEncryptedNativeOnly()
+                        && !SystemProperties.getBoolean(StorageManager.PROP_ADOPTABLE_FBE, false)) {
+                    flags &= ~DiskInfo.FLAG_ADOPTABLE;
+                }
+                mDisks.put(diskId, new DiskInfo(diskId, flags));
+            }
+        }
+
+        @Override
+        public void onDiskScanned(String diskId) {
+            synchronized (mLock) {
+                final DiskInfo disk = mDisks.get(diskId);
+                if (disk != null) {
+                    onDiskScannedLocked(disk);
+                }
+            }
+        }
+
+        @Override
+        public void onDiskMetadataChanged(String diskId, long sizeBytes, String label,
+                String sysPath) {
+            synchronized (mLock) {
+                final DiskInfo disk = mDisks.get(diskId);
+                if (disk != null) {
+                    disk.size = sizeBytes;
+                    disk.label = label;
+                    disk.sysPath = sysPath;
+                }
+            }
+        }
+
+        @Override
+        public void onDiskDestroyed(String diskId) {
+            synchronized (mLock) {
+                final DiskInfo disk = mDisks.remove(diskId);
+                if (disk != null) {
+                    mCallbacks.notifyDiskDestroyed(disk);
+                }
+            }
+        }
+
+        @Override
+        public void onVolumeCreated(String volId, int type, String diskId, String partGuid) {
+            synchronized (mLock) {
+                final DiskInfo disk = mDisks.get(diskId);
+                final VolumeInfo vol = new VolumeInfo(volId, type, disk, partGuid);
+                mVolumes.put(volId, vol);
+                onVolumeCreatedLocked(vol);
+            }
+        }
+
+        @Override
+        public void onVolumeStateChanged(String volId, int state) {
+            synchronized (mLock) {
+                final VolumeInfo vol = mVolumes.get(volId);
+                if (vol != null) {
+                    final int oldState = vol.state;
+                    final int newState = state;
+                    vol.state = newState;
+                    onVolumeStateChangedLocked(vol, oldState, newState);
+                }
+            }
+        }
+
+        @Override
+        public void onVolumeMetadataChanged(String volId, String fsType, String fsUuid,
+                String fsLabel) {
+            synchronized (mLock) {
+                final VolumeInfo vol = mVolumes.get(volId);
+                if (vol != null) {
+                    vol.fsType = fsType;
+                    vol.fsUuid = fsUuid;
+                    vol.fsLabel = fsLabel;
+                }
+            }
+        }
+
+        @Override
+        public void onVolumePathChanged(String volId, String path) {
+            synchronized (mLock) {
+                final VolumeInfo vol = mVolumes.get(volId);
+                if (vol != null) {
+                    vol.path = path;
+                }
+            }
+        }
+
+        @Override
+        public void onVolumeInternalPathChanged(String volId, String internalPath) {
+            synchronized (mLock) {
+                final VolumeInfo vol = mVolumes.get(volId);
+                if (vol != null) {
+                    vol.internalPath = internalPath;
+                }
+            }
+        }
+
+        @Override
+        public void onVolumeDestroyed(String volId) {
+            synchronized (mLock) {
+                mVolumes.remove(volId);
+            }
+        }
+    };
 
     private void onDiskScannedLocked(DiskInfo disk) {
         int volumeCount = 0;
@@ -1661,12 +1758,19 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (binder != null) {
             mVold = IVold.Stub.asInterface(binder);
+            try {
+                mVold.setListener(mListener);
+                return;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "vold listener rejected; trying again", e);
+            }
         } else {
             Slog.w(TAG, "vold not found; trying again");
-            BackgroundThread.getHandler().postDelayed(() -> {
-                connect();
-            }, DateUtils.SECOND_IN_MILLIS);
         }
+
+        BackgroundThread.getHandler().postDelayed(() -> {
+            connect();
+        }, DateUtils.SECOND_IN_MILLIS);
     }
 
     private void systemReady() {
@@ -2769,14 +2873,14 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public int decryptStorage(String password) {
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
                 "no permission to access the crypt keeper");
 
         waitForReady();
+
+        if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
 
         if (DEBUG_EVENTS) {
             Slog.i(TAG, "decrypting storage...");
@@ -2792,6 +2896,7 @@ class StorageManagerService extends IStorageManager.Stub
                         Slog.wtf(TAG, e);
                     }
                 }, DateUtils.SECOND_IN_MILLIS);
+                return 0;
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
                 return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
@@ -2825,30 +2930,28 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     public int encryptStorage(int type, String password) {
-        if (TextUtils.isEmpty(password) && type != StorageManager.CRYPT_TYPE_DEFAULT) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
         waitForReady();
+
+        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
+            password = "";
+        } else if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
 
         if (DEBUG_EVENTS) {
             Slog.i(TAG, "encrypting storage...");
         }
 
         try {
-            if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-                if (ENABLE_BINDER) {
-                    mVold.fdeEnable(type, null, IVold.ENCRYPTION_FLAG_IN_PLACE);
-                } else {
+            if (ENABLE_BINDER) {
+                mVold.fdeEnable(type, password, IVold.ENCRYPTION_FLAG_IN_PLACE);
+            } else {
+                if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
                     mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
                             CRYPTO_TYPES[type]);
-                }
-            } else {
-                if (ENABLE_BINDER) {
-                    mVold.fdeEnable(type, password, IVold.ENCRYPTION_FLAG_IN_PLACE);
                 } else {
                     mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
                             CRYPTO_TYPES[type], new SensitiveArg(password));
@@ -2871,6 +2974,12 @@ class StorageManagerService extends IStorageManager.Stub
             "no permission to access the crypt keeper");
 
         waitForReady();
+
+        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
+            password = "";
+        } else if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
 
         if (DEBUG_EVENTS) {
             Slog.i(TAG, "changing encryption password...");

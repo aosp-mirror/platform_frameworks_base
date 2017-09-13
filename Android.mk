@@ -567,6 +567,7 @@ LOCAL_SRC_FILES += \
 LOCAL_SRC_FILES += \
 	../../system/netd/server/binder/android/net/INetd.aidl \
 	../../system/vold/binder/android/os/IVold.aidl \
+	../../system/vold/binder/android/os/IVoldListener.aidl \
 	../native/cmds/installd/binder/android/os/IInstalld.aidl \
 
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
@@ -591,6 +592,7 @@ LOCAL_AIDL_INCLUDES += \
 	frameworks/av/media/libaudioclient/aidl \
 	frameworks/native/aidl/gui \
 	system/netd/server/binder \
+	system/vold/binder \
 	system/bt/binder
 
 LOCAL_INTERMEDIATE_SOURCES := \

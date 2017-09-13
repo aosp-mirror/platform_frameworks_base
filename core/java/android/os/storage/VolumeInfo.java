@@ -76,21 +76,21 @@ public class VolumeInfo implements Parcelable {
     /** Real volume representing internal emulated storage */
     public static final String ID_EMULATED_INTERNAL = "emulated";
 
-    public static final int TYPE_PUBLIC = IVold.TYPE_PUBLIC;
-    public static final int TYPE_PRIVATE = IVold.TYPE_PRIVATE;
-    public static final int TYPE_EMULATED = IVold.TYPE_EMULATED;
-    public static final int TYPE_ASEC = IVold.TYPE_ASEC;
-    public static final int TYPE_OBB = IVold.TYPE_OBB;
+    public static final int TYPE_PUBLIC = IVold.VOLUME_TYPE_PUBLIC;
+    public static final int TYPE_PRIVATE = IVold.VOLUME_TYPE_PRIVATE;
+    public static final int TYPE_EMULATED = IVold.VOLUME_TYPE_EMULATED;
+    public static final int TYPE_ASEC = IVold.VOLUME_TYPE_ASEC;
+    public static final int TYPE_OBB = IVold.VOLUME_TYPE_OBB;
 
-    public static final int STATE_UNMOUNTED = IVold.STATE_UNMOUNTED;
-    public static final int STATE_CHECKING = IVold.STATE_CHECKING;
-    public static final int STATE_MOUNTED = IVold.STATE_MOUNTED;
-    public static final int STATE_MOUNTED_READ_ONLY = IVold.STATE_MOUNTED_READ_ONLY;
-    public static final int STATE_FORMATTING = IVold.STATE_FORMATTING;
-    public static final int STATE_EJECTING = IVold.STATE_EJECTING;
-    public static final int STATE_UNMOUNTABLE = IVold.STATE_UNMOUNTABLE;
-    public static final int STATE_REMOVED = IVold.STATE_REMOVED;
-    public static final int STATE_BAD_REMOVAL = IVold.STATE_BAD_REMOVAL;
+    public static final int STATE_UNMOUNTED = IVold.VOLUME_STATE_UNMOUNTED;
+    public static final int STATE_CHECKING = IVold.VOLUME_STATE_CHECKING;
+    public static final int STATE_MOUNTED = IVold.VOLUME_STATE_MOUNTED;
+    public static final int STATE_MOUNTED_READ_ONLY = IVold.VOLUME_STATE_MOUNTED_READ_ONLY;
+    public static final int STATE_FORMATTING = IVold.VOLUME_STATE_FORMATTING;
+    public static final int STATE_EJECTING = IVold.VOLUME_STATE_EJECTING;
+    public static final int STATE_UNMOUNTABLE = IVold.VOLUME_STATE_UNMOUNTABLE;
+    public static final int STATE_REMOVED = IVold.VOLUME_STATE_REMOVED;
+    public static final int STATE_BAD_REMOVAL = IVold.VOLUME_STATE_BAD_REMOVAL;
 
     public static final int MOUNT_FLAG_PRIMARY = IVold.MOUNT_FLAG_PRIMARY;
     public static final int MOUNT_FLAG_VISIBLE = IVold.MOUNT_FLAG_VISIBLE;
