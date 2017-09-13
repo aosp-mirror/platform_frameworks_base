@@ -459,7 +459,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                 }
                 mOutputFile.close();
             } catch (IOException e) {
-                /* nothing we can do about this */
+                Slog.e(TAG, "IO error closing adb backup file: " + e.getMessage());
             }
             synchronized (mLatch) {
                 mLatch.set(true);
