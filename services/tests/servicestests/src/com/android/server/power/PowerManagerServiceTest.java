@@ -32,6 +32,10 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
+import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
@@ -91,5 +95,34 @@ public class PowerManagerServiceTest extends AndroidTestCase {
         }
         int reason = mService.getLastShutdownReasonInternal(mTempReason);
         assertThat(reason).isEqualTo(PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN);
+    }
+
+    @SmallTest
+    public void testGetDesiredScreenPolicy_WithVR() throws Exception {
+        // Brighten up the screen
+        mService.setWakefulnessLocked(WAKEFULNESS_AWAKE, 0);
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_BRIGHT);
+
+        // Move to VR
+        mService.setVrModeEnabled(true);
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_VR);
+
+        // Then take a nap
+        mService.setWakefulnessLocked(WAKEFULNESS_ASLEEP, 0);
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_OFF);
+
+        // Wake up to VR
+        mService.setWakefulnessLocked(WAKEFULNESS_AWAKE, 0);
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_VR);
+
+        // And back to normal
+        mService.setVrModeEnabled(false);
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_BRIGHT);
+
     }
 }
