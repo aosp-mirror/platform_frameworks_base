@@ -37,7 +37,7 @@
     <string name="generating_print_job" msgid="3119608742651698916">"Inprimatze-lana sortzen"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Gorde PDF gisa"</string>
     <string name="all_printers" msgid="5018829726861876202">"Inprimagailu guztiak…"</string>
-    <string name="print_dialog" msgid="32628687461331979">"Inprimatzeko elkarrizketa-koadroa"</string>
+    <string name="print_dialog" msgid="32628687461331979">"Inprimatzeko leihoa"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g> orria"</string>
     <string name="summary_template" msgid="8899734908625669193">"Laburpena, <xliff:g id="COPIES">%1$s</xliff:g> kopia, <xliff:g id="PAPER_SIZE">%2$s</xliff:g> paper-tamaina"</string>
