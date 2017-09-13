@@ -211,8 +211,9 @@ public final class SmartSelectionEventTracker {
             return (clamp(mSmartIndices[0] - mOrigStart) << 16)
                     | (clamp(mSmartIndices[1] - mOrigStart) & 0xffff);
         }
-        // If no smart selection, return start selection indices (i.e. [0, 1])
-        return /* (0 << 16) | */ (1 & 0xffff);
+        // If the smart selection model was not run, return invalid selection indices [0,0]. This
+        // allows us to tell from the terminal event alone whether the model was run.
+        return 0;
     }
 
     private int getEventDelta(SelectionEvent event) {
