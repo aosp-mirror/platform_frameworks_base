@@ -16,6 +16,8 @@
 
 #include "Privacy.h"
 
+#include <stdlib.h>
+
 // DESTINATION enum value
 const uint8_t DEST_LOCAL = 0;
 const uint8_t DEST_EXPLICIT = 1;
@@ -24,33 +26,6 @@ const uint8_t DEST_AUTOMATIC = 2;
 // type of the field, identitical to protobuf definition
 const uint8_t TYPE_STRING = 9;
 const uint8_t TYPE_MESSAGE = 11;
-
-Privacy::Privacy(uint32_t field_id, uint8_t type, uint8_t dest)
-    : field_id(field_id),
-      type(type),
-      children(NULL),
-      dest(dest),
-      patterns(NULL)
-{
-}
-
-Privacy::Privacy(uint32_t field_id, const Privacy** children)
-    : field_id(field_id),
-      type(TYPE_MESSAGE),
-      children(children),
-      dest(DEST_DEFAULT_VALUE), // this will be ignored
-      patterns(NULL)
-{
-}
-
-Privacy::Privacy(uint32_t field_id, uint8_t dest, const char** patterns)
-    : field_id(field_id),
-      type(TYPE_STRING),
-      children(NULL),
-      dest(dest),
-      patterns(patterns)
-{
-}
 
 bool
 Privacy::IsMessageType() const { return type == TYPE_MESSAGE; }

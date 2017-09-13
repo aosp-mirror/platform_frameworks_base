@@ -22,15 +22,17 @@
 
 /**
  * This is the mapping of section IDs to the commands that are run to get those commands.
- * The section IDs are guaranteed in ascending order
+ * The section IDs are guaranteed in ascending order, NULL-terminated.
  */
 extern const Section* SECTION_LIST[];
 
 /**
  * This is the mapping of section IDs to each section's privacy policy.
- * The section IDs are guaranteed in ascending order
+ * The section IDs are guaranteed in ascending order, not NULL-terminated since size is provided.
  */
 extern const Privacy* PRIVACY_POLICY_LIST[];
+
+extern const int PRIVACY_POLICY_COUNT;
 
 #endif // SECTION_LIST_H
 

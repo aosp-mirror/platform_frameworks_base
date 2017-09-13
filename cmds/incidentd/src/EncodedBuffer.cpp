@@ -27,15 +27,15 @@ const size_t BUFFER_SIZE = 4 * 1024; // 4 KB
  * Return the number of bytes of the varint.
  */
 static uint32_t
-read_raw_varint(FdBuffer::iterator& it)
+read_raw_varint(FdBuffer::iterator* it)
 {
     uint32_t val = 0;
     int i = 0;
     bool hasNext = true;
     while (hasNext) {
-        hasNext = ((*it & 0x80) != 0);
-        val += (*it & 0x7F) << (7*i);
-        it++;
+        hasNext = ((**it & 0x80) != 0);
+        val += (**it & 0x7F) << (7*i);
+        (*it)++;
         i++;
     }
     return val;
@@ -46,21 +46,21 @@ read_raw_varint(FdBuffer::iterator& it)
  * If skip is set to true, no data will be written to buf. Return number of bytes written.
  */
 static size_t
-write_field_or_skip(FdBuffer::iterator &iterator, vector<uint8_t> &buf, uint8_t wireType, bool skip)
+write_field_or_skip(FdBuffer::iterator* iter, vector<uint8_t>* buf, uint8_t wireType, bool skip)
 {
-    FdBuffer::iterator snapshot = iterator.snapshot();
+    FdBuffer::iterator snapshot = iter->snapshot();
     size_t bytesToWrite = 0;
     uint32_t varint = 0;
     switch (wireType) {
         case WIRE_TYPE_VARINT:
-            varint = read_raw_varint(iterator);
+            varint = read_raw_varint(iter);
             if(!skip) return write_raw_varint(buf, varint);
             break;
         case WIRE_TYPE_FIXED64:
             bytesToWrite = 8;
             break;
         case WIRE_TYPE_LENGTH_DELIMITED:
-            bytesToWrite = read_raw_varint(iterator);
+            bytesToWrite = read_raw_varint(iter);
             if(!skip) write_raw_varint(buf, bytesToWrite);
             break;
         case WIRE_TYPE_FIXED32:
@@ -68,14 +68,14 @@ write_field_or_skip(FdBuffer::iterator &iterator, vector<uint8_t> &buf, uint8_t 
             break;
     }
     if (skip) {
-        iterator += bytesToWrite;
+        *iter += bytesToWrite;
     } else {
         for (size_t i=0; i<bytesToWrite; i++) {
-            buf.push_back(*iterator);
-            iterator++;
+            buf->push_back(**iter);
+            (*iter)++;
         }
     }
-    return skip ? 0 : iterator - snapshot;
+    return skip ? 0 : *iter - snapshot;
 }
 
 /**
@@ -86,30 +86,30 @@ write_field_or_skip(FdBuffer::iterator &iterator, vector<uint8_t> &buf, uint8_t 
  * After exit with NO_ERROR, iterator points to the next protobuf field's head.
  */
 static status_t
-stripField(FdBuffer::iterator &iterator, vector<uint8_t> &buf, const Privacy* parentPolicy, const PrivacySpec& spec)
+stripField(FdBuffer::iterator* iter, vector<uint8_t>* buf, const Privacy* parentPolicy, const PrivacySpec& spec)
 {
-    if (iterator.outOfBound() || parentPolicy == NULL) return BAD_VALUE;
+    if (iter->outOfBound() || parentPolicy == NULL) return BAD_VALUE;
 
-    uint32_t varint = read_raw_varint(iterator);
+    uint32_t varint = read_raw_varint(iter);
     uint8_t wireType = read_wire_type(varint);
     uint32_t fieldId = read_field_id(varint);
     const Privacy* policy = parentPolicy->lookup(fieldId);
 
     if (policy == NULL || !policy->IsMessageType() || !policy->HasChildren()) {
         bool skip = !spec.CheckPremission(policy);
-        size_t amt = buf.size();
+        size_t amt = buf->size();
         if (!skip) amt += write_header(buf, fieldId, wireType);
-        amt += write_field_or_skip(iterator, buf, wireType, skip); // point to head of next field
-        return buf.size() != amt ? BAD_VALUE : NO_ERROR;
+        amt += write_field_or_skip(iter, buf, wireType, skip); // point to head of next field
+        return buf->size() != amt ? BAD_VALUE : NO_ERROR;
     }
     // current field is message type and its sub-fields have extra privacy policies
     deque<vector<uint8_t>> q;
-    uint32_t msgSize = read_raw_varint(iterator);
+    uint32_t msgSize = read_raw_varint(iter);
     size_t finalSize = 0;
-    FdBuffer::iterator start = iterator.snapshot();
-    while ((iterator - start) != (int)msgSize) {
+    FdBuffer::iterator start = iter->snapshot();
+    while ((*iter - start) != (int)msgSize) {
         vector<uint8_t> v;
-        status_t err = stripField(iterator, v, policy, spec);
+        status_t err = stripField(iter, &v, policy, spec);
         if (err != NO_ERROR) return err;
         if (v.empty()) continue;
         q.push_back(v);
@@ -118,11 +118,11 @@ stripField(FdBuffer::iterator &iterator, vector<uint8_t> &buf, const Privacy* pa
 
     write_header(buf, fieldId, wireType);
     write_raw_varint(buf, finalSize);
-    buf.reserve(finalSize);
+    buf->reserve(finalSize); // reserve the size of the field
     while (!q.empty()) {
         vector<uint8_t> subField = q.front();
         for (vector<uint8_t>::iterator it = subField.begin(); it != subField.end(); it++) {
-            buf.push_back(*it);
+            buf->push_back(*it);
         }
         q.pop_front();
     }
@@ -156,7 +156,7 @@ EncodedBuffer::strip(const PrivacySpec& spec)
     field.reserve(BUFFER_SIZE);
 
     while (it != mFdBuffer.end()) {
-        status_t err = stripField(it, field, mPolicy, spec);
+        status_t err = stripField(&it, &field, mPolicy, spec);
         if (err != NO_ERROR) return err;
         if (field.size() > BUFFER_SIZE) { // rotate to another chunk if buffer size exceeds
             mBuffers.push_back(field);

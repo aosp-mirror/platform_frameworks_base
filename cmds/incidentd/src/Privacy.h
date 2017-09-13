@@ -30,16 +30,12 @@ struct Privacy {
     uint32_t field_id;
     uint8_t type;
     // ignore parent's privacy flags if children are set, NULL-terminated
-    const Privacy** children;
+    Privacy** children;
 
     // the following fields are identitical to
     // frameworks/base/libs/incident/proto/android/privacy.proto
     uint8_t dest;
     const char** patterns; // only set when type is string
-
-    Privacy(uint32_t field_id, uint8_t type, uint8_t dest); // generic constructor
-    Privacy(uint32_t field_id, const Privacy** children); // used for message type
-    Privacy(uint32_t field_id, uint8_t dest, const char** patterns); // used for string type
 
     bool IsMessageType() const;
     bool IsStringType() const;

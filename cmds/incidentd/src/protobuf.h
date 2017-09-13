@@ -53,12 +53,12 @@ uint8_t* write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_
 /**
  * Write a varint into a vector. Return the size of the varint.
  */
-size_t write_raw_varint(vector<uint8_t> &buf, uint32_t val);
+size_t write_raw_varint(vector<uint8_t>* buf, uint32_t val);
 
 /**
  * Write a protobuf header. Return the size of the header.
  */
-size_t write_header(vector<uint8_t> &buf, uint32_t fieldId, uint8_t wireType);
+size_t write_header(vector<uint8_t>* buf, uint32_t fieldId, uint8_t wireType);
 
 enum {
     // IncidentProto.header
