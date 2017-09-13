@@ -33,14 +33,14 @@ import java.util.List;
  * frontend apps.
  * @hide
  */
-//@SystemApi
+@SystemApi
 public class VendorUtils {
 
     /**
      * The MBMS middleware should send this when a download of single file has completed or
      * failed. Mandatory extras are
-     * {@link android.telephony.MbmsDownloadManager#EXTRA_RESULT}
-     * {@link android.telephony.MbmsDownloadManager#EXTRA_FILE_INFO}
+     * {@link android.telephony.MbmsDownloadManager#EXTRA_MBMS_DOWNLOAD_RESULT}
+     * {@link android.telephony.MbmsDownloadManager#EXTRA_MBMS_FILE_INFO}
      * {@link #EXTRA_REQUEST}
      * {@link #EXTRA_TEMP_LIST}
      * {@link #EXTRA_FINAL_URI}
