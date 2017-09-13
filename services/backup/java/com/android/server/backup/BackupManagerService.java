@@ -4535,7 +4535,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     }
                     mOutputFile.close();
                 } catch (IOException e) {
-                    /* nothing we can do about this */
+                    Slog.e(TAG, "IO error closing adb backup file: " + e.getMessage());
                 }
                 synchronized (mLatch) {
                     mLatch.set(true);
@@ -10112,7 +10112,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             try {
                 fd.close();
             } catch (IOException e) {
-                // just eat it
+                Slog.e(TAG, "IO error closing output for adb backup: " + e.getMessage());
             }
             Binder.restoreCallingIdentity(oldId);
             Slog.d(TAG, "Adb backup processing complete.");
