@@ -19,7 +19,7 @@
 #include <log/event_tag_map.h>
 #include <log/logprint.h>
 #include <utils/Errors.h>
-
+#include <cutils/log.h>
 #include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
 
 using namespace android;
@@ -66,3 +66,9 @@ StatsLogProcessor::OnLogEvent(const log_msg& msg)
     }
 }
 
+void
+StatsLogProcessor::UpdateConfig(const int config_source, StatsdConfig config)
+{
+    m_configs[config_source] = config;
+    ALOGD("Updated configuration for source %i", config_source);
+}
