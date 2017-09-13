@@ -53,7 +53,6 @@ import java.util.UUID;
     android:enabled="true"
     android:exported="true">
 </receiver>}</pre>
- * @hide
  */
 public class MbmsDownloadReceiver extends BroadcastReceiver {
     /** @hide */
@@ -65,7 +64,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * Indicates that the requested operation completed without error.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public static final int RESULT_OK = 0;
 
     /**
@@ -77,7 +76,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * This is a fatal result code and no result extras should be expected.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public static final int RESULT_INVALID_ACTION = 1;
 
     /**
@@ -85,7 +84,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * This is a fatal result code and no result extras should be expected.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public static final int RESULT_MALFORMED_INTENT = 2;
 
     /**
@@ -94,7 +93,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * This is a fatal result code and no result extras should be expected.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public static final int RESULT_BAD_TEMP_FILE_ROOT = 3;
 
     /**
@@ -102,7 +101,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * This is a fatal result code and no result extras should be expected.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public static final int RESULT_DOWNLOAD_FINALIZATION_ERROR = 4;
 
     /**
@@ -112,7 +111,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
      * is no guarantee that they will be the same number as requested.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public static final int RESULT_TEMP_FILE_GENERATION_ERROR = 5;
 
     private static final String LOG_TAG = "MbmsDownloadReceiver";
@@ -149,7 +148,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private boolean verifyIntentContents(Context context, Intent intent) {
         if (VendorUtils.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
-            if (!intent.hasExtra(MbmsDownloadManager.EXTRA_RESULT)) {
+            if (!intent.hasExtra(MbmsDownloadManager.EXTRA_MBMS_DOWNLOAD_RESULT)) {
                 Log.w(LOG_TAG, "Download result did not include a result code. Ignoring.");
                 return false;
             }
@@ -161,7 +160,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 Log.w(LOG_TAG, "Download result did not include the temp file root. Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(MbmsDownloadManager.EXTRA_FILE_INFO)) {
+            if (!intent.hasExtra(MbmsDownloadManager.EXTRA_MBMS_FILE_INFO)) {
                 Log.w(LOG_TAG, "Download result did not include the associated file info. " +
                         "Ignoring.");
                 return false;
@@ -214,9 +213,9 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
         Intent intentForApp = request.getIntentForApp();
 
-        int result = intent.getIntExtra(MbmsDownloadManager.EXTRA_RESULT,
+        int result = intent.getIntExtra(MbmsDownloadManager.EXTRA_MBMS_DOWNLOAD_RESULT,
                 MbmsDownloadManager.RESULT_CANCELLED);
-        intentForApp.putExtra(MbmsDownloadManager.EXTRA_RESULT, result);
+        intentForApp.putExtra(MbmsDownloadManager.EXTRA_MBMS_DOWNLOAD_RESULT, result);
 
         if (result != MbmsDownloadManager.RESULT_SUCCESSFUL) {
             Log.i(LOG_TAG, "Download request indicated a failed download. Aborting.");
@@ -233,7 +232,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         FileInfo completedFileInfo =
-                (FileInfo) intent.getParcelableExtra(MbmsDownloadManager.EXTRA_FILE_INFO);
+                (FileInfo) intent.getParcelableExtra(MbmsDownloadManager.EXTRA_MBMS_FILE_INFO);
         String relativePath = calculateDestinationFileRelativePath(request, completedFileInfo);
 
         Uri finalFileLocation = moveTempFile(finalTempFile, destinationUri, relativePath);
@@ -242,8 +241,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
             return;
         }
-        intentForApp.putExtra(MbmsDownloadManager.EXTRA_COMPLETED_FILE_URI, finalFileLocation);
-        intentForApp.putExtra(MbmsDownloadManager.EXTRA_FILE_INFO, completedFileInfo);
+        intentForApp.putExtra(MbmsDownloadManager.EXTRA_MBMS_COMPLETED_FILE_URI, finalFileLocation);
+        intentForApp.putExtra(MbmsDownloadManager.EXTRA_MBMS_FILE_INFO, completedFileInfo);
 
         context.sendBroadcast(intentForApp);
         setResultCode(RESULT_OK);
