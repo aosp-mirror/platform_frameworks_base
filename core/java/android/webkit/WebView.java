@@ -75,18 +75,22 @@ import java.util.Map;
  * can roll your own web browser or simply display some online content within your Activity.
  * It uses the WebKit rendering engine to display
  * web pages and includes methods to navigate forward and backward
- * through a history, zoom in and out, perform text searches and more.</p>
+ * through a history, zoom in and out, perform text searches and more.
+ *
  * <p>Note that, in order for your Activity to access the Internet and load web pages
  * in a WebView, you must add the {@code INTERNET} permissions to your
- * Android Manifest file:</p>
- * <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre>
+ * Android Manifest file:
+ *
+ * <pre>
+ * {@code <uses-permission android:name="android.permission.INTERNET" />}
+ * </pre>
  *
  * <p>This must be a child of the <a
  * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code <manifest>}</a>
- * element.</p>
+ * element.
  *
  * <p>For more information, read
- * <a href="{@docRoot}guide/webapps/webview.html">Building Web Apps in WebView</a>.</p>
+ * <a href="{@docRoot}guide/webapps/webview.html">Building Web Apps in WebView</a>.
  *
  * <h3>Basic usage</h3>
  *
@@ -103,17 +107,19 @@ import java.util.Map;
  * Intent intent = new Intent(Intent.ACTION_VIEW, uri);
  * startActivity(intent);
  * </pre>
- * <p>See {@link android.content.Intent} for more information.</p>
+ * <p>See {@link android.content.Intent} for more information.
  *
  * <p>To provide a WebView in your own Activity, include a {@code <WebView>} in your layout,
  * or set the entire Activity window as a WebView during {@link
- * android.app.Activity#onCreate(Bundle) onCreate()}:</p>
+ * android.app.Activity#onCreate(Bundle) onCreate()}:
+ *
  * <pre class="prettyprint">
  * WebView webview = new WebView(this);
  * setContentView(webview);
  * </pre>
  *
- * <p>Then load the desired web page:</p>
+ * <p>Then load the desired web page:
+ *
  * <pre>
  * // Simplest usage: note that an exception will NOT be thrown
  * // if there is an error loading this page (see below).
@@ -128,7 +134,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>A WebView has several customization points where you can add your
- * own behavior. These are:</p>
+ * own behavior. These are:
  *
  * <ul>
  *   <li>Creating and setting a {@link android.webkit.WebChromeClient} subclass.
@@ -153,7 +159,7 @@ import java.util.Map;
  * </ul>
  *
  * <p>Here's a more complicated example, showing error handling,
- *    settings, and progress notification:</p>
+ *    settings, and progress notification:
  *
  * <pre class="prettyprint">
  * // Let's display the progress in the activity title bar, like the
@@ -183,23 +189,23 @@ import java.util.Map;
  *
  * <p>To enable the built-in zoom, set
  * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
- * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).</p>
+ * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).
+ *
  * <p>NOTE: Using zoom if either the height or width is set to
  * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} may lead to undefined behavior
- * and should be avoided.</p>
+ * and should be avoided.
  *
  * <h3>Cookie and window management</h3>
  *
  * <p>For obvious security reasons, your application has its own
  * cache, cookie store etc.&mdash;it does not share the Browser
  * application's data.
- * </p>
  *
  * <p>By default, requests by the HTML to open new windows are
  * ignored. This is {@code true} whether they be opened by JavaScript or by
  * the target attribute on a link. You can customize your
  * {@link WebChromeClient} to provide your own behavior for opening multiple windows,
- * and render them in whatever manner you want.</p>
+ * and render them in whatever manner you want.
  *
  * <p>The standard behavior for an Activity is to be destroyed and
  * recreated when the device orientation or any other configuration changes. This will cause
@@ -208,7 +214,7 @@ import java.util.Map;
  * changes, and then just leave the WebView alone. It'll automatically
  * re-orient itself as appropriate. Read <a
  * href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a> for
- * more information about how to handle configuration changes during runtime.</p>
+ * more information about how to handle configuration changes during runtime.
  *
  *
  * <h3>Building web pages to support different screen densities</h3>
@@ -220,15 +226,15 @@ import java.util.Map;
  * height and width are defined in terms of screen pixels will appear larger on the lower density
  * screen and smaller on the higher density screen.
  * For simplicity, Android collapses all actual screen densities into three generalized densities:
- * high, medium, and low.</p>
+ * high, medium, and low.
  * <p>By default, WebView scales a web page so that it is drawn at a size that matches the default
  * appearance on a medium density screen. So, it applies 1.5x scaling on a high density screen
  * (because its pixels are smaller) and 0.75x scaling on a low density screen (because its pixels
  * are bigger).
  * Starting with API level {@link android.os.Build.VERSION_CODES#ECLAIR}, WebView supports DOM, CSS,
  * and meta tag features to help you (as a web developer) target screens with different screen
- * densities.</p>
- * <p>Here's a summary of the features you can use to handle different screen densities:</p>
+ * densities.
+ * <p>Here's a summary of the features you can use to handle different screen densities:
  * <ul>
  * <li>The {@code window.devicePixelRatio} DOM property. The value of this property specifies the
  * default scaling factor used for the current device. For example, if the value of {@code
@@ -244,7 +250,7 @@ import java.util.Map;
  * <pre>
  * &lt;link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio:1.5)" href="hdpi.css" /&gt;</pre>
  * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ration of 1.5,
- * which is the high density pixel ratio.</p>
+ * which is the high density pixel ratio.
  * </li>
  * </ul>
  *
@@ -252,7 +258,6 @@ import java.util.Map;
  *
  * <p>In order to support inline HTML5 video in your application you need to have hardware
  * acceleration turned on.
- * </p>
  *
  * <h3>Full screen support</h3>
  *
@@ -263,7 +268,6 @@ import java.util.Map;
  * missing then the web contents will not be allowed to enter full screen. Optionally you can implement
  * {@link WebChromeClient#getVideoLoadingProgressView()} to customize the View displayed whilst a video
  * is loading.
- * </p>
  *
  * <h3>HTML5 Geolocation API support</h3>
  *
@@ -273,7 +277,6 @@ import java.util.Map;
  * origins are automatically denied without invoking the corresponding
  * {@link WebChromeClient#onGeolocationPermissionsShowPrompt(String, GeolocationPermissions.Callback)}
  * method.
- * </p>
  *
  * <h3>Layout size</h3>
  * <p>
@@ -284,7 +287,6 @@ import java.util.Map;
  * for the height none of the WebView's parents should use a
  * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} layout height since that could result in
  * incorrect sizing of the views.
- * </p>
  *
  * <p>Setting the WebView's height to {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
  * enables the following behaviors:
@@ -294,13 +296,11 @@ import java.util.Map;
  * <li>For applications targeting {@link android.os.Build.VERSION_CODES#KITKAT} and earlier SDKs the
  * HTML viewport meta tag will be ignored in order to preserve backwards compatibility. </li>
  * </ul>
- * </p>
  *
  * <p>
  * Using a layout width of {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} is not
  * supported. If such a width is used the WebView will attempt to use the width of the parent
  * instead.
- * </p>
  *
  * <h3>Metrics</h3>
  *
@@ -313,27 +313,22 @@ import java.util.Map;
  * &lt;meta-data android:name="android.webkit.WebView.MetricsOptOut"
  *            android:value="true" /&gt;
  * </pre>
- * </p>
  * <p>
  * Data will only be uploaded for a given app if the user has consented AND the app has not opted
  * out.
- * </p>
  *
  * <h3>Safe Browsing</h3>
  *
  * <p>
  * If Safe Browsing is enabled, WebView will block malicious URLs and present a warning UI to the
  * user to allow them to navigate back safely or proceed to the malicious page.
- * </p>
  * <p>
  * The recommended way for apps to enable the feature is putting the following tag in the manifest:
- * </p>
  * <p>
  * <pre>
  * &lt;meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
  *            android:value="true" /&gt;
  * </pre>
- * </p>
  *
  */
 // Implementation notes.
@@ -1197,11 +1192,11 @@ public class WebView extends AbsoluteLayout
      * immediately be reflected visually by subsequent {@link WebView#onDraw} invocations. The
      * {@link VisualStateCallback} provides a mechanism to notify the caller when the contents of
      * the DOM at the current time are ready to be drawn the next time the {@link WebView}
-     * draws.</p>
+     * draws.
      *
      * <p>The next draw after the callback completes is guaranteed to reflect all the updates to the
      * DOM up to the point at which the {@link VisualStateCallback} was posted, but it may also
-     * contain updates applied after the callback was posted.</p>
+     * contain updates applied after the callback was posted.
      *
      * <p>The state of the DOM covered by this API includes the following:
      * <ul>
@@ -1214,7 +1209,7 @@ public class WebView extends AbsoluteLayout
      * It does not include the state of:
      * <ul>
      * <li>the video tag</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>To guarantee that the {@link WebView} will successfully render the first frame
      * after the {@link VisualStateCallback#onComplete} method has been called a set of conditions
@@ -1230,11 +1225,11 @@ public class WebView extends AbsoluteLayout
      * {@link AbsoluteLayout.LayoutParams LayoutParams}'s width and height need to be set to fixed
      * values and must be made {@link View#VISIBLE VISIBLE} from the
      * {@link VisualStateCallback#onComplete} method.</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>When using this API it is also recommended to enable pre-rasterization if the {@link
      * WebView} is off screen to avoid flickering. See {@link WebSettings#setOffscreenPreRaster} for
-     * more details and do consider its caveats.</p>
+     * more details and do consider its caveats.
      *
      * @param requestId An id that will be returned in the callback to allow callers to match
      *                  requests with callbacks.
@@ -1990,7 +1985,7 @@ public class WebView extends AbsoluteLayout
      * <a href="https://html.spec.whatwg.org/multipage/comms.html#messagechannel">here
      * </a>
      *
-     * <p>The returned message channels are entangled and already in started state.</p>
+     * <p>The returned message channels are entangled and already in started state.
      *
      * @return the two message ports that form the message channel.
      */

@@ -1394,11 +1394,9 @@ public abstract class WebSettings {
      * Safe browsing is disabled by default. The recommended way to enable Safe browsing is using a
      * manifest tag to change the default value to enabled for all WebViews (read <a
      * href="{@docRoot}reference/android/webkit/WebView.html">general Safe Browsing info</a>).
-     * </p>
      *
      * <p>
      * This API overrides the manifest tag value for this WebView.
-     * </p>
      *
      * @param enabled Whether Safe browsing is enabled.
      */
