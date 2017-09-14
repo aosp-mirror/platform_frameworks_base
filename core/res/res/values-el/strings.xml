@@ -38,7 +38,7 @@
     <string name="serviceErased" msgid="1288584695297200972">"Η διαγραφή ήταν επιτυχής."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Λανθασμένος κωδικός πρόσβασης."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"Το MMI ολοκληρώθηκε."</string>
-    <string name="badPin" msgid="9015277645546710014">"Ο παλιός αριθμός PIN που πληκτρολογήσατε είναι λάθος."</string>
+    <string name="badPin" msgid="9015277645546710014">"Το παλιό PIN που πληκτρολογήσατε είναι λάθος."</string>
     <string name="badPuk" msgid="5487257647081132201">"Ο κωδικός PUK που πληκτρολογήσατε είναι λάθος."</string>
     <string name="mismatchPin" msgid="609379054496863419">"Οι αριθμοί PIN που πληκτρολογήσατε δεν ταιριάζουν."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Πληκτρολογήστε έναν αριθμό PIN μεγέθους 4 έως 8 αριθμών."</string>
@@ -230,7 +230,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Ρυθμίσεις"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Βοήθεια"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Φων.υποβοηθ."</string>
-    <string name="global_action_lockdown" msgid="8751542514724332873">"Κλείδωμα τώρα"</string>
+    <!-- no translation found for global_action_lockdown (2277328351790053477) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Νέα ειδοποίηση"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Εικονικό πληκτρολόγιο"</string>

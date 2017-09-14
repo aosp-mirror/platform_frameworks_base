@@ -22,7 +22,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ਬੱਗ ਰਿਪੋਰਟ <xliff:g id="ID">#%d</xliff:g> ਕੈਪਚਰ ਕੀਤੀ ਗਈ"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ਬੱਗ ਰਿਪੋਰਟ ਵਿੱਚ ਵੇਰਵਿਆਂ ਨੂੰ ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ਬੱਗ ਰਿਪੋਰਟ ਜਲਦ ਹੀ ਫ਼ੋਨ \'ਤੇ ਵਿਖਾਈ ਦੇਵੇਗੀ"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ਬੱਗ ਰਿਪੋਰਟ ਜਲਦ ਹੀ ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਈ ਦੇਵੇਗੀ"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਲਈ ਚੁਣੋ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਬਿਨਾਂ ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਲਈ ਚੁਣੋ ਜਾਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਪੂਰੇ ਹੋਣ ਦੀ ਉਡੀਕ ਕਰੋ"</string>

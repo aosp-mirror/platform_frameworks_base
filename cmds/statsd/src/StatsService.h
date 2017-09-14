@@ -45,6 +45,10 @@ public:
     virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
 
     virtual Status systemRunning();
+
+private:
+    status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
+    void printCmdHelp(FILE* out);
 };
 
 #endif // STATS_SERVICE_H

@@ -66,6 +66,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -438,6 +439,8 @@ public class TileUtilsTest {
         tile.metaData.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY_URI, URI_GET_SUMMARY);
         tile.remoteViews = mock(RemoteViews.class);
         TileUtils.updateTileUsingSummaryUri(mContext, tile);
+        ShadowApplication.runBackgroundTasks();
+
         verify(tile.remoteViews, times(1)).setTextViewText(anyInt(), eq(expectedSummary));
     }
 

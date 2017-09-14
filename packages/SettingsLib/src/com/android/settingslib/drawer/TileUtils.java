@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -534,24 +535,35 @@ public class TileUtils {
         }
     }
 
-    public static void updateTileUsingSummaryUri(Context context, Tile tile) {
+    public static void updateTileUsingSummaryUri(Context context, final Tile tile) {
         if (tile == null || tile.metaData == null ||
-            !tile.metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+                !tile.metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
             return;
         }
 
-        final Map<String, IContentProvider> providerMap = new HashMap<>();
+        new AsyncTask<Void, Void, Bundle>() {
+            @Override
+            protected Bundle doInBackground(Void... params) {
+                return getBundleFromUri(context,
+                        tile.metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI), new HashMap<>());
+            }
 
-        final String uriString = tile.metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI);
-        final Bundle bundle = getBundleFromUri(context, uriString, providerMap);
-        final String overrideSummary = getString(bundle, META_DATA_PREFERENCE_SUMMARY);
-        final String overrideTitle = getString(bundle, META_DATA_PREFERENCE_TITLE);
-        if (overrideSummary != null) {
-            tile.remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
-        }
-        if (overrideTitle != null) {
-            tile.remoteViews.setTextViewText(android.R.id.title, overrideTitle);
-        }
+            @Override
+            protected void onPostExecute(Bundle bundle) {
+                if (bundle == null) {
+                    return;
+                }
+                final String overrideSummary = getString(bundle, META_DATA_PREFERENCE_SUMMARY);
+                final String overrideTitle = getString(bundle, META_DATA_PREFERENCE_TITLE);
+
+                if (overrideSummary != null) {
+                    tile.remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
+                }
+                if (overrideTitle != null) {
+                    tile.remoteViews.setTextViewText(android.R.id.title, overrideTitle);
+                }
+            }
+        }.execute();
     }
 
     private static String getString(Bundle bundle, String key) {

@@ -22299,13 +22299,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             // default permission exceptions lazily to ensure we don't hit the
             // disk on a new user creation.
             mDefaultPermissionPolicy.scheduleReadDefaultPermissionExceptions();
-        } else {
-            // Since we granted default permissions above, we need an update
-            // pass to apply those changes.
-            synchronized (mPackages) {
-                updatePermissionsLPw(null, null, StorageManager.UUID_PRIVATE_INTERNAL,
-                        UPDATE_PERMISSIONS_ALL);
-            }
+        }
+
+        // Now that we've scanned all packages, and granted any default
+        // permissions, ensure permissions are updated. Beware of dragons if you
+        // try optimizing this.
+        synchronized (mPackages) {
+            updatePermissionsLPw(null, null, StorageManager.UUID_PRIVATE_INTERNAL,
+                    UPDATE_PERMISSIONS_ALL);
         }
 
         // Kick off any messages waiting for system ready

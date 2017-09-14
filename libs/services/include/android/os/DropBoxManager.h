@@ -57,7 +57,7 @@ public:
     // and a handle will be passed to the system process, so no additional permissions
     // are required from the system process.  Returns NULL if the file can't be opened.
     Status addFile(const String16& tag, const string& filename, int flags);
-    
+
     class Entry : public virtual RefBase, public Parcelable {
     public:
         Entry();
@@ -65,7 +65,12 @@ public:
 
         virtual status_t writeToParcel(Parcel* out) const;
         virtual status_t readFromParcel(const Parcel* in);
-        
+
+        const vector<uint8_t>& getData() const;
+        const unique_fd& getFd() const;
+        int32_t getFlags() const;
+        int64_t getTimestamp() const;
+
     private:
         Entry(const String16& tag, int32_t flags);
         Entry(const String16& tag, int32_t flags, int fd);
@@ -79,6 +84,9 @@ public:
 
         friend class DropBoxManager;
     };
+
+    // Get the next entry from the drop box after the specified time.
+    Status getNextEntry(const String16& tag, long msec, Entry* entry);
 
 private:
     enum {

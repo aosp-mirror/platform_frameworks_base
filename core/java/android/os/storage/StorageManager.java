@@ -225,22 +225,28 @@ public class StorageManager {
     public static final int FSTRIM_FLAG_BENCHMARK = IVold.FSTRIM_FLAG_BENCHMARK_AFTER;
 
     /** @hide The volume is not encrypted. */
-    public static final int ENCRYPTION_STATE_NONE = 1;
+    public static final int ENCRYPTION_STATE_NONE =
+            IVold.ENCRYPTION_STATE_NONE;
 
     /** @hide The volume has been encrypted succesfully. */
-    public static final int ENCRYPTION_STATE_OK = 0;
+    public static final int ENCRYPTION_STATE_OK =
+            IVold.ENCRYPTION_STATE_OK;
 
-    /** @hide The volume is in a bad state.*/
-    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
+    /** @hide The volume is in a bad state. */
+    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN =
+            IVold.ENCRYPTION_STATE_ERROR_UNKNOWN;
 
     /** @hide Encryption is incomplete */
-    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE =
+            IVold.ENCRYPTION_STATE_ERROR_INCOMPLETE;
 
     /** @hide Encryption is incomplete and irrecoverable */
-    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT = -3;
+    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT =
+            IVold.ENCRYPTION_STATE_ERROR_INCONSISTENT;
 
     /** @hide Underlying data is corrupt */
-    public static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
+    public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
+            IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
 
     private static volatile IStorageManager sStorageManager = null;
 
@@ -1974,13 +1980,13 @@ public class StorageManager {
 
     /// Consts to match the password types in cryptfs.h
     /** @hide */
-    public static final int CRYPT_TYPE_PASSWORD = 0;
+    public static final int CRYPT_TYPE_PASSWORD = IVold.PASSWORD_TYPE_PASSWORD;
     /** @hide */
-    public static final int CRYPT_TYPE_DEFAULT = 1;
+    public static final int CRYPT_TYPE_DEFAULT = IVold.PASSWORD_TYPE_DEFAULT;
     /** @hide */
-    public static final int CRYPT_TYPE_PATTERN = 2;
+    public static final int CRYPT_TYPE_PATTERN = IVold.PASSWORD_TYPE_PATTERN;
     /** @hide */
-    public static final int CRYPT_TYPE_PIN = 3;
+    public static final int CRYPT_TYPE_PIN = IVold.PASSWORD_TYPE_PIN;
 
     // Constants for the data available via StorageManagerService.getField.
     /** @hide */

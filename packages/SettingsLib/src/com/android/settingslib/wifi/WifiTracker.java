@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -70,8 +69,7 @@ public class WifiTracker {
      * Default maximum age in millis of cached scored networks in
      * {@link AccessPoint#mScoredNetworkCache} to be used for speed label generation.
      */
-    private static final long MAX_CACHED_SCORE_AGE_MILLIS_DEFAULT =
-            20 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long DEFAULT_MAX_CACHED_SCORE_AGE_MILLIS = 20 * DateUtils.MINUTE_IN_MILLIS;
 
     private static final String TAG = "WifiTracker";
     private static final boolean DBG() {
@@ -146,8 +144,6 @@ public class WifiTracker {
     private final NetworkScoreManager mNetworkScoreManager;
     private final WifiNetworkScoreCache mScoreCache;
     private boolean mNetworkScoringUiEnabled;
-    private final ContentObserver mScoringEnabledObserver;
-    private final ContentObserver mSpeedLabelCacheAgeObserver;
     private long mMaxSpeedLabelScoreCacheAge;
 
     @GuardedBy("mLock")
@@ -246,27 +242,6 @@ public class WifiTracker {
                 updateNetworkScores();
             }
         });
-
-        mScoringEnabledObserver = new ContentObserver(mWorkHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                mNetworkScoringUiEnabled =
-                        Settings.Global.getInt(
-                                mContext.getContentResolver(),
-                                Settings.Global.NETWORK_SCORING_UI_ENABLED, 0) == 1;
-            }
-        };
-
-        mSpeedLabelCacheAgeObserver = new ContentObserver(mWorkHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                mMaxSpeedLabelScoreCacheAge =
-                        Settings.Global.getLong(
-                                mContext.getContentResolver(),
-                                Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
-                                MAX_CACHED_SCORE_AGE_MILLIS_DEFAULT);
-            }
-        };
     }
 
     /** Synchronously update the list of access points with the latest information. */
@@ -342,18 +317,16 @@ public class WifiTracker {
         synchronized (mLock) {
             registerScoreCache();
 
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.NETWORK_SCORING_UI_ENABLED),
-                    false /* notifyForDescendants */,
-                    mScoringEnabledObserver);
-            mScoringEnabledObserver.onChange(false /* selfChange */); // Set mScoringUiEnabled
+            mNetworkScoringUiEnabled =
+                    Settings.Global.getInt(
+                            mContext.getContentResolver(),
+                            Settings.Global.NETWORK_SCORING_UI_ENABLED, 0) == 1;
 
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(
-                            Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS),
-                    false /* notifyForDescendants */,
-                    mSpeedLabelCacheAgeObserver);
-            mSpeedLabelCacheAgeObserver.onChange(false /* selfChange */); // Set initial value
+            mMaxSpeedLabelScoreCacheAge =
+                    Settings.Global.getLong(
+                            mContext.getContentResolver(),
+                            Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
+                            DEFAULT_MAX_CACHED_SCORE_AGE_MILLIS);
 
             resumeScanning();
             if (!mRegistered) {
@@ -405,8 +378,6 @@ public class WifiTracker {
             }
             unregisterScoreCache();
             pauseScanning();
-            mContext.getContentResolver().unregisterContentObserver(mScoringEnabledObserver);
-            mContext.getContentResolver().unregisterContentObserver(mSpeedLabelCacheAgeObserver);
 
             mWorkHandler.removePendingMessages();
             mMainHandler.removePendingMessages();
@@ -660,7 +631,7 @@ public class WifiTracker {
                 String prevSsid = prevAccessPoint.getSsidStr();
                 boolean found = false;
                 for (AccessPoint newAccessPoint : accessPoints) {
-                    if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid()
+                    if (newAccessPoint.getSsidStr() != null && newAccessPoint.getSsidStr()
                             .equals(prevSsid)) {
                         found = true;
                         break;
@@ -712,24 +683,23 @@ public class WifiTracker {
     private void updateNetworkInfo(NetworkInfo networkInfo) {
         /* sticky broadcasts can call this when wifi is disabled */
         if (!mWifiManager.isWifiEnabled()) {
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
             clearAccessPointsAndConditionallyUpdate();
             return;
         }
 
-        if (networkInfo != null &&
-                networkInfo.getDetailedState() == DetailedState.OBTAINING_IPADDR) {
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
-        } else {
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_RESUME_SCANNING);
-        }
-
         if (networkInfo != null) {
             mLastNetworkInfo = networkInfo;
+            if (DBG()) {
+                Log.d(TAG, "mLastNetworkInfo set: " + mLastNetworkInfo);
+            }
         }
 
         WifiConfiguration connectionConfig = null;
+
         mLastInfo = mWifiManager.getConnectionInfo();
+        if (DBG()) {
+            Log.d(TAG, "mLastInfo set as: " + mLastInfo);
+        }
         if (mLastInfo != null) {
             connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId(),
                     mWifiManager.getConfiguredNetworks());
@@ -753,7 +723,6 @@ public class WifiTracker {
             }
 
             if (reorder) Collections.sort(mInternalAccessPoints);
-
             if (updated) mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
         }
     }
@@ -902,6 +871,9 @@ public class WifiTracker {
                     if (mScanner != null) {
                         mScanner.pause();
                     }
+                    synchronized (mLock) {
+                        mStaleScanResults = true;
+                    }
                     break;
             }
         }
@@ -964,6 +936,9 @@ public class WifiTracker {
                         if (mScanner != null) {
                             mScanner.pause();
                         }
+                        synchronized (mLock) {
+                            mStaleScanResults = true;
+                        }
                     }
                     mMainHandler.obtainMessage(MainHandler.MSG_WIFI_STATE_CHANGED, msg.arg1, 0)
                             .sendToTarget();
@@ -1018,7 +993,7 @@ public class WifiTracker {
                 }
                 return;
             }
-            sendEmptyMessageDelayed(0, WIFI_RESCAN_INTERVAL_MS);
+            sendEmptyMessageDelayed(MSG_SCAN, WIFI_RESCAN_INTERVAL_MS);
         }
     }
 
@@ -1111,10 +1086,12 @@ public class WifiTracker {
             oldAccessPoints.put(accessPoint.mId, accessPoint);
         }
 
-        if (DBG()) {
-            Log.d(TAG, "Starting to copy AP items on the MainHandler");
-        }
         synchronized (mLock) {
+            if (DBG()) {
+                Log.d(TAG, "Starting to copy AP items on the MainHandler. Internal APs: "
+                        + mInternalAccessPoints);
+            }
+
             if (notifyListeners) {
                 notificationMap = mAccessPointListenerAdapter.mPendingNotifications.clone();
             }

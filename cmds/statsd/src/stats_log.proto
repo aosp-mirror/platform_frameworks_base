@@ -1,0 +1,77 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+
+package android.os.statsd;
+
+option optimize_for = LITE_RUNTIME;
+
+option java_package = "com.android.os";
+option java_outer_classname = "StatsLog";
+
+import "frameworks/base/cmds/statsd/src/statsd_config.proto";
+import "frameworks/base/cmds/statsd/src/stats_constants.proto";
+
+// StatsLogEntry is a generic proto holding a single metrics data.
+message StatsLogEntry {
+  // Type of stats.
+  optional android.os.statsd.StatsConstants.Type type = 1;
+
+  // Aggregation type of the data.
+  optional android.os.statsd.TrackedAggregateType aggregate_type = 2;
+
+  // Start timestamp of the interval. Timestamp for event-type data will have
+  // equal value for start_report_millis and end_report_millis.
+  optional int64 start_report_millis = 3;
+
+  // End timestamp of the interval.
+  optional int64 end_report_millis = 4;
+
+  // Package information for application-level data.
+  optional string package_name = 5;
+  optional int32 package_version = 6;
+  optional string package_version_string = 7;
+
+  // UID associated with the data.
+  optional int32 uid = 8;
+
+  // PID associated with the data.
+  optional int32 pid = 9;
+
+  // Payload contains key value pairs of the data from statsd.
+  message KeyValuePair {
+    // Integer representation of data type.
+    optional int32 key = 1;
+
+    oneof value {
+      string value_str = 2;
+      int64 value_int = 3;
+      bool value_bool = 4;
+    }
+  }
+  repeated KeyValuePair pairs = 10;
+
+  // Next tag: 11
+}
+
+// Data captured for a given metric during a given period of time.
+message StatsLogList {
+  // Unique ID for this metric.
+  optional int32 metric_id = 1;
+
+  // List of stats log entry.
+  repeated StatsLogEntry stats_log_entry = 2;
+}

@@ -66,7 +66,6 @@ public class WebViewClient {
      * with the request's url from inside the method and then return {@code true},
      * as this will make WebView to attempt loading a non-http url, and thus fail.</li>
      * </ul>
-     * </p>
      *
      * @param view The WebView that is initiating the callback.
      * @param request Object containing the details of the request.
@@ -130,15 +129,15 @@ public class WebViewClient {
      * <p>This method is called when the body of the HTTP response has started loading, is reflected
      * in the DOM, and will be visible in subsequent draws. This callback occurs early in the
      * document loading process, and as such you should expect that linked resources (for example,
-     * css and images) may not be available.</p>
+     * css and images) may not be available.
      *
      * <p>For more fine-grained notification of visual state updates, see {@link
-     * WebView#postVisualStateCallback}.</p>
+     * WebView#postVisualStateCallback}.
      *
      * <p>Please note that all the conditions and recommendations applicable to
-     * {@link WebView#postVisualStateCallback} also apply to this API.<p>
+     * {@link WebView#postVisualStateCallback} also apply to this API.
      *
-     * <p>This callback is only called for main frame navigations.</p>
+     * <p>This callback is only called for main frame navigations.
      *
      * @param view The {@link android.webkit.WebView} for which the navigation occurred.
      * @param url  The URL corresponding to the page navigation that triggered this callback.
@@ -153,6 +152,10 @@ public class WebViewClient {
      * response and data will be used.  NOTE: This method is called on a thread
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
+     *
+     * <p>Note: when Safe Browsing is enabled, these URLs still undergo Safe Browsing checks. If
+     * this is undesired, whitelist the URL with {@link WebView#setSafeBrowsingWhitelist} or ignore
+     * the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
@@ -176,6 +179,10 @@ public class WebViewClient {
      * response and data will be used.  NOTE: This method is called on a thread
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
+     *
+     * <p>Note: when Safe Browsing is enabled, these URLs still undergo Safe Browsing checks. If
+     * this is undesired, whitelist the URL with {@link WebView#setSafeBrowsingWhitelist} or ignore
+     * the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.

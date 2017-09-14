@@ -917,13 +917,22 @@ class StorageManagerService extends IStorageManager.Stub
             for (UserInfo user : users) {
                 try {
                     if (initLocked) {
-                        mCryptConnector.execute("cryptfs", "lock_user_key", user.id);
+                        if (ENABLE_BINDER) {
+                            mVold.lockUserKey(user.id);
+                        } else {
+                            mCryptConnector.execute("cryptfs", "lock_user_key", user.id);
+                        }
                     } else {
-                        mCryptConnector.execute("cryptfs", "unlock_user_key", user.id,
-                                user.serialNumber, "!", "!");
+                        if (ENABLE_BINDER) {
+                            mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null),
+                                    encodeBytes(null));
+                        } else {
+                            mCryptConnector.execute("cryptfs", "unlock_user_key", user.id,
+                                    user.serialNumber, "!", "!");
+                        }
                     }
-                } catch (NativeDaemonConnectorException e) {
-                    Slog.w(TAG, "Failed to init vold", e);
+                } catch (Exception e) {
+                    Slog.wtf(TAG, e);
                 }
             }
         }
@@ -2734,6 +2743,15 @@ class StorageManagerService extends IStorageManager.Stub
 
         waitForReady();
 
+        if (ENABLE_BINDER) {
+            try {
+                return mVold.fdeComplete();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
+            }
+        }
+
         final NativeDaemonEvent event;
         try {
             event = mCryptConnector.execute("cryptfs", "cryptocomplete");
@@ -2762,6 +2780,22 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (DEBUG_EVENTS) {
             Slog.i(TAG, "decrypting storage...");
+        }
+
+        if (ENABLE_BINDER) {
+            try {
+                mVold.fdeCheckPassword(password);
+                mHandler.postDelayed(() -> {
+                    try {
+                        mVold.fdeRestart();
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, e);
+                    }
+                }, DateUtils.SECOND_IN_MILLIS);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
+            }
         }
 
         final NativeDaemonEvent event;
@@ -2806,15 +2840,23 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-                mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
-                                CRYPTO_TYPES[type]);
+                if (ENABLE_BINDER) {
+                    mVold.fdeEnable(type, null, IVold.ENCRYPTION_FLAG_IN_PLACE);
+                } else {
+                    mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
+                            CRYPTO_TYPES[type]);
+                }
             } else {
-                mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
-                                CRYPTO_TYPES[type], new SensitiveArg(password));
+                if (ENABLE_BINDER) {
+                    mVold.fdeEnable(type, password, IVold.ENCRYPTION_FLAG_IN_PLACE);
+                } else {
+                    mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
+                            CRYPTO_TYPES[type], new SensitiveArg(password));
+                }
             }
-        } catch (NativeDaemonConnectorException e) {
-            // Encryption failed
-            return e.getCode();
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+            return -1;
         }
 
         return 0;
@@ -2832,6 +2874,16 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (DEBUG_EVENTS) {
             Slog.i(TAG, "changing encryption password...");
+        }
+
+        if (ENABLE_BINDER) {
+            try {
+                mVold.fdeChangePassword(type, password);
+                return 0;
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return -1;
+            }
         }
 
         try {
@@ -2867,6 +2919,16 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.i(TAG, "validating encryption password...");
         }
 
+        if (ENABLE_BINDER) {
+            try {
+                mVold.fdeVerifyPassword(password);
+                return 0;
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return -1;
+            }
+        }
+
         final NativeDaemonEvent event;
         try {
             event = mCryptConnector.execute("cryptfs", "verifypw", new SensitiveArg(password));
@@ -2888,6 +2950,15 @@ class StorageManagerService extends IStorageManager.Stub
             "no permission to access the crypt keeper");
 
         waitForReady();
+
+        if (ENABLE_BINDER) {
+            try {
+                return mVold.fdeGetPasswordType();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return -1;
+            }
+        }
 
         final NativeDaemonEvent event;
         try {
@@ -2915,6 +2986,16 @@ class StorageManagerService extends IStorageManager.Stub
 
         waitForReady();
 
+        if (ENABLE_BINDER) {
+            try {
+                mVold.fdeSetField(field, contents);
+                return;
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return;
+            }
+        }
+
         final NativeDaemonEvent event;
         try {
             event = mCryptConnector.execute("cryptfs", "setfield", field, contents);
@@ -2934,6 +3015,15 @@ class StorageManagerService extends IStorageManager.Stub
             "no permission to access the crypt keeper");
 
         waitForReady();
+
+        if (ENABLE_BINDER) {
+            try {
+                return mVold.fdeGetField(field);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return null;
+            }
+        }
 
         final NativeDaemonEvent event;
         try {
@@ -2961,6 +3051,15 @@ class StorageManagerService extends IStorageManager.Stub
 
         waitForReady();
 
+        if (ENABLE_BINDER) {
+            try {
+                return mVold.isConvertibleToFbe();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return false;
+            }
+        }
+
         final NativeDaemonEvent event;
         try {
             event = mCryptConnector.execute("cryptfs", "isConvertibleToFBE");
@@ -2977,6 +3076,15 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (!isReady()) {
             return new String();
+        }
+
+        if (ENABLE_BINDER) {
+            try {
+                return mVold.fdeGetPassword();
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return null;
+            }
         }
 
         final NativeDaemonEvent event;
@@ -3004,6 +3112,16 @@ class StorageManagerService extends IStorageManager.Stub
             return;
         }
 
+        if (ENABLE_BINDER) {
+            try {
+                mVold.fdeClearPassword();
+                return;
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return;
+            }
+        }
+
         final NativeDaemonEvent event;
         try {
             event = mCryptConnector.execute("cryptfs", "clearpw");
@@ -3018,10 +3136,14 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "create_user_key", userId, serialNumber,
-                ephemeral ? 1 : 0);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.createUserKey(userId, serialNumber, ephemeral);
+            } else {
+                mCryptConnector.execute("cryptfs", "create_user_key", userId, serialNumber,
+                        ephemeral ? 1 : 0);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -3031,17 +3153,21 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "destroy_user_key", userId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.destroyUserKey(userId);
+            } else {
+                mCryptConnector.execute("cryptfs", "destroy_user_key", userId);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
-    private SensitiveArg encodeBytes(byte[] bytes) {
+    private String encodeBytes(byte[] bytes) {
         if (ArrayUtils.isEmpty(bytes)) {
-            return new SensitiveArg("!");
+            return "!";
         } else {
-            return new SensitiveArg(HexDump.toHexString(bytes));
+            return HexDump.toHexString(bytes);
         }
     }
 
@@ -3058,10 +3184,15 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "add_user_key_auth", userId, serialNumber,
-                encodeBytes(token), encodeBytes(secret));
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+            } else {
+                mCryptConnector.execute("cryptfs", "add_user_key_auth", userId, serialNumber,
+                        new SensitiveArg(encodeBytes(token)),
+                        new SensitiveArg(encodeBytes(secret)));
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -3074,9 +3205,13 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "fixate_newest_user_key_auth", userId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.fixateNewestUserKeyAuth(userId);
+            } else {
+                mCryptConnector.execute("cryptfs", "fixate_newest_user_key_auth", userId);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -3093,10 +3228,17 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
-                mCryptConnector.execute("cryptfs", "unlock_user_key", userId, serialNumber,
-                        encodeBytes(token), encodeBytes(secret));
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+                if (ENABLE_BINDER) {
+                    mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
+                            encodeBytes(secret));
+                } else {
+                    mCryptConnector.execute("cryptfs", "unlock_user_key", userId, serialNumber,
+                            new SensitiveArg(encodeBytes(token)),
+                            new SensitiveArg(encodeBytes(secret)));
+                }
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+                return;
             }
         }
 
@@ -3116,9 +3258,14 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "lock_user_key", userId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.lockUserKey(userId);
+            } else {
+                mCryptConnector.execute("cryptfs", "lock_user_key", userId);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+            return;
         }
 
         synchronized (mLock) {
@@ -3139,10 +3286,14 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "prepare_user_storage", escapeNull(volumeUuid),
-                    userId, serialNumber, flags);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            } else {
+                mCryptConnector.execute("cryptfs", "prepare_user_storage", escapeNull(volumeUuid),
+                        userId, serialNumber, flags);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -3152,10 +3303,14 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "destroy_user_storage", escapeNull(volumeUuid),
-                    userId, flags);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.destroyUserStorage(volumeUuid, userId, flags);
+            } else {
+                mCryptConnector.execute("cryptfs", "destroy_user_storage", escapeNull(volumeUuid),
+                        userId, flags);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -3165,9 +3320,13 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "secdiscard", escapeNull(path));
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            if (ENABLE_BINDER) {
+                mVold.secdiscard(path);
+            } else {
+                mCryptConnector.execute("cryptfs", "secdiscard", escapeNull(path));
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 

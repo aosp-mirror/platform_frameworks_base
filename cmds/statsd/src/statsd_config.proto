@@ -1,0 +1,449 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// Version 1.
+// Important: Update the version line above before copy-pasting this file
+// from/to Google3 and Android repository.
+// This proto needs to be manually synced between Google3 and Android versions.
+
+/*
+ * Note about semantics of the buckets:
+ * In this current proto scheme, the buckets are updated only when an event
+ * occurs. In the case of durations, this means that we update at the end of a
+ * duration.
+ *
+ * For example, suppose we have buckets at every 10 min:
+ * 0, 10, 20, 30, 40, etc.
+ * And then suppose a wakelock is first held starting at min 5 and lasts for 21
+ * mins. Then the buckets for 0-10 and 10-20 don't contain anything and inside
+ * the bucket for 20-30, we add the value of 21 minutes.
+ *
+ * Also note that buckets are only aligned to wall-clock (no custom time-bases).
+ */
+
+syntax = "proto2";
+package android.os.statsd;
+
+option optimize_for = LITE_RUNTIME;
+
+option java_package = "com.android.internal.os";
+option java_outer_classname = "StatsdConfigProto";
+
+// KeyMatcher specifies how to match the key.
+message KeyMatcher {
+  oneof contents {
+    int32 key = 1; // ID of the key to match.
+
+    // Special matcher for package name. This will match either the package name
+    // or the UID (statsD will map the UID of the source event to a package
+    // name). Specify the package name to match in eq_string.
+    bool use_package = 2;
+  }
+}
+
+// FieldMatcher allows us to match specific fields/keys in an event.
+message FieldMatcher {
+  optional KeyMatcher key_matcher = 1;
+
+  oneof value_matcher {
+    // Equality matchers
+    bool eq_bool = 2;
+    string eq_string = 3;
+    int32 eq_int32 = 4;
+    int64 eq_int64 = 5;
+
+    // Numeric comparisons;
+    int32 lt_int32 = 6;
+    int32 gt_int32 = 7;
+    int64 lt_int64 = 8;
+    int64 gt_int64 = 9;
+    float lt_float = 10;
+    float gt_float = 11;
+  }
+}
+
+enum OperationType {
+  AND = 1;
+  OR = 2;
+  NOT = 3; // Must have only a single operand when using NOT operator.
+  NAND = 4;  // NAND and NOR as conveniences to avoid NOT+(AND/OR)-layers.
+  NOR = 5;
+}
+
+enum TrackedAggregateType {
+  // IS_RUNNING; // whether it is currently running
+  VALUE_COUNT = 1;  // count number of events
+  VALUE_SUM = 2;
+  VALUE_MAX = 3;
+  VALUE_MIN = 4;
+  DURATION_SUM = 5;      // cumulative total time
+  DURATION_MAX = 6;      // longest continuously-on time
+  DURATION_MIN = 7;      // shortest continuously-on time
+  //DURATION_CURRENT = 6;  // current continuously-on time (not bucketed)
+}
+
+// Assume the events come in with a tag and an array of (key, value) tuples
+// where the key must be an int32 and value can be any type.
+message LineMatcher {
+  // For now, we assume that we don't flatten the tags (ie, one tag corresponds
+  // to screen-on and screen-off events and key 1 represents ON or OFF).
+  repeated int32 tag = 1; // Must match at least one of the tags.
+
+  message Nested {
+    optional OperationType operation = 1;
+    repeated LineMatcher matcher = 2;
+  }
+  oneof contents {
+    FieldMatcher requirement = 2;
+    Nested nested = 3;
+  }
+}
+
+// Defines when an AggregateCounter or EventMatcher applies.
+message Condition {
+  message Nested {
+    optional OperationType operation = 1;
+    repeated Condition nested_conditions = 2;  // operands that are themselves
+                                               // conditions (recursively)
+  }
+
+  // Leaf node of condition.
+  message RangeMatcher {
+    optional LineMatcher start = 1;
+    optional LineMatcher stop = 2;
+    optional bool count_nesting = 3
+        [default = true];  // true if "start start stop" is still
+                            // considered running
+
+    // Configure which fields define the slices. These fields must be present in
+    // both the start and stop lines. Note that this can be a subset of all the
+    // slices defined in the AggregateCounter.
+    // For example, if the counter slices on both app name and wake lock name,
+    // we can define that this range only slices on app name.
+    repeated KeyMatcher slice = 4;
+  }
+
+  oneof contents {
+    RangeMatcher range = 1; // Represents a leaf node.
+    Nested nested = 2; // Represents a non-leaf node.
+  }
+}
+
+// Emits matching events to statsd event buffer.
+message EventMatcher {
+  // Tracks what configuration led to uploading of this event.
+  optional int32 metric_id = 1;
+
+  // LineMatcher for the event to emit.
+  optional LineMatcher what = 2;
+
+  optional Condition condition = 3;
+
+  // TODO: Have a clear use-case for this in P or-else drop this for P.
+  message Filter {
+  }
+  optional Filter filter = 4;
+}
+
+// Hard-code the possible metrics that we can pull.
+// For example, NETSTATS_BY_UID would provide network usage per uid.
+// We should treat the results like a batch of individual log events, and we
+// should process them one-by-one to re-use our LineMatcher logic.
+enum PulledMetricSource {
+  NETSTATS = 1;
+}
+
+message AggregateCounter {  // previously called Timer
+  // Specifies which fields in the message act as dimensions.
+  // For both pushed and pulled metrics, we assume every record has all the
+  // dimensions set.
+  message Slicer {
+    repeated KeyMatcher keys = 1;
+  }
+  optional Slicer slicer = 1;
+
+  message ValueSource {
+    message PushedMetric {
+      // LineMatcher for the event to apply.
+      // Slicing (which keys act as dimensions) should not be specified here.
+      optional LineMatcher what = 1;
+
+      // Only needed if one key should be treated as the value.
+      optional int32 value_key = 2;
+    }
+
+    // The values for pulled metrics are computed and aggregated at the end of
+    // the condition.
+    message PulledMetric {
+      optional bool compute_diff =
+          1;  // If we want the diff (if this
+              // metric is pulled when condition opens/closes).
+      optional PulledMetricSource metric = 2;
+
+      // We treat the pulled metrics as a batch of log-records that look like
+      // they came from LogD.
+      optional LineMatcher what = 3;
+      optional int32 value_field = 4;
+    }
+
+    oneof value {
+      PushedMetric pushed_metric = 1;
+
+      // Pulled metrics are computed when the duration closes (and are also
+      // fetched at the open if we need to compute a diff).
+      // Pulled metrics require a condition being defined.
+      // These metrics are not pulled at the end of every bucket.
+      PulledMetric pulled_metric = 2;
+
+      // Polled Metrics are pulled at the end of every bucket.
+      // Since the buckets are only planned to be on wall-clock for Android P,
+      // condition is NOT supported for polled metrics.
+      PulledMetric polled_metric = 3;
+    }
+  }
+  optional ValueSource value = 2;
+
+  message TrackedAggregate {
+    // Must be an integer that is uniquely chosen so we can identify the metric
+    // on server. We will provide a tool on server to help generate this.
+    optional int32 metric_id = 1;
+
+    optional TrackedAggregateType type = 2;
+
+    // Alert if the value, when summed over the Counter's number_of_buckets
+    // most-recent bins, exceeds min_threshold or is below max_threshold. For
+    // Anomaly Detection.
+    message Alert {
+      message IncidentdDetails {
+        optional string
+            alert_name = 1;  // for humans and incidentd to identify this issue
+        repeated int32 incidentd_sections = 2;  // tells incidentd what to do if
+                                                // alert triggers
+      }
+      optional IncidentdDetails incidentd_details = 1;
+      optional int32 number_of_buckets = 2;
+      // NOTE: that we assume the aggregate is only int.
+      optional int64 trigger_if_gt = 3;    // min threshold
+      optional int64 trigger_if_lt = 4;       // max_threshold;
+      optional int32 refractory_period_secs = 5;  // alarm cannot fire a second
+                                                  // time until elapsed
+    }
+    repeated Alert alerts = 3;  // Support diff alert params for same aggregate.
+  }  // end TrackedAggregate
+  repeated TrackedAggregate tracked_aggregates = 3;
+
+  optional Condition condition = 4;
+
+  message Bucket {
+    // TODO: Consider switching to second granularity.
+    // In practice, this must be chosen from a pre-defined list. So that we have
+    // flexiblity, we don't hard-code this as an enum today.
+    optional int64 bucket_size_msec = 1;
+    optional int32 max_number_of_bits = 2; // Max bits per bucket.
+  }
+  optional Bucket bucket = 5;
+
+  message MiscellaneousEffect {
+    optional LineMatcher matcher = 1;  // When to trigger the effect
+
+    enum Effect {
+      STOP_ALL = 1;  // Needed for stop-all events, where nested start value is
+                     // forced to 0.
+    }
+    repeated Effect effects = 2;
+  }  // end MiscellaneousEffect
+  repeated MiscellaneousEffect misc_effects = 6;
+}  // end Counter
+
+// Alarm configs not tied to a particular Counter.
+message GlobalAlertParameters {
+  // No alarm can fire after any other alarm fired until this many seconds has
+  // elapsed.
+  optional int32 global_refractory_period_seconds = 1;
+}
+
+// The config defining all metrics to be captured.
+message StatsdConfig {
+  // Event matchers.
+  repeated EventMatcher event_matchers = 1;
+
+  // Aggregate counters.
+  repeated AggregateCounter aggregate_counters = 2;
+}
+
+/* Sample configurations start here:
+----Screen on time----
+AggregateCounter <
+  condition <
+    range <
+      start <
+        tag: SCREEN_ON
+        requirement <
+          key_matcher<
+            key: SCREEN_ON_VALUE
+          eq_bool: true
+      stop <
+        tag: SCREEN_ON
+        requirement <
+          key_matcher<
+            key: SCREEN_ON_VALUE
+          eq_bool: false
+  metric_id: # set on server
+  tracked_aggregates <
+    DURATION_SUM
+  (For brevity, omit the bucket options but they can also be set)
+
+----Screen off time----
+Should be like aboe but reversing start and stop
+
+----Log the screen change events----
+EventMatcher <
+  metric_id: # set on server
+  what <
+    tag: SCREEN_ON
+
+----Number of crashes (across system)----
+AggregateCounter <
+  metric_id: # set on server
+  tracked_aggregates <
+    VALUE_COUNT
+  value <
+    pushed_metric <
+      what <
+        tag: CRASH_TAG
+
+----Network Usage in bytes Per App While in Background----
+AggregateCounter <
+  metric_id: # set on server
+  slicer <
+    keys <
+      use_package_name: true
+  tracked_aggregates <
+    VALUE_SUM
+  value <
+    pulled_metric <
+      compute_diff: true
+      metric: Enum corresponding to network usage in bytes
+  condition <
+    range <
+      sliced: true
+      start <
+        tag: APP_FOREGROUND_TRANSITION (assume false means move to background)
+        requirement <
+          key_matcher<
+            key: APP_FOREGROUND_STATE
+          eq_bool: false
+      stop <
+        tag: APP_FOREGROUND_TRANSITION (assume false means move to background)
+        requirement <
+          key_matcher<
+            key: APP_FOREGROUND_STATE
+          eq_bool: true
+
+----Wakelock Acquire time per app and wakelock
+    while unplugged and screen off and in background process state----
+AggregateCounter <
+  metric_id: # set on server
+  slicer <
+    keys <
+      use_package_name: true
+    keys <
+      key: Key corresponding to wake_lock ID
+  tracked_aggregates <
+    DURATION_SUM
+  condition <
+    nested <
+      operation: AND
+      nested_conditions <
+        range <
+          start <
+            tag: PLUGGED_IN (assume false means uncharged)
+            requirement <
+              key_matcher<
+                key: PLUGGED_IN_STATE
+              eq_bool: false
+          stop <
+            tag: PLUGGED_IN (assume false means uncharged)
+            requirement <
+              key_matcher<
+                key: PLUGGED_IN_STATE
+              eq_bool: true
+      nested_conditions <
+        range <
+          start <
+            tag: SCREEN_ON
+            requirement <
+              key_matcher<
+                key: SCREEN_ON_STATE
+              eq_bool: false
+          stop <
+            tag: SCREEN_ON
+            requirement <
+              key_matcher<
+                key: SCREEN_ON_STATE
+              eq_bool: true
+      nested_conditions <
+        range <
+          start <
+            tag: PROCESS_CHANGE
+            requirement <
+              key_matcher<
+                key: PROCESS_STATE_VALUE
+              eq_int32: BACKGROUND_PROCESS
+          stop <
+            tag: PROCESS_CHANGE
+            nested <
+              operation: NOT
+              matcher< (This is an example of using the NOT to define stop)
+                requirement < (Note this requirement should match the start.)
+                  key_matcher<
+                    key: PROCESS_STATE_VALUE
+                  eq_int32: BACKGROUND_PROCESS
+          slice<
+              use_package_name: true
+
+
+----Number of crashes (per app) ----
+AggregateCounter <
+  metric_id: # set on server
+  slicer <
+    keys<
+      use_package_name: true
+  tracked_aggregates <
+    VALUE_COUNT
+  value <
+      pushed_metric <
+        what <
+          tag: CRASH_TAG
+
+---- Number of transitions to background (per app) ----
+AggregateCounter <
+  metric_id: # set on server
+  slicer <
+    keys<
+      use_package_name: true
+  tracked_aggregates <
+    VALUE_COUNT
+  value <
+      pushed_metric <
+        what <
+          tag: APP_FOREGROUND_TRANSITION
+          requirement<
+            key: APP_FOREGROUND_TRANSITION_STATE
+            eq_bool: false
+
+*/

@@ -17,6 +17,7 @@
 #define LOG_TAG "statsd"
 
 #include "StatsService.h"
+#include "DropboxReader.h"
 
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -27,6 +28,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 using namespace android;
 
@@ -118,15 +120,13 @@ StatsService::dump(int fd, const Vector<String16>& args)
 status_t
 StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& args)
 {
-    fprintf(out, "StatsService::command:");
-    ALOGD("StatsService::command:");
-    const int N = args.size();
-    for (int i=0; i<N; i++) {
-        fprintf(out, " %s", String8(args[i]).string());
-        ALOGD("   %s", String8(args[i]).string());
+    if (args.size() > 0) {
+        if (!args[0].compare(String8("print-stats-log")) && args.size() > 1) {
+            return doPrintStatsLog(out, args);
+        }
     }
-    fprintf(out, "\n");
 
+    printCmdHelp(out);
     return NO_ERROR;
 }
 
@@ -144,3 +144,18 @@ StatsService::systemRunning()
     return Status::ok();
 }
 
+status_t
+StatsService::doPrintStatsLog(FILE* out, const Vector<String8>& args) {
+    long msec = 0;
+
+    if (args.size() > 2) {
+        msec = strtol(args[2].string(), NULL, 10);
+    }
+    return DropboxReader::readStatsLogs(out, args[1].string(), msec);
+}
+
+void
+StatsService::printCmdHelp(FILE* out) {
+    fprintf(out, "Usage:\n");
+    fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
+}
