@@ -249,6 +249,11 @@
              that target runtime permissions ({@link android.os.Build.VERSION_CODES#M} and above)
              -->
         <flag name="runtime" value="0x2000" />
+        <!-- Additional flag from base permission type: this permission can be granted only
+             if its protection level is signature, the requesting app resides on the OEM partition,
+             and the OEM has white-listed the app to receive this permission by the OEM.
+         -->
+        <flag name="oem" value="0x4000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
