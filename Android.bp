@@ -40,6 +40,7 @@ cc_library {
             // needed by the device.
             srcs: [
                 "core/proto/android/os/kernelwake.proto",
+                "core/proto/android/os/pagetypeinfo.proto",
                 "core/proto/android/os/procrank.proto",
                 "core/proto/android/service/graphicsstats.proto",
                 "libs/incident/proto/android/privacy.proto",

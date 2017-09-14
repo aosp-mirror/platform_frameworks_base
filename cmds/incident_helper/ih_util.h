@@ -28,8 +28,28 @@ typedef std::string (*trans_func) (const std::string&);
 const char DEFAULT_NEWLINE = '\n';
 const std::string DEFAULT_WHITESPACE = " \t";
 
+/**
+ * When a text has a table format like this
+ * line 1: HeadA HeadB HeadC
+ * line 2: v1    v2    v3
+ * line 3: v11   v12   v13
+ *
+ * We want to parse the line in structure given the delimiter.
+ * parseHeader is used to parse the firse line of the table and returns a list of strings in lower case
+ * parseRecord is used to parse other lines and returns a list of strings
+ * empty strings are skipped
+ */
 header_t parseHeader(const std::string& line, const std::string& delimiters = DEFAULT_WHITESPACE);
 record_t parseRecord(const std::string& line, const std::string& delimiters = DEFAULT_WHITESPACE);
+
+/**
+ * When the line starts with the given key, the function returns true
+ * as well as the line argument is changed to the rest part of the original.
+ * e.g. "ZRAM: 6828K physical used for 31076K in swap (524284K total swap)" becomes
+ * "6828K physical used for 31076K in swap (524284K total swap)" when given key "ZRAM:",
+ * otherwise the line is not changed.
+ */
+bool hasPrefix(std::string* line, const char* key);
 
 /**
  * Reader class reads data from given fd in streaming fashion.
@@ -42,8 +62,8 @@ public:
     Reader(const int fd, const size_t capacity);
     ~Reader();
 
-    bool readLine(std::string& line, const char newline = DEFAULT_NEWLINE);
-    bool ok(std::string& error);
+    bool readLine(std::string* line, const char newline = DEFAULT_NEWLINE);
+    bool ok(std::string* error);
 
 private:
     int mFd; // set mFd to -1 when read EOF()

@@ -18,6 +18,7 @@
 
 #include "ih_util.h"
 
+#include <algorithm>
 #include <sstream>
 #include <unistd.h>
 
@@ -72,6 +73,20 @@ record_t parseRecord(const std::string& line, const std::string& delimiters) {
     return record;
 }
 
+bool hasPrefix(std::string* line, const char* key) {
+    const auto head = line->find_first_not_of(DEFAULT_WHITESPACE);
+    if (head == std::string::npos) return false;
+    auto i = 0;
+    auto j = head;
+    while (key[i] != '\0') {
+        if (j >= line->size() || key[i++] != line->at(j++)) {
+            return false;
+        }
+    }
+    line->assign(trim(line->substr(j)));
+    return true;
+}
+
 Reader::Reader(const int fd) : Reader(fd, BUFFER_SIZE) {};
 
 Reader::Reader(const int fd, const size_t capacity)
@@ -86,8 +101,9 @@ Reader::~Reader()
     free(mBuf);
 }
 
-bool Reader::readLine(std::string& line, const char newline) {
+bool Reader::readLine(std::string* line, const char newline) {
     if (!ok(line)) return false; // bad status
+    line->clear();
     std::stringstream ss;
     while (!EOR()) {
         // read if available
@@ -124,14 +140,14 @@ bool Reader::readLine(std::string& line, const char newline) {
         if (mFlushed >= (int) mMaxSize) mFlushed = 0;
 
         if (EOR() || meetsNewLine) {
-            line.assign(ss.str());
+            line->assign(ss.str());
             return true;
         }
     }
     return false;
 }
 
-bool Reader::ok(std::string& error) {
-    error.assign(mStatus);
+bool Reader::ok(std::string* error) {
+    error->assign(mStatus);
     return mStatus.empty();
 }

@@ -33,6 +33,7 @@ import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 
 package android.os;
@@ -52,17 +53,24 @@ message IncidentProto {
         (section).type = SECTION_COMMAND,
         (section).args = "/system/xbin/procrank"
     ];
-    //PageTypeInfo page_type_info = 2001;
+
+    PageTypeInfo page_type_info = 2001 [
+        (section).type = SECTION_FILE,
+        (section).args = "/proc/pagetypeinfo"
+    ];
+
     KernelWakeSources kernel_wake_sources = 2002 [
         (section).type = SECTION_FILE,
         (section).args = "/d/wakeup_sources"
     ];
+
 
     // System Services
     android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "fingerprint --proto --incident"
     ];
+
     android.service.NetworkStatsServiceDumpProto netstats = 3001;
     android.providers.settings.SettingsServiceDumpProto settings = 3002;
     android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;

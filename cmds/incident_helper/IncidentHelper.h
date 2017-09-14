@@ -80,6 +80,17 @@ public:
 };
 
 /**
+ * PageTypeInfo parser, parses text to protobuf in /proc/pageinfotype
+ */
+class PageTypeInfoParser : public TextParserBase {
+public:
+    PageTypeInfoParser() : TextParserBase(String8("PageTypeInfo")) {};
+    ~PageTypeInfoParser() {};
+
+    virtual status_t Parse(const int in, const int out) const;
+};
+
+/**
  * Procrank parser, parses text produced by command procrank
  */
 class ProcrankParser : public TextParserBase {
