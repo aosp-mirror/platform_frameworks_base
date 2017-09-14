@@ -31,8 +31,12 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
@@ -48,6 +52,10 @@ public class UsbDebuggingActivity extends AlertActivity
 
     @Override
     public void onCreate(Bundle icicle) {
+        Window window = getWindow();
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+
         super.onCreate(icicle);
 
         if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0) {
@@ -79,6 +87,23 @@ public class UsbDebuggingActivity extends AlertActivity
         ap.mView = checkbox;
 
         setupAlert();
+
+        // adding touch listener on affirmative button - checks if window is obscured
+        // if obscured, do not let user give permissions (could be tapjacking involved)
+        final View.OnTouchListener filterTouchListener = (View v, MotionEvent event) -> {
+            // Filter obscured touches by consuming them.
+            if (((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0)
+                    || ((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED) != 0)) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    Toast.makeText(v.getContext(),
+                            R.string.touch_filtered_warning,
+                            Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+            return false;
+        };
+        mAlert.getButton(BUTTON_POSITIVE).setOnTouchListener(filterTouchListener);
     }
 
     private class UsbDisconnectedReceiver extends BroadcastReceiver {
