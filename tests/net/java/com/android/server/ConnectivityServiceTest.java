@@ -683,7 +683,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         public WrappedNetworkMonitor(Context context, Handler handler,
                 NetworkAgentInfo networkAgentInfo, NetworkRequest defaultRequest,
                 IpConnectivityLog log) {
-            super(context, handler, networkAgentInfo, defaultRequest, log);
+            super(context, handler, networkAgentInfo, defaultRequest, log,
+                    NetworkMonitor.NetworkMonitorSettings.DEFAULT);
         }
 
         @Override

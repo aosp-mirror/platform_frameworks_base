@@ -30,8 +30,7 @@ public final class TestUtils {
      * Block until the given Handler thread becomes idle, or until timeoutMs has passed.
      */
     public static void waitForIdleHandler(HandlerThread handlerThread, long timeoutMs) {
-        // TODO: convert to getThreadHandler once it is available on aosp
-        waitForIdleLooper(handlerThread.getLooper(), timeoutMs);
+        waitForIdleHandler(handlerThread.getThreadHandler(), timeoutMs);
     }
 
     /**
