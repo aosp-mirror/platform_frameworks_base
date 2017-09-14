@@ -41,23 +41,16 @@ import java.util.Objects;
  * Describes a request to download files over cell-broadcast. Instances of this class should be
  * created by the app when requesting a download, and instances of this class will be passed back
  * to the app when the middleware updates the status of the download.
- * @hide
  */
-public class DownloadRequest implements Parcelable {
+public final class DownloadRequest implements Parcelable {
     // Version code used to keep token calculation consistent.
     private static final int CURRENT_VERSION = 1;
     private static final String LOG_TAG = "MbmsDownloadRequest";
 
-    /**
-     * Maximum permissible length for the app's download-completion intent, when serialized via
-     * {@link Intent#toUri(int)}.
-     */
+    /** @hide */
     public static final int MAX_APP_INTENT_SIZE = 50000;
 
-    /**
-     * Maximum permissible length for the app's destination path, when serialized via
-     * {@link Uri#toString()}.
-     */
+    /** @hide */
     public static final int MAX_DESTINATION_URI_SIZE = 50000;
 
     /** @hide */
@@ -95,7 +88,7 @@ public class DownloadRequest implements Parcelable {
          * Set the service ID for the download request. For use by the middleware only.
          * @hide
          */
-        //@SystemApi
+        @SystemApi
         public Builder setServiceId(String serviceId) {
             fileServiceId = serviceId;
             return this;
@@ -104,7 +97,6 @@ public class DownloadRequest implements Parcelable {
         /**
          * Sets the source URI for the download request to be built.
          * @param source
-         * @return
          */
         public Builder setSource(Uri source) {
             this.source = source;
@@ -116,7 +108,6 @@ public class DownloadRequest implements Parcelable {
          * not set this directly.
          * @param dest A URI obtained from {@link Uri#fromFile(File)}, denoting the requested
          *             final destination of the download.
-         * @return
          */
         public Builder setDest(Uri dest) {
             if (dest.toString().length() > MAX_DESTINATION_URI_SIZE) {
@@ -130,7 +121,6 @@ public class DownloadRequest implements Parcelable {
         /**
          * Set the subscription ID on which the file(s) should be downloaded.
          * @param subscriptionId
-         * @return
          */
         public Builder setSubscriptionId(int subscriptionId) {
             this.subscriptionId = subscriptionId;
@@ -144,7 +134,6 @@ public class DownloadRequest implements Parcelable {
          *
          * The middleware should not use this method.
          * @param intent
-         * @return
          */
         public Builder setAppIntent(Intent intent) {
             this.appIntent = intent.toUri(0);
@@ -161,10 +150,9 @@ public class DownloadRequest implements Parcelable {
          * manager code, but is irrelevant to the middleware.
          * @param data A byte array, the contents of which should have been originally obtained
          *             from {@link DownloadRequest#getOpaqueData()}.
-         * @return
          * @hide
          */
-        //@SystemApi
+        @SystemApi
         public Builder setOpaqueData(byte[] data) {
             try {
                 ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(data));
@@ -291,7 +279,7 @@ public class DownloadRequest implements Parcelable {
      * @return A byte array of opaque data to persist.
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public byte[] getOpaqueData() {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -322,6 +310,22 @@ public class DownloadRequest implements Parcelable {
             return new DownloadRequest[size];
         }
     };
+
+    /**
+     * Maximum permissible length for the app's destination path, when serialized via
+     * {@link Uri#toString()}.
+     */
+    public static int getMaxAppIntentSize() {
+        return MAX_APP_INTENT_SIZE;
+    }
+
+    /**
+     * Maximum permissible length for the app's download-completion intent, when serialized via
+     * {@link Intent#toUri(int)}.
+     */
+    public static int getMaxDestinationUriSize() {
+        return MAX_DESTINATION_URI_SIZE;
+    }
 
     /**
      * @hide

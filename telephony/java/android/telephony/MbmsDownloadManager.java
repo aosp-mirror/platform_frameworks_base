@@ -27,11 +27,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.DownloadRequest;
+import android.telephony.mbms.InternalDownloadManagerCallback;
+import android.telephony.mbms.InternalDownloadStateCallback;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
 import android.telephony.mbms.MbmsException;
@@ -52,7 +56,6 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 /**
  * This class provides functionality for file download over MBMS.
- * @hide
  */
 public class MbmsDownloadManager {
     private static final String LOG_TAG = MbmsDownloadManager.class.getSimpleName();
@@ -76,7 +79,8 @@ public class MbmsDownloadManager {
      *
      * This extra may also be used by the middleware when it is sending intents to the app.
      */
-    public static final String EXTRA_RESULT = "android.telephony.mbms.extra.RESULT";
+    public static final String EXTRA_MBMS_DOWNLOAD_RESULT =
+            "android.telephony.extra.MBMS_DOWNLOAD_RESULT";
 
     /**
      * {@link FileInfo} extra that Android will attach to the intent supplied via
@@ -85,21 +89,21 @@ public class MbmsDownloadManager {
      *
      * This extra may also be used by the middleware when it is sending intents to the app.
      */
-    public static final String EXTRA_FILE_INFO = "android.telephony.mbms.extra.FILE_INFO";
+    public static final String EXTRA_MBMS_FILE_INFO = "android.telephony.extra.MBMS_FILE_INFO";
 
     /**
      * {@link Uri} extra that Android will attach to the intent supplied via
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
      * Indicates the location of the successfully
-     * downloaded file. Will always be set to a non-null value if {@link #EXTRA_RESULT} is set to
-     * {@link #RESULT_SUCCESSFUL}.
+     * downloaded file. Will always be set to a non-null value if
+     * {@link #EXTRA_MBMS_DOWNLOAD_RESULT} is set to {@link #RESULT_SUCCESSFUL}.
      */
-    public static final String EXTRA_COMPLETED_FILE_URI =
-            "android.telephony.mbms.extra.COMPLETED_FILE_URI";
+    public static final String EXTRA_MBMS_COMPLETED_FILE_URI =
+            "android.telephony.extra.MBMS_COMPLETED_FILE_URI";
 
     /**
      * The default directory name for all MBMS temp files. If you call
-     * {@link #download(DownloadRequest, DownloadStateCallback)} without first calling
+     * {@link #download(DownloadRequest, DownloadStateCallback, Handler)} without first calling
      * {@link #setTempFileRootDirectory(File)}, this directory will be created for you under the
      * path returned by {@link Context#getFilesDir()}.
      */
@@ -173,24 +177,47 @@ public class MbmsDownloadManager {
     };
 
     private AtomicReference<IMbmsDownloadService> mService = new AtomicReference<>(null);
-    private final MbmsDownloadManagerCallback mCallback;
+    private final InternalDownloadManagerCallback mInternalCallback;
 
-    private MbmsDownloadManager(Context context, MbmsDownloadManagerCallback callback, int subId) {
+    private MbmsDownloadManager(Context context, MbmsDownloadManagerCallback callback,
+            int subscriptionId, Handler handler) {
         mContext = context;
-        mCallback = callback;
-        mSubscriptionId = subId;
+        mSubscriptionId = subscriptionId;
+        if (handler == null) {
+            handler = new Handler(Looper.myLooper());
+        }
+        mInternalCallback = new InternalDownloadManagerCallback(callback, handler);
+    }
+
+    /**
+     * Create a new MbmsDownloadManager using the system default data subscription ID and default
+     * {@link Handler}
+     * See {@link #create(Context, MbmsDownloadManagerCallback, int, Handler)}
+     */
+    public static MbmsDownloadManager create(Context context,
+            MbmsDownloadManagerCallback callback)
+            throws MbmsException {
+        return create(context, callback, SubscriptionManager.getDefaultSubscriptionId(), null);
     }
 
     /**
      * Create a new MbmsDownloadManager using the system default data subscription ID.
-     * See {@link #create(Context, MbmsDownloadManagerCallback, int)}
-     *
-     * @hide
+     * See {@link #create(Context, MbmsDownloadManagerCallback, int, Handler)}
      */
     public static MbmsDownloadManager create(Context context,
-            MbmsDownloadManagerCallback listener)
+            MbmsDownloadManagerCallback callback, Handler handler)
             throws MbmsException {
-        return create(context, listener, SubscriptionManager.getDefaultSubscriptionId());
+        return create(context, callback, SubscriptionManager.getDefaultSubscriptionId(), handler);
+    }
+
+    /**
+     * Create a new MbmsDownloadManager using the default {@link Handler}
+     * See {@link #create(Context, MbmsDownloadManagerCallback, int, Handler)}
+     */
+    public static MbmsDownloadManager create(Context context,
+            MbmsDownloadManagerCallback callback, int subscriptionId)
+            throws MbmsException {
+        return create(context, callback, subscriptionId, null);
     }
 
     /**
@@ -198,7 +225,7 @@ public class MbmsDownloadManager {
      *
      * Note that this call will bind a remote service and that may take a bit. The instance of
      * {@link MbmsDownloadManager} that is returned will not be ready for use until
-     * {@link MbmsDownloadManagerCallback#middlewareReady()} is called on the provided callback.
+     * {@link MbmsDownloadManagerCallback#onMiddlewareReady()} is called on the provided callback.
      * If you attempt to use the manager before it is ready, a {@link MbmsException} will be thrown.
      *
      * This also may throw an {@link IllegalArgumentException} or an {@link IllegalStateException}.
@@ -208,7 +235,7 @@ public class MbmsDownloadManager {
      * (in other words, one that has not had {@link #dispose()} called on it), this method will
      * throw an {@link MbmsException}. If you call this method in a different process
      * running under the same UID, an error will be indicated via
-     * {@link MbmsDownloadManagerCallback#error(int, String)}.
+     * {@link MbmsDownloadManagerCallback#onError(int, String)}.
      *
      * Note that initialization may fail asynchronously. If you wish to try again after you
      * receive such an asynchronous error, you must call dispose() on the instance of
@@ -217,15 +244,15 @@ public class MbmsDownloadManager {
      * @param context The instance of {@link Context} to use
      * @param listener A callback to get asynchronous error messages and file service updates.
      * @param subscriptionId The data subscription ID to use
-     * @hide
      */
     public static MbmsDownloadManager create(Context context,
-            MbmsDownloadManagerCallback listener, int subscriptionId)
+            MbmsDownloadManagerCallback listener, int subscriptionId, Handler handler)
             throws MbmsException {
         if (!sIsInitialized.compareAndSet(false, true)) {
             throw new MbmsException(MbmsException.InitializationErrors.ERROR_DUPLICATE_INITIALIZE);
         }
-        MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, subscriptionId);
+        MbmsDownloadManager mdm =
+                new MbmsDownloadManager(context, listener, subscriptionId, handler);
         try {
             mdm.bindAndInitialize();
         } catch (MbmsException e) {
@@ -244,7 +271,7 @@ public class MbmsDownloadManager {
                                 IMbmsDownloadService.Stub.asInterface(service);
                         int result;
                         try {
-                            result = downloadService.initialize(mSubscriptionId, mCallback);
+                            result = downloadService.initialize(mSubscriptionId, mInternalCallback);
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
                             sIsInitialized.set(false);
@@ -285,7 +312,7 @@ public class MbmsDownloadManager {
      * An inspection API to retrieve the list of available
      * {@link android.telephony.mbms.FileServiceInfo}s currently being advertised.
      * The results are returned asynchronously via a call to
-     * {@link MbmsDownloadManagerCallback#fileServicesUpdated(List)}
+     * {@link MbmsDownloadManagerCallback#onFileServicesUpdated(List)}
      *
      * The serviceClasses argument lets the app filter on types of programming and is opaque data
      * negotiated beforehand between the app and the carrier.
@@ -294,12 +321,12 @@ public class MbmsDownloadManager {
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
      * {@link MbmsException#ERROR_MIDDLEWARE_LOST}
      *
-     * Asynchronous error codes via the {@link MbmsDownloadManagerCallback#error(int, String)}
+     * Asynchronous error codes via the {@link MbmsDownloadManagerCallback#onError(int, String)}
      * callback can include any of the errors except:
      * {@link MbmsException.StreamingErrors#ERROR_UNABLE_TO_START_SERVICE}
      *
      * @param classList A list of service classes which the app wishes to receive
-     *                  {@link MbmsDownloadManagerCallback#fileServicesUpdated(List)} callbacks
+     *                  {@link MbmsDownloadManagerCallback#onFileServicesUpdated(List)} callbacks
      *                  about. Subsequent calls to this method will replace this list of service
      *                  classes (i.e. the middleware will no longer send updates for services
      *                  matching classes only in the old list).
@@ -329,7 +356,7 @@ public class MbmsDownloadManager {
      * local instance of {@link android.content.SharedPreferences} and by the middleware.
      *
      * If this method is not called at least once before calling
-     * {@link #download(DownloadRequest, DownloadStateCallback)}, the framework
+     * {@link #download(DownloadRequest, DownloadStateCallback, Handler)}, the framework
      * will default to a directory formed by the concatenation of the app's files directory and
      * {@link MbmsDownloadManager#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
      *
@@ -380,9 +407,9 @@ public class MbmsDownloadManager {
     /**
      * Retrieves the currently configured temp file root directory. Returns the file that was
      * configured via {@link #setTempFileRootDirectory(File)} or the default directory
-     * {@link #download(DownloadRequest, DownloadStateCallback)} was called without ever setting
-     * the temp file root. If neither method has been called since the last time the app's shared
-     * preferences were reset, returns null.
+     * {@link #download(DownloadRequest, DownloadStateCallback, Handler)} was called without ever
+     * setting the temp file root. If neither method has been called since the last time the app's
+     * shared preferences were reset, returns {@code null}.
      *
      * @return A {@link File} pointing to the configured temp file directory, or null if not yet
      *         configured.
@@ -410,11 +437,15 @@ public class MbmsDownloadManager {
      * Asynchronous errors through the listener include any of the errors
      *
      * @param request The request that specifies what should be downloaded
-     * @param progressListener Optional listener that will be provided progress updates
+     * @param stateCallback Optional listener that will be provided progress updates
      *                         if the app is running. If {@code null}, no callbacks will be
      *                         provided.
+     * @param handler A handler that calls to {@code stateCallback} should be called on. If
+     *                null, defaults to the handler provided via
+     *                {@link #create(Context, MbmsDownloadManagerCallback, int, Handler)}
      */
-    public void download(DownloadRequest request, @Nullable DownloadStateCallback progressListener)
+    public void download(DownloadRequest request, @Nullable DownloadStateCallback stateCallback,
+            Handler handler)
             throws MbmsException {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
@@ -430,11 +461,16 @@ public class MbmsDownloadManager {
             tempRootDirectory.mkdirs();
             setTempFileRootDirectory(tempRootDirectory);
         }
+        InternalDownloadStateCallback internalCallback = null;
+        if (stateCallback != null) {
+            internalCallback = new InternalDownloadStateCallback(stateCallback,
+                    handler == null ? mInternalCallback.getHandler() : handler);
+        }
 
         checkValidDownloadDestination(request);
         writeDownloadRequestToken(request);
         try {
-            downloadService.download(request, progressListener);
+            downloadService.download(request, internalCallback);
         } catch (RemoteException e) {
             mService.set(null);
             throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
@@ -444,7 +480,7 @@ public class MbmsDownloadManager {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from this application.
      * A pending request is one that was issued via
-     * {@link #download(DownloadRequest, DownloadStateCallback)} but not cancelled through
+     * {@link #download(DownloadRequest, DownloadStateCallback, Handler)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * @return A list, possibly empty, of {@link DownloadRequest}s
      */
@@ -636,7 +672,7 @@ public class MbmsDownloadManager {
 
     private void sendErrorToApp(int errorCode, String message) {
         try {
-            mCallback.error(errorCode, message);
+            mInternalCallback.error(errorCode, message);
         } catch (RemoteException e) {
             // Ignore, should not happen locally.
         }

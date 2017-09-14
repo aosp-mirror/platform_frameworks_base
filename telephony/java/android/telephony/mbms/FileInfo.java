@@ -23,9 +23,8 @@ import android.os.Parcelable;
 
 /**
  * Describes a single file that is available over MBMS.
- * @hide
  */
-public class FileInfo implements Parcelable {
+public final class FileInfo implements Parcelable {
 
     private final Uri uri;
 
@@ -47,7 +46,7 @@ public class FileInfo implements Parcelable {
     /**
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public FileInfo(Uri uri, String mimeType) {
         this.uri = uri;
         this.mimeType = mimeType;
