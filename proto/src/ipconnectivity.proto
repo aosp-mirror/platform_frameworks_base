@@ -473,6 +473,38 @@ message NetworkStats {
   repeated Pair validation_states = 8;
 }
 
+// Represents statistics from NFLOG wakeup events due to ingress packets.
+// Since oc-mr1.
+// Next tag: 8.
+message WakeupStats {
+  // The time duration in seconds covered by these stats, for deriving
+  // exact wakeup rates.
+  optional int64 duration_sec = 1;
+
+  // The total number of ingress packets waking up the device.
+  optional int64 total_wakeups = 2;
+
+  // The total number of wakeup packets routed to a socket belonging to
+  // the root uid (uid 0).
+  optional int64 root_wakeups = 3;
+
+  // The total number of wakeup packets routed to a socket belonging to
+  // the system server (uid 1000).
+  optional int64 system_wakeups = 4;
+
+  // The total number of wakeup packets routed to a socket belonging to
+  // an application (uid > 9999).
+  optional int64 application_wakeups = 5;
+
+  // The total number of wakeup packets routed to a socket belonging to another
+  // uid than the root uid, system uid, or an application uid (any uid in
+  // between [1001, 9999]. See android.os.Process for possible uids.
+  optional int64 non_application_wakeups = 6;
+
+  // The total number of wakeup packets with no associated sockets.
+  optional int64 unrouted_wakeups = 7;
+}
+
 // Represents one of the IP connectivity event defined in this file.
 // Next tag: 20
 message IpConnectivityEvent {
@@ -547,6 +579,9 @@ message IpConnectivityEvent {
 
     // Network statistics.
     NetworkStats network_stats = 19;
+
+    // Ingress packet wakeup statistics.
+    WakeupStats wakeup_stats = 20;
   };
 };
 
