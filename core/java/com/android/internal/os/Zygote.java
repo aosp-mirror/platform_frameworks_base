@@ -26,7 +26,7 @@ import dalvik.system.ZygoteHooks;
 /** @hide */
 public final class Zygote {
     /*
-    * Bit values for "debugFlags" argument.  The definitions are duplicated
+    * Bit values for "runtimeFlags" argument.  The definitions are duplicated
     * in the native code.
     */
 
@@ -73,7 +73,7 @@ public final class Zygote {
      * fork()ing and and before spawning any threads.
      * @param gids null-ok; a list of UNIX gids that the new process should
      * setgroups() to after fork and before spawning any threads.
-     * @param debugFlags bit flags that enable debugging features.
+     * @param runtimeFlags bit flags that enable ART features.
      * @param rlimits null-ok an array of rlimit tuples, with the second
      * dimension having a length of 3 and representing
      * (resource, rlim_cur, rlim_max). These are set via the posix
@@ -94,18 +94,18 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
+    public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           int[] fdsToIgnore, String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
-                  uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
+                  uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                   fdsToIgnore, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
-            Trace.setTracingEnabled(true, debugFlags);
+            Trace.setTracingEnabled(true, runtimeFlags);
 
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -114,7 +114,7 @@ public final class Zygote {
         return pid;
     }
 
-    native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int debugFlags,
+    native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           int[] fdsToIgnore, String instructionSet, String appDataDir);
 
@@ -135,7 +135,7 @@ public final class Zygote {
      * fork()ing and and before spawning any threads.
      * @param gids null-ok; a list of UNIX gids that the new process should
      * setgroups() to after fork and before spawning any threads.
-     * @param debugFlags bit flags that enable debugging features.
+     * @param runtimeFlags bit flags that enable ART features.
      * @param rlimits null-ok an array of rlimit tuples, with the second
      * dimension having a length of 3 and representing
      * (resource, rlim_cur, rlim_max). These are set via the posix
@@ -146,22 +146,22 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkSystemServer(int uid, int gid, int[] gids, int debugFlags,
+    public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkSystemServer(
-                uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
+                uid, gid, gids, runtimeFlags, rlimits, permittedCapabilities, effectiveCapabilities);
         // Enable tracing as soon as we enter the system_server.
         if (pid == 0) {
-            Trace.setTracingEnabled(true, debugFlags);
+            Trace.setTracingEnabled(true, runtimeFlags);
         }
         VM_HOOKS.postForkCommon();
         return pid;
     }
 
-    native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int debugFlags,
+    native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
     /**
@@ -175,9 +175,9 @@ public final class Zygote {
      */
     native protected static void nativeUnmountStorageOnInit();
 
-    private static void callPostForkChildHooks(int debugFlags, boolean isSystemServer,
+    private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             String instructionSet) {
-        VM_HOOKS.postForkChild(debugFlags, isSystemServer, instructionSet);
+        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, instructionSet);
     }
 
     /**
