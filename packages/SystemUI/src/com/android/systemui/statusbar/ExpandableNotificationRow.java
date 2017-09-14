@@ -80,6 +80,7 @@ import com.android.systemui.statusbar.stack.StackScrollState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public class ExpandableNotificationRow extends ActivatableNotificationView
         implements PluginListener<NotificationMenuRowPlugin> {
@@ -93,6 +94,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private LayoutListener mLayoutListener;
+    private boolean mDark;
     private boolean mLowPriorityStateUpdated;
     private final NotificationInflater mNotificationInflater;
     private int mIconTransformContentShift;
@@ -173,6 +175,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
     private boolean mGroupExpansionChanging;
+
+    /**
+     * A supplier that returns true if keyguard is secure.
+     */
+    private BooleanSupplier mSecureStateProvider;
 
     /**
      * Whether or not a notification that is not part of a group of notifications can be manually
@@ -393,6 +400,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setAboveShelfChangedListener(AboveShelfChangedListener aboveShelfChangedListener) {
         mAboveShelfChangedListener = aboveShelfChangedListener;
+    }
+
+    /**
+     * Sets a supplier that can determine whether the keyguard is secure or not.
+     * @param secureStateProvider A function that returns true if keyguard is secure.
+     */
+    public void setSecureStateProvider(BooleanSupplier secureStateProvider) {
+        mSecureStateProvider = secureStateProvider;
     }
 
     @Override
@@ -1454,6 +1469,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
         super.setDark(dark, fade, delay);
+        mDark = dark;
         if (!mIsHeadsUp) {
             // Only fade the showing view of the pulsing notification.
             fade = false;
@@ -1466,6 +1482,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setDark(dark, fade, delay);
         }
         updateShelfIconColor();
+    }
+
+    /**
+     * Tap sounds should not be played when we're unlocking.
+     * Doing so would cause audio collision and the system would feel unpolished.
+     */
+    @Override
+    public boolean isSoundEffectsEnabled() {
+        final boolean mute = mDark && mSecureStateProvider != null &&
+                !mSecureStateProvider.getAsBoolean();
+        return !mute && super.isSoundEffectsEnabled();
     }
 
     public boolean isExpandable() {
