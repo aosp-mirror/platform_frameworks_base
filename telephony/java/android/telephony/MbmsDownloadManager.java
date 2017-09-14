@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +29,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.mbms.DownloadProgressListener;
+import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
@@ -49,41 +50,82 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-/** @hide */
+/**
+ * This class provides functionality for file download over MBMS.
+ * @hide
+ */
 public class MbmsDownloadManager {
     private static final String LOG_TAG = MbmsDownloadManager.class.getSimpleName();
 
-    /** @hide */
-    // TODO: systemapi
+    /**
+     * Service action which must be handled by the middleware implementing the MBMS file download
+     * interface.
+     * @hide
+     */
+    @SystemApi
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String MBMS_DOWNLOAD_SERVICE_ACTION =
             "android.telephony.action.EmbmsDownload";
 
     /**
-     * Integer extra indicating the result code of the download. One of
-     * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, or {@link #RESULT_CANCELLED}.
+     * Integer extra that Android will attach to the intent supplied via
+     * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
+     * Indicates the result code of the download. One of
+     * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, {@link #RESULT_CANCELLED}, or
+     * {@link #RESULT_IO_ERROR}.
+     *
+     * This extra may also be used by the middleware when it is sending intents to the app.
      */
     public static final String EXTRA_RESULT = "android.telephony.mbms.extra.RESULT";
 
     /**
-     * Extra containing the {@link android.telephony.mbms.FileInfo} for which the download result
-     * is for. Must not be null.
+     * {@link FileInfo} extra that Android will attach to the intent supplied via
+     * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
+     * Indicates the file for which the download result is for. Never null.
+     *
+     * This extra may also be used by the middleware when it is sending intents to the app.
      */
     public static final String EXTRA_FILE_INFO = "android.telephony.mbms.extra.FILE_INFO";
 
     /**
-     * Extra containing a single {@link Uri} indicating the location of the successfully
-     * downloaded file. Set on the intent provided via
-     * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}.
-     * Will always be set to a non-null value if {@link #EXTRA_RESULT} is set to
+     * {@link Uri} extra that Android will attach to the intent supplied via
+     * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
+     * Indicates the location of the successfully
+     * downloaded file. Will always be set to a non-null value if {@link #EXTRA_RESULT} is set to
      * {@link #RESULT_SUCCESSFUL}.
      */
     public static final String EXTRA_COMPLETED_FILE_URI =
             "android.telephony.mbms.extra.COMPLETED_FILE_URI";
 
+    /**
+     * The default directory name for all MBMS temp files. If you call
+     * {@link #download(DownloadRequest, DownloadStateCallback)} without first calling
+     * {@link #setTempFileRootDirectory(File)}, this directory will be created for you under the
+     * path returned by {@link Context#getFilesDir()}.
+     */
+    public static final String DEFAULT_TOP_LEVEL_TEMP_DIRECTORY = "androidMbmsTempFileRoot";
+
+    /**
+     * Indicates that the download was successful.
+     */
     public static final int RESULT_SUCCESSFUL = 1;
+
+    /**
+     * Indicates that the download was cancelled via {@link #cancelDownload(DownloadRequest)}.
+     */
     public static final int RESULT_CANCELLED = 2;
+
+    /**
+     * Indicates that the download will not be completed due to the expiration of its download
+     * window on the carrier's network.
+     */
     public static final int RESULT_EXPIRED = 3;
+
+    /**
+     * Indicates that the download will not be completed due to an I/O error incurred while
+     * writing to temp files. This commonly indicates that the device is out of storage space,
+     * but may indicate other conditions as well (such as an SD card being removed).
+     */
     public static final int RESULT_IO_ERROR = 4;
     // TODO - more results!
 
@@ -93,10 +135,30 @@ public class MbmsDownloadManager {
             STATUS_PENDING_REPAIR, STATUS_PENDING_DOWNLOAD_WINDOW})
     public @interface DownloadStatus {}
 
+    /**
+     * Indicates that the middleware has no information on the file.
+     */
     public static final int STATUS_UNKNOWN = 0;
+
+    /**
+     * Indicates that the file is actively downloading.
+     */
     public static final int STATUS_ACTIVELY_DOWNLOADING = 1;
+
+    /**
+     * TODO: I don't know...
+     */
     public static final int STATUS_PENDING_DOWNLOAD = 2;
+
+    /**
+     * Indicates that the file is being repaired after the download being interrupted.
+     */
     public static final int STATUS_PENDING_REPAIR = 3;
+
+    /**
+     * Indicates that the file is waiting to download because its download window has not yet
+     * started.
+     */
     public static final int STATUS_PENDING_DOWNLOAD_WINDOW = 4;
 
     private static AtomicBoolean sIsInitialized = new AtomicBoolean(false);
@@ -267,9 +329,9 @@ public class MbmsDownloadManager {
      * local instance of {@link android.content.SharedPreferences} and by the middleware.
      *
      * If this method is not called at least once before calling
-     * {@link #download(DownloadRequest, DownloadProgressListener)}, the framework
+     * {@link #download(DownloadRequest, DownloadStateCallback)}, the framework
      * will default to a directory formed by the concatenation of the app's files directory and
-     * {@link android.telephony.mbms.MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
+     * {@link MbmsDownloadManager#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
      *
      * Before calling this method, the app must cancel all of its pending
      * {@link DownloadRequest}s via {@link #cancelDownload(DownloadRequest)}. If this is not done,
@@ -318,7 +380,7 @@ public class MbmsDownloadManager {
     /**
      * Retrieves the currently configured temp file root directory. Returns the file that was
      * configured via {@link #setTempFileRootDirectory(File)} or the default directory
-     * {@link #download(DownloadRequest, DownloadProgressListener)} was called without ever setting
+     * {@link #download(DownloadRequest, DownloadStateCallback)} was called without ever setting
      * the temp file root. If neither method has been called since the last time the app's shared
      * preferences were reset, returns null.
      *
@@ -338,25 +400,21 @@ public class MbmsDownloadManager {
     /**
      * Requests a download of a file that is available via multicast.
      *
-     * downloadListener is an optional callback object which can be used to get progress reports
-     *     of a currently occuring download.  Note this can only run while the calling app
-     *     is running, so future downloads will simply result in resultIntents being sent
-     *     for completed or errored-out downloads.  A NULL indicates no callbacks are needed.
-     *
      * May throw an {@link IllegalArgumentException}
      *
      * If {@link #setTempFileRootDirectory(File)} has not called after the app has been installed,
      * this method will create a directory at the default location defined at
-     * {@link MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY} and store that as the temp
+     * {@link MbmsDownloadManager#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY} and store that as the temp
      * file root directory.
      *
      * Asynchronous errors through the listener include any of the errors
      *
      * @param request The request that specifies what should be downloaded
      * @param progressListener Optional listener that will be provided progress updates
-     *                         if the app is running.
+     *                         if the app is running. If {@code null}, no callbacks will be
+     *                         provided.
      */
-    public void download(DownloadRequest request, DownloadProgressListener progressListener)
+    public void download(DownloadRequest request, @Nullable DownloadStateCallback progressListener)
             throws MbmsException {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
@@ -368,7 +426,7 @@ public class MbmsDownloadManager {
                 MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_FILE_NAME, 0);
         if (prefs.getString(MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_NAME, null) == null) {
             File tempRootDirectory = new File(mContext.getFilesDir(),
-                    MbmsTempFileProvider.DEFAULT_TOP_LEVEL_TEMP_DIRECTORY);
+                    DEFAULT_TOP_LEVEL_TEMP_DIRECTORY);
             tempRootDirectory.mkdirs();
             setTempFileRootDirectory(tempRootDirectory);
         }
@@ -386,7 +444,7 @@ public class MbmsDownloadManager {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from this application.
      * A pending request is one that was issued via
-     * {@link #download(DownloadRequest, DownloadProgressListener)} but not cancelled through
+     * {@link #download(DownloadRequest, DownloadStateCallback)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * @return A list, possibly empty, of {@link DownloadRequest}s
      */

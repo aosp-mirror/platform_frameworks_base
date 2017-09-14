@@ -17,12 +17,14 @@
 package android.telephony.mbms.vendor;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.content.Intent;
 import android.os.RemoteException;
-import android.telephony.mbms.DownloadProgressListener;
+import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.FileServiceInfo;
-import android.telephony.mbms.IDownloadProgressListener;
+import android.telephony.mbms.IDownloadStateCallback;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsException;
@@ -30,11 +32,11 @@ import android.telephony.mbms.MbmsException;
 import java.util.List;
 
 /**
- * Base class for MbmsDownloadService. The middleware should extend this base class rather than
- * the aidl stub for compatibility
+ * Base class for MbmsDownloadService. The middleware should return an instance of this object from
+ * its {@link android.app.Service#onBind(Intent)} method.
  * @hide
- * TODO: future systemapi
  */
+//@SystemApi
 public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     /**
      * Initialize the download service for this app and subId, registering the listener.
@@ -132,12 +134,12 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * this is not the case, an {@link IllegalStateException} may be thrown.
      *
      * @param downloadRequest An object describing the set of files to be downloaded.
-     * @param listener A listener through which the middleware can provide progress updates to
+     * @param callback A callback through which the middleware can provide progress updates to
      *                 the app while both are still running.
      * @return Any error from {@link android.telephony.mbms.MbmsException.GeneralErrors}
      *         or {@link MbmsException#SUCCESS}
      */
-    public int download(DownloadRequest downloadRequest, DownloadProgressListener listener) {
+    public int download(DownloadRequest downloadRequest, DownloadStateCallback callback) {
         return 0;
     }
 
@@ -146,14 +148,14 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @hide
      */
     @Override
-    public final int download(DownloadRequest downloadRequest, IDownloadProgressListener listener)
+    public final int download(DownloadRequest downloadRequest, IDownloadStateCallback callback)
             throws RemoteException {
-        return download(downloadRequest, new DownloadProgressListener() {
+        return download(downloadRequest, new DownloadStateCallback() {
             @Override
             public void progress(DownloadRequest request, FileInfo fileInfo, int
                     currentDownloadSize, int fullDownloadSize, int currentDecodedSize, int
                     fullDecodedSize) throws RemoteException {
-                listener.progress(request, fileInfo, currentDownloadSize, fullDownloadSize,
+                callback.progress(request, fileInfo, currentDownloadSize, fullDownloadSize,
                         currentDecodedSize, fullDecodedSize);
             }
         });
@@ -163,7 +165,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from the calling
      * application, identified by its uid. A pending request is one that was issued via
-     * {@link #download(DownloadRequest, IDownloadProgressListener)} but not cancelled through
+     * {@link #download(DownloadRequest, DownloadStateCallback)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * The middleware must return a non-null result synchronously or throw an exception
      * inheriting from {@link RuntimeException}.
