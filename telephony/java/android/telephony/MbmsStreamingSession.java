@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
@@ -25,18 +27,20 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.telephony.mbms.InternalStreamingManagerCallback;
+import android.telephony.mbms.InternalStreamingSessionCallback;
 import android.telephony.mbms.InternalStreamingServiceCallback;
 import android.telephony.mbms.MbmsException;
-import android.telephony.mbms.MbmsStreamingManagerCallback;
+import android.telephony.mbms.MbmsStreamingSessionCallback;
 import android.telephony.mbms.MbmsUtils;
 import android.telephony.mbms.StreamingService;
 import android.telephony.mbms.StreamingServiceCallback;
 import android.telephony.mbms.StreamingServiceInfo;
 import android.telephony.mbms.vendor.IMbmsStreamingService;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,8 +49,8 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 /**
  * This class provides functionality for streaming media over MBMS.
  */
-public class MbmsStreamingManager {
-    private static final String LOG_TAG = "MbmsStreamingManager";
+public class MbmsStreamingSession implements AutoCloseable {
+    private static final String LOG_TAG = "MbmsStreamingSession";
 
     /**
      * Service action which must be handled by the middleware implementing the MBMS streaming
@@ -69,94 +73,94 @@ public class MbmsStreamingManager {
         }
     };
 
-    private InternalStreamingManagerCallback mInternalCallback;
+    private InternalStreamingSessionCallback mInternalCallback;
+    private Set<StreamingService> mKnownActiveStreamingServices = new ArraySet<>();
 
     private final Context mContext;
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
     /** @hide */
-    private MbmsStreamingManager(Context context, MbmsStreamingManagerCallback callback,
+    private MbmsStreamingSession(Context context, MbmsStreamingSessionCallback callback,
                     int subscriptionId, Handler handler) {
         mContext = context;
         mSubscriptionId = subscriptionId;
         if (handler == null) {
             handler = new Handler(Looper.getMainLooper());
         }
-        mInternalCallback = new InternalStreamingManagerCallback(callback, handler);
+        mInternalCallback = new InternalStreamingSessionCallback(callback, handler);
     }
 
     /**
-     * Create a new MbmsStreamingManager using the given subscription ID.
+     * Create a new {@link MbmsStreamingSession} using the given subscription ID.
      *
      * Note that this call will bind a remote service. You may not call this method on your app's
-     * main thread. This may throw an {@link MbmsException}, indicating errors that may happen
-     * during the initialization or binding process.
+     * main thread.
      *
-     *
-     * You may only have one instance of {@link MbmsStreamingManager} per UID. If you call this
-     * method while there is an active instance of {@link MbmsStreamingManager} in your process
-     * (in other words, one that has not had {@link #dispose()} called on it), this method will
-     * throw an {@link MbmsException}. If you call this method in a different process
+     * You may only have one instance of {@link MbmsStreamingSession} per UID. If you call this
+     * method while there is an active instance of {@link MbmsStreamingSession} in your process
+     * (in other words, one that has not had {@link #close()} called on it), this method will
+     * throw an {@link IllegalStateException}. If you call this method in a different process
      * running under the same UID, an error will be indicated via
-     * {@link MbmsStreamingManagerCallback#onError(int, String)}.
+     * {@link MbmsStreamingSessionCallback#onError(int, String)}.
      *
      * Note that initialization may fail asynchronously. If you wish to try again after you
-     * receive such an asynchronous error, you must call dispose() on the instance of
-     * {@link MbmsStreamingManager} that you received before calling this method again.
+     * receive such an asynchronous error, you must call {@link #close()} on the instance of
+     * {@link MbmsStreamingSession} that you received before calling this method again.
      *
      * @param context The {@link Context} to use.
      * @param callback A callback object on which you wish to receive results of asynchronous
      *                 operations.
      * @param subscriptionId The subscription ID to use.
-     * @param handler The handler you wish to receive callbacks on. If null, callbacks will be
-     *                processed on the main looper (in other words, the looper returned from
-     *                {@link Looper#getMainLooper()}).
+     * @param handler The handler you wish to receive callbacks on.
+     * @return An instance of {@link MbmsStreamingSession}, or null if an error occurred.
      */
-    public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback callback, int subscriptionId, Handler handler)
-            throws MbmsException {
+    public static @Nullable MbmsStreamingSession create(@NonNull Context context,
+            @NonNull MbmsStreamingSessionCallback callback, int subscriptionId,
+            @NonNull Handler handler) {
         if (!sIsInitialized.compareAndSet(false, true)) {
-            throw new MbmsException(MbmsException.InitializationErrors.ERROR_DUPLICATE_INITIALIZE);
+            throw new IllegalStateException("Cannot create two instances of MbmsStreamingSession");
         }
-        MbmsStreamingManager manager = new MbmsStreamingManager(context, callback,
+        MbmsStreamingSession session = new MbmsStreamingSession(context, callback,
                 subscriptionId, handler);
-        try {
-            manager.bindAndInitialize();
-        } catch (MbmsException e) {
+
+        int result = session.bindAndInitialize();
+        if (result != MbmsException.SUCCESS) {
             sIsInitialized.set(false);
-            throw e;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onError(result, null);
+                }
+            });
+            return null;
         }
-        return manager;
+        return session;
     }
 
     /**
-     * Create a new MbmsStreamingManager using the system default data subscription ID.
-     * See {@link #create(Context, MbmsStreamingManagerCallback, int, Handler)}.
+     * Create a new {@link MbmsStreamingSession} using the system default data subscription ID.
+     * See {@link #create(Context, MbmsStreamingSessionCallback, int, Handler)}.
      */
-    public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback callback, Handler handler)
-            throws MbmsException {
+    public static MbmsStreamingSession create(@NonNull Context context,
+            @NonNull MbmsStreamingSessionCallback callback, @NonNull Handler handler) {
         return create(context, callback, SubscriptionManager.getDefaultSubscriptionId(), handler);
     }
 
     /**
-     * Create a new MbmsStreamingManager using the system default data subscription ID and
-     * default {@link Handler}.
-     * See {@link #create(Context, MbmsStreamingManagerCallback, int, Handler)}.
-     */
-    public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback callback)
-            throws MbmsException {
-        return create(context, callback, SubscriptionManager.getDefaultSubscriptionId(), null);
-    }
-
-    /**
-     * Terminates this instance, ending calls to the registered listener.  Also terminates
-     * any streaming services spawned from this instance.
+     * Terminates this instance. Also terminates
+     * any streaming services spawned from this instance as if
+     * {@link StreamingService#stopStreaming()} had been called on them. After this method returns,
+     * no further callbacks originating from the middleware will be enqueued on the provided
+     * instance of {@link MbmsStreamingSessionCallback}, but callbacks that have already been
+     * enqueued will still be delivered.
+     *
+     * It is safe to call {@link #create(Context, MbmsStreamingSessionCallback, int, Handler)} to
+     * obtain another instance of {@link MbmsStreamingSession} immediately after this method
+     * returns.
      *
      * May throw an {@link IllegalStateException}
      */
-    public void dispose() {
+    public void close() {
         try {
             IMbmsStreamingService streamingService = mService.get();
             if (streamingService == null) {
@@ -164,47 +168,49 @@ public class MbmsStreamingManager {
                 return;
             }
             streamingService.dispose(mSubscriptionId);
+            for (StreamingService s : mKnownActiveStreamingServices) {
+                s.getCallback().stop();
+            }
+            mKnownActiveStreamingServices.clear();
         } catch (RemoteException e) {
             // Ignore for now
         } finally {
             mService.set(null);
             sIsInitialized.set(false);
+            mInternalCallback.stop();
         }
     }
 
     /**
      * An inspection API to retrieve the list of streaming media currently be advertised.
-     * The results are returned asynchronously through the previously registered callback.
-     * serviceClasses lets the app filter on types of programming and is opaque data between
-     * the app and the carrier.
+     * The results are returned asynchronously via
+     * {@link MbmsStreamingSessionCallback#onStreamingServicesUpdated(List)} on the callback
+     * provided upon creation.
      *
-     * Multiple calls replace the list of serviceClasses of interest.
+     * Multiple calls replace the list of service classes of interest.
      *
-     * This may throw an {@link MbmsException} containing any error in
-     * {@link android.telephony.mbms.MbmsException.GeneralErrors},
-     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}, or
-     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}.
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}.
      *
-     * May also throw an unchecked {@link IllegalArgumentException} or an
-     * {@link IllegalStateException}
-     *
-     * @param classList A list of streaming service classes that the app would like updates on.
+     * @param serviceClassList A list of streaming service classes that the app would like updates
+     *                         on. The exact names of these classes should be negotiated with the
+     *                         wireless carrier separately.
      */
-    public void getStreamingServices(List<String> classList) throws MbmsException {
+    public void requestUpdateStreamingServices(List<String> serviceClassList) {
         IMbmsStreamingService streamingService = mService.get();
         if (streamingService == null) {
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+            throw new IllegalStateException("Middleware not yet bound");
         }
         try {
-            int returnCode = streamingService.getStreamingServices(mSubscriptionId, classList);
+            int returnCode = streamingService.requestUpdateStreamingServices(
+                    mSubscriptionId, serviceClassList);
             if (returnCode != MbmsException.SUCCESS) {
-                throw new MbmsException(returnCode);
+                sendErrorToApp(returnCode, null);
             }
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
             sIsInitialized.set(false);
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
         }
     }
 
@@ -215,13 +221,7 @@ public class MbmsStreamingManager {
      * reported via
      * {@link android.telephony.mbms.StreamingServiceCallback#onStreamStateUpdated(int, int)}
      *
-     * May throw an
-     * {@link MbmsException} containing any of the error codes in
-     * {@link android.telephony.mbms.MbmsException.GeneralErrors},
-     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}, or
-     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}.
-     *
-     * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
      * Asynchronous errors through the callback include any of the errors in
      * {@link android.telephony.mbms.MbmsException.GeneralErrors} or
@@ -229,42 +229,49 @@ public class MbmsStreamingManager {
      *
      * @param serviceInfo The information about the service to stream.
      * @param callback A callback that'll be called when something about the stream changes.
-     * @param handler A handler that calls to {@code callback} should be called on. If null,
-     *                defaults to the handler provided via
-     *                {@link #create(Context, MbmsStreamingManagerCallback, int, Handler)}.
+     * @param handler A handler that calls to {@code callback} should be called on.
      * @return An instance of {@link StreamingService} through which the stream can be controlled.
+     *         May be {@code null} if an error occurred.
      */
-    public StreamingService startStreaming(StreamingServiceInfo serviceInfo,
-            StreamingServiceCallback callback, Handler handler) throws MbmsException {
+    public @Nullable StreamingService startStreaming(StreamingServiceInfo serviceInfo,
+            StreamingServiceCallback callback, @NonNull Handler handler) {
         IMbmsStreamingService streamingService = mService.get();
         if (streamingService == null) {
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+            throw new IllegalStateException("Middleware not yet bound");
         }
 
         InternalStreamingServiceCallback serviceCallback = new InternalStreamingServiceCallback(
-                callback, handler == null ? mInternalCallback.getHandler() : handler);
+                callback, handler);
 
         StreamingService serviceForApp = new StreamingService(
-                mSubscriptionId, streamingService, serviceInfo, serviceCallback);
+                mSubscriptionId, streamingService, this, serviceInfo, serviceCallback);
+        mKnownActiveStreamingServices.add(serviceForApp);
 
         try {
             int returnCode = streamingService.startStreaming(
                     mSubscriptionId, serviceInfo.getServiceId(), serviceCallback);
             if (returnCode != MbmsException.SUCCESS) {
-                throw new MbmsException(returnCode);
+                sendErrorToApp(returnCode, null);
+                return null;
             }
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
             sIsInitialized.set(false);
-            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            return null;
         }
 
         return serviceForApp;
     }
 
-    private void bindAndInitialize() throws MbmsException {
-        MbmsUtils.startBinding(mContext, MBMS_STREAMING_SERVICE_ACTION,
+    /** @hide */
+    public void onStreamingServiceStopped(StreamingService service) {
+        mKnownActiveStreamingServices.remove(service);
+    }
+
+    private int bindAndInitialize() {
+        return MbmsUtils.startBinding(mContext, MBMS_STREAMING_SERVICE_ACTION,
                 new ServiceConnection() {
                     @Override
                     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -315,7 +322,7 @@ public class MbmsStreamingManager {
 
     private void sendErrorToApp(int errorCode, String message) {
         try {
-            mInternalCallback.error(errorCode, message);
+            mInternalCallback.onError(errorCode, message);
         } catch (RemoteException e) {
             // Ignore, should not happen locally.
         }
