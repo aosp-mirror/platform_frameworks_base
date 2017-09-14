@@ -970,8 +970,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.logSaveShown(id);
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
-                getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo,
-                        valueFinder, mPackageName, this, mPendingSaveUi);
+                getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
+                        saveInfo, valueFinder, mPackageName, this, mPendingSaveUi);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -1774,7 +1774,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     /**
      * Checks whether this session is hiding the Save UI to handle a custom description link for
-     * a specific {@code token} created by {@link PendingUi#PendingUi(IBinder)}.
+     * a specific {@code token} created by
+     * {@link PendingUi#PendingUi(IBinder, int, IAutoFillManagerClient)}.
      */
     boolean isSaveUiPendingForToken(@NonNull IBinder token) {
         return isSaveUiPending() && token.equals(mPendingSaveUi.getToken());

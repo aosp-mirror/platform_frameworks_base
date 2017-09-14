@@ -604,4 +604,7 @@
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
 
+    <!-- Max (absolute) dimensions (both width and height) of autofill service icon on autofill save affordance -->
+    <dimen name="autofill_save_icon_max_size">100dp</dimen>
+
 </resources>
