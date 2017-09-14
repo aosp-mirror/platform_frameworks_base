@@ -558,6 +558,16 @@ public:
     SkPaint* getPaint();
     void syncProperties() {
         if (mStagingProperties.mNonAnimatablePropertiesDirty) {
+            mCache.dirty |= (mProperties.mNonAnimatableProperties.viewportWidth
+                    != mStagingProperties.mNonAnimatableProperties.viewportWidth)
+                    || (mProperties.mNonAnimatableProperties.viewportHeight
+                    != mStagingProperties.mNonAnimatableProperties.viewportHeight)
+                    || (mProperties.mNonAnimatableProperties.scaledWidth
+                    != mStagingProperties.mNonAnimatableProperties.scaledWidth)
+                    || (mProperties.mNonAnimatableProperties.scaledHeight
+                    != mStagingProperties.mNonAnimatableProperties.scaledHeight)
+                    || (mProperties.mNonAnimatableProperties.bounds
+                    != mStagingProperties.mNonAnimatableProperties.bounds);
             mProperties.syncNonAnimatableProperties(mStagingProperties);
             mStagingProperties.mNonAnimatablePropertiesDirty = false;
         }
