@@ -493,14 +493,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.noteStartSensorLocked(uid, sensor);
         }
     }
-    
+
     public void noteStopSensor(int uid, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStopSensorLocked(uid, sensor);
         }
     }
-    
+
     public void noteVibratorOn(int uid, long durationMillis) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -521,23 +521,28 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.noteStartGpsLocked(uid);
         }
     }
-    
+
     public void noteStopGps(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStopGpsLocked(uid);
         }
     }
-        
+
     public void noteScreenState(int state) {
         enforceCallingPermission();
         if (DBG) Slog.d(TAG, "begin noteScreenState");
         synchronized (mStats) {
             mStats.noteScreenStateLocked(state);
+            // TODO: remove this once we figure out properly where and how
+            // SCREEN_EVENT = 1003
+            // State key: 1
+            // State value: state. We can change this to our own def later.
+            StatsLog.writeArray(1003, 1, state);
         }
         if (DBG) Slog.d(TAG, "end noteScreenState");
     }
-    
+
     public void noteScreenBrightness(int brightness) {
         enforceCallingPermission();
         synchronized (mStats) {
