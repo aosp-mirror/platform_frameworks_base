@@ -494,7 +494,7 @@ abstract public class ManagedServices {
             return info;
         }
         throw new SecurityException("Disallowed call from unknown " + getCaption() + ": "
-                + service);
+                + service + " " + service.getClass());
     }
 
     public void unregisterService(IInterface service, int userid) {
