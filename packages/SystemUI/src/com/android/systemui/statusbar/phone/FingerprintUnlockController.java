@@ -198,6 +198,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     public void startWakeAndUnlock(int mode) {
+        // TODO(b/62444020): remove when this bug is fixed
+        Log.v(TAG, "startWakeAndUnlock(" + mode + ")");
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = mode;
         mHasScreenTurnedOnSinceAuthenticating = false;
