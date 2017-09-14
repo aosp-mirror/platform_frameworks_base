@@ -37,10 +37,11 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     private final Sensor mLightSensor;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
+
     private boolean mRegistered;
-    private boolean mReady = true;
-    private ReadyListener mReadyListener;
     private int mDefaultDozeBrightness;
+    private boolean mPaused = false;
+    private int mLastSensorValue = -1;
 
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, DozeHost host,
@@ -86,22 +87,38 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
                 setLightSensorEnabled(false);
                 break;
         }
+        if (newState != DozeMachine.State.FINISH) {
+            setPaused(newState == DozeMachine.State.DOZE_AOD_PAUSED);
+        }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mRegistered) {
-            int sensorValue = (int) event.values[0];
-            int brightness = computeBrightness(sensorValue);
-            if (brightness > 0) {
+            mLastSensorValue = (int) event.values[0];
+            updateBrightnessAndReady();
+        }
+    }
+
+    private void updateBrightnessAndReady() {
+        if (mRegistered) {
+            int brightness = computeBrightness(mLastSensorValue);
+            boolean brightnessReady = brightness > 0;
+            if (brightnessReady) {
                 mDozeService.setDozeScreenBrightness(brightness);
             }
-            // If the brightness is zero or negative, this indicates that the brightness sensor is
-            // covered or reports that the screen should be off, therefore we're not ready to turn
-            // on the screen yet.
-            setReady(brightness > 0);
 
-            int scrimOpacity = computeScrimOpacity(sensorValue);
+            int scrimOpacity = -1;
+            if (mPaused) {
+                // If AOD is paused, force the screen black until the
+                // sensor reports a new brightness. This ensures that when the screen comes on
+                // again, it will only show after the brightness sensor has stabilized,
+                // avoiding a potential flicker.
+                scrimOpacity = 255;
+            } else if (brightnessReady) {
+                // Only unblank scrim once brightness is ready.
+                scrimOpacity = computeScrimOpacity(mLastSensorValue);
+            }
             if (scrimOpacity >= 0) {
                 mDozeHost.setAodDimmingScrim(scrimOpacity / 255f);
             }
@@ -128,47 +145,28 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
 
     private void resetBrightnessToDefault() {
         mDozeService.setDozeScreenBrightness(mDefaultDozeBrightness);
+        mDozeHost.setAodDimmingScrim(0f);
     }
 
     private void setLightSensorEnabled(boolean enabled) {
         if (enabled && !mRegistered && mLightSensor != null) {
             // Wait until we get an event from the sensor until indicating ready.
-            setReady(false);
             mRegistered = mSensorManager.registerListener(this, mLightSensor,
                     SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+            mLastSensorValue = -1;
         } else if (!enabled && mRegistered) {
             mSensorManager.unregisterListener(this);
             mRegistered = false;
+            mLastSensorValue = -1;
             // Sensor is not enabled, hence we use the default brightness and are always ready.
-            setReady(true);
         }
     }
 
-    private void setReady(boolean ready) {
-        if (ready != mReady) {
-            mReady = ready;
-            if (mReadyListener != null) {
-                mReadyListener.onBrightnessReadyChanged(mReady);
-            }
+    private void setPaused(boolean paused) {
+        if (mPaused != paused) {
+            mPaused = paused;
+            updateBrightnessAndReady();
         }
     }
 
-    public void setBrightnessReadyListener(ReadyListener l) {
-        mReadyListener = l;
-        l.onBrightnessReadyChanged(mReady);
-    }
-
-    /**
-     * @return true if the screen brightness is properly calculated.
-     *
-     * Can be used to wait for transitioning out of the paused state, such that we don't turn the
-     * display on before the display brightness is properly calculated.
-     */
-    public boolean isReady() {
-        return mReady;
-    }
-
-    public interface ReadyListener {
-        void onBrightnessReadyChanged(boolean ready);
-    }
 }
