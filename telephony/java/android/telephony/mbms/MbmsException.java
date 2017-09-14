@@ -31,7 +31,7 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates that the app attempted to perform an operation on an instance of
-     * TODO: link android.telephony.MbmsDownloadManager or
+     * TODO link android.telephony.MbmsDownloadManager or
      * {@link android.telephony.MbmsStreamingManager} without being bound to the middleware.
      */
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 2;
@@ -48,7 +48,7 @@ public class MbmsException extends Exception {
         /**
          * Indicates that the app tried to create more than one instance each of
          * {@link android.telephony.MbmsStreamingManager} or
-         * TODO: link android.telephony.MbmsDownloadManager
+         * TODO link android.telephony.MbmsDownloadManager
          */
         public static final int ERROR_DUPLICATE_INITIALIZE = 101;
         /** Indicates that the app is not authorized to access media via MBMS.*/
@@ -117,10 +117,10 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates the errors that are applicable only to the file-download use-case
-     * TODO: unhide
      * @hide
      */
     public static class DownloadErrors {
+        private DownloadErrors() { }
         /**
          * Indicates that the app is not allowed to change the temp file root at this time due to
          * outstanding download requests.
