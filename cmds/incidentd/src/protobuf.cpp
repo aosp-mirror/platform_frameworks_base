@@ -50,23 +50,23 @@ write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_t size)
 }
 
 size_t
-write_raw_varint(vector<uint8_t> &buf, uint32_t val)
+write_raw_varint(vector<uint8_t>* buf, uint32_t val)
 {
     size_t size = 0;
     while (true) {
         size++;
         if ((val & ~0x7F) == 0) {
-            buf.push_back((uint8_t) val);
+            buf->push_back((uint8_t) val);
             return size;
         } else {
-            buf.push_back((uint8_t)((val & 0x7F) | 0x80));
+            buf->push_back((uint8_t)((val & 0x7F) | 0x80));
             val >>= 7;
         }
     }
 }
 
 size_t
-write_header(vector<uint8_t> &buf, uint32_t fieldId, uint8_t wireType)
+write_header(vector<uint8_t>* buf, uint32_t fieldId, uint8_t wireType)
 {
     return write_raw_varint(buf, (fieldId << 3) | wireType);
 }

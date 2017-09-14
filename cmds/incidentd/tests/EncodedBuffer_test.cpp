@@ -42,6 +42,38 @@ const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff"; // -1
 const string FIX32_FIELD_4 = "\x25\xff\xff\xff\xff"; // -1
 const string MESSAGE_FIELD_5 = "\x2a\x10" + VARINT_FIELD_1 + STRING_FIELD_2;
 
+static Privacy* create_privacy(uint32_t field_id, uint8_t type, uint8_t dest) {
+  struct Privacy* p = (struct Privacy*)malloc(sizeof(struct Privacy));
+  p->field_id = field_id;
+  p->type = type;
+  p->children = NULL;
+  p->dest = dest;
+  p->patterns = NULL;
+  return p;
+}
+
+static Privacy* create_message_privacy(uint32_t field_id, Privacy** children)
+{
+  struct Privacy* p = (struct Privacy*)malloc(sizeof(struct Privacy));
+  p->field_id = field_id;
+  p->type = MESSAGE_TYPE;
+  p->children = children;
+  p->dest = EXPLICIT;
+  p->patterns = NULL;
+  return p;
+}
+
+static Privacy* create_string_privacy(uint32_t field_id, uint8_t dest, const char** patterns)
+{
+  struct Privacy* p = (struct Privacy*)malloc(sizeof(struct Privacy));
+  p->field_id = field_id;
+  p->type = STRING_TYPE;
+  p->children = NULL;
+  p->dest = dest;
+  p->patterns = patterns;
+  return p;
+}
+
 class EncodedBufferTest : public Test {
 public:
     virtual void SetUp() override {
@@ -78,7 +110,7 @@ public:
         }
         va_end(args);
         list[size] = NULL;
-        assertStrip(dest, expected, new Privacy(300, const_cast<const Privacy**>(list)));
+        assertStrip(dest, expected, create_message_privacy(300, list));
     }
 
     FdBuffer buffer;
@@ -88,62 +120,62 @@ private:
 
 TEST_F(EncodedBufferTest, NullFieldPolicy) {
     writeToFdBuffer(STRING_FIELD_0);
-    assertStrip(EXPLICIT, STRING_FIELD_0, new Privacy(300, NULL));
+    assertStrip(EXPLICIT, STRING_FIELD_0, create_string_privacy(300, AUTOMATIC, NULL));
 }
 
 TEST_F(EncodedBufferTest, StripSpecNotAllowed) {
     writeToFdBuffer(STRING_FIELD_0);
-    assertStripByFields(AUTOMATIC, "", 1, new Privacy(0, STRING_TYPE, EXPLICIT));
+    assertStripByFields(AUTOMATIC, "", 1, create_privacy(0, STRING_TYPE, EXPLICIT));
 }
 
 TEST_F(EncodedBufferTest, StripVarintField) {
     writeToFdBuffer(VARINT_FIELD_1);
-    assertStripByFields(EXPLICIT, "", 1, new Privacy(1, OTHER_TYPE, LOCAL));
+    assertStripByFields(EXPLICIT, "", 1, create_privacy(1, OTHER_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, StripLengthDelimitedField_String) {
     writeToFdBuffer(STRING_FIELD_2);
-    assertStripByFields(EXPLICIT, "", 1, new Privacy(2, STRING_TYPE, LOCAL));
+    assertStripByFields(EXPLICIT, "", 1, create_privacy(2, STRING_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, StripFixed64Field) {
     writeToFdBuffer(FIX64_FIELD_3);
-    assertStripByFields(EXPLICIT, "", 1, new Privacy(3, OTHER_TYPE, LOCAL));
+    assertStripByFields(EXPLICIT, "", 1, create_privacy(3, OTHER_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, StripFixed32Field) {
     writeToFdBuffer(FIX32_FIELD_4);
-    assertStripByFields(EXPLICIT, "", 1, new Privacy(4, OTHER_TYPE, LOCAL));
+    assertStripByFields(EXPLICIT, "", 1, create_privacy(4, OTHER_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, StripLengthDelimitedField_Message) {
     writeToFdBuffer(MESSAGE_FIELD_5);
-    assertStripByFields(EXPLICIT, "", 1, new Privacy(5, MESSAGE_TYPE, LOCAL));
+    assertStripByFields(EXPLICIT, "", 1, create_privacy(5, MESSAGE_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, NoStripVarintField) {
     writeToFdBuffer(VARINT_FIELD_1);
-    assertStripByFields(EXPLICIT, VARINT_FIELD_1, 1, new Privacy(1, OTHER_TYPE, AUTOMATIC));
+    assertStripByFields(EXPLICIT, VARINT_FIELD_1, 1, create_privacy(1, OTHER_TYPE, AUTOMATIC));
 }
 
 TEST_F(EncodedBufferTest, NoStripLengthDelimitedField_String) {
     writeToFdBuffer(STRING_FIELD_2);
-    assertStripByFields(EXPLICIT, STRING_FIELD_2, 1, new Privacy(2, STRING_TYPE, AUTOMATIC));
+    assertStripByFields(EXPLICIT, STRING_FIELD_2, 1, create_privacy(2, STRING_TYPE, AUTOMATIC));
 }
 
 TEST_F(EncodedBufferTest, NoStripFixed64Field) {
     writeToFdBuffer(FIX64_FIELD_3);
-    assertStripByFields(EXPLICIT, FIX64_FIELD_3, 1, new Privacy(3, OTHER_TYPE, AUTOMATIC));
+    assertStripByFields(EXPLICIT, FIX64_FIELD_3, 1, create_privacy(3, OTHER_TYPE, AUTOMATIC));
 }
 
 TEST_F(EncodedBufferTest, NoStripFixed32Field) {
     writeToFdBuffer(FIX32_FIELD_4);
-    assertStripByFields(EXPLICIT, FIX32_FIELD_4, 1, new Privacy(4, OTHER_TYPE, AUTOMATIC));
+    assertStripByFields(EXPLICIT, FIX32_FIELD_4, 1, create_privacy(4, OTHER_TYPE, AUTOMATIC));
 }
 
 TEST_F(EncodedBufferTest, NoStripLengthDelimitedField_Message) {
     writeToFdBuffer(MESSAGE_FIELD_5);
-    assertStripByFields(EXPLICIT, MESSAGE_FIELD_5, 1, new Privacy(5, MESSAGE_TYPE, AUTOMATIC));
+    assertStripByFields(EXPLICIT, MESSAGE_FIELD_5, 1, create_privacy(5, MESSAGE_TYPE, AUTOMATIC));
 }
 
 TEST_F(EncodedBufferTest, StripVarintAndString) {
@@ -151,7 +183,7 @@ TEST_F(EncodedBufferTest, StripVarintAndString) {
             + FIX64_FIELD_3 + FIX32_FIELD_4);
     string expected = STRING_FIELD_0 + FIX64_FIELD_3 + FIX32_FIELD_4;
     assertStripByFields(EXPLICIT, expected, 2,
-            new Privacy(1, OTHER_TYPE, LOCAL), new Privacy(2, STRING_TYPE, LOCAL));
+            create_privacy(1, OTHER_TYPE, LOCAL), create_privacy(2, STRING_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, StripVarintAndFixed64) {
@@ -159,28 +191,28 @@ TEST_F(EncodedBufferTest, StripVarintAndFixed64) {
             + FIX64_FIELD_3 + FIX32_FIELD_4);
     string expected = STRING_FIELD_0 + STRING_FIELD_2 + FIX32_FIELD_4;
     assertStripByFields(EXPLICIT, expected, 2,
-            new Privacy(1, OTHER_TYPE, LOCAL), new Privacy(3, OTHER_TYPE, LOCAL));
+            create_privacy(1, OTHER_TYPE, LOCAL), create_privacy(3, OTHER_TYPE, LOCAL));
 }
 
 TEST_F(EncodedBufferTest, StripVarintInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + MESSAGE_FIELD_5);
-    const Privacy* list[] = { new Privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
     string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
-    assertStripByFields(EXPLICIT, expected, 1, new Privacy(5, list));
+    assertStripByFields(EXPLICIT, expected, 1, create_message_privacy(5, list));
 }
 
 TEST_F(EncodedBufferTest, StripFix64AndVarintInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + FIX64_FIELD_3 + MESSAGE_FIELD_5);
-    const Privacy* list[] = { new Privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
     string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
-    assertStripByFields(EXPLICIT, expected, 2, new Privacy(3, OTHER_TYPE, LOCAL), new Privacy(5, list));
+    assertStripByFields(EXPLICIT, expected, 2, create_privacy(3, OTHER_TYPE, LOCAL), create_message_privacy(5, list));
 }
 
 TEST_F(EncodedBufferTest, ClearAndStrip) {
     string data = STRING_FIELD_0 + VARINT_FIELD_1;
     writeToFdBuffer(data);
-    const Privacy* list[] = { new Privacy(1, OTHER_TYPE, LOCAL), NULL };
-    EncodedBuffer encodedBuf(buffer, new Privacy(300, list));
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
+    EncodedBuffer encodedBuf(buffer, create_message_privacy(300, list));
     PrivacySpec spec1(EXPLICIT), spec2(LOCAL);
 
     ASSERT_EQ(encodedBuf.strip(spec1), NO_ERROR);
@@ -191,17 +223,17 @@ TEST_F(EncodedBufferTest, ClearAndStrip) {
 
 TEST_F(EncodedBufferTest, BadDataInFdBuffer) {
     writeToFdBuffer("iambaddata");
-    const Privacy* list[] = { new Privacy(4, OTHER_TYPE, AUTOMATIC), NULL };
-    EncodedBuffer encodedBuf(buffer, new Privacy(300, list));
+    Privacy* list[] = { create_privacy(4, OTHER_TYPE, AUTOMATIC), NULL };
+    EncodedBuffer encodedBuf(buffer, create_message_privacy(300, list));
     PrivacySpec spec;
     ASSERT_EQ(encodedBuf.strip(spec), BAD_VALUE);
 }
 
 TEST_F(EncodedBufferTest, BadDataInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + MESSAGE_FIELD_5 + "aoeoe");
-    const Privacy* list[] = { new Privacy(1, OTHER_TYPE, LOCAL), NULL };
-    const Privacy* field5[] = { new Privacy(5, list), NULL };
-    EncodedBuffer encodedBuf(buffer, new Privacy(300, field5));
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), NULL };
+    Privacy* field5[] = { create_message_privacy(5, list), NULL };
+    EncodedBuffer encodedBuf(buffer, create_message_privacy(300, field5));
     PrivacySpec spec;
     ASSERT_EQ(encodedBuf.strip(spec), BAD_VALUE);
 }

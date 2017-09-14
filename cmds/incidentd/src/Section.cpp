@@ -97,13 +97,19 @@ static status_t wait_child(pid_t pid) {
 static const Privacy*
 get_privacy_of_section(int id)
 {
-    if (id < 0) return NULL;
-    int i=0;
-    while (PRIVACY_POLICY_LIST[i] != NULL) {
-        const Privacy* p = PRIVACY_POLICY_LIST[i];
-        if (p->field_id == (uint32_t)id) return p;
-        if (p->field_id > (uint32_t)id) return NULL;
-        i++;
+    int l = 0;
+    int r = PRIVACY_POLICY_COUNT - 1;
+    while (l <= r) {
+        int mid = (l + r) >> 1;
+        const Privacy* p = PRIVACY_POLICY_LIST[mid];
+
+        if (p->field_id < (uint32_t)id) {
+            l = mid + 1;
+        } else if (p->field_id > (uint32_t)id) {
+            r = mid - 1;
+        } else {
+            return p;
+        }
     }
     return NULL;
 }
