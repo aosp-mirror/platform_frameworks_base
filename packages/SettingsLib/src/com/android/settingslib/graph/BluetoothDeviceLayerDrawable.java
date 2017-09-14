@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -47,7 +48,7 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
 
     /**
      * Create the {@link LayerDrawable} that contains bluetooth device icon and battery icon.
-     * This is a vertical layout drawable while bluetooth icon at top and battery icon at bottom.
+     * This is a horizontal layout drawable while bluetooth icon at start and battery icon at end.
      *
      * @param context      used to get the spec for icon
      * @param resId        represents the bluetooth device drawable
@@ -55,55 +56,44 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
      */
     public static BluetoothDeviceLayerDrawable createLayerDrawable(Context context, int resId,
             int batteryLevel) {
+        return createLayerDrawable(context, resId, batteryLevel, 1 /*iconScale*/);
+    }
+
+    /**
+     * Create the {@link LayerDrawable} that contains bluetooth device icon and battery icon.
+     * This is a horizontal layout drawable while bluetooth icon at start and battery icon at end.
+     *
+     * @param context      used to get the spec for icon
+     * @param resId        represents the bluetooth device drawable
+     * @param batteryLevel the battery level for bluetooth device
+     * @param iconScale    the ratio of height between battery icon and bluetooth icon
+     */
+    public static BluetoothDeviceLayerDrawable createLayerDrawable(Context context, int resId,
+            int batteryLevel, float iconScale) {
         final Drawable deviceDrawable = context.getDrawable(resId);
 
         final BatteryMeterDrawable batteryDrawable = new BatteryMeterDrawable(context,
                 R.color.meter_background_color, batteryLevel);
-        final int pad = context.getResources()
-                .getDimensionPixelSize(R.dimen.bt_battery_padding);
-        batteryDrawable.setPadding(0, pad, 0, pad);
+        final int pad = context.getResources().getDimensionPixelSize(R.dimen.bt_battery_padding);
+        batteryDrawable.setPadding(pad, pad, pad, pad);
 
         final BluetoothDeviceLayerDrawable drawable = new BluetoothDeviceLayerDrawable(
-                new Drawable[]{deviceDrawable,
-                        rotateDrawable(context.getResources(), batteryDrawable)});
-        // Set the bluetooth icon at the top
-        drawable.setLayerGravity(0 /* index of deviceDrawable */, Gravity.TOP);
-        // Set battery icon right below the bluetooth icon
-        drawable.setLayerInset(1 /* index of batteryDrawable */, 0,
-                deviceDrawable.getIntrinsicHeight(), 0, 0);
+                new Drawable[]{deviceDrawable, batteryDrawable});
+        // Set the bluetooth icon at the left
+        drawable.setLayerGravity(0 /* index of deviceDrawable */, Gravity.START);
+        // Set battery icon to the right of the bluetooth icon
+        drawable.setLayerInsetStart(1 /* index of batteryDrawable */,
+                deviceDrawable.getIntrinsicWidth());
+        drawable.setLayerInsetTop(1 /* index of batteryDrawable */,
+                (int) (deviceDrawable.getIntrinsicHeight() * (1 - iconScale)));
 
-        drawable.setConstantState(context, resId, batteryLevel);
+        drawable.setConstantState(context, resId, batteryLevel, iconScale);
 
         return drawable;
     }
 
-    /**
-     * Rotate the {@code drawable} by 90 degree clockwise and return rotated {@link Drawable}
-     */
-    private static Drawable rotateDrawable(Resources res, Drawable drawable) {
-        // Get the bitmap from drawable
-        final Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        final Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        // Create rotate matrix
-        final Matrix matrix = new Matrix();
-        matrix.postRotate(
-                res.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_LTR
-                        ? 90 : 270);
-
-        // Create new bitmap with rotate matrix
-        final Bitmap rotateBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                bitmap.getHeight(), matrix, true);
-        bitmap.recycle();
-
-        return new BitmapDrawable(res, rotateBitmap);
-    }
-
-    public void setConstantState(Context context, int resId, int batteryLevel) {
-        mState = new BluetoothDeviceLayerDrawableState(context, resId, batteryLevel);
+    public void setConstantState(Context context, int resId, int batteryLevel, float iconScale) {
+        mState = new BluetoothDeviceLayerDrawableState(context, resId, batteryLevel, iconScale);
     }
 
     @Override
@@ -149,17 +139,19 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
         Context context;
         int resId;
         int batteryLevel;
+        float iconScale;
 
         public BluetoothDeviceLayerDrawableState(Context context, int resId,
-                int batteryLevel) {
+                int batteryLevel, float iconScale) {
             this.context = context;
             this.resId = resId;
             this.batteryLevel = batteryLevel;
+            this.iconScale = iconScale;
         }
 
         @Override
         public Drawable newDrawable() {
-            return createLayerDrawable(context, resId, batteryLevel);
+            return createLayerDrawable(context, resId, batteryLevel, iconScale);
         }
 
         @Override
