@@ -16,6 +16,9 @@
 
 package android.print;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,26 +33,21 @@ import android.os.UserHandle;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
-import android.printservice.PrintServiceInfo;
-import android.printservice.recommendation.IRecommendationsChangeListener;
-
 import android.print.mockservice.MockPrintService;
 import android.print.mockservice.PrintServiceCallbacks;
 import android.print.mockservice.PrinterDiscoverySessionCallbacks;
 import android.print.mockservice.StubbablePrinterDiscoverySession;
-
+import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.support.test.filters.LargeTest;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * tests feeding all possible parameters to the IPrintManager Binder.
@@ -399,7 +397,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     public void testAddPrintServicesChangeListener() throws Exception {
         final IPrintServicesChangeListener listener = createMockIPrintServicesChangeListener();
 
-        mIPrintManager.addPrintServicesChangeListener(listener, mUserId);
+        assertException(() ->  mIPrintManager.addPrintServicesChangeListener(listener, mUserId),
+                SecurityException.class);
 
         assertException(() -> mIPrintManager.addPrintServicesChangeListener(null, mUserId),
                 NullPointerException.class);
@@ -415,17 +414,11 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     public void testRemovePrintServicesChangeListener() throws Exception {
         final IPrintServicesChangeListener listener = createMockIPrintServicesChangeListener();
 
-        mIPrintManager.addPrintServicesChangeListener(listener, mUserId);
-        mIPrintManager.removePrintServicesChangeListener(listener, mUserId);
+        assertException(() ->  mIPrintManager.removePrintServicesChangeListener(listener, mUserId),
+                SecurityException.class);
 
-        // Removing unknown listeners is a no-op
-        mIPrintManager.removePrintServicesChangeListener(listener, mUserId);
-
-        mIPrintManager.addPrintServicesChangeListener(listener, mUserId);
-        assertException(() -> mIPrintManager.removePrintServicesChangeListener(null, mUserId),
+        assertException(() ->  mIPrintManager.removePrintServicesChangeListener(null, mUserId),
                 NullPointerException.class);
-
-        // Cannot test bad user Id as these tests are allowed to call across users
     }
 
     /**
@@ -434,12 +427,11 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     @MediumTest
     @Test
     public void testGetPrintServices() throws Exception {
-        List<PrintServiceInfo> printServices = mIPrintManager.getPrintServices(
-                PrintManager.ALL_SERVICES, mUserId);
-        assertTrue(printServices.size() >= 1);
+        assertException(() -> mIPrintManager.getPrintServices(PrintManager.ALL_SERVICES, mUserId),
+                SecurityException.class);
 
-        printServices = mIPrintManager.getPrintServices(0, mUserId);
-        assertEquals(printServices, null);
+        assertException(() -> mIPrintManager.getPrintServices(0, mUserId),
+                SecurityException.class);
 
         assertException(() -> mIPrintManager.getPrintServices(~PrintManager.ALL_SERVICES, mUserId),
                 IllegalArgumentException.class);
@@ -453,15 +445,6 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     @MediumTest
     @Test
     public void testSetPrintServiceEnabled() throws Exception {
-        final ComponentName printService = mIPrintManager.getPrintServices(
-                PrintManager.ALL_SERVICES, mUserId).get(0).getComponentName();
-
-        assertException(() -> mIPrintManager.setPrintServiceEnabled(printService, false, mUserId),
-                SecurityException.class);
-
-        assertException(() -> mIPrintManager.setPrintServiceEnabled(printService, true, mUserId),
-                SecurityException.class);
-
         assertException(
                 () -> mIPrintManager.setPrintServiceEnabled(new ComponentName("bad", "name"), true,
                                 mUserId), SecurityException.class);
@@ -481,7 +464,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         final IRecommendationsChangeListener listener =
                 createMockIPrintServiceRecommendationsChangeListener();
 
-        mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
+        assertException(() -> mIPrintManager.addPrintServiceRecommendationsChangeListener(listener,
+                mUserId), SecurityException.class);
 
         assertException(
                 () -> mIPrintManager.addPrintServiceRecommendationsChangeListener(null, mUserId),
@@ -499,13 +483,9 @@ public class IPrintManagerParametersTest extends BasePrintTest {
         final IRecommendationsChangeListener listener =
                 createMockIPrintServiceRecommendationsChangeListener();
 
-        mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
-        mIPrintManager.removePrintServiceRecommendationsChangeListener(listener, mUserId);
+        assertException(() -> mIPrintManager.removePrintServiceRecommendationsChangeListener(
+                listener, mUserId), SecurityException.class);
 
-        // Removing unknown listeners is a no-op
-        mIPrintManager.removePrintServiceRecommendationsChangeListener(listener, mUserId);
-
-        mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
         assertException(
                 () -> mIPrintManager.removePrintServiceRecommendationsChangeListener(null, mUserId),
                 NullPointerException.class);
@@ -519,7 +499,8 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     @MediumTest
     @Test
     public void testGetPrintServiceRecommendations() throws Exception {
-        mIPrintManager.getPrintServiceRecommendations(mUserId);
+        assertException(() -> mIPrintManager.getPrintServiceRecommendations(mUserId),
+                SecurityException.class);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
