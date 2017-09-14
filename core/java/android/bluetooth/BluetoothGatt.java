@@ -311,8 +311,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                         for (BluetoothGattService brokenRef : includedServices) {
                             BluetoothGattService includedService = getService(mDevice,
-                                    brokenRef.getUuid(), brokenRef.getInstanceId(),
-                                    brokenRef.getType());
+                                    brokenRef.getUuid(), brokenRef.getInstanceId());
                             if (includedService != null) {
                                 fixedService.addIncludedService(includedService);
                             } else {
@@ -714,10 +713,9 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @hide
      */
     /*package*/ BluetoothGattService getService(BluetoothDevice device, UUID uuid,
-            int instanceId, int type) {
+            int instanceId) {
         for (BluetoothGattService svc : mServices) {
             if (svc.getDevice().equals(device)
-                    && svc.getType() == type
                     && svc.getInstanceId() == instanceId
                     && svc.getUuid().equals(uuid)) {
                 return svc;
