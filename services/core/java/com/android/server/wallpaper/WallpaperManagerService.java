@@ -1295,15 +1295,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     void switchUser(int userId, IRemoteCallback reply) {
-        WallpaperData systemWallpaper;
-        WallpaperData lockWallpaper;
+        final WallpaperData systemWallpaper;
+        final WallpaperData lockWallpaper;
         synchronized (mLock) {
             mCurrentUserId = userId;
             systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-            lockWallpaper = mLockWallpaperMap.get(userId);
-            if (lockWallpaper == null) {
-                lockWallpaper = systemWallpaper;
-            }
+            final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
+            lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
             // Not started watching yet, in case wallpaper data was loaded for other reasons.
             if (systemWallpaper.wallpaperObserver == null) {
                 systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
@@ -1311,8 +1309,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             switchWallpaper(systemWallpaper, reply);
         }
-        notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
-        notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+
+        // Offload color extraction to another thread since switchUser will be called
+        // from the main thread.
+        FgThread.getHandler().post(() -> {
+            notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
+            notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+        });
     }
 
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {
