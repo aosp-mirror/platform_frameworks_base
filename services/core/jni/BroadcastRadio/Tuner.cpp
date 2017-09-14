@@ -84,6 +84,7 @@ struct TunerContext {
     bool mIsClosed = false;
     HalRevision mHalRev;
     bool mWithAudio;
+    bool mIsAudioConnected = false;
     Band mBand;
     wp<V1_0::IBroadcastRadio> mHalModule;
     wp<V1_1::IBroadcastRadio> mHalModule11;
@@ -142,6 +143,8 @@ void HalDeathRecipient::serviceDied(uint64_t cookie __unused,
 // TODO(b/62713378): implement support for multiple tuners open at the same time
 static void notifyAudioService(TunerContext& ctx, bool connected) {
     if (!ctx.mWithAudio) return;
+    if (ctx.mIsAudioConnected == connected) return;
+    ctx.mIsAudioConnected = connected;
 
     ALOGD("Notifying AudioService about new state: %d", connected);
     auto token = IPCThreadState::self()->clearCallingIdentity();
@@ -263,6 +266,14 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
     }
 
     return convert::BandConfigFromHal(env, halConfig, region).release();
+}
+
+static void nativeSetMuted(JNIEnv *env, jobject obj, jlong nativeContext, bool mute) {
+    ALOGV("%s(%d)", __func__, mute);
+    lock_guard<mutex> lk(gContextMutex);
+    auto& ctx = getNativeContext(nativeContext);
+
+    notifyAudioService(ctx, !mute);
 }
 
 static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
@@ -497,6 +508,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void*)nativeSetConfiguration },
     { "nativeGetConfiguration", "(JI)Landroid/hardware/radio/RadioManager$BandConfig;",
             (void*)nativeGetConfiguration },
+    { "nativeSetMuted", "(JZ)V", (void*)nativeSetMuted },
     { "nativeStep", "(JZZ)V", (void*)nativeStep },
     { "nativeScan", "(JZZ)V", (void*)nativeScan },
     { "nativeTune", "(JLandroid/hardware/radio/ProgramSelector;)V", (void*)nativeTune },
