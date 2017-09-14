@@ -14,6 +14,23 @@
 
 LOCAL_PATH:= $(call my-dir)
 
+# ================
+# proto static lib
+# ================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := statsd_proto
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := $(call all-proto-files-under, src)
+
+LOCAL_PROTOC_FLAGS :=
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+
+include $(BUILD_STATIC_LIBRARY)
+
+STATSD_PROTO_INCLUDES := $(local-generated-sources-dir)/src/$(LOCAL_PATH)
+
 # =========
 # statsd
 # =========
@@ -27,7 +44,14 @@ LOCAL_SRC_FILES := \
     src/StatsService.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \
-    src/main.cpp
+    src/main.cpp \
+    src/DropboxWriter.cpp \
+    src/StatsLogProcessor.cpp \
+    src/stats_log.proto \
+    src/statsd_config.proto \
+    src/stats_constants.proto \
+    src/DropboxReader.cpp \
+
 
 LOCAL_CFLAGS += \
     -Wall \
@@ -47,7 +71,10 @@ else
 endif
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/../../core/java
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
+	STATSD_PROTO_INCLUDES
+
+LOCAL_STATIC_LIBRARIES := statsd_proto
 
 LOCAL_SHARED_LIBRARIES := \
         libbase \
@@ -56,7 +83,9 @@ LOCAL_SHARED_LIBRARIES := \
         libincident \
         liblog \
         libselinux \
-        libutils
+        libutils \
+        libservices \
+        libandroidfw \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
@@ -82,7 +111,8 @@ LOCAL_CFLAGS += \
     -Wno-unused-function \
     -Wno-unused-parameter
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
+	STATSD_PROTO_INCLUDES
 
 LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsManager.aidl \
@@ -93,6 +123,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock \
+    statsd_proto
 
 LOCAL_SHARED_LIBRARIES := \
     libbase \
@@ -103,4 +134,3 @@ LOCAL_SHARED_LIBRARIES := \
     libutils
 
 include $(BUILD_NATIVE_TEST)
-

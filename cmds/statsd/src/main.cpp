@@ -19,6 +19,7 @@
 #include "LogEntryPrinter.h"
 #include "LogReader.h"
 #include "StatsService.h"
+#include "StatsLogProcessor.h"
 
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
@@ -55,9 +56,8 @@ log_reader_thread_func(void* cookie)
     sp<LogReader> reader = new LogReader();
 
     // Put the printer one first, so it will print before the real ones.
-    if (true) {
-        reader->AddListener(new LogEntryPrinter(STDOUT_FILENO));
-    }
+    reader->AddListener(new LogEntryPrinter(STDOUT_FILENO));
+    reader->AddListener(new StatsLogProcessor());
 
     // TODO: Construct and add real LogListners here.
 
