@@ -16,6 +16,14 @@
 
 package com.android.printspooler.outofprocess.tests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.annotation.NonNull;
 import android.app.Instrumentation;
 import android.content.Context;
@@ -26,16 +34,19 @@ import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintManager;
 import android.print.PrinterId;
-import com.android.printspooler.outofprocess.tests.mockservice.PrintServiceCallbacks;
-import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoverySessionCallbacks;
-import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
 import android.printservice.CustomPrinterIconCallback;
 import android.printservice.PrintJob;
 import android.printservice.PrintService;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.uiautomator.UiDevice;
+
+import com.android.printspooler.outofprocess.tests.mockservice.PrintServiceCallbacks;
+import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoverySessionCallbacks;
+import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
+
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.mockito.stubbing.Answer;
@@ -43,14 +54,6 @@ import org.mockito.stubbing.Answer;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * This is the base class for print tests.
@@ -97,6 +100,13 @@ abstract class BasePrintTest {
         // Dexmaker is used by mockito.
         System.setProperty("dexmaker.dexcache", getInstrumentation()
                 .getTargetContext().getCacheDir().getPath());
+    }
+
+    @Before
+    public void unlockScreen() throws Exception {
+        // Unlock screen.
+        runShellCommand(getInstrumentation(), "input keyevent KEYCODE_WAKEUP");
+        runShellCommand(getInstrumentation(), "wm dismiss-keyguard");
     }
 
     @After
