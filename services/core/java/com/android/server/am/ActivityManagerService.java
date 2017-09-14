@@ -3830,38 +3830,38 @@ public class ActivityManagerService extends IActivityManager.Stub
                     uid = 0;
                 }
             }
-            int debugFlags = 0;
+            int runtimeFlags = 0;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
-                debugFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.
-                debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 ||
                 mSafeMode == true) {
-                debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
-                debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             String genDebugInfoProperty = SystemProperties.get("debug.generate-debug-info");
             if ("true".equals(genDebugInfoProperty)) {
-                debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
+                runtimeFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
             }
             if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
-                debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
             }
             if ("1".equals(SystemProperties.get("debug.assert"))) {
-                debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
             if (mNativeDebuggingApp != null && mNativeDebuggingApp.equals(app.processName)) {
                 // Enable all debug flags required by the native debugger.
-                debugFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything
-                debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO; // Generate debug info
-                debugFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;   // Disbale optimizations
+                runtimeFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything
+                runtimeFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO; // Generate debug info
+                runtimeFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;   // Disbale optimizations
                 mNativeDebuggingApp = null;
             }
 
@@ -3911,12 +3911,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessStartResult startResult;
             if (hostingType.equals("webview_service")) {
                 startResult = startWebView(entryPoint,
-                        app.processName, uid, uid, gids, debugFlags, mountExternal,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, entryPointArgs);
             } else {
                 startResult = Process.start(entryPoint,
-                        app.processName, uid, uid, gids, debugFlags, mountExternal,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, entryPointArgs);
             }
