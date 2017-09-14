@@ -40,15 +40,18 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
+namespace V1_2 = hardware::broadcastradio::V1_2;
+namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::Band;
 using V1_0::BandConfig;
 using V1_0::MetaData;
 using V1_0::Result;
-using V1_1::ITunerCallback;
 using V1_1::ProgramInfo;
 using V1_1::ProgramListResult;
 using V1_1::ProgramSelector;
+using V1_2::ITunerCallback;
+using utils::HalRevision;
 
 static JavaVM *gvm = nullptr;
 
@@ -203,7 +206,7 @@ Return<void> NativeCallback::tuneComplete(Result result, const V1_0::ProgramInfo
         return {};
     }
 
-    auto selector = V1_1::utils::make_selector(mBand, info.channel, info.subChannel);
+    auto selector = utils::make_selector(mBand, info.channel, info.subChannel);
     return tuneComplete_1_1(result, selector);
 }
 
