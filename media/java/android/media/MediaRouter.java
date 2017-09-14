@@ -202,7 +202,6 @@ public class MediaRouter {
                 audioRoutesChanged = true;
             }
 
-            final int mainType = mCurAudioRoutesInfo.mainType;
             if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
                 mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
                 if (mCurAudioRoutesInfo.bluetoothName != null) {
@@ -229,8 +228,11 @@ public class MediaRouter {
             }
 
             if (audioRoutesChanged) {
-                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, getDefaultSystemAudioRoute(), false);
                 Log.v(TAG, "Audio routes updated: " + newRoutes + ", a2dp=" + isBluetoothA2dpOn());
+                if (mSelectedRoute == null || mSelectedRoute == mDefaultAudioVideo
+                        || mSelectedRoute == mBluetoothA2dpRoute) {
+                    selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, getDefaultSystemAudioRoute(), false);
+                }
             }
         }
 
