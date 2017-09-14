@@ -53,20 +53,34 @@ final class IntentHelperImpl implements IntentHelper {
         // The intent filter that triggers when package update events happen that indicate there may
         // be work to do.
         IntentFilter packageIntentFilter = new IntentFilter();
-        // Either of these mean a downgrade?
-        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+
         packageIntentFilter.addDataScheme("package");
         packageIntentFilter.addDataSchemeSpecificPart(
                 updaterAppPackageName, PatternMatcher.PATTERN_LITERAL);
         packageIntentFilter.addDataSchemeSpecificPart(
                 dataAppPackageName, PatternMatcher.PATTERN_LITERAL);
+
+        // ACTION_PACKAGE_ADDED is fired when a package is upgraded or downgraded (in addition to
+        // ACTION_PACKAGE_REMOVED and ACTION_PACKAGE_REPLACED). A system/priv-app can never be
+        // removed entirely so we do not need to trigger on ACTION_PACKAGE_REMOVED or
+        // ACTION_PACKAGE_FULLY_REMOVED.
+        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+
+        // ACTION_PACKAGE_CHANGED is used when a package is disabled / re-enabled. It is not
+        // strictly necessary to trigger on this but it won't hurt anything and may catch some cases
+        // where a package has changed while disabled.
+        // Note: ACTION_PACKAGE_CHANGED is not fired when updating a suspended app, but
+        // ACTION_PACKAGE_ADDED, ACTION_PACKAGE_REMOVED and ACTION_PACKAGE_REPLACED are (and the app
+        // is left in an unsuspended state after this).
+        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+
+        // We do not register for ACTION_PACKAGE_RESTARTED because it doesn't imply an update.
+        // We do not register for ACTION_PACKAGE_DATA_CLEARED because the updater / data apps are
+        // not expected to need local data.
+
         Receiver packageUpdateReceiver = new Receiver(listener, true /* packageUpdated */);
         mContext.registerReceiver(packageUpdateReceiver, packageIntentFilter);
 
-        // TODO(nfuller): Add more exotic intents as needed. e.g.
-        // packageIntentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        // Also, disabled...?
         mReliabilityReceiver = new Receiver(listener, false /* packageUpdated */);
     }
 
