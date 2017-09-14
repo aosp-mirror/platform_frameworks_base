@@ -117,7 +117,6 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates the errors that are applicable only to the file-download use-case
-     * @hide
      */
     public static class DownloadErrors {
         private DownloadErrors() { }

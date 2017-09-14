@@ -16,19 +16,20 @@
 
 package android.telephony.mbms;
 
-import android.os.RemoteException;
+import android.os.Handler;
 import android.telephony.MbmsDownloadManager;
 
 /**
  * A optional listener class used by download clients to track progress. Apps should extend this
  * class and pass an instance into
- * {@link android.telephony.MbmsDownloadManager#download(DownloadRequest, DownloadStateCallback)}
+ * {@link android.telephony.MbmsDownloadManager#download(
+ * DownloadRequest, DownloadStateCallback, Handler)}
  *
  * This is optionally specified when requesting a download and will only be called while the app
  * is running.
  * @hide
  */
-public class DownloadStateCallback extends IDownloadStateCallback.Stub {
+public class DownloadStateCallback {
 
     /**
      * Called when the middleware wants to report progress for a file in a {@link DownloadRequest}.
@@ -44,10 +45,9 @@ public class DownloadStateCallback extends IDownloadStateCallback.Stub {
      * @param currentDecodedSize is the number of bytes that have been decoded.
      * @param fullDecodedSize is the total number of bytes that make up the final decoded content.
      */
-    @Override
-    public void progress(DownloadRequest request, FileInfo fileInfo,
+    public void onProgressUpdated(DownloadRequest request, FileInfo fileInfo,
             int currentDownloadSize, int fullDownloadSize,
-            int currentDecodedSize, int fullDecodedSize) throws RemoteException {
+            int currentDecodedSize, int fullDecodedSize) {
     }
 
     /**
@@ -59,8 +59,7 @@ public class DownloadStateCallback extends IDownloadStateCallback.Stub {
      *   may not have been able to get a list of them in advance.
      * @param state The current state of the download.
      */
-    @Override
-    public void state(DownloadRequest request, FileInfo fileInfo,
+    public void onStateChanged(DownloadRequest request, FileInfo fileInfo,
             @MbmsDownloadManager.DownloadStatus int state) {
     }
 }

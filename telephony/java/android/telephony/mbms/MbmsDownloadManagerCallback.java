@@ -16,7 +16,6 @@
 
 package android.telephony.mbms;
 
-import android.os.RemoteException;
 import android.telephony.MbmsDownloadManager;
 
 import java.util.List;
@@ -26,17 +25,15 @@ import java.util.List;
  * cell-broadcast.
  * @hide
  */
-public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.Stub {
+public class MbmsDownloadManagerCallback {
 
     /**
      * Indicates that the middleware has encountered an asynchronous error.
      * @param errorCode Any error code listed in {@link MbmsException}
      * @param message A message, intended for debugging purposes, describing the error in further
      *                detail.
-     * @throws RemoteException
      */
-    @Override
-    public void error(int errorCode, String message) throws RemoteException {
+    public void onError(int errorCode, String message) {
         // default implementation empty
     }
 
@@ -51,8 +48,7 @@ public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.St
      *
      * @param services The most recently updated list of available file services.
      */
-    @Override
-    public void fileServicesUpdated(List<FileServiceInfo> services) throws RemoteException {
+    public void onFileServicesUpdated(List<FileServiceInfo> services) {
         // default implementation empty
     }
 
@@ -64,8 +60,7 @@ public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.St
      * being thrown with error code {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
      * or {@link MbmsException.GeneralErrors#ERROR_MIDDLEWARE_NOT_YET_READY}
      */
-    @Override
-    public void middlewareReady() throws RemoteException {
+    public void onMiddlewareReady() {
         // default implementation empty
     }
 }
