@@ -1142,12 +1142,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 continue;
             }
             try {
-                result.put(userId, getDecryptedPasswordForTiedProfile(userId));
+                result.put(managedUserId, getDecryptedPasswordForTiedProfile(managedUserId));
             } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
                     | NoSuchPaddingException | InvalidKeyException
                     | InvalidAlgorithmParameterException | IllegalBlockSizeException
                     | BadPaddingException | CertificateException | IOException e) {
-                // ignore
+                Slog.e(TAG, "getDecryptedPasswordsForAllTiedProfiles failed for user " +
+                    managedUserId, e);
             }
         }
         return result;
