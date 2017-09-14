@@ -76,6 +76,19 @@ public class SlashImageViewTest extends SysuiTestCase {
         assertTrue(mSlashView.getSlashDrawable() == null);
     }
 
+    @Test
+    public void testSetImageDrawableUsesDrawableLevel() {
+        SlashImageView iv = new SlashImageView(mContext);
+        Drawable mockDrawable = mock(Drawable.class);
+        mockDrawable.setLevel(2);
+        assertTrue(mockDrawable.getLevel() == 2);
+
+        iv.setImageDrawable(mockDrawable);
+
+        // Make sure setting the drawable didn't reset its level to 0
+        assertTrue(mockDrawable.getLevel() == 2);
+    }
+
     // Expose getSlashDrawable
     private static class TestableSlashImageView extends SlashImageView {
         TestableSlashImageView(Context c) {
