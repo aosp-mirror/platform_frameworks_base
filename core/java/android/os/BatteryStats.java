@@ -53,6 +53,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String TAG = "BatteryStats";
 
     private static final boolean LOCAL_LOGV = false;
+    /** Fetching RPM stats is too slow to do each time screen changes, so disable it. */
+    protected static final boolean SCREEN_OFF_RPM_STATS_ENABLED = false;
 
     /** @hide */
     public static final String SERVICE_NAME = "batterystats";
@@ -213,8 +215,10 @@ public abstract class BatteryStats implements Parcelable {
      *   - Fixed bugs in background timers and BLE scan time
      * New in version 25:
      *   - Package wakeup alarms are now on screen-off timebase
+     * New in version 26:
+     *   - Resource power manager (rpm) states [but screenOffRpm is disabled from working properly]
      */
-    static final String CHECKIN_VERSION = "25";
+    static final String CHECKIN_VERSION = "26";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -233,6 +237,10 @@ public abstract class BatteryStats implements Parcelable {
     private static final String CPU_DATA = "cpu";
     private static final String GLOBAL_CPU_FREQ_DATA = "gcf";
     private static final String CPU_TIMES_AT_FREQ_DATA = "ctf";
+    // rpm line is:
+    // BATTERY_STATS_CHECKIN_VERSION, uid, which, "rpm", state/voter name, total time, total count,
+    // screen-off time, screen-off count
+    private static final String RESOURCE_POWER_MANAGER_DATA = "rpm";
     private static final String SENSOR_DATA = "sr";
     private static final String VIBRATOR_DATA = "vib";
     private static final String FOREGROUND_ACTIVITY_DATA = "fg";
@@ -2648,6 +2656,16 @@ public abstract class BatteryStats implements Parcelable {
 
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
 
+    /**
+     * Returns Timers tracking the total time of each Resource Power Manager state and voter.
+     */
+    public abstract Map<String, ? extends Timer> getRpmStats();
+    /**
+     * Returns Timers tracking the screen-off time of each Resource Power Manager state and voter.
+     */
+    public abstract Map<String, ? extends Timer> getScreenOffRpmStats();
+
+
     public abstract LongSparseArray<? extends Timer> getKernelMemoryStats();
 
     public abstract void writeToParcelWithoutUids(Parcel out, int flags);
@@ -3305,6 +3323,30 @@ public abstract class BatteryStats implements Parcelable {
                     int count = ent.getValue().getCountLocked(which);
                     dumpLine(pw, 0 /* uid */, category, WAKEUP_REASON_DATA,
                             "\"" + ent.getKey() + "\"", (totalTimeMicros + 500) / 1000, count);
+                }
+            }
+        }
+
+        final Map<String, ? extends Timer> rpmStats = getRpmStats();
+        final Map<String, ? extends Timer> screenOffRpmStats = getScreenOffRpmStats();
+        if (rpmStats.size() > 0) {
+            for (Map.Entry<String, ? extends Timer> ent : rpmStats.entrySet()) {
+                sb.setLength(0);
+                Timer totalTimer = ent.getValue();
+                long timeMs = (totalTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                int count = totalTimer.getCountLocked(which);
+                Timer screenOffTimer = screenOffRpmStats.get(ent.getKey());
+                long screenOffTimeMs = screenOffTimer != null
+                        ? (screenOffTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : 0;
+                int screenOffCount = screenOffTimer != null
+                        ? screenOffTimer.getCountLocked(which) : 0;
+                if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                    dumpLine(pw, 0 /* uid */, category, RESOURCE_POWER_MANAGER_DATA,
+                            "\"" + ent.getKey() + "\"", timeMs, count, screenOffTimeMs,
+                            screenOffCount);
+                } else {
+                    dumpLine(pw, 0 /* uid */, category, RESOURCE_POWER_MANAGER_DATA,
+                            "\"" + ent.getKey() + "\"", timeMs, count);
                 }
             }
         }
@@ -4570,24 +4612,56 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         final LongSparseArray<? extends Timer> mMemoryStats = getKernelMemoryStats();
-        pw.println("Memory Stats");
-        for (int i = 0; i < mMemoryStats.size(); i++) {
-            sb.setLength(0);
-            sb.append("Bandwidth ");
-            sb.append(mMemoryStats.keyAt(i));
-            sb.append(" Time ");
-            sb.append(mMemoryStats.valueAt(i).getTotalTimeLocked(rawRealtime, which));
-            pw.println(sb.toString());
+        if (mMemoryStats.size() > 0) {
+            pw.println("  Memory Stats");
+            for (int i = 0; i < mMemoryStats.size(); i++) {
+                sb.setLength(0);
+                sb.append("  Bandwidth ");
+                sb.append(mMemoryStats.keyAt(i));
+                sb.append(" Time ");
+                sb.append(mMemoryStats.valueAt(i).getTotalTimeLocked(rawRealtime, which));
+                pw.println(sb.toString());
+            }
+            pw.println();
+        }
+
+        final Map<String, ? extends Timer> rpmStats = getRpmStats();
+        if (rpmStats.size() > 0) {
+            pw.print(prefix); pw.println("  Resource Power Manager Stats");
+            if (rpmStats.size() > 0) {
+                for (Map.Entry<String, ? extends Timer> ent : rpmStats.entrySet()) {
+                    final String timerName = ent.getKey();
+                    final Timer timer = ent.getValue();
+                    printTimer(pw, sb, timer, rawRealtime, which, prefix, timerName);
+                }
+            }
+            pw.println();
+        }
+        if (SCREEN_OFF_RPM_STATS_ENABLED) {
+            final Map<String, ? extends Timer> screenOffRpmStats = getScreenOffRpmStats();
+            if (screenOffRpmStats.size() > 0) {
+                pw.print(prefix);
+                pw.println("  Resource Power Manager Stats for when screen was off");
+                if (screenOffRpmStats.size() > 0) {
+                    for (Map.Entry<String, ? extends Timer> ent : screenOffRpmStats.entrySet()) {
+                        final String timerName = ent.getKey();
+                        final Timer timer = ent.getValue();
+                        printTimer(pw, sb, timer, rawRealtime, which, prefix, timerName);
+                    }
+                }
+                pw.println();
+            }
         }
 
         final long[] cpuFreqs = getCpuFreqs();
         if (cpuFreqs != null) {
             sb.setLength(0);
-            sb.append("CPU freqs:");
+            sb.append("  CPU freqs:");
             for (int i = 0; i < cpuFreqs.length; ++i) {
                 sb.append(" " + cpuFreqs[i]);
             }
             pw.println(sb.toString());
+            pw.println();
         }
 
         for (int iu=0; iu<NU; iu++) {
