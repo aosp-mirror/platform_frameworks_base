@@ -60,7 +60,7 @@ public class NsdManagerTest {
 
     NsdManager mManager;
 
-    long mTimeoutMs = 100; // non-final so that tests can adjust the value.
+    long mTimeoutMs = 200; // non-final so that tests can adjust the value.
 
     @Before
     public void setUp() throws Exception {
@@ -74,7 +74,7 @@ public class NsdManagerTest {
 
     @After
     public void tearDown() throws Exception {
-        waitForIdleHandler(mServiceHandler, mTimeoutMs);
+        mServiceHandler.waitForIdle(mTimeoutMs);
         mServiceHandler.chan.disconnect();
         mServiceHandler.stop();
         if (mManager != null) {
@@ -334,9 +334,10 @@ public class NsdManagerTest {
     }
 
     int verifyRequest(int expectedMessageType) {
+        mServiceHandler.waitForIdle(mTimeoutMs);
         verify(mServiceHandler, timeout(mTimeoutMs)).handleMessage(any());
         reset(mServiceHandler);
-        Message received = mServiceHandler.lastMessage;
+        Message received = mServiceHandler.getLastMessage();
         assertEquals(NsdManager.nameOf(expectedMessageType), NsdManager.nameOf(received.what));
         return received.arg2;
     }
@@ -347,31 +348,43 @@ public class NsdManagerTest {
 
     // Implements the server side of AsyncChannel connection protocol
     public static class MockServiceHandler extends Handler {
-        public Context mContext;
+        public final Context context;
         public AsyncChannel chan;
-        public volatile Message lastMessage;
+        public Message lastMessage;
 
-        MockServiceHandler(Looper looper, Context context) {
-            super(looper);
-            mContext = context;
+        MockServiceHandler(Looper l, Context c) {
+            super(l);
+            context = c;
+        }
+
+        synchronized Message getLastMessage() {
+            return lastMessage;
+        }
+
+        synchronized void setLastMessage(Message msg) {
+            lastMessage = obtainMessage();
+            lastMessage.copyFrom(msg);
+        }
+
+        void waitForIdle(long timeoutMs) {
+            waitForIdleHandler(this, timeoutMs);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            lastMessage = obtainMessage();
-            lastMessage.copyFrom(msg);
+            setLastMessage(msg);
             if (msg.what == AsyncChannel.CMD_CHANNEL_FULL_CONNECTION) {
                 chan = new AsyncChannel();
-                chan.connect(mContext, this, msg.replyTo);
+                chan.connect(context, this, msg.replyTo);
                 chan.sendMessage(AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED);
             }
         }
 
-        public void stop() {
+        void stop() {
             getLooper().quitSafely();
         }
 
-        public static MockServiceHandler create(Context context) {
+        static MockServiceHandler create(Context context) {
             HandlerThread t = new HandlerThread("mock-service-handler");
             t.start();
             return new MockServiceHandler(t.getLooper(), context);
