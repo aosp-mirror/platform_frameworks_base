@@ -33,7 +33,7 @@ message MetricsEvent {
     // The view became hidden.
     TYPE_CLOSE = 2;
 
-    // The view switched to detail mode (most relevant for quick settings tiles)
+    // The view switched to detail mode (most relevant for quick settings tiles and notifications)
     TYPE_DETAIL = 3;
 
     // The view or control was activated.
@@ -70,6 +70,9 @@ message MetricsEvent {
     // Type for APP_TRANSITION_REPORTED_DRAWN event: The activity was started with restoring from
     // a bundle.
     TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE = 13;
+
+    // The view switched to summary mode (most relevant for notifications)
+    TYPE_COLLAPSE = 14;
   }
 
   // Types of alerts, as bit field values
