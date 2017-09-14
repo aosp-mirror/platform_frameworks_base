@@ -29,8 +29,8 @@ import java.io.UnsupportedEncodingException;
  * Class to write to a protobuf stream.
  *
  * Each write method takes an ID code from the protoc generated classes
- * and the value to write.  To make a nested object, call startObject
- * and then endObject when you are done.
+ * and the value to write.  To make a nested object, call #start
+ * and then #end when you are done.
  *
  * The ID codes have type information embedded into them, so if you call
  * the incorrect function you will get an IllegalArgumentException.
@@ -60,16 +60,16 @@ import java.io.UnsupportedEncodingException;
  * Message objects. We need to find another way.
  *
  * So what we do here is to let the calling code write the data into a
- * byte[] (actually a collection of them wrapped in the EncodedBuffer) class,
+ * byte[] (actually a collection of them wrapped in the EncodedBuffer class),
  * but not do the varint encoding of the sub-message sizes.  Then, we do a
  * recursive traversal of the buffer itself, calculating the sizes (which are
  * then knowable, although still not the actual sizes in the buffer because of
  * possible further nesting).  Then we do a third pass, compacting the
  * buffer and varint encoding the sizes.
  *
- * This gets us a relatively small number number of fixed-size allocations,
+ * This gets us a relatively small number of fixed-size allocations,
  * which is less likely to cause memory fragmentation or churn the GC, and
- * the same number of data copies as would have gotten with setting it
+ * the same number of data copies as we would have gotten with setting it
  * field-by-field in generated code, and no code bloat from generated code.
  * The final data copy is also done with System.arraycopy, which will be
  * more efficient, in general, than doing the individual fields twice (as in
@@ -77,26 +77,26 @@ import java.io.UnsupportedEncodingException;
  *
  * To accomplish the multiple passes, whenever we write a
  * WIRE_TYPE_LENGTH_DELIMITED field, we write the size occupied in our
- * buffer as a fixed 32 bit int (called childRawSize), not variable length
+ * buffer as a fixed 32 bit int (called childRawSize), not a variable length
  * one. We reserve another 32 bit slot for the computed size (called
  * childEncodedSize).  If we know the size up front, as we do for strings
  * and byte[], then we also put that into childEncodedSize, if we don't, we
- * write the negative of childRawSize, as a sentiel that we need to
+ * write the negative of childRawSize, as a sentinel that we need to
  * compute it during the second pass and recursively compact it during the
  * third pass.
  *
- * Unsgigned size varints can be up to five bytes long, but we reserve eight
+ * Unsigned size varints can be up to five bytes long, but we reserve eight
  * bytes for overhead, so we know that when we compact the buffer, there
  * will always be space for the encoded varint.
  *
  * When we can figure out the size ahead of time, we do, in order
  * to save overhead with recalculating it, and with the later arraycopy.
  *
- * During the period between when the caller has called startObject, but
- * not yet called endObject, we maintain a linked list of the tokens
- * returned by startObject, stored in those 8 bytes of size storage space.
+ * During the period between when the caller has called #start, but
+ * not yet called #end, we maintain a linked list of the tokens
+ * returned by #start, stored in those 8 bytes of size storage space.
  * We use that linked list of tokens to ensure that the caller has
- * correctly matched pairs of startObject and endObject calls, and issue
+ * correctly matched pairs of #start and #end calls, and issue
  * errors if they are not matched.
  */
 @TestApi
