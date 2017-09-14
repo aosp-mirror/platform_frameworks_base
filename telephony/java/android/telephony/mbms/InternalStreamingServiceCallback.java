@@ -23,6 +23,7 @@ import android.os.RemoteException;
 public class InternalStreamingServiceCallback extends IStreamingServiceCallback.Stub {
     private final StreamingServiceCallback mAppCallback;
     private final Handler mHandler;
+    private volatile boolean mIsStopped = false;
 
     public InternalStreamingServiceCallback(StreamingServiceCallback appCallback, Handler handler) {
         mAppCallback = appCallback;
@@ -30,7 +31,11 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void error(int errorCode, String message) throws RemoteException {
+    public void onError(int errorCode, String message) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -40,7 +45,11 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void streamStateUpdated(int state, int reason) throws RemoteException {
+    public void onStreamStateUpdated(int state, int reason) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -50,7 +59,11 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void mediaDescriptionUpdated() throws RemoteException {
+    public void onMediaDescriptionUpdated() throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -60,7 +73,11 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void broadcastSignalStrengthUpdated(int signalStrength) throws RemoteException {
+    public void onBroadcastSignalStrengthUpdated(int signalStrength) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -70,12 +87,20 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void streamMethodUpdated(int methodType) throws RemoteException {
+    public void onStreamMethodUpdated(int methodType) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 mAppCallback.onStreamMethodUpdated(methodType);
             }
         });
+    }
+
+    public void stop() {
+        mIsStopped = true;
     }
 }
