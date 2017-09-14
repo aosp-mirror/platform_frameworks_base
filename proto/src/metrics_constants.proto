@@ -161,6 +161,16 @@ message MetricsEvent {
     CAMERA_EXTERNAL_USED = 2;
   }
 
+  // TextClassifier entity types.
+  enum TextClassifierEntityType {
+    TEXT_CLASSIFIER_TYPE_UNKNOWN = 1;
+    TEXT_CLASSIFIER_TYPE_OTHER = 2;
+    TEXT_CLASSIFIER_TYPE_EMAIL = 3;
+    TEXT_CLASSIFIER_TYPE_PHONE = 4;
+    TEXT_CLASSIFIER_TYPE_ADDRESS = 5;
+    TEXT_CLASSIFIER_TYPE_URL = 6;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -4319,6 +4329,127 @@ message MetricsEvent {
 
     // FIELD: A string value representing some state of the platform, e.g., boot reason
     FIELD_PLATFORM_REASON = 1099;
+
+    // CATEGORY: The category for all actions relating to selection session logging.
+    // OS: O MR
+    TEXT_SELECTION_SESSION = 1100;
+
+    // ACTION: A selection session started (i.e. the selection handles appeared)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_START = 1101;
+
+    // ACTION: The user modified the selection (e.g. by dragging the handles)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_MODIFY = 1102;
+
+    // ACTION: The user modified the selection by pressing the "select all" button.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SELECT_ALL = 1103;
+
+    // ACTION: The user modified the selection by pressing on a word in a multi word selection
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_RESET = 1104;
+
+    // ACTION: Smart selection made a single word prediction
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_SINGLE = 1105;
+
+    // ACTION: Smart selection made a multi word prediction
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_MULTI = 1106;
+
+    // ACTION: The app made an automatic selection on the user's behalf (not smart selection)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_AUTO = 1107;
+
+    // ACTION: A selection session ended with the user typing over the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_OVERTYPE = 1108;
+
+    // ACTION: A selection session ended with the user copying the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_COPY = 1109;
+
+    // ACTION: A selection session ended with the user pasting over the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_PASTE = 1110;
+
+    // ACTION: A selection session ended with the user cutting the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_CUT = 1111;
+
+    // ACTION: A selection session ended with the user pressing the share button
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SHARE = 1112;
+
+    // ACTION: A selection session ended with the user pressing the smart share button
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_SHARE = 1113;
+
+    // ACTION: A selection session ended with the user dragging the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_DRAG = 1114;
+
+    // ACTION: A selection session ended with the user abandoning the selection
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_ABANDON = 1115;
+
+    // ACTION: A selection session ended with the user picking an unhandled action bar item
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_OTHER = 1116;
+
+    // FIELD: Time in milliseconds from the start of the session to this event
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SINCE_START = 1117;
+
+    // FIELD: time in milliseconds between the last event in the session and this one
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SINCE_PREVIOUS = 1118;
+
+    // FIELD: a random uid for a selection session (lasting from select start to end)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SESSION_ID = 1119;
+
+    // FIELD: the sequence number of the event in the session
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SESSION_INDEX = 1120;
+
+    // FIELD: a concatenation of the widget type and ML model version.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_VERSION_TAG = 1121;
+
+    // FIELD: text select start offset in words (as defined by the ICU BreakIterator), stored as two
+    //        packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_RANGE = 1122;
+
+    // FIELD: smart text selection start offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SMART_RANGE = 1123;
 
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
