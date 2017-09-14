@@ -12463,19 +12463,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
+            boolean wasAwake = mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
+            boolean isAwake = wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
             mWakefulness = wakefulness;
 
-            // Also update state in a special way for running foreground services UI.
-            switch (mWakefulness) {
-                case PowerManagerInternal.WAKEFULNESS_ASLEEP:
-                case PowerManagerInternal.WAKEFULNESS_DREAMING:
-                case PowerManagerInternal.WAKEFULNESS_DOZING:
-                    mServices.updateScreenStateLocked(false /* screenOn */);
-                    break;
-                case PowerManagerInternal.WAKEFULNESS_AWAKE:
-                default:
-                    mServices.updateScreenStateLocked(true /* screenOn */);
-                    break;
+            if (wasAwake != isAwake) {
+                // Also update state in a special way for running foreground services UI.
+                mServices.updateScreenStateLocked(isAwake);
+                sendNotifyVrManagerOfSleepState(!isAwake);
             }
         }
     }
@@ -12511,7 +12506,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.applySleepTokensLocked(true /* applyToStacks */);
             if (wasSleeping) {
-                sendNotifyVrManagerOfSleepState(false);
                 updateOomAdjLocked();
             }
         } else if (!mSleeping && shouldSleep) {
@@ -12521,7 +12515,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
-            sendNotifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
         }
     }
