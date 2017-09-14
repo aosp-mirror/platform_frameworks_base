@@ -1338,6 +1338,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 set.put("rejectCrypto", (cryptoStats != null) ? cryptoStats.reject : 0);
                 set.put("acquireCrypto", (cryptoStats != null) ? cryptoStats.acquire : 0);
                 set.put("lockoutCrypto", (cryptoStats != null) ? cryptoStats.lockout : 0);
+                set.put("permanentLockoutCrypto",
+                    (cryptoStats != null) ? cryptoStats.permanentLockout : 0);
                 sets.put(set);
             }
 
@@ -1367,7 +1369,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 proto.write(FingerprintActionStatsProto.REJECT, normal.reject);
                 proto.write(FingerprintActionStatsProto.ACQUIRE, normal.acquire);
                 proto.write(FingerprintActionStatsProto.LOCKOUT, normal.lockout);
-                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, normal.lockout);
+                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, normal.permanentLockout);
                 proto.end(countsToken);
             }
 
@@ -1380,7 +1382,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 proto.write(FingerprintActionStatsProto.REJECT, crypto.reject);
                 proto.write(FingerprintActionStatsProto.ACQUIRE, crypto.acquire);
                 proto.write(FingerprintActionStatsProto.LOCKOUT, crypto.lockout);
-                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, crypto.lockout);
+                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, crypto.permanentLockout);
                 proto.end(countsToken);
             }
 
