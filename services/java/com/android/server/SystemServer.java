@@ -1079,8 +1079,15 @@ public final class SystemServer {
                 if (!disableRtt) {
                     traceBeginAndSlog("StartWifiRtt");
                     mSystemServiceManager.startService("com.android.server.wifi.RttService");
-                    mSystemServiceManager.startService("com.android.server.wifi.rtt.RttService");
                     traceEnd();
+
+                    if (context.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WIFI_RTT)) {
+                        traceBeginAndSlog("StartRttService");
+                        mSystemServiceManager.startService(
+                                "com.android.server.wifi.rtt.RttService");
+                        traceEnd();
+                    }
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
@@ -1088,8 +1095,6 @@ public final class SystemServer {
                     traceBeginAndSlog("StartWifiAware");
                     mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
                     traceEnd();
-                } else {
-                    Slog.i(TAG, "No Wi-Fi Aware Service (Aware support Not Present)");
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
