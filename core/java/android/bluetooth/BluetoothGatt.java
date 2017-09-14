@@ -311,8 +311,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                         for (BluetoothGattService brokenRef : includedServices) {
                             BluetoothGattService includedService = getService(mDevice,
-                                    brokenRef.getUuid(), brokenRef.getInstanceId(),
-                                    brokenRef.getType());
+                                    brokenRef.getUuid(), brokenRef.getInstanceId());
                             if (includedService != null) {
                                 fixedService.addIncludedService(includedService);
                             } else {
@@ -714,10 +713,9 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @hide
      */
     /*package*/ BluetoothGattService getService(BluetoothDevice device, UUID uuid,
-            int instanceId, int type) {
+            int instanceId) {
         for (BluetoothGattService svc : mServices) {
             if (svc.getDevice().equals(device)
-                    && svc.getType() == type
                     && svc.getInstanceId() == instanceId
                     && svc.getUuid().equals(uuid)) {
                 return svc;
@@ -913,7 +911,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /**
      * Set the preferred connection PHY for this app. Please note that this is just a
-     * recommendation, whether the PHY change will happen depends on other applications peferences,
+     * recommendation, whether the PHY change will happen depends on other applications preferences,
      * local and remote controller capabilities. Controller can override these settings.
      * <p>
      * {@link BluetoothGattCallback#onPhyUpdate} will be triggered as a result of this call, even
