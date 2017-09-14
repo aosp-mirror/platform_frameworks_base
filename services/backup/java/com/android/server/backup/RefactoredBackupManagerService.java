@@ -2486,7 +2486,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             try {
                 fd.close();
             } catch (IOException e) {
-                // just eat it
+                Slog.e(TAG, "IO error closing output for adb backup: " + e.getMessage());
             }
             Binder.restoreCallingIdentity(oldId);
             Slog.d(TAG, "Adb backup processing complete.");
