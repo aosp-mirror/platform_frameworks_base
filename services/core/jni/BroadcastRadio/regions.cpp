@@ -64,7 +64,7 @@ static const RegionalBandDefinition kKnownRegionConfigs[] = {
     {
         { Region::ITU_2 },
         { Band::FM, Band::FM_HD },
-        87900,
+        87700,
         107900,
         200,
         Deemphasis::D75,
@@ -101,14 +101,14 @@ static const RegionalBandDefinition kKnownRegionConfigs[] = {
         { Region::ITU_1, Region::OIRT, Region::JAPAN, Region::KOREA },
         { Band::AM },
         153,
-        279,
+        282,
         9,
     },
     {  // AM MW
         { Region::ITU_1, Region::OIRT, Region::JAPAN, Region::KOREA },
         { Band::AM },
         531,
-        1611,
+        1620,
         9,
     },
     {  // AM SW
@@ -128,8 +128,8 @@ static const RegionalBandDefinition kKnownRegionConfigs[] = {
     {  // AM MW ITU2
         { Region::ITU_2 },
         { Band::AM, Band::AM_HD },
-        540,
-        1610,
+        530,
+        1700,
         10,
     },
     {  // AM SW ITU2
