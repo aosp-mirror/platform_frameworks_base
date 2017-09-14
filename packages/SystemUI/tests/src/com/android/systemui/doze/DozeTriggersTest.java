@@ -58,7 +58,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     private WakeLock mWakeLock;
     private Instrumentation mInstrumentation;
     private AlarmManager mAlarmManager;
-    private DozeScreenBrightness mDozeScreenBrightness;
 
     @BeforeClass
     public static void setupSuite() {
@@ -77,12 +76,10 @@ public class DozeTriggersTest extends SysuiTestCase {
         mSensors = new FakeSensorManager(mContext);
         mHandler = new Handler(Looper.getMainLooper());
         mWakeLock = new WakeLockFake();
-        mDozeScreenBrightness = mock(DozeScreenBrightness.class);
 
         mInstrumentation.runOnMainSync(() -> {
             mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager,
-                    mConfig, mParameters, mSensors, mHandler, mDozeScreenBrightness,
-                    mWakeLock, true);
+                    mConfig, mParameters, mSensors, mHandler, mWakeLock, true);
         });
     }
 
@@ -115,22 +112,4 @@ public class DozeTriggersTest extends SysuiTestCase {
         verify(mMachine).requestPulse(anyInt());
     }
 
-    @Test
-    public void unpausing_fromPaused_waitsForBrightnessReady() throws Exception {
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD_PAUSED);
-
-        mTriggers.recalculatePausing(true /* proxFar */, false /* brightnessReady */);
-        verify(mMachine, never()).requestState(any());
-
-        mTriggers.recalculatePausing(true /* proxFar */, true /* brightnessReady */);
-        verify(mMachine).requestState(DozeMachine.State.DOZE_AOD);
-    }
-
-    @Test
-    public void unpausing_fromPausing_doesntWaitForBrightnessReady() throws Exception {
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD_PAUSED);
-
-        mTriggers.recalculatePausing(true /* proxFar */, false /* brightnessReady */);
-        verify(mMachine).requestState(DozeMachine.State.DOZE_AOD);
-    }
 }
