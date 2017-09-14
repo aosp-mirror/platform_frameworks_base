@@ -183,8 +183,12 @@ public class BatteryStatsImpl extends BatteryStats {
         return mKernelMemoryStats;
     }
 
-    /** Temporary container for Resource Power Manager stats. */
+    /** Container for Resource Power Manager stats. Updated by updateRpmStatsLocked. */
     private final RpmStats mTmpRpmStats = new RpmStats();
+    /** The soonest the RPM stats can be updated after it was last updated. */
+    private static final long RPM_STATS_UPDATE_FREQ_MS = 1000;
+    /** Last time that RPM stats were updated by updateRpmStatsLocked. */
+    private long mLastRpmStatsUpdateTimeMs = -RPM_STATS_UPDATE_FREQ_MS;
 
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
@@ -10246,11 +10250,17 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
-     * Read and record Resource Power Manager state and voter times.
+     * Read and record Resource Power Manager (RPM) state and voter times.
+     * If RPM stats were fetched more recently than RPM_STATS_UPDATE_FREQ_MS ago, uses the old data
+     * instead of fetching it anew.
      */
     public void updateRpmStatsLocked() {
         if (mPlatformIdleStateCallback == null) return;
-        mPlatformIdleStateCallback.fillLowPowerStats(mTmpRpmStats);
+        long now = SystemClock.elapsedRealtime();
+        if (now - mLastRpmStatsUpdateTimeMs >= RPM_STATS_UPDATE_FREQ_MS) {
+            mPlatformIdleStateCallback.fillLowPowerStats(mTmpRpmStats);
+            mLastRpmStatsUpdateTimeMs = now;
+        }
 
         for (Map.Entry<String, RpmStats.PowerStatePlatformSleepState> pstate
                 : mTmpRpmStats.mPlatformLowPowerStats.entrySet()) {
