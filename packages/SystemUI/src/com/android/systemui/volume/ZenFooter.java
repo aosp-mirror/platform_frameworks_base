@@ -152,6 +152,7 @@ public class ZenFooter extends LinearLayout {
                                 mController.getCurrentUser(), true /*shortVersion*/);
         Util.setText(mSummaryLine2, line2);
     }
+
     public boolean shouldShowIntroduction() {
         final boolean confirmed =  Prefs.getBoolean(mContext,
                 Prefs.Key.DND_CONFIRMED_ALARM_INTRODUCTION, false);
