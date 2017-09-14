@@ -30,7 +30,6 @@ import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.FactoryTest;
 import android.os.Process;
-import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.system.ErrnoException;
@@ -42,14 +41,13 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import libcore.io.IoUtils;
 
 /**
@@ -73,6 +71,7 @@ class ZygoteConnection {
     private final BufferedReader mSocketReader;
     private final Credentials peer;
     private final String abiList;
+    private boolean isEof;
 
     /**
      * Constructs instance from connected socket.
@@ -99,6 +98,8 @@ class ZygoteConnection {
             Log.e(TAG, "Cannot read peer credentials", ex);
             throw ex;
         }
+
+        isEof = false;
     }
 
     /**
@@ -111,21 +112,14 @@ class ZygoteConnection {
     }
 
     /**
-     * Reads one start command from the command socket. If successful,
-     * a child is forked and a {@link Zygote.MethodAndArgsCaller}
-     * exception is thrown in that child while in the parent process,
-     * the method returns normally. On failure, the child is not
-     * spawned and messages are printed to the log and stderr. Returns
-     * a boolean status value indicating whether an end-of-file on the command
-     * socket has been encountered.
+     * Reads one start command from the command socket. If successful, a child is forked and a
+     * {@code Runnable} that calls the childs main method (or equivalent) is returned in the child
+     * process. {@code null} is always returned in the parent process (the zygote).
      *
-     * @return false if command socket should continue to be read from, or
-     * true if an end-of-file has been encountered.
-     * @throws Zygote.MethodAndArgsCaller trampoline to invoke main()
-     * method in child process
+     * If the client closes the socket, an {@code EOF} condition is set, which callers can test
+     * for by calling {@code ZygoteConnection.isClosedByPeer}.
      */
-    boolean runOnce(ZygoteServer zygoteServer) throws Zygote.MethodAndArgsCaller {
-
+    Runnable processOneCommand(ZygoteServer zygoteServer) {
         String args[];
         Arguments parsedArgs = null;
         FileDescriptor[] descriptors;
@@ -134,130 +128,120 @@ class ZygoteConnection {
             args = readArgumentList();
             descriptors = mSocket.getAncillaryFileDescriptors();
         } catch (IOException ex) {
-            Log.w(TAG, "IOException on command socket " + ex.getMessage());
-            closeSocket();
-            return true;
+            throw new IllegalStateException("IOException on command socket", ex);
         }
 
+        // readArgumentList returns null only when it has reached EOF with no available
+        // data to read. This will only happen when the remote socket has disconnected.
         if (args == null) {
-            // EOF reached.
-            closeSocket();
-            return true;
-        }
-
-        /** the stderr of the most recent request, if avail */
-        PrintStream newStderr = null;
-
-        if (descriptors != null && descriptors.length >= 3) {
-            newStderr = new PrintStream(
-                    new FileOutputStream(descriptors[2]));
+            isEof = true;
+            return null;
         }
 
         int pid = -1;
         FileDescriptor childPipeFd = null;
         FileDescriptor serverPipeFd = null;
 
-        try {
-            parsedArgs = new Arguments(args);
+        parsedArgs = new Arguments(args);
 
-            if (parsedArgs.abiListQuery) {
-                return handleAbiListQuery();
-            }
+        if (parsedArgs.abiListQuery) {
+            handleAbiListQuery();
+            return null;
+        }
 
-            if (parsedArgs.preloadDefault) {
-                return handlePreload();
-            }
+        if (parsedArgs.preloadDefault) {
+            handlePreload();
+            return null;
+        }
 
-            if (parsedArgs.preloadPackage != null) {
-                return handlePreloadPackage(parsedArgs.preloadPackage,
-                        parsedArgs.preloadPackageLibs, parsedArgs.preloadPackageCacheKey);
-            }
+        if (parsedArgs.preloadPackage != null) {
+            handlePreloadPackage(parsedArgs.preloadPackage, parsedArgs.preloadPackageLibs,
+                    parsedArgs.preloadPackageCacheKey);
+            return null;
+        }
 
-            if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
-                throw new ZygoteSecurityException("Client may not specify capabilities: " +
-                        "permitted=0x" + Long.toHexString(parsedArgs.permittedCapabilities) +
-                        ", effective=0x" + Long.toHexString(parsedArgs.effectiveCapabilities));
-            }
+        if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
+            throw new ZygoteSecurityException("Client may not specify capabilities: " +
+                    "permitted=0x" + Long.toHexString(parsedArgs.permittedCapabilities) +
+                    ", effective=0x" + Long.toHexString(parsedArgs.effectiveCapabilities));
+        }
 
-            applyUidSecurityPolicy(parsedArgs, peer);
-            applyInvokeWithSecurityPolicy(parsedArgs, peer);
+        applyUidSecurityPolicy(parsedArgs, peer);
+        applyInvokeWithSecurityPolicy(parsedArgs, peer);
 
-            applyDebuggerSystemProperty(parsedArgs);
-            applyInvokeWithSystemProperty(parsedArgs);
+        applyDebuggerSystemProperty(parsedArgs);
+        applyInvokeWithSystemProperty(parsedArgs);
 
-            int[][] rlimits = null;
+        int[][] rlimits = null;
 
-            if (parsedArgs.rlimits != null) {
-                rlimits = parsedArgs.rlimits.toArray(intArray2d);
-            }
+        if (parsedArgs.rlimits != null) {
+            rlimits = parsedArgs.rlimits.toArray(intArray2d);
+        }
 
-            int[] fdsToIgnore = null;
+        int[] fdsToIgnore = null;
 
-            if (parsedArgs.invokeWith != null) {
+        if (parsedArgs.invokeWith != null) {
+            try {
                 FileDescriptor[] pipeFds = Os.pipe2(O_CLOEXEC);
                 childPipeFd = pipeFds[1];
                 serverPipeFd = pipeFds[0];
                 Os.fcntlInt(childPipeFd, F_SETFD, 0);
-                fdsToIgnore = new int[] { childPipeFd.getInt$(), serverPipeFd.getInt$() };
+                fdsToIgnore = new int[]{childPipeFd.getInt$(), serverPipeFd.getInt$()};
+            } catch (ErrnoException errnoEx) {
+                throw new IllegalStateException("Unable to set up pipe for invoke-with", errnoEx);
             }
-
-            /**
-             * In order to avoid leaking descriptors to the Zygote child,
-             * the native code must close the two Zygote socket descriptors
-             * in the child process before it switches from Zygote-root to
-             * the UID and privileges of the application being launched.
-             *
-             * In order to avoid "bad file descriptor" errors when the
-             * two LocalSocket objects are closed, the Posix file
-             * descriptors are released via a dup2() call which closes
-             * the socket and substitutes an open descriptor to /dev/null.
-             */
-
-            int [] fdsToClose = { -1, -1 };
-
-            FileDescriptor fd = mSocket.getFileDescriptor();
-
-            if (fd != null) {
-                fdsToClose[0] = fd.getInt$();
-            }
-
-            fd = zygoteServer.getServerSocketFileDescriptor();
-
-            if (fd != null) {
-                fdsToClose[1] = fd.getInt$();
-            }
-
-            fd = null;
-
-            pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
-                    parsedArgs.runtimeFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                    parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.instructionSet,
-                    parsedArgs.appDataDir);
-        } catch (ErrnoException ex) {
-            logAndPrintError(newStderr, "Exception creating pipe", ex);
-        } catch (IllegalArgumentException ex) {
-            logAndPrintError(newStderr, "Invalid zygote arguments", ex);
-        } catch (ZygoteSecurityException ex) {
-            logAndPrintError(newStderr,
-                    "Zygote security policy prevents request: ", ex);
         }
+
+        /**
+         * In order to avoid leaking descriptors to the Zygote child,
+         * the native code must close the two Zygote socket descriptors
+         * in the child process before it switches from Zygote-root to
+         * the UID and privileges of the application being launched.
+         *
+         * In order to avoid "bad file descriptor" errors when the
+         * two LocalSocket objects are closed, the Posix file
+         * descriptors are released via a dup2() call which closes
+         * the socket and substitutes an open descriptor to /dev/null.
+         */
+
+        int [] fdsToClose = { -1, -1 };
+
+        FileDescriptor fd = mSocket.getFileDescriptor();
+
+        if (fd != null) {
+            fdsToClose[0] = fd.getInt$();
+        }
+
+        fd = zygoteServer.getServerSocketFileDescriptor();
+
+        if (fd != null) {
+            fdsToClose[1] = fd.getInt$();
+        }
+
+        fd = null;
+
+        pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
+                parsedArgs.runtimeFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+                parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.instructionSet,
+                parsedArgs.appDataDir);
 
         try {
             if (pid == 0) {
                 // in child
+                zygoteServer.setForkChild();
+
                 zygoteServer.closeServerSocket();
                 IoUtils.closeQuietly(serverPipeFd);
                 serverPipeFd = null;
-                handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
 
-                // should never get here, the child is expected to either
-                // throw Zygote.MethodAndArgsCaller or exec().
-                return true;
+                return handleChildProc(parsedArgs, descriptors, childPipeFd);
             } else {
-                // in parent...pid of < 0 means failure
+                // In the parent. A pid < 0 indicates a failure and will be handled in
+                // handleParentProc.
                 IoUtils.closeQuietly(childPipeFd);
                 childPipeFd = null;
-                return handleParentProc(pid, descriptors, serverPipeFd, parsedArgs);
+                handleParentProc(pid, descriptors, serverPipeFd);
+                return null;
             }
         } finally {
             IoUtils.closeQuietly(childPipeFd);
@@ -265,15 +249,13 @@ class ZygoteConnection {
         }
     }
 
-    private boolean handleAbiListQuery() {
+    private void handleAbiListQuery() {
         try {
             final byte[] abiListBytes = abiList.getBytes(StandardCharsets.US_ASCII);
             mSocketOutStream.writeInt(abiListBytes.length);
             mSocketOutStream.write(abiListBytes);
-            return false;
         } catch (IOException ioe) {
-            Log.e(TAG, "Error writing to command socket", ioe);
-            return true;
+            throw new IllegalStateException("Error writing to command socket", ioe);
         }
     }
 
@@ -283,7 +265,7 @@ class ZygoteConnection {
      * if no preload was initiated. The latter implies that the zygote is not configured to load
      * resources lazy or that the zygote has already handled a previous request to handlePreload.
      */
-    private boolean handlePreload() {
+    private void handlePreload() {
         try {
             if (isPreloadComplete()) {
                 mSocketOutStream.writeInt(1);
@@ -291,11 +273,8 @@ class ZygoteConnection {
                 preload();
                 mSocketOutStream.writeInt(0);
             }
-
-            return false;
         } catch (IOException ioe) {
-            Log.e(TAG, "Error writing to command socket", ioe);
-            return true;
+            throw new IllegalStateException("Error writing to command socket", ioe);
         }
     }
 
@@ -307,7 +286,11 @@ class ZygoteConnection {
         return ZygoteInit.isPreloadComplete();
     }
 
-    protected boolean handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
+    protected DataOutputStream getSocketOutputStream() {
+        return mSocketOutStream;
+    }
+
+    protected void handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
         throw new RuntimeException("Zyogte does not support package preloading");
     }
 
@@ -321,6 +304,10 @@ class ZygoteConnection {
             Log.e(TAG, "Exception while closing command "
                     + "socket in parent", ex);
         }
+    }
+
+    boolean isClosedByPeer() {
+        return isEof;
     }
 
     /**
@@ -753,15 +740,9 @@ class ZygoteConnection {
      * @param parsedArgs non-null; zygote args
      * @param descriptors null-ok; new file descriptors for stdio if available.
      * @param pipeFd null-ok; pipe for communication back to Zygote.
-     * @param newStderr null-ok; stream to use for stderr until stdio
-     * is reopened.
-     *
-     * @throws Zygote.MethodAndArgsCaller on success to
-     * trampoline to code that invokes static main.
      */
-    private void handleChildProc(Arguments parsedArgs,
-            FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
-            throws Zygote.MethodAndArgsCaller {
+    private Runnable handleChildProc(Arguments parsedArgs, FileDescriptor[] descriptors,
+            FileDescriptor pipeFd) {
         /**
          * By the time we get here, the native code has closed the two actual Zygote
          * socket connections, and substituted /dev/null in their place.  The LocalSocket
@@ -778,7 +759,6 @@ class ZygoteConnection {
                 for (FileDescriptor fd: descriptors) {
                     IoUtils.closeQuietly(fd);
                 }
-                newStderr = System.err;
             } catch (ErrnoException ex) {
                 Log.e(TAG, "Error reopening stdio", ex);
             }
@@ -795,9 +775,12 @@ class ZygoteConnection {
                     parsedArgs.niceName, parsedArgs.targetSdkVersion,
                     VMRuntime.getCurrentInstructionSet(),
                     pipeFd, parsedArgs.remainingArgs);
+
+            // Should not get here.
+            throw new IllegalStateException("WrapperInit.execApplication unexpectedly returned");
         } else {
-            ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion,
-                    parsedArgs.remainingArgs, null /* classLoader */);
+            return ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs,
+                    null /* classLoader */);
         }
     }
 
@@ -809,13 +792,8 @@ class ZygoteConnection {
      * @param descriptors null-ok; file descriptors for child's new stdio if
      * specified.
      * @param pipeFd null-ok; pipe for communication with child.
-     * @param parsedArgs non-null; zygote args
-     * @return true for "exit command loop" and false for "continue command
-     * loop"
      */
-    private boolean handleParentProc(int pid,
-            FileDescriptor[] descriptors, FileDescriptor pipeFd, Arguments parsedArgs) {
-
+    private void handleParentProc(int pid, FileDescriptor[] descriptors, FileDescriptor pipeFd) {
         if (pid > 0) {
             setChildPgid(pid);
         }
@@ -907,11 +885,8 @@ class ZygoteConnection {
             mSocketOutStream.writeInt(pid);
             mSocketOutStream.writeBoolean(usingWrapper);
         } catch (IOException ex) {
-            Log.e(TAG, "Error writing to command socket", ex);
-            return true;
+            throw new IllegalStateException("Error writing to command socket", ex);
         }
-
-        return false;
     }
 
     private void setChildPgid(int pid) {
@@ -925,22 +900,6 @@ class ZygoteConnection {
             // getsid(0) != getsid(peer.getPid())
             Log.i(TAG, "Zygote: setpgid failed. This is "
                 + "normal if peer is not in our session");
-        }
-    }
-
-    /**
-     * Logs an error message and prints it to the specified stream, if
-     * provided
-     *
-     * @param newStderr null-ok; a standard error stream
-     * @param message non-null; error message
-     * @param ex null-ok an exception
-     */
-    private static void logAndPrintError (PrintStream newStderr,
-            String message, Throwable ex) {
-        Log.e(TAG, message, ex);
-        if (newStderr != null) {
-            newStderr.println(message + (ex == null ? "" : ex));
         }
     }
 }
