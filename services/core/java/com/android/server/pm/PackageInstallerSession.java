@@ -118,6 +118,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String REMOVE_SPLIT_MARKER_EXTENSION = ".removed";
 
     private static final int MSG_COMMIT = 0;
+    private static final int MSG_SESSION_FINISHED_WITH_EXCEPTION = 1;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -274,15 +275,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            synchronized (mLock) {
-                try {
-                    commitLocked();
-                } catch (PackageManagerException e) {
-                    final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-                    Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
-                    destroyInternal();
-                    dispatchSessionFinished(e.error, completeMsg, null);
-                }
+            switch (msg.what) {
+                case MSG_COMMIT:
+                    synchronized (mLock) {
+                        try {
+                            commitLocked();
+                        } catch (PackageManagerException e) {
+                            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+                            Slog.e(TAG,
+                                    "Commit of session " + sessionId + " failed: " + completeMsg);
+                            destroyInternal();
+                            dispatchSessionFinished(e.error, completeMsg, null);
+                        }
+                    }
+
+                    break;
+                case MSG_SESSION_FINISHED_WITH_EXCEPTION:
+                    PackageManagerException e = (PackageManagerException) msg.obj;
+
+                    dispatchSessionFinished(e.error, ExceptionUtils.getCompleteMessage(e),
+                            null);
+                    break;
             }
 
             return true;
@@ -705,9 +718,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 } catch (IOException e) {
                     throw new IllegalArgumentException(e);
                 } catch (PackageManagerException e) {
-                    // Do now throw an exception here to stay compatible with O and older
                     destroyInternal();
-                    dispatchSessionFinished(e.error, ExceptionUtils.getCompleteMessage(e), null);
+
+                    // Cannot call dispatchFinal synchronous as this might be called from inside the
+                    // system server on the main thread. Hence the call back scheduled in
+                    // dispachFinal has to be scheduled on a different thread.
+                    mHandler.obtainMessage(MSG_SESSION_FINISHED_WITH_EXCEPTION, e).sendToTarget();
+
                     return;
                 }
             }
