@@ -38,7 +38,7 @@ import android.telephony.mbms.InternalDownloadSessionCallback;
 import android.telephony.mbms.InternalDownloadStateCallback;
 import android.telephony.mbms.MbmsDownloadSessionCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
-import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsErrors;
 import android.telephony.mbms.MbmsTempFileProvider;
 import android.telephony.mbms.MbmsUtils;
 import android.telephony.mbms.vendor.IMbmsDownloadService;
@@ -97,12 +97,24 @@ public class MbmsDownloadSession implements AutoCloseable {
     /**
      * {@link Uri} extra that Android will attach to the intent supplied via
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
-     * Indicates the location of the successfully
-     * downloaded file. Will always be set to a non-null value if
+     * Indicates the location of the successfully downloaded file within the temp file root set
+     * via {@link #setTempFileRootDirectory(File)}.
+     * While you may use this file in-place, it is highly encouraged that you move
+     * this file to a different location after receiving the download completion intent, as this
+     * file resides within the temp file directory.
+     *
+     * Will always be set to a non-null value if
      * {@link #EXTRA_MBMS_DOWNLOAD_RESULT} is set to {@link #RESULT_SUCCESSFUL}.
      */
     public static final String EXTRA_MBMS_COMPLETED_FILE_URI =
             "android.telephony.extra.MBMS_COMPLETED_FILE_URI";
+
+    /**
+     * Extra containing the {@link DownloadRequest} for which the download result or file
+     * descriptor request is for. Must not be null.
+     */
+    public static final String EXTRA_MBMS_DOWNLOAD_REQUEST =
+            "android.telephony.extra.MBMS_DOWNLOAD_REQUEST";
 
     /**
      * The default directory name for all MBMS temp files. If you call
@@ -175,7 +187,7 @@ public class MbmsDownloadSession implements AutoCloseable {
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, "Received death notification");
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, "Received death notification");
         }
     };
 
@@ -242,7 +254,7 @@ public class MbmsDownloadSession implements AutoCloseable {
         MbmsDownloadSession session =
                 new MbmsDownloadSession(context, callback, subscriptionId, handler);
         final int result = session.bindAndInitialize();
-        if (result != MbmsException.SUCCESS) {
+        if (result != MbmsErrors.SUCCESS) {
             sIsInitialized.set(false);
             handler.post(new Runnable() {
                 @Override
@@ -272,12 +284,12 @@ public class MbmsDownloadSession implements AutoCloseable {
                         } catch (RuntimeException e) {
                             Log.e(LOG_TAG, "Runtime exception during initialization");
                             sendErrorToApp(
-                                    MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
                                     e.toString());
                             sIsInitialized.set(false);
                             return;
                         }
-                        if (result != MbmsException.SUCCESS) {
+                        if (result != MbmsErrors.SUCCESS) {
                             sendErrorToApp(result, "Error returned during initialization");
                             sIsInitialized.set(false);
                             return;
@@ -285,7 +297,7 @@ public class MbmsDownloadSession implements AutoCloseable {
                         try {
                             downloadService.asBinder().linkToDeath(mDeathRecipient, 0);
                         } catch (RemoteException e) {
-                            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST,
+                            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
                                     "Middleware lost during initialization");
                             sIsInitialized.set(false);
                             return;
@@ -327,13 +339,13 @@ public class MbmsDownloadSession implements AutoCloseable {
         }
         try {
             int returnCode = downloadService.requestUpdateFileServices(mSubscriptionId, classList);
-            if (returnCode != MbmsException.SUCCESS) {
+            if (returnCode != MbmsErrors.SUCCESS) {
                 sendErrorToApp(returnCode, null);
             }
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
 
@@ -352,7 +364,7 @@ public class MbmsDownloadSession implements AutoCloseable {
      * Before calling this method, the app must cancel all of its pending
      * {@link DownloadRequest}s via {@link #cancelDownload(DownloadRequest)}. If this is not done,
      * you will receive an asynchronous error with code
-     * {@link MbmsException.DownloadErrors#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT} unless the
+     * {@link MbmsErrors.DownloadErrors#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT} unless the
      * provided directory is the same as what has been previously configured.
      *
      * The {@link File} supplied as a root temp file directory must already exist. If not, an
@@ -381,12 +393,12 @@ public class MbmsDownloadSession implements AutoCloseable {
 
         try {
             int result = downloadService.setTempFileRootDirectory(mSubscriptionId, filePath);
-            if (result != MbmsException.SUCCESS) {
+            if (result != MbmsErrors.SUCCESS) {
                 sendErrorToApp(result, null);
             }
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return;
         }
 
@@ -464,13 +476,12 @@ public class MbmsDownloadSession implements AutoCloseable {
             setTempFileRootDirectory(tempRootDirectory);
         }
 
-        checkValidDownloadDestination(request);
         writeDownloadRequestToken(request);
         try {
             downloadService.download(request);
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
 
@@ -491,7 +502,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             return downloadService.listPendingDownloads(mSubscriptionId);
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return Collections.emptyList();
         }
     }
@@ -523,8 +534,8 @@ public class MbmsDownloadSession implements AutoCloseable {
 
         try {
             int result = downloadService.registerStateCallback(request, internalCallback);
-            if (result != MbmsException.SUCCESS) {
-                if (result == MbmsException.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+            if (result != MbmsErrors.SUCCESS) {
+                if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                     throw new IllegalArgumentException("Unknown download request.");
                 }
                 sendErrorToApp(result, null);
@@ -532,7 +543,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             }
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return;
         }
         mInternalDownloadCallbacks.put(callback, internalCallback);
@@ -563,15 +574,15 @@ public class MbmsDownloadSession implements AutoCloseable {
 
             try {
                 int result = downloadService.unregisterStateCallback(request, internalCallback);
-                if (result != MbmsException.SUCCESS) {
-                    if (result == MbmsException.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+                if (result != MbmsErrors.SUCCESS) {
+                    if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                         throw new IllegalArgumentException("Unknown download request.");
                     }
                     sendErrorToApp(result, null);
                 }
             } catch (RemoteException e) {
                 mService.set(null);
-                sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+                sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             }
         } finally {
             InternalDownloadStateCallback internalCallback =
@@ -598,8 +609,8 @@ public class MbmsDownloadSession implements AutoCloseable {
 
         try {
             int result = downloadService.cancelDownload(downloadRequest);
-            if (result != MbmsException.SUCCESS) {
-                if (result == MbmsException.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+            if (result != MbmsErrors.SUCCESS) {
+                if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                     throw new IllegalArgumentException("Unknown download request.");
                 }
                 sendErrorToApp(result, null);
@@ -607,7 +618,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             }
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return;
         }
         deleteDownloadRequestToken(downloadRequest);
@@ -635,7 +646,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             return downloadService.getDownloadStatus(downloadRequest, fileInfo);
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return STATUS_UNKNOWN;
         }
     }
@@ -668,15 +679,15 @@ public class MbmsDownloadSession implements AutoCloseable {
 
         try {
             int result = downloadService.resetDownloadKnowledge(downloadRequest);
-            if (result != MbmsException.SUCCESS) {
-                if (result == MbmsException.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+            if (result != MbmsErrors.SUCCESS) {
+                if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                     throw new IllegalArgumentException("Unknown download request.");
                 }
                 sendErrorToApp(result, null);
             }
         } catch (RemoteException e) {
             mService.set(null);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
 
@@ -750,32 +761,6 @@ public class MbmsDownloadSession implements AutoCloseable {
         String downloadTokenFileName = request.getHash()
                 + MbmsDownloadReceiver.DOWNLOAD_TOKEN_SUFFIX;
         return new File(tempFileLocation, downloadTokenFileName);
-    }
-
-    /**
-     * Verifies the following:
-     * If a request is multi-part,
-     *     1. Destination Uri must exist and be a directory
-     *     2. Directory specified must contain no files.
-     * Otherwise
-     *     1. The file specified by the destination Uri must not exist.
-     */
-    private void checkValidDownloadDestination(DownloadRequest request) {
-        File toFile = new File(request.getDestinationUri().getSchemeSpecificPart());
-        if (request.isMultipartDownload()) {
-            if (!toFile.isDirectory()) {
-                throw new IllegalArgumentException("Multipart download must specify valid " +
-                        "destination directory.");
-            }
-            if (toFile.listFiles().length > 0) {
-                throw new IllegalArgumentException("Destination directory must be clear of all " +
-                        "files.");
-            }
-        } else {
-            if (toFile.exists()) {
-                throw new IllegalArgumentException("Destination file must not exist.");
-            }
-        }
     }
 
     private void sendErrorToApp(int errorCode, String message) {
