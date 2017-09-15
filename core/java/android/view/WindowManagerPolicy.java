@@ -159,6 +159,12 @@ public interface WindowManagerPolicy {
     public final static boolean WATCH_POINTER = false;
 
     /**
+     * Broadcast sent when a user activity is detected.
+     */
+    public final static String ACTION_USER_ACTIVITY_NOTIFICATION =
+            "android.intent.action.USER_ACTIVITY_NOTIFICATION";
+
+    /**
      * Sticky broadcast of the current HDMI plugged state.
      */
     public final static String ACTION_HDMI_PLUGGED = "android.intent.action.HDMI_PLUGGED";
@@ -1741,4 +1747,10 @@ public interface WindowManagerPolicy {
      * @return true if ready; false otherwise.
      */
     boolean canDismissBootAnimation();
+
+    /**
+     * Requests that the WindowManager sends WindowManagerPolicy#ACTION_USER_ACTIVITY_NOTIFICATION
+     * on the next user activity.
+     */
+    public void requestUserActivityNotification();
 }
