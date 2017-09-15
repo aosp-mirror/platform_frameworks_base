@@ -8985,11 +8985,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * Execute the background dexopt job immediately.
      */
     @Override
-    public boolean runBackgroundDexoptJob() {
+    public boolean runBackgroundDexoptJob(@Nullable List<String> packageNames) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         }
-        return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext);
+        return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext, packageNames);
     }
 
     List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {

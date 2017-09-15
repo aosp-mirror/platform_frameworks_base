@@ -1219,7 +1219,13 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runDexoptJob() throws RemoteException {
-        boolean result = mInterface.runBackgroundDexoptJob();
+        String arg;
+        List<String> packageNames = new ArrayList<>();
+        while ((arg = getNextArg()) != null) {
+            packageNames.add(arg);
+        }
+        boolean result = mInterface.runBackgroundDexoptJob(packageNames.isEmpty() ? null :
+                packageNames);
         return result ? 0 : -1;
     }
 
