@@ -1585,49 +1585,49 @@ public class Editor {
         outText.startOffset = 0;
         outText.selectionStart = mTextView.getSelectionStart();
         outText.selectionEnd = mTextView.getSelectionEnd();
+        outText.hint = mTextView.getHint();
         return true;
     }
 
     boolean reportExtractedText() {
         final Editor.InputMethodState ims = mInputMethodState;
-        if (ims != null) {
-            final boolean contentChanged = ims.mContentChanged;
-            if (contentChanged || ims.mSelectionModeChanged) {
-                ims.mContentChanged = false;
-                ims.mSelectionModeChanged = false;
-                final ExtractedTextRequest req = ims.mExtractedTextRequest;
-                if (req != null) {
-                    InputMethodManager imm = InputMethodManager.peekInstance();
-                    if (imm != null) {
-                        if (TextView.DEBUG_EXTRACT) {
-                            Log.v(TextView.LOG_TAG, "Retrieving extracted start="
-                                    + ims.mChangedStart
-                                    + " end=" + ims.mChangedEnd
-                                    + " delta=" + ims.mChangedDelta);
-                        }
-                        if (ims.mChangedStart < 0 && !contentChanged) {
-                            ims.mChangedStart = EXTRACT_NOTHING;
-                        }
-                        if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
-                                ims.mChangedDelta, ims.mExtractedText)) {
-                            if (TextView.DEBUG_EXTRACT) {
-                                Log.v(TextView.LOG_TAG,
-                                        "Reporting extracted start="
-                                                + ims.mExtractedText.partialStartOffset
-                                                + " end=" + ims.mExtractedText.partialEndOffset
-                                                + ": " + ims.mExtractedText.text);
-                            }
-
-                            imm.updateExtractedText(mTextView, req.token, ims.mExtractedText);
-                            ims.mChangedStart = EXTRACT_UNKNOWN;
-                            ims.mChangedEnd = EXTRACT_UNKNOWN;
-                            ims.mChangedDelta = 0;
-                            ims.mContentChanged = false;
-                            return true;
-                        }
-                    }
-                }
+        if (ims == null) {
+            return false;
+        }
+        ims.mSelectionModeChanged = false;
+        final ExtractedTextRequest req = ims.mExtractedTextRequest;
+        if (req == null) {
+            return false;
+        }
+        final InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm == null) {
+            return false;
+        }
+        if (TextView.DEBUG_EXTRACT) {
+            Log.v(TextView.LOG_TAG, "Retrieving extracted start="
+                    + ims.mChangedStart
+                    + " end=" + ims.mChangedEnd
+                    + " delta=" + ims.mChangedDelta);
+        }
+        if (ims.mChangedStart < 0 && !ims.mContentChanged) {
+            ims.mChangedStart = EXTRACT_NOTHING;
+        }
+        if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
+                ims.mChangedDelta, ims.mExtractedText)) {
+            if (TextView.DEBUG_EXTRACT) {
+                Log.v(TextView.LOG_TAG,
+                        "Reporting extracted start="
+                                + ims.mExtractedText.partialStartOffset
+                                + " end=" + ims.mExtractedText.partialEndOffset
+                                + ": " + ims.mExtractedText.text);
             }
+
+            imm.updateExtractedText(mTextView, req.token, ims.mExtractedText);
+            ims.mChangedStart = EXTRACT_UNKNOWN;
+            ims.mChangedEnd = EXTRACT_UNKNOWN;
+            ims.mChangedDelta = 0;
+            ims.mContentChanged = false;
+            return true;
         }
         return false;
     }

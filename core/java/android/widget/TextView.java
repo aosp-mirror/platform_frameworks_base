@@ -5547,6 +5547,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public final void setHint(CharSequence hint) {
+        setHintInternal(hint);
+
+        if (isInputMethodTarget()) {
+            mEditor.reportExtractedText();
+        }
+    }
+
+    private void setHintInternal(CharSequence hint) {
         mHint = TextUtils.stringOrSpannedString(hint);
 
         if (mLayout != null) {
@@ -7644,6 +7652,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             MetaKeyKeyListener.stopSelecting(this, sp);
         }
+
+        setHintInternal(text.hint);
     }
 
     /**
