@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.net.Uri;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.FileInfo;
-import android.telephony.mbms.IMbmsDownloadManagerCallback;
+import android.telephony.mbms.IMbmsDownloadSessionCallback;
 import android.telephony.mbms.IDownloadStateCallback;
 
 /**
@@ -28,13 +28,18 @@ import android.telephony.mbms.IDownloadStateCallback;
  */
 interface IMbmsDownloadService
 {
-    int initialize(int subId, IMbmsDownloadManagerCallback listener);
+    int initialize(int subId, IMbmsDownloadSessionCallback listener);
 
-    int getFileServices(int subId, in List<String> serviceClasses);
+    int requestUpdateFileServices(int subId, in List<String> serviceClasses);
 
     int setTempFileRootDirectory(int subId, String rootDirectoryPath);
 
-    int download(in DownloadRequest downloadRequest, IDownloadStateCallback listener);
+    int download(in DownloadRequest downloadRequest);
+
+    int registerStateCallback(in DownloadRequest downloadRequest, IDownloadStateCallback listener);
+
+    int unregisterStateCallback(in DownloadRequest downloadRequest,
+        IDownloadStateCallback listener);
 
     List<DownloadRequest> listPendingDownloads(int subscriptionId);
 

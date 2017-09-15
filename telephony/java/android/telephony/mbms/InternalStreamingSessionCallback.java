@@ -34,7 +34,7 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
     }
 
     @Override
-    public void onError(int errorCode, String message) throws RemoteException {
+    public void onError(final int errorCode, final String message) throws RemoteException {
         if (mIsStopped) {
             return;
         }
@@ -48,7 +48,7 @@ public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallb
     }
 
     @Override
-    public void onStreamingServicesUpdated(List<StreamingServiceInfo> services)
+    public void onStreamingServicesUpdated(final List<StreamingServiceInfo> services)
             throws RemoteException {
         if (mIsStopped) {
             return;
