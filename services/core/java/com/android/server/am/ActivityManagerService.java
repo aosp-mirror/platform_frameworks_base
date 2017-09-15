@@ -7005,7 +7005,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProfileProc = app;
                 profilerInfo = (mProfilerInfo != null && mProfilerInfo.profileFile != null) ?
                         new ProfilerInfo(mProfilerInfo) : null;
-                agent = profilerInfo.agent;
+                agent = mProfilerInfo != null ? mProfilerInfo.agent : null;
             } else if (app.instr != null && app.instr.mProfileFile != null) {
                 profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
                         null);
