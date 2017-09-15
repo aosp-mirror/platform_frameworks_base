@@ -49,6 +49,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
@@ -85,6 +86,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final Context mContext;
     private final BatteryExternalStatsWorker mWorker;
 
+    private native void getLowPowerStats(RpmStats rpmStats);
     private native int getPlatformLowPowerStats(ByteBuffer outBuffer);
     private native int getSubsystemLowPowerStats(ByteBuffer outBuffer);
     private CharsetDecoder mDecoderStat = StandardCharsets.UTF_8
@@ -95,6 +97,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
     private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
     private static final int MAX_LOW_POWER_STATS_SIZE = 512;
+
+    /**
+     * Replaces the information in the given rpmStats with up-to-date information.
+     */
+    @Override
+    public void fillLowPowerStats(RpmStats rpmStats) {
+        if (DBG) Slog.d(TAG, "begin getLowPowerStats");
+        try {
+            getLowPowerStats(rpmStats);
+        } finally {
+            if (DBG) Slog.d(TAG, "end getLowPowerStats");
+        }
+    }
 
     @Override
     public String getPlatformLowPowerStats() {
@@ -120,7 +135,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public String getSubsystemLowPowerStats() {
-        Slog.d(TAG, "begin getSubsystemLowPowerStats");
+        if (DBG) Slog.d(TAG, "begin getSubsystemLowPowerStats");
         try {
             mUtf8BufferStat.clear();
             mUtf16BufferStat.clear();
@@ -136,7 +151,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mUtf16BufferStat.flip();
             return mUtf16BufferStat.toString();
         } finally {
-            Slog.d(TAG, "end getSubsystemLowPowerStats");
+            if (DBG) Slog.d(TAG, "end getSubsystemLowPowerStats");
         }
     }
 
