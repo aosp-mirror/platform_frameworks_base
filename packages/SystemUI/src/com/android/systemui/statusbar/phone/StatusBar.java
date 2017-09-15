@@ -5236,8 +5236,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void maybePrepareWakeUpFromAod() {
         int wakefulness = mWakefulnessLifecycle.getWakefulness();
-        if (mDozing && (wakefulness == WAKEFULNESS_WAKING
-                || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
+        if (mDozing && wakefulness == WAKEFULNESS_WAKING && !isPulsing()) {
             mScrimController.prepareWakeUpFromAod();
         }
     }
