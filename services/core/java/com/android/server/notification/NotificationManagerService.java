@@ -755,10 +755,11 @@ public class NotificationManagerService extends SystemService {
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
                     final long now = System.currentTimeMillis();
-                    if (userAction && expanded) {
+                    if (userAction) {
                         MetricsLogger.action(r.getLogMaker(now)
                                 .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-                                .setType(MetricsEvent.TYPE_DETAIL));
+                                .setType(expanded ? MetricsEvent.TYPE_DETAIL
+                                        : MetricsEvent.TYPE_COLLAPSE));
                     }
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
