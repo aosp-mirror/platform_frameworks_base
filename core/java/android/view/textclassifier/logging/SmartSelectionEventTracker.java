@@ -136,7 +136,6 @@ public final class SmartSelectionEventTracker {
                 .setType(getLogType(event))
                 .setSubtype(event.mEventType)
                 .setPackageName(mContext.getPackageName())
-                .setTimestamp(now)
                 .addTaggedData(START_EVENT_DELTA, now - mSessionStartTime)
                 .addTaggedData(PREV_EVENT_DELTA, now - mLastEventTime)
                 .addTaggedData(ENTITY_TYPE, event.mEntityType)
