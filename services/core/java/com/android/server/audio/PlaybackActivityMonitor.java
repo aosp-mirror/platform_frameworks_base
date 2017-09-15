@@ -171,7 +171,7 @@ public final class PlaybackActivityMonitor
             }
         }
         if (change) {
-            dispatchPlaybackChange();
+            dispatchPlaybackChange(false);
         }
     }
 
@@ -210,7 +210,7 @@ public final class PlaybackActivityMonitor
             }
         }
         if (change) {
-            dispatchPlaybackChange();
+            dispatchPlaybackChange(event == AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
         }
     }
 
@@ -244,6 +244,14 @@ public final class PlaybackActivityMonitor
         pw.println("\nPlaybackActivityMonitor dump time: "
                 + DateFormat.getTimeInstance().format(new Date()));
         synchronized(mPlayerLock) {
+            pw.println("\n  playback listeners:");
+            synchronized(mClients) {
+                for (PlayMonitorClient pmc : mClients) {
+                    pw.print(" " + (pmc.mIsPrivileged ? "(S)" : "(P)")
+                            + pmc.toString());
+                }
+            }
+            pw.println("\n");
             // all players
             pw.println("\n  players:");
             final List<Integer> piidIntList = new ArrayList<Integer>(mPlayers.keySet());
@@ -268,7 +276,7 @@ public final class PlaybackActivityMonitor
             for (int uid : mBannedUids) {
                 pw.print(" " + uid);
             }
-            pw.println();
+            pw.println("\n");
             // log
             mEventLogger.dump(pw);
         }
@@ -293,7 +301,11 @@ public final class PlaybackActivityMonitor
         return true;
     }
 
-    private void dispatchPlaybackChange() {
+    /**
+     * Sends new list after update of playback configurations
+     * @param iplayerReleased indicates if the change was due to a player being released
+     */
+    private void dispatchPlaybackChange(boolean iplayerReleased) {
         synchronized (mClients) {
             // typical use case, nobody is listening, don't do any work
             if (mClients.isEmpty()) {
@@ -324,9 +336,12 @@ public final class PlaybackActivityMonitor
                     // do not spam the logs if there are problems communicating with this client
                     if (pmc.mErrorCount < PlayMonitorClient.MAX_ERRORS) {
                         if (pmc.mIsPrivileged) {
-                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsSystem);
+                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsSystem,
+                                    iplayerReleased);
                         } else {
-                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsPublic);
+                            // non-system clients don't have the control interface IPlayer, so
+                            // they don't need to flush commands when a player was released
+                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsPublic, false);
                         }
                     }
                 } catch (RemoteException e) {
