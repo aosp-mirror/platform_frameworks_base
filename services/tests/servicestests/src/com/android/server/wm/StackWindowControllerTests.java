@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -60,6 +61,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
     }
 
     @Test
+    @Ignore("b/65379195")
     public void testRemoveContainer_deferRemoval() throws Exception {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(mDisplayContent);
