@@ -16,14 +16,12 @@
 
 package android.telephony.mbms;
 
-import android.os.Handler;
-import android.telephony.MbmsDownloadManager;
+import android.telephony.MbmsDownloadSession;
 
 /**
  * A optional listener class used by download clients to track progress. Apps should extend this
  * class and pass an instance into
- * {@link android.telephony.MbmsDownloadManager#download(
- * DownloadRequest, DownloadStateCallback, Handler)}
+ * {@link MbmsDownloadSession#download(DownloadRequest)}
  *
  * This is optionally specified when requesting a download and will only be called while the app
  * is running.
@@ -58,7 +56,7 @@ public class DownloadStateCallback {
      *   may not have been able to get a list of them in advance.
      * @param state The current state of the download.
      */
-    public void onStateChanged(DownloadRequest request, FileInfo fileInfo,
-            @MbmsDownloadManager.DownloadStatus int state) {
+    public void onStateUpdated(DownloadRequest request, FileInfo fileInfo,
+            @MbmsDownloadSession.DownloadStatus int state) {
     }
 }

@@ -24,11 +24,11 @@ import java.util.List;
  * The interface the clients top-level file download listener will satisfy.
  * @hide
  */
-oneway interface IMbmsDownloadManagerCallback
+oneway interface IMbmsDownloadSessionCallback
 {
-    void error(int errorCode, String message);
+    void onError(int errorCode, String message);
 
-    void fileServicesUpdated(in List<FileServiceInfo> services);
+    void onFileServicesUpdated(in List<FileServiceInfo> services);
 
-    void middlewareReady();
+    void onMiddlewareReady();
 }

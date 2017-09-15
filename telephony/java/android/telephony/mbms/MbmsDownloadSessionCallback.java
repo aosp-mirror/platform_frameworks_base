@@ -16,7 +16,7 @@
 
 package android.telephony.mbms;
 
-import android.telephony.MbmsDownloadManager;
+import android.telephony.MbmsDownloadSession;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
  * A callback class that apps should use to receive information on file downloads over
  * cell-broadcast.
  */
-public class MbmsDownloadManagerCallback {
+public class MbmsDownloadSessionCallback {
 
     /**
      * Indicates that the middleware has encountered an asynchronous error.
@@ -41,8 +41,8 @@ public class MbmsDownloadManagerCallback {
      *
      * This will only be called after the application has requested a list of file services and
      * specified a service class list of interest via
-     * {@link MbmsDownloadManager#getFileServices(List)}. If there are subsequent calls to
-     * {@link MbmsDownloadManager#getFileServices(List)}, this method may not be called again if
+     * {@link MbmsDownloadSession#requestUpdateFileServices(List)}. If there are subsequent calls to
+     * {@link MbmsDownloadSession#requestUpdateFileServices(List)}, this method may not be called again if
      * the list of service classes would remain the same.
      *
      * @param services The most recently updated list of available file services.
@@ -55,7 +55,7 @@ public class MbmsDownloadManagerCallback {
      * Called to indicate that the middleware has been initialized and is ready.
      *
      * Before this method is called, calling any method on an instance of
-     * {@link android.telephony.MbmsDownloadManager} will result in an {@link MbmsException}
+     * {@link MbmsDownloadSession} will result in an {@link MbmsException}
      * being thrown with error code {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
      * or {@link MbmsException.GeneralErrors#ERROR_MIDDLEWARE_NOT_YET_READY}
      */
