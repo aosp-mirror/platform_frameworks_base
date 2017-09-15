@@ -474,8 +474,9 @@ public class PackageDexOptimizer {
         }
 
         if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
-            // If the dex files is used by other apps, we cannot use profile-guided compilation.
-            return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+            // If the dex files is used by other apps, apply the shared filter.
+            return PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                    PackageManagerService.REASON_SHARED);
         }
 
         return targetCompilerFilter;
