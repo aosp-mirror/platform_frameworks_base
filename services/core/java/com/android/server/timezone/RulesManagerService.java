@@ -343,16 +343,20 @@ public final class RulesManagerService extends IRulesManager.Stub {
         @Override
         public void run() {
             EventLogTags.writeTimezoneUninstallStarted(toStringOrNull(mCheckToken));
-            boolean success = false;
+            boolean packageTrackerStatus = false;
             try {
-                success = mInstaller.stageUninstall();
-                // Right now we just have success (0) / failure (1). All clients should be checking
-                // against SUCCESS. More granular failures may be added in future.
-                int resultCode = success ? Callback.SUCCESS
-                        : Callback.ERROR_UNKNOWN_FAILURE;
+                int uninstallResult = mInstaller.stageUninstall();
+                packageTrackerStatus = (uninstallResult == TimeZoneDistroInstaller.UNINSTALL_SUCCESS
+                        || uninstallResult == TimeZoneDistroInstaller.UNINSTALL_NOTHING_INSTALLED);
+
+                // Right now we just have Callback.SUCCESS / Callback.ERROR_UNKNOWN_FAILURE for
+                // uninstall. All clients should be checking against SUCCESS. More granular failures
+                // may be added in future.
+                int callbackResultCode =
+                        packageTrackerStatus ? Callback.SUCCESS : Callback.ERROR_UNKNOWN_FAILURE;
                 EventLogTags.writeTimezoneUninstallComplete(
-                        toStringOrNull(mCheckToken), resultCode);
-                sendFinishedStatus(mCallback, resultCode);
+                        toStringOrNull(mCheckToken), callbackResultCode);
+                sendFinishedStatus(mCallback, callbackResultCode);
             } catch (Exception e) {
                 EventLogTags.writeTimezoneUninstallComplete(
                         toStringOrNull(mCheckToken), Callback.ERROR_UNKNOWN_FAILURE);
@@ -360,7 +364,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 sendFinishedStatus(mCallback, Callback.ERROR_UNKNOWN_FAILURE);
             } finally {
                 // Notify the package tracker that the operation is now complete.
-                mPackageTracker.recordCheckResult(mCheckToken, success);
+                mPackageTracker.recordCheckResult(mCheckToken, packageTrackerStatus);
 
                 mOperationInProgress.set(false);
             }
