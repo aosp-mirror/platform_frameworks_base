@@ -278,6 +278,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return mHandler;
     }
 
+    public Network network() {
+        return network;
+    }
+
     // Functions for manipulating the requests satisfied by this network.
     //
     // These functions must only called on ConnectivityService's main thread.

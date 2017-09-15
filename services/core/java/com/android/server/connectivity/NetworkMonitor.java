@@ -20,7 +20,6 @@ import static android.net.CaptivePortal.APP_RETURN_DISMISSED;
 import static android.net.CaptivePortal.APP_RETURN_UNWANTED;
 import static android.net.CaptivePortal.APP_RETURN_WANTED_AS_IS;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -229,6 +228,8 @@ public class NetworkMonitor extends StateMachine {
     // Delay between reevaluations once a captive portal has been found.
     private static final int CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10*60*1000;
 
+    private static final int NUM_VALIDATION_LOG_LINES = 20;
+
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
     private final NetworkAgentInfo mNetworkAgentInfo;
@@ -236,9 +237,15 @@ public class NetworkMonitor extends StateMachine {
     private final int mNetId;
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
-    private final AlarmManager mAlarmManager;
     private final NetworkRequest mDefaultRequest;
     private final IpConnectivityLog mMetricsLog;
+    private final NetworkMonitorSettings mSettings;
+
+    // Configuration values for captive portal detection probes.
+    private final String mCaptivePortalUserAgent;
+    private final URL mCaptivePortalHttpsUrl;
+    private final URL mCaptivePortalHttpUrl;
+    private final URL[] mCaptivePortalFallbackUrls;
 
     @VisibleForTesting
     protected boolean mIsCaptivePortalCheckEnabled;
@@ -262,40 +269,37 @@ public class NetworkMonitor extends StateMachine {
 
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
 
-    private final LocalLog validationLogs = new LocalLog(20); // 20 lines
+    private final LocalLog validationLogs = new LocalLog(NUM_VALIDATION_LOG_LINES);
 
     private final Stopwatch mEvaluationTimer = new Stopwatch();
 
     // This variable is set before transitioning to the mCaptivePortalState.
     private CaptivePortalProbeResult mLastPortalProbeResult = CaptivePortalProbeResult.FAILED;
 
-    // Configuration values for captive portal detection probes.
-    private final String mCaptivePortalUserAgent;
-    private final URL mCaptivePortalHttpsUrl;
-    private final URL mCaptivePortalHttpUrl;
-    private final URL[] mCaptivePortalFallbackUrls;
     private int mNextFallbackUrlIndex = 0;
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
-        this(context, handler, networkAgentInfo, defaultRequest, new IpConnectivityLog());
+        this(context, handler, networkAgentInfo, defaultRequest, new IpConnectivityLog(),
+                NetworkMonitorSettings.DEFAULT);
     }
 
     @VisibleForTesting
     protected NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
-            NetworkRequest defaultRequest, IpConnectivityLog logger) {
+            NetworkRequest defaultRequest, IpConnectivityLog logger,
+            NetworkMonitorSettings settings) {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + networkAgentInfo.name());
 
         mContext = context;
         mMetricsLog = logger;
         mConnectivityServiceHandler = handler;
+        mSettings = settings;
         mNetworkAgentInfo = networkAgentInfo;
-        mNetwork = new OneAddressPerFamilyNetwork(networkAgentInfo.network);
+        mNetwork = new OneAddressPerFamilyNetwork(networkAgentInfo.network());
         mNetId = mNetwork.netId;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mDefaultRequest = defaultRequest;
 
         addState(mDefaultState);
@@ -305,16 +309,12 @@ public class NetworkMonitor extends StateMachine {
             addState(mCaptivePortalState, mMaybeNotifyState);
         setInitialState(mDefaultState);
 
-        mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_MODE, Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT)
-                != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
-        mUseHttps = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
-
-        mCaptivePortalUserAgent = getCaptivePortalUserAgent(context);
-        mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl(context));
-        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(context));
-        mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls(context);
+        mIsCaptivePortalCheckEnabled = getIsCaptivePortalCheckEnabled();
+        mUseHttps = getUseHttpsValidation();
+        mCaptivePortalUserAgent = getCaptivePortalUserAgent();
+        mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl());
+        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(settings, context));
+        mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls();
 
         start();
     }
@@ -705,19 +705,42 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    private static String getCaptivePortalServerHttpsUrl(Context context) {
-        return getSetting(context, Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
+    public boolean getIsCaptivePortalCheckEnabled() {
+        String symbol = Settings.Global.CAPTIVE_PORTAL_MODE;
+        int defaultValue = Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT;
+        int mode = mSettings.getSetting(mContext, symbol, defaultValue);
+        return mode != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
     }
 
+    public boolean getUseHttpsValidation() {
+        return mSettings.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
+    }
+
+    public boolean getWifiScansAlwaysAvailableDisabled() {
+        return mSettings.getSetting(mContext, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0;
+    }
+
+    private String getCaptivePortalServerHttpsUrl() {
+        return mSettings.getSetting(mContext,
+                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
+    }
+
+    // Static for direct access by ConnectivityService
     public static String getCaptivePortalServerHttpUrl(Context context) {
-        return getSetting(context, Settings.Global.CAPTIVE_PORTAL_HTTP_URL, DEFAULT_HTTP_URL);
+        return getCaptivePortalServerHttpUrl(NetworkMonitorSettings.DEFAULT, context);
     }
 
-    private URL[] makeCaptivePortalFallbackUrls(Context context) {
+    public static String getCaptivePortalServerHttpUrl(
+            NetworkMonitorSettings settings, Context context) {
+        return settings.getSetting(
+                context, Settings.Global.CAPTIVE_PORTAL_HTTP_URL, DEFAULT_HTTP_URL);
+    }
+
+    private URL[] makeCaptivePortalFallbackUrls() {
         String separator = ",";
-        String firstUrl = getSetting(context,
+        String firstUrl = mSettings.getSetting(mContext,
                 Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
-        String joinedUrls = firstUrl + separator + getSetting(context,
+        String joinedUrls = firstUrl + separator + mSettings.getSetting(mContext,
                 Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, DEFAULT_OTHER_FALLBACK_URLS);
         List<URL> urls = new ArrayList<>();
         for (String s : joinedUrls.split(separator)) {
@@ -733,13 +756,9 @@ public class NetworkMonitor extends StateMachine {
         return urls.toArray(new URL[urls.size()]);
     }
 
-    private static String getCaptivePortalUserAgent(Context context) {
-        return getSetting(context, Settings.Global.CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
-    }
-
-    private static String getSetting(Context context, String symbol, String defaultValue) {
-        final String value = Settings.Global.getString(context.getContentResolver(), symbol);
-        return value != null ? value : defaultValue;
+    private String getCaptivePortalUserAgent() {
+        return mSettings.getSetting(mContext,
+                Settings.Global.CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
     }
 
     private URL nextFallbackUrl() {
@@ -1035,12 +1054,13 @@ public class NetworkMonitor extends StateMachine {
      */
     private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
             long requestTimestampMs, long responseTimestampMs) {
-        if (Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0) {
+        if (getWifiScansAlwaysAvailableDisabled()) {
             return;
         }
 
-        if (systemReady == false) return;
+        if (!systemReady) {
+            return;
+        }
 
         Intent latencyBroadcast = new Intent(ACTION_NETWORK_CONDITIONS_MEASURED);
         switch (mNetworkAgentInfo.networkInfo.getType()) {
@@ -1143,5 +1163,25 @@ public class NetworkMonitor extends StateMachine {
         ev.returnCode = probeResult;
         ev.durationMs = durationMs;
         mMetricsLog.log(mNetId, transports, ev);
+    }
+
+    @VisibleForTesting
+    public interface NetworkMonitorSettings {
+        int getSetting(Context context, String symbol, int defaultValue);
+        String getSetting(Context context, String symbol, String defaultValue);
+
+        static NetworkMonitorSettings DEFAULT = new DefaultNetworkMonitorSettings();
+    }
+
+    @VisibleForTesting
+    public static class DefaultNetworkMonitorSettings implements NetworkMonitorSettings {
+        public int getSetting(Context context, String symbol, int defaultValue) {
+            return Settings.Global.getInt(context.getContentResolver(), symbol, defaultValue);
+        }
+
+        public String getSetting(Context context, String symbol, String defaultValue) {
+            final String value = Settings.Global.getString(context.getContentResolver(), symbol);
+            return value != null ? value : defaultValue;
+        }
     }
 }
