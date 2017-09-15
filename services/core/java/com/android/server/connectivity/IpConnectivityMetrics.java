@@ -34,6 +34,7 @@ import android.util.Base64;
 import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.TokenBucket;
 import com.android.server.SystemService;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
@@ -62,7 +63,10 @@ final public class IpConnectivityMetrics extends SystemService {
 
     private static final String SERVICE_NAME = IpConnectivityLog.SERVICE_NAME;
 
-    // Default size of the event buffer. Once the buffer is full, incoming events are dropped.
+    // Default size of the event rolling log for bug report dumps.
+    private static final int DEFAULT_LOG_SIZE = 500;
+    // Default size of the event buffer for metrics reporting.
+    // Once the buffer is full, incoming events are dropped.
     private static final int DEFAULT_BUFFER_SIZE = 2000;
     // Maximum size of the event buffer.
     private static final int MAXIMUM_BUFFER_SIZE = DEFAULT_BUFFER_SIZE * 10;
@@ -71,24 +75,38 @@ final public class IpConnectivityMetrics extends SystemService {
 
     private static final int ERROR_RATE_LIMITED = -1;
 
-    // Lock ensuring that concurrent manipulations of the event buffer are correct.
+    // Lock ensuring that concurrent manipulations of the event buffers are correct.
     // There are three concurrent operations to synchronize:
     //  - appending events to the buffer.
     //  - iterating throught the buffer.
     //  - flushing the buffer content and replacing it by a new buffer.
     private final Object mLock = new Object();
 
+    // Implementation instance of IIpConnectivityMetrics.aidl.
     @VisibleForTesting
     public final Impl impl = new Impl();
+    // Subservice listening to Netd events via INetdEventListener.aidl.
     @VisibleForTesting
     NetdEventListenerService mNetdListener;
 
+    // Rolling log of the most recent events. This log is used for dumping
+    // connectivity events in bug reports.
+    @GuardedBy("mLock")
+    private final RingBuffer<ConnectivityMetricsEvent> mEventLog =
+            new RingBuffer(ConnectivityMetricsEvent.class, DEFAULT_LOG_SIZE);
+    // Buffer of connectivity events used for metrics reporting. This buffer
+    // does not rotate automatically and instead saturates when it becomes full.
+    // It is flushed at metrics reporting.
     @GuardedBy("mLock")
     private ArrayList<ConnectivityMetricsEvent> mBuffer;
+    // Total number of events dropped from mBuffer since last metrics reporting.
     @GuardedBy("mLock")
     private int mDropped;
+    // Capacity of mBuffer
     @GuardedBy("mLock")
     private int mCapacity;
+    // A list of rate limiting counters keyed by connectivity event types for
+    // metrics reporting mBuffer.
     @GuardedBy("mLock")
     private final ArrayMap<Class<?>, TokenBucket> mBuckets = makeRateLimitingBuckets();
 
@@ -136,6 +154,7 @@ final public class IpConnectivityMetrics extends SystemService {
     private int append(ConnectivityMetricsEvent event) {
         if (DBG) Log.d(TAG, "logEvent: " + event);
         synchronized (mLock) {
+            mEventLog.append(event);
             final int left = mCapacity - mBuffer.size();
             if (event == null) {
                 return left;
@@ -220,6 +239,23 @@ final public class IpConnectivityMetrics extends SystemService {
         }
     }
 
+    /**
+     * Prints for bug reports the content of the rolling event log and the
+     * content of Netd event listener.
+     */
+    private void cmdDumpsys(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final ConnectivityMetricsEvent[] events;
+        synchronized (mLock) {
+            events = mEventLog.toArray();
+        }
+        for (ConnectivityMetricsEvent ev : events) {
+            pw.println(ev.toString());
+        }
+        if (mNetdListener != null) {
+            mNetdListener.list(pw);
+        }
+    }
+
     private void cmdStats(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mLock) {
             pw.println("Buffered events: " + mBuffer.size());
@@ -262,7 +298,8 @@ final public class IpConnectivityMetrics extends SystemService {
                     cmdFlush(fd, pw, args);
                     return;
                 case CMD_DUMPSYS:
-                    // Fallthrough to CMD_LIST when dumpsys.cpp dumps services states (bug reports)
+                    cmdDumpsys(fd, pw, args);
+                    return;
                 case CMD_LIST:
                     cmdList(fd, pw, args);
                     return;
