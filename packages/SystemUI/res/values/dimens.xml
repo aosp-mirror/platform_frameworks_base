@@ -80,6 +80,12 @@
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
+    <!-- The increase in minHeight that is allowed when the notification is colorized -->
+    <dimen name="notification_height_increase_colorized">11sp</dimen>
+
+    <!-- The increase in minHeight that is allowed when the notification is colorized and has increased height (i.e messages) -->
+    <dimen name="notification_height_increase_colorized_increased">13sp</dimen>
+
     <!-- Height of a large notification in the status bar -->
     <dimen name="notification_max_height">284dp</dimen>
 

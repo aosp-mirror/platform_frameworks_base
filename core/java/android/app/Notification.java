@@ -67,6 +67,7 @@ import android.text.style.TextAppearanceSpan;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -3905,6 +3906,7 @@ public class Notification implements Parcelable
             if (p.title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
+                updateTextSizePrimary(contentView, R.id.title);
                 if (!p.ambient) {
                     setTextViewColorPrimary(contentView, R.id.title);
                 }
@@ -3916,6 +3918,7 @@ public class Notification implements Parcelable
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
                         : com.android.internal.R.id.text;
                 contentView.setTextViewText(textId, processTextSpans(p.text));
+                updateTextSizeSecondary(contentView, textId);
                 if (!p.ambient) {
                     setTextViewColorSecondary(contentView, textId);
                 }
@@ -3925,6 +3928,25 @@ public class Notification implements Parcelable
             setContentMinHeight(contentView, showProgress || mN.hasLargeIcon());
 
             return contentView;
+        }
+
+        private void updateTextSizeSecondary(RemoteViews contentView, int textId) {
+            updateTextSizeColorized(contentView, textId,
+                    com.android.internal.R.dimen.notification_text_size_colorized,
+                    com.android.internal.R.dimen.notification_text_size);
+        }
+
+        private void updateTextSizePrimary(RemoteViews contentView, int textId) {
+            updateTextSizeColorized(contentView, textId,
+                    com.android.internal.R.dimen.notification_title_text_size_colorized,
+                    com.android.internal.R.dimen.notification_title_text_size);
+        }
+
+        private void updateTextSizeColorized(RemoteViews contentView, int textId,
+                int colorizedDimen, int normalDimen) {
+            int size = mContext.getResources().getDimensionPixelSize(isColorized()
+                    ? colorizedDimen : normalDimen);
+            contentView.setTextViewTextSize(textId, TypedValue.COMPLEX_UNIT_PX, size);
         }
 
         private CharSequence processTextSpans(CharSequence text) {
@@ -5852,6 +5874,7 @@ public class Notification implements Parcelable
             builder.setTextViewColorSecondary(contentView, R.id.big_text);
             contentView.setViewVisibility(R.id.big_text,
                     TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
+            builder.updateTextSizeSecondary(contentView, R.id.big_text);
             contentView.setBoolean(R.id.big_text, "setHasImage", builder.mN.hasLargeIcon());
         }
     }
@@ -6185,6 +6208,7 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(rowId, View.VISIBLE);
                 contentView.setTextViewText(rowId, mBuilder.processTextSpans(
                         makeMessageLine(m, mBuilder)));
+                mBuilder.updateTextSizeSecondary(contentView, rowId);
                 mBuilder.setTextViewColorSecondary(contentView, rowId);
 
                 if (contractedMessage == m) {
@@ -6552,6 +6576,7 @@ public class Notification implements Parcelable
                     contentView.setViewVisibility(rowIds[i], View.VISIBLE);
                     contentView.setTextViewText(rowIds[i],
                             mBuilder.processTextSpans(mBuilder.processLegacyText(str)));
+                    mBuilder.updateTextSizeSecondary(contentView, rowIds[i]);
                     mBuilder.setTextViewColorSecondary(contentView, rowIds[i]);
                     contentView.setViewPadding(rowIds[i], 0, topPadding, 0, 0);
                     handleInboxImageMargin(contentView, rowIds[i], first);
