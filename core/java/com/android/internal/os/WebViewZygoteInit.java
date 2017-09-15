@@ -69,8 +69,7 @@ class WebViewZygoteInit {
         }
 
         @Override
-        protected boolean handlePreloadPackage(String packagePath, String libsPath,
-                                               String cacheKey) {
+        protected void handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
             Log.i(TAG, "Beginning package preload");
             // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
             // our children will reuse the same classloader instead of creating their own.
@@ -106,12 +105,10 @@ class WebViewZygoteInit {
                 DataOutputStream socketOut = getSocketOutputStream();
                 socketOut.writeInt(preloadSucceeded ? 1 : 0);
             } catch (IOException ioe) {
-                Log.e(TAG, "Error writing to command socket", ioe);
-                return true;
+                throw new IllegalStateException("Error writing to command socket", ioe);
             }
 
             Log.i(TAG, "Package preload done");
-            return false;
         }
     }
 
@@ -125,16 +122,23 @@ class WebViewZygoteInit {
             throw new RuntimeException("Failed to setpgid(0,0)", ex);
         }
 
+        final Runnable caller;
         try {
             sServer.registerServerSocket("webview_zygote");
-            sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
-            sServer.closeServerSocket();
-        } catch (Zygote.MethodAndArgsCaller caller) {
-            caller.run();
+            // The select loop returns early in the child process after a fork and
+            // loops forever in the zygote.
+            caller = sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
         } catch (RuntimeException e) {
             Log.e(TAG, "Fatal exception:", e);
+            throw e;
+        } finally {
+            sServer.closeServerSocket();
         }
 
-        System.exit(0);
+        // We're in the child process and have exited the select loop. Proceed to execute the
+        // command.
+        if (caller != null) {
+            caller.run();
+        }
     }
 }

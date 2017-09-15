@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.icu.impl.CacheValue;
 import android.icu.text.DecimalFormatSymbols;
 import android.icu.util.ULocale;
-import android.net.LocalServerSocket;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.IInstalld;
@@ -452,10 +451,7 @@ public class ZygoteInit {
     /**
      * Finish remaining work for the newly forked system server process.
      */
-    private static void handleSystemServerProcess(
-            ZygoteConnection.Arguments parsedArgs)
-            throws Zygote.MethodAndArgsCaller {
-
+    private static Runnable handleSystemServerProcess(ZygoteConnection.Arguments parsedArgs) {
         // set umask to 0077 so new files and directories will default to owner-only permissions.
         Os.umask(S_IRWXG | S_IRWXO);
 
@@ -501,6 +497,8 @@ public class ZygoteInit {
             WrapperInit.execApplication(parsedArgs.invokeWith,
                     parsedArgs.niceName, parsedArgs.targetSdkVersion,
                     VMRuntime.getCurrentInstructionSet(), null, args);
+
+            throw new IllegalStateException("Unexpected return from WrapperInit.execApplication");
         } else {
             ClassLoader cl = null;
             if (systemServerClasspath != null) {
@@ -512,7 +510,7 @@ public class ZygoteInit {
             /*
              * Pass the remaining arguments to SystemServer.
              */
-            ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);
+            return ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);
         }
 
         /* should never reach here */
@@ -594,10 +592,13 @@ public class ZygoteInit {
     }
 
     /**
-     * Prepare the arguments and fork for the system server process.
+     * Prepare the arguments and forks for the system server process.
+     *
+     * Returns an {@code Runnable} that provides an entrypoint into system_server code in the
+     * child process, and {@code null} in the parent.
      */
-    private static boolean startSystemServer(String abiList, String socketName, ZygoteServer zygoteServer)
-            throws Zygote.MethodAndArgsCaller, RuntimeException {
+    private static Runnable forkSystemServer(String abiList, String socketName,
+            ZygoteServer zygoteServer) {
         long capabilities = posixCapabilitiesAsBits(
             OsConstants.CAP_IPC_LOCK,
             OsConstants.CAP_KILL,
@@ -662,10 +663,10 @@ public class ZygoteInit {
             }
 
             zygoteServer.closeServerSocket();
-            handleSystemServerProcess(parsedArgs);
+            return handleSystemServerProcess(parsedArgs);
         }
 
-        return true;
+        return null;
     }
 
     /**
@@ -696,6 +697,7 @@ public class ZygoteInit {
             throw new RuntimeException("Failed to setpgid(0,0)", ex);
         }
 
+        final Runnable caller;
         try {
             // Report Zygote start time to tron unless it is a runtime restart
             if (!"1".equals(SystemProperties.get("sys.boot_completed"))) {
@@ -765,19 +767,32 @@ public class ZygoteInit {
             ZygoteHooks.stopZygoteNoThreadCreation();
 
             if (startSystemServer) {
-                startSystemServer(abiList, socketName, zygoteServer);
+                Runnable r = forkSystemServer(abiList, socketName, zygoteServer);
+
+                // {@code r == null} in the parent (zygote) process, and {@code r != null} in the
+                // child (system_server) process.
+                if (r != null) {
+                    r.run();
+                    return;
+                }
             }
 
             Log.i(TAG, "Accepting command socket connections");
-            zygoteServer.runSelectLoop(abiList);
 
-            zygoteServer.closeServerSocket();
-        } catch (Zygote.MethodAndArgsCaller caller) {
-            caller.run();
+            // The select loop returns early in the child process after a fork and
+            // loops forever in the zygote.
+            caller = zygoteServer.runSelectLoop(abiList);
         } catch (Throwable ex) {
             Log.e(TAG, "System zygote died with exception", ex);
-            zygoteServer.closeServerSocket();
             throw ex;
+        } finally {
+            zygoteServer.closeServerSocket();
+        }
+
+        // We're in the child process and have exited the select loop. Proceed to execute the
+        // command.
+        if (caller != null) {
+            caller.run();
         }
     }
 
@@ -821,8 +836,7 @@ public class ZygoteInit {
      * @param targetSdkVersion target SDK version
      * @param argv arg strings
      */
-    public static final void zygoteInit(int targetSdkVersion, String[] argv,
-            ClassLoader classLoader) throws Zygote.MethodAndArgsCaller {
+    public static final Runnable zygoteInit(int targetSdkVersion, String[] argv, ClassLoader classLoader) {
         if (RuntimeInit.DEBUG) {
             Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from zygote");
         }
@@ -832,7 +846,7 @@ public class ZygoteInit {
 
         RuntimeInit.commonInit();
         ZygoteInit.nativeZygoteInit();
-        RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+        return RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
     }
 
     private static final native void nativeZygoteInit();
