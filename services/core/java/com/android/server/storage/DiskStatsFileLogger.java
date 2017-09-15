@@ -56,10 +56,12 @@ public class DiskStatsFileLogger {
     public static final String SYSTEM_KEY = "systemSize";
     public static final String MISC_KEY = "otherSize";
     public static final String APP_SIZE_AGG_KEY = "appSize";
+    public static final String APP_DATA_SIZE_AGG_KEY = "appDataSize";
     public static final String APP_CACHE_AGG_KEY = "cacheSize";
     public static final String PACKAGE_NAMES_KEY = "packageNames";
     public static final String APP_SIZES_KEY = "appSizes";
     public static final String APP_CACHES_KEY = "cacheSizes";
+    public static final String APP_DATA_KEY = "appDataSizes";
     public static final String LAST_QUERY_TIMESTAMP_KEY = "queryTime";
 
     private MeasurementResult mResult;
@@ -114,31 +116,39 @@ public class DiskStatsFileLogger {
     private void addAppsToJson(JSONObject json) throws JSONException {
         JSONArray names = new JSONArray();
         JSONArray appSizeList = new JSONArray();
+        JSONArray appDataSizeList = new JSONArray();
         JSONArray cacheSizeList = new JSONArray();
 
         long appSizeSum = 0L;
+        long appDataSizeSum = 0L;
         long cacheSizeSum = 0L;
         boolean isExternal = Environment.isExternalStorageEmulated();
         for (Map.Entry<String, PackageStats> entry : filterOnlyPrimaryUser().entrySet()) {
             PackageStats stat = entry.getValue();
-            long appSize = stat.codeSize + stat.dataSize;
+            long appSize = stat.codeSize;
+            long appDataSize = stat.dataSize;
             long cacheSize = stat.cacheSize;
             if (isExternal) {
-                appSize += stat.externalCodeSize + stat.externalDataSize;
+                appSize += stat.externalCodeSize;
+                appDataSize += stat.externalDataSize;
                 cacheSize += stat.externalCacheSize;
             }
             appSizeSum += appSize;
+            appDataSizeSum += appDataSize;
             cacheSizeSum += cacheSize;
 
             names.put(stat.packageName);
             appSizeList.put(appSize);
+            appDataSizeList.put(appDataSize);
             cacheSizeList.put(cacheSize);
         }
         json.put(PACKAGE_NAMES_KEY, names);
         json.put(APP_SIZES_KEY, appSizeList);
         json.put(APP_CACHES_KEY, cacheSizeList);
+        json.put(APP_DATA_KEY, appDataSizeList);
         json.put(APP_SIZE_AGG_KEY, appSizeSum);
         json.put(APP_CACHE_AGG_KEY, cacheSizeSum);
+        json.put(APP_DATA_SIZE_AGG_KEY, appDataSizeSum);
     }
 
     /**
