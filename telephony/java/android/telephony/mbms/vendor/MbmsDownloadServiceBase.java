@@ -20,17 +20,21 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.mbms.DownloadStateCallback;
+import android.telephony.MbmsDownloadSession;
 import android.telephony.mbms.DownloadRequest;
+import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.FileServiceInfo;
 import android.telephony.mbms.IDownloadStateCallback;
-import android.telephony.mbms.IMbmsDownloadManagerCallback;
-import android.telephony.mbms.MbmsDownloadManagerCallback;
+import android.telephony.mbms.IMbmsDownloadSessionCallback;
+import android.telephony.mbms.MbmsDownloadSessionCallback;
 import android.telephony.mbms.MbmsException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for MbmsDownloadService. The middleware should return an instance of this object from
@@ -39,6 +43,9 @@ import java.util.List;
  */
 @SystemApi
 public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
+    private final Map<IBinder, DownloadStateCallback> mDownloadCallbackBinderMap = new HashMap<>();
+    private final Map<IBinder, DeathRecipient> mDownloadCallbackDeathRecipients = new HashMap<>();
+
     /**
      * Initialize the download service for this app and subId, registering the listener.
      *
@@ -48,12 +55,12 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      *
      * May return any value from {@link android.telephony.mbms.MbmsException.InitializationErrors}
      * or {@link MbmsException#SUCCESS}. Non-successful error codes will be passed to the app via
-     * {@link IMbmsDownloadManagerCallback#error(int, String)}.
+     * {@link IMbmsDownloadSessionCallback#onError(int, String)}.
      *
      * @param callback The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
      */
-    public int initialize(int subscriptionId, MbmsDownloadManagerCallback callback)
+    public int initialize(int subscriptionId, MbmsDownloadSessionCallback callback)
             throws RemoteException {
         return 0;
     }
@@ -64,7 +71,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      */
     @Override
     public final int initialize(final int subscriptionId,
-            final IMbmsDownloadManagerCallback callback) throws RemoteException {
+            final IMbmsDownloadSessionCallback callback) throws RemoteException {
         final int uid = Binder.getCallingUid();
         callback.asBinder().linkToDeath(new DeathRecipient() {
             @Override
@@ -73,11 +80,11 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
             }
         }, 0);
 
-        return initialize(subscriptionId, new MbmsDownloadManagerCallback() {
+        return initialize(subscriptionId, new MbmsDownloadSessionCallback() {
             @Override
             public void onError(int errorCode, String message) {
                 try {
-                    callback.error(errorCode, message);
+                    callback.onError(errorCode, message);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -86,7 +93,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
             @Override
             public void onFileServicesUpdated(List<FileServiceInfo> services) {
                 try {
-                    callback.fileServicesUpdated(services);
+                    callback.onFileServicesUpdated(services);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -95,7 +102,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
             @Override
             public void onMiddlewareReady() {
                 try {
-                    callback.middlewareReady();
+                    callback.onMiddlewareReady();
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
                 }
@@ -106,7 +113,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     /**
      * Registers serviceClasses of interest with the appName/subId key.
      * Starts async fetching data on streaming services of matching classes to be reported
-     * later via {@link IMbmsDownloadManagerCallback#fileServicesUpdated(List)}
+     * later via {@link IMbmsDownloadSessionCallback#onFileServicesUpdated(List)}
      *
      * Note that subsequent calls with the same uid and subId will replace
      * the service class list.
@@ -121,7 +128,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      *         {@link MbmsException.GeneralErrors#ERROR_MIDDLEWARE_NOT_YET_READY},
      */
     @Override
-    public int getFileServices(int subscriptionId, List<String> serviceClasses)
+    public int requestUpdateFileServices(int subscriptionId, List<String> serviceClasses)
             throws RemoteException {
         return 0;
     }
@@ -155,12 +162,32 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * this is not the case, an {@link IllegalStateException} may be thrown.
      *
      * @param downloadRequest An object describing the set of files to be downloaded.
-     * @param callback A callback through which the middleware can provide progress updates to
-     *                 the app while both are still running.
      * @return Any error from {@link android.telephony.mbms.MbmsException.GeneralErrors}
      *         or {@link MbmsException#SUCCESS}
      */
-    public int download(DownloadRequest downloadRequest, DownloadStateCallback callback) {
+    @Override
+    public int download(DownloadRequest downloadRequest) throws RemoteException {
+        return 0;
+    }
+
+    /**
+     * Registers a download state callbacks for the provided {@link DownloadRequest}.
+     *
+     * This method is called by the app when it wants to request updates on the progress or
+     * status of the download.
+     *
+     * If the middleware is not aware of a download having been requested with the provided
+     *
+     * {@link DownloadRequest} in the past,
+     * {@link android.telephony.mbms.MbmsException.DownloadErrors#ERROR_UNKNOWN_DOWNLOAD_REQUEST}
+     * must be returned.
+     *
+     * @param downloadRequest The {@link DownloadRequest} that was used to initiate the download
+     *                        for which progress updates are being requested.
+     * @param callback The callback object to use.
+     */
+    public int registerStateCallback(DownloadRequest downloadRequest,
+            DownloadStateCallback callback) throws RemoteException {
         return 0;
     }
 
@@ -169,36 +196,101 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @hide
      */
     @Override
-    public final int download(DownloadRequest downloadRequest, IDownloadStateCallback callback)
+    public final int registerStateCallback(
+            final DownloadRequest downloadRequest, final IDownloadStateCallback callback)
             throws RemoteException {
         final int uid = Binder.getCallingUid();
-        callback.asBinder().linkToDeath(new DeathRecipient() {
+        DeathRecipient deathRecipient = new DeathRecipient() {
             @Override
             public void binderDied() {
                 onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
+                mDownloadCallbackBinderMap.remove(callback.asBinder());
+                mDownloadCallbackDeathRecipients.remove(callback.asBinder());
             }
-        }, 0);
+        };
+        mDownloadCallbackDeathRecipients.put(callback.asBinder(), deathRecipient);
+        callback.asBinder().linkToDeath(deathRecipient, 0);
 
-        return download(downloadRequest, new DownloadStateCallback() {
+        DownloadStateCallback exposedCallback = new DownloadStateCallback() {
             @Override
             public void onProgressUpdated(DownloadRequest request, FileInfo fileInfo, int
                     currentDownloadSize, int fullDownloadSize, int currentDecodedSize, int
                     fullDecodedSize) {
                 try {
-                    callback.progress(request, fileInfo, currentDownloadSize, fullDownloadSize,
+                    callback.onProgressUpdated(request, fileInfo, currentDownloadSize,
+                            fullDownloadSize,
                             currentDecodedSize, fullDecodedSize);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
                 }
             }
-        });
+
+            @Override
+            public void onStateUpdated(DownloadRequest request, FileInfo fileInfo,
+                    @MbmsDownloadSession.DownloadStatus int state) {
+                try {
+                    callback.onStateUpdated(request, fileInfo, state);
+                } catch (RemoteException e) {
+                    onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
+                }
+            }
+        };
+
+        mDownloadCallbackBinderMap.put(callback.asBinder(), exposedCallback);
+
+        return registerStateCallback(downloadRequest, exposedCallback);
     }
 
+    /**
+     * Un-registers a download state callbacks for the provided {@link DownloadRequest}.
+     *
+     * This method is called by the app when it no longer wants to request updates on the
+     * download.
+     *
+     * If the middleware is not aware of a download having been requested with the provided
+     * {@link DownloadRequest} in the past,
+     * {@link android.telephony.mbms.MbmsException.DownloadErrors#ERROR_UNKNOWN_DOWNLOAD_REQUEST}
+     * must be returned.
+     *
+     * @param downloadRequest The {@link DownloadRequest} that was used to register the callback
+     * @param callback The callback object that
+     *                 {@link #registerStateCallback(DownloadRequest, DownloadStateCallback)}
+     *                 was called with.
+     */
+    public int unregisterStateCallback(DownloadRequest downloadRequest,
+            DownloadStateCallback callback) throws RemoteException {
+        return 0;
+    }
+
+    /**
+     * Actual AIDL implementation -- hides the callback AIDL from the API.
+     * @hide
+     */
+    @Override
+    public final int unregisterStateCallback(
+            final DownloadRequest downloadRequest, final IDownloadStateCallback callback)
+            throws RemoteException {
+        DeathRecipient deathRecipient =
+                mDownloadCallbackDeathRecipients.remove(callback.asBinder());
+        if (deathRecipient == null) {
+            throw new IllegalArgumentException("Unknown callback");
+        }
+
+        callback.asBinder().unlinkToDeath(deathRecipient, 0);
+
+        DownloadStateCallback exposedCallback =
+                mDownloadCallbackBinderMap.remove(callback.asBinder());
+        if (exposedCallback == null) {
+            throw new IllegalArgumentException("Unknown callback");
+        }
+
+        return unregisterStateCallback(downloadRequest, exposedCallback);
+    }
 
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from the calling
      * application, identified by its uid. A pending request is one that was issued via
-     * {@link #download(DownloadRequest, DownloadStateCallback)} but not cancelled through
+     * {@link #download(DownloadRequest)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * The middleware must return a non-null result synchronously or throw an exception
      * inheriting from {@link RuntimeException}.
@@ -232,7 +324,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      *
      * If the middleware has not yet been properly initialized or if it has no records of the
      * file indicated by {@code fileInfo} being associated with {@code downloadRequest},
-     * {@link android.telephony.MbmsDownloadManager#STATUS_UNKNOWN} must be returned.
+     * {@link MbmsDownloadSession#STATUS_UNKNOWN} must be returned.
      *
      * @param downloadRequest The download request to query.
      * @param fileInfo The particular file within the request to get information on.
@@ -266,7 +358,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * Signals that the app wishes to dispose of the session identified by the
      * {@code subscriptionId} argument and the caller's uid. No notification back to the
      * app is required for this operation, and the corresponding callback provided via
-     * {@link #initialize(int, IMbmsDownloadManagerCallback)} should no longer be used
+     * {@link #initialize(int, IMbmsDownloadSessionCallback)} should no longer be used
      * after this method has been called by the app.
      *
      * Any download requests issued by the app should remain in effect until the app calls

@@ -25,6 +25,7 @@ import android.os.RemoteException;
 public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
     private final Handler mHandler;
     private final DownloadStateCallback mAppCallback;
+    private volatile boolean mIsStopped = false;
 
     public InternalDownloadStateCallback(DownloadStateCallback appCallback, Handler handler) {
         mAppCallback = appCallback;
@@ -32,9 +33,13 @@ public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
     }
 
     @Override
-    public void progress(final DownloadRequest request, final FileInfo fileInfo,
+    public void onProgressUpdated(final DownloadRequest request, final FileInfo fileInfo,
             final int currentDownloadSize, final int fullDownloadSize, final int currentDecodedSize,
             final int fullDecodedSize) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -45,13 +50,21 @@ public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
     }
 
     @Override
-    public void state(final DownloadRequest request, final FileInfo fileInfo, final int state)
-            throws RemoteException {
+    public void onStateUpdated(final DownloadRequest request, final FileInfo fileInfo,
+            final int state) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onStateChanged(request, fileInfo, state);
+                mAppCallback.onStateUpdated(request, fileInfo, state);
             }
         });
+    }
+
+    public void stop() {
+        mIsStopped = true;
     }
 }

@@ -31,7 +31,7 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void onError(int errorCode, String message) throws RemoteException {
+    public void onError(final int errorCode, final String message) throws RemoteException {
         if (mIsStopped) {
             return;
         }
@@ -45,7 +45,7 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void onStreamStateUpdated(int state, int reason) throws RemoteException {
+    public void onStreamStateUpdated(final int state, final int reason) throws RemoteException {
         if (mIsStopped) {
             return;
         }
@@ -73,7 +73,7 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void onBroadcastSignalStrengthUpdated(int signalStrength) throws RemoteException {
+    public void onBroadcastSignalStrengthUpdated(final int signalStrength) throws RemoteException {
         if (mIsStopped) {
             return;
         }
@@ -87,7 +87,7 @@ public class InternalStreamingServiceCallback extends IStreamingServiceCallback.
     }
 
     @Override
-    public void onStreamMethodUpdated(int methodType) throws RemoteException {
+    public void onStreamMethodUpdated(final int methodType) throws RemoteException {
         if (mIsStopped) {
             return;
         }
