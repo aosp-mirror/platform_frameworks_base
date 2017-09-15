@@ -39,6 +39,8 @@ import org.robolectric.annotation.Config;
 public class BluetoothDeviceLayerDrawableTest {
     private static final int RES_ID = R.drawable.ic_bt_cellphone;
     private static final int BATTERY_LEVEL = 15;
+    private static final float BATTERY_ICON_SCALE = 0.75f;
+    private static final int BATTERY_ICON_PADDING_TOP = 6;
     private static final float TOLERANCE = 0.001f;
 
     private Context mContext;
@@ -54,9 +56,24 @@ public class BluetoothDeviceLayerDrawableTest {
                 mContext, RES_ID, BATTERY_LEVEL);
 
         assertThat(drawable.getDrawable(0)).isInstanceOf(VectorDrawable.class);
-        assertThat(drawable.getDrawable(1)).isInstanceOf(BitmapDrawable.class);
-        assertThat(drawable.getLayerInsetTop(1)).isEqualTo(
-                drawable.getDrawable(0).getIntrinsicHeight());
+        assertThat(drawable.getDrawable(1)).isInstanceOf(
+                BluetoothDeviceLayerDrawable.BatteryMeterDrawable.class);
+        assertThat(drawable.getLayerInsetStart(1)).isEqualTo(
+                drawable.getDrawable(0).getIntrinsicWidth());
+        assertThat(drawable.getLayerInsetTop(1)).isEqualTo(0);
+    }
+
+    @Test
+    public void testCreateLayerDrawable_withIconScale_configCorrect() {
+        BluetoothDeviceLayerDrawable drawable = BluetoothDeviceLayerDrawable.createLayerDrawable(
+                mContext, RES_ID, BATTERY_LEVEL, BATTERY_ICON_SCALE);
+
+        assertThat(drawable.getDrawable(0)).isInstanceOf(VectorDrawable.class);
+        assertThat(drawable.getDrawable(1)).isInstanceOf(
+                BluetoothDeviceLayerDrawable.BatteryMeterDrawable.class);
+        assertThat(drawable.getLayerInsetStart(1)).isEqualTo(
+                drawable.getDrawable(0).getIntrinsicWidth());
+        assertThat(drawable.getLayerInsetTop(1)).isEqualTo(BATTERY_ICON_PADDING_TOP);
     }
 
     @Test
@@ -65,7 +82,7 @@ public class BluetoothDeviceLayerDrawableTest {
                 new BluetoothDeviceLayerDrawable.BatteryMeterDrawable(mContext,
                         R.color.meter_background_color, BATTERY_LEVEL);
 
-        assertThat(batteryDrawable.getAspectRatio()).isWithin(TOLERANCE).of(0.45f);
+        assertThat(batteryDrawable.getAspectRatio()).isWithin(TOLERANCE).of(0.35f);
         assertThat(batteryDrawable.getRadiusRatio()).isWithin(TOLERANCE).of(0f);
         assertThat(batteryDrawable.getBatteryLevel()).isEqualTo(BATTERY_LEVEL);
     }
