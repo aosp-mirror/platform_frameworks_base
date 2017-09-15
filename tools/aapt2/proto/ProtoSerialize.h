@@ -30,11 +30,10 @@ namespace aapt {
 
 class CompiledFileOutputStream {
  public:
-  explicit CompiledFileOutputStream(
-      google::protobuf::io::ZeroCopyOutputStream* out);
+  explicit CompiledFileOutputStream(google::protobuf::io::ZeroCopyOutputStream* out);
 
   void WriteLittleEndian32(uint32_t value);
-  void WriteCompiledFile(const pb::CompiledFile* compiledFile);
+  void WriteCompiledFile(const pb::internal::CompiledFile* compiledFile);
   void WriteData(const BigBuffer* buffer);
   void WriteData(const void* data, size_t len);
   bool HadError();
@@ -52,7 +51,7 @@ class CompiledFileInputStream {
   explicit CompiledFileInputStream(const void* data, size_t size);
 
   bool ReadLittleEndian32(uint32_t* outVal);
-  bool ReadCompiledFile(pb::CompiledFile* outVal);
+  bool ReadCompiledFile(pb::internal::CompiledFile* outVal);
   bool ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen);
 
  private:
@@ -64,13 +63,12 @@ class CompiledFileInputStream {
 };
 
 std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table);
-std::unique_ptr<ResourceTable> DeserializeTableFromPb(
-    const pb::ResourceTable& pbTable, const Source& source, IDiagnostics* diag);
+std::unique_ptr<ResourceTable> DeserializeTableFromPb(const pb::ResourceTable& pbTable,
+                                                      const Source& source, IDiagnostics* diag);
 
-std::unique_ptr<pb::CompiledFile> SerializeCompiledFileToPb(
-    const ResourceFile& file);
+std::unique_ptr<pb::internal::CompiledFile> SerializeCompiledFileToPb(const ResourceFile& file);
 std::unique_ptr<ResourceFile> DeserializeCompiledFileFromPb(
-    const pb::CompiledFile& pbFile, const Source& source, IDiagnostics* diag);
+    const pb::internal::CompiledFile& pbFile, const Source& source, IDiagnostics* diag);
 
 }  // namespace aapt
 

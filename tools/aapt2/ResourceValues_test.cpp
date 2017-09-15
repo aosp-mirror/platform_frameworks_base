@@ -54,19 +54,19 @@ TEST(ResourceValuesTest, ArrayEquals) {
   StringPool pool;
 
   Array a;
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   Array b;
-  b.items.push_back(util::make_unique<String>(pool.MakeRef("une")));
-  b.items.push_back(util::make_unique<String>(pool.MakeRef("deux")));
+  b.elements.push_back(util::make_unique<String>(pool.MakeRef("une")));
+  b.elements.push_back(util::make_unique<String>(pool.MakeRef("deux")));
 
   Array c;
-  c.items.push_back(util::make_unique<String>(pool.MakeRef("uno")));
+  c.elements.push_back(util::make_unique<String>(pool.MakeRef("uno")));
 
   Array d;
-  d.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  d.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  d.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  d.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   EXPECT_FALSE(a.Equals(&b));
   EXPECT_FALSE(a.Equals(&c));
@@ -78,8 +78,8 @@ TEST(ResourceValuesTest, ArrayClone) {
   StringPool pool;
 
   Array a;
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   std::unique_ptr<Array> b(a.Clone(&pool));
   EXPECT_TRUE(a.Equals(b.get()));

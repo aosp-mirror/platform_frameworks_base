@@ -27,11 +27,11 @@
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
-bool DumpCompiledFile(const pb::CompiledFile& pb_file, const void* data, size_t len,
+bool DumpCompiledFile(const pb::internal::CompiledFile& pb_file, const void* data, size_t len,
                       const Source& source, IAaptContext* context) {
   std::unique_ptr<ResourceFile> file =
       DeserializeCompiledFileFromPb(pb_file, source, context->GetDiagnostics());
@@ -118,7 +118,7 @@ bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
       }
 
       for (uint32_t i = 0; i < num_files; i++) {
-        pb::CompiledFile compiled_file;
+        pb::internal::CompiledFile compiled_file;
         if (!input.ReadCompiledFile(&compiled_file)) {
           context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
           return false;

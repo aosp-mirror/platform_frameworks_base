@@ -18,6 +18,7 @@
 #define AAPT_JAVA_CLASSDEFINITION_H
 
 #include <ostream>
+#include <set>
 #include <string>
 
 #include "android-base/macros.h"
@@ -37,9 +38,13 @@ class ClassMember {
  public:
   virtual ~ClassMember() = default;
 
-  AnnotationProcessor* GetCommentBuilder() { return &processor_; }
+  AnnotationProcessor* GetCommentBuilder() {
+    return &processor_;
+  }
 
   virtual bool empty() const = 0;
+
+  virtual const std::string& GetName() const = 0;
 
   // Writes the class member to the out stream. Subclasses should derive this method
   // to write their own data. Call this base method from the subclass to write out
@@ -57,7 +62,13 @@ class PrimitiveMember : public ClassMember {
   PrimitiveMember(const android::StringPiece& name, const T& val)
       : name_(name.to_string()), val_(val) {}
 
-  bool empty() const override { return false; }
+  bool empty() const override {
+    return false;
+  }
+
+  const std::string& GetName() const override {
+    return name_;
+  }
 
   void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
@@ -83,7 +94,13 @@ class PrimitiveMember<std::string> : public ClassMember {
   PrimitiveMember(const android::StringPiece& name, const std::string& val)
       : name_(name.to_string()), val_(val) {}
 
-  bool empty() const override { return false; }
+  bool empty() const override {
+    return false;
+  }
+
+  const std::string& GetName() const override {
+    return name_;
+  }
 
   void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
@@ -109,9 +126,17 @@ class PrimitiveArrayMember : public ClassMember {
  public:
   explicit PrimitiveArrayMember(const android::StringPiece& name) : name_(name.to_string()) {}
 
-  void AddElement(const T& val) { elements_.push_back(val); }
+  void AddElement(const T& val) {
+    elements_.push_back(val);
+  }
 
-  bool empty() const override { return false; }
+  bool empty() const override {
+    return false;
+  }
+
+  const std::string& GetName() const override {
+    return name_;
+  }
 
   void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
@@ -154,6 +179,11 @@ class MethodDefinition : public ClassMember {
   // formatting may be broken.
   void AppendStatement(const android::StringPiece& statement);
 
+  // Not quite the same as a name, but good enough.
+  const std::string& GetName() const override {
+    return signature_;
+  }
+
   // Even if the method is empty, we always want to write the method signature.
   bool empty() const override { return false; }
 
@@ -175,19 +205,34 @@ class ClassDefinition : public ClassMember {
   ClassDefinition(const android::StringPiece& name, ClassQualifier qualifier, bool createIfEmpty)
       : name_(name.to_string()), qualifier_(qualifier), create_if_empty_(createIfEmpty) {}
 
-  void AddMember(std::unique_ptr<ClassMember> member) {
-    members_.push_back(std::move(member));
-  }
+  enum class Result {
+    kAdded,
+    kOverridden,
+  };
+
+  Result AddMember(std::unique_ptr<ClassMember> member);
 
   bool empty() const override;
+
+  const std::string& GetName() const override {
+    return name_;
+  }
+
   void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override;
 
  private:
+  struct ClassMemberCompare {
+    using T = std::unique_ptr<ClassMember>;
+    bool operator()(const T& a, const T& b) const {
+      return a->GetName() < b->GetName();
+    }
+  };
+
   std::string name_;
   ClassQualifier qualifier_;
   bool create_if_empty_;
-  std::vector<std::unique_ptr<ClassMember>> members_;
+  std::set<std::unique_ptr<ClassMember>, ClassMemberCompare> members_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassDefinition);
 };

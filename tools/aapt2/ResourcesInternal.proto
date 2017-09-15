@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option java_package = "android.aapt.pb.internal";
+option optimize_for = LITE_RUNTIME;
+
+import "frameworks/base/tools/aapt2/Resources.proto";
+
+package aapt.pb.internal;
+
+// The top level message representing an external resource file (layout XML, PNG, etc).
+// This is used to represent a compiled file before it is linked. Only useful to aapt2.
+message CompiledFile {
+  message Symbol {
+    // The name of the symbol (in the form package:type/name).
+    optional string resource_name = 1;
+
+    // The position in the file at which this symbol is defined. For debug use.
+    optional aapt.pb.SourcePosition source = 2;
+  }
+
+  // The name of the resource (in the form package:type/name).
+  optional string resource_name = 1;
+
+  // The configuration for which the resource is defined.
+  optional aapt.pb.ConfigDescription config = 2;
+
+  // The filesystem path to where the source file originated.
+  // Mainly used to display helpful error messages.
+  optional string source_path = 3;
+
+  // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
+  repeated Symbol exported_symbol = 4;
+
+  // If this is a compiled XML file, this is the root node.
+  optional aapt.pb.XmlNode xml_root = 5;
+}
