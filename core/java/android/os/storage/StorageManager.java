@@ -221,8 +221,6 @@ public class StorageManager {
 
     /** {@hide} */
     public static final int FSTRIM_FLAG_DEEP = IVold.FSTRIM_FLAG_DEEP_TRIM;
-    /** {@hide} */
-    public static final int FSTRIM_FLAG_BENCHMARK = IVold.FSTRIM_FLAG_BENCHMARK_AFTER;
 
     /** @hide The volume is not encrypted. */
     public static final int ENCRYPTION_STATE_NONE =
