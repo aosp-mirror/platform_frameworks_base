@@ -292,6 +292,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     @Override
     public void draw(Canvas c) {
         final int level = mLevel;
+        final Rect bounds = getBounds();
 
         if (level == -1) return;
 
@@ -300,8 +301,10 @@ public class BatteryMeterDrawableBase extends Drawable {
         final int width = (int) (getAspectRatio() * mHeight);
         final int px = (mWidth - width) / 2;
         final int buttonHeight = Math.round(height * mButtonHeightFraction);
+        final int left = mPadding.left + bounds.left;
+        final int top = bounds.bottom - mPadding.bottom - height;
 
-        mFrame.set(mPadding.left, mPadding.top, width + mPadding.left, height + mPadding.top);
+        mFrame.set(left, top, width + left, height + top);
         mFrame.offset(px, 0);
 
         // button-frame: area above the battery body
