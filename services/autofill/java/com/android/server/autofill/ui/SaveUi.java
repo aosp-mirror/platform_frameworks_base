@@ -22,10 +22,14 @@ import static com.android.server.autofill.Helper.sVerbose;
 import android.annotation.NonNull;
 import android.app.Dialog;
 import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -43,7 +47,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManager;
-import android.view.autofill.IAutoFillManagerClient;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -121,9 +125,9 @@ final class SaveUi {
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
-           @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-           @NonNull ValueFinder valueFinder, @NonNull OverlayControl overlayControl,
-           @NonNull OnSaveListener listener) {
+           @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
+           @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
+           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener) {
         mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
@@ -155,23 +159,24 @@ final class SaveUi {
         switch (types.size()) {
             case 1:
                 mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_type,
-                        types.valueAt(0), providerLabel), 0);
+                        types.valueAt(0), serviceLabel), 0);
                 break;
             case 2:
                 mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_2types,
-                        types.valueAt(0), types.valueAt(1), providerLabel), 0);
+                        types.valueAt(0), types.valueAt(1), serviceLabel), 0);
                 break;
             case 3:
                 mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_3types,
-                        types.valueAt(0), types.valueAt(1), types.valueAt(2), providerLabel), 0);
+                        types.valueAt(0), types.valueAt(1), types.valueAt(2), serviceLabel), 0);
                 break;
             default:
                 // Use generic if more than 3 or invalid type (size 0).
                 mTitle = Html.fromHtml(
-                        context.getString(R.string.autofill_save_title, providerLabel), 0);
+                        context.getString(R.string.autofill_save_title, serviceLabel), 0);
         }
-
         titleView.setText(mTitle);
+
+        setServiceIcon(context, view, serviceIcon);
 
         ScrollView subtitleContainer = null;
         final CustomDescription customDescription = info.getCustomDescription();
@@ -282,6 +287,30 @@ final class SaveUi {
         params.windowAnimations = R.style.AutofillSaveAnimation;
 
         show();
+    }
+
+    private void setServiceIcon(Context context, View view, Drawable serviceIcon) {
+        final ImageView iconView = view.findViewById(R.id.autofill_save_icon);
+        final Resources res = context.getResources();
+
+        final int maxWidth = res.getDimensionPixelSize(R.dimen.autofill_save_icon_max_size);
+        final int maxHeight = maxWidth;
+        final int actualWidth = serviceIcon.getMinimumWidth();
+        final int actualHeight = serviceIcon.getMinimumHeight();
+
+        if (actualWidth <= maxWidth && actualHeight <= maxHeight) {
+            if (sDebug) {
+                Slog.d(TAG, "Addingservice icon "
+                        + "(" + actualWidth + "x" + actualHeight + ") as it's less than maximum "
+                        + "(" + maxWidth + "x" + maxHeight + ").");
+            }
+            iconView.setImageDrawable(serviceIcon);
+        } else {
+            Slog.w(TAG, "Not adding service icon of size "
+                    + "(" + actualWidth + "x" + actualHeight + ") because maximum is "
+                    + "(" + maxWidth + "x" + maxHeight + ").");
+            iconView.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**

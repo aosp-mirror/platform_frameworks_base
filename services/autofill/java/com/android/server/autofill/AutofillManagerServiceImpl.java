@@ -34,6 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -481,8 +482,14 @@ final class AutofillManagerServiceImpl {
         sendStateToClients(true);
     }
 
+    @NonNull
     CharSequence getServiceLabel() {
         return mInfo.getServiceInfo().loadLabel(mContext.getPackageManager());
+    }
+
+    @NonNull
+    Drawable getServiceIcon() {
+        return mInfo.getServiceInfo().loadIcon(mContext.getPackageManager());
     }
 
     /**
