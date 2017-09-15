@@ -47,7 +47,7 @@ message DiskStatsServiceDumpProto {
 }
 
 message DiskStatsCachedValuesProto {
-    // Total app data size, in kilobytes
+    // Total app code size, in kilobytes
     int64 agg_apps_size = 1;
     // Total app cache size, in kilobytes
     int64 agg_apps_cache_size = 2;
@@ -65,15 +65,19 @@ message DiskStatsCachedValuesProto {
     int64 other_size = 8;
     // Sizes of individual packages
     repeated DiskStatsAppSizesProto app_sizes = 9;
+    // Total app data size, in kilobytes
+    int64 agg_apps_data_size = 10;
 }
 
 message DiskStatsAppSizesProto {
     // Name of the package
     string package_name = 1;
-    // App's data size in kilobytes
+    // App's code size in kilobytes
     int64 app_size = 2;
     // App's cache size in kilobytes
     int64 cache_size = 3;
+    // App's data size in kilobytes
+    int64 app_data_size = 4;
 }
 
 message DiskStatsFreeSpaceProto {
