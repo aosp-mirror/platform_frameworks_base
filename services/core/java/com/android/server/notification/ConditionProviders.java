@@ -186,6 +186,11 @@ public class ConditionProviders extends ManagedServices {
         super.onPackagesChanged(removingPackage, pkgList, uid);
     }
 
+    @Override
+    protected boolean isValidEntry(String packageOrComponent, int userId) {
+        return true;
+    }
+
     public ManagedServiceInfo checkServiceToken(IConditionProvider provider) {
         synchronized(mMutex) {
             return checkServiceTokenLocked(provider);
