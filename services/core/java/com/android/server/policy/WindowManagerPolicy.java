@@ -1716,4 +1716,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return Integer.toString(mode);
         }
     }
+
+    /**
+     * Requests that the WindowManager sends WindowManagerPolicy#ACTION_USER_ACTIVITY_NOTIFICATION
+     * on the next user activity.
+     */
+    public void requestUserActivityNotification();
 }
