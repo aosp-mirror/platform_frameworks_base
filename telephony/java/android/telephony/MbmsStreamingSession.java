@@ -29,7 +29,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.mbms.InternalStreamingSessionCallback;
 import android.telephony.mbms.InternalStreamingServiceCallback;
-import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsErrors;
 import android.telephony.mbms.MbmsStreamingSessionCallback;
 import android.telephony.mbms.MbmsUtils;
 import android.telephony.mbms.StreamingService;
@@ -69,7 +69,7 @@ public class MbmsStreamingSession implements AutoCloseable {
         @Override
         public void binderDied() {
             sIsInitialized.set(false);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, "Received death notification");
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, "Received death notification");
         }
     };
 
@@ -124,7 +124,7 @@ public class MbmsStreamingSession implements AutoCloseable {
                 subscriptionId, handler);
 
         final int result = session.bindAndInitialize();
-        if (result != MbmsException.SUCCESS) {
+        if (result != MbmsErrors.SUCCESS) {
             sIsInitialized.set(false);
             handler.post(new Runnable() {
                 @Override
@@ -203,14 +203,14 @@ public class MbmsStreamingSession implements AutoCloseable {
         try {
             int returnCode = streamingService.requestUpdateStreamingServices(
                     mSubscriptionId, serviceClassList);
-            if (returnCode != MbmsException.SUCCESS) {
+            if (returnCode != MbmsErrors.SUCCESS) {
                 sendErrorToApp(returnCode, null);
             }
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
             sIsInitialized.set(false);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
 
@@ -224,8 +224,8 @@ public class MbmsStreamingSession implements AutoCloseable {
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
      * Asynchronous errors through the callback include any of the errors in
-     * {@link android.telephony.mbms.MbmsException.GeneralErrors} or
-     * {@link android.telephony.mbms.MbmsException.StreamingErrors}.
+     * {@link MbmsErrors.GeneralErrors} or
+     * {@link MbmsErrors.StreamingErrors}.
      *
      * @param serviceInfo The information about the service to stream.
      * @param callback A callback that'll be called when something about the stream changes.
@@ -250,7 +250,7 @@ public class MbmsStreamingSession implements AutoCloseable {
         try {
             int returnCode = streamingService.startStreaming(
                     mSubscriptionId, serviceInfo.getServiceId(), serviceCallback);
-            if (returnCode != MbmsException.SUCCESS) {
+            if (returnCode != MbmsErrors.SUCCESS) {
                 sendErrorToApp(returnCode, null);
                 return null;
             }
@@ -258,7 +258,7 @@ public class MbmsStreamingSession implements AutoCloseable {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
             sIsInitialized.set(false);
-            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST, null);
+            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return null;
         }
 
@@ -284,19 +284,19 @@ public class MbmsStreamingSession implements AutoCloseable {
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
                             sendErrorToApp(
-                                    MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
                                     e.toString());
                             sIsInitialized.set(false);
                             return;
                         } catch (RuntimeException e) {
                             Log.e(LOG_TAG, "Runtime exception during initialization");
                             sendErrorToApp(
-                                    MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
                                     e.toString());
                             sIsInitialized.set(false);
                             return;
                         }
-                        if (result != MbmsException.SUCCESS) {
+                        if (result != MbmsErrors.SUCCESS) {
                             sendErrorToApp(result, "Error returned during initialization");
                             sIsInitialized.set(false);
                             return;
@@ -304,7 +304,7 @@ public class MbmsStreamingSession implements AutoCloseable {
                         try {
                             streamingService.asBinder().linkToDeath(mDeathRecipient, 0);
                         } catch (RemoteException e) {
-                            sendErrorToApp(MbmsException.ERROR_MIDDLEWARE_LOST,
+                            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
                                     "Middleware lost during initialization");
                             sIsInitialized.set(false);
                             return;
