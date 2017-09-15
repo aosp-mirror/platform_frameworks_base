@@ -755,9 +755,11 @@ public class NotificationManagerService extends SystemService {
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
                     final long now = System.currentTimeMillis();
-                    MetricsLogger.action(r.getLogMaker(now)
-                            .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-                            .setType(MetricsEvent.TYPE_DETAIL));
+                    if (userAction && expanded) {
+                        MetricsLogger.action(r.getLogMaker(now)
+                                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                                .setType(MetricsEvent.TYPE_DETAIL));
+                    }
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
                             r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
