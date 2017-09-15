@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.settingslib.applications;
+package com.android.settingslib.wrapper;
 
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
+import android.os.storage.VolumeInfo;
 
 import java.util.List;
 
@@ -33,89 +35,159 @@ import java.util.List;
  * and the PackageManager. This class only provides access to the minimum number of functions from
  * the PackageManager needed for DeletionHelper to work.
  */
-public class PackageManagerWrapperImpl implements PackageManagerWrapper {
+public class PackageManagerWrapper {
 
     private final PackageManager mPm;
 
-    public PackageManagerWrapperImpl(PackageManager pm) {
+    public PackageManagerWrapper(PackageManager pm) {
         mPm = pm;
     }
 
-    @Override
+    /**
+     * Returns the real {@code PackageManager} object.
+     */
     public PackageManager getPackageManager() {
         return mPm;
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.getInstalledApplicationsAsUser()}.
+     *
+     * @see android.content.pm.PackageManager#getInstalledApplicationsAsUser
+     */
     public List<ApplicationInfo> getInstalledApplicationsAsUser(int flags, int userId) {
         return mPm.getInstalledApplicationsAsUser(flags, userId);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.hasSystemFeature()}.
+     *
+     * @see android.content.pm.PackageManager#hasSystemFeature
+     */
     public boolean hasSystemFeature(String name) {
         return mPm.hasSystemFeature(name);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.queryIntentActivitiesAsUser()}.
+     *
+     * @see android.content.pm.PackageManager#queryIntentActivitiesAsUser
+     */
     public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int flags, int userId) {
         return mPm.queryIntentActivitiesAsUser(intent, flags, userId);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.getInstallReason()}.
+     *
+     * @see android.content.pm.PackageManager#getInstallReason
+     */
     public int getInstallReason(String packageName, UserHandle user) {
         return mPm.getInstallReason(packageName, user);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.getApplicationInfoAsUser}
+     */
     public ApplicationInfo getApplicationInfoAsUser(String packageName, int i, int userId)
             throws PackageManager.NameNotFoundException {
         return mPm.getApplicationInfoAsUser(packageName, i, userId);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.setDefaultBrowserPackageNameAsUser}
+     */
     public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
         return mPm.setDefaultBrowserPackageNameAsUser(packageName, userId);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.getDefaultBrowserPackageNameAsUser}
+     */
     public String getDefaultBrowserPackageNameAsUser(int userId) {
         return mPm.getDefaultBrowserPackageNameAsUser(userId);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.getHomeActivities}
+     */
     public ComponentName getHomeActivities(List<ResolveInfo> homeActivities) {
         return mPm.getHomeActivities(homeActivities);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.queryIntentServicesAsUser}
+     */
     public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int i, int user) {
         return mPm.queryIntentServicesAsUser(intent, i, user);
     }
 
-    @Override
+    /**
+     * Calls {@code PackageManager.replacePreferredActivity}
+     */
     public void replacePreferredActivity(IntentFilter homeFilter, int matchCategoryEmpty,
             ComponentName[] componentNames, ComponentName component) {
         mPm.replacePreferredActivity(homeFilter, matchCategoryEmpty, componentNames, component);
     }
 
-    @Override
+    /**
+     * Gets information about a particular package from the package manager.
+     * @param packageName The name of the package we would like information about.
+     * @param i additional options flags. see javadoc for
+     * {@link PackageManager#getPackageInfo(String, int)}
+     * @return The PackageInfo for the requested package
+     * @throws NameNotFoundException
+     */
     public PackageInfo getPackageInfo(String packageName, int i) throws NameNotFoundException {
         return mPm.getPackageInfo(packageName, i);
     }
 
-    @Override
+    /**
+     * Retrieves the icon associated with this particular set of ApplicationInfo
+     * @param info The ApplicationInfo to retrieve the icon for
+     * @return The icon as a drawable.
+     */
     public Drawable getUserBadgedIcon(ApplicationInfo info) {
         return mPm.getUserBadgedIcon(mPm.loadUnbadgedItemIcon(info, info),
                 new UserHandle(UserHandle.getUserId(info.uid)));
     }
 
-    @Override
+    /**
+     * Retrieves the label associated with the particular set of ApplicationInfo
+     * @param app The ApplicationInfo to retrieve the label for
+     * @return the label as a CharSequence
+     */
     public CharSequence loadLabel(ApplicationInfo app) {
         return app.loadLabel(mPm);
     }
 
-    @Override
+    /**
+     * Retrieve all activities that can be performed for the given intent.
+     */
     public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
         return mPm.queryIntentActivities(intent, flags);
+    }
+
+    /**
+     * Calls {@code PackageManager.getPrimaryStorageCurrentVolume}
+     */
+    public VolumeInfo getPrimaryStorageCurrentVolume() {
+        return mPm.getPrimaryStorageCurrentVolume();
+    }
+
+    /**
+     * Calls {@code PackageManager.deletePackageAsUser}
+     */
+    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer, int flags,
+            int userId) {
+        mPm.deletePackageAsUser(packageName, observer, flags, userId);
+    }
+
+    /**
+     * Calls {@code PackageManager.getPackageUidAsUser}
+     */
+    public int getPackageUidAsUser(String pkg, int userId)
+            throws PackageManager.NameNotFoundException {
+        return mPm.getPackageUidAsUser(pkg, userId);
     }
 }
