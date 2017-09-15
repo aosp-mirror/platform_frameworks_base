@@ -13,43 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STATS_LOG_PROCESSOR_H
-#define STATS_LOG_PROCESSOR_H
 
+#ifndef CONDITION_TRACKER_H
+#define CONDITION_TRACKER_H
+
+#include <utils/RefBase.h>
+#include "../matchers/LogEntryMatcherManager.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "DropboxWriter.h"
-#include "LogReader.h"
-#include "metrics/MetricsManager.h"
-#include "parse_util.h"
-
-#include <log/logprint.h>
-#include <stdio.h>
-#include <unordered_map>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsLogProcessor : public LogListener {
+class ConditionTracker : public RefBase {
 public:
-    StatsLogProcessor();
-    virtual ~StatsLogProcessor();
+    ConditionTracker();
 
-    virtual void OnLogEvent(const log_msg& msg);
+    ConditionTracker(const Condition& condition);
 
-    void UpdateConfig(const int config_source, const StatsdConfig& config);
+    ~ConditionTracker();
+
+    void evaluateCondition(const LogEventWrapper& event);
+
+    bool isConditionMet() const;
 
 private:
-    // TODO: use EventMetrics to log the events.
-    DropboxWriter m_dropbox_writer;
+    // this is the definition of the Condition.
+    Condition mCondition;
 
-    std::unordered_map<int, std::unique_ptr<MetricsManager>> mMetricsManagers;
-
-    static StatsdConfig buildFakeConfig();
+    bool mIsConditionMet;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif  // STATS_LOG_PROCESSOR_H
+#endif  // CONDITION_TRACKER_H

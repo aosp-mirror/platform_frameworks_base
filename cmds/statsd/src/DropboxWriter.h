@@ -17,7 +17,8 @@
 #ifndef DROPBOX_WRITER_H
 #define DROPBOX_WRITER_H
 
-#include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
+#include <utils/RefBase.h>
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 using std::string;
 
@@ -25,7 +26,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class DropboxWriter {
+class DropboxWriter : public virtual RefBase {
 public:
     /* tag will be part of the file name, and used as the key to build the file index inside
        DropBoxManagerService.
