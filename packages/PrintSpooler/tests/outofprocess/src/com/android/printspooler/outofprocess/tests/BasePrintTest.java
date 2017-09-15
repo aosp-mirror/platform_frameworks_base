@@ -16,6 +16,9 @@
 
 package com.android.printspooler.outofprocess.tests;
 
+import static android.content.pm.PackageManager.GET_META_DATA;
+import static android.content.pm.PackageManager.GET_SERVICES;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
@@ -26,8 +29,11 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.print.PrintAttributes;
@@ -37,6 +43,7 @@ import android.print.PrinterId;
 import android.printservice.CustomPrinterIconCallback;
 import android.printservice.PrintJob;
 import android.printservice.PrintService;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.uiautomator.UiDevice;
@@ -46,6 +53,7 @@ import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoveryS
 import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -62,6 +70,7 @@ abstract class BasePrintTest {
     protected static final long OPERATION_TIMEOUT = 30000;
     private static final String PM_CLEAR_SUCCESS_OUTPUT = "Success";
     private static final int CURRENT_USER_ID = -2; // Mirrors UserHandle.USER_CURRENT
+    private static String sDisabledPrintServicesBefore;
 
     private android.print.PrintJob mPrintJob;
 
@@ -96,17 +105,24 @@ abstract class BasePrintTest {
         // Make sure we start with a clean slate.
         clearPrintSpoolerData();
 
+        disablePrintServices(sInstrumentation.getTargetContext().getPackageName());
+
         // Workaround for dexmaker bug: https://code.google.com/p/dexmaker/issues/detail?id=2
         // Dexmaker is used by mockito.
         System.setProperty("dexmaker.dexcache", getInstrumentation()
                 .getTargetContext().getCacheDir().getPath());
     }
 
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        enablePrintServices();
+    }
+
     @Before
     public void unlockScreen() throws Exception {
         // Unlock screen.
-        runShellCommand(getInstrumentation(), "input keyevent KEYCODE_WAKEUP");
-        runShellCommand(getInstrumentation(), "wm dismiss-keyguard");
+        runShellCommand("input keyevent KEYCODE_WAKEUP");
+        runShellCommand("wm dismiss-keyguard");
     }
 
     @After
@@ -132,9 +148,9 @@ abstract class BasePrintTest {
         return mActivityRule.getActivity();
     }
 
-    public static String runShellCommand(Instrumentation instrumentation, String cmd)
+    public static String runShellCommand(String cmd)
             throws IOException {
-        ParcelFileDescriptor pfd = instrumentation.getUiAutomation().executeShellCommand(cmd);
+        ParcelFileDescriptor pfd = getInstrumentation().getUiAutomation().executeShellCommand(cmd);
         byte[] buf = new byte[512];
         int bytesRead;
         FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
@@ -147,11 +163,49 @@ abstract class BasePrintTest {
     }
 
     protected static void clearPrintSpoolerData() throws Exception {
-        assertTrue("failed to clear print spooler data",
-                runShellCommand(getInstrumentation(), String.format(
-                        "pm clear --user %d %s", CURRENT_USER_ID,
-                        PrintManager.PRINT_SPOOLER_PACKAGE_NAME))
-                        .contains(PM_CLEAR_SUCCESS_OUTPUT));
+        assertTrue("failed to clear print spooler data", runShellCommand(
+                String.format("pm clear --user %d %s", CURRENT_USER_ID,
+                        PrintManager.PRINT_SPOOLER_PACKAGE_NAME)).contains(
+                PM_CLEAR_SUCCESS_OUTPUT));
+    }
+
+    /**
+     * Disable all print services beside the ones we want to leave enabled.
+     *
+     * @param packageToLeaveEnabled The package of the services to leave enabled.
+     */
+    private static void disablePrintServices(String packageToLeaveEnabled) throws IOException {
+        Instrumentation instrumentation = getInstrumentation();
+
+        sDisabledPrintServicesBefore = runShellCommand(
+                "settings get secure " + Settings.Secure.DISABLED_PRINT_SERVICES);
+
+        Intent printServiceIntent = new Intent(android.printservice.PrintService.SERVICE_INTERFACE);
+        List<ResolveInfo> installedServices = instrumentation.getContext().getPackageManager()
+                .queryIntentServices(printServiceIntent, GET_SERVICES | GET_META_DATA);
+
+        StringBuilder builder = new StringBuilder();
+        for (ResolveInfo service : installedServices) {
+            if (packageToLeaveEnabled.equals(service.serviceInfo.packageName)) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append(":");
+            }
+            builder.append(new ComponentName(service.serviceInfo.packageName,
+                    service.serviceInfo.name).flattenToString());
+        }
+
+        runShellCommand(
+                "settings put secure " + Settings.Secure.DISABLED_PRINT_SERVICES + " " + builder);
+    }
+
+    /**
+     * Revert {@link #disablePrintServices(String)}
+     */
+    private static  void enablePrintServices() throws IOException {
+        runShellCommand("settings put secure " + Settings.Secure.DISABLED_PRINT_SERVICES + " "
+                        + sDisabledPrintServicesBefore);
     }
 
     @SuppressWarnings("unchecked")
