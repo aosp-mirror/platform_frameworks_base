@@ -346,6 +346,11 @@
     <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
     <dimen name="notification_title_text_size">14sp</dimen>
+
+    <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) when colorized -->
+    <dimen name="notification_text_size_colorized">16sp</dimen>
+    <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) when colorized -->
+    <dimen name="notification_title_text_size_colorized">20sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12sp</dimen>
 
