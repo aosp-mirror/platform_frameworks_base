@@ -25,10 +25,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
-import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.ArraySet;
 import android.util.AttributeSet;
@@ -39,10 +37,8 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.ViewState;
 
 import java.util.ArrayList;
@@ -84,7 +80,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }.setDuration(CANNED_ANIMATION_DURATION)
             .setCustomInterpolator(View.TRANSLATION_Y, Interpolators.ICON_OVERSHOT);
 
-    private static final AnimationProperties mTempProperties = new AnimationProperties() {
+    /**
+     * Temporary AnimationProperties to avoid unnecessary allocations.
+     */
+    private static final AnimationProperties sTempProperties = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter();
 
         @Override
@@ -102,15 +101,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(200).setDelay(50);
 
-    private static final AnimationProperties UNDARK_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter()
-                .animateX();
-
-        @Override
-        public AnimationFilter getAnimationFilter() {
-            return mAnimationFilter;
-        }
-    }.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
     public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
 
     private boolean mShowAllIcons = true;
@@ -478,9 +468,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             View view = getChildAt(i);
             if (view instanceof StatusBarIconView) {
                 ((StatusBarIconView) view).setDark(dark, fade, delay);
-                if (!dark && fade) {
-                    getIconState((StatusBarIconView) view).justUndarkened = true;
-                }
             }
         }
     }
@@ -551,7 +538,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean useFullTransitionAmount;
         public boolean useLinearTransitionAmount;
         public boolean translateContent;
-        public boolean justUndarkened;
         public int iconColor = StatusBarIconView.NO_COLOR;
         public boolean noAnimations;
         public boolean isLastExpandIcon;
@@ -563,8 +549,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 StatusBarIconView icon = (StatusBarIconView) view;
                 boolean animate = false;
                 AnimationProperties animationProperties = null;
-                boolean animationsAllowed = (mAnimationsEnabled || justUndarkened)
-                        && !mDisallowNextAnimation
+                boolean animationsAllowed = mAnimationsEnabled && !mDisallowNextAnimation
                         && !noAnimations;
                 if (animationsAllowed) {
                     if (justAdded || justReplaced) {
@@ -576,9 +561,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                             animationProperties = ADD_ICON_PROPERTIES;
                             animate = true;
                         }
-                    } else if (justUndarkened) {
-                        animationProperties = UNDARK_PROPERTIES;
-                        animate = true;
                     } else if (visibleState != icon.getVisibleState()) {
                         animationProperties = DOT_ANIMATION_PROPERTIES;
                         animate = true;
@@ -591,17 +573,17 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                         animate = true;
                     }
                     if (needsCannedAnimation) {
-                        AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
+                        AnimationFilter animationFilter = sTempProperties.getAnimationFilter();
                         animationFilter.reset();
                         animationFilter.combineFilter(
                                 ICON_ANIMATION_PROPERTIES.getAnimationFilter());
-                        mTempProperties.resetCustomInterpolators();
-                        mTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
+                        sTempProperties.resetCustomInterpolators();
+                        sTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
                         if (animationProperties != null) {
                             animationFilter.combineFilter(animationProperties.getAnimationFilter());
-                            mTempProperties.combineCustomInterpolators(animationProperties);
+                            sTempProperties.combineCustomInterpolators(animationProperties);
                         }
-                        animationProperties = mTempProperties;
+                        animationProperties = sTempProperties;
                         animationProperties.setDuration(CANNED_ANIMATION_DURATION);
                         animate = true;
                         mCannedAnimationStartIndex = indexOfChild(view);
@@ -610,11 +592,11 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                             && indexOfChild(view) > mCannedAnimationStartIndex
                             && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
                             || visibleState != StatusBarIconView.STATE_HIDDEN)) {
-                        AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
+                        AnimationFilter animationFilter = sTempProperties.getAnimationFilter();
                         animationFilter.reset();
                         animationFilter.animateX();
-                        mTempProperties.resetCustomInterpolators();
-                        animationProperties = mTempProperties;
+                        sTempProperties.resetCustomInterpolators();
+                        animationProperties = sTempProperties;
                         animationProperties.setDuration(CANNED_ANIMATION_DURATION);
                         animate = true;
                     }
@@ -638,7 +620,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
-            justUndarkened = false;
         }
 
         private boolean shouldVibrateChange(boolean inShelfChanged) {
