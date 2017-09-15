@@ -22,9 +22,11 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
+#include "io/StringInputStream.h"
 #include "test/Test.h"
 #include "xml/XmlPullParser.h"
 
+using ::aapt::io::StringInputStream;
 using ::aapt::test::StrValueEq;
 using ::aapt::test::ValueEq;
 using ::android::ResTable_map;
@@ -43,11 +45,13 @@ constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 
 TEST(ResourceParserSingleTest, FailToParseWithNoRootResourcesElement) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
-  std::stringstream input(kXmlPreamble);
-  input << R"(<attr name="foo"/>)" << std::endl;
   ResourceTable table;
   ResourceParser parser(context->GetDiagnostics(), &table, Source{"test"}, {});
-  xml::XmlPullParser xml_parser(input);
+
+  std::string input = kXmlPreamble;
+  input += R"(<attr name="foo"/>)";
+  StringInputStream in(input);
+  xml::XmlPullParser xml_parser(&in);
   ASSERT_FALSE(parser.Parse(&xml_parser));
 }
 
@@ -62,12 +66,16 @@ class ResourceParserTest : public ::testing::Test {
   }
 
   ::testing::AssertionResult TestParse(const StringPiece& str, const ConfigDescription& config) {
-    std::stringstream input(kXmlPreamble);
-    input << "<resources>\n" << str << "\n</resources>" << std::endl;
     ResourceParserOptions parserOptions;
     ResourceParser parser(context_->GetDiagnostics(), &table_, Source{"test"}, config,
                           parserOptions);
-    xml::XmlPullParser xmlParser(input);
+
+    std::string input = kXmlPreamble;
+    input += "<resources>\n";
+    input.append(str.data(), str.size());
+    input += "\n</resources>";
+    StringInputStream in(input);
+    xml::XmlPullParser xmlParser(&in);
     if (parser.Parse(&xmlParser)) {
       return ::testing::AssertionSuccess();
     }
@@ -532,11 +540,11 @@ TEST_F(ResourceParserTest, ParseArray) {
 
   Array* array = test::GetValue<Array>(&table_, "array/foo");
   ASSERT_THAT(array, NotNull());
-  ASSERT_THAT(array->items, SizeIs(3));
+  ASSERT_THAT(array->elements, SizeIs(3));
 
-  EXPECT_THAT(ValueCast<Reference>(array->items[0].get()), NotNull());
-  EXPECT_THAT(ValueCast<String>(array->items[1].get()), NotNull());
-  EXPECT_THAT(ValueCast<BinaryPrimitive>(array->items[2].get()), NotNull());
+  EXPECT_THAT(ValueCast<Reference>(array->elements[0].get()), NotNull());
+  EXPECT_THAT(ValueCast<String>(array->elements[1].get()), NotNull());
+  EXPECT_THAT(ValueCast<BinaryPrimitive>(array->elements[2].get()), NotNull());
 }
 
 TEST_F(ResourceParserTest, ParseStringArray) {
@@ -557,9 +565,9 @@ TEST_F(ResourceParserTest, ParseArrayWithFormat) {
 
   Array* array = test::GetValue<Array>(&table_, "array/foo");
   ASSERT_THAT(array, NotNull());
-  ASSERT_THAT(array->items, SizeIs(1));
+  ASSERT_THAT(array->elements, SizeIs(1));
 
-  String* str = ValueCast<String>(array->items[0].get());
+  String* str = ValueCast<String>(array->elements[0].get());
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("100"));
 }

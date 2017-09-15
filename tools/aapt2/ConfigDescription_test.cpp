@@ -140,4 +140,16 @@ TEST(ConfigDescriptionTest, ParseVrAttribute) {
   EXPECT_EQ(std::string("vrheadset-v26"), config.toString().string());
 }
 
+TEST(ConfigDescriptionTest, RangeQualifiersDoNotConflict) {
+  using test::ParseConfigOrDie;
+
+  EXPECT_FALSE(ParseConfigOrDie("large").ConflictsWith(ParseConfigOrDie("normal-land")));
+  EXPECT_FALSE(ParseConfigOrDie("long-hdpi").ConflictsWith(ParseConfigOrDie("xhdpi")));
+  EXPECT_FALSE(ParseConfigOrDie("sw600dp").ConflictsWith(ParseConfigOrDie("sw700dp")));
+  EXPECT_FALSE(ParseConfigOrDie("v11").ConflictsWith(ParseConfigOrDie("v21")));
+  EXPECT_FALSE(ParseConfigOrDie("h600dp").ConflictsWith(ParseConfigOrDie("h300dp")));
+  EXPECT_FALSE(ParseConfigOrDie("w400dp").ConflictsWith(ParseConfigOrDie("w300dp")));
+  EXPECT_FALSE(ParseConfigOrDie("600x400").ConflictsWith(ParseConfigOrDie("300x200")));
+}
+
 }  // namespace aapt

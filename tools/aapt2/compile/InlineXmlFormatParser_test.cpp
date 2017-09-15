@@ -18,25 +18,32 @@
 
 #include "test/Test.h"
 
+using ::testing::Eq;
+using ::testing::IsNull;
+using ::testing::Not;
+using ::testing::NotNull;
+using ::testing::SizeIs;
+using ::testing::StrEq;
+
 namespace aapt {
 
 TEST(InlineXmlFormatParserTest, PassThrough) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
       <View xmlns:android="http://schemas.android.com/apk/res/android">
         <View android:text="hey">
           <View android:id="hi" />
         </View>
-      </View>)EOF");
+      </View>)");
 
   InlineXmlFormatParser parser;
   ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
-  EXPECT_EQ(0u, parser.GetExtractedInlineXmlDocuments().size());
+  EXPECT_THAT(parser.GetExtractedInlineXmlDocuments(), SizeIs(0u));
 }
 
 TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
       <View1 xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:aapt="http://schemas.android.com/aapt">
         <aapt:attr name="android:text">
@@ -44,7 +51,7 @@ TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
             <View3 android:id="hi" />
           </View2>
         </aapt:attr>
-      </View1>)EOF");
+      </View1>)");
 
   doc->file.name = test::ParseNameOrDie("layout/main");
 
@@ -52,42 +59,38 @@ TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
   ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
 
   // One XML resource should have been extracted.
-  EXPECT_EQ(1u, parser.GetExtractedInlineXmlDocuments().size());
+  EXPECT_THAT(parser.GetExtractedInlineXmlDocuments(), SizeIs(1u));
 
-  xml::Element* el = xml::FindRootElement(doc.get());
-  ASSERT_NE(nullptr, el);
-
-  EXPECT_EQ("View1", el->name);
+  xml::Element* el = doc->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->name, StrEq("View1"));
 
   // The <aapt:attr> tag should be extracted.
-  EXPECT_EQ(nullptr, el->FindChild(xml::kSchemaAapt, "attr"));
+  EXPECT_THAT(el->FindChild(xml::kSchemaAapt, "attr"), IsNull());
 
   // The 'android:text' attribute should be set with a reference.
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "text");
-  ASSERT_NE(nullptr, attr);
+  ASSERT_THAT(attr, NotNull());
 
   ResourceNameRef name_ref;
   ASSERT_TRUE(ResourceUtils::ParseReference(attr->value, &name_ref));
 
-  xml::XmlResource* extracted_doc =
-      parser.GetExtractedInlineXmlDocuments()[0].get();
-  ASSERT_NE(nullptr, extracted_doc);
+  xml::XmlResource* extracted_doc = parser.GetExtractedInlineXmlDocuments()[0].get();
+  ASSERT_THAT(extracted_doc, NotNull());
 
   // Make sure the generated reference is correct.
-  EXPECT_EQ(name_ref.package, extracted_doc->file.name.package);
-  EXPECT_EQ(name_ref.type, extracted_doc->file.name.type);
-  EXPECT_EQ(name_ref.entry, extracted_doc->file.name.entry);
+  EXPECT_THAT(extracted_doc->file.name, Eq(name_ref));
 
   // Verify the structure of the extracted XML.
-  el = xml::FindRootElement(extracted_doc);
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ("View2", el->name);
-  EXPECT_NE(nullptr, el->FindChild({}, "View3"));
+  el = extracted_doc->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->name, StrEq("View2"));
+  EXPECT_THAT(el->FindChild({}, "View3"), NotNull());
 }
 
 TEST(InlineXmlFormatParserTest, ExtractTwoXmlResources) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
       <View1 xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:aapt="http://schemas.android.com/aapt">
         <aapt:attr name="android:text">
@@ -99,45 +102,39 @@ TEST(InlineXmlFormatParserTest, ExtractTwoXmlResources) {
         <aapt:attr name="android:drawable">
           <vector />
         </aapt:attr>
-      </View1>)EOF");
+      </View1>)");
 
   doc->file.name = test::ParseNameOrDie("layout/main");
 
   InlineXmlFormatParser parser;
   ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
-  ASSERT_EQ(2u, parser.GetExtractedInlineXmlDocuments().size());
+  ASSERT_THAT(parser.GetExtractedInlineXmlDocuments(), SizeIs(2u));
 
-  xml::Element* el = xml::FindRootElement(doc.get());
-  ASSERT_NE(nullptr, el);
-
-  EXPECT_EQ("View1", el->name);
+  xml::Element* el = doc->root.get();
+  ASSERT_THAT(el, NotNull());
+  EXPECT_THAT(el->name, StrEq("View1"));
 
   xml::Attribute* attr_text = el->FindAttribute(xml::kSchemaAndroid, "text");
-  ASSERT_NE(nullptr, attr_text);
+  ASSERT_THAT(attr_text, NotNull());
 
-  xml::Attribute* attr_drawable =
-      el->FindAttribute(xml::kSchemaAndroid, "drawable");
-  ASSERT_NE(nullptr, attr_drawable);
+  xml::Attribute* attr_drawable = el->FindAttribute(xml::kSchemaAndroid, "drawable");
+  ASSERT_THAT(attr_drawable, NotNull());
 
   // The two extracted resources should have different names.
-  EXPECT_NE(attr_text->value, attr_drawable->value);
+  EXPECT_THAT(attr_text->value, Not(Eq(attr_drawable->value)));
 
   // The child <aapt:attr> elements should be gone.
-  EXPECT_EQ(nullptr, el->FindChild(xml::kSchemaAapt, "attr"));
+  EXPECT_THAT(el->FindChild(xml::kSchemaAapt, "attr"), IsNull());
 
-  xml::XmlResource* extracted_doc_text =
-      parser.GetExtractedInlineXmlDocuments()[0].get();
-  ASSERT_NE(nullptr, extracted_doc_text);
-  el = xml::FindRootElement(extracted_doc_text);
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ("View2", el->name);
+  xml::XmlResource* extracted_doc_text = parser.GetExtractedInlineXmlDocuments()[0].get();
+  ASSERT_THAT(extracted_doc_text, NotNull());
+  ASSERT_THAT(extracted_doc_text->root, NotNull());
+  EXPECT_THAT(extracted_doc_text->root->name, StrEq("View2"));
 
-  xml::XmlResource* extracted_doc_drawable =
-      parser.GetExtractedInlineXmlDocuments()[1].get();
-  ASSERT_NE(nullptr, extracted_doc_drawable);
-  el = xml::FindRootElement(extracted_doc_drawable);
-  ASSERT_NE(nullptr, el);
-  EXPECT_EQ("vector", el->name);
+  xml::XmlResource* extracted_doc_drawable = parser.GetExtractedInlineXmlDocuments()[1].get();
+  ASSERT_THAT(extracted_doc_drawable, NotNull());
+  ASSERT_THAT(extracted_doc_drawable->root, NotNull());
+  EXPECT_THAT(extracted_doc_drawable->root->name, StrEq("vector"));
 }
 
 }  // namespace aapt
