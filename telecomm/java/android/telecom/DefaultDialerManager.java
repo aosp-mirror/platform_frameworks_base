@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Process;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -163,7 +164,10 @@ public class DefaultDialerManager {
 
         for (ResolveInfo resolveInfo : resolveInfoList) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
-            if (activityInfo != null && !packageNames.contains(activityInfo.packageName)) {
+            if (activityInfo != null
+                    && !packageNames.contains(activityInfo.packageName)
+                    // ignore cross profile intent handler
+                    && resolveInfo.targetUserId == UserHandle.USER_CURRENT) {
                 packageNames.add(activityInfo.packageName);
             }
         }
