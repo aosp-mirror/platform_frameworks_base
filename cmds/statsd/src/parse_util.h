@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-syntax = "proto2";
+#ifndef PARSE_UTIL_H
+#define PARSE_UTIL_H
 
-package android.os.statsd;
+#include "LogReader.h"
+#include "DropboxWriter.h"
 
-option optimize_for = LITE_RUNTIME;
+#include <log/logprint.h>
 
-option java_package = "com.android.internal.logging";
-option java_outer_classname = "StatsConstantsProto";
+using android::os::statsd::EventMetricData;
 
-enum TagId {
-  WAKELOCK = 1;
-  SCREEN = 1003;
-}
+EventMetricData parse(const log_msg msg);
 
-enum KeyId {
-  STATE = 1;
-  ANOTHER_STATE = 2;
-  EVENT_TIMESTAMP = 1001;
-  PACKAGE_NAME = 1002;
-  PACKAGE_VERSION = 1003;
-  PACKAGE_VERSION_STRING = 1004;
-  ATTRIBUTION_CHAIN = 1005;
-}
+#endif // PARSE_UTIL_H
