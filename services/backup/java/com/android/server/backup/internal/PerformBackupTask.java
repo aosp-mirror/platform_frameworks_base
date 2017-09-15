@@ -1060,7 +1060,8 @@ public class PerformBackupTask implements BackupRestoreTask {
             Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e.getMessage());
             delay = 0;  // use the scheduler's default
         }
-        KeyValueBackupJob.schedule(backupManagerService.getContext(), delay);
+        KeyValueBackupJob.schedule(backupManagerService.getContext(), delay,
+                backupManagerService.getConstants());
 
         for (BackupRequest request : mOriginalQueue) {
             backupManagerService.dataChangedImpl(request.packageName);
