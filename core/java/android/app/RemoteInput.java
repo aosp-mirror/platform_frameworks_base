@@ -33,8 +33,8 @@ import java.util.Set;
  * an intent inside a {@link android.app.PendingIntent} that is sent.
  * Always use {@link RemoteInput.Builder} to create instances of this class.
  * <p class="note"> See
- * <a href="{@docRoot}wear/notifications/remote-input.html">Receiving Voice Input from
- * a Notification</a> for more information on how to use this class.
+ * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#direct">Replying
+ * to notifications</a> for more information on how to use this class.
  *
  * <p>The following example adds a {@code RemoteInput} to a {@link Notification.Action},
  * sets the result key as {@code quick_reply}, and sets the label as {@code Quick reply}.
