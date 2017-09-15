@@ -16,8 +16,10 @@
 
 package android.telephony.mbms;
 
+import android.telephony.MbmsStreamingSession;
+
 /** @hide */
-public class MbmsException extends Exception {
+public class MbmsErrors {
     /** Indicates that the operation was successful. */
     public static final int SUCCESS = 0;
 
@@ -31,8 +33,8 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates that the app attempted to perform an operation on an instance of
-     * TODO link android.telephony.MbmsDownloadManager or
-     * {@link android.telephony.MbmsStreamingManager} without being bound to the middleware.
+     * {@link android.telephony.MbmsDownloadSession} or
+     * {@link MbmsStreamingSession} without being bound to the middleware.
      */
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 2;
 
@@ -47,8 +49,7 @@ public class MbmsException extends Exception {
         private InitializationErrors() {}
         /**
          * Indicates that the app tried to create more than one instance each of
-         * {@link android.telephony.MbmsStreamingManager} or
-         * TODO link android.telephony.MbmsDownloadManager
+         * {@link MbmsStreamingSession} or {@link android.telephony.MbmsDownloadSession}.
          */
         public static final int ERROR_DUPLICATE_INITIALIZE = 101;
         /** Indicates that the app is not authorized to access media via MBMS.*/
@@ -65,8 +66,8 @@ public class MbmsException extends Exception {
         private GeneralErrors() {}
         /**
          * Indicates that the app attempted to perform an operation before receiving notification
-         * that the middleware is ready via {@link MbmsStreamingManagerCallback#onMiddlewareReady()}
-         * or TODO: link MbmsDownloadManagerCallback#middlewareReady
+         * that the middleware is ready via {@link MbmsStreamingSessionCallback#onMiddlewareReady()}
+         * or {@link MbmsDownloadSessionCallback#onMiddlewareReady()}.
          */
         public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 201;
         /**
@@ -108,7 +109,7 @@ public class MbmsException extends Exception {
 
         /**
          * Indicates that the app called
-         * {@link android.telephony.MbmsStreamingManager#startStreaming(
+         * {@link MbmsStreamingSession#startStreaming(
          * StreamingServiceInfo, StreamingServiceCallback, android.os.Handler)}
          * more than once for the same {@link StreamingServiceInfo}.
          */
@@ -130,15 +131,5 @@ public class MbmsException extends Exception {
         public static final int ERROR_UNKNOWN_DOWNLOAD_REQUEST = 402;
     }
 
-    private final int mErrorCode;
-
-    /** @hide */
-    public MbmsException(int errorCode) {
-        super();
-        mErrorCode = errorCode;
-    }
-
-    public int getErrorCode() {
-        return mErrorCode;
-    }
+    private MbmsErrors() {}
 }

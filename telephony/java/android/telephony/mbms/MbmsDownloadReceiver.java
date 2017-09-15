@@ -25,7 +25,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.telephony.MbmsDownloadManager;
+import android.telephony.MbmsDownloadSession;
 import android.telephony.mbms.vendor.VendorUtils;
 import android.util.Log;
 
@@ -36,8 +36,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -115,8 +117,19 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     //@SystemApi
     public static final int RESULT_TEMP_FILE_GENERATION_ERROR = 5;
 
+    /**
+     * Indicates that the manager was unable to notify the app of the completed download.
+     * This is a fatal result code and no result extras should be expected.
+     * @hide
+     */
+    @SystemApi
+    public static final int RESULT_APP_NOTIFICATION_ERROR = 6;
+
+
     private static final String LOG_TAG = "MbmsDownloadReceiver";
     private static final String TEMP_FILE_SUFFIX = ".embms.temp";
+    private static final String TEMP_FILE_STAGING_LOCATION = "staged_completed_files";
+
     private static final int MAX_TEMP_FILE_RETRIES = 5;
 
     private String mFileProviderAuthorityCache = null;
@@ -149,11 +162,11 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private boolean verifyIntentContents(Context context, Intent intent) {
         if (VendorUtils.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
-            if (!intent.hasExtra(MbmsDownloadManager.EXTRA_MBMS_DOWNLOAD_RESULT)) {
+            if (!intent.hasExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT)) {
                 Log.w(LOG_TAG, "Download result did not include a result code. Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(VendorUtils.EXTRA_REQUEST)) {
+            if (!intent.hasExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST)) {
                 Log.w(LOG_TAG, "Download result did not include the associated request. Ignoring.");
                 return false;
             }
@@ -161,7 +174,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 Log.w(LOG_TAG, "Download result did not include the temp file root. Ignoring.");
                 return false;
             }
-            if (!intent.hasExtra(MbmsDownloadManager.EXTRA_MBMS_FILE_INFO)) {
+            if (!intent.hasExtra(MbmsDownloadSession.EXTRA_MBMS_FILE_INFO)) {
                 Log.w(LOG_TAG, "Download result did not include the associated file info. " +
                         "Ignoring.");
                 return false;
@@ -171,7 +184,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                         "temp file. Ignoring.");
                 return false;
             }
-            DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
+            DownloadRequest request = intent.getParcelableExtra(
+                    MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST);
             String expectedTokenFileName = request.getHash() + DOWNLOAD_TOKEN_SUFFIX;
             File expectedTokenFile = new File(
                     MbmsUtils.getEmbmsTempFileDirForService(context, request.getFileServiceId()),
@@ -211,20 +225,25 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void moveDownloadedFile(Context context, Intent intent) {
-        DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
+        DownloadRequest request = intent.getParcelableExtra(
+                MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST);
         Intent intentForApp = request.getIntentForApp();
+        if (intentForApp == null) {
+            Log.i(LOG_TAG, "Malformed app notification intent");
+            setResultCode(RESULT_APP_NOTIFICATION_ERROR);
+            return;
+        }
 
-        int result = intent.getIntExtra(MbmsDownloadManager.EXTRA_MBMS_DOWNLOAD_RESULT,
-                MbmsDownloadManager.RESULT_CANCELLED);
-        intentForApp.putExtra(MbmsDownloadManager.EXTRA_MBMS_DOWNLOAD_RESULT, result);
+        int result = intent.getIntExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT,
+                MbmsDownloadSession.RESULT_CANCELLED);
+        intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT, result);
 
-        if (result != MbmsDownloadManager.RESULT_SUCCESSFUL) {
+        if (result != MbmsDownloadSession.RESULT_SUCCESSFUL) {
             Log.i(LOG_TAG, "Download request indicated a failed download. Aborting.");
             context.sendBroadcast(intentForApp);
             return;
         }
 
-        Uri destinationUri = request.getDestinationUri();
         Uri finalTempFile = intent.getParcelableExtra(VendorUtils.EXTRA_FINAL_URI);
         if (!verifyTempFilePath(context, request.getFileServiceId(), finalTempFile)) {
             Log.w(LOG_TAG, "Download result specified an invalid temp file " + finalTempFile);
@@ -233,24 +252,31 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         FileInfo completedFileInfo =
-                (FileInfo) intent.getParcelableExtra(MbmsDownloadManager.EXTRA_MBMS_FILE_INFO);
-        String relativePath = calculateDestinationFileRelativePath(request, completedFileInfo);
+                (FileInfo) intent.getParcelableExtra(MbmsDownloadSession.EXTRA_MBMS_FILE_INFO);
+        Path stagingDirectory = FileSystems.getDefault().getPath(
+                MbmsTempFileProvider.getEmbmsTempFileDir(context).getPath(),
+                TEMP_FILE_STAGING_LOCATION);
 
-        Uri finalFileLocation = moveTempFile(finalTempFile, destinationUri, relativePath);
-        if (finalFileLocation == null) {
+        Uri stagedFileLocation;
+        try {
+            stagedFileLocation = stageTempFile(finalTempFile, stagingDirectory);
+        } catch (IOException e) {
             Log.w(LOG_TAG, "Failed to move temp file to final destination");
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
             return;
         }
-        intentForApp.putExtra(MbmsDownloadManager.EXTRA_MBMS_COMPLETED_FILE_URI, finalFileLocation);
-        intentForApp.putExtra(MbmsDownloadManager.EXTRA_MBMS_FILE_INFO, completedFileInfo);
+        intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_COMPLETED_FILE_URI,
+                stagedFileLocation);
+        intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_FILE_INFO, completedFileInfo);
+        intentForApp.putExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST, request);
 
         context.sendBroadcast(intentForApp);
         setResultCode(RESULT_OK);
     }
 
     private void cleanupPostMove(Context context, Intent intent) {
-        DownloadRequest request = intent.getParcelableExtra(VendorUtils.EXTRA_REQUEST);
+        DownloadRequest request = intent.getParcelableExtra(
+                MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST);
         if (request == null) {
             Log.w(LOG_TAG, "Intent does not include a DownloadRequest. Ignoring.");
             return;
@@ -404,63 +430,22 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
     }
 
-    private static String calculateDestinationFileRelativePath(DownloadRequest request,
-            FileInfo info) {
-        List<String> filePathComponents = info.getUri().getPathSegments();
-        List<String> requestPathComponents = request.getSourceUri().getPathSegments();
-        Iterator<String> filePathIter = filePathComponents.iterator();
-        Iterator<String> requestPathIter = requestPathComponents.iterator();
-
-        StringBuilder pathBuilder = new StringBuilder();
-        // Iterate through the segments of the carrier's URI to the file, along with the segments
-        // of the source URI specified in the download request. The relative path is calculated
-        // as the tail of the file's URI that does not match the path segments in the source URI.
-        while (filePathIter.hasNext()) {
-            String currFilePathComponent = filePathIter.next();
-            if (requestPathIter.hasNext()) {
-                String requestFilePathComponent = requestPathIter.next();
-                if (requestFilePathComponent.equals(currFilePathComponent)) {
-                    continue;
-                }
-            }
-            pathBuilder.append(currFilePathComponent);
-            pathBuilder.append('/');
-        }
-        // remove the trailing slash
-        if (pathBuilder.length() > 0) {
-            pathBuilder.deleteCharAt(pathBuilder.length() - 1);
-        }
-        return pathBuilder.toString();
-    }
-
     /*
-     * Moves a tempfile located at fromPath to a new location at toPath. If
-     * toPath is a directory, the destination file will be located at  relativePath
-     * underneath toPath.
+     * Moves a tempfile located at fromPath to a new location in the staging directory.
      */
-    private static Uri moveTempFile(Uri fromPath, Uri toPath, String relativePath) {
+    private static Uri stageTempFile(Uri fromPath, Path stagingDirectory) throws IOException {
         if (!ContentResolver.SCHEME_FILE.equals(fromPath.getScheme())) {
             Log.w(LOG_TAG, "Moving source uri " + fromPath+ " does not have a file scheme");
             return null;
         }
-        if (!ContentResolver.SCHEME_FILE.equals(toPath.getScheme())) {
-            Log.w(LOG_TAG, "Moving destination uri " + toPath + " does not have a file scheme");
-            return null;
-        }
 
-        File fromFile = new File(fromPath.getSchemeSpecificPart());
-        File toFile = new File(toPath.getSchemeSpecificPart());
-        if (toFile.isDirectory()) {
-            toFile = new File(toFile, relativePath);
+        Path fromFile = FileSystems.getDefault().getPath(fromPath.getPath());
+        if (!Files.isDirectory(stagingDirectory)) {
+            Files.createDirectory(stagingDirectory);
         }
-        toFile.getParentFile().mkdirs();
+        Path result = Files.move(fromFile, stagingDirectory.resolve(fromFile.getFileName()));
 
-        if (fromFile.renameTo(toFile)) {
-            return Uri.fromFile(toFile);
-        } else if (manualMove(fromFile, toFile)) {
-            return Uri.fromFile(toFile);
-        }
-        return null;
+        return Uri.fromFile(result.toFile());
     }
 
     private static boolean verifyTempFilePath(Context context, String serviceId,
@@ -512,7 +497,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     private String getMiddlewarePackageCached(Context context) {
         if (mMiddlewarePackageNameCache == null) {
             mMiddlewarePackageNameCache = MbmsUtils.getMiddlewareServiceInfo(context,
-                    MbmsDownloadManager.MBMS_DOWNLOAD_SERVICE_ACTION).packageName;
+                    MbmsDownloadSession.MBMS_DOWNLOAD_SERVICE_ACTION).packageName;
         }
         return mMiddlewarePackageNameCache;
     }

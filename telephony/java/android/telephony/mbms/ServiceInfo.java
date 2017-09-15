@@ -16,6 +16,8 @@
 
 package android.telephony.mbms;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -26,12 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
 /**
  * Describes a cell-broadcast service. This class should not be instantiated directly -- use
- * {@link StreamingServiceInfo} or TODO link FileServiceInfo
+ * {@link StreamingServiceInfo} or {@link FileServiceInfo}
  * @hide
  */
 public class ServiceInfo {
@@ -59,6 +62,13 @@ public class ServiceInfo {
         if (newLocales.size() > MAP_LIMIT) {
             throw new RuntimeException("bad locales length " + newLocales.size());
         }
+
+        for (Locale l : newLocales) {
+            if (!newNames.containsKey(l)) {
+                throw new IllegalArgumentException("A name must be provided for each locale");
+            }
+        }
+
         names = new HashMap(newNames.size());
         names.putAll(newNames);
         className = newClassName;
@@ -115,16 +125,25 @@ public class ServiceInfo {
     }
 
     /**
-     * User displayable names listed by language. Do not modify the map returned from this method.
+     * Get the user-displayable name for this cell-broadcast service corresponding to the
+     * provided {@link Locale}.
+     * @param locale The {@link Locale} in which you want the name of the service. This must be a
+     *               value from the list returned by {@link #getLocales()} -- an
+     *               {@link java.util.NoSuchElementException} may be thrown otherwise.
+     * @return The {@link CharSequence} providing the name of the service in the given
+     *         {@link Locale}
      */
-    public Map<Locale, String> getNames() {
-        return names;
+    public @NonNull CharSequence getNameForLocale(@NonNull Locale locale) {
+        if (!names.containsKey(locale)) {
+            throw new NoSuchElementException("Locale not supported");
+        }
+        return names.get(locale);
     }
 
     /**
      * The class name for this service - used to categorize and filter
      */
-    public String getClassName() {
+    public String getServiceClassName() {
         return className;
     }
 

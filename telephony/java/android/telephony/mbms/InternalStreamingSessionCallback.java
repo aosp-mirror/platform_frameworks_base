@@ -22,19 +22,23 @@ import android.os.RemoteException;
 import java.util.List;
 
 /** @hide */
-public class InternalDownloadManagerCallback extends IMbmsDownloadManagerCallback.Stub {
-
+public class InternalStreamingSessionCallback extends IMbmsStreamingSessionCallback.Stub {
     private final Handler mHandler;
-    private final MbmsDownloadManagerCallback mAppCallback;
+    private final MbmsStreamingSessionCallback mAppCallback;
+    private volatile boolean mIsStopped = false;
 
-    public InternalDownloadManagerCallback(MbmsDownloadManagerCallback appCallback,
+    public InternalStreamingSessionCallback(MbmsStreamingSessionCallback appCallback,
             Handler handler) {
         mAppCallback = appCallback;
         mHandler = handler;
     }
 
     @Override
-    public void error(final int errorCode, final String message) throws RemoteException {
+    public void onError(final int errorCode, final String message) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -44,17 +48,26 @@ public class InternalDownloadManagerCallback extends IMbmsDownloadManagerCallbac
     }
 
     @Override
-    public void fileServicesUpdated(final List<FileServiceInfo> services) throws RemoteException {
+    public void onStreamingServicesUpdated(final List<StreamingServiceInfo> services)
+            throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onFileServicesUpdated(services);
+                mAppCallback.onStreamingServicesUpdated(services);
             }
         });
     }
 
     @Override
-    public void middlewareReady() throws RemoteException {
+    public void onMiddlewareReady() throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -65,5 +78,9 @@ public class InternalDownloadManagerCallback extends IMbmsDownloadManagerCallbac
 
     public Handler getHandler() {
         return mHandler;
+    }
+
+    public void stop() {
+        mIsStopped = true;
     }
 }
