@@ -75,13 +75,13 @@ public class MbmsUtils {
                 MbmsUtils.getMiddlewareServiceInfo(context, serviceAction);
 
         if (mbmsServiceInfo == null) {
-            return MbmsException.ERROR_NO_UNIQUE_MIDDLEWARE;
+            return MbmsErrors.ERROR_NO_UNIQUE_MIDDLEWARE;
         }
 
         bindIntent.setComponent(MbmsUtils.toComponentName(mbmsServiceInfo));
 
         context.bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        return MbmsException.SUCCESS;
+        return MbmsErrors.SUCCESS;
     }
 
     /**
