@@ -1443,6 +1443,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.NOTIFICATION_BADGING,
                 SecureSettingsProto.NOTIFICATION_BADGING);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_MANAGER_CONSTANTS,
+                SecureSettingsProto.BACKUP_MANAGER_CONSTANTS);
     }
 
     private static void dumpProtoSystemSettingsLocked(
