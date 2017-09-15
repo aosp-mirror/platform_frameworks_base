@@ -29,6 +29,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import static com.android.internal.app.procstats.ProcessStats.*;
 
@@ -66,6 +67,8 @@ public final class DumpUtils {
             "cch-activity", "cch-aclient", "cch-empty"
     };
 
+    // State enum is defined in frameworks/base/core/proto/android/service/procstats.proto
+    // Update states must sync enum definition as well, the ordering must not be changed.
     static final String[] ADJ_SCREEN_TAGS = new String[] {
             "0", "1"
     };
@@ -175,6 +178,13 @@ public final class DumpUtils {
         state = printArrayEntry(pw, ADJ_SCREEN_TAGS,  state, ADJ_SCREEN_MOD*STATE_COUNT);
         state = printArrayEntry(pw, ADJ_MEM_TAGS,  state, STATE_COUNT);
         printArrayEntry(pw, STATE_TAGS,  state, 1);
+    }
+
+    public static void printProcStateTagProto(ProtoOutputStream proto, long screenId, long memId,
+            long stateId, int state) {
+        state = printProto(proto, screenId, ADJ_SCREEN_TAGS, state, ADJ_SCREEN_MOD * STATE_COUNT);
+        state = printProto(proto, memId, ADJ_MEM_TAGS, state, STATE_COUNT);
+        printProto(proto, stateId, STATE_TAGS, state, 1);
     }
 
     public static void printAdjTag(PrintWriter pw, int state) {
@@ -349,6 +359,15 @@ public final class DumpUtils {
         } else {
             pw.print('?');
         }
+        return value - index*mod;
+    }
+
+    public static int printProto(ProtoOutputStream proto, long fieldId, String[] array, int value, int mod) {
+        int index = value/mod;
+        if (index >= 0 && index < array.length) {
+            // Valid state enum number starts at 1, 0 stands for unknown.
+            proto.write(fieldId, index + 1);
+        } // else enum default is always zero in proto3
         return value - index*mod;
     }
 
