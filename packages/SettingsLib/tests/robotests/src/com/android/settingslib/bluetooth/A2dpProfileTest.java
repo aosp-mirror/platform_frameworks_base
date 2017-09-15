@@ -25,6 +25,7 @@ import android.content.res.Resources;
 
 import com.android.settingslib.R;
 import com.android.settingslib.TestConfig;
+import com.android.settingslib.wrapper.BluetoothA2dpWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,8 +74,8 @@ public class A2dpProfileTest {
         }).when(mAdapter).getProfileProxy(any(Context.class), any(), eq(BluetoothProfile.A2DP));
 
         mProfile = new A2dpProfile(mContext, mAdapter, mDeviceManager, mProfileManager);
-        mProfile.setWrapperFactory((service) -> { return mBluetoothA2dpWrapper; });
         mServiceListener.onServiceConnected(BluetoothProfile.A2DP, mBluetoothA2dp);
+        mProfile.setBluetoothA2dpWrapper(mBluetoothA2dpWrapper);
     }
 
     @Test
