@@ -223,7 +223,7 @@ public class PipMenuActivityController {
         }
     }
 
-    public void onActivityUnpinned(ComponentName topPipActivity) {
+    public void onActivityUnpinned() {
         hideMenu();
         setStartActivityRequested(false);
     }
