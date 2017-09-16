@@ -42,7 +42,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private static final boolean VDBG = false;
 
     private IBluetoothGatt mService;
-    private BluetoothGattCallback mCallback;
+    private volatile BluetoothGattCallback mCallback;
     private Handler mHandler;
     private int mClientIf;
     private BluetoothDevice mDevice;
@@ -164,8 +164,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                         runOrQueueCallback(new Runnable() {
                             @Override
                             public void run() {
-                                if (mCallback != null) {
-                                    mCallback.onConnectionStateChange(BluetoothGatt.this,
+                                final BluetoothGattCallback callback = mCallback;
+                                if (callback != null) {
+                                    callback.onConnectionStateChange(BluetoothGatt.this,
                                             GATT_FAILURE,
                                             BluetoothProfile.STATE_DISCONNECTED);
                                 }
@@ -203,8 +204,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onPhyUpdate(BluetoothGatt.this, txPhy, rxPhy, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onPhyUpdate(BluetoothGatt.this, txPhy, rxPhy, status);
                             }
                         }
                     });
@@ -227,8 +229,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onPhyRead(BluetoothGatt.this, txPhy, rxPhy, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onPhyRead(BluetoothGatt.this, txPhy, rxPhy, status);
                             }
                         }
                     });
@@ -254,8 +257,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onConnectionStateChange(BluetoothGatt.this, status,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onConnectionStateChange(BluetoothGatt.this, status,
                                         profileState);
                             }
                         }
@@ -307,8 +311,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                         for (BluetoothGattService brokenRef : includedServices) {
                             BluetoothGattService includedService = getService(mDevice,
-                                    brokenRef.getUuid(), brokenRef.getInstanceId(),
-                                    brokenRef.getType());
+                                    brokenRef.getUuid(), brokenRef.getInstanceId());
                             if (includedService != null) {
                                 fixedService.addIncludedService(includedService);
                             } else {
@@ -320,8 +323,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onServicesDiscovered(BluetoothGatt.this, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onServicesDiscovered(BluetoothGatt.this, status);
                             }
                         }
                     });
@@ -371,13 +375,13 @@ public final class BluetoothGatt implements BluetoothProfile {
                         return;
                     }
 
-                    if (status == 0) characteristic.setValue(value);
-
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onCharacteristicRead(BluetoothGatt.this, characteristic,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                if (status == 0) characteristic.setValue(value);
+                                callback.onCharacteristicRead(BluetoothGatt.this, characteristic,
                                         status);
                             }
                         }
@@ -429,8 +433,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onCharacteristicWrite(BluetoothGatt.this, characteristic,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onCharacteristicWrite(BluetoothGatt.this, characteristic,
                                         status);
                             }
                         }
@@ -454,13 +459,13 @@ public final class BluetoothGatt implements BluetoothProfile {
                             handle);
                     if (characteristic == null) return;
 
-                    characteristic.setValue(value);
-
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onCharacteristicChanged(BluetoothGatt.this,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                characteristic.setValue(value);
+                                callback.onCharacteristicChanged(BluetoothGatt.this,
                                         characteristic);
                             }
                         }
@@ -489,7 +494,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                     BluetoothGattDescriptor descriptor = getDescriptorById(mDevice, handle);
                     if (descriptor == null) return;
 
-                    if (status == 0) descriptor.setValue(value);
 
                     if ((status == GATT_INSUFFICIENT_AUTHENTICATION
                             || status == GATT_INSUFFICIENT_ENCRYPTION)
@@ -510,8 +514,10 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                if (status == 0) descriptor.setValue(value);
+                                callback.onDescriptorRead(BluetoothGatt.this, descriptor, status);
                             }
                         }
                     });
@@ -559,8 +565,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onDescriptorWrite(BluetoothGatt.this, descriptor, status);
                             }
                         }
                     });
@@ -587,8 +594,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onReliableWriteCompleted(BluetoothGatt.this, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onReliableWriteCompleted(BluetoothGatt.this, status);
                             }
                         }
                     });
@@ -610,8 +618,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onReadRemoteRssi(BluetoothGatt.this, rssi, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onReadRemoteRssi(BluetoothGatt.this, rssi, status);
                             }
                         }
                     });
@@ -634,8 +643,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onMtuChanged(BluetoothGatt.this, mtu, status);
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onMtuChanged(BluetoothGatt.this, mtu, status);
                             }
                         }
                     });
@@ -660,8 +670,9 @@ public final class BluetoothGatt implements BluetoothProfile {
                     runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
-                            if (mCallback != null) {
-                                mCallback.onConnectionUpdated(BluetoothGatt.this, interval, latency,
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onConnectionUpdated(BluetoothGatt.this, interval, latency,
                                         timeout, status);
                             }
                         }
@@ -702,10 +713,9 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @hide
      */
     /*package*/ BluetoothGattService getService(BluetoothDevice device, UUID uuid,
-            int instanceId, int type) {
+            int instanceId) {
         for (BluetoothGattService svc : mServices) {
             if (svc.getDevice().equals(device)
-                    && svc.getType() == type
                     && svc.getInstanceId() == instanceId
                     && svc.getUuid().equals(uuid)) {
                 return svc;
@@ -901,7 +911,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
     /**
      * Set the preferred connection PHY for this app. Please note that this is just a
-     * recommendation, whether the PHY change will happen depends on other applications peferences,
+     * recommendation, whether the PHY change will happen depends on other applications preferences,
      * local and remote controller capabilities. Controller can override these settings.
      * <p>
      * {@link BluetoothGattCallback#onPhyUpdate} will be triggered as a result of this call, even

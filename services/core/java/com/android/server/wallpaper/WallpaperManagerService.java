@@ -1138,7 +1138,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, null, UserHandle.ALL, true);
         getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
+
+        // Initialize state from the persistent store, then guarantee that the
+        // WallpaperData for the system imagery is instantiated & active, creating
+        // it from defaults if necessary.
         loadSettingsLocked(UserHandle.USER_SYSTEM, false);
+        getWallpaperSafeLocked(UserHandle.USER_SYSTEM, FLAG_SYSTEM);
+
         mColorsChangedListeners = new SparseArray<>();
     }
 
@@ -1295,15 +1301,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     void switchUser(int userId, IRemoteCallback reply) {
-        WallpaperData systemWallpaper;
-        WallpaperData lockWallpaper;
+        final WallpaperData systemWallpaper;
+        final WallpaperData lockWallpaper;
         synchronized (mLock) {
             mCurrentUserId = userId;
             systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-            lockWallpaper = mLockWallpaperMap.get(userId);
-            if (lockWallpaper == null) {
-                lockWallpaper = systemWallpaper;
-            }
+            final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
+            lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
             // Not started watching yet, in case wallpaper data was loaded for other reasons.
             if (systemWallpaper.wallpaperObserver == null) {
                 systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
@@ -1311,8 +1315,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             switchWallpaper(systemWallpaper, reply);
         }
-        notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
-        notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+
+        // Offload color extraction to another thread since switchUser will be called
+        // from the main thread.
+        FgThread.getHandler().post(() -> {
+            notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
+            notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+        });
     }
 
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {
@@ -1627,13 +1636,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     (which == FLAG_LOCK) ? mLockWallpaperMap : mWallpaperMap;
             WallpaperData wallpaper = whichSet.get(wallpaperUserId);
             if (wallpaper == null) {
-                // common case, this is the first lookup post-boot of the system or
-                // unified lock, so we bring up the saved state lazily now and recheck.
-                loadSettingsLocked(wallpaperUserId, false);
-                wallpaper = whichSet.get(wallpaperUserId);
-                if (wallpaper == null) {
-                    return null;
-                }
+                // There is no established wallpaper imagery of this type (expected
+                // only for lock wallpapers; a system WallpaperData is established at
+                // user switch)
+                return null;
             }
             try {
                 if (outParams != null) {
@@ -1658,7 +1664,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     @Override
     public WallpaperInfo getWallpaperInfo(int userId) {
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, true, "getWallpaperIdForUser", null);
+                Binder.getCallingUid(), userId, false, true, "getWallpaperInfo", null);
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(userId);
             if (wallpaper != null && wallpaper.connection != null) {
@@ -2260,7 +2266,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     private void writeWallpaperAttributes(XmlSerializer out, String tag, WallpaperData wallpaper)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (DEBUG) {
-            Slog.v(TAG, "writeWallpaperAttributes");
+            Slog.v(TAG, "writeWallpaperAttributes id=" + wallpaper.wallpaperId);
         }
         out.startTag(null, tag);
         out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
@@ -2359,6 +2365,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
      * the event yet.  We use this safe method when we don't care about this ordering and just
      * want to update the data.  The data is going to be applied when the user switch observer
      * is eventually executed.
+     *
+     * Important: this method loads settings to initialize the given user's wallpaper data if
+     * there is no current in-memory state.
      */
     private WallpaperData getWallpaperSafeLocked(int userId, int which) {
         // We're setting either just system (work with the system wallpaper),
@@ -2397,8 +2406,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     private void loadSettingsLocked(int userId, boolean keepDimensionHints) {
-        if (DEBUG) Slog.v(TAG, "loadSettingsLocked");
-
         JournaledFile journal = makeJournaledFile(userId);
         FileInputStream stream = null;
         File file = journal.chooseForRead();

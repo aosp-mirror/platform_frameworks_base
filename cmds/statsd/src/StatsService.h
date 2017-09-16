@@ -17,9 +17,12 @@
 #ifndef STATS_SERVICE_H
 #define STATS_SERVICE_H
 
+#include "StatsLogProcessor.h"
+
 #include <android/os/BnStatsManager.h>
 #include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
+#include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <utils/Looper.h>
 
 #include <deque>
@@ -30,7 +33,7 @@ using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
 using namespace std;
-
+using android::os::statsd::StatsdConfig;
 
 // ================================================================================
 class StatsService : public BnStatsManager {
@@ -46,9 +49,13 @@ public:
 
     virtual Status systemRunning();
 
+    virtual status_t setProcessor(const sp<StatsLogProcessor>& main_processor);
+
 private:
+    sp<StatsLogProcessor> m_processor; // Reference to the processor for updating configs.
     status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
     void printCmdHelp(FILE* out);
+    status_t doLoadConfig(FILE* in);
 };
 
 #endif // STATS_SERVICE_H

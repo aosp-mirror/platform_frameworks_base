@@ -25,7 +25,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(call all-proto-files-under, src)
 
 LOCAL_PROTOC_FLAGS :=
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite-static
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -86,6 +86,7 @@ LOCAL_SHARED_LIBRARIES := \
         libutils \
         libservices \
         libandroidfw \
+        libprotobuf-cpp-lite \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
@@ -131,6 +132,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     liblog \
     libselinux \
-    libutils
+    libutils \
+    libprotobuf-cpp-lite \
 
 include $(BUILD_NATIVE_TEST)

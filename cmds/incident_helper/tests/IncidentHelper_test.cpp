@@ -17,6 +17,7 @@
 #include "IncidentHelper.h"
 
 #include "frameworks/base/core/proto/android/os/kernelwake.pb.h"
+#include "frameworks/base/core/proto/android/os/pagetypeinfo.pb.h"
 #include "frameworks/base/core/proto/android/os/procrank.pb.h"
 
 #include <android-base/file.h>
@@ -29,6 +30,7 @@
 
 using namespace android::base;
 using namespace android::os;
+using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
 using ::testing::internal::CaptureStderr;
@@ -42,8 +44,8 @@ public:
         ASSERT_TRUE(tf.fd != -1);
     }
 
-    std::string getSerializedString(::google::protobuf::Message& message) {
-        std::string expectedStr;
+    string getSerializedString(::google::protobuf::Message& message) {
+        string expectedStr;
         message.SerializeToFileDescriptor(tf.fd);
         ReadFileToString(tf.path, &expectedStr);
         return expectedStr;
@@ -52,8 +54,8 @@ public:
 protected:
     TemporaryFile tf;
 
-    const std::string kTestPath = GetExecutableDirectory();
-    const std::string kTestDataPath = kTestPath + "/testdata/";
+    const string kTestPath = GetExecutableDirectory();
+    const string kTestDataPath = kTestPath + "/testdata/";
 };
 
 TEST_F(IncidentHelperTest, ReverseParser) {
@@ -69,7 +71,7 @@ TEST_F(IncidentHelperTest, ReverseParser) {
 }
 
 TEST_F(IncidentHelperTest, KernelWakesParser) {
-    const std::string testFile = kTestDataPath + "kernel_wakeups.txt";
+    const string testFile = kTestDataPath + "kernel_wakeups.txt";
     KernelWakesParser parser;
     KernelWakeSources expected;
 
@@ -107,7 +109,7 @@ TEST_F(IncidentHelperTest, KernelWakesParser) {
 }
 
 TEST_F(IncidentHelperTest, ProcrankParser) {
-    const std::string testFile = kTestDataPath + "procrank.txt";
+    const string testFile = kTestDataPath + "procrank.txt";
     ProcrankParser parser;
     Procrank expected;
 
@@ -159,7 +161,7 @@ TEST_F(IncidentHelperTest, ProcrankParser) {
 }
 
 TEST_F(IncidentHelperTest, ProcrankParserShortHeader) {
-    const std::string testFile = kTestDataPath + "procrank_short.txt";
+    const string testFile = kTestDataPath + "procrank_short.txt";
     ProcrankParser parser;
     Procrank expected;
 
@@ -186,6 +188,62 @@ TEST_F(IncidentHelperTest, ProcrankParserShortHeader) {
 
     expected.mutable_summary()->mutable_ram()
         ->set_raw_text("3843972K total, 281424K free, 116764K buffers, 1777452K cached, 1136K shmem, 217916K slab");
+
+    int fd = open(testFile.c_str(), O_RDONLY);
+    ASSERT_TRUE(fd != -1);
+
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, parser.Parse(fd, STDOUT_FILENO));
+    EXPECT_EQ(GetCapturedStdout(), getSerializedString(expected));
+    close(fd);
+}
+
+TEST_F(IncidentHelperTest, PageTypeInfoParser) {
+    const string testFile = kTestDataPath + "pagetypeinfo.txt";
+    PageTypeInfoParser parser;
+    PageTypeInfo expected;
+
+    expected.set_page_block_order(10);
+    expected.set_pages_per_block(1024);
+
+    MigrateTypeProto* mt1 = expected.add_migrate_types();
+    mt1->set_node(0);
+    mt1->set_zone("DMA");
+    mt1->set_type("Unmovable");
+    int arr1[] = { 426, 279, 226, 1, 1, 1, 0, 0, 2, 2, 0};
+    for (auto i=0; i<11; i++) {
+        mt1->add_free_pages_count(arr1[i]);
+    }
+
+    MigrateTypeProto* mt2 = expected.add_migrate_types();
+    mt2->set_node(0);
+    mt2->set_zone("Normal");
+    mt2->set_type("Reclaimable");
+    int arr2[] = { 953, 773, 437, 154, 92, 26, 15, 14, 12, 7, 0};
+    for (auto i=0; i<11; i++) {
+        mt2->add_free_pages_count(arr2[i]);
+    }
+
+    BlockProto* block1 = expected.add_blocks();
+    block1->set_node(0);
+    block1->set_zone("DMA");
+    block1->set_unmovable(74);
+    block1->set_reclaimable(9);
+    block1->set_movable(337);
+    block1->set_cma(41);
+    block1->set_reserve(1);
+    block1->set_isolate(0);
+
+
+    BlockProto* block2 = expected.add_blocks();
+    block2->set_node(0);
+    block2->set_zone("Normal");
+    block2->set_unmovable(70);
+    block2->set_reclaimable(12);
+    block2->set_movable(423);
+    block2->set_cma(0);
+    block2->set_reserve(1);
+    block2->set_isolate(0);
 
     int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_TRUE(fd != -1);

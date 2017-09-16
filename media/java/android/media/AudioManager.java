@@ -3058,7 +3058,11 @@ public class AudioManager {
 
     private final IPlaybackConfigDispatcher mPlayCb = new IPlaybackConfigDispatcher.Stub() {
         @Override
-        public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
+        public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
+                boolean flush) {
+            if (flush) {
+                Binder.flushPendingCommands();
+            }
             synchronized(mPlaybackCallbackLock) {
                 if (mPlaybackCallbackList != null) {
                     for (int i=0 ; i < mPlaybackCallbackList.size() ; i++) {

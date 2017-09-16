@@ -481,7 +481,7 @@ static void FillFileDescriptorVector(JNIEnv* env,
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
-                                     jint debug_flags, jobjectArray javaRlimits,
+                                     jint runtime_flags, jobjectArray javaRlimits,
                                      jlong permittedCapabilities, jlong effectiveCapabilities,
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
@@ -662,7 +662,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     UnsetSigChldHandler();
 
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags,
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
                               is_system_server, instructionSet);
     if (env->ExceptionCheck()) {
       RuntimeAbort(env, __LINE__, "Error calling post fork hooks.");
@@ -704,7 +704,7 @@ static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jcl
 
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
-        jint debug_flags, jobjectArray rlimits,
+        jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose,
         jintArray fdsToIgnore,
@@ -748,17 +748,17 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     // available.
     capabilities &= GetEffectiveCapabilityMask(env);
 
-    return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
+    return ForkAndSpecializeCommon(env, uid, gid, gids, runtime_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
             se_name, false, fdsToClose, fdsToIgnore, instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
-        jint debug_flags, jobjectArray rlimits, jlong permittedCapabilities,
+        jint runtime_flags, jobjectArray rlimits, jlong permittedCapabilities,
         jlong effectiveCapabilities) {
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
-                                      debug_flags, rlimits,
+                                      runtime_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
                                       NULL, NULL, NULL);

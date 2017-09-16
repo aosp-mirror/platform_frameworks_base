@@ -16,18 +16,20 @@
 
 package android.telephony.mbms;
 
-import android.os.RemoteException;
+import android.telephony.MbmsDownloadSession;
 
 /**
- * A optional listener class used by download clients to track progress.
- * @hide
+ * A optional listener class used by download clients to track progress. Apps should extend this
+ * class and pass an instance into
+ * {@link MbmsDownloadSession#download(DownloadRequest)}
+ *
+ * This is optionally specified when requesting a download and will only be called while the app
+ * is running.
  */
-public class DownloadProgressListener extends IDownloadProgressListener.Stub {
+public class DownloadStateCallback {
+
     /**
-     * Gives process callbacks for a given DownloadRequest.
-     * This is optionally specified when requesting a download and
-     * only lives while the app is running - it's unlikely to be useful for
-     * downloads far in the future.
+     * Called when the middleware wants to report progress for a file in a {@link DownloadRequest}.
      *
      * @param request a {@link DownloadRequest}, indicating which download is being referenced.
      * @param fileInfo a {@link FileInfo} specifying the file to report progress on.  Note that
@@ -40,9 +42,21 @@ public class DownloadProgressListener extends IDownloadProgressListener.Stub {
      * @param currentDecodedSize is the number of bytes that have been decoded.
      * @param fullDecodedSize is the total number of bytes that make up the final decoded content.
      */
-    @Override
-    public void progress(DownloadRequest request, FileInfo fileInfo,
+    public void onProgressUpdated(DownloadRequest request, FileInfo fileInfo,
             int currentDownloadSize, int fullDownloadSize,
-            int currentDecodedSize, int fullDecodedSize) throws RemoteException {
+            int currentDecodedSize, int fullDecodedSize) {
+    }
+
+    /**
+     * Gives download state callbacks for a file in a {@link DownloadRequest}.
+     *
+     * @param request a {@link DownloadRequest}, indicating which download is being referenced.
+     * @param fileInfo a {@link FileInfo} specifying the file to report progress on.  Note that
+     *   the request may result in many files being downloaded and the client
+     *   may not have been able to get a list of them in advance.
+     * @param state The current state of the download.
+     */
+    public void onStateUpdated(DownloadRequest request, FileInfo fileInfo,
+            @MbmsDownloadSession.DownloadStatus int state) {
     }
 }

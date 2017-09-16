@@ -22,6 +22,7 @@
 
 #include <gui/Surface.h>
 #include <GrContextOptions.h>
+#include <SkExecutor.h>
 #include <math.h>
 #include <set>
 
@@ -73,6 +74,29 @@ void CacheManager::updateContextCacheSizes() {
     mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
 }
 
+class CacheManager::SkiaTaskProcessor : public TaskProcessor<bool>, public SkExecutor {
+public:
+    explicit SkiaTaskProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
+
+    // This is really a Task<void> but that doesn't really work when Future<>
+    // expects to be able to get/set a value
+    struct SkiaTask : public Task<bool> {
+        std::function<void()> func;
+    };
+
+    virtual void add(std::function<void(void)> func) override {
+        sp<SkiaTask> task(new SkiaTask());
+        task->func = func;
+        TaskProcessor<bool>::add(task);
+    }
+
+    virtual void onProcess(const sp<Task<bool> >& task) override {
+        SkiaTask* t = static_cast<SkiaTask*>(task.get());
+        t->func();
+        task->setResult(true);
+    }
+};
+
 void CacheManager::configureContext(GrContextOptions* contextOptions) {
     contextOptions->fAllowPathMaskCaching = true;
 
@@ -95,6 +119,13 @@ void CacheManager::configureContext(GrContextOptions* contextOptions) {
     // Skia's implementation doesn't provide a mechanism to resize the font cache due to
     // the potential cost of recreating the glyphs.
     contextOptions->fGlyphCacheTextureMaximumBytes = fontCacheMB * 1024 * 1024;
+
+    if (mTaskManager.canRunTasks()) {
+        if (!mTaskProcessor.get()) {
+            mTaskProcessor = new SkiaTaskProcessor(&mTaskManager);
+        }
+        contextOptions->fExecutor = mTaskProcessor.get();
+    }
 }
 
 void CacheManager::trimMemory(TrimMemoryMode mode) {

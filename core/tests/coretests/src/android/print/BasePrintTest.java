@@ -39,8 +39,8 @@ import android.printservice.CustomPrinterIconCallback;
 import android.printservice.PrintJob;
 import android.printservice.PrintService;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.UiDevice;
 import android.support.test.rule.ActivityTestRule;
+import android.support.test.uiautomator.UiDevice;
 
 import org.junit.After;
 import org.junit.Before;
@@ -141,6 +141,13 @@ abstract class BasePrintTest {
         // Initialize the latches.
         mStartCallCounter = new CallCounter();
         mStartSessionCallCounter = new CallCounter();
+    }
+
+    @Before
+    public void unlockScreen() throws Exception {
+        // Unlock screen.
+        runShellCommand(getInstrumentation(), "input keyevent KEYCODE_WAKEUP");
+        runShellCommand(getInstrumentation(), "wm dismiss-keyguard");
     }
 
     @After

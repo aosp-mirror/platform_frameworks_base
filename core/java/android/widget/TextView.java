@@ -5547,6 +5547,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public final void setHint(CharSequence hint) {
+        setHintInternal(hint);
+
+        if (isInputMethodTarget()) {
+            mEditor.reportExtractedText();
+        }
+    }
+
+    private void setHintInternal(CharSequence hint) {
         mHint = TextUtils.stringOrSpannedString(hint);
 
         if (mLayout != null) {
@@ -7644,6 +7652,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             MetaKeyKeyListener.stopSelecting(this, sp);
         }
+
+        setHintInternal(text.hint);
     }
 
     /**
@@ -8433,7 +8443,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mMaxMode != LINES) {
             desired = Math.min(desired, mMaximum);
-        } else if (cap && linecount > mMaximum && layout instanceof DynamicLayout) {
+        } else if (cap && linecount > mMaximum && (layout instanceof DynamicLayout
+                || layout instanceof BoringLayout)) {
             desired = layout.getLineTop(mMaximum);
 
             if (dr != null) {

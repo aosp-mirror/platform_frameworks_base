@@ -53,7 +53,8 @@ public class ProvisionedObserver extends ContentObserver {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Now provisioned, so starting backups");
                 }
-                KeyValueBackupJob.schedule(backupManagerService.getContext());
+                KeyValueBackupJob.schedule(backupManagerService.getContext(),
+                        backupManagerService.getConstants());
                 backupManagerService.scheduleNextFullBackupJob(0);
             }
         }

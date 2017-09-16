@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 165 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 166 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -195,6 +195,13 @@ public class BatteryStatsImpl extends BatteryStats {
         return mKernelMemoryStats;
     }
 
+    /** Container for Resource Power Manager stats. Updated by updateRpmStatsLocked. */
+    private final RpmStats mTmpRpmStats = new RpmStats();
+    /** The soonest the RPM stats can be updated after it was last updated. */
+    private static final long RPM_STATS_UPDATE_FREQ_MS = 1000;
+    /** Last time that RPM stats were updated by updateRpmStatsLocked. */
+    private long mLastRpmStatsUpdateTimeMs = -RPM_STATS_UPDATE_FREQ_MS;
+
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
         public void batteryPowerChanged(boolean onBattery);
@@ -202,6 +209,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public interface PlatformIdleStateCallback {
+        public void fillLowPowerStats(RpmStats rpmStats);
         public String getPlatformLowPowerStats();
         public String getSubsystemLowPowerStats();
     }
@@ -279,7 +287,8 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_WIFI = 0x02;
         int UPDATE_RADIO = 0x04;
         int UPDATE_BT = 0x08;
-        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
+        int UPDATE_RPM = 0x10; // 16
+        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM;
 
         Future<?> scheduleSync(String reason, int flags);
         Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
@@ -626,6 +635,25 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @VisibleForTesting
     protected PowerProfile mPowerProfile;
+
+    /*
+     * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
+     * recording their times when on-battery (regardless of screen state).
+     */
+    private final HashMap<String, SamplingTimer> mRpmStats = new HashMap<>();
+    /** Times for each Resource Power Manager state and voter when screen-off and on-battery. */
+    private final HashMap<String, SamplingTimer> mScreenOffRpmStats = new HashMap<>();
+
+    @Override
+    public Map<String, ? extends Timer> getRpmStats() {
+        return mRpmStats;
+    }
+
+    // TODO: Note: screenOffRpmStats has been disabled via SCREEN_OFF_RPM_STATS_ENABLED.
+    @Override
+    public Map<String, ? extends Timer> getScreenOffRpmStats() {
+        return mScreenOffRpmStats;
+    }
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -2648,6 +2676,26 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /** Get Resource Power Manager stats. Create a new one if it doesn't already exist. */
+    public SamplingTimer getRpmTimerLocked(String name) {
+        SamplingTimer rpmt = mRpmStats.get(name);
+        if (rpmt == null) {
+            rpmt = new SamplingTimer(mClocks, mOnBatteryTimeBase);
+            mRpmStats.put(name, rpmt);
+        }
+        return rpmt;
+    }
+
+    /** Get Screen-off Resource Power Manager stats. Create new one if it doesn't already exist. */
+    public SamplingTimer getScreenOffRpmTimerLocked(String name) {
+        SamplingTimer rpmt = mScreenOffRpmStats.get(name);
+        if (rpmt == null) {
+            rpmt = new SamplingTimer(mClocks, mOnBatteryScreenOffTimeBase);
+            mScreenOffRpmStats.put(name, rpmt);
+        }
+        return rpmt;
+    }
+
     /*
      * Get the wakeup reason counter, and create a new one if one
      * doesn't already exist.
@@ -3535,6 +3583,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (updateOnBatteryScreenOffTimeBase) {
                 updateKernelWakelocksLocked();
                 updateBatteryPropertiesLocked();
+            }
+            // This if{} is only necessary due to SCREEN_OFF_RPM_STATS_ENABLED, which exists because
+            // updateRpmStatsLocked is too slow to run each screen change. When the speed is
+            // improved, remove the surrounding if{}.
+            if (SCREEN_OFF_RPM_STATS_ENABLED || updateOnBatteryTimeBase) {
+                updateRpmStatsLocked(); // if either OnBattery or OnBatteryScreenOff timebase changes.
             }
             if (DEBUG_ENERGY_CPU) {
                 Slog.d(TAG, "Updating cpu time because screen is now " + (screenOff ? "off" : "on")
@@ -9501,6 +9555,19 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        if (mRpmStats.size() > 0) {
+            for (SamplingTimer timer : mRpmStats.values()) {
+                mOnBatteryTimeBase.remove(timer);
+            }
+            mRpmStats.clear();
+        }
+        if (mScreenOffRpmStats.size() > 0) {
+            for (SamplingTimer timer : mScreenOffRpmStats.values()) {
+                mOnBatteryScreenOffTimeBase.remove(timer);
+            }
+            mScreenOffRpmStats.clear();
+        }
+
         if (mKernelWakelockStats.size() > 0) {
             for (SamplingTimer timer : mKernelWakelockStats.values()) {
                 mOnBatteryScreenOffTimeBase.remove(timer);
@@ -10199,6 +10266,61 @@ public class BatteryStatsImpl extends BatteryStats {
             // We store the power drain as mAms.
             mBluetoothActivity.getPowerCounter().addCountLocked(
                     (long) (info.getControllerEnergyUsed() / opVolt));
+        }
+    }
+
+    /**
+     * Read and record Resource Power Manager (RPM) state and voter times.
+     * If RPM stats were fetched more recently than RPM_STATS_UPDATE_FREQ_MS ago, uses the old data
+     * instead of fetching it anew.
+     */
+    public void updateRpmStatsLocked() {
+        if (mPlatformIdleStateCallback == null) return;
+        long now = SystemClock.elapsedRealtime();
+        if (now - mLastRpmStatsUpdateTimeMs >= RPM_STATS_UPDATE_FREQ_MS) {
+            mPlatformIdleStateCallback.fillLowPowerStats(mTmpRpmStats);
+            mLastRpmStatsUpdateTimeMs = now;
+        }
+
+        for (Map.Entry<String, RpmStats.PowerStatePlatformSleepState> pstate
+                : mTmpRpmStats.mPlatformLowPowerStats.entrySet()) {
+
+            // Update values for this platform state.
+            final String pName = pstate.getKey();
+            final long pTimeUs = pstate.getValue().mTimeMs * 1000;
+            final int pCount = pstate.getValue().mCount;
+            getRpmTimerLocked(pName).update(pTimeUs, pCount);
+            if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                getScreenOffRpmTimerLocked(pName).update(pTimeUs, pCount);
+            }
+
+            // Update values for each voter of this platform state.
+            for (Map.Entry<String, RpmStats.PowerStateElement> voter
+                    : pstate.getValue().mVoters.entrySet()) {
+                final String vName = pName + "." + voter.getKey();
+                final long vTimeUs = voter.getValue().mTimeMs * 1000;
+                final int vCount = voter.getValue().mCount;
+                getRpmTimerLocked(vName).update(vTimeUs, vCount);
+                if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                    getScreenOffRpmTimerLocked(vName).update(vTimeUs, vCount);
+                }
+            }
+        }
+
+        for (Map.Entry<String, RpmStats.PowerStateSubsystem> subsys
+                : mTmpRpmStats.mSubsystemLowPowerStats.entrySet()) {
+
+            final String subsysName = subsys.getKey();
+            for (Map.Entry<String, RpmStats.PowerStateElement> sstate
+                    : subsys.getValue().mStates.entrySet()) {
+                final String name = subsysName + "." + sstate.getKey();
+                final long timeUs = sstate.getValue().mTimeMs * 1000;
+                final int count = sstate.getValue().mCount;
+                getRpmTimerLocked(name).update(timeUs, count);
+                if (SCREEN_OFF_RPM_STATS_ENABLED) {
+                    getScreenOffRpmTimerLocked(name).update(timeUs, count);
+                }
+            }
         }
     }
 
@@ -11725,6 +11847,27 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer.readSummaryFromParcelLocked(in);
 
+        int NRPMS = in.readInt();
+        if (NRPMS > 10000) {
+            throw new ParcelFormatException("File corrupt: too many rpm stats " + NRPMS);
+        }
+        for (int irpm = 0; irpm < NRPMS; irpm++) {
+            if (in.readInt() != 0) {
+                String rpmName = in.readString();
+                getRpmTimerLocked(rpmName).readSummaryFromParcelLocked(in);
+            }
+        }
+        int NSORPMS = in.readInt();
+        if (NSORPMS > 10000) {
+            throw new ParcelFormatException("File corrupt: too many screen-off rpm stats " + NSORPMS);
+        }
+        for (int irpm = 0; irpm < NSORPMS; irpm++) {
+            if (in.readInt() != 0) {
+                String rpmName = in.readString();
+                getScreenOffRpmTimerLocked(rpmName).readSummaryFromParcelLocked(in);
+            }
+        }
+
         int NKW = in.readInt();
         if (NKW > 10000) {
             throw new ParcelFormatException("File corrupt: too many kernel wake locks " + NKW);
@@ -12110,6 +12253,29 @@ public class BatteryStatsImpl extends BatteryStats {
         mFlashlightOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mCameraOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mBluetoothScanTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+
+        out.writeInt(mRpmStats.size());
+        for (Map.Entry<String, SamplingTimer> ent : mRpmStats.entrySet()) {
+            Timer rpmt = ent.getValue();
+            if (rpmt != null) {
+                out.writeInt(1);
+                out.writeString(ent.getKey());
+                rpmt.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+        }
+        out.writeInt(mScreenOffRpmStats.size());
+        for (Map.Entry<String, SamplingTimer> ent : mScreenOffRpmStats.entrySet()) {
+            Timer rpmt = ent.getValue();
+            if (rpmt != null) {
+                out.writeInt(1);
+                out.writeString(ent.getKey());
+                rpmt.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+        }
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
@@ -12568,6 +12734,25 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeScreenOffCounter = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mLastWriteTime = in.readLong();
 
+        mRpmStats.clear();
+        int NRPMS = in.readInt();
+        for (int irpm = 0; irpm < NRPMS; irpm++) {
+            if (in.readInt() != 0) {
+                String rpmName = in.readString();
+                SamplingTimer rpmt = new SamplingTimer(mClocks, mOnBatteryTimeBase, in);
+                mRpmStats.put(rpmName, rpmt);
+            }
+        }
+        mScreenOffRpmStats.clear();
+        int NSORPMS = in.readInt();
+        for (int irpm = 0; irpm < NSORPMS; irpm++) {
+            if (in.readInt() != 0) {
+                String rpmName = in.readString();
+                SamplingTimer rpmt = new SamplingTimer(mClocks, mOnBatteryScreenOffTimeBase, in);
+                mScreenOffRpmStats.put(rpmName, rpmt);
+            }
+        }
+
         mKernelWakelockStats.clear();
         int NKW = in.readInt();
         for (int ikw = 0; ikw < NKW; ikw++) {
@@ -12731,6 +12916,29 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeScreenOffCounter.writeToParcel(out);
         out.writeLong(mLastWriteTime);
 
+        out.writeInt(mRpmStats.size());
+        for (Map.Entry<String, SamplingTimer> ent : mRpmStats.entrySet()) {
+            SamplingTimer rpmt = ent.getValue();
+            if (rpmt != null) {
+                out.writeInt(1);
+                out.writeString(ent.getKey());
+                rpmt.writeToParcel(out, uSecRealtime);
+            } else {
+                out.writeInt(0);
+            }
+        }
+        out.writeInt(mScreenOffRpmStats.size());
+        for (Map.Entry<String, SamplingTimer> ent : mScreenOffRpmStats.entrySet()) {
+            SamplingTimer rpmt = ent.getValue();
+            if (rpmt != null) {
+                out.writeInt(1);
+                out.writeString(ent.getKey());
+                rpmt.writeToParcel(out, uSecRealtime);
+            } else {
+                out.writeInt(0);
+            }
+        }
+
         if (inclUids) {
             out.writeInt(mKernelWakelockStats.size());
             for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
@@ -12755,6 +12963,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         } else {
+            // TODO: There should be two 0's printed here, not just one.
             out.writeInt(0);
         }
 

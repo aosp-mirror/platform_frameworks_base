@@ -19,9 +19,11 @@
 #include "StatsService.h"
 #include "DropboxReader.h"
 
+#include <android-base/file.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <cutils/log.h>
+#include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
 #include <utils/String16.h>
@@ -31,6 +33,7 @@
 #include <stdlib.h>
 
 using namespace android;
+using android::os::statsd::StatsdConfig;
 
 // ================================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
@@ -40,6 +43,13 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
 
 StatsService::~StatsService()
 {
+}
+
+status_t
+StatsService::setProcessor(const sp<StatsLogProcessor>& main_processor) {
+    m_processor = main_processor;
+    ALOGD("stats service set to processor %p", m_processor.get());
+    return NO_ERROR;
 }
 
 // Implement our own because the default binder implementation isn't
@@ -124,10 +134,31 @@ StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& args)
         if (!args[0].compare(String8("print-stats-log")) && args.size() > 1) {
             return doPrintStatsLog(out, args);
         }
+        if (!args[0].compare(String8("config"))) {
+            return doLoadConfig(in);
+        }
     }
 
     printCmdHelp(out);
     return NO_ERROR;
+}
+
+status_t
+StatsService::doLoadConfig(FILE* in)
+{
+    string content;
+    if (!android::base::ReadFdToString(fileno(in), &content)) {
+        return UNKNOWN_ERROR;
+    }
+    StatsdConfig config;
+    if (config.ParseFromString(content)) {
+        ALOGD("Config parsed from command line: %s", config.SerializeAsString().c_str());
+        m_processor->UpdateConfig(0, config);
+        return NO_ERROR;
+    } else {
+        ALOGD("Config failed to be parsed");
+        return UNKNOWN_ERROR;
+    }
 }
 
 Status
@@ -158,4 +189,5 @@ void
 StatsService::printCmdHelp(FILE* out) {
     fprintf(out, "Usage:\n");
     fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
+    fprintf(out, "\t config\t Loads a new config from command-line (must be proto in wire-encoded format).\n");
 }

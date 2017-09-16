@@ -25,10 +25,8 @@
         android:id="@+id/zen_embedded_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="12dp"
         android:layout_marginTop="8dp"
         android:background="@color/qs_tile_divider" />
-
 
     <RelativeLayout
         android:id="@+id/zen_introduction"
@@ -36,7 +34,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:background="@drawable/zen_introduction_message_background"
         android:theme="@*android:style/ThemeOverlay.DeviceDefault.Accent.Light">

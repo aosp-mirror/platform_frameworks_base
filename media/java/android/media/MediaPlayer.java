@@ -2072,6 +2072,20 @@ public class MediaPlayer extends PlayerBase
     private native void _reset();
 
     /**
+     * Set up a timer for {@link #TimeProvider}. {@link #TimeProvider} will be
+     * notified when the presentation time reaches (becomes greater than or equal to)
+     * the value specified.
+     *
+     * @param mediaTimeUs presentation time to get timed event callback at
+     * @hide
+     */
+    public void notifyAt(long mediaTimeUs) {
+        _notifyAt(mediaTimeUs);
+    }
+
+    private native void _notifyAt(long mediaTimeUs);
+
+    /**
      * Sets the audio stream type for this MediaPlayer. See {@link AudioManager}
      * for a list of stream types. Must call this method before prepare() or
      * prepareAsync() in order for the target stream type to become effective
@@ -3155,6 +3169,7 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_PAUSED = 7;
     private static final int MEDIA_STOPPED = 8;
     private static final int MEDIA_SKIPPED = 9;
+    private static final int MEDIA_NOTIFY_TIME = 98;
     private static final int MEDIA_TIMED_TEXT = 99;
     private static final int MEDIA_ERROR = 100;
     private static final int MEDIA_INFO = 200;
@@ -3345,6 +3360,14 @@ public class MediaPlayer extends PlayerBase
                 }
                 // No real default action so far.
                 return;
+
+            case MEDIA_NOTIFY_TIME:
+                    TimeProvider timeProvider = mTimeProvider;
+                    if (timeProvider != null) {
+                        timeProvider.onNotifyTime();
+                    }
+                return;
+
             case MEDIA_TIMED_TEXT:
                 OnTimedTextListener onTimedTextListener = mOnTimedTextListener;
                 if (onTimedTextListener == null)
@@ -5144,19 +5167,16 @@ public class MediaPlayer extends PlayerBase
         private boolean mStopped = true;
         private boolean mBuffering;
         private long mLastReportedTime;
-        private long mTimeAdjustment;
         // since we are expecting only a handful listeners per stream, there is
         // no need for log(N) search performance
         private MediaTimeProvider.OnMediaTimeListener mListeners[];
         private long mTimes[];
-        private long mLastNanoTime;
         private Handler mEventHandler;
         private boolean mRefresh = false;
         private boolean mPausing = false;
         private boolean mSeeking = false;
         private static final int NOTIFY = 1;
         private static final int NOTIFY_TIME = 0;
-        private static final int REFRESH_AND_NOTIFY_TIME = 1;
         private static final int NOTIFY_STOP = 2;
         private static final int NOTIFY_SEEK = 3;
         private static final int NOTIFY_TRACK_DATA = 4;
@@ -5188,13 +5208,11 @@ public class MediaPlayer extends PlayerBase
             mListeners = new MediaTimeProvider.OnMediaTimeListener[0];
             mTimes = new long[0];
             mLastTimeUs = 0;
-            mTimeAdjustment = 0;
         }
 
         private void scheduleNotification(int type, long delayUs) {
             // ignore time notifications until seek is handled
-            if (mSeeking &&
-                    (type == NOTIFY_TIME || type == REFRESH_AND_NOTIFY_TIME)) {
+            if (mSeeking && type == NOTIFY_TIME) {
                 return;
             }
 
@@ -5221,6 +5239,14 @@ public class MediaPlayer extends PlayerBase
         }
 
         /** @hide */
+        public void onNotifyTime() {
+            synchronized (this) {
+                if (DEBUG) Log.d(TAG, "onNotifyTime: ");
+                scheduleNotification(NOTIFY_TIME, 0 /* delay */);
+            }
+        }
+
+        /** @hide */
         public void onPaused(boolean paused) {
             synchronized(this) {
                 if (DEBUG) Log.d(TAG, "onPaused: " + paused);
@@ -5231,7 +5257,7 @@ public class MediaPlayer extends PlayerBase
                 } else {
                     mPausing = paused;  // special handling if player disappeared
                     mSeeking = false;
-                    scheduleNotification(REFRESH_AND_NOTIFY_TIME, 0 /* delay */);
+                    scheduleNotification(NOTIFY_TIME, 0 /* delay */);
                 }
             }
         }
@@ -5241,7 +5267,7 @@ public class MediaPlayer extends PlayerBase
             synchronized (this) {
                 if (DEBUG) Log.d(TAG, "onBuffering: " + buffering);
                 mBuffering = buffering;
-                scheduleNotification(REFRESH_AND_NOTIFY_TIME, 0 /* delay */);
+                scheduleNotification(NOTIFY_TIME, 0 /* delay */);
             }
         }
 
@@ -5438,7 +5464,7 @@ public class MediaPlayer extends PlayerBase
             if (nextTimeUs > nowUs && !mPaused) {
                 // schedule callback at nextTimeUs
                 if (DEBUG) Log.d(TAG, "scheduling for " + nextTimeUs + " and " + nowUs);
-                scheduleNotification(NOTIFY_TIME, nextTimeUs - nowUs);
+                mPlayer.notifyAt(nextTimeUs);
             } else {
                 mEventHandler.removeMessages(NOTIFY);
                 // no more callbacks
@@ -5447,25 +5473,6 @@ public class MediaPlayer extends PlayerBase
             for (MediaTimeProvider.OnMediaTimeListener listener: activatedListeners) {
                 listener.onTimedEvent(nowUs);
             }
-        }
-
-        private long getEstimatedTime(long nanoTime, boolean monotonic) {
-            if (mPaused) {
-                mLastReportedTime = mLastTimeUs + mTimeAdjustment;
-            } else {
-                long timeSinceRead = (nanoTime - mLastNanoTime) / 1000;
-                mLastReportedTime = mLastTimeUs + timeSinceRead;
-                if (mTimeAdjustment > 0) {
-                    long adjustment =
-                        mTimeAdjustment - timeSinceRead / TIME_ADJUSTMENT_RATE;
-                    if (adjustment <= 0) {
-                        mTimeAdjustment = 0;
-                    } else {
-                        mLastReportedTime += adjustment;
-                    }
-                }
-            }
-            return mLastReportedTime;
         }
 
         public long getCurrentTimeUs(boolean refreshTime, boolean monotonic)
@@ -5477,42 +5484,38 @@ public class MediaPlayer extends PlayerBase
                     return mLastReportedTime;
                 }
 
-                long nanoTime = System.nanoTime();
-                if (refreshTime ||
-                        nanoTime >= mLastNanoTime + MAX_NS_WITHOUT_POSITION_CHECK) {
-                    try {
-                        mLastTimeUs = mPlayer.getCurrentPosition() * 1000L;
-                        mPaused = !mPlayer.isPlaying() || mBuffering;
-                        if (DEBUG) Log.v(TAG, (mPaused ? "paused" : "playing") + " at " + mLastTimeUs);
-                    } catch (IllegalStateException e) {
-                        if (mPausing) {
-                            // if we were pausing, get last estimated timestamp
-                            mPausing = false;
-                            getEstimatedTime(nanoTime, monotonic);
-                            mPaused = true;
-                            if (DEBUG) Log.d(TAG, "illegal state, but pausing: estimating at " + mLastReportedTime);
-                            return mLastReportedTime;
+                try {
+                    mLastTimeUs = mPlayer.getCurrentPosition() * 1000L;
+                    mPaused = !mPlayer.isPlaying() || mBuffering;
+                    if (DEBUG) Log.v(TAG, (mPaused ? "paused" : "playing") + " at " + mLastTimeUs);
+                } catch (IllegalStateException e) {
+                    if (mPausing) {
+                        // if we were pausing, get last estimated timestamp
+                        mPausing = false;
+                        if (!monotonic || mLastReportedTime < mLastTimeUs) {
+                            mLastReportedTime = mLastTimeUs;
                         }
-                        // TODO get time when prepared
-                        throw e;
+                        mPaused = true;
+                        if (DEBUG) Log.d(TAG, "illegal state, but pausing: estimating at " + mLastReportedTime);
+                        return mLastReportedTime;
                     }
-                    mLastNanoTime = nanoTime;
-                    if (monotonic && mLastTimeUs < mLastReportedTime) {
-                        /* have to adjust time */
-                        mTimeAdjustment = mLastReportedTime - mLastTimeUs;
-                        if (mTimeAdjustment > 1000000) {
-                            // schedule seeked event if time jumped significantly
-                            // TODO: do this properly by introducing an exception
-                            mStopped = false;
-                            mSeeking = true;
-                            scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
-                        }
-                    } else {
-                        mTimeAdjustment = 0;
+                    // TODO get time when prepared
+                    throw e;
+                }
+                if (monotonic && mLastTimeUs < mLastReportedTime) {
+                    /* have to adjust time */
+                    if (mLastReportedTime - mLastTimeUs > 1000000) {
+                        // schedule seeked event if time jumped significantly
+                        // TODO: do this properly by introducing an exception
+                        mStopped = false;
+                        mSeeking = true;
+                        scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
                     }
+                } else {
+                    mLastReportedTime = mLastTimeUs;
                 }
 
-                return getEstimatedTime(nanoTime, monotonic);
+                return mLastReportedTime;
             }
         }
 
@@ -5526,9 +5529,6 @@ public class MediaPlayer extends PlayerBase
                 if (msg.what == NOTIFY) {
                     switch (msg.arg1) {
                     case NOTIFY_TIME:
-                        notifyTimedEvent(false /* refreshTime */);
-                        break;
-                    case REFRESH_AND_NOTIFY_TIME:
                         notifyTimedEvent(true /* refreshTime */);
                         break;
                     case NOTIFY_STOP:

@@ -64,10 +64,10 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.NotificationGuts.GutsContent;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -436,6 +436,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else {
             minHeight = mNotificationMinHeight;
         }
+        NotificationViewWrapper collapsedWrapper = layout.getVisibleWrapper(
+                NotificationContentView.VISIBLE_TYPE_CONTRACTED);
+        minHeight += collapsedWrapper.getMinHeightIncrease(mUseIncreasedCollapsedHeight);
         boolean headsUpCustom = layout.getHeadsUpChild() != null &&
                 layout.getHeadsUpChild().getId()
                         != com.android.internal.R.id.status_bar_latest_event_content;
@@ -446,6 +449,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             headsUpheight = mMaxHeadsUpHeightIncreased;
         } else {
             headsUpheight = mMaxHeadsUpHeight;
+        }
+        NotificationViewWrapper headsUpWrapper = layout.getVisibleWrapper(
+                NotificationContentView.VISIBLE_TYPE_HEADSUP);
+        if (headsUpWrapper != null) {
+            headsUpheight += headsUpWrapper.getMinHeightIncrease(mUseIncreasedCollapsedHeight);
         }
         layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight,
                 mNotificationAmbientHeight);

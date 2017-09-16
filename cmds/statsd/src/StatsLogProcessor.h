@@ -19,8 +19,12 @@
 #include "LogReader.h"
 #include "DropboxWriter.h"
 
+#include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <log/logprint.h>
 #include <stdio.h>
+#include <unordered_map>
+
+using android::os::statsd::StatsdConfig;
 
 class StatsLogProcessor : public LogListener
 {
@@ -29,6 +33,8 @@ public:
     virtual ~StatsLogProcessor();
 
     virtual void OnLogEvent(const log_msg& msg);
+
+    virtual void UpdateConfig(const int config_source, StatsdConfig config);
 
 private:
     /**
@@ -42,5 +48,11 @@ private:
     AndroidLogFormat* m_format;
 
     DropboxWriter m_dropbox_writer;
+
+    /**
+     * Configs that have been specified, keyed by the source. This allows us to over-ride the config
+     * from a source later.
+     */
+    std::unordered_map<int, StatsdConfig> m_configs;
 };
 #endif //STATS_LOG_PROCESSOR_H

@@ -113,16 +113,20 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
@@ -446,6 +450,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidState = new SparseIntArray();
 
+    /** Map from network ID to last observed meteredness state */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private final SparseBooleanArray mNetworkMetered = new SparseBooleanArray();
+
     private final RemoteCallbackList<INetworkPolicyListener>
             mListeners = new RemoteCallbackList<>();
 
@@ -748,6 +756,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     ACTION_CARRIER_CONFIG_CHANGED);
             mContext.registerReceiver(mCarrierConfigReceiver, carrierConfigFilter, null, mHandler);
 
+            // listen for meteredness changes
+            mContext.getSystemService(ConnectivityManager.class).registerNetworkCallback(
+                    new NetworkRequest.Builder().build(), mNetworkCallback);
+
             mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
             // tell systemReady() that the service has been initialized
             initCompleteSignal.countDown();
@@ -936,6 +948,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     upgradeWifiMeteredOverrideAL();
+                }
+            }
+            // Only need to perform upgrade logic once
+            mContext.unregisterReceiver(this);
+        }
+    };
+
+    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
+        @Override
+        public void onCapabilitiesChanged(Network network,
+                NetworkCapabilities networkCapabilities) {
+            if (network == null || networkCapabilities == null) return;
+
+            synchronized (mNetworkPoliciesSecondLock) {
+                final boolean oldMetered = mNetworkMetered.get(network.netId, false);
+                final boolean newMetered = !networkCapabilities
+                        .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+
+                if ((oldMetered != newMetered) || mNetworkMetered.indexOfKey(network.netId) < 0) {
+                    mNetworkMetered.put(network.netId, newMetered);
                     updateNetworkRulesNL();
                 }
             }

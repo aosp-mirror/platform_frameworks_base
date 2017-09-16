@@ -88,6 +88,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -118,6 +119,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String REMOVE_SPLIT_MARKER_EXTENSION = ".removed";
 
     private static final int MSG_COMMIT = 0;
+    private static final int MSG_ON_PACKAGE_INSTALLED = 1;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -274,15 +276,36 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            synchronized (mLock) {
-                try {
-                    commitLocked();
-                } catch (PackageManagerException e) {
-                    final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-                    Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
-                    destroyInternal();
-                    dispatchSessionFinished(e.error, completeMsg, null);
-                }
+            switch (msg.what) {
+                case MSG_COMMIT:
+                    synchronized (mLock) {
+                        try {
+                            commitLocked();
+                        } catch (PackageManagerException e) {
+                            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+                            Slog.e(TAG,
+                                    "Commit of session " + sessionId + " failed: " + completeMsg);
+                            destroyInternal();
+                            dispatchSessionFinished(e.error, completeMsg, null);
+                        }
+                    }
+
+                    break;
+                case MSG_ON_PACKAGE_INSTALLED:
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final String packageName = (String) args.arg1;
+                    final String message = (String) args.arg2;
+                    final Bundle extras = (Bundle) args.arg3;
+                    final IPackageInstallObserver2 observer = (IPackageInstallObserver2) args.arg4;
+                    final int returnCode = args.argi1;
+                    args.recycle();
+
+                    try {
+                        observer.onPackageInstalled(packageName, returnCode, message, extras);
+                    } catch (RemoteException ignored) {
+                    }
+
+                    break;
             }
 
             return true;
@@ -1468,10 +1491,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (observer != null) {
-            try {
-                observer.onPackageInstalled(packageName, returnCode, msg, extras);
-            } catch (RemoteException ignored) {
-            }
+            // Execute observer.onPackageInstalled on different tread as we don't want callers
+            // inside the system server have to worry about catching the callbacks while they are
+            // calling into the session
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = packageName;
+            args.arg2 = msg;
+            args.arg3 = extras;
+            args.arg4 = observer;
+            args.argi1 = returnCode;
+
+            mHandler.obtainMessage(MSG_ON_PACKAGE_INSTALLED, args).sendToTarget();
         }
 
         final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);

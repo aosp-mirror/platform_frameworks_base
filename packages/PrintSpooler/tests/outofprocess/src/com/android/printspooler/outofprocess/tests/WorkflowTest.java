@@ -16,6 +16,8 @@
 
 package com.android.printspooler.outofprocess.tests;
 
+import static org.junit.Assert.assertNotNull;
+
 import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -27,10 +29,6 @@ import android.print.PrintDocumentInfo;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
-import com.android.printspooler.outofprocess.tests.mockservice.AddPrintersActivity;
-import com.android.printspooler.outofprocess.tests.mockservice.MockPrintService;
-import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoverySessionCallbacks;
-import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
 import android.print.pdf.PrintedPdfDocument;
 import android.support.test.filters.LargeTest;
 import android.support.test.uiautomator.By;
@@ -39,13 +37,16 @@ import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+
+import com.android.printspooler.outofprocess.tests.mockservice.AddPrintersActivity;
+import com.android.printspooler.outofprocess.tests.mockservice.MockPrintService;
+import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoverySessionCallbacks;
+import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,8 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
-
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests for the basic printing workflows
@@ -98,74 +97,6 @@ public class WorkflowTest extends BasePrintTest {
             }
 
             waiter.accept(timeLeft);
-        }
-    }
-
-    /**
-     * Executes a shell command using shell user identity, and return the standard output in
-     * string.
-     *
-     * @param cmd the command to run
-     *
-     * @return the standard output of the command
-     */
-    private static String runShellCommand(String cmd) throws IOException {
-        try (FileInputStream is = new ParcelFileDescriptor.AutoCloseInputStream(
-                getInstrumentation().getUiAutomation().executeShellCommand(cmd))) {
-            byte[] buf = new byte[64];
-            int bytesRead;
-
-            StringBuilder stdout = new StringBuilder();
-            while ((bytesRead = is.read(buf)) != -1) {
-                stdout.append(new String(buf, 0, bytesRead));
-            }
-
-            return stdout.toString();
-        }
-    }
-
-    @BeforeClass
-    public static void disableAnimations() throws Exception {
-        try {
-            sWindowAnimationScaleBefore = Float.parseFloat(runShellCommand(
-                    "settings get global window_animation_scale"));
-
-            runShellCommand("settings put global window_animation_scale 0");
-        } catch (NumberFormatException e) {
-            sWindowAnimationScaleBefore = Float.NaN;
-        }
-        try {
-            sTransitionAnimationScaleBefore = Float.parseFloat(runShellCommand(
-                    "settings get global transition_animation_scale"));
-
-            runShellCommand("settings put global transition_animation_scale 0");
-        } catch (NumberFormatException e) {
-            sTransitionAnimationScaleBefore = Float.NaN;
-        }
-        try {
-            sAnimatiorDurationScaleBefore = Float.parseFloat(runShellCommand(
-                    "settings get global animator_duration_scale"));
-
-            runShellCommand("settings put global animator_duration_scale 0");
-        } catch (NumberFormatException e) {
-            sAnimatiorDurationScaleBefore = Float.NaN;
-        }
-    }
-
-    @AfterClass
-    public static void enableAnimations() throws Exception {
-        if (sWindowAnimationScaleBefore != Float.NaN) {
-            runShellCommand(
-                    "settings put global window_animation_scale " + sWindowAnimationScaleBefore);
-        }
-        if (sTransitionAnimationScaleBefore != Float.NaN) {
-            runShellCommand(
-                    "settings put global transition_animation_scale " +
-                            sTransitionAnimationScaleBefore);
-        }
-        if (sAnimatiorDurationScaleBefore != Float.NaN) {
-            runShellCommand(
-                    "settings put global animator_duration_scale " + sAnimatiorDurationScaleBefore);
         }
     }
 

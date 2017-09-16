@@ -2,6 +2,16 @@
 
 ## Version 2.19
 - Added navigation resource type.
+- Fixed issue with resource deduplication. (bug 64397629)
+- Added a daemon mode for issuing commands. This is invoked with `aapt2 daemon`.
+  Command line arguments are separated by newlines, with an empty line signalling the
+  end of a command. Sending `EOF (Ctrl+D)` to the daemon will exit.
+- Fixed an issue where multiple permissions defined in AndroidManifest.xml would generate
+  conflicting definitions for the same Java constant in Manifest.java. Changed the implementation
+  to match that of `aapt`, which will take the last definition as the sole definition.
+  A warning is logged if such a scenario occurs. (bug 64472942)
+- Made improvements to handling of paths on Windows. This should resolve a lot of issues with
+  Unicode paths. (bug 62336414, 63830502)
 
 ## Version 2.18
 ### `aapt2 ...`

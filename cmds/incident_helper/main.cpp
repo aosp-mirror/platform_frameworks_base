@@ -48,6 +48,8 @@ static TextParserBase* selectParser(int section) {
         // IDs larger than 1 are section ids reserved in incident.proto
         case 2000:
             return new ProcrankParser();
+        case 2001:
+            return new PageTypeInfoParser();
         case 2002:
             return new KernelWakesParser();
         default:

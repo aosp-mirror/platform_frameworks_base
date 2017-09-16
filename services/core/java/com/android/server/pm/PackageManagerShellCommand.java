@@ -54,6 +54,7 @@ import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import com.android.internal.content.PackageHelper;
@@ -75,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -150,6 +152,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetPrivappPermissions();
                 case "get-privapp-deny-permissions":
                     return runGetPrivappDenyPermissions();
+                case "get-oem-permissions":
+                    return runGetOemPermissions();
                 case "get-instantapp-resolver":
                     return runGetInstantAppResolver();
                 case "has-feature":
@@ -1308,6 +1312,24 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetOemPermissions() {
+        final String pkg = getNextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            return 1;
+        }
+        final Map<String, Boolean> oemPermissions = SystemConfig.getInstance()
+                .getOemPermissions(pkg);
+        if (oemPermissions == null || oemPermissions.isEmpty()) {
+            getOutPrintWriter().println("{}");
+        } else {
+            oemPermissions.forEach((permission, granted) ->
+                getOutPrintWriter().println(permission + " granted:" + granted)
+            );
+        }
+        return 0;
+    }
+
     private int runGetInstantAppResolver() {
         final PrintWriter pw = getOutPrintWriter();
         try {
@@ -1730,6 +1752,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  has-feature FEATURE_NAME [version]");
         pw.println("   prints true and returns exit status 0 when system has a FEATURE_NAME,");
         pw.println("   otherwise prints false and returns exit status 1");
+        pw.println("  get-privileged-permissions TARGET-PACKAGE");
+        pw.println("   prints all privileged permissions for a package.");
+        pw.println("  get-oem-permissions TARGET-PACKAGE");
+        pw.println("   prints all OEM permissions for a package.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }

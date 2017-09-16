@@ -96,8 +96,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
-
 import libcore.util.EmptyArray;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -815,21 +815,22 @@ public class PackageParser {
         }
     }
 
-    public final static int PARSE_IS_SYSTEM = 1<<0;
-    public final static int PARSE_CHATTY = 1<<1;
-    public final static int PARSE_MUST_BE_APK = 1<<2;
-    public final static int PARSE_IGNORE_PROCESSES = 1<<3;
-    public final static int PARSE_FORWARD_LOCK = 1<<4;
-    public final static int PARSE_EXTERNAL_STORAGE = 1<<5;
-    public final static int PARSE_IS_SYSTEM_DIR = 1<<6;
-    public final static int PARSE_IS_PRIVILEGED = 1<<7;
-    public final static int PARSE_COLLECT_CERTIFICATES = 1<<8;
-    public final static int PARSE_TRUSTED_OVERLAY = 1<<9;
-    public final static int PARSE_ENFORCE_CODE = 1<<10;
+    public static final int PARSE_IS_SYSTEM = 1 << 0;
+    public static final int PARSE_CHATTY = 1 << 1;
+    public static final int PARSE_MUST_BE_APK = 1 << 2;
+    public static final int PARSE_IGNORE_PROCESSES = 1 << 3;
+    public static final int PARSE_FORWARD_LOCK = 1 << 4;
+    public static final int PARSE_EXTERNAL_STORAGE = 1 << 5;
+    public static final int PARSE_IS_SYSTEM_DIR = 1 << 6;
+    public static final int PARSE_IS_PRIVILEGED = 1 << 7;
+    public static final int PARSE_COLLECT_CERTIFICATES = 1 << 8;
+    public static final int PARSE_TRUSTED_OVERLAY = 1 << 9;
+    public static final int PARSE_ENFORCE_CODE = 1 << 10;
     /** @deprecated remove when fixing b/34761192 */
     @Deprecated
-    public final static int PARSE_IS_EPHEMERAL = 1<<11;
-    public final static int PARSE_FORCE_SDK = 1<<12;
+    public static final int PARSE_IS_EPHEMERAL = 1 << 11;
+    public static final int PARSE_FORCE_SDK = 1 << 12;
+    public static final int PARSE_IS_OEM = 1 << 13;
 
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 

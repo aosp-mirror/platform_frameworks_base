@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
+
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_FULL_CONFIRMATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_OP_COMPLETE;
@@ -212,14 +213,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // order to give them time to enter the backup password.
     private static final long TIMEOUT_FULL_CONFIRMATION = 60 * 1000;
 
-    // How long between attempts to perform a full-data backup of any given app
-    private static final long MIN_FULL_BACKUP_INTERVAL = 1000 * 60 * 60 * 24; // one day
-
     // If an app is busy when we want to do a full-data backup, how long to defer the retry.
     // This is fuzzed, so there are two parameters; backoff_min + Rand[0, backoff_fuzz)
     private static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
+    private BackupManagerConstants mConstants;
     private Context mContext;
     private PackageManager mPackageManager;
     private IPackageManager mPackageManagerBinder;
@@ -295,6 +294,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     static Trampoline getInstance() {
         // Always constructed during system bringup, so no need to lazy-init
         return sInstance;
+    }
+
+    public BackupManagerConstants getConstants() {
+        return mConstants;
     }
 
     public Context getContext() {
@@ -604,10 +607,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
      * {@link RefactoredBackupManagerService#waitUntilOperationComplete(int)} is
      * used in various places to 'wait' for notifyAll and detect change of pending state of an
      * operation. So typically, an operation will be removed from this array by:
-     *   - BackupRestoreTask#handleCancel and
-     *   - BackupRestoreTask#operationComplete OR waitUntilOperationComplete. Do not remove at both
-     *     these places because waitUntilOperationComplete relies on the operation being present to
-     *     determine its completion status.
+     * - BackupRestoreTask#handleCancel and
+     * - BackupRestoreTask#operationComplete OR waitUntilOperationComplete. Do not remove at both
+     * these places because waitUntilOperationComplete relies on the operation being present to
+     * determine its completion status.
      *
      * If type of operation is OP_BACKUP, it is a task running backups. It provides a handle to
      * cancel backup tasks.
@@ -623,7 +626,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private File mBaseStateDir;
     private File mDataDir;
     private File mJournalDir;
-    @Nullable private DataChangedJournal mJournal;
+    @Nullable
+    private DataChangedJournal mJournal;
 
     private final SecureRandom mRng = new SecureRandom();
 
@@ -752,6 +756,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mJournalDir = new File(mBaseStateDir, "pending");
         mJournalDir.mkdirs();   // creates mBaseStateDir along the way
         mJournal = null;        // will be created on first use
+
+        mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -1532,8 +1538,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         if (!mEnabled || !mProvisioned) {
-            Slog.i(TAG, "Backup requested but e=" + mEnabled + " p=" +mProvisioned);
-            BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+            Slog.i(TAG, "Backup requested but e=" + mEnabled + " p=" + mProvisioned);
+            BackupObserverUtils.sendBackupFinished(observer,
+                    BackupManager.ERROR_BACKUP_NOT_ALLOWED);
             final int logTag = mProvisioned
                     ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
                     : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
@@ -1626,8 +1633,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
-            KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS);
-            FullBackupJob.schedule(mContext, 2 * BUSY_BACKOFF_MIN_MILLIS);
+            KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            FullBackupJob.schedule(mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
@@ -1835,13 +1842,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 // due.
                 final long upcomingLastBackup = mFullBackupQueue.get(0).lastBackup;
                 final long timeSinceLast = System.currentTimeMillis() - upcomingLastBackup;
-                final long appLatency = (timeSinceLast < MIN_FULL_BACKUP_INTERVAL)
-                        ? (MIN_FULL_BACKUP_INTERVAL - timeSinceLast) : 0;
+                final long interval = mConstants.getFullBackupIntervalMilliseconds();
+                final long appLatency = (timeSinceLast < interval) ? (interval - timeSinceLast) : 0;
                 final long latency = Math.max(transportMinLatency, appLatency);
                 Runnable r = new Runnable() {
                     @Override
                     public void run() {
-                        FullBackupJob.schedule(mContext, latency);
+                        FullBackupJob.schedule(mContext, latency, mConstants);
                     }
                 };
                 mBackupHandler.postDelayed(r, 2500);
@@ -1932,13 +1939,19 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
      * <p>This is the "start a full backup operation" entry point called by the scheduled job.
      *
      * @return Whether ongoing work will continue.  The return value here will be passed
-     *         along as the return value to the scheduled job's onStartJob() callback.
+     * along as the return value to the scheduled job's onStartJob() callback.
      */
     @Override
     public boolean beginFullBackup(FullBackupJob scheduledJob) {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
+        final long fullBackupInterval;
+        final long keyValueBackupInterval;
+        synchronized (mConstants) {
+            fullBackupInterval = mConstants.getFullBackupIntervalMilliseconds();
+            keyValueBackupInterval = mConstants.getKeyValueBackupIntervalMilliseconds();
+        }
         FullBackupEntry entry = null;
-        long latency = MIN_FULL_BACKUP_INTERVAL;
+        long latency = fullBackupInterval;
 
         if (!mEnabled || !mProvisioned) {
             // Backups are globally disabled, so don't proceed.  We also don't reschedule
@@ -1957,7 +1970,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
         if (result.batterySaverEnabled) {
             if (DEBUG) Slog.i(TAG, "Deferring scheduled full backups in battery saver mode");
-            FullBackupJob.schedule(mContext, KeyValueBackupJob.BATCH_INTERVAL);
+            FullBackupJob.schedule(mContext, keyValueBackupInterval, mConstants);
             return false;
         }
 
@@ -2000,20 +2013,20 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     // Typically this means we haven't run a key/value backup yet.  Back off
                     // full-backup operations by the key/value job's run interval so that
                     // next time we run, we are likely to be able to make progress.
-                    latency = KeyValueBackupJob.BATCH_INTERVAL;
+                    latency = keyValueBackupInterval;
                 }
 
                 if (runBackup) {
                     entry = mFullBackupQueue.get(0);
                     long timeSinceRun = now - entry.lastBackup;
-                    runBackup = (timeSinceRun >= MIN_FULL_BACKUP_INTERVAL);
+                    runBackup = (timeSinceRun >= fullBackupInterval);
                     if (!runBackup) {
                         // It's too early to back up the next thing in the queue, so bow out
                         if (MORE_DEBUG) {
                             Slog.i(TAG, "Device ready but too early to back up next app");
                         }
                         // Wait until the next app in the queue falls due for a full data backup
-                        latency = MIN_FULL_BACKUP_INTERVAL - timeSinceRun;
+                        latency = fullBackupInterval - timeSinceRun;
                         break;  // we know we aren't doing work yet, so bail.
                     }
 
@@ -2049,8 +2062,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                             // This relocates the app's entry from the head of the queue to
                             // its order-appropriate position further down, so upon looping
                             // a new candidate will be considered at the head.
-                            enqueueFullBackup(entry.packageName,
-                                    nextEligible - MIN_FULL_BACKUP_INTERVAL);
+                            enqueueFullBackup(entry.packageName, nextEligible - fullBackupInterval);
                         }
                     } catch (NameNotFoundException nnf) {
                         // So, we think we want to back this up, but it turns out the package
@@ -2072,7 +2084,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 mBackupHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        FullBackupJob.schedule(mContext, deferTime);
+                        FullBackupJob.schedule(mContext, deferTime, mConstants);
                     }
                 });
                 return false;
@@ -2153,7 +2165,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         // ...and schedule a backup pass if necessary
-        KeyValueBackupJob.schedule(mContext);
+        KeyValueBackupJob.schedule(mContext, mConstants);
     }
 
     // Note: packageName is currently unused, but may be in the future
@@ -2222,7 +2234,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // Run an initialize operation for the given transport
     @Override
     public void initializeTransports(String[] transportNames, IBackupObserver observer) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "initializeTransport");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                "initializeTransport");
         if (MORE_DEBUG || true) {
             Slog.v(TAG, "initializeTransport(): " + Arrays.asList(transportNames));
         }
@@ -2296,7 +2309,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
         if (result.batterySaverEnabled) {
             if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
-            KeyValueBackupJob.schedule(mContext);   // try again in several hours
+            KeyValueBackupJob.schedule(mContext, mConstants);   // try again in several hours
         } else {
             if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
             synchronized (mQueueLock) {
@@ -2672,7 +2685,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             synchronized (mQueueLock) {
                 if (enable && !wasEnabled && mProvisioned) {
                     // if we've just been enabled, start scheduling backup passes
-                    KeyValueBackupJob.schedule(mContext);
+                    KeyValueBackupJob.schedule(mContext, mConstants);
                     scheduleNextFullBackupJob(0);
                 } else if (!enable) {
                     // No longer enabled, so stop running backups
@@ -2808,31 +2821,34 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         Slog.v(TAG, "selectBackupTransportAsync() called with transport " +
                 transport.flattenToShortString());
 
-        mTransportManager.ensureTransportReady(transport, new TransportManager.TransportReadyCallback() {
-            @Override
-            public void onSuccess(String transportName) {
-                mTransportManager.selectTransport(transportName);
-                Settings.Secure.putString(mContext.getContentResolver(),
-                        Settings.Secure.BACKUP_TRANSPORT,
-                        mTransportManager.getCurrentTransportName());
-                Slog.v(TAG, "Transport successfully selected: " + transport.flattenToShortString());
-                try {
-                    listener.onSuccess(transportName);
-                } catch (RemoteException e) {
-                    // Nothing to do here.
-                }
-            }
+        mTransportManager.ensureTransportReady(transport,
+                new TransportManager.TransportReadyCallback() {
+                    @Override
+                    public void onSuccess(String transportName) {
+                        mTransportManager.selectTransport(transportName);
+                        Settings.Secure.putString(mContext.getContentResolver(),
+                                Settings.Secure.BACKUP_TRANSPORT,
+                                mTransportManager.getCurrentTransportName());
+                        Slog.v(TAG, "Transport successfully selected: "
+                                + transport.flattenToShortString());
+                        try {
+                            listener.onSuccess(transportName);
+                        } catch (RemoteException e) {
+                            // Nothing to do here.
+                        }
+                    }
 
-            @Override
-            public void onFailure(int reason) {
-                Slog.v(TAG, "Failed to select transport: " + transport.flattenToShortString());
-                try {
-                    listener.onFailure(reason);
-                } catch (RemoteException e) {
-                    // Nothing to do here.
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(int reason) {
+                        Slog.v(TAG,
+                                "Failed to select transport: " + transport.flattenToShortString());
+                        try {
+                            listener.onFailure(reason);
+                        } catch (RemoteException e) {
+                            // Nothing to do here.
+                        }
+                    }
+                });
 
         Binder.restoreCallingIdentity(oldId);
     }

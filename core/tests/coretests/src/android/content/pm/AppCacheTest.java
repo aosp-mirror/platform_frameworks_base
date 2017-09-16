@@ -566,44 +566,6 @@ public class AppCacheTest extends AndroidTestCase {
         }
     }
 
-    public PackageStats invokePMGetPackageSizeInfo() throws Exception {
-        try {
-            String packageName = mContext.getPackageName();
-            PackageStatsObserver observer = new PackageStatsObserver();
-            //wait on observer
-            synchronized(observer) {
-                getPm().getPackageSizeInfo(packageName, UserHandle.myUserId(), observer);
-                long waitTime = 0;
-                while((!observer.isDone()) || (waitTime > MAX_WAIT_TIME) ) {
-                    observer.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                }
-                if(!observer.isDone()) {
-                    throw new Exception("Timed out waiting for PackageStatsObserver.onGetStatsCompleted");
-                }
-            }
-            if(localLOGV) Log.i(TAG, "OBSERVER RET VALUES code="+observer.stats.codeSize+
-                    ", data="+observer.stats.dataSize+", cache="+observer.stats.cacheSize);
-            return observer.stats;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
-            return null;
-        } catch (InterruptedException e) {
-            Log.w(TAG, "InterruptedException :"+e);
-            return null;
-        }
-    }
-
-    @SmallTest
-    public void testGetPackageSizeInfo() throws Exception {
-        String testName="testGetPackageSizeInfo";
-        PackageStats stats = invokePMGetPackageSizeInfo();
-        assertTrue(stats!=null);
-        //confirm result
-        if(localLOGV) Log.i(TAG, "code="+stats.codeSize+", data="+stats.dataSize+
-                ", cache="+stats.cacheSize);
-    }
-
     @SmallTest
     public void testGetSystemSharedLibraryNames() throws Exception {
         try {

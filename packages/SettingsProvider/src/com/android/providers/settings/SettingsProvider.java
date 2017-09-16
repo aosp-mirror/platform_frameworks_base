@@ -2896,7 +2896,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 148;
+            private static final int SETTINGS_VERSION = 149;
 
             private final int mUserId;
 
@@ -3456,6 +3456,23 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 148;
                 }
 
+                if (currentVersion == 148) {
+                    // Version 149: Set the default value for BACKUP_MANAGER_CONSTANTS.
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    final String oldValue = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.BACKUP_MANAGER_CONSTANTS).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        final String defaultValue = getContext().getResources().getString(
+                                R.string.def_backup_manager_constants);
+                        if (!TextUtils.isEmpty(defaultValue)) {
+                            systemSecureSettings.insertSettingLocked(
+                                    Settings.Secure.BACKUP_MANAGER_CONSTANTS, defaultValue, null,
+                                    true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 149;
+                }
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {

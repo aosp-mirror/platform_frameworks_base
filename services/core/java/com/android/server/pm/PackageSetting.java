@@ -113,6 +113,10 @@ final class PackageSetting extends PackageSettingBase {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
 
+    public boolean isOem() {
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
+    }
+
     public boolean isForwardLocked() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
     }

@@ -305,6 +305,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
 	core/java/android/service/notification/IConditionListener.aidl \
 	core/java/android/service/notification/IConditionProvider.aidl \
+	core/java/android/service/settings/suggestions/ISuggestionService.aidl \
 	core/java/android/service/vr/IPersistentVrStateCallbacks.aidl \
 	core/java/android/service/vr/IVrListener.aidl \
 	core/java/android/service/vr/IVrManager.aidl \
@@ -503,9 +504,9 @@ LOCAL_SRC_FILES += \
 	telecomm/java/com/android/internal/telecom/IInCallService.aidl \
 	telecomm/java/com/android/internal/telecom/ITelecomService.aidl \
 	telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl \
-        telephony/java/android/telephony/mbms/IMbmsDownloadManagerCallback.aidl \
-	telephony/java/android/telephony/mbms/IMbmsStreamingManagerCallback.aidl \
-	telephony/java/android/telephony/mbms/IDownloadProgressListener.aidl \
+	telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl \
+	telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl \
+	telephony/java/android/telephony/mbms/IDownloadStateCallback.aidl \
         telephony/java/android/telephony/mbms/IStreamingServiceCallback.aidl \
 	telephony/java/android/telephony/mbms/vendor/IMbmsDownloadService.aidl \
 	telephony/java/android/telephony/mbms/vendor/IMbmsStreamingService.aidl \
@@ -567,6 +568,8 @@ LOCAL_SRC_FILES += \
 LOCAL_SRC_FILES += \
 	../../system/netd/server/binder/android/net/INetd.aidl \
 	../../system/vold/binder/android/os/IVold.aidl \
+	../../system/vold/binder/android/os/IVoldListener.aidl \
+	../../system/vold/binder/android/os/IVoldTaskListener.aidl \
 	../native/cmds/installd/binder/android/os/IInstalld.aidl \
 
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
@@ -591,6 +594,7 @@ LOCAL_AIDL_INCLUDES += \
 	frameworks/av/media/libaudioclient/aidl \
 	frameworks/native/aidl/gui \
 	system/netd/server/binder \
+	system/vold/binder \
 	system/bt/binder
 
 LOCAL_INTERMEDIATE_SOURCES := \

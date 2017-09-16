@@ -293,14 +293,12 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // order to give them time to enter the backup password.
     static final long TIMEOUT_FULL_CONFIRMATION = 60 * 1000;
 
-    // How long between attempts to perform a full-data backup of any given app
-    static final long MIN_FULL_BACKUP_INTERVAL = 1000 * 60 * 60 * 24; // one day
-
     // If an app is busy when we want to do a full-data backup, how long to defer the retry.
     // This is fuzzed, so there are two parameters; backoff_min + Rand[0, backoff_fuzz)
     static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
     static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
+    BackupManagerConstants mConstants;
     Context mContext;
     private PackageManager mPackageManager;
     IPackageManager mPackageManagerBinder;
@@ -457,7 +455,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 if (mProvisioned && !wasProvisioned && mEnabled) {
                     // we're now good to go, so start the backup alarms
                     if (MORE_DEBUG) Slog.d(TAG, "Now provisioned, so starting backups");
-                    KeyValueBackupJob.schedule(mContext);
+                    KeyValueBackupJob.schedule(mContext, mConstants);
                     scheduleNextFullBackupJob(0);
                 }
             }
@@ -1322,6 +1320,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         mJournalDir = new File(mBaseStateDir, "pending");
         mJournalDir.mkdirs();   // creates mBaseStateDir along the way
         mJournal = null;        // will be created on first use
+
+        mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -2478,8 +2478,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
-            KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS);
-            FullBackupJob.schedule(mContext, 2 * BUSY_BACKOFF_MIN_MILLIS);
+            KeyValueBackupJob.schedule(mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            FullBackupJob.schedule(mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
@@ -3558,7 +3558,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e.getMessage());
                 delay = 0;  // use the scheduler's default
             }
-            KeyValueBackupJob.schedule(mContext, delay);
+            KeyValueBackupJob.schedule(mContext, delay, mConstants);
 
             for (BackupRequest request : mOriginalQueue) {
                 dataChangedImpl(request.packageName);
@@ -5370,12 +5370,12 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 // due.
                 final long upcomingLastBackup = mFullBackupQueue.get(0).lastBackup;
                 final long timeSinceLast = System.currentTimeMillis() - upcomingLastBackup;
-                final long appLatency = (timeSinceLast < MIN_FULL_BACKUP_INTERVAL)
-                        ? (MIN_FULL_BACKUP_INTERVAL - timeSinceLast) : 0;
+                final long interval = mConstants.getFullBackupIntervalMilliseconds();
+                final long appLatency = (timeSinceLast < interval) ? (interval - timeSinceLast) : 0;
                 final long latency = Math.max(transportMinLatency, appLatency);
                 Runnable r = new Runnable() {
                     @Override public void run() {
-                        FullBackupJob.schedule(mContext, latency);
+                        FullBackupJob.schedule(mContext, latency, mConstants);
                     }
                 };
                 mBackupHandler.postDelayed(r, 2500);
@@ -5470,9 +5470,15 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      */
     @Override
     public boolean beginFullBackup(FullBackupJob scheduledJob) {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         FullBackupEntry entry = null;
-        long latency = MIN_FULL_BACKUP_INTERVAL;
+        final long fullBackupInterval;
+        final long keyValueBackupInterval;
+        synchronized (mConstants) {
+            fullBackupInterval = mConstants.getFullBackupIntervalMilliseconds();
+            keyValueBackupInterval = mConstants.getKeyValueBackupIntervalMilliseconds();
+        }
+        long latency = fullBackupInterval;
 
         if (!mEnabled || !mProvisioned) {
             // Backups are globally disabled, so don't proceed.  We also don't reschedule
@@ -5491,7 +5497,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
         if (result.batterySaverEnabled) {
             if (DEBUG) Slog.i(TAG, "Deferring scheduled full backups in battery saver mode");
-            FullBackupJob.schedule(mContext, KeyValueBackupJob.BATCH_INTERVAL);
+            FullBackupJob.schedule(mContext, keyValueBackupInterval, mConstants);
             return false;
         }
 
@@ -5534,20 +5540,20 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     // Typically this means we haven't run a key/value backup yet.  Back off
                     // full-backup operations by the key/value job's run interval so that
                     // next time we run, we are likely to be able to make progress.
-                    latency = KeyValueBackupJob.BATCH_INTERVAL;
+                    latency = keyValueBackupInterval;
                 }
 
                 if (runBackup) {
                     entry = mFullBackupQueue.get(0);
                     long timeSinceRun = now - entry.lastBackup;
-                    runBackup = (timeSinceRun >= MIN_FULL_BACKUP_INTERVAL);
+                    runBackup = (timeSinceRun >= fullBackupInterval);
                     if (!runBackup) {
                         // It's too early to back up the next thing in the queue, so bow out
                         if (MORE_DEBUG) {
                             Slog.i(TAG, "Device ready but too early to back up next app");
                         }
                         // Wait until the next app in the queue falls due for a full data backup
-                        latency = MIN_FULL_BACKUP_INTERVAL - timeSinceRun;
+                        latency = fullBackupInterval - timeSinceRun;
                         break;  // we know we aren't doing work yet, so bail.
                     }
 
@@ -5583,8 +5589,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                             // This relocates the app's entry from the head of the queue to
                             // its order-appropriate position further down, so upon looping
                             // a new candidate will be considered at the head.
-                            enqueueFullBackup(entry.packageName,
-                                    nextEligible - MIN_FULL_BACKUP_INTERVAL);
+                            enqueueFullBackup(entry.packageName, nextEligible - fullBackupInterval);
                         }
                     } catch (NameNotFoundException nnf) {
                         // So, we think we want to back this up, but it turns out the package
@@ -5605,7 +5610,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 final long deferTime = latency;     // pin for the closure
                 mBackupHandler.post(new Runnable() {
                     @Override public void run() {
-                        FullBackupJob.schedule(mContext, deferTime);
+                        FullBackupJob.schedule(mContext, deferTime, mConstants);
                     }
                 });
                 return false;
@@ -9851,7 +9856,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
 
         // ...and schedule a backup pass if necessary
-        KeyValueBackupJob.schedule(mContext);
+        KeyValueBackupJob.schedule(mContext, mConstants);
     }
 
     // Note: packageName is currently unused, but may be in the future
@@ -10014,7 +10019,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
         if (result.batterySaverEnabled) {
             if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
-            KeyValueBackupJob.schedule(mContext);   // try again in several hours
+            KeyValueBackupJob.schedule(mContext, mConstants);   // try again in several hours
         } else {
             if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
             synchronized (mQueueLock) {
@@ -10387,7 +10392,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             synchronized (mQueueLock) {
                 if (enable && !wasEnabled && mProvisioned) {
                     // if we've just been enabled, start scheduling backup passes
-                    KeyValueBackupJob.schedule(mContext);
+                    KeyValueBackupJob.schedule(mContext, mConstants);
                     scheduleNextFullBackupJob(0);
                 } else if (!enable) {
                     // No longer enabled, so stop running backups

@@ -1264,6 +1264,11 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name="android.service.settings.suggestions.MockSuggestionService"
+            android:permission="android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE"
+            android:exported="true"/>
+
         <provider android:name="android.app.activity.LocalProvider"
                 android:authorities="com.android.frameworks.coretests.LocalProvider">
             <meta-data android:name="com.android.frameworks.coretests.string" android:value="foo" />

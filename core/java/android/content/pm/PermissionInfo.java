@@ -17,7 +17,6 @@
 package android.content.pm;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -135,6 +134,16 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_RUNTIME_ONLY = 0x2000;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>oem</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PROTECTION_FLAG_OEM = 0x4000;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -222,7 +231,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public static String protectionToString(int level) {
         String protLevel = "????";
-        switch (level&PROTECTION_MASK_BASE) {
+        switch (level & PROTECTION_MASK_BASE) {
             case PermissionInfo.PROTECTION_DANGEROUS:
                 protLevel = "dangerous";
                 break;
@@ -236,35 +245,38 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
                 protLevel = "signatureOrSystem";
                 break;
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
             protLevel += "|privileged";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
             protLevel += "|development";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
             protLevel += "|appop";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_PRE23) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_PRE23) != 0) {
             protLevel += "|pre23";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0) {
             protLevel += "|installer";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0) {
             protLevel += "|verifier";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0) {
             protLevel += "|preinstalled";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_SETUP) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_SETUP) != 0) {
             protLevel += "|setup";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_INSTANT) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_INSTANT) != 0) {
             protLevel += "|instant";
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0) {
+        if ((level & PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) != 0) {
             protLevel += "|runtime";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_OEM) != 0) {
+            protLevel += "|oem";
         }
         return protLevel;
     }

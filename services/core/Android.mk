@@ -6,8 +6,8 @@ LOCAL_MODULE := services.core
 
 LOCAL_AIDL_INCLUDES := \
     frameworks/native/aidl/binder \
-    system/netd/server/binder
-
+    system/netd/server/binder \
+    system/vold/binder
 
 LOCAL_SRC_FILES += \
     $(call all-java-files-under,java) \
@@ -16,6 +16,8 @@ LOCAL_SRC_FILES += \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
     ../../../../system/netd/server/binder/android/net/metrics/INetdEventListener.aidl \
     ../../../../system/vold/binder/android/os/IVold.aidl \
+    ../../../../system/vold/binder/android/os/IVoldListener.aidl \
+    ../../../../system/vold/binder/android/os/IVoldTaskListener.aidl \
     ../../../native/cmds/installd/binder/android/os/IInstalld.aidl \
 
 LOCAL_AIDL_INCLUDES += \
