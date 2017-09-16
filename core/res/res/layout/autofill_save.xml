@@ -47,7 +47,7 @@
                 <ImageView
                     android:id="@+id/autofill_save_icon"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="24sp"/>
 
                 <TextView
                     android:id="@+id/autofill_save_title"
