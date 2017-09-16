@@ -281,7 +281,8 @@ public class ApplicationPackageManager extends PackageManager {
     public PermissionInfo getPermissionInfo(String name, int flags)
             throws NameNotFoundException {
         try {
-            PermissionInfo pi = mPM.getPermissionInfo(name, flags);
+            PermissionInfo pi = mPM.getPermissionInfo(name,
+                    mContext.getOpPackageName(), flags);
             if (pi != null) {
                 return pi;
             }
