@@ -49,12 +49,11 @@ public:
 
     void AssertBufferContent(const char* expected) {
         int i=0;
-        FdBuffer::iterator it = buffer.begin();
-        while (expected[i] != '\0') {
-            ASSERT_EQ(*it, expected[i++]);
-            it++;
+        EncodedBuffer::iterator it = buffer.data();
+        while (it.hasNext()) {
+            ASSERT_EQ(it.next(), expected[i++]);
         }
-        ASSERT_EQ(it, buffer.end());
+        EXPECT_EQ(expected[i], '\0');
     }
 
     bool DoDataStream(int rFd, int wFd) {
@@ -92,20 +91,8 @@ TEST_F(FdBufferTest, ReadAndWrite) {
 }
 
 TEST_F(FdBufferTest, IterateEmpty) {
-    FdBuffer::iterator it = buffer.begin();
-    EXPECT_EQ(it, buffer.end());
-    it += 1;
-    EXPECT_TRUE(it.outOfBound());
-}
-
-TEST_F(FdBufferTest, IteratorSnapshot) {
-    FdBuffer::iterator it = buffer.begin();
-    it += 4;
-    FdBuffer::iterator snapshot = it.snapshot();
-    it += 5;
-    EXPECT_TRUE(snapshot != it);
-    EXPECT_EQ(it - snapshot, 5);
-    EXPECT_EQ(snapshot - it, -5);
+    EncodedBuffer::iterator it = buffer.data();
+    EXPECT_FALSE(it.hasNext());
 }
 
 TEST_F(FdBufferTest, ReadAndIterate) {
@@ -114,15 +101,15 @@ TEST_F(FdBufferTest, ReadAndIterate) {
     ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
 
     int i=0;
-    for (FdBuffer::iterator it = buffer.begin(); it != buffer.end(); ++it) {
-        EXPECT_EQ(*it, (uint8_t)testdata[i++]);
+    EncodedBuffer::iterator it = buffer.data();
+    while (it.hasNext()) {
+        EXPECT_EQ(it.next(), (uint8_t)testdata[i++]);
     }
 
-    FdBuffer::iterator it = buffer.begin();
-    it += buffer.size();
-    EXPECT_EQ(it, buffer.end());
+    it.rp()->rewind();
+    it.rp()->move(buffer.size());
     EXPECT_EQ(it.bytesRead(), testdata.size());
-    EXPECT_FALSE(it.outOfBound());
+    EXPECT_FALSE(it.hasNext());
 }
 
 TEST_F(FdBufferTest, ReadTimeout) {
@@ -258,13 +245,15 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
         EXPECT_FALSE(buffer.timedOut());
         EXPECT_TRUE(buffer.truncated());
         wait(&pid);
-        FdBuffer::iterator it = buffer.begin();
-        it += fourMB;
+        EncodedBuffer::iterator it = buffer.data();
+        it.rp()->move(fourMB);
         EXPECT_EQ(it.bytesRead(), fourMB);
-        EXPECT_EQ(it, buffer.end());
-        for (FdBuffer::iterator it = buffer.begin(); it != buffer.end(); it++) {
+        EXPECT_FALSE(it.hasNext());
+
+        it.rp()->rewind();
+        while (it.hasNext()) {
             char c = 'A' + (it.bytesRead() % 64 / 8);
-            ASSERT_TRUE(*it == c);
+            ASSERT_TRUE(it.next() == c);
         }
     }
 }

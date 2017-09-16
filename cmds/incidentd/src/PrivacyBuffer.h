@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-#ifndef ENCODED_BUFFER_H
-#define ENCODED_BUFFER_H
+#ifndef PRIVACY_BUFFER_H
+#define PRIVACY_BUFFER_H
 
-#include "FdBuffer.h"
 #include "Privacy.h"
 
+#include <android/util/EncodedBuffer.h>
 #include <stdint.h>
-#include <vector>
+#include <utils/Errors.h>
+
+using namespace android;
+using namespace android::util;
 
 /**
- * EncodedBuffer is constructed from FdBuffer which holds original protobuf formatted data and
- * its privacy policy in its tagged proto message. The class strips PII-sensitive fields
- * based on the request and holds stripped data in its buffer for output.
+ * PrivacyBuffer holds the original protobuf data and strips PII-sensitive fields
+ * based on the request and holds stripped data in its own buffer for output.
  */
-class EncodedBuffer
+class PrivacyBuffer
 {
 public:
-    EncodedBuffer(const FdBuffer& buffer, const Privacy* policy);
-    ~EncodedBuffer();
+    PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator& data);
+    ~PrivacyBuffer();
 
     /**
      * Strip based on the request and hold data in its own buffer. Return NO_ERROR if strip succeeds.
@@ -55,10 +57,11 @@ public:
     status_t flush(int fd);
 
 private:
-    const FdBuffer& mFdBuffer;
     const Privacy* mPolicy;
-    vector<vector<uint8_t>> mBuffers;
+    EncodedBuffer::iterator& mData;
+
+    EncodedBuffer mBuffer;
     size_t mSize;
 };
 
-#endif // ENCODED_BUFFER_H
+#endif // PRIVACY_BUFFER_H

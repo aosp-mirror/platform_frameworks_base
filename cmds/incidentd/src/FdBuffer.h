@@ -17,11 +17,11 @@
 #ifndef FD_BUFFER_H
 #define FD_BUFFER_H
 
+#include <android/util/EncodedBuffer.h>
 #include <utils/Errors.h>
 
-#include <vector>
-
 using namespace android;
+using namespace android::util;
 using namespace std;
 
 /**
@@ -71,52 +71,19 @@ public:
     size_t size() const;
 
     /**
-     * Flush all the data to given file descriptor;
-     */
-    status_t flush(int fd) const;
-
-    /**
      * How long the read took in milliseconds.
      */
     int64_t durationMs() const { return mFinishTime - mStartTime; }
 
     /**
-     * Read data stored in FdBuffer
+     * Reader API for data stored in FdBuffer
      */
-    class iterator;
-    friend class iterator;
-    class iterator : public std::iterator<std::random_access_iterator_tag, uint8_t> {
-    public:
-        iterator(const FdBuffer& buffer, ssize_t index, ssize_t offset);
-        iterator& operator=(iterator& other) const;
-        iterator& operator+(size_t offset);
-        iterator& operator+=(size_t offset);
-        iterator& operator++();
-        iterator operator++(int);
-        bool operator==(iterator other) const;
-        bool operator!=(iterator other) const;
-        int operator-(iterator other) const;
-        reference operator*() const;
-
-        // return the snapshot of the current iterator
-        iterator snapshot() const;
-        // how many bytes are read
-        size_t bytesRead() const;
-        // random access could make the iterator out of bound
-        bool outOfBound() const;
-    private:
-        const FdBuffer& mFdBuffer;
-        size_t mIndex;
-        size_t mOffset;
-    };
-    iterator begin() const;
-    iterator end() const;
+    EncodedBuffer::iterator data() const;
 
 private:
-    vector<uint8_t*> mBuffers;
+    EncodedBuffer mBuffer;
     int64_t mStartTime;
     int64_t mFinishTime;
-    ssize_t mCurrentWritten;
     bool mTimedOut;
     bool mTruncated;
 };
