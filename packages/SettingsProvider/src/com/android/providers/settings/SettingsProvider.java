@@ -2895,7 +2895,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 145;
+            private static final int SETTINGS_VERSION = 146;
 
             private final int mUserId;
 
@@ -3421,22 +3421,11 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 141) {
-                    // Version 142: We added the notion of a default and whether the system set
-                    // the setting. This is used for resetting the internal state and we need
-                    // to make sure this value is updated for the existing settings, otherwise
-                    // we would delete system set settings while they should stay unmodified.
-                    SettingsState globalSettings = getGlobalSettingsLocked();
-                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(globalSettings);
-                    globalSettings.persistSyncLocked();
-
-                    SettingsState secureSettings = getSecureSettingsLocked(mUserId);
-                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(secureSettings);
-                    secureSettings.persistSyncLocked();
-
-                    SettingsState systemSettings = getSystemSettingsLocked(mUserId);
-                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(systemSettings);
-                    systemSettings.persistSyncLocked();
-
+                    // This implementation was incorrectly setting the current value of
+                    // settings changed by non-system packages as the default which default
+                    // is set by the system. We add a new upgrade step at the end to properly
+                    // handle this case which would also fix incorrect changes made by the
+                    // old implementation of this step.
                     currentVersion = 142;
                 }
 
@@ -3496,6 +3485,31 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 145;
                 }
 
+                if (currentVersion == 145) {
+                    // Version 146: In step 142 we had a bug where incorrectly
+                    // some settings were considered system set and as a result
+                    // made the default and marked as the default being set by
+                    // the system. Here reevaluate the default and default system
+                    // set flags. This would both fix corruption by the old impl
+                    // of step 142 and also properly handle devices which never
+                    // run 142.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        SettingsState globalSettings = getGlobalSettingsLocked();
+                        ensureLegacyDefaultValueAndSystemSetUpdatedLocked(globalSettings, userId);
+                        globalSettings.persistSyncLocked();
+                    }
+
+                    SettingsState secureSettings = getSecureSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(secureSettings, userId);
+                    secureSettings.persistSyncLocked();
+
+                    SettingsState systemSettings = getSystemSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(systemSettings, userId);
+                    systemSettings.persistSyncLocked();
+
+                    currentVersion = 146;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
@@ -3514,19 +3528,46 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        private void ensureLegacyDefaultValueAndSystemSetUpdatedLocked(SettingsState settings) {
+        private void ensureLegacyDefaultValueAndSystemSetUpdatedLocked(SettingsState settings,
+                int userId) {
             List<String> names = settings.getSettingNamesLocked();
             final int nameCount = names.size();
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
                 Setting setting = settings.getSettingLocked(name);
-                if (setting.getDefaultValue() == null) {
-                    boolean systemSet = SettingsState.isSystemPackage(getContext(),
-                            setting.getPackageName());
+
+                // In the upgrade case we pretend the call is made from the app
+                // that made the last change to the setting to properly determine
+                // whether the call has been made by a system component.
+                int callingUid = -1;
+                try {
+                    callingUid = mPackageManager.getPackageUid(setting.getPackageName(), 0, userId);
+                } catch (RemoteException e) {
+                    /* ignore - handled below */
+                }
+                if (callingUid < 0) {
+                    Slog.e(LOG_TAG, "Unknown package: " + setting.getPackageName());
+                    continue;
+                }
+                try {
+                    final boolean systemSet = SettingsState.isSystemPackage(getContext(),
+                            setting.getPackageName(), callingUid);
                     if (systemSet) {
                         settings.insertSettingLocked(name, setting.getValue(),
                                 setting.getTag(), true, setting.getPackageName());
+                    } else if (setting.getDefaultValue() != null && setting.isDefaultFromSystem()) {
+                        // We had a bug where changes by non-system packages were marked
+                        // as system made and as a result set as the default. Therefore, if
+                        // the package changed the setting last is not a system one but the
+                        // setting is marked as its default coming from the system we clear
+                        // the default and clear the system set flag.
+                        settings.resetSettingDefaultValueLocked(name);
                     }
+                } catch (IllegalStateException e) {
+                    // If the package goes over its quota during the upgrade, don't
+                    // crash but just log the error as the system does the upgrade.
+                    Slog.e(LOG_TAG, "Error upgrading setting: " + setting.getName(), e);
+
                 }
             }
         }
