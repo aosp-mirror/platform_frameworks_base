@@ -26,9 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
@@ -309,7 +306,7 @@ final class SaveUi {
             Slog.w(TAG, "Not adding service icon of size "
                     + "(" + actualWidth + "x" + actualHeight + ") because maximum is "
                     + "(" + maxWidth + "x" + maxHeight + ").");
-            iconView.setVisibility(View.INVISIBLE);
+            ((ViewGroup)iconView.getParent()).removeView(iconView);
         }
     }
 
