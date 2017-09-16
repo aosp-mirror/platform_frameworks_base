@@ -57,7 +57,9 @@ log_reader_thread_func(void* cookie)
 
     // Put the printer one first, so it will print before the real ones.
     reader->AddListener(new LogEntryPrinter(STDOUT_FILENO));
-    reader->AddListener(new StatsLogProcessor());
+    sp<StatsLogProcessor> main_processor = new StatsLogProcessor();
+    data->service->setProcessor(main_processor);
+    reader->AddListener(main_processor);
 
     // TODO: Construct and add real LogListners here.
 
