@@ -61,7 +61,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"तुमचा पॅटर्न काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"सिम पिन एंटर करा"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन एंटर करा"</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"मोबाइल सेवांशिवाय डीव्हाइस वापरण्यासाठी eSIM बंद करा."</string>
+    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"मोबाइल सेवांशिवाय डिव्हाइस वापरण्यासाठी eSIM बंद करा."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन प्रविष्ट करा"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"संकेतशब्द प्रविष्ट करा"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
@@ -91,7 +91,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. कार्य प्रोफाइल काढली जाईल, जे सर्व प्रोफाइल डेटा हटवेल."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुमच्याला ईमेल खाते वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुमच्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डीव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
       <item quantity="one">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
       <item quantity="other">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
@@ -107,28 +107,28 @@
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"सेवा नाही."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"इनपुट पद्धत स्विच करा"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"विमान मोड"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"डीव्हाइस रीस्टार्ट झाल्यावर पॅटर्न आवश्यक आहे"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"डीव्हाइस रीस्टार्ट झाल्यावर पिन आवश्यक आहे"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"डीव्हाइस रीस्टार्ट झाल्यावर पासवर्ड आवश्यक आहे"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"डिव्हाइस रीस्टार्ट झाल्यावर पॅटर्न आवश्यक आहे"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"डिव्हाइस रीस्टार्ट झाल्यावर पिन आवश्यक आहे"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"डिव्हाइस रीस्टार्ट झाल्यावर पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"अतिरिक्त सुरक्षिततेसाठी पॅटर्न आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"अतिरिक्त सुरक्षिततेसाठी पिन आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"अतिरिक्त सुरक्षिततेसाठी संकेतशब्द आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"तुम्ही प्रोफाईल स्विच करता तेव्‍हा पॅटर्न आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"आपण प्रोफाईल स्विच करता तेव्‍हा पिन आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"आपण प्रोफाईल स्विच करता तेव्‍हा संकेतशब्द आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"प्रशासकाद्वारे लॉक केलेले डीव्हाइस"</string>
-    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"डीव्हाइस मॅन्युअली लॉक केले होते"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"प्रशासकाद्वारे लॉक केलेले डिव्हाइस"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"डिव्हाइस मॅन्युअली लॉक केले होते"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
-      <item quantity="one">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
-      <item quantity="other">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
+      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
+      <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
-      <item quantity="one">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पिनची खात्री करा.</item>
-      <item quantity="other">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पिन ची खात्री करा.</item>
+      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पिनची खात्री करा.</item>
+      <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पिन ची खात्री करा.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
-      <item quantity="one">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
-      <item quantity="other">डीव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
+      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
+      <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"ओळखले नाही"</string>
 </resources>

@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM कार्ड लगाएं."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM कार्ड मौजूद नहीं है या उसे पढ़ा नहीं जा सकता है. कोई SIM कार्ड लगाएं."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"बेकार SIM कार्ड."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"आपका SIM कार्ड हमेशा के लिए अक्षम कर दिया गया है.\n दूसरे SIM कार्ड के लिए अपने वायरलेस सेवा प्रदाता से संपर्क करें."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"आपका सिम कार्ड हमेशा के लिए बंद कर दिया गया है.\n दूसरे सिम कार्ड के लिए अपने वायरलेस सेवा देने वाले से संपर्क करें."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM कार्ड लॉक किया हुआ है."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM कार्ड को PUK के ज़रिए लॉक किया हुआ है."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM कार्ड अनलॉक हो रहा है…"</string>
@@ -50,7 +50,7 @@
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM पिन क्षेत्र"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK क्षेत्र"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"अगला अलार्म <xliff:g id="ALARM">%1$s</xliff:g> बजे के लिए सेट किया गया है"</string>
-    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"हटाएं"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"मिटाएं"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM अक्षम करें"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"पैटर्न भूल गए हैं"</string>

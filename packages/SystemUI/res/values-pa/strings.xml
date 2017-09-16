@@ -605,7 +605,7 @@
     <string name="keyboard_key_media_next" msgid="1894394911630345607">"ਅੱਗੇ"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"ਪਿਛਲਾ"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Rewind"</string>
-    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Fast Forward"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"ਤੇਜ਼ੀ ਨਾਲ ਅੱਗੇ ਭੇਜੋ"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"ਮਿਟਾਓ"</string>
