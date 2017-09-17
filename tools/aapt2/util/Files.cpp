@@ -27,6 +27,8 @@
 #include "android-base/errors.h"
 #include "android-base/file.h"
 #include "android-base/logging.h"
+#include "android-base/unique_fd.h"
+#include "android-base/utf8.h"
 
 #include "util/Util.h"
 
@@ -35,14 +37,32 @@
 #include <direct.h>
 #endif
 
-using android::StringPiece;
+using ::android::FileMap;
+using ::android::StringPiece;
+using ::android::base::ReadFileToString;
+using ::android::base::SystemErrorCodeToString;
+using ::android::base::unique_fd;
 
 namespace aapt {
 namespace file {
 
-FileType GetFileType(const StringPiece& path) {
+FileType GetFileType(const std::string& path) {
+// TODO(adamlesinski): I'd like to move this to ::android::base::utf8 but Windows does some macro
+// trickery with 'stat' and things don't override very well.
+#ifdef _WIN32
+  std::wstring path_utf16;
+  if (!::android::base::UTF8PathToWindowsLongPath(path.c_str(), &path_utf16)) {
+    return FileType::kNonexistant;
+  }
+
+  struct _stat64 sb;
+  int result = _wstat64(path_utf16.c_str(), &sb);
+#else
   struct stat sb;
-  if (stat(path.data(), &sb) < 0) {
+  int result = stat(path.c_str(), &sb);
+#endif
+
+  if (result == -1) {
     if (errno == ENOENT || errno == ENOTDIR) {
       return FileType::kNonexistant;
     }
@@ -72,27 +92,20 @@ FileType GetFileType(const StringPiece& path) {
   }
 }
 
-inline static int MkdirImpl(const StringPiece& path) {
-#ifdef _WIN32
-  return _mkdir(path.to_string().c_str());
-#else
-  return mkdir(path.to_string().c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP);
-#endif
-}
-
-bool mkdirs(const StringPiece& path) {
-  const char* start = path.begin();
-  const char* end = path.end();
-  for (const char* current = start; current != end; ++current) {
-    if (*current == sDirSep && current != start) {
-      StringPiece parent_path(start, current - start);
-      int result = MkdirImpl(parent_path);
-      if (result < 0 && errno != EEXIST) {
-        return false;
-      }
+bool mkdirs(const std::string& path) {
+  constexpr const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP;
+  // Start after the first character so that we don't consume the root '/'.
+  // This is safe to do with unicode because '/' will never match with a continuation character.
+  size_t current_pos = 1u;
+  while ((current_pos = path.find(sDirSep, current_pos)) != std::string::npos) {
+    std::string parent_path = path.substr(0, current_pos);
+    int result = ::android::base::utf8::mkdir(parent_path.c_str(), mode);
+    if (result < 0 && errno != EEXIST) {
+      return false;
     }
+    current_pos += 1;
   }
-  return MkdirImpl(path) == 0 || errno == EEXIST;
+  return ::android::base::utf8::mkdir(path.c_str(), mode) == 0 || errno == EEXIST;
 }
 
 StringPiece GetStem(const StringPiece& path) {
@@ -129,10 +142,8 @@ StringPiece GetExtension(const StringPiece& path) {
 
 void AppendPath(std::string* base, StringPiece part) {
   CHECK(base != nullptr);
-  const bool base_has_trailing_sep =
-      (!base->empty() && *(base->end() - 1) == sDirSep);
-  const bool part_has_leading_sep =
-      (!part.empty() && *(part.begin()) == sDirSep);
+  const bool base_has_trailing_sep = (!base->empty() && *(base->end() - 1) == sDirSep);
+  const bool part_has_leading_sep = (!part.empty() && *(part.begin()) == sDirSep);
   if (base_has_trailing_sep && part_has_leading_sep) {
     // Remove the part's leading sep
     part = part.substr(1, part.size() - 1);
@@ -151,31 +162,34 @@ std::string PackageToPath(const StringPiece& package) {
   return out_path;
 }
 
-Maybe<android::FileMap> MmapPath(const StringPiece& path,
-                                 std::string* out_error) {
-  std::unique_ptr<FILE, decltype(fclose)*> f = {fopen(path.data(), "rb"),
-                                                fclose};
-  if (!f) {
-    if (out_error) *out_error = android::base::SystemErrorCodeToString(errno);
+Maybe<FileMap> MmapPath(const std::string& path, std::string* out_error) {
+  int flags = O_RDONLY | O_CLOEXEC | O_BINARY;
+  unique_fd fd(TEMP_FAILURE_RETRY(::android::base::utf8::open(path.c_str(), flags)));
+  if (fd == -1) {
+    if (out_error) {
+      *out_error = SystemErrorCodeToString(errno);
+    }
     return {};
   }
-
-  int fd = fileno(f.get());
 
   struct stat filestats = {};
   if (fstat(fd, &filestats) != 0) {
-    if (out_error) *out_error = android::base::SystemErrorCodeToString(errno);
+    if (out_error) {
+      *out_error = SystemErrorCodeToString(errno);
+    }
     return {};
   }
 
-  android::FileMap filemap;
+  FileMap filemap;
   if (filestats.st_size == 0) {
     // mmap doesn't like a length of 0. Instead we return an empty FileMap.
     return std::move(filemap);
   }
 
-  if (!filemap.create(path.data(), fd, 0, filestats.st_size, true)) {
-    if (out_error) *out_error = android::base::SystemErrorCodeToString(errno);
+  if (!filemap.create(path.c_str(), fd, 0, filestats.st_size, true)) {
+    if (out_error) {
+      *out_error = SystemErrorCodeToString(errno);
+    }
     return {};
   }
   return std::move(filemap);
@@ -184,7 +198,7 @@ Maybe<android::FileMap> MmapPath(const StringPiece& path,
 bool AppendArgsFromFile(const StringPiece& path, std::vector<std::string>* out_arglist,
                         std::string* out_error) {
   std::string contents;
-  if (!android::base::ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
+  if (!ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
     if (out_error) {
       *out_error = "failed to read argument-list file";
     }
@@ -270,7 +284,7 @@ Maybe<std::vector<std::string>> FindFiles(const android::StringPiece& path, IDia
   const std::string root_dir = path.to_string();
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
-    diag->Error(DiagMessage() << android::base::SystemErrorCodeToString(errno));
+    diag->Error(DiagMessage() << SystemErrorCodeToString(errno));
     return {};
   }
 

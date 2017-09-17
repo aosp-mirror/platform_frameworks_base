@@ -36,7 +36,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"ਕੋਈ ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ ਨਹੀਂ"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ਵੱਲੋਂ ਸੁਰੱਖਿਅਤ ਕੀਤਾ"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s ਰਾਹੀਂ ਆਪਣੇ-ਆਪ ਕਨੈਕਟ ਹੋਇਆ"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ਨੈੱਟਵਰਕ ਰੇਟਿੰਗ ਪ੍ਰਦਾਨਕ ਰਾਹੀਂ ਆਪਣੇ-ਆਪ ਕਨੈਕਟ ਹੋਇਆ"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ਨੈੱਟਵਰਕ ਰੇਟਿੰਗ ਪ੍ਰਦਾਨਕ ਰਾਹੀਂ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"ਕਨੈਕਟ ਕੀਤਾ, ਕੋਈ ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
@@ -171,7 +171,7 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"ਇਸ ਵਰਤੋਂਕਾਰ ਲਈ ਟੈਦਰਿੰਗ ਸੈਟਿੰਗਾਂ ਉਪਲਬਧ ਨਹੀਂ ਹਨ"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"ਐਕਸੈੱਸ ਪੁਆਇੰਟ ਨਾਮ ਸੈਟਿੰਗਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਲਈ ਉਪਲਬਧ ਨਹੀਂ ਹਨ"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB ਡੀਬਗਿੰਗ"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"ਡੀਬਗ ਮੋਡ ਜਦੋਂ USB ਕਨੈਕਟ ਕੀਤੀ ਜਾਏ"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"ਡੀਬੱਗ ਮੋਡ ਜਦੋਂ USB ਕਨੈਕਟ ਕੀਤੀ ਜਾਏ"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ਡੀਬਗਿੰਗ ਅਧਿਕਾਰ ਰੱਦ ਕਰੋ"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ਬੱਗ ਰਿਪੋਰਟ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ਇੱਕ ਬੱਗ ਰਿਪੋਰਟ ਲੈਣ ਲਈ ਪਾਵਰ ਮੀਨੂ ਵਿੱਚ ਇੱਕ ਬਟਨ ਦਿਖਾਓ"</string>
@@ -180,7 +180,7 @@
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ਬਲੂਟੁੱਥ HCI ਸਨੂਪ ਲੌਗ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ਇੱਕ ਫਾਈਲ ਵਿੱਚ ਸਾਰੇ bluetooth HCI ਪੈਕੇਟ ਕੈਪਚਰ ਕਰੋ"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ਅਣਲਾਕ ਕਰਨਾ"</string>
-    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ਬੂਟਲੋਡਰ ਨੂੰ ਅਨਲੌਕ ਕੀਤੇ ਜਾਣ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ਬੂਟਲੋਡਰ ਨੂੰ ਅਣਲਾਕ ਕੀਤੇ ਜਾਣ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"ਕੀ OEM ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ਚਿਤਾਵਨੀ: ਡੀਵਾਈਸ ਸੁਰੱਖਿਆ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਉਦੋਂ ਇਸ ਡੀਵਾਈਸ ਤੇ ਕੰਮ ਨਹੀਂ ਕਰਨਗੀਆਂ ਜਦੋਂ ਇਹ ਸੈਟਿੰਗ ਚਾਲੂ ਹੋਵੇਗੀ।"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"ਮੌਕ ਸਥਾਨ ਐਪ ਚੁਣੋ"</string>
@@ -223,7 +223,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB ਕੌਂਫਿਗਰੇਸ਼ਨ ਚੁਣੋ"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
-    <string name="debug_view_attributes" msgid="6485448367803310384">"ਗੁਣ ਛਾਣਬੀਣ ਦੇਖੋ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"ਵਿਸ਼ੇਸ਼ਤਾ ਛਾਣਬੀਣ ਦੇਖੋ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾਂ ਮੋਬਾਈਲ ਡਾਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ ਵਾਈ‑ਫਾਈ ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ਉਪਲਬਧ ਹੋਣ \'ਤੇ ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ ਵਰਤੋ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
@@ -241,13 +241,13 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ਜਾਂਚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP ਜਾਂਚ ਵਿਵਹਾਰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"ਡੀਬਗਿੰਗ"</string>
-    <string name="debug_app" msgid="8349591734751384446">"ਡੀਬਗ ਐਪ ਚੁਣੋ"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"ਕੋਈ ਡੀਬਗ ਐਪਲੀਕੇਸ਼ਨ ਸੈਟ ਨਹੀਂ ਕੀਤੀ"</string>
+    <string name="debug_app" msgid="8349591734751384446">"ਡੀਬੱਗ ਐਪ ਚੁਣੋ"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"ਕੋਈ ਡੀਬੱਗ ਐਪਲੀਕੇਸ਼ਨ ਸੈੱਟ ਨਹੀਂ ਕੀਤੀ"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"ਡੀਬਗਿੰਗ ਐਪਲੀਕੇਸ਼ਨ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"ਐਪਲੀਕੇਸ਼ਨ ਚੁਣੋ"</string>
     <string name="no_application" msgid="2813387563129153880">"ਕੁਝ ਨਹੀਂ"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"ਡੀਬਗਰ ਦੀ ਉਡੀਕ ਕਰੋ"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ਡੀਬਗ ਕੀਤੇ ਐਪਲੀਕੇਸ਼ਨ ਐਗਜੀਕਿਊਟ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਟੈਚ ਕਰਨ ਲਈ ਡੀਬਗਰ ਦੀ ਉਡੀਕ ਕਰਦੇ ਹਨ"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰੋ"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ਡੀਬੱਗ ਕੀਤੇ ਐਪਲੀਕੇਸ਼ਨ ਐਗਜੀਕਿਊਟ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਟੈਚ ਕਰਨ ਲਈ ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰਦੇ ਹਨ"</string>
     <string name="telephony_monitor_switch" msgid="1764958220062121194">"ਟੈਲੀਫ਼ੋਨੀ ਮੋਨੀਟਰ"</string>
     <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"ਟੈਲੀਫ਼ੋਨੀ ਮੋਨੀਟਰ ਟੈਲੀਫ਼ੋਨੀ/ਮੌਡਮ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਵਿੱਚ ਕਿਸੇ ਸਮੱਸਿਆ ਦਾ ਪਤਾ ਲੱਗਣ \'ਤੇ ਲੌਗਾਂ ਨੂੰ ਇਕੱਤਰ ਕਰੇਗਾ ਅਤੇ ਵਰਤੋਂਕਾਰ ਨੂੰ ਇੱਕ ਬੱਗ ਦਾਇਰ ਕਰਨ ਲਈ ਸੂਚਨਾ ਦੇਵੇਗਾ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ਇਨਪੁਟ"</string>
@@ -283,7 +283,7 @@
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ਡ੍ਰਾਇੰਗ ਲਈ GPU ਦੀ ਵਰਤੋਂ ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 ਐਪਾਂ ਵਿੱਚ 4x MSAA ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"ਗ਼ੈਰ-ਆਇਤਾਕਾਰ ਕਲਿਪ ਓਪਰੇਸ਼ਨ ਡੀਬਗ ਕਰੋ"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"ਗੈਰ-ਆਇਤਾਕਾਰ ਕਲਿੱਪ ਓਪਰੇਸ਼ਨ ਡੀਬੱਗ ਕਰੋ"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"ਪ੍ਰੋਫਾਈਲ GPU ਰੈਂਡਰਿੰਗ"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"ਵਿੰਡੋ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ਟ੍ਰਾਂਜਿਸ਼ਨ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>

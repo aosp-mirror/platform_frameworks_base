@@ -18,55 +18,53 @@ package android.telephony.mbms;
 
 import android.os.Handler;
 import android.os.RemoteException;
-import android.telephony.mbms.IMbmsStreamingManagerCallback;
-import android.telephony.mbms.MbmsStreamingManagerCallback;
-import android.telephony.mbms.StreamingServiceInfo;
 
-import java.util.List;
-
-/** @hide */
-public class InternalStreamingManagerCallback extends IMbmsStreamingManagerCallback.Stub {
+/**
+ * @hide
+ */
+public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
     private final Handler mHandler;
-    private final MbmsStreamingManagerCallback mAppCallback;
+    private final DownloadStateCallback mAppCallback;
+    private volatile boolean mIsStopped = false;
 
-    public InternalStreamingManagerCallback(MbmsStreamingManagerCallback appCallback,
-            Handler handler) {
+    public InternalDownloadStateCallback(DownloadStateCallback appCallback, Handler handler) {
         mAppCallback = appCallback;
         mHandler = handler;
     }
 
     @Override
-    public void error(int errorCode, String message) throws RemoteException {
+    public void onProgressUpdated(final DownloadRequest request, final FileInfo fileInfo,
+            final int currentDownloadSize, final int fullDownloadSize, final int currentDecodedSize,
+            final int fullDecodedSize) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onError(errorCode, message);
+                mAppCallback.onProgressUpdated(request, fileInfo, currentDownloadSize,
+                        fullDownloadSize, currentDecodedSize, fullDecodedSize);
             }
         });
     }
 
     @Override
-    public void streamingServicesUpdated(List<StreamingServiceInfo> services)
-            throws RemoteException {
+    public void onStateUpdated(final DownloadRequest request, final FileInfo fileInfo,
+            final int state) throws RemoteException {
+        if (mIsStopped) {
+            return;
+        }
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onStreamingServicesUpdated(services);
+                mAppCallback.onStateUpdated(request, fileInfo, state);
             }
         });
     }
 
-    @Override
-    public void middlewareReady() throws RemoteException {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mAppCallback.onMiddlewareReady();
-            }
-        });
-    }
-
-    public Handler getHandler() {
-        return mHandler;
+    public void stop() {
+        mIsStopped = true;
     }
 }

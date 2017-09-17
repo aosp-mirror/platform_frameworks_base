@@ -23,27 +23,23 @@
 #include "ResourceTable.h"
 #include "Source.h"
 #include "StringPool.h"
-#include "Format.pb.h"
+#include "Resources.pb.h"
+#include "ResourcesInternal.pb.h"
 
 namespace aapt {
 
-void SerializeStringPoolToPb(const StringPool& pool,
-                             pb::StringPool* out_pb_pool);
+void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool);
 
-void SerializeSourceToPb(const Source& source, StringPool* src_pool,
-                         pb::Source* out_pb_source);
+void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source* out_pb_source);
 
-void DeserializeSourceFromPb(const pb::Source& pb_source,
-                             const android::ResStringPool& src_pool,
+void DeserializeSourceFromPb(const pb::Source& pb_source, const android::ResStringPool& src_pool,
                              Source* out_source);
 
 pb::SymbolStatus_Visibility SerializeVisibilityToPb(SymbolState state);
 
-SymbolState DeserializeVisibilityFromPb(
-    pb::SymbolStatus_Visibility pb_visibility);
+SymbolState DeserializeVisibilityFromPb(pb::SymbolStatus_Visibility pb_visibility);
 
-void SerializeConfig(const ConfigDescription& config,
-                     pb::ConfigDescription* out_pb_config);
+void SerializeConfig(const ConfigDescription& config, pb::ConfigDescription* out_pb_config);
 
 bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
                                         ConfigDescription* out_config);

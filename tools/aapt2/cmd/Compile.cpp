@@ -16,11 +16,11 @@
 
 #include <dirent.h>
 
-#include <fstream>
 #include <string>
 
 #include "android-base/errors.h"
 #include "android-base/file.h"
+#include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
@@ -38,6 +38,7 @@
 #include "flatten/Archive.h"
 #include "flatten/XmlFlattener.h"
 #include "io/BigBufferOutputStream.h"
+#include "io/FileInputStream.h"
 #include "io/Util.h"
 #include "proto/ProtoSerialize.h"
 #include "util/Files.h"
@@ -46,8 +47,9 @@
 #include "xml/XmlDom.h"
 #include "xml/XmlPullParser.h"
 
-using android::StringPiece;
-using google::protobuf::io::CopyingOutputStreamAdaptor;
+using ::aapt::io::FileInputStream;
+using ::android::StringPiece;
+using ::google::protobuf::io::CopyingOutputStreamAdaptor;
 
 namespace aapt {
 
@@ -57,19 +59,14 @@ struct ResourcePathData {
   std::string name;
   std::string extension;
 
-  // Original config str. We keep this because when we parse the config, we may
-  // add on
-  // version qualifiers. We want to preserve the original input so the output is
-  // easily
+  // Original config str. We keep this because when we parse the config, we may add on
+  // version qualifiers. We want to preserve the original input so the output is easily
   // computed before hand.
   std::string config_str;
   ConfigDescription config;
 };
 
-/**
- * Resource file paths are expected to look like:
- * [--/res/]type[-config]/name
- */
+// Resource file paths are expected to look like: [--/res/]type[-config]/name
 static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
                                                        std::string* out_error) {
   std::vector<std::string> parts = util::Split(path, file::sDirSep);
@@ -137,9 +134,7 @@ static bool IsHidden(const StringPiece& filename) {
   return util::StartsWith(filename, ".");
 }
 
-/**
- * Walks the res directory structure, looking for resource files.
- */
+// Walks the res directory structure, looking for resource files.
 static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& options,
                                   std::vector<ResourcePathData>* out_path_data) {
   const std::string& root_dir = options.res_dir.value();
@@ -195,22 +190,20 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
                          const std::string& output_path) {
   ResourceTable table;
   {
-    std::ifstream fin(path_data.source.path, std::ifstream::binary);
-    if (!fin) {
+    FileInputStream fin(path_data.source.path);
+    if (fin.HadError()) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << "failed to open file: "
-                                       << android::base::SystemErrorCodeToString(errno));
+                                       << "failed to open file: " << fin.GetError());
       return false;
     }
 
     // Parse the values file from XML.
-    xml::XmlPullParser xml_parser(fin);
+    xml::XmlPullParser xml_parser(&fin);
 
     ResourceParserOptions parser_options;
     parser_options.error_on_positional_arguments = !options.legacy_mode;
 
-    // If the filename includes donottranslate, then the default translatable is
-    // false.
+    // If the filename includes donottranslate, then the default translatable is false.
     parser_options.translatable = path_data.name.find("donottranslate") == std::string::npos;
 
     ResourceParser res_parser(context->GetDiagnostics(), &table, path_data.source, path_data.config,
@@ -218,8 +211,6 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     if (!res_parser.Parse(&xml_parser)) {
       return false;
     }
-
-    fin.close();
   }
 
   if (options.pseudolocalize) {
@@ -239,8 +230,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
   // Assign an ID to any package that has resources.
   for (auto& pkg : table.packages) {
     if (!pkg->id) {
-      // If no package ID was set while parsing (public identifiers), auto
-      // assign an ID.
+      // If no package ID was set while parsing (public identifiers), auto assign an ID.
       pkg->id = context->GetPackageId();
     }
   }
@@ -292,7 +282,7 @@ static bool WriteHeaderAndBufferToWriter(const StringPiece& output_path, const R
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
+    std::unique_ptr<pb::internal::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
     output_stream.WriteCompiledFile(compiled_file.get());
     output_stream.WriteData(&buffer);
 
@@ -329,7 +319,7 @@ static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path, const Res
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
+    std::unique_ptr<pb::internal::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
     output_stream.WriteCompiledFile(compiled_file.get());
     output_stream.WriteData(map.getDataPtr(), map.getDataLength());
 
@@ -356,7 +346,8 @@ static bool FlattenXmlToOutStream(IAaptContext* context, const StringPiece& outp
     return false;
   }
 
-  std::unique_ptr<pb::CompiledFile> pb_compiled_file = SerializeCompiledFileToPb(xmlres->file);
+  std::unique_ptr<pb::internal::CompiledFile> pb_compiled_file =
+      SerializeCompiledFileToPb(xmlres->file);
   out->WriteCompiledFile(pb_compiled_file.get());
   out->WriteData(&buffer);
 
@@ -367,7 +358,7 @@ static bool FlattenXmlToOutStream(IAaptContext* context, const StringPiece& outp
   return true;
 }
 
-static bool IsValidFile(IAaptContext* context, const StringPiece& input_path) {
+static bool IsValidFile(IAaptContext* context, const std::string& input_path) {
   const file::FileType file_type = file::GetFileType(input_path);
   if (file_type != file::FileType::kRegular && file_type != file::FileType::kSymlink) {
     if (file_type == file::FileType::kDirectory) {
@@ -393,17 +384,14 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
 
   std::unique_ptr<xml::XmlResource> xmlres;
   {
-    std::ifstream fin(path_data.source.path, std::ifstream::binary);
-    if (!fin) {
+    FileInputStream fin(path_data.source.path);
+    if (fin.HadError()) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << "failed to open file: "
-                                       << android::base::SystemErrorCodeToString(errno));
+                                       << "failed to open file: " << fin.GetError());
       return false;
     }
 
     xmlres = xml::Inflate(&fin, context->GetDiagnostics(), path_data.source);
-
-    fin.close();
   }
 
   if (!xmlres) {
@@ -432,12 +420,9 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
     return false;
   }
 
-  // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->FinishEntry().
+  // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->FinishEntry().
   {
-    // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream
-    // interface.
+    // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
     CompiledFileOutputStream output_stream(&copying_adaptor);
 

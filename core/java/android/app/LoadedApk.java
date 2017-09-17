@@ -637,7 +637,9 @@ public final class LoadedApk {
         // as unbundled.
         final String defaultSearchPaths = System.getProperty("java.library.path");
         final boolean treatVendorApkAsUnbundled = !defaultSearchPaths.contains("/vendor/lib");
-        if (mApplicationInfo.getCodePath().startsWith("/vendor/") && treatVendorApkAsUnbundled) {
+        if (mApplicationInfo.getCodePath() != null
+                && mApplicationInfo.getCodePath().startsWith("/vendor/")
+                && treatVendorApkAsUnbundled) {
             isBundledApp = false;
         }
 

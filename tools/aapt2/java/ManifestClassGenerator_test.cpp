@@ -112,6 +112,21 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
   EXPECT_THAT(actual, HasSubstr(expected_secret));
 }
 
+// This is bad but part of public API behaviour so we need to preserve it.
+TEST(ManifestClassGeneratorTest, LastSeenPermissionWithSameLeafNameTakesPrecedence) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+        <permission android:name="android.permission.ACCESS_INTERNET" />
+        <permission android:name="com.android.aapt.test.ACCESS_INTERNET" />
+      </manifest>)");
+
+  std::string actual;
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
+  EXPECT_THAT(actual, HasSubstr("ACCESS_INTERNET=\"com.android.aapt.test.ACCESS_INTERNET\";"));
+  EXPECT_THAT(actual, Not(HasSubstr("ACCESS_INTERNET=\"android.permission.ACCESS_INTERNET\";")));
+}
+
 static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xml::XmlResource* res,
                                                        std::string* out_str) {
   std::unique_ptr<ClassDefinition> manifest_class =
