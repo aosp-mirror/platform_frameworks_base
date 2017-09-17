@@ -34,6 +34,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.RestrictedLockUtils;
@@ -91,20 +92,28 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
     public InputMethodPreference(final Context context, final InputMethodInfo imi,
             final boolean isImeEnabler, final boolean isAllowedByOrganization,
             final OnSavePreferenceListener onSaveListener) {
+        this(context, imi, imi.loadLabel(context.getPackageManager()), isAllowedByOrganization,
+                onSaveListener);
+        if (!isImeEnabler) {
+            // Remove switch widget.
+            setWidgetLayoutResource(NO_WIDGET);
+        }
+    }
+
+    @VisibleForTesting
+    InputMethodPreference(final Context context, final InputMethodInfo imi,
+            final CharSequence title, final boolean isAllowedByOrganization,
+            final OnSavePreferenceListener onSaveListener) {
         super(context);
         setPersistent(false);
         mImi = imi;
         mIsAllowedByOrganization = isAllowedByOrganization;
         mOnSaveListener = onSaveListener;
-        if (!isImeEnabler) {
-            // Remove switch widget.
-            setWidgetLayoutResource(NO_WIDGET);
-        }
         // Disable on/off switch texts.
         setSwitchTextOn(EMPTY_TEXT);
         setSwitchTextOff(EMPTY_TEXT);
         setKey(imi.getId());
-        setTitle(imi.loadLabel(context.getPackageManager()));
+        setTitle(title);
         final String settingsActivity = imi.getSettingsActivity();
         if (TextUtils.isEmpty(settingsActivity)) {
             setIntent(null);
@@ -283,18 +292,18 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
         if (this == rhs) {
             return 0;
         }
-        if (mHasPriorityInSorting == rhs.mHasPriorityInSorting) {
-            final CharSequence t0 = getTitle();
-            final CharSequence t1 = rhs.getTitle();
-            if (TextUtils.isEmpty(t0)) {
-                return 1;
-            }
-            if (TextUtils.isEmpty(t1)) {
-                return -1;
-            }
-            return collator.compare(t0.toString(), t1.toString());
+        if (mHasPriorityInSorting != rhs.mHasPriorityInSorting) {
+            // Prefer always checked system IMEs
+            return mHasPriorityInSorting ? -1 : 1;
         }
-        // Prefer always checked system IMEs
-        return mHasPriorityInSorting ? -1 : 1;
+        final CharSequence title = getTitle();
+        final CharSequence rhsTitle = rhs.getTitle();
+        final boolean emptyTitle = TextUtils.isEmpty(title);
+        final boolean rhsEmptyTitle = TextUtils.isEmpty(rhsTitle);
+        if (!emptyTitle && !rhsEmptyTitle) {
+            return collator.compare(title.toString(), rhsTitle.toString());
+        }
+        // For historical reasons, an empty text needs to be put at the first.
+        return (emptyTitle ? -1 : 0) - (rhsEmptyTitle ? -1 : 0);
     }
 }
