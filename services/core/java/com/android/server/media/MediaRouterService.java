@@ -271,14 +271,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public boolean isGlobalBluetoothA2doOn() {
-        synchronized (mLock) {
-            return mGlobalBluetoothA2dpOn;
-        }
-    }
-
-    // Binder call
-    @Override
     public void setDiscoveryRequest(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
         if (client == null) {
@@ -383,7 +375,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             synchronized (mLock) {
                 a2dpOn = mGlobalBluetoothA2dpOn;
             }
-            Slog.v(TAG, "restoreBluetoothA2dp( " + a2dpOn + ")");
+            Slog.v(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
             mAudioService.setBluetoothA2dpOn(a2dpOn);
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn.");
