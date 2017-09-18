@@ -2119,14 +2119,26 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // so tear down any ongoing backup task right away.
     @Override
     public void endFullBackup() {
-        synchronized (mQueueLock) {
-            if (mRunningFullBackupTask != null) {
-                if (DEBUG_SCHEDULING) {
-                    Slog.i(TAG, "Telling running backup to stop");
+        // offload the mRunningFullBackupTask.handleCancel() call to another thread,
+        // as we might have to wait for mCancelLock
+        Runnable endFullBackupRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PerformFullTransportBackupTask pftbt = null;
+                synchronized (mQueueLock) {
+                    if (mRunningFullBackupTask != null) {
+                        pftbt = mRunningFullBackupTask;
+                    }
                 }
-                mRunningFullBackupTask.handleCancel(true);
+                if (pftbt != null) {
+                    if (DEBUG_SCHEDULING) {
+                        Slog.i(TAG, "Telling running backup to stop");
+                    }
+                    pftbt.handleCancel(true);
+                }
             }
-        }
+        };
+        new Thread(endFullBackupRunnable, "end-full-backup").start();
     }
 
     // Used by both incremental and full restore
