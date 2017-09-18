@@ -150,6 +150,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RefactoredBackupManagerService implements BackupManagerServiceInterface {
 
@@ -626,6 +627,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
     private final Object mCurrentOpLock = new Object();
     private final Random mTokenGenerator = new Random();
+    final AtomicInteger mNextToken = new AtomicInteger();
 
     private final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
 
@@ -665,15 +667,15 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     @GuardedBy("mQueueLock")
     private ArrayList<FullBackupEntry> mFullBackupQueue;
 
-    // Utility: build a new random integer token
+    // Utility: build a new random integer token. The low bits are the ordinal of the
+    // operation for near-time uniqueness, and the upper bits are random for app-
+    // side unpredictability.
     @Override
     public int generateRandomIntegerToken() {
-        int token;
-        do {
-            synchronized (mTokenGenerator) {
-                token = mTokenGenerator.nextInt();
-            }
-        } while (token < 0);
+        int token = mTokenGenerator.nextInt();
+        if (token < 0) token = -token;
+        token &= ~0xFF;
+        token |= (mNextToken.incrementAndGet() & 0xFF);
         return token;
     }
 
