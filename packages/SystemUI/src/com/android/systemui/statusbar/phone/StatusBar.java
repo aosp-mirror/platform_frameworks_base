@@ -1057,6 +1057,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         mHeadsUpManager.setVisualStabilityManager(mVisualStabilityManager);
+        putComponent(HeadsUpManager.class, mHeadsUpManager);
 
         if (MULTIUSER_DEBUG) {
             mNotificationPanelDebugText = (TextView) mNotificationPanel.findViewById(
