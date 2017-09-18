@@ -3627,10 +3627,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return -1;
             }
 
-            // If the device is in Vr mode, drop the volume keys and don't
-            // forward it to the application/dispatch the audio event.
+            // If the device is in VR mode and keys are "internal" (e.g. on the side of the
+            // device), then drop the volume keys and don't forward it to the application/dispatch
+            // the audio event.
             if (mPersistentVrModeEnabled) {
-                return -1;
+                final InputDevice d = event.getDevice();
+                if (d != null && !d.isExternal()) {
+                    return -1;
+                }
             }
         } else if (keyCode == KeyEvent.KEYCODE_TAB && event.isMetaPressed()) {
             // Pass through keyboard navigation keys.
