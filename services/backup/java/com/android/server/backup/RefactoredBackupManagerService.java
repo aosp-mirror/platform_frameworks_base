@@ -1759,8 +1759,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 // Can't delete op from mCurrentOperations here. waitUntilOperationComplete may be
                 // called after we receive cancel here. We need this op's state there.
 
-                // Remove all pending timeout messages for this operation type.
-                mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+                // Remove all pending timeout messages of types OP_TYPE_BACKUP_WAIT and
+                // OP_TYPE_RESTORE_WAIT. On the other hand, OP_TYPE_BACKUP cannot time out and
+                // doesn't require cancellation.
+                if (op.type == OP_TYPE_BACKUP_WAIT || op.type == OP_TYPE_RESTORE_WAIT) {
+                    mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+                }
             }
             mCurrentOpLock.notifyAll();
         }
