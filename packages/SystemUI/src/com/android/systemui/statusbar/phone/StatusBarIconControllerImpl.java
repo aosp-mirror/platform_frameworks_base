@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -50,21 +49,17 @@ import java.util.ArrayList;
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController {
 
-    private final DarkIconDispatcher mDarkIconDispatcher;
+    private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
+    private final ArraySet<String> mIconBlacklist = new ArraySet<>();
+    private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
     private Context mContext;
     private DemoStatusIcons mDemoStatusIcons;
-
-    private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
-
-    private final ArraySet<String> mIconBlacklist = new ArraySet<>();
-    private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
     public StatusBarIconControllerImpl(Context context) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
         Dependency.get(ConfigurationController.class).addCallback(this);
-        mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
         mContext = context;
 
         loadDimens();

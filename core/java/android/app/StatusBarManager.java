@@ -70,14 +70,15 @@ public class StatusBarManager {
      * Setting this flag disables quick settings completely, but does not disable expanding the
      * notification shade.
      */
-    public static final int DISABLE2_QUICK_SETTINGS = 0x00000001;
+    public static final int DISABLE2_QUICK_SETTINGS = 1;
+    public static final int DISABLE2_SYSTEM_ICONS = 1 << 1;
 
     public static final int DISABLE2_NONE = 0x00000000;
 
-    public static final int DISABLE2_MASK = DISABLE2_QUICK_SETTINGS;
+    public static final int DISABLE2_MASK = DISABLE2_QUICK_SETTINGS | DISABLE2_SYSTEM_ICONS;
 
     @IntDef(flag = true,
-            value = {DISABLE2_NONE, DISABLE2_MASK, DISABLE2_QUICK_SETTINGS})
+            value = {DISABLE2_NONE, DISABLE2_MASK, DISABLE2_QUICK_SETTINGS, DISABLE2_SYSTEM_ICONS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Disable2Flags {}
 

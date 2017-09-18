@@ -15,6 +15,8 @@
  */
 package com.android.systemui;
 
+import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
+import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import android.animation.ArgbEvaluator;
@@ -52,6 +54,7 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.Utils.DisableStateTracker;
 
 import java.text.NumberFormat;
 
@@ -100,6 +103,9 @@ public class BatteryMeterView extends LinearLayout implements
         atts.recycle();
 
         mSettingObserver = new SettingObserver(new Handler(context.getMainLooper()));
+
+        addOnAttachStateChangeListener(
+                new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS));
 
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
