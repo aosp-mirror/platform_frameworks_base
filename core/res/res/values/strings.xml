@@ -3785,15 +3785,18 @@
          a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name" product="default">Phone</string>
 
+    <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50] -->
+    <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
+
+    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=50] -->
+    <string name="default_audio_route_name_hdmi">HDMI</string>
+
     <!-- Name of the default audio route when wired headphones are
          connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_headphones">Headphones</string>
 
-    <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50] -->
-    <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
-
-    <!-- Name of the default media route when HDMI is connected. [CHAR LIMIT=50] -->
-    <string name="default_media_route_name_hdmi">HDMI</string>
+    <!-- Name of the default audio route when USB is connected. [CHAR LIMIT=50] -->
+    <string name="default_audio_route_name_usb">USB</string>
 
     <!-- Name of the default audio route category. [CHAR LIMIT=50] -->
     <string name="default_audio_route_category_name">System</string>

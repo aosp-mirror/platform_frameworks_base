@@ -1025,9 +1025,10 @@
   <java-symbol type="string" name="granularity_label_link" />
   <java-symbol type="string" name="granularity_label_line" />
   <java-symbol type="string" name="default_audio_route_name" />
-  <java-symbol type="string" name="default_audio_route_name_headphones" />
   <java-symbol type="string" name="default_audio_route_name_dock_speakers" />
-  <java-symbol type="string" name="default_media_route_name_hdmi" />
+  <java-symbol type="string" name="default_audio_route_name_hdmi" />
+  <java-symbol type="string" name="default_audio_route_name_headphones" />
+  <java-symbol type="string" name="default_audio_route_name_usb" />
   <java-symbol type="string" name="default_audio_route_category_name" />
   <java-symbol type="string" name="stk_cc_ss_to_dial" />
   <java-symbol type="string" name="stk_cc_ss_to_ss" />
