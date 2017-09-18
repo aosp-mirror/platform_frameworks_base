@@ -4451,6 +4451,82 @@ message MetricsEvent {
     // OS: O MR
     FIELD_SELECTION_SMART_RANGE = 1123;
 
+    // The value of an autofillable and savable view was reset
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_PREVIOUS_LENGTH: the previous length of the value
+    AUTOFILL_VALUE_RESET = 1124;
+
+    // Tag of AUTOFILL_VALUE_RESET
+    // OS: O MR
+    FIELD_AUTOFILL_PREVIOUS_LENGTH = 1125;
+
+    // An autofill dataset authentification succeeded
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_DATASET_AUTHENTICATED = 1126;
+
+    // An autofill service provided an invalid dataset authentification
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_INVALID_DATASET_AUTHENTICATION = 1127;
+
+    // An autofill service provided an invalid authentification extra
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_INVALID_AUTHENTICATION = 1128;
+
+    // An autofill service used a custom description (using RemoteViews) in the Save affordance
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_CUSTOM_DESCRIPTION = 1129;
+
+    // FIELD - Type of save object passed by the service when the Save UI is shown
+    // OS: O MR
+    FIELD_AUTOFILL_SAVE_TYPE = 1130;
+
+    // An autofill service used a custom subtitle (String) in the Save affordance
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
+
+    // User tapped a link in the custom description of the Save affordance provided by an autofill service
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_UNKNOWN: The link was not properly set by the service
+    // Type TYPE_OPEN: The link launched an activity
+    // Type TYPE_FAILURE: The link could not launc an activity
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_LINK_TAPPED = 1132;
+
+    // Result of the validation on save when an autofill service provided a validator
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_FAILURE: The validation could not be performed due to an error
+    // Type TYPE_SUCCESS: The validation passed
+    // Type TYPE_DISMISS: The validation failed
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_VALIDATION = 1133;
+
+    // Result of an operation in the autofill save affordance after the user tapped a link in the custom description
+    // provided by the autofill service
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_OPEN: The save affordance was restored
+    // Type TYPE_DISMISS: The save affordcance was destroyed
+    // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
+    AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // OPEN: Settings > Network & Internet > Mobile network
