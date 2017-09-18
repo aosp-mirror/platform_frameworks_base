@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.CallSuper;
 import android.util.proto.ProtoOutputStream;
 import java.util.Comparator;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -28,6 +29,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.proto.WindowTokenProto.HASH_CODE;
 import static com.android.server.wm.proto.WindowTokenProto.WINDOWS;
+import static com.android.server.wm.proto.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.os.Debug;
 import android.os.IBinder;
@@ -263,8 +265,11 @@ class WindowToken extends WindowContainer<WindowState> {
         super.onDisplayChanged(dc);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    @CallSuper
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        super.writeToProto(proto, WINDOW_CONTAINER);
         proto.write(HASH_CODE, System.identityHashCode(this));
         for (int i = 0; i < mChildren.size(); i++) {
             final WindowState w = mChildren.get(i);

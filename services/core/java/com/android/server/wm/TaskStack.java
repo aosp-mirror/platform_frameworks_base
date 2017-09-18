@@ -41,7 +41,9 @@ import static com.android.server.wm.proto.StackProto.BOUNDS;
 import static com.android.server.wm.proto.StackProto.FILLS_PARENT;
 import static com.android.server.wm.proto.StackProto.ID;
 import static com.android.server.wm.proto.StackProto.TASKS;
+import static com.android.server.wm.proto.StackProto.WINDOW_CONTAINER;
 
+import android.annotation.CallSuper;
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -1219,8 +1221,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return mMinimizeAmount != 0f;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    @CallSuper
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        super.writeToProto(proto, WINDOW_CONTAINER);
         proto.write(ID, mStackId);
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
             mChildren.get(taskNdx).writeToProto(proto, TASKS);

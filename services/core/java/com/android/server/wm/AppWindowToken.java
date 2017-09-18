@@ -53,6 +53,7 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.proto.AppWindowTokenProto.NAME;
 import static com.android.server.wm.proto.AppWindowTokenProto.WINDOW_TOKEN;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.res.Configuration;
@@ -1620,8 +1621,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    @CallSuper
     @Override
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         writeNameToProto(proto, NAME);
         super.writeToProto(proto, WINDOW_TOKEN);

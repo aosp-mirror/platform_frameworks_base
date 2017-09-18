@@ -109,6 +109,7 @@ import static com.android.server.wm.proto.WindowManagerServiceProto.FOCUSED_WIND
 import static com.android.server.wm.proto.WindowManagerServiceProto.INPUT_METHOD_WINDOW;
 import static com.android.server.wm.proto.WindowManagerServiceProto.LAST_ORIENTATION;
 import static com.android.server.wm.proto.WindowManagerServiceProto.POLICY;
+import static com.android.server.wm.proto.WindowManagerServiceProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.wm.proto.WindowManagerServiceProto.ROTATION;
 
 import android.Manifest;
@@ -6505,7 +6506,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void writeToProtoLocked(ProtoOutputStream proto) {
         mPolicy.writeToProto(proto, POLICY);
-        mRoot.writeToProto(proto);
+        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER);
         if (mCurrentFocus != null) {
             mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
         }

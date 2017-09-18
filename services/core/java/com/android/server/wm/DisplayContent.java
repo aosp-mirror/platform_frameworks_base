@@ -112,7 +112,9 @@ import static com.android.server.wm.proto.DisplayProto.PINNED_STACK_CONTROLLER;
 import static com.android.server.wm.proto.DisplayProto.ROTATION;
 import static com.android.server.wm.proto.DisplayProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.proto.DisplayProto.STACKS;
+import static com.android.server.wm.proto.DisplayProto.WINDOW_CONTAINER;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
 import android.app.WindowConfiguration;
@@ -2119,8 +2121,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    @CallSuper
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        super.writeToProto(proto, WINDOW_CONTAINER);
         proto.write(ID, mDisplayId);
         for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.get(stackNdx);
