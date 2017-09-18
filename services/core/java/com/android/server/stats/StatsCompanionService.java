@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
 import android.os.Process;
@@ -28,6 +29,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 
 /**
@@ -40,43 +42,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
+    @GuardedBy("sStatsdLock")
     private static IStatsManager sStatsd;
+    private static final Object sStatsdLock = new Object();
 
     private final PendingIntent mAnomalyAlarmIntent;
     private final PendingIntent mPollingAlarmIntent;
-
-    public final static class AnomalyAlarmReceiver extends BroadcastReceiver  {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred.");
-            try {
-                // TODO: should be twoway so device won't sleep before acting?
-                getStatsdService().informAnomalyAlarmFired();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "failed to inform statsd of anomaly alarm firing", e);
-            } catch (NullPointerException e) {
-                Slog.e(TAG, "could not access statsd to inform it of anomaly alarm firing", e);
-            }
-            // AlarmManager releases its own wakelock here.
-        }
-    };
-
-    public final static class PollingAlarmReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Slog.d(TAG, "Time to poll something.");
-            if (DEBUG) Slog.d(TAG, "Time to poll something.");
-            try {
-                // TODO: should be twoway so device won't sleep before acting?
-                getStatsdService().informPollAlarmFired();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "failed to inform statsd of polling alarm firing",e);
-            } catch (NullPointerException e) {
-                Slog.e(TAG, "could not access statsd to inform it of polling alarm firing", e);
-            }
-            // AlarmManager releases its own wakelock here.
-        }
-    };
 
     public StatsCompanionService(Context context) {
         super();
@@ -89,33 +60,45 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 new Intent(mContext, PollingAlarmReceiver.class), 0);
     }
 
-    /** Returns the statsd IBinder service */
-    public static IStatsManager getStatsdService() {
-        if (sStatsd != null) {
-            return sStatsd;
-        }
-        sStatsd = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
-        return sStatsd;
-    }
-
-    public static final class Lifecycle extends SystemService {
-        private StatsCompanionService mStatsCompanionService;
-
-        public Lifecycle(Context context) {
-            super(context);
-        }
-
+    public final static class AnomalyAlarmReceiver extends BroadcastReceiver  {
         @Override
-        public void onStart() {
-            mStatsCompanionService = new StatsCompanionService(getContext());
-            try {
-                publishBinderService(Context.STATS_COMPANION_SERVICE, mStatsCompanionService);
-                if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_COMPANION_SERVICE);
-            } catch (Exception e) {
-                Slog.e(TAG, "Failed to publishBinderService", e);
+        public void onReceive(Context context, Intent intent) {
+            Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred.");
+            synchronized (sStatsdLock) {
+                if (sStatsd == null) {
+                    Slog.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");
+                    return;
+                }
+                try {
+                    // Two-way call to statsd to retain AlarmManager wakelock
+                    sStatsd.informAnomalyAlarmFired();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to inform statsd of anomaly alarm firing", e);
+                }
             }
+            // AlarmManager releases its own wakelock here.
         }
-    }
+    };
+
+    public final static class PollingAlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) Slog.d(TAG, "Time to poll something.");
+            synchronized (sStatsdLock) {
+                if (sStatsd == null) {
+                    Slog.w(TAG, "Could not access statsd to inform it of polling alarm firing");
+                    return;
+                }
+                try {
+                    // Two-way call to statsd to retain AlarmManager wakelock
+                    sStatsd.informPollAlarmFired();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to inform statsd of polling alarm firing", e);
+                }
+            }
+            // AlarmManager releases its own wakelock here.
+        }
+    };
 
     @Override // Binder call
     public void setAnomalyAlarm(long timestampMs) {
@@ -173,11 +156,104 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    @Override
+    public void statsdReady() {
+        enforceCallingPermission();
+        if (DEBUG) Slog.d(TAG, "learned that statsdReady");
+        sayHiToStatsd(); // tell statsd that we're ready too and link to it
+    }
+
     private void enforceCallingPermission() {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
         }
         mContext.enforceCallingPermission(android.Manifest.permission.STATSCOMPANION, null);
+    }
+
+    // Lifecycle and related code
+
+    /** Fetches the statsd IBinder service */
+    private static IStatsManager fetchStatsdService() {
+        return IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+    }
+
+    public static final class Lifecycle extends SystemService {
+        private StatsCompanionService mStatsCompanionService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mStatsCompanionService = new StatsCompanionService(getContext());
+            try {
+                publishBinderService(Context.STATS_COMPANION_SERVICE, mStatsCompanionService);
+                if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_COMPANION_SERVICE);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to publishBinderService", e);
+            }
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            super.onBootPhase(phase);
+            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+                mStatsCompanionService.systemReady();
+            }
+        }
+    }
+
+    /** Now that the android system is ready, StatsCompanion is ready too, so inform statsd. */
+    private void systemReady() {
+        if (DEBUG) Slog.d(TAG, "Learned that systemReady");
+        sayHiToStatsd();
+    }
+
+    /** Tells statsd that statscompanion is ready. If the binder call returns, link to statsd. */
+    private void sayHiToStatsd() {
+        synchronized (sStatsdLock) {
+            if (sStatsd != null) {
+                Slog.e(TAG, "Trying to fetch statsd, but it was already fetched",
+                        new IllegalStateException("sStatsd is not null when being fetched"));
+                return;
+            }
+            sStatsd = fetchStatsdService();
+            if (sStatsd == null) {
+                Slog.w(TAG, "Could not access statsd");
+                return;
+            }
+            if (DEBUG) Slog.d(TAG, "Saying hi to statsd");
+            try {
+                sStatsd.statsCompanionReady();
+                // If the statsCompanionReady two-way binder call returns, link to statsd.
+                try {
+                    sStatsd.asBinder().linkToDeath(new StatsdDeathRecipient(), 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "linkToDeath(StatsdDeathRecipient) failed", e);
+                    forgetEverything();
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
+                forgetEverything();
+            }
+        }
+    }
+
+    private class StatsdDeathRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            Slog.i(TAG, "Statsd is dead - erase all my knowledge.");
+            forgetEverything();
+        }
+    }
+
+    private void forgetEverything() {
+        synchronized (sStatsdLock) {
+            sStatsd = null;
+            cancelAnomalyAlarm();
+            cancelPollingAlarms();
+        }
     }
 
 }

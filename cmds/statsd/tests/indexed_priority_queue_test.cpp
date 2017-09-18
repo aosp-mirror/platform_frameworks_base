@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace statsd;
+using namespace android::os::statsd;
 
 /** struct for template in indexed_priority_queue */
 struct AATest : public RefBase {

@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "statsd"
+#define DEBUG true
 
 #include "StatsService.h"
 #include "DropboxReader.h"
@@ -37,6 +38,7 @@ using android::os::statsd::StatsdConfig;
 
 // ================================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
+        : mAnomalyMonitor(new AnomalyMonitor(2)) // TODO: Change this based on the config
 {
     ALOGD("stats service constructed");
 }
@@ -164,14 +166,14 @@ StatsService::doLoadConfig(FILE* in)
 Status
 StatsService::informAnomalyAlarmFired()
 {
-    ALOGD("StatsService::informAnomalyAlarmFired was called");
+    if (DEBUG) ALOGD("StatsService::informAnomalyAlarmFired was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                 "Only system uid can call informAnomalyAlarmFired");
     }
 
-    ALOGD("StatsService::informAnomalyAlarmFired succeeded");
+    if (DEBUG) ALOGD("StatsService::informAnomalyAlarmFired succeeded");
     // TODO: check through all counters/timers and see if an anomaly has indeed occurred.
 
     return Status::ok();
@@ -180,14 +182,14 @@ StatsService::informAnomalyAlarmFired()
 Status
 StatsService::informPollAlarmFired()
 {
-    ALOGD("StatsService::informPollAlarmFired was called");
+    if (DEBUG) ALOGD("StatsService::informPollAlarmFired was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                 "Only system uid can call informPollAlarmFired");
     }
 
-    ALOGD("StatsService::informPollAlarmFired succeeded");
+    if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
     // TODO: determine what services to poll and poll (or ask StatsCompanionService to poll) them.
 
     return Status::ok();
@@ -203,6 +205,8 @@ StatsService::systemRunning()
 
     // When system_server is up and running, schedule the dropbox task to run.
     ALOGD("StatsService::systemRunning");
+
+    sayHiToStatsCompanion();
 
     return Status::ok();
 }
@@ -222,4 +226,61 @@ StatsService::printCmdHelp(FILE* out) {
     fprintf(out, "Usage:\n");
     fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
     fprintf(out, "\t config\t Loads a new config from command-line (must be proto in wire-encoded format).\n");
+}
+
+void
+StatsService::sayHiToStatsCompanion()
+{
+    // TODO: This method needs to be private. It is temporarily public and unsecured for testing purposes.
+    sp<IStatsCompanionService> statsCompanion = getStatsCompanionService();
+    if (statsCompanion != nullptr) {
+        if (DEBUG) ALOGD("Telling statsCompanion that statsd is ready");
+        statsCompanion->statsdReady();
+    } else {
+        if (DEBUG) ALOGD("Could not access statsCompanion");
+    }
+}
+
+Status
+StatsService::statsCompanionReady()
+{
+    if (DEBUG) ALOGD("StatsService::statsCompanionReady was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                                         "Only system uid can call statsCompanionReady");
+    }
+
+    sp<IStatsCompanionService> statsCompanion = getStatsCompanionService();
+    if (statsCompanion == nullptr) {
+        return Status::fromExceptionCode(Status::EX_NULL_POINTER,
+                                         "statscompanion unavailable despite it contacting statsd!");
+    }
+    if (DEBUG) ALOGD("StatsService::statsCompanionReady linking to statsCompanion.");
+    IInterface::asBinder(statsCompanion)->linkToDeath(new StatsdDeathRecipient(mAnomalyMonitor));
+    mAnomalyMonitor->setStatsCompanionService(statsCompanion);
+
+    return Status::ok();
+}
+
+sp<IStatsCompanionService>
+StatsService::getStatsCompanionService() {
+    sp<IStatsCompanionService> statsCompanion = nullptr;
+    // Get statscompanion service from service manager
+    const sp<IServiceManager> sm(defaultServiceManager());
+    if (sm != nullptr) {
+        const String16 name("statscompanion");
+        statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
+        if (statsCompanion == nullptr) {
+            ALOGW("statscompanion service unavailable!");
+            return nullptr;
+        }
+    }
+    return statsCompanion;
+}
+
+void
+StatsdDeathRecipient::binderDied(const wp<IBinder>& who) {
+    ALOGW("statscompanion service died");
+    mAnmlyMntr->setStatsCompanionService(nullptr);
 }

@@ -40,8 +40,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := statsd
 
 LOCAL_SRC_FILES := \
-    ../../core/java/android/os/IStatsManager.aidl \
     ../../core/java/android/os/IStatsCompanionService.aidl \
+    ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
     src/AnomalyMonitor.cpp \
     src/LogEntryPrinter.cpp \
@@ -119,6 +119,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
 	STATSD_PROTO_INCLUDES
 
 LOCAL_SRC_FILES := \
+    ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
     tests/indexed_priority_queue_test.cpp \
