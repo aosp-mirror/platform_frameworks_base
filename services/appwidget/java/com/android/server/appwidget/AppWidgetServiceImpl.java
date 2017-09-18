@@ -2426,14 +2426,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             out.attribute(null, "p", Integer.toHexString(widget.provider.tag));
         }
         if (widget.options != null) {
-            out.attribute(null, "min_width", Integer.toHexString(widget.options.getInt(
-                    AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)));
-            out.attribute(null, "min_height", Integer.toHexString(widget.options.getInt(
-                    AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)));
-            out.attribute(null, "max_width", Integer.toHexString(widget.options.getInt(
-                    AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)));
-            out.attribute(null, "max_height", Integer.toHexString(widget.options.getInt(
-                    AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)));
+            int minWidth = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
+            int minHeight = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
+            int maxWidth = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
+            int maxHeight = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+            out.attribute(null, "min_width", Integer.toHexString((minWidth > 0) ? minWidth : 0));
+            out.attribute(null, "min_height", Integer.toHexString((minHeight > 0) ? minHeight : 0));
+            out.attribute(null, "max_width", Integer.toHexString((maxWidth > 0) ? maxWidth : 0));
+            out.attribute(null, "max_height", Integer.toHexString((maxHeight > 0) ? maxHeight : 0));
             out.attribute(null, "host_category", Integer.toHexString(widget.options.getInt(
                     AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
         }
