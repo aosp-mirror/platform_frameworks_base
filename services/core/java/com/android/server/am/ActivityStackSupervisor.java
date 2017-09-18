@@ -1639,6 +1639,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return true;
         }
 
+        // Check if caller is already present on display
+        final boolean uidPresentOnDisplay = activityDisplay.isUidPresent(callingUid);
+
         final int displayOwnerUid = activityDisplay.mDisplay.getOwnerUid();
         if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
                 && displayOwnerUid != aInfo.applicationInfo.uid) {
@@ -1651,7 +1654,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
             // Check if the caller is allowed to embed activities from other apps.
             if (mService.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
-                    == PERMISSION_DENIED) {
+                    == PERMISSION_DENIED && !uidPresentOnDisplay) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                         + " disallow activity embedding without permission.");
                 return false;
@@ -1672,8 +1675,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return true;
         }
 
-        // Check if caller is present on display
-        if (activityDisplay.isUidPresent(callingUid)) {
+        if (uidPresentOnDisplay) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                     + " allow launch for caller present on the display");
             return true;
