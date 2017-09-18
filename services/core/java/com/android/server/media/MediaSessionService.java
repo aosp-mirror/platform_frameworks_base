@@ -1363,6 +1363,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     flags, packageName, TAG);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error adjusting default volume.", e);
+                        } catch (IllegalArgumentException e) {
+                            Log.e(TAG, "Cannot adjust volume: direction=" + direction
+                                    + ", suggestedStream=" + suggestedStream + ", flags=" + flags,
+                                    e);
                         }
                     }
                 });
