@@ -2718,25 +2718,20 @@ public class WebView extends AbsoluteLayout
      *   {@code IFRAME}, in which case it would be treated the same way as multiple forms described
      *   above, except that the {@link ViewStructure#setWebDomain(String) web domain} of the
      *   {@code FORM} contains the {@code src} attribute from the {@code IFRAME} node.
-     *   <li>If the Android SDK provides a similar View, then should be set with the
-     *   fully-qualified class name of such view.
      *   <li>The W3C autofill field ({@code autocomplete} tag attribute) maps to
-     *       {@link ViewStructure#setAutofillHints(String[])}.
-     *   <li>The {@code type} attribute of {@code INPUT} tags maps to
-     *       {@link ViewStructure#setInputType(int)}.
-     *   <li>The {@code value} attribute of {@code INPUT} tags maps to
-     *       {@link ViewStructure#setText(CharSequence)}.
-     *   <li>If the view is editalbe, the {@link ViewStructure#setAutofillType(int)} and
+     *   {@link ViewStructure#setAutofillHints(String[])}.
+     *   <li>If the view is editable, the {@link ViewStructure#setAutofillType(int)} and
      *   {@link ViewStructure#setAutofillValue(AutofillValue)} must be set.
      *   <li>The {@code placeholder} attribute maps to {@link ViewStructure#setHint(CharSequence)}.
      *   <li>Other HTML attributes can be represented through
      *   {@link ViewStructure#setHtmlInfo(android.view.ViewStructure.HtmlInfo)}.
      * </ol>
      *
-     * <p>It should also call {@code structure.setDataIsSensitive(false)} for fields whose value
-     * were not dynamically changed (for example, through Javascript).
+     * <p>If the WebView implementation can determine that the value of a field was set statically
+     * (for example, not through Javascript), it should also call
+     * {@code structure.setDataIsSensitive(false)}.
      *
-     * <p>Example1: an HTML form with 2 fields for username and password.
+     * <p>For example, an HTML form with 2 fields for username and password:
      *
      * <pre class="prettyprint">
      *    &lt;input type="text" name="username" id="user" value="Type your username" autocomplete="username" placeholder="Email or username"&gt;
@@ -2749,50 +2744,26 @@ public class WebView extends AbsoluteLayout
      *     int index = structure.addChildCount(2);
      *     ViewStructure username = structure.newChild(index);
      *     username.setAutofillId(structure.getAutofillId(), 1); // id 1 - first child
-     *     username.setClassName("input");
-     *     username.setInputType("android.widget.EditText");
      *     username.setAutofillHints("username");
      *     username.setHtmlInfo(username.newHtmlInfoBuilder("input")
      *         .addAttribute("type", "text")
      *         .addAttribute("name", "username")
-     *         .addAttribute("id", "user")
      *         .build());
      *     username.setHint("Email or username");
      *     username.setAutofillType(View.AUTOFILL_TYPE_TEXT);
      *     username.setAutofillValue(AutofillValue.forText("Type your username"));
-     *     username.setText("Type your username");
-     *     // Value of the field is not sensitive because it was not dynamically changed:
+     *     // Value of the field is not sensitive because it was created statically and not changed.
      *     username.setDataIsSensitive(false);
      *
      *     ViewStructure password = structure.newChild(index + 1);
      *     username.setAutofillId(structure, 2); // id 2 - second child
-     *     password.setInputType("android.widget.EditText");
-     *     password.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
      *     password.setAutofillHints("current-password");
      *     password.setHtmlInfo(password.newHtmlInfoBuilder("input")
      *         .addAttribute("type", "password")
      *         .addAttribute("name", "password")
-     *         .addAttribute("id", "pass")
      *         .build());
      *     password.setHint("Password");
      *     password.setAutofillType(View.AUTOFILL_TYPE_TEXT);
-     * </pre>
-     *
-     * <p>Example2: an IFRAME tag.
-     *
-     * <pre class="prettyprint">
-     *    &lt;iframe src="https://example.com/login"/&gt;
-     * </pre>
-     *
-     * <p>Would map to:
-     *
-     * <pre class="prettyprint">
-     *     int index = structure.addChildCount(1);
-     *     ViewStructure iframe = structure.newChildFor(index);
-     *     iframe.setAutofillId(structure.getAutofillId(), 1);
-     *     iframe.setHtmlInfo(iframe.newHtmlInfoBuilder("iframe")
-     *         .addAttribute("src", "https://example.com/login")
-     *         .build());
      * </pre>
      */
     @Override
