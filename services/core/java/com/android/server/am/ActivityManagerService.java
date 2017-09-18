@@ -14046,10 +14046,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                         || Settings.Global.getInt(
                                 resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
-        final boolean supportsPictureInPicture =
-                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow(mContext);
+        final boolean supportsPictureInPicture = supportsMultiWindow &&
+                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         final boolean supportsSplitScreenMultiWindow =
                 ActivityManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
