@@ -16,11 +16,10 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +32,7 @@ import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -54,6 +54,21 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     private final ComponentName testActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity");
 
+    private ActivityManagerService mService;
+    private ActivityStackSupervisor mSupervisor;
+    private ActivityStack mFullscreenStack;
+
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        mService = createActivityManagerService();
+        mSupervisor = mService.mStackSupervisor;
+        mFullscreenStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+    }
+
     /**
      * This test ensures that we do not try to restore a task based off an invalid task id. The
      * stack supervisor is a test version so there will be no tasks present. We should expect
@@ -61,8 +76,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testRestoringInvalidTask() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        TaskRecord task = service.mStackSupervisor.anyTaskForIdLocked(0 /*taskId*/,
+        TaskRecord task = mSupervisor.anyTaskForIdLocked(0 /*taskId*/,
                 MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null);
         assertNull(task);
     }
@@ -73,43 +87,44 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testReplacingTaskInPinnedStack() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord firstTask = createTask(service, testActivityComponent,
-                FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityRecord firstActivity = createActivity(service, testActivityComponent,
+        final TaskRecord firstTask = createTask(
+                mSupervisor, testActivityComponent, mFullscreenStack);
+        final ActivityRecord firstActivity = createActivity(mService, testActivityComponent,
                 firstTask);
         // Create a new task on the full screen stack
-        final TaskRecord secondTask = createTask(service, testActivityComponent,
-                FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityRecord secondActivity = createActivity(service, testActivityComponent,
+        final TaskRecord secondTask = createTask(
+                mSupervisor, testActivityComponent, mFullscreenStack);
+        final ActivityRecord secondActivity = createActivity(mService, testActivityComponent,
                 secondTask);
-        service.mStackSupervisor.setFocusStackUnchecked("testReplacingTaskInPinnedStack",
-                service.mStackSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID));
+        mSupervisor.setFocusStackUnchecked("testReplacingTaskInPinnedStack", mFullscreenStack);
 
         // Ensure full screen stack has both tasks.
-        ensureStackPlacement(service.mStackSupervisor, FULLSCREEN_WORKSPACE_STACK_ID, firstTask,
-                secondTask);
+        ensureStackPlacement(mFullscreenStack, firstTask, secondTask);
 
         // Move first activity to pinned stack.
-        service.mStackSupervisor.moveActivityToPinnedStackLocked(firstActivity,
-                new Rect() /*sourceBounds*/, 0f /*aspectRatio*/, false, "initialMove");
+        final Rect sourceBounds = new Rect();
+        mSupervisor.moveActivityToPinnedStackLocked(firstActivity, sourceBounds,
+                0f /*aspectRatio*/, false, "initialMove");
 
+        final ActivityDisplay display = mFullscreenStack.getDisplay();
+        ActivityStack pinnedStack = display.getPinnedStack();
         // Ensure a task has moved over.
-        ensureStackPlacement(service.mStackSupervisor, PINNED_STACK_ID, firstTask);
-        ensureStackPlacement(service.mStackSupervisor, FULLSCREEN_WORKSPACE_STACK_ID, secondTask);
+        ensureStackPlacement(pinnedStack, firstTask);
+        ensureStackPlacement(mFullscreenStack, secondTask);
 
         // Move second activity to pinned stack.
-        service.mStackSupervisor.moveActivityToPinnedStackLocked(secondActivity,
-                new Rect() /*sourceBounds*/, 0f /*aspectRatio*/ /*destBounds*/, false, "secondMove");
+        mSupervisor.moveActivityToPinnedStackLocked(secondActivity, sourceBounds,
+                0f /*aspectRatio*/, false, "secondMove");
+
+        // Need to get pinned stack again as a new instance might have been created.
+        pinnedStack = display.getPinnedStack();
 
         // Ensure stacks have swapped tasks.
-        ensureStackPlacement(service.mStackSupervisor, PINNED_STACK_ID, secondTask);
-        ensureStackPlacement(service.mStackSupervisor, FULLSCREEN_WORKSPACE_STACK_ID, firstTask);
+        ensureStackPlacement(pinnedStack, secondTask);
+        ensureStackPlacement(mFullscreenStack, firstTask);
     }
 
-    private static void ensureStackPlacement(ActivityStackSupervisor supervisor, int stackId,
-            TaskRecord... tasks) {
-        final ActivityStack stack = supervisor.getStack(stackId);
+    private static void ensureStackPlacement(ActivityStack stack, TaskRecord... tasks) {
         final ArrayList<TaskRecord> stackTasks = stack.getAllTasks();
         assertEquals(stackTasks.size(), tasks != null ? tasks.length : 0);
 
@@ -127,15 +142,14 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testStoppingActivityRemovedWhenResumed() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord firstTask = createTask(service, testActivityComponent,
-            FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityRecord firstActivity = createActivity(service, testActivityComponent,
+        final TaskRecord firstTask = createTask(
+                mSupervisor, testActivityComponent, mFullscreenStack);
+        final ActivityRecord firstActivity = createActivity(mService, testActivityComponent,
             firstTask);
-        service.mStackSupervisor.mStoppingActivities.add(firstActivity);
+        mSupervisor.mStoppingActivities.add(firstActivity);
 
         firstActivity.completeResumeLocked();
 
-        assertFalse(service.mStackSupervisor.mStoppingActivities.contains(firstActivity));
+        assertFalse(mSupervisor.mStoppingActivities.contains(firstActivity));
     }
 }

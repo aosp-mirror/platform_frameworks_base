@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import android.app.RemoteAction;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -34,7 +37,7 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
 
     PinnedActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
             boolean onTop) {
-        super(display, stackId, supervisor, onTop);
+        super(display, stackId, supervisor, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, onTop);
     }
 
     @Override

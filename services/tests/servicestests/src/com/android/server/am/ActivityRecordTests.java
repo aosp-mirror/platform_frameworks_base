@@ -16,9 +16,15 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -26,14 +32,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
-import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import android.view.Display;
 import org.junit.runner.RunWith;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -46,64 +51,53 @@ import org.junit.Test;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityRecordTests extends ActivityTestsBase {
-    private static final int TEST_STACK_ID = 100;
-
     private final ComponentName testActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity");
     private final ComponentName secondaryActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity2");
+
+    private ActivityManagerService mService;
+    private ActivityStack mStack;
+    private TaskRecord mTask;
+    private ActivityRecord mActivity;
+
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        mService = createActivityManagerService();
+        mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
+        mActivity = createActivity(mService, testActivityComponent, mTask);
+    }
+
     @Test
     public void testStackCleanupOnClearingTask() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord record = createActivity(service, testActivityComponent, task);
-
-        record.setTask(null);
-        assertEquals(getActivityRemovedFromStackCount(service, TEST_STACK_ID), 1);
+        mActivity.setTask(null);
+        assertEquals(getActivityRemovedFromStackCount(), 1);
     }
 
     @Test
     public void testStackCleanupOnActivityRemoval() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord record = createActivity(service, testActivityComponent, task);
-
-        task.removeActivity(record);
-        assertEquals(getActivityRemovedFromStackCount(service, TEST_STACK_ID),  1);
+        mTask.removeActivity(mActivity);
+        assertEquals(getActivityRemovedFromStackCount(),  1);
     }
 
     @Test
     public void testStackCleanupOnTaskRemoval() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord record = createActivity(service, testActivityComponent, task);
-
-        service.mStackSupervisor.getStack(TEST_STACK_ID)
-                .removeTask(task, null /*reason*/, ActivityStack.REMOVE_TASK_MODE_MOVING);
-
+        mStack.removeTask(mTask, null /*reason*/, REMOVE_TASK_MODE_MOVING);
         // Stack should be gone on task removal.
-        assertNull(service.mStackSupervisor.getStack(TEST_STACK_ID));
+        assertNull(mService.mStackSupervisor.getStack(mStack.mStackId));
     }
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord oldTask = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord record = createActivity(service, testActivityComponent, oldTask);
-        final TaskRecord newTask = createTask(service, testActivityComponent, TEST_STACK_ID);
-
-        record.reparent(newTask, 0, null /*reason*/);
-        assertEquals(getActivityRemovedFromStackCount(service, TEST_STACK_ID), 0);
-    }
-
-    private static int getActivityRemovedFromStackCount(ActivityManagerService service,
-            int stackId) {
-        final ActivityStack stack = service.mStackSupervisor.getStack(stackId);
-        if (stack instanceof ActivityStackReporter) {
-            return ((ActivityStackReporter) stack).onActivityRemovedFromStackInvocationCount();
-        }
-
-        return -1;
+        final TaskRecord newTask =
+                createTask(mService.mStackSupervisor, testActivityComponent, mStack);
+        mActivity.reparent(newTask, 0, null /*reason*/);
+        assertEquals(getActivityRemovedFromStackCount(), 0);
     }
 
     @Test
@@ -126,16 +120,21 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     private void verifyPositionWithLimitedAspectRatio(int navBarPosition, Rect taskBounds,
             float aspectRatio, Rect expectedActivityBounds) {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord record = createActivity(service, testActivityComponent, task);
-
         // Verify with nav bar on the right.
-        when(service.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
-        task.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
-        record.info.maxAspectRatio = aspectRatio;
-        record.ensureActivityConfigurationLocked(0 /* globalChanges */, false /* preserveWindow */);
-        assertEquals(expectedActivityBounds, record.getBounds());
+        when(mService.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
+        mTask.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
+        mActivity.info.maxAspectRatio = aspectRatio;
+        mActivity.ensureActivityConfigurationLocked(
+                0 /* globalChanges */, false /* preserveWindow */);
+        assertEquals(expectedActivityBounds, mActivity.getBounds());
+    }
+
+    private int getActivityRemovedFromStackCount() {
+        if (mStack instanceof ActivityStackReporter) {
+            return ((ActivityStackReporter) mStack).onActivityRemovedFromStackInvocationCount();
+        }
+
+        return -1;
     }
 
 
@@ -156,26 +155,22 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     private void testSupportsLaunchingResizeable(boolean taskPresent, boolean taskResizeable,
             boolean activityResizeable, boolean expected) {
-        final ActivityManagerService service = createActivityManagerService();
-        service.mSupportsMultiWindow = true;
-
+        mService.mSupportsMultiWindow = true;
 
         final TaskRecord task = taskPresent
-                ? createTask(service, testActivityComponent, TEST_STACK_ID) : null;
+                ? createTask(mService.mStackSupervisor, testActivityComponent, mStack) : null;
 
         if (task != null) {
-            task.setResizeMode(taskResizeable ? ActivityInfo.RESIZE_MODE_RESIZEABLE
-                    : ActivityInfo.RESIZE_MODE_UNRESIZEABLE);
+            task.setResizeMode(taskResizeable ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE);
         }
 
-        final ActivityRecord record = createActivity(service, secondaryActivityComponent,
-                task);
-        record.info.resizeMode = activityResizeable ? ActivityInfo.RESIZE_MODE_RESIZEABLE
-                : ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        final ActivityRecord record = createActivity(mService, secondaryActivityComponent, task);
+        record.info.resizeMode = activityResizeable
+                ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE;
 
-        record.canBeLaunchedOnDisplay(Display.DEFAULT_DISPLAY);
+        record.canBeLaunchedOnDisplay(DEFAULT_DISPLAY);
 
-        assertEquals(((TestActivityStackSupervisor) service.mStackSupervisor)
+        assertEquals(((TestActivityStackSupervisor) mService.mStackSupervisor)
                 .getLastResizeableFromCanPlaceEntityOnDisplay(), expected);
     }
 }

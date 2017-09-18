@@ -24,16 +24,12 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
-import static android.app.ActivityManager.StackId.getStackIdForActivityType;
-import static android.app.ActivityManager.StackId.getStackIdForWindowingMode;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -87,8 +83,6 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
-import static com.android.server.am.ActivityStack.STACK_VISIBLE;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -100,8 +94,6 @@ import static com.android.server.am.proto.ActivityStackSupervisorProto.FOCUSED_S
 import static com.android.server.am.proto.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.proto.ActivityDisplayProto.STACKS;
-import static com.android.server.am.proto.ActivityDisplayProto.ID;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static java.lang.Integer.MAX_VALUE;
 
@@ -121,6 +113,7 @@ import android.app.AppOpsManager;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -172,7 +165,6 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.proto.ActivityDisplayProto;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
@@ -619,8 +611,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
             }
 
-            mHomeStack = mFocusedStack = mLastFocusedStack =
-                    getStack(HOME_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+            mHomeStack = mFocusedStack = mLastFocusedStack = getDefaultDisplay().getOrCreateStack(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
 
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         }
@@ -676,7 +668,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void moveRecentsStackToFront(String reason) {
-        final ActivityStack recentsStack = getStack(RECENTS_STACK_ID);
+        final ActivityStack recentsStack = getDefaultDisplay().getStack(
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
         if (recentsStack != null) {
             recentsStack.moveToFront(reason);
         }
@@ -1163,8 +1156,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void getTasksLocked(int maxNum, List<RunningTaskInfo> list, int callingUid, boolean allowed) {
         // Gather all of the running tasks for each stack into runningTaskLists.
-        ArrayList<ArrayList<RunningTaskInfo>> runningTaskLists =
-                new ArrayList<ArrayList<RunningTaskInfo>>();
+        ArrayList<ArrayList<RunningTaskInfo>> runningTaskLists = new ArrayList<>();
         final int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -2107,19 +2099,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final Rect bounds = TaskRecord.validateBounds(options.getLaunchBounds());
             task.updateOverrideConfiguration(bounds);
 
-            int stackId = getLaunchStackId(null, options, task);
+            ActivityStack stack = getLaunchStack(null, options, task, ON_TOP);
 
-            if (stackId != currentStack.mStackId) {
-                task.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
-                        DEFER_RESUME, "findTaskToMoveToFrontLocked");
-                stackId = currentStack.mStackId;
+            if (stack != currentStack) {
+                task.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE, DEFER_RESUME,
+                        "findTaskToMoveToFrontLocked");
+                stack = currentStack;
                 // moveTaskToStackUncheckedLocked() should already placed the task on top,
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
-            if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                resizeStackLocked(stackId, bounds,
-                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        !PRESERVE_WINDOWS, true /* allowResizeInDockedMode */, !DEFER_RESUME);
+            if (StackId.resizeStackWithLaunchBounds(stack.mStackId)) {
+                resizeStackLocked(stack.mStackId, bounds, null /* tempTaskBounds */,
+                        null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS,
+                        true /* allowResizeInDockedMode */, !DEFER_RESUME);
             } else {
                 // WM resizeTask must be done after the task is moved to the correct stack,
                 // because Task's setBounds() also updates dim layer's bounds, but that has
@@ -2160,25 +2152,46 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return null;
     }
 
-    protected <T extends ActivityStack> T getStack(int stackId, boolean createStaticStackIfNeeded,
-            boolean createOnTop) {
-        final ActivityStack stack = getStack(stackId);
-        if (stack != null) {
-            return (T) stack;
+    /**
+     * Returns true if the {@param windowingMode} is supported based on other parameters passed in.
+     * @param windowingMode The windowing mode we are checking support for.
+     * @param supportsMultiWindow If we should consider support for multi-window mode in general.
+     * @param supportsSplitScreen If we should consider support for split-screen multi-window.
+     * @param supportsFreeform If we should consider support for freeform multi-window.
+     * @param supportsPip If we should consider support for picture-in-picture mutli-window.
+     * @param activityType The activity type under consideration.
+     * @return true if the windowing mode is supported.
+     */
+    boolean isWindowingModeSupported(int windowingMode, boolean supportsMultiWindow,
+            boolean supportsSplitScreen, boolean supportsFreeform, boolean supportsPip,
+            int activityType) {
+
+        if (windowingMode == WINDOWING_MODE_UNDEFINED
+                || windowingMode == WINDOWING_MODE_FULLSCREEN) {
+            return true;
         }
-        if (!createStaticStackIfNeeded || !StackId.isStaticStack(stackId)) {
-            return null;
+        if (!supportsMultiWindow) {
+            return false;
         }
-        if (stackId == DOCKED_STACK_ID) {
-            // Make sure recents stack exist when creating a dock stack as it normally need to be on
-            // the other side of the docked stack and we make visibility decisions based on that.
-            getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, createOnTop);
+
+        if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+            return supportsSplitScreen && WindowConfiguration.supportSplitScreenWindowingMode(
+                    windowingMode, activityType);
         }
-        return (T) createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
+
+        if (!supportsFreeform && windowingMode == WINDOWING_MODE_FREEFORM) {
+            return false;
+        }
+
+        if (!supportsPip && windowingMode == WINDOWING_MODE_PINNED) {
+            return false;
+        }
+        return true;
     }
 
     private int resolveWindowingMode(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable TaskRecord task) {
+            @Nullable TaskRecord task, int activityType) {
 
         // First preference if the windowing mode in the activity options if set.
         int windowingMode = (options != null)
@@ -2196,47 +2209,47 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Make sure the windowing mode we are trying to use makes sense for what is supported.
-        if (!mService.mSupportsMultiWindow && windowingMode != WINDOWING_MODE_FULLSCREEN) {
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
+        boolean supportsMultiWindow = mService.mSupportsMultiWindow;
+        boolean supportsSplitScreen = mService.mSupportsSplitScreenMultiWindow;
+        boolean supportsFreeform = mService.mSupportsFreeformWindowManagement;
+        boolean supportsPip = mService.mSupportsPictureInPicture;
+        if (supportsMultiWindow) {
+            if (task != null) {
+                supportsMultiWindow = task.isResizeable();
+                supportsSplitScreen = task.supportsSplitScreenWindowingMode();
+                // TODO: Do we need to check for freeform and Pip support here?
+            } else if (r != null) {
+                supportsMultiWindow = r.isResizeable();
+                supportsSplitScreen = r.supportsSplitScreenWindowingMode();
+                supportsFreeform = r.supportsFreeform();
+                supportsPip = r.supportsPictureInPicture();
+            }
         }
 
-        if (!mService.mSupportsSplitScreenMultiWindow
-                && (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)) {
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
+        if (isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
+                supportsFreeform, supportsPip, activityType)) {
+            return windowingMode;
         }
-
-        if (windowingMode == WINDOWING_MODE_FREEFORM
-                && !mService.mSupportsFreeformWindowManagement) {
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
-        }
-
-        return windowingMode;
+        return WINDOWING_MODE_FULLSCREEN;
     }
 
-    private int resolveActivityType(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
+    int resolveActivityType(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
             @Nullable TaskRecord task) {
-        // First preference if the activity type in the activity options if set.
-        int activityType = (options != null)
-                ? options.getLaunchActivityType() : ACTIVITY_TYPE_UNDEFINED;
-
+        // Preference is given to the activity type for the activity then the task since the type
+        // once set shouldn't change.
+        int activityType = r != null ? r.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
+        if (activityType == ACTIVITY_TYPE_UNDEFINED && task != null) {
+            activityType = task.getActivityType();
+        }
         if (activityType != ACTIVITY_TYPE_UNDEFINED) {
             return activityType;
         }
-
-        // If activity type is unset, then next preference is the task, then the activity record.
-        if (task != null) {
-            activityType = task.getActivityType();
-        }
-        if (activityType == ACTIVITY_TYPE_UNDEFINED && r != null) {
-            activityType = r.getActivityType();
-        }
-        return activityType;
+        return options != null ? options.getLaunchActivityType() : ACTIVITY_TYPE_UNDEFINED;
     }
 
-    int getLaunchStackId(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable TaskRecord candidateTask) {
-        return getLaunchStackId(r, options, candidateTask, INVALID_DISPLAY);
+    <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
+            @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
+        return getLaunchStack(r, options, candidateTask, onTop, INVALID_DISPLAY);
     }
 
     /**
@@ -2248,8 +2261,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
-    int getLaunchStackId(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable TaskRecord candidateTask, int candidateDisplayId) {
+    <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
+            @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
+            int candidateDisplayId) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         //Rect bounds = null;
@@ -2271,13 +2285,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, options);
             options.setLaunchTaskId(taskId);
             if (task != null) {
-                return task.getStack().mStackId;
+                return task.getStack();
             }
         }
 
-        final int windowingMode = resolveWindowingMode(r, options, candidateTask);
         final int activityType = resolveActivityType(r, options, candidateTask);
-        ActivityStack stack = null;
+        int windowingMode = resolveWindowingMode(r, options, candidateTask, activityType);
+        T stack = null;
 
         // Next preference for stack goes to the display Id set in the activity options or the
         // candidate display.
@@ -2287,18 +2301,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (displayId != INVALID_DISPLAY) {
             if (r != null) {
                 // TODO: This should also take in the windowing mode and activity type into account.
-                stack = getValidLaunchStackOnDisplay(displayId, r);
+                stack = (T) getValidLaunchStackOnDisplay(displayId, r);
                 if (stack != null) {
-                    return stack.mStackId;
+                    return stack;
                 }
             }
             final ActivityDisplay display = getActivityDisplayOrCreateLocked(displayId);
             if (display != null) {
                 for (int i = display.mStacks.size() - 1; i >= 0; --i) {
-                    stack = display.mStacks.get(i);
-                    if (stack.getWindowingMode() == windowingMode
-                            && stack.getActivityType() == activityType) {
-                        return stack.mStackId;
+                    stack = (T) display.mStacks.get(i);
+                    if (stack.isCompatible(windowingMode, activityType)) {
+                        return stack;
                     }
                 }
                 // TODO: We should create the stack we want on the display at this point.
@@ -2307,6 +2320,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Give preference to the stack and display of the input task and activity if they match the
         // mode we want to launch into.
+        stack = null;
+        ActivityDisplay display = null;
         if (candidateTask != null) {
             stack = candidateTask.getStack();
         }
@@ -2314,40 +2329,33 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             stack = r.getStack();
         }
         if (stack != null) {
-            if (stack.getWindowingMode() == windowingMode
-                    && stack.getActivityType() == activityType) {
-                return stack.mStackId;
+            if (stack.isCompatible(windowingMode, activityType)) {
+                return stack;
             }
-            ActivityDisplay display = stack.getDisplay();
-
-            if (display != null) {
-                for (int i = display.mStacks.size() - 1; i >= 0; --i) {
-                    stack = display.mStacks.get(i);
-                    if (stack.getWindowingMode() == windowingMode
-                            && stack.getActivityType() == activityType) {
-                        return stack.mStackId;
-                    }
-                }
-            }
+            display = stack.getDisplay();
         }
 
-        // Give preference to the type of activity we are trying to launch followed by the windowing
-        // mode.
-        int stackId = getStackIdForActivityType(activityType);
-        if (stackId != INVALID_STACK_ID) {
-            return stackId;
+        if (display == null
+                // TODO: Can be removed once we figure-out how non-standard types should launch
+                // outside the default display.
+                || (activityType != ACTIVITY_TYPE_STANDARD
+                && activityType != ACTIVITY_TYPE_UNDEFINED)) {
+            display = getDefaultDisplay();
         }
-        stackId = getStackIdForWindowingMode(windowingMode);
-        if (stackId != INVALID_STACK_ID) {
-            return stackId;
+
+        stack = display.getOrCreateStack(windowingMode, activityType, onTop);
+        if (stack != null) {
+            return stack;
         }
 
         // Whatever...return some default for now.
         if (candidateTask != null && candidateTask.mBounds != null
                 && mService.mSupportsFreeformWindowManagement) {
-            return FREEFORM_WORKSPACE_STACK_ID;
+            windowingMode = WINDOWING_MODE_FREEFORM;
+        } else {
+            windowingMode = WINDOWING_MODE_FULLSCREEN;
         }
-        return FULLSCREEN_WORKSPACE_STACK_ID;
+        return display.getOrCreateStack(windowingMode, activityType, onTop);
     }
 
     /**
@@ -2364,6 +2372,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     "Display with displayId=" + displayId + " not found.");
         }
 
+        if (!r.canBeLaunchedOnDisplay(displayId)) {
+            return null;
+        }
+
         // Return the topmost valid stack on the display.
         for (int i = activityDisplay.mStacks.size() - 1; i >= 0; --i) {
             final ActivityStack stack = activityDisplay.mStacks.get(i);
@@ -2373,11 +2385,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // If there is no valid stack on the external display - check if new dynamic stack will do.
-        if (displayId != Display.DEFAULT_DISPLAY) {
-            final int newDynamicStackId = getNextStackId();
-            if (isValidLaunchStackId(newDynamicStackId, displayId, r)) {
-                return createStackOnDisplay(newDynamicStackId, displayId, true /*onTop*/);
-            }
+        if (displayId != DEFAULT_DISPLAY) {
+            return activityDisplay.createStack(
+                    r.getWindowingMode(), r.getActivityType(), true /*onTop*/);
         }
 
         Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
@@ -2394,7 +2404,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             case FREEFORM_WORKSPACE_STACK_ID:
                 return r.supportsFreeform();
             case DOCKED_STACK_ID:
-                return r.supportsSplitScreen();
+                return r.supportsSplitScreenWindowingMode();
             case PINNED_STACK_ID:
                 return r.supportsPictureInPicture();
             case RECENTS_STACK_ID:
@@ -2440,7 +2450,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final List<ActivityStack> stacks = getActivityDisplayOrCreateLocked(displayId).mStacks;
             for (int j = stacks.size() - 1; j >= 0; --j) {
                 final ActivityStack stack = stacks.get(j);
-                if (stack != currentFocus && stack.isFocusable() && stack.shouldBeVisible(null)) {
+                if (stack != currentFocus && stack.isFocusable()
+                        && stack.shouldBeVisible(null)) {
                     return stack;
                 }
             }
@@ -2509,7 +2520,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
-        final boolean splitScreenActive = getStack(DOCKED_STACK_ID) != null;
+        final boolean splitScreenActive = getDefaultDisplay().hasSplitScreenStack();
         if (!allowResizeInDockedMode
                 && !stack.getWindowConfiguration().tasksAreFloating() && splitScreenActive) {
             // If the docked stack exists, don't resize non-floating stacks independently of the
@@ -2520,7 +2531,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stackId);
         mWindowManager.deferSurfaceLayout();
         try {
-            if (stack.supportSplitScreenWindowingMode()) {
+            if (stack.supportsSplitScreenWindowingMode()) {
                 if (bounds == null && stack.inSplitScreenWindowingMode()) {
                     // null bounds = fullscreen windowing mode...at least for now.
                     stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -2567,25 +2578,31 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mResizingTasksDuringAnimation.clear();
     }
 
+    /**
+     * TODO: This should just change the windowing mode and resize vs. actually moving task around.
+     * Can do that once we are no longer using static stack ids. Specially when
+     * {@link ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} is removed.
+     */
     private void moveTasksToFullscreenStackInSurfaceTransaction(ActivityStack fromStack,
-            boolean onTop) {
+            int toDisplayId, boolean onTop) {
 
         mWindowManager.deferSurfaceLayout();
         try {
-            final int fromStackId = fromStack.mStackId;
-            if (fromStackId == DOCKED_STACK_ID) {
+            final int windowingMode = fromStack.getWindowingMode();
+            final boolean inPinnedWindowingMode = windowingMode == WINDOWING_MODE_PINNED;
+            final ActivityDisplay toDisplay = getActivityDisplay(toDisplayId);
+
+            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 // We are moving all tasks from the docked stack to the fullscreen stack,
                 // which is dismissing the docked stack, so resize all other stacks to
                 // fullscreen here already so we don't end up with resize trashing.
-                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    final ActivityStack otherStack = getStack(i);
-                    if (otherStack == null) {
-                        continue;
-                    }
+                final ArrayList<ActivityStack> displayStacks = toDisplay.mStacks;
+                for (int i = displayStacks.size() - 1; i >= 0; --i) {
+                    final ActivityStack otherStack = displayStacks.get(i);
                     if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
-                    resizeStackLocked(i, null, null, null, PRESERVE_WINDOWS,
+                    resizeStackLocked(otherStack.mStackId, null, null, null, PRESERVE_WINDOWS,
                             true /* allowResizeInDockedMode */, DEFER_RESUME);
                 }
 
@@ -2594,35 +2611,35 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // resize when we remove task from it below and it is detached from the
                 // display because it no longer contains any tasks.
                 mAllowDockedStackResize = false;
-            } else if (fromStackId == PINNED_STACK_ID) {
-                if (onTop) {
-                    // Log if we are expanding the PiP to fullscreen
-                    MetricsLogger.action(mService.mContext,
-                            ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
-                }
+            } else if (inPinnedWindowingMode && onTop) {
+                // Log if we are expanding the PiP to fullscreen
+                MetricsLogger.action(mService.mContext,
+                        ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
             }
-            ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
-            final boolean isFullscreenStackVisible = fullscreenStack != null
-                    && fullscreenStack.shouldBeVisible(null);
+
             // If we are moving from the pinned stack, then the animation takes care of updating
             // the picture-in-picture mode.
-            final boolean schedulePictureInPictureModeChange = (fromStackId == PINNED_STACK_ID);
+            final boolean schedulePictureInPictureModeChange = inPinnedWindowingMode;
             final ArrayList<TaskRecord> tasks = fromStack.getAllTasks();
             final int size = tasks.size();
+            final ActivityStack fullscreenStack = toDisplay.getOrCreateStack(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, onTop);
+
             if (onTop) {
+                final int returnToType =
+                        toDisplay.getTopVisibleStackActivityType(WINDOWING_MODE_PINNED);
                 for (int i = 0; i < size; i++) {
                     final TaskRecord task = tasks.get(i);
                     final boolean isTopTask = i == (size - 1);
-                    if (fromStackId == PINNED_STACK_ID) {
+                    if (inPinnedWindowingMode) {
                         // Update the return-to to reflect where the pinned stack task was moved
                         // from so that we retain the stack that was previously visible if the
                         // pinned stack is recreated. See moveActivityToPinnedStackLocked().
-                        task.setTaskToReturnTo(isFullscreenStackVisible ?
-                                ACTIVITY_TYPE_STANDARD : ACTIVITY_TYPE_HOME);
+                        task.setTaskToReturnTo(returnToType);
                     }
                     // Defer resume until all the tasks have been moved to the fullscreen stack
-                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
-                            REPARENT_MOVE_STACK_TO_FRONT, isTopTask /* animate */, DEFER_RESUME,
+                    task.reparent(fullscreenStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
+                            isTopTask /* animate */, DEFER_RESUME,
                             schedulePictureInPictureModeChange,
                             "moveTasksToFullscreenStack - onTop");
                 }
@@ -2632,7 +2649,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // Position the tasks in the fullscreen stack in order at the bottom of the
                     // stack. Also defer resume until all the tasks have been moved to the
                     // fullscreen stack.
-                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, i /* position */,
+                    task.reparent(fullscreenStack, i /* position */,
                             REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME,
                             schedulePictureInPictureModeChange,
                             "moveTasksToFullscreenStack - NOT_onTop");
@@ -2648,8 +2665,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void moveTasksToFullscreenStackLocked(ActivityStack fromStack, boolean onTop) {
-        mWindowManager.inSurfaceTransaction(
-                () -> moveTasksToFullscreenStackInSurfaceTransaction(fromStack, onTop));
+        moveTasksToFullscreenStackLocked(fromStack, DEFAULT_DISPLAY, onTop);
+    }
+
+    void moveTasksToFullscreenStackLocked(ActivityStack fromStack, int toDisplayId, boolean onTop) {
+        mWindowManager.inSurfaceTransaction(() ->
+                moveTasksToFullscreenStackInSurfaceTransaction(fromStack, toDisplayId, onTop));
     }
 
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
@@ -2660,7 +2681,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 false /* deferResume */);
     }
 
-    void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
+    private void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
             boolean preserveWindows, boolean deferResume) {
 
@@ -2669,7 +2690,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return;
         }
 
-        final ActivityStack stack = getStack(DOCKED_STACK_ID);
+        final ActivityStack stack = getDefaultDisplay().getStack(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
         if (stack == null) {
             Slog.w(TAG, "resizeDockedStackLocked: docked stack not found");
             return;
@@ -2698,13 +2720,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
+                final ArrayList<ActivityStack> stacks = getStacksOnDefaultDisplay();
                 final Rect otherTaskRect = new Rect();
-                for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (i == DOCKED_STACK_ID) {
+                for (int i = stacks.size() - 1; i >= 0; --i) {
+                    final ActivityStack current = stacks.get(i);
+                    if (current.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                         continue;
                     }
-                    final ActivityStack current = getStack(i);
-                    if (current == null || !current.supportSplitScreenWindowingMode()) {
+                    if (!current.supportsSplitScreenWindowingMode()) {
                         continue;
                     }
                     // Need to set windowing mode here before we try to get the dock bounds.
@@ -2714,7 +2737,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             tempRect /* outStackBounds */,
                             otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
 
-                    resizeStackLocked(i, !tempRect.isEmpty() ? tempRect : null,
+                    resizeStackLocked(current.mStackId, !tempRect.isEmpty() ? tempRect : null,
                             !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
                             tempOtherTaskInsetBounds, preserveWindows,
                             true /* allowResizeInDockedMode */, deferResume);
@@ -2731,7 +2754,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
-        final PinnedActivityStack stack = getStack(PINNED_STACK_ID);
+        // TODO(multi-display): Pinned stack display should be passed in.
+        final PinnedActivityStack stack = getDefaultDisplay().getStack(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
         if (stack == null) {
             Slog.w(TAG, "resizePinnedStackLocked: pinned stack not found");
             return;
@@ -2769,32 +2794,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {
-        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
-        if (activityDisplay == null) {
-            return null;
-        }
-        return createStack(stackId, activityDisplay, onTop);
-
-    }
-
-    ActivityStack createStack(int stackId, ActivityDisplay display, boolean onTop) {
-        switch (stackId) {
-            case PINNED_STACK_ID:
-                return new PinnedActivityStack(display, stackId, this, onTop);
-            default:
-                return new ActivityStack(display, stackId, this, onTop);
-        }
-    }
-
-    void removeStackInSurfaceTransaction(int stackId) {
+    private void removeStackInSurfaceTransaction(int stackId) {
         final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             return;
         }
 
         final ArrayList<TaskRecord> tasks = stack.getAllTasks();
-        if (stack.getStackId() == PINNED_STACK_ID) {
+        if (stack.getWindowingMode() == WINDOWING_MODE_PINNED) {
             /**
              * Workaround: Force-stop all the activities in the pinned stack before we reparent them
              * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
@@ -2827,8 +2834,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * instead moved back onto the fullscreen stack.
      */
     void removeStackLocked(int stackId) {
-        mWindowManager.inSurfaceTransaction(
-                () -> removeStackInSurfaceTransaction(stackId));
+        mWindowManager.inSurfaceTransaction(() -> removeStackInSurfaceTransaction(stackId));
+    }
+
+    /** Removes all stacks in the input windowing mode from the system */
+    void removeStacksInWindowingMode(int windowingMode) {
+        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
+            mActivityDisplays.valueAt(i).removeStacksInWindowingMode(windowingMode);
+        }
     }
 
     /**
@@ -2966,11 +2979,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @return true if the task has been restored successfully.
      */
     boolean restoreRecentTaskLocked(TaskRecord task, ActivityOptions aOptions) {
-        final int stackId = getLaunchStackId(null, aOptions, task);
+        final ActivityStack stack = getLaunchStack(null, aOptions, task, !ON_TOP);
         final ActivityStack currentStack = task.getStack();
         if (currentStack != null) {
             // Task has already been restored once. See if we need to do anything more
-            if (currentStack.mStackId == stackId) {
+            if (currentStack == stack) {
                 // Nothing else to do since it is already restored in the right stack.
                 return true;
             }
@@ -2979,11 +2992,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             currentStack.removeTask(task, "restoreRecentTaskLocked", REMOVE_TASK_MODE_MOVING);
         }
 
-        final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, !ON_TOP);
-
-        stack.addTask(task, false /* toTop */, "restoreRecentTask");
+        stack.addTask(task, !ON_TOP, "restoreRecentTask");
         // TODO: move call for creation here and other place into Stack.addTask()
-        task.createWindowContainer(false /* toTop */, true /* showForAllUsers */);
+        task.createWindowContainer(!ON_TOP, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -3030,8 +3041,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Returns the reparent target stack, creating the stack if necessary.  This call also enforces
      * the various checks on tasks that are going to be reparented from one stack to another.
      */
-    ActivityStack getReparentTargetStack(TaskRecord task, int stackId, boolean toTop) {
+    ActivityStack getReparentTargetStack(TaskRecord task, ActivityStack stack, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
+        final int stackId = stack.mStackId;
+        final boolean inMultiWindowMode = stack.inMultiWindowMode();
 
         // Check that we aren't reparenting to the same stack that the task is already in
         if (prevStack != null && prevStack.mStackId == stackId) {
@@ -3042,22 +3055,22 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Ensure that we aren't trying to move into a multi-window stack without multi-window
         // support
-        if (StackId.isMultiWindowStack(stackId) && !mService.mSupportsMultiWindow) {
+        if (inMultiWindowMode && !mService.mSupportsMultiWindow) {
             throw new IllegalArgumentException("Device doesn't support multi-window, can not"
-                    + " reparent task=" + task + " to stackId=" + stackId);
+                    + " reparent task=" + task + " to stack=" + stack);
         }
 
         // Ensure that we're not moving a task to a dynamic stack if device doesn't support
         // multi-display.
-        // TODO(multi-display): Support non-dynamic stacks on secondary displays.
-        if (StackId.isDynamicStack(stackId) && !mService.mSupportsMultiDisplay) {
+        if (stack.mDisplayId != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
 
         // Ensure that we aren't trying to move into a freeform stack without freeform
         // support
-        if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
+        if (stack.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                && !mService.mSupportsFreeformWindowManagement) {
             throw new IllegalArgumentException("Device doesn't support freeform, can not reparent"
                     + " task=" + task);
         }
@@ -3066,25 +3079,25 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // used for split-screen mode and will cause things like the docked divider to show up. We
         // instead leave the task in its current stack or move it to the fullscreen stack if it
         // isn't currently in a stack.
-        if (stackId == DOCKED_STACK_ID && !task.isResizeable()) {
-            stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
+        if (inMultiWindowMode && !task.isResizeable()) {
             Slog.w(TAG, "Can not move unresizeable task=" + task + " to docked stack."
                     + " Moving to stackId=" + stackId + " instead.");
+            // Temporarily disable resizeablility of the task as we don't want it to be resized if,
+            // for example, a docked stack is created which will lead to the stack we are moving
+            // from being resized and and its resizeable tasks being resized.
+            try {
+                task.mTemporarilyUnresizable = true;
+                stack = stack.getDisplay().createStack(
+                        WINDOWING_MODE_FULLSCREEN, stack.getActivityType(), toTop);
+            } finally {
+                task.mTemporarilyUnresizable = false;
+            }
         }
-
-        // Temporarily disable resizeablility of the task as we don't want it to be resized if, for
-        // example, a docked stack is created which will lead to the stack we are moving from being
-        // resized and and its resizeable tasks being resized.
-        try {
-            task.mTemporarilyUnresizable = true;
-            return getStack(stackId, CREATE_IF_NEEDED, toTop);
-        } finally {
-            task.mTemporarilyUnresizable = false;
-        }
+        return stack;
     }
 
     boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect destBounds) {
-        final ActivityStack stack = getStack(stackId, !CREATE_IF_NEEDED, !ON_TOP);
+        final ActivityStack stack = getStack(stackId);
         if (stack == null) {
             throw new IllegalArgumentException(
                     "moveTopStackActivityToPinnedStackLocked: Unknown stackId=" + stackId);
@@ -3114,7 +3127,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         mWindowManager.deferSurfaceLayout();
 
-        PinnedActivityStack stack = getStack(PINNED_STACK_ID);
+        final ActivityDisplay display = r.getStack().getDisplay();
+        PinnedActivityStack stack = display.getPinnedStack();
 
         // This will clear the pinned stack by moving an existing task to the full screen stack,
         // ensuring only one task is present.
@@ -3123,7 +3137,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Need to make sure the pinned stack exist so we can resize it below...
-        stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        stack = display.getOrCreateStack(WINDOWING_MODE_PINNED, r.getActivityType(), ON_TOP);
 
         try {
             final TaskRecord task = r.getTask();
@@ -3147,8 +3161,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     moveHomeStackToFront(reason);
                 }
                 // Defer resume until below, and do not schedule PiP changes until we animate below
-                task.reparent(PINNED_STACK_ID, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
-                        DEFER_RESUME, false /* schedulePictureInPictureModeChange */, reason);
+                task.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE, DEFER_RESUME,
+                        false /* schedulePictureInPictureModeChange */, reason);
             } else {
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
@@ -3163,7 +3177,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
 
                 // Defer resume until below, and do not schedule PiP changes until we animate below
-                newTask.reparent(PINNED_STACK_ID, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
+                newTask.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
                         DEFER_RESUME, false /* schedulePictureInPictureModeChange */, reason);
             }
 
@@ -3617,7 +3631,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     boolean switchUserLocked(int userId, UserState uss) {
         final int focusStackId = mFocusedStack.getStackId();
         // We dismiss the docked stack whenever we switch users.
-        final ActivityStack dockedStack = getStack(DOCKED_STACK_ID);
+        final ActivityStack dockedStack = getDefaultDisplay().getSplitScreenStack();
         if (dockedStack != null) {
             moveTasksToFullscreenStackLocked(dockedStack, mFocusedStack == dockedStack);
         }
@@ -4057,15 +4071,22 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return getActivityDisplayOrCreateLocked(displayId) != null;
     }
 
+    // TODO: Look into consolidating with getActivityDisplayOrCreateLocked()
     ActivityDisplay getActivityDisplay(int displayId) {
         return mActivityDisplays.get(displayId);
+    }
+
+    // TODO(multi-display): Look at all callpoints to make sure they make sense in multi-display.
+    ActivityDisplay getDefaultDisplay() {
+        return mActivityDisplays.get(DEFAULT_DISPLAY);
     }
 
     /**
      * Get an existing instance of {@link ActivityDisplay} or create new if there is a
      * corresponding record in display manager.
      */
-    private ActivityDisplay getActivityDisplayOrCreateLocked(int displayId) {
+    // TODO: Look into consolidating with getActivityDisplay()
+    ActivityDisplay getActivityDisplayOrCreateLocked(int displayId) {
         ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
         if (activityDisplay != null) {
             return activityDisplay;
@@ -4290,7 +4311,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityRecord topActivity = task.getTopActivity();
-        if (launchOnSecondaryDisplayFailed || !task.supportsSplitScreen() || forceNonResizable) {
+        if (launchOnSecondaryDisplayFailed
+                || !task.supportsSplitScreenWindowingMode() || forceNonResizable) {
             if (launchOnSecondaryDisplayFailed) {
                 // Display a warning toast that we tried to put a non-resizeable task on a secondary
                 // display with config different from global config.
@@ -4304,7 +4326,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
-            final ActivityStack dockedStack = getStack(DOCKED_STACK_ID);
+
+            final ActivityStack dockedStack = task.getStack().getDisplay().getSplitScreenStack();
             if (dockedStack != null) {
                 moveTasksToFullscreenStackLocked(dockedStack,
                         actualStackId == dockedStack.getStackId());
@@ -4582,13 +4605,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // Since we don't have an actual source record here, we assume that the currently
             // focused activity was the source.
-            final ActivityStack focusedStack = getFocusedStack();
-            final ActivityRecord sourceRecord = focusedStack != null
-                    ? focusedStack.topActivity() : null;
-            final int stackId = getLaunchStackId(null, activityOptions, task);
+            final ActivityStack stack = getLaunchStack(null, activityOptions, task, ON_TOP);
 
-            if (stackId != INVALID_STACK_ID && task.getStackId() != stackId) {
-                task.reparent(stackId, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
+            if (stack != null && task.getStack() != stack) {
+                task.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                         "startActivityFromRecents");
             }
 
@@ -4613,10 +4633,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
 
                 mService.mActivityStarter.postStartActivityProcessing(task.getTopActivity(),
-                        ActivityManager.START_TASK_TO_FRONT,
-                        sourceRecord != null
-                                ? sourceRecord.getTask().getStackId() : INVALID_STACK_ID,
-                        sourceRecord, task.getStack());
+                        ActivityManager.START_TASK_TO_FRONT, task.getStack());
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingUid = task.mCallingUid;

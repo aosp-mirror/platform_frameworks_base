@@ -675,7 +675,7 @@ public class ActivityManager {
 
         /** First static stack ID.
          * @hide */
-        public static final int FIRST_STATIC_STACK_ID = 0;
+        private  static final int FIRST_STATIC_STACK_ID = 0;
 
         /** Home activity stack ID. */
         public static final int HOME_STACK_ID = FIRST_STATIC_STACK_ID;
@@ -700,7 +700,7 @@ public class ActivityManager {
 
         /** Last static stack stack ID.
          * @hide */
-        public static final int LAST_STATIC_STACK_ID = ASSISTANT_STACK_ID;
+        private static final int LAST_STATIC_STACK_ID = ASSISTANT_STACK_ID;
 
         /** Start of ID range used by stacks that are created dynamically.
          * @hide */
