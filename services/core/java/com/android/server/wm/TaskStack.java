@@ -149,9 +149,10 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     Rect mPreAnimationBounds = new Rect();
 
-    TaskStack(WindowManagerService service, int stackId) {
+    TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
         mService = service;
         mStackId = stackId;
+        setController(controller);
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);

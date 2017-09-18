@@ -78,7 +78,7 @@ public class WindowTestUtils {
      */
     public static class TestTaskStack extends TaskStack {
         TestTaskStack(WindowManagerService service, int stackId) {
-            super(service, stackId);
+            super(service, stackId, null);
         }
 
         @Override

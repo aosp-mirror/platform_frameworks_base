@@ -102,7 +102,7 @@ public class WindowFrameTests extends WindowTestsBase {
         sWm.mSystemDecorLayer = 10000;
 
         mWindowToken = new WindowTestUtils.TestAppWindowToken(sWm.getDefaultDisplayContentLocked());
-        mStubStack = new TaskStack(sWm, 0);
+        mStubStack = new TaskStack(sWm, 0, null);
     }
 
     public void assertRect(Rect rect, int left, int top, int right, int bottom) {

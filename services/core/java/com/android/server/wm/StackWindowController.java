@@ -18,8 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
-import android.app.ActivityManager.StackId;
-import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -76,8 +74,7 @@ public class StackWindowController
                         + " to unknown displayId=" + displayId);
             }
 
-            final TaskStack stack = dc.addStackToDisplay(stackId, onTop);
-            stack.setController(this);
+            dc.addStackToDisplay(stackId, onTop, this);
             getRawBounds(outBounds);
         }
     }
