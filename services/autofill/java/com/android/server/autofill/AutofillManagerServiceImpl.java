@@ -146,8 +146,9 @@ final class AutofillManagerServiceImpl {
         updateLocked(disabled);
     }
 
+    @Nullable
     CharSequence getServiceName() {
-        final String packageName = getPackageName();
+        final String packageName = getServicePackageName();
         if (packageName == null) {
             return null;
         }
@@ -162,7 +163,8 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    String getPackageName() {
+    @Nullable
+    String getServicePackageName() {
         final ComponentName serviceComponent = getServiceComponentName();
         if (serviceComponent != null) {
             return serviceComponent.getPackageName();

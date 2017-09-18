@@ -650,7 +650,7 @@ public final class AutofillManagerService extends SystemService {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service == null) return false;
-                return Objects.equals(packageName, service.getPackageName());
+                return Objects.equals(packageName, service.getServicePackageName());
             }
         }
 
