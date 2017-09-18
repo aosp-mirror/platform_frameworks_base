@@ -390,11 +390,9 @@ public class PerformBackupTask implements BackupRestoreTask {
         // to sanity-check here.  This also gives us the classname of the
         // package's backup agent.
         try {
-            mCurrentPackage = backupManagerService.getPackageManager().getPackageInfo(
-                    request.packageName,
-                    PackageManager.GET_SIGNATURES);
-            if (!AppBackupUtils.appIsEligibleForBackup(
-                    mCurrentPackage.applicationInfo)) {
+            PackageManager pm = backupManagerService.getPackageManager();
+            mCurrentPackage = pm.getPackageInfo(request.packageName, PackageManager.GET_SIGNATURES);
+            if (!AppBackupUtils.appIsEligibleForBackup(mCurrentPackage.applicationInfo, pm)) {
                 // The manifest has changed but we had a stale backup request pending.
                 // This won't happen again because the app won't be requesting further
                 // backups.
