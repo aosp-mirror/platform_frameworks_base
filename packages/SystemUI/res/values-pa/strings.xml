@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ਸੂਚੀ ਵਿੱਚੋਂ ਹਟਾਓ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ਤੁਹਾਡੀਆਂ ਹਾਲੀਆ ਸਕ੍ਰੀਨਾਂ ਇੱਥੇ ਪ੍ਰਗਟ ਹੋਣਗੀਆਂ"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਾਂ ਰੱਦ ਕਰੋ"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਾਂ ਨੂੰ ਖਾਰਜ ਕਰੋ"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="one">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
       <item quantity="other">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
@@ -175,7 +175,7 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_work_mode" msgid="2478631941714607225">"ਕੰਮ ਮੋਡ"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਰੱਦ ਕਰੋ।"</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਖਾਰਜ ਕਰੋ।"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ਰੱਦ ਕੀਤਾ।"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"ਸਾਰੀਆਂ ਹਾਲੀਆ ਐਪਲੀਕੇਸ਼ਨਾਂ ਰੱਦ ਕੀਤੀਆਂ।"</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> ਐਪਲੀਕੇਸ਼ਨਾਂ ਜਾਣਕਾਰੀ ਖੋਲ੍ਹੋ।"</string>
@@ -502,13 +502,13 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। ਥਰਥਰਾਹਟ \'ਤੇ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਦਿਖਾਏ ਗਏ ਹਨ। ਖਾਰਜ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਅਵਾਜ਼ ਕੰਟਰੋਲ ਦਿਖਾਏ ਗਏ ਹਨ। ਖਾਰਜ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਲੁਕਾਏ ਗਏ ਹਨ"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI ਟਿਊਨਰ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="status_bar" msgid="4877645476959324760">"ਸਥਿਤੀ ਬਾਰ"</string>
+    <string name="status_bar" msgid="4877645476959324760">"ਸਥਿਤੀ ਪੱਟੀ"</string>
     <string name="overview" msgid="4018602013895926956">"ਰੂਪ-ਰੇਖਾ"</string>
     <string name="demo_mode" msgid="2532177350215638026">"ਸਿਸਟਮ UI ਡੈਮੋ ਮੋਡ"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"ਡੈਮੋ ਮੋਡ ਚਾਲੂ ਕਰੋ"</string>
@@ -535,7 +535,7 @@
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਾਂ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਵਰਤੋਂ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ਐਪਲੀਕੇਸ਼ਨ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਤੇ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ"</string>
-    <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਬਾਰ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਪੱਟੀ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੁਬਾਰਾ ਕ੍ਰਮ ਦਿਓ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਮਕ ਦਿਖਾਓ"</string>
     <string name="experimental" msgid="6198182315536726162">"ਪ੍ਰਯੋਗਾਤਮਿਕ"</string>
@@ -549,7 +549,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲ"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ਚਾਲੂ"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ਬੰਦ"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨਾਲ, ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਦੀਆਂ ਸੂਚਨਾਵਾਂ ਲਈ ਮਹੱਤਤਾ ਪੱਧਰ ਨੂੰ 0 ਤੋਂ 5 ਤੱਕ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ। \n\n"<b>"ਪੱਧਰ 5"</b>" \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਦੀ ਆਗਿਆ ਦਿਓ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 4"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 3"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 2"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਵੀ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n\n"<b>"ਪੱਧਰ 1"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n- ਲੌਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 0"</b>" \n- ਐਪ ਤੋਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬਲਾਕ ਕਰੋ"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨਾਲ, ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਦੀਆਂ ਸੂਚਨਾਵਾਂ ਲਈ ਮਹੱਤਤਾ ਪੱਧਰ ਨੂੰ 0 ਤੋਂ 5 ਤੱਕ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ। \n\n"<b>"ਪੱਧਰ 5"</b>" \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਦੀ ਆਗਿਆ ਦਿਓ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 4"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 3"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 2"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਵੀ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n\n"<b>"ਪੱਧਰ 1"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n- ਲਾਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 0"</b>" \n- ਐਪ ਤੋਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬਲਾਕ ਕਰੋ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_channel_disabled" msgid="2139193533791840539">"ਤੁਹਾਨੂੰ ਹੁਣ ਇਹ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋਣਗੀਆਂ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ਸੂਚਨਾ ਸ਼੍ਰੇਣੀਆਂ"</string>
@@ -605,7 +605,7 @@
     <string name="keyboard_key_media_next" msgid="1894394911630345607">"ਅੱਗੇ"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"ਪਿਛਲਾ"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Rewind"</string>
-    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Fast Forward"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"ਤੇਜ਼ੀ ਨਾਲ ਅੱਗੇ ਭੇਜੋ"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"ਮਿਟਾਓ"</string>
