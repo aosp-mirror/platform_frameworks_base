@@ -1516,7 +1516,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         long token = mAncestralToken;
         synchronized (mQueueLock) {
-            if (mProcessedPackagesJournal.hasBeenProcessed(packageName)) {
+            if (mCurrentToken != 0 && mProcessedPackagesJournal.hasBeenProcessed(packageName)) {
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "App in ever-stored, so using current token");
                 }
@@ -2825,8 +2825,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         final long oldId = Binder.clearCallingIdentity();
         try {
             String prevTransport = mTransportManager.selectTransport(transport);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.BACKUP_TRANSPORT, transport);
+            updateStateForTransport(transport);
             Slog.v(TAG, "selectBackupTransport() set " + mTransportManager.getCurrentTransportName()
                     + " returning " + prevTransport);
             return prevTransport;
@@ -2851,9 +2850,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     @Override
                     public void onSuccess(String transportName) {
                         mTransportManager.selectTransport(transportName);
-                        Settings.Secure.putString(mContext.getContentResolver(),
-                                Settings.Secure.BACKUP_TRANSPORT,
-                                mTransportManager.getCurrentTransportName());
+                        updateStateForTransport(mTransportManager.getCurrentTransportName());
                         Slog.v(TAG, "Transport successfully selected: "
                                 + transport.flattenToShortString());
                         try {
@@ -2876,6 +2873,28 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 });
 
         Binder.restoreCallingIdentity(oldId);
+    }
+
+    private void updateStateForTransport(String newTransportName) {
+        // Publish the name change
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_TRANSPORT, newTransportName);
+
+        // And update our current-dataset bookkeeping
+        IBackupTransport transport = mTransportManager.getTransportBinder(newTransportName);
+        if (transport != null) {
+            try {
+                mCurrentToken = transport.getCurrentRestoreSet();
+            } catch (Exception e) {
+                // Oops.  We can't know the current dataset token, so reset and figure it out
+                // when we do the next k/v backup operation on this transport.
+                mCurrentToken = 0;
+            }
+        } else {
+            // The named transport isn't bound at this particular moment, so we can't
+            // know yet what its current dataset token is.  Reset as above.
+            mCurrentToken = 0;
+        }
     }
 
     // Supply the configuration Intent for the given transport.  If the name is not one
