@@ -259,10 +259,10 @@
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ಪರದೆಯನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋರ್ಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ಪರದೆಯು ಈಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ಪರದೆಯು ಇದೀಗ ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ಪರದೆಯು ಇದೀಗ ಪೋರ್ಟ್ರೇಟ್ ಒರಿಯಂಟೇಶನ್‌ನಲ್ಲಿ ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ಇಥರ್ನೆಟ್"</string>
@@ -279,7 +279,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> ಮೋಡ್"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ತಿರುಗುವಿಕೆ ಲಾಕ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋಟ್ರೇಟ್"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋರ್ಟ್ರೇಟ್"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"ಸ್ಥಳ"</string>
@@ -494,7 +494,7 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ಡ್ಯುಯಲ್‌ ಬಹು ಟೋನ್ ಆವರ್ತನೆ"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. ವೈಬ್ರೇಟ್ ಮಾಡಲು ಹೊಂದಿಸುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ಬದಲಿಸಿ"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಮರೆಮಾಚುತ್ತಿರುವ ಕಾರಣ, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
 </resources>

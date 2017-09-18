@@ -298,7 +298,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Mati"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi Aktif"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Tidak ada jaringan Wi-Fi yang tersedia"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmisi"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Melakukan transmisi"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Perangkat tanpa nama"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Siap melakukan transmisi"</string>
@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalkan"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Tutup"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Seret ke bawah untuk menutup"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu gambar dalam gambar"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> adalah gambar-dalam-gambar"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menu picture in picture"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> adalah picture-in-picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>
     <string name="pip_play" msgid="1417176722760265888">"Putar"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Jeda"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ganti"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikasi yang sedang berjalan di latar belakang"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tap untuk melihat detail penggunaan baterai dan data"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Karena sebuah aplikasi menghalangi permintaan izin, Setelan tidak dapat memverifikasi respons Anda."</string>
 </resources>

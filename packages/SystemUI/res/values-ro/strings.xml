@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"UI sistem"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ștergeți"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminați din listă"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informații despre aplicație"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info aplicație"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ecranele dvs. recente apar aici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Renunțați la aplicațiile recente"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -61,7 +61,7 @@
     <string name="label_view" msgid="6304565553218192990">"Afișați"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Utilizați în mod prestabilit pt. acest dispoz. USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utiliz. în mod prestabilit pt. acest accesoriu USB"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteți depanarea USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteți remedierea erorilor prin USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Amprenta digitală din cheia RSA a computerului este:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permiteți întotdeauna de pe acest computer"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Remedierea erorilor prin USB nu este permisă"</string>
@@ -387,7 +387,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Adăugați un utilizator"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Utilizator nou"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Invitat"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Adăugați un oaspete"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Adăugați un invitat"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Eliminați invitatul"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ștergeți invitatul?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
@@ -724,7 +724,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizați"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Închideți"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trageți în jos pentru a închide"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul imagine în imagine"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul picture-in-picture"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> este în modul picture-in-picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
     <string name="pip_play" msgid="1417176722760265888">"Redați"</string>
@@ -771,4 +771,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Înlocuiți"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicațiile rulează în fundal"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Atingeți pentru mai multe detalii privind bateria și utilizarea datelor"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Deoarece o aplicație acoperă o solicitare de permisiune, Setările nu vă pot verifica răspunsul."</string>
 </resources>

@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ย่อเล็กสุด"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ปิด"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ลากลงเพื่อปิด"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"เมนูการแสดงผลหลายแหล่งพร้อมกัน"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงผลหลายแหล่งพร้อมกัน"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"เมนูการแสดงภาพซ้อนภาพ"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
     <string name="pip_play" msgid="1417176722760265888">"เล่น"</string>
     <string name="pip_pause" msgid="8881063404466476571">"หยุดชั่วคราว"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"แทนที่"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"แอปที่กำลังทำงานในเบื้องหลัง"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"แตะเพื่อดูรายละเอียดเกี่ยวกับแบตเตอรี่และปริมาณการใช้อินเทอร์เน็ต"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"เนื่องจากแอปหนึ่งได้บดบังคำขอสิทธิ์ ระบบจึงไม่สามารถยืนยันคำตอบของคุณสำหรับการตั้งค่าได้"</string>
 </resources>

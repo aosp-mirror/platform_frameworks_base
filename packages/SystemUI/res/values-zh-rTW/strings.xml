@@ -608,7 +608,7 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"數字鍵 <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"系統"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"主畫面"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"近期活動"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"最近"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"返回"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"通知"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"鍵盤快速鍵"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"取代"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"在背景執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"輕觸即可查看電池和數據用量詳情"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"由於某個應用程式覆蓋了權限要求畫面，因此「設定」應用程式無法驗證你的回應。"</string>
 </resources>

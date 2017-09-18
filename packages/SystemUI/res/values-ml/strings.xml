@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ബാറ്ററി കുറവാണ്"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു. ബാറ്ററി സേവർ ഓണാണ്."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു. ബാറ്ററി ലാഭിക്കൽ ഓണാണ്."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണയ്ക്കുന്നില്ല.\nഅതിന്റെ അനുബന്ധ ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണച്ചില്ല."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"വിതരണം ചെയ്‌ത ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"ക്രമീകരണം"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ബാറ്ററി സേവർ ഓണാക്കണോ?"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കണോ?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ഓൺ ചെയ്യുക"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി സേവർ ഓണാക്കുക"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണം"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
@@ -84,7 +84,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"ഹോം"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"മെനു"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"ഉപയോഗസഹായി"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"കാഴ്ച"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"അവലോകനം"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"തിരയൽ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ക്യാമറ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ഫോണ്‍"</string>
@@ -186,7 +186,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ദ്രുത ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ലോക്ക് സ്‌ക്രീൻ."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ക്രമീകരണം"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"കാഴ്ച."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"അവലോകനം."</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"ഔദ്യോഗിക ലോക്ക് സ്ക്രീൻ"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"അടയ്‌ക്കുക"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -293,7 +293,7 @@
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ഉപയോക്താവ്"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"പുതിയ ഉപയോക്താവ്"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"വൈഫൈ"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"കണ‌ക്റ്റുചെയ്‌തിട്ടില്ല"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"കണ‌ക്റ്റ് ചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"നെറ്റ്‌വർക്ക് ഒന്നുമില്ല"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"വൈഫൈ ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"വൈഫൈ ഓണാണ്"</string>
@@ -403,9 +403,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ഉപയോക്താവിനെ ഇല്ലാതാക്കണോ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ഈ ഉപയോക്താവിന്റെ എല്ലാ ആപ്സും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"നീക്കംചെയ്യുക"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"ബാറ്ററി സേവർ ഓണാണ്"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"ബാറ്ററി ലാഭിക്കൽ ഓണാണ്"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ബാറ്ററി സേവർ ഓഫാക്കുക"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"നിങ്ങളുടെ സ്ക്രീനിൽ പ്രദർശിപ്പിച്ചിരിക്കുന്ന എല്ലാ കാര്യങ്ങളും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ക്യാപ്‌ചർ ചെയ്യുന്നത് ആരംഭിക്കും."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"എല്ലാം മായ്‌ക്കുക"</string>
@@ -485,7 +485,7 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"അടുത്ത തവണ നിങ്ങൾ അത് ക്രമീകരണങ്ങളിൽ ഓണാക്കുമ്പോൾ അത് വീണ്ടും ദൃശ്യമാകും."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"മറയ്‌ക്കുക"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
-    <string name="stream_voice_call" msgid="4410002696470423714">"കോള്‍ ചെയ്യുക"</string>
+    <string name="stream_voice_call" msgid="4410002696470423714">"കോള്‍"</string>
     <string name="stream_system" msgid="7493299064422163147">"സിസ്റ്റം"</string>
     <string name="stream_ring" msgid="8213049469184048338">"റിംഗുചെയ്യുക"</string>
     <string name="stream_music" msgid="9086982948697544342">"മീഡിയ"</string>
@@ -577,8 +577,8 @@
     <string name="snooze_undo" msgid="6074877317002985129">"പഴയപടിയാക്കുക"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> സമയത്തേക്ക് സ്‌നൂസ് ‌ചെയ്‌തു"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ബാറ്ററി ഉപയോഗം"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി സേവർ ലഭ്യമല്ല"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി സേവർ"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി ലാഭിക്കൽ നടക്കില്ല"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ബട്ടൺ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"ഹോം"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"മാറ്റിസ്ഥാപിക്കുക"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ആപ്പുകൾ പശ്ചാത്തലത്തിൽ റൺ ചെയ്യുന്നു"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ബാറ്ററി, ഡാറ്റ ഉപയോഗം എന്നിവയുടെ വിശദാംശങ്ങളറിയാൻ ടാപ്പുചെയ്യുക"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"അനുമതി അഭ്യർത്ഥനയെ ഒരു ആപ്പ് മറയ്‌ക്കുന്നതിനാൽ, ക്രമീകരണത്തിന് നിങ്ങളുടെ പ്രതികരണം പരിശോധിച്ചുറപ്പിക്കാനാകില്ല."</string>
 </resources>

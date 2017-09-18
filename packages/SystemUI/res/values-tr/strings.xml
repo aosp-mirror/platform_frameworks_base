@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Simge durumuna getir"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Kapat"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Kapatmak için aşağıya sürükleyin"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Ekran içinde ekran menüsü"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>, ekran içinde ekran özelliğini kullanıyor"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Pencere içinde pencere menüsü"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>, pencere içinde pencere özelliğini kullanıyor"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> uygulamasının bu özelliği kullanmasını istemiyorsanız dokunarak ayarları açın ve özelliği kapatın."</string>
     <string name="pip_play" msgid="1417176722760265888">"Oynat"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Duraklat"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Değiştir"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Arka planda çalışan uygulamalar"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Pil ve veri kullanımı ile ilgili ayrıntılar için dokunun"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Bir uygulama bir izin isteğinin anlaşılmasını engellediğinden, Ayarlar, yanıtınızı doğrulayamıyor."</string>
 </resources>

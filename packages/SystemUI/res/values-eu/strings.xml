@@ -242,7 +242,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Kargatzen"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera eten da"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Datu mugikorrak pausatu egin dira"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Datu-konexioa pausatu egin da"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Iritsi zara ezarri zenuen datu-mugara. Datu mugikorrak erabiltzeari utzi diozu.\n\nDatu mugikorrak erabiltzeari berrekiten badiozu, datuen erabileragatiko gastuak izango dituzu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jarraitu erabiltzen"</string>
@@ -300,7 +300,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Igorri"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Igortzeko prest"</string>
@@ -341,9 +341,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Banandu pantaila eta ezarri goian"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Banandu pantaila eta ezarri ezkerrean"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Banandu pantaila eta ezarri eskuinean"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Zatitu pantaila eta ezarri goian"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Zatitu pantaila eta ezarri ezkerrean"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Zatitu pantaila eta ezarri eskuinean"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kargatuta"</string>
@@ -720,8 +720,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizatu"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Itxi"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Baztertzeko, arrastatu behera"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Pantaila txikiaren menua"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"Pantaila txikian dago <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Pantaila txiki gainjarriaren menua"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"Pantaila txiki gainjarrian dago <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="1417176722760265888">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausatu"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ordeztu"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
 </resources>

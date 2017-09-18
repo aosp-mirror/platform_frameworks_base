@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"Interf sist"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do app"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Inform. do app"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Suas telas recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar apps recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -214,10 +214,10 @@
     <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth conectado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"O Bluetooth foi desativado."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"O Bluetooth foi ativado."</string>
-    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Relatório de Localização desativado."</string>
-    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Relatório de Localização ativado."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"O Relatório de Localização foi desativado."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"O Relatório de Localização foi ativado."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Relatório de localização desativado."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Relatório de localização ativado."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"O Relatório de localização foi desativado."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"O Relatório de localização foi ativado."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarme definido para <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Fechar painel."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Mais tempo."</string>
@@ -475,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Não, obrigado"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurar"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desligar agora"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desativar agora"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expandir"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Recolher"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A tela está fixada"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Substituir"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps sendo executados em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Como um app está ocultando uma solicitação de permissão, as configurações não podem verificar sua resposta."</string>
 </resources>

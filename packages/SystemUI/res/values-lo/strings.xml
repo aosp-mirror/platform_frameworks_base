@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ແທນທີ່"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ແອັບທີ່ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດການນຳໃຊ້ແບັດເຕີຣີ ແລະ ອິນເຕີເນັດ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ເນື່ອງຈາກມີແອັບໃດໜຶ່ງກຳລັງຂັດຂວາງການຂໍອະນຸຍາດ, ການຕັ້ງຄ່າຈຶ່ງບໍ່ສາມາດຢັ້ງຢືນການຕອບຮັບຂອງທ່ານໄດ້."</string>
 </resources>

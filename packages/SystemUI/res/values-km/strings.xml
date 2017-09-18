@@ -150,7 +150,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"រ៉ូ​មីង"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ទិន្នន័យទូរសព្ទចល័តបានបើក"</string>
@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"បង្រួម"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"បិទ"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"អូស​ចុះក្រោម​ដើម្បី​បដិសេធ"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"ម៉ឺនុយ​រូបភាព​ក្នុងរូបភាព"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបភាពក្នុងរូបភាព"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"ម៉ឺនុយ​រូប​ក្នុងរូប"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបក្នុងរូប"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ទេ សូមចុច​ដើម្បី​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
     <string name="pip_play" msgid="1417176722760265888">"លេង"</string>
     <string name="pip_pause" msgid="8881063404466476571">"ផ្អាក"</string>
@@ -753,7 +753,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"កម្មវិធី​ប្រើ​ភ្លាមៗ​មិន​តម្រូវ​ឲ្យ​មានការ​ដំឡើង​ទេ។"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="go_to_web" msgid="1106022723459948514">"ចូលទៅកាន់បណ្តាញ"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"ទិន្នន័យ​ចល័ត"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi បាន​បិទ"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ប៊្លូធូស​បាន​បិទ"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"មុខងារ​កុំរំខាន​បាន​បិទ"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ជំនួស"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ការកំណត់​មិនអាច​ផ្ទៀងផ្ទាត់​ការឆ្លើយតប​របស់អ្នក​បាន​ទេ ដោយសារ​កម្មវិធី​កំពុង​បាំងសំណើ​សុំការ​អនុញ្ញាត។"</string>
 </resources>

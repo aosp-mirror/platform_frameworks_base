@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Əvəz edin"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Arxa fonda işləyən tətbiqlər"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya və data istifadəsi haqqında ətraflı məlumat üçün klikləyin"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Tətbiq icazə sorğusunu gizlətdiyi üçün Ayarlar cavabınızı doğrulaya bilməz."</string>
 </resources>

@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zëvendëso"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacionet që ekzekutohen në sfond"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Trokit për detaje mbi baterinë dhe përdorimin e të dhënave"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Duke qenë se një aplikacion po bllokon një kërkesë për leje, \"Cilësimet\" nuk mund të verifikojnë përgjigjen tënde."</string>
 </resources>

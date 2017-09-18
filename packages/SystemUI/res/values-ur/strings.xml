@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"بدلیں"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ایپس پس منظر میں چل رہی ہیں"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"چونکہ ایک ایپ اجازت کی درخواست کو مبہم کر رہی ہے، لہذا ترتیبات آپ کے جواب کی توثیق نہیں کر سکتی ہیں۔"</string>
 </resources>

@@ -97,7 +97,7 @@
     <string name="phone_label" msgid="2320074140205331708">"otvori telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otvori glasovnu pomoć"</string>
     <string name="camera_label" msgid="7261107956054836961">"otvori kameru"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Izaberite novi raspored zadataka"</string>
+    <string name="recents_caption_resize" msgid="3517056471774958200">"Odaberite novi raspored zadataka"</string>
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Dugme za uvećavanje u slučaju nekompatibilnosti."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Uvećani prikaz manjeg ekrana na većem ekranu."</string>
@@ -269,7 +269,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Čuvar ekrana"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne ometaj"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetni prekidi"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetno"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Samo alarmi"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Potpuna tišina"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -354,8 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pretraživanje"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Povucite gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Povucite lijevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivalaca koje odredite. I dalje ćete čuti sve što ste izabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Neće vas ometati zvukovi i vibracije, osim alarma. I dalje ćete čuti sve što ste izabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivalaca koje odredite. I dalje ćete čuti sve što ste odabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Neće vas ometati zvukovi i vibracije, osim alarma. I dalje ćete čuti sve što ste odabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, videozapise i igre. I dalje ćete moći obavljati pozive."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, video zapise i igre."</string>
@@ -370,7 +370,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Prevucite od ikone da otvorite kameru"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Potpuna tišina. Ovo će utišati i čitače ekrana."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Potpuna tišina"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetni prekidi"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prioritetno"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Samo alarmi"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Potpuna\ntišina"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Samo\nprioritetni prekidi"</string>
@@ -618,7 +618,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Nazad"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Obavještenja"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Prečice tastature"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Promijeni način unosa"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Promjena načina unosa"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplikacije"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Pomoć"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Preglednik"</string>
@@ -644,8 +644,8 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Isključeno"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigaciona traka"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Raspored"</string>
-    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Dodatni tip dugmeta lijevo"</string>
-    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Dodatni tip dugmeta desno"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Vrsta dodatnog dugmeta lijevo"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Vrsta dodatnog dugmeta desno"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(zadano)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Međumemorija"</item>
@@ -771,4 +771,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zamijeni"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
 </resources>

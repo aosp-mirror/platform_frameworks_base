@@ -240,7 +240,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Lader"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G- og 3G-data er satt på pause"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data er satt på pause"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobildata er satt på pause"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobildatabruk er satt på pause"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data er satt på pause"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Datagrensen du har angitt, er nådd. Du bruker ikke lenger mobildata.\n\nHvis du fortsetter, kan avgifter for databruk påløpe."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Gjenoppta"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Erstatt"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apper kjører i bakgrunnen"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Trykk for detaljer om batteri- og databruk"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
 </resources>

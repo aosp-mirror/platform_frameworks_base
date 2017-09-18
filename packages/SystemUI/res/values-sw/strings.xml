@@ -77,7 +77,7 @@
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezaji cha maudhui (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nyuma"</string>
@@ -240,7 +240,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Inachaji"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data ya 2G-3G imesitishwa"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data ya 4G imesitishwa"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Data ya simu imesitishwa"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Data ya mtandao wa simu imesitishwa"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data imesitishwa"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Umefikia kikomo cha data ulichoweka. Hutumii tena data ya simu.\n\nUkiendelea, huenda ukatozwa ada ya matumizi ya data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Endelea"</string>
@@ -284,7 +284,7 @@
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mbinu ya uingizaji"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Kutambua Eneo"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Kitambua eneo kimezimwa"</string>
-    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha midia"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Kifaa cha faili"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Simu za Dharura Pekee"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Mipangilio"</string>
@@ -315,7 +315,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Mtandao-hewa"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Arifa"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Tochi"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data ya simu"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data ya mtandao wa simu"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Matumizi ya data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data iliyosalia"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Imezidi kikomo"</string>
@@ -383,7 +383,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Mtumiaji mpya"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza aliyealikwa"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Data na programu zote katika kipindi hiki zitafutwa."</string>
@@ -473,7 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hapana, asante"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Sanidi"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="6930243045593601084">"Zima sasa"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Izime sasa"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Panua"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Kunja"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skrini imebandikwa"</string>
@@ -588,8 +588,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Kushoto"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Kulia"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Katikati"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Sogeza"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Nafasi"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Nafasinyuma"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Cheza/Sitisha"</string>
@@ -719,7 +719,7 @@
     <string name="pip_phone_close" msgid="8416647892889710330">"Funga"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Buruta ili uondoe"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Menyu ya picha ndani ya picha"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> iko katika picha ndani ya picha"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> iko katika hali ya picha ndani ya picha nyingine"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Ikiwa hutaki <xliff:g id="NAME">%s</xliff:g> kutumia kipengele hiki, gonga ili ufungue mipangilio na ukizime."</string>
     <string name="pip_play" msgid="1417176722760265888">"Cheza"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Sitisha"</string>
@@ -753,7 +753,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Huhitaji kusakinisha programu zinazofunguka papo hapo."</string>
     <string name="app_info" msgid="6856026610594615344">"Maelezo ya programu"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Nenda kwenye wavuti"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Data ya simu"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Data ya mtandao wa simu"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi imezimwa"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth imezimwa"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Kipengele cha Usinisumbue kimezimwa"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Badilisha"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Programu zinatumika chinichini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Gonga ili upate maelezo kuhusu betri na matumizi ya data"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Kwa sababu programu nyingine inazuia ombi la ruhusa, hatuwezi kuthibitisha jibu lako katika Mipangilio."</string>
 </resources>

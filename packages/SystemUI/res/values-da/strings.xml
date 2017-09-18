@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"System-UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Appinfo"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dine seneste skærme vises her"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Luk de seneste apps"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -255,14 +255,14 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> underretning mere i gruppen.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> underretninger mere i gruppen.</item>
     </plurals>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Underretningsindstillinger"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Indstillinger for underretninger"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Indstillinger for <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående retning."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående format."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Skærmen roteres nu automatisk."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i liggende tilstand."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i stående tilstand."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i liggende format."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i stående format."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessertcase"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Pauseskærm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
@@ -751,7 +751,7 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Lagerplads"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant apps kræver ingen installation."</string>
-    <string name="app_info" msgid="6856026610594615344">"Oplysninger om appen"</string>
+    <string name="app_info" msgid="6856026610594615344">"Appinfo"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Gå til website"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobildata"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi er slået fra"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Erstat"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps, der kører i baggrunden"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tryk for at se oplysninger om batteri- og dataforbrug"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Indstillinger kan ikke bekræfte dit svar, da en app dækker for en anmodning om tilladelse."</string>
 </resources>

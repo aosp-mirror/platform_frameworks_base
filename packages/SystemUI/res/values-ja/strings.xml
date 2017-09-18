@@ -720,8 +720,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"閉じる"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"下にドラッグして閉じる"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"PIP メニュー"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>は PIP 表示中です"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"ピクチャー イン ピクチャー メニュー"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>はピクチャー イン ピクチャーで表示中です"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g>でこの機能を使用しない場合は、タップして設定を開いて OFF にしてください。"</string>
     <string name="pip_play" msgid="1417176722760265888">"再生"</string>
     <string name="pip_pause" msgid="8881063404466476571">"一時停止"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"設定を変更"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"バックグラウンドで実行中のアプリ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"タップして電池やデータの使用量を確認"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
 </resources>

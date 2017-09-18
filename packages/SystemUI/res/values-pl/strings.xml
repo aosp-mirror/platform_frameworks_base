@@ -773,4 +773,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zastąp"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacje działające w tle"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i transmisji danych"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikacja Ustawienia nie może zweryfikować Twojej odpowiedzi, ponieważ inna aplikacja zasłania prośbę o udzielenie uprawnień."</string>
 </resources>
