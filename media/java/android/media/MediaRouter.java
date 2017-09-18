@@ -193,7 +193,9 @@ public class MediaRouter {
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                     name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
-                    name = com.android.internal.R.string.default_media_route_name_hdmi;
+                    name = com.android.internal.R.string.default_audio_route_name_hdmi;
+                } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_USB) != 0) {
+                    name = com.android.internal.R.string.default_audio_route_name_usb;
                 } else {
                     name = com.android.internal.R.string.default_audio_route_name;
                 }
