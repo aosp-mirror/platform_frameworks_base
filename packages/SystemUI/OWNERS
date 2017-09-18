@@ -1,0 +1,6 @@
+set noparent  # do not inherit owners in parent directories
+
+per-file Android.bp = build.master@android.com  # special file expert
+per-file Android.bp = android-sysui-eng+reviews@google.com
+
+android-sysui-eng+reviews@google.com
