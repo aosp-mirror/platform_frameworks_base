@@ -236,12 +236,11 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         obbConnection.establish();  // we'll want this later
 
         sendStartBackup();
+        PackageManager pm = backupManagerService.getPackageManager();
 
         // doAllApps supersedes the package set if any
         if (mAllApps) {
-            List<PackageInfo> allPackages =
-                    backupManagerService.getPackageManager().getInstalledPackages(
-                            PackageManager.GET_SIGNATURES);
+            List<PackageInfo> allPackages = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
             for (int i = 0; i < allPackages.size(); i++) {
                 PackageInfo pkg = allPackages.get(i);
                 // Exclude system apps if we've been asked to do so
@@ -288,7 +287,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
         while (iter.hasNext()) {
             PackageInfo pkg = iter.next().getValue();
-            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo)
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, pm)
                     || AppBackupUtils.appIsStopped(pkg.applicationInfo)) {
                 iter.remove();
                 if (DEBUG) {

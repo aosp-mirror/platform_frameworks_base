@@ -887,7 +887,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
                         if (AppBackupUtils.appGetsFullBackup(pkg)
                                 && AppBackupUtils.appIsEligibleForBackup(
-                                pkg.applicationInfo)) {
+                                pkg.applicationInfo, mPackageManager)) {
                             schedule.add(new FullBackupEntry(pkgName, lastBackup));
                         } else {
                             if (DEBUG) {
@@ -908,7 +908,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 for (PackageInfo app : apps) {
                     if (AppBackupUtils.appGetsFullBackup(app)
                             && AppBackupUtils.appIsEligibleForBackup(
-                            app.applicationInfo)) {
+                            app.applicationInfo, mPackageManager)) {
                         if (!foundApps.contains(app.packageName)) {
                             if (MORE_DEBUG) {
                                 Slog.i(TAG, "New full backup app " + app.packageName + " found");
@@ -934,7 +934,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             schedule = new ArrayList<>(apps.size());
             for (PackageInfo info : apps) {
                 if (AppBackupUtils.appGetsFullBackup(info) && AppBackupUtils.appIsEligibleForBackup(
-                        info.applicationInfo)) {
+                        info.applicationInfo, mPackageManager)) {
                     schedule.add(new FullBackupEntry(info.packageName, 0));
                 }
             }
@@ -1219,7 +1219,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
                         if (AppBackupUtils.appGetsFullBackup(app)
                                 && AppBackupUtils.appIsEligibleForBackup(
-                                app.applicationInfo)) {
+                                app.applicationInfo, mPackageManager)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
                         } else {
@@ -1577,7 +1577,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
-                if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo)) {
+                if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
+                        mPackageManager)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
@@ -3206,19 +3207,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    // We also avoid backups of 'disabled' apps
-    private static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
-        switch (pm.getApplicationEnabledSetting(app.packageName)) {
-            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
-            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
-            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
     @Override
     public boolean isAppEligibleForBackup(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -3226,9 +3214,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         try {
             PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
-            if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo) ||
+            if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
+                            mPackageManager) ||
                     AppBackupUtils.appIsStopped(packageInfo.applicationInfo) ||
-                    appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
+                    AppBackupUtils.appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
                 return false;
             }
             IBackupTransport transport = mTransportManager.getCurrentTransportBinder();

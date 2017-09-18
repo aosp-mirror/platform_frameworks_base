@@ -45,6 +45,7 @@ import java.util.List;
  */
 public class PackageManagerStub extends PackageManager {
     public static PackageInfo sPackageInfo;
+    public static int sApplicationEnabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
@@ -820,7 +821,7 @@ public class PackageManagerStub extends PackageManager {
 
     @Override
     public int getApplicationEnabledSetting(String packageName) {
-        return 0;
+        return sApplicationEnabledSetting;
     }
 
     @Override
