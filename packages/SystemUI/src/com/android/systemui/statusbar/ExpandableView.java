@@ -151,9 +151,21 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
-     * @return The minimum content height of this notification.
+     * @return The minimum content height of this notification. This also respects the temporary
+     * states of the view.
      */
     public int getMinHeight() {
+        return getMinHeight(false /* ignoreTemporaryStates */);
+    }
+
+    /**
+     * Get the minimum height of this view.
+     *
+     * @param ignoreTemporaryStates should temporary states be ignored like the guts or heads-up.
+     *
+     * @return The minimum height that this view needs.
+     */
+    public int getMinHeight(boolean ignoreTemporaryStates) {
         return getHeight();
     }
 
