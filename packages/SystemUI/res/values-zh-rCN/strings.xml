@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"修改设置顺序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 页，共 <xliff:g id="ID_2">%2$d</xliff:g> 页"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"无法将通知静音或屏蔽"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"由于某个应用遮挡了权限请求界面，因此“设置”应用无法验证您的回应。"</string>
 </resources>

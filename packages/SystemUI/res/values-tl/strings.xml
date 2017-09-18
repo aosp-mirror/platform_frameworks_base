@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"I-edit ang pagkakasunud-sunod ng mga setting."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Page <xliff:g id="ID_1">%1$d</xliff:g> ng <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Hindi maaaring i-silent o i-block ang mga notification"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Hindi ma-verify ng Mga Setting ang iyong tugon dahil may app na tumatakip sa isang kahilingan sa pagpapahintulot."</string>
 </resources>

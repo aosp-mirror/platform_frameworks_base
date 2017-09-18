@@ -654,4 +654,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editatu ezarpenen ordena."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Jakinarazpenak ezin dira ezkutatu edo blokeatu"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
 </resources>

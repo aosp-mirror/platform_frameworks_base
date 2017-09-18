@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Επεξεργασία σειράς ρυθμίσεων."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Δεν είναι δυνατή η σίγαση ή ο αποκλεισμός των ειδοποιήσεων"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Επειδή μια εφαρμογή αποκρύπτει ένα αίτημα άδειας, δεν είναι δυνατή η επαλήθευση της απάντησής σας από τις Ρυθμίσεις."</string>
 </resources>

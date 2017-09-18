@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ແກ້ໄຂລຳດັບການຕັ້ງຄ່າ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g> ຈາກທັງໝົດ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"ບໍ່ສາມາດປິດສຽງ ຫຼື ບລັອກການແຈ້ງເຕືອນໄດ້"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ເນື່ອງຈາກມີແອັບໃດໜຶ່ງກຳລັງຂັດຂວາງການຂໍອະນຸຍາດ, ການຕັ້ງຄ່າຈຶ່ງບໍ່ສາມາດຢັ້ງຢືນການຕອບຮັບຂອງທ່ານໄດ້."</string>
 </resources>

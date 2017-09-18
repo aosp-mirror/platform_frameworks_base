@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"அமைப்புகளின் வரிசை முறையைத் திருத்து."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"அறிவிப்புகளை ஒலியடக்க அல்லது தடுக்க முடியவில்லை"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையைப் பயன்பாடு மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
 </resources>

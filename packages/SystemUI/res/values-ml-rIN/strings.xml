@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ക്രമീകരണ ക്രമം എഡിറ്റുചെയ്യുക."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"അറിയിപ്പുകൾ നിശബ്ദമാക്കാനോ ബ്ലോക്കുചെയ്യാനോ കഴിയില്ല"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"അനുമതി അഭ്യർത്ഥനയെ ഒരു ആപ്പ് മറയ്‌ക്കുന്നതിനാൽ, ക്രമീകരണത്തിന് നിങ്ങളുടെ പ്രതികരണം പരിശോധിച്ചുറപ്പിക്കാനാകില്ല."</string>
 </resources>

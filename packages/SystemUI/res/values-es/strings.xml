@@ -654,4 +654,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Cambiar el orden de los ajustes."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Las notificaciones no se pueden silenciar ni bloquear"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Una aplicación impide ver una solicitud de permiso, por lo que Ajustes no puede verificar tu respuesta."</string>
 </resources>

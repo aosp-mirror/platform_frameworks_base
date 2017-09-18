@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Endre rekkefølgen på innstillingene."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Varslinger kan ikke ignoreres eller blokkeres"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
 </resources>

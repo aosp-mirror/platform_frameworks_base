@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"నోటిఫికేషన్‌లను నిశ్శబ్దంగా ఉంచలేరు లేదా బ్లాక్ చేయలేరు"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"అనుమతి అభ్యర్థనకు ఒక యాప్ అడ్డు తగులుతున్నందున సెట్టింగ్‌లు మీ ప్రతిస్పందనను ధృవీకరించలేకపోయాయి."</string>
 </resources>

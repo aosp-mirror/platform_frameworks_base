@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Жөндөөлөрдүн иретин өзгөртүү."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Эскертмелердин үнүн басууга же бөгөттөөгө болбойт"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Жөндөөлөр жообуңузду ырастай албай жатат."</string>
 </resources>

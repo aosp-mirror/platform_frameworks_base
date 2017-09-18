@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Ayarların sırasını düzenle."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Sayfa <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Bildirimler engellenemez veya sesi kapatılamaz"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Bir uygulama bir izin isteğinin anlaşılmasını engellediğinden, Ayarlar, yanıtınızı doğrulayamıyor."</string>
 </resources>

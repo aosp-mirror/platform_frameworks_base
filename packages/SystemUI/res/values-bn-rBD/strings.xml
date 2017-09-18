@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ক্রম বা সেটিংস সম্পাদনা করুন৷"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"বিজ্ঞপ্তিগুলিকে নীরব বা অবরুদ্ধ করা যাবে না"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"একটি অ্যাপ কোনও অনুমোদনের অনুরোধকে ঢেকে দিচ্ছে, তাই সেটিংস থেকে আপনার প্রতিক্রিয়া যাচাই করা যাচ্ছে না।"</string>
 </resources>

@@ -654,4 +654,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar a orde das opcións de configuración."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Páxina <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"As notificacións non se poden silenciar nin bloquear"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Dado que unha aplicación se superpón sobre unha solicitude de permiso, a configuración non pode verificar a túa resposta."</string>
 </resources>

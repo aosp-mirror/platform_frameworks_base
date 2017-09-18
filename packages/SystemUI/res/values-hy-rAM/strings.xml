@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Խմբագրել կարգավորումների հերթականությունը:"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Հնարավոր չէ արգելափակել ծանուցումները կամ անջատել դրանց ձայնը"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Քանի որ ներածումն արգելափակված է ինչ-որ հավելվածի կողմից, Կարգավորումները չեն կարող հաստատել ձեր պատասխանը:"</string>
 </resources>

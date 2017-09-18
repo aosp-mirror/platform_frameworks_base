@@ -658,4 +658,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Змяніць парадак налад."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Старонка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Гук паведамленняў нельга адключыць, і іх нельга заблакіраваць"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Праграма хавае запыт на дазвол, таму ваш адказ немагчыма спраўдзіць у Наладах."</string>
 </resources>

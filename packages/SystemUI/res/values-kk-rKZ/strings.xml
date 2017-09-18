@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Параметрлер тәртібін өзгерту."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ішінен <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Хабарландыруды үнсіз режимге қою не бөгеу мүмкін емес"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Басқа қолданба рұқсат сұрауын жасырып тұрғандықтан, параметрлер жауабыңызды растай алмайды."</string>
 </resources>

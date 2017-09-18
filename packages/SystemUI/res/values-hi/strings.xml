@@ -304,7 +304,7 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंग उलटें"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"रंग सुधार मोड"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"और सेटिंग"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"पूर्ण"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"हो गया"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"कनेक्ट है"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट हो रहा है..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"टेदरिंग"</string>
@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिंग के क्रम को बदलें"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"सूचना की आवाज़ को बंद किया या रोका नहीं जा सकती"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
 </resources>

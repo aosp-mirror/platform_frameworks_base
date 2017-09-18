@@ -656,4 +656,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Reihenfolge der Einstellungen bearbeiten."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Seite <xliff:g id="ID_1">%1$d</xliff:g> von <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Benachrichtigungen können nicht stummgeschaltet oder blockiert werden"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Deine Eingabe wird von \"Einstellungen\" nicht erkannt, weil die Berechtigungsanfrage von einer App verdeckt wird."</string>
 </resources>

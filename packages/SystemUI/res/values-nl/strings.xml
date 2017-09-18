@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Meldingen kunnen niet op stil worden gezet of worden geblokkeerd"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
 </resources>

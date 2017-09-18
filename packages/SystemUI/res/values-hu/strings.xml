@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Beállítások sorrendjének szerkesztése."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. oldal, összesen: <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Az értesítéseket nem lehet elnémítani vagy letiltani"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Mivel az egyik alkalmazás eltakarja az engedélykérést, a Beállítások alkalmazás nem tudja ellenőrizni az Ön válaszát."</string>
 </resources>

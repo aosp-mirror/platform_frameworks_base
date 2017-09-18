@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ਸੂਚੀ ਵਿੱਚੋਂ ਹਟਾਓ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ਤੁਹਾਡੀਆਂ ਹਾਲੀਆ ਸਕ੍ਰੀਨਾਂ ਇੱਥੇ ਪ੍ਰਗਟ ਹੋਣਗੀਆਂ"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਾਂ ਰੱਦ ਕਰੋ"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ਹਾਲੀਆ ਐਪਾਂ ਨੂੰ ਖਾਰਜ ਕਰੋ"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="one">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
       <item quantity="other">ਰੂਪ-ਰੇਖਾ ਵਿੱਚ %d ਸਕ੍ਰੀਨਾਂ</item>
@@ -74,12 +74,12 @@
     <string name="screenshot_saved_text" msgid="2685605830386712477">"ਆਪਣਾ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਕੈਪਚਰ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਕਰਨ ਦੌਰਾਨ ਸਮੱਸਿਆ ਆਈ।"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ਸੀਮਿਤ ਸਟੋਰੇਜ ਥਾਂ ਦੇ ਕਾਰਨ ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਸਕਦਾ।"</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ਸਟੋਰੇਜ ਦੀ ਸੀਮਿਤ ਜਗ੍ਹਾ ਹੋਣ ਕਾਰਨ ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਸਕਦਾ।"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ਐਪ ਜਾਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਦੁਆਰਾ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਹੈ।"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ ਚੋਣਾਂ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ਇੱਕ ਮੀਡੀਆ ਪਲੇਅਰ (MTP) ਦੇ ਤੌਰ ਤੇ ਮਾਊਂਟ ਕਰੋ"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ਇੱਕ ਕੈਮਰੇ (PTP) ਦੇ ਤੌਰ ਤੇ ਮਾਊਂਟ ਕਰੋ"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac ਲਈ Android ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ ਐਪ ਇੰਸਟੌਲ ਕਰੋ"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac ਲਈ Android ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫਰ ਐਪ ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="accessibility_back" msgid="567011538994429120">"ਪਿੱਛੇ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ਘਰ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ਮੀਨੂ"</string>
@@ -172,7 +172,7 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_work_mode" msgid="2478631941714607225">"ਕੰਮ ਮੋਡ"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਰੱਦ ਕਰੋ।"</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਖਾਰਜ ਕਰੋ।"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ਰੱਦ ਕੀਤਾ।"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"ਸਾਰੀਆਂ ਹਾਲੀਆ ਐਪਲੀਕੇਸ਼ਨਾਂ ਰੱਦ ਕੀਤੀਆਂ।"</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> ਐਪਲੀਕੇਸ਼ਨਾਂ ਜਾਣਕਾਰੀ ਖੋਲ੍ਹੋ।"</string>
@@ -354,8 +354,8 @@
     <string name="notification_tap_again" msgid="7590196980943943842">"ਖੋਲ੍ਹਣ ਲਈ ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ਫ਼ੋਨ ਲਈ ਪ੍ਰਤੀਕ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"ਕੈਮਰੇ ਲਈ ਆਈਕਨ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ ਲਈ ਪ੍ਰਤੀਕ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"ਕੈਮਰੇ ਲਈ ਪ੍ਰਤੀਕ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"ਪੂਰਾ ਸ਼ਾਂਤ। ਇਹ ਸਕ੍ਰੀਨ ਰੀਡਰਾਂ ਨੂੰ ਵੀ ਸ਼ਾਂਤ ਕਰ ਦੇਵੇਗਾ।"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"ਪੂਰਾ ਸ਼ਾਂਤ"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ਕੇਵਲ ਤਰਜੀਹੀ"</string>
@@ -412,8 +412,8 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਾਂ, ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਸਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਨੂੰ ਇੱਕ VPN ਕਨੈਕਸ਼ਨ ਸੈੱਟ ਅੱਪ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਹੈ।\n\nਇਹ ਐਪ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਅਤੇ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ, ਈਮੇਲਾਂ, ਐਪਾਂ ਅਤੇ ਸੁਰੱਖਿਅਤ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ।"</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g>ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਾਂ, ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਸਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਕੀਤਾ ਹੈ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ, ਈਮੇਲਾਂ, ਐਪਾਂ ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਈਮੇਲ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰਨ ਦੇ ਸਮਰੱਥ ਹੈ।\n\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।\n\nਤੁਸੀਂ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਾਂ, ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਸਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਕੀਤਾ ਹੈ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ, ਈਮੇਲਾਂ, ਐਪਾਂ ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਈਮੇਲ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰਨ ਦੇ ਸਮਰੱਥ ਹੈ।\n\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾ ਲ ਸੰਪਰਕ ਕਰੋ।\n\nਤੁਸੀਂ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -458,13 +458,13 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। ਅਣਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। ਥਰਥਰਾਹਟ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਦਿਖਾਏ ਗਏ ਹਨ। ਖਾਰਜ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਅਵਾਜ਼ ਕੰਟਰੋਲ ਦਿਖਾਏ ਗਏ ਹਨ। ਖਾਰਜ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਲੁਕਾਏ ਗਏ ਹਨ"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI ਟਿਊਨਰ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
-    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਬਾਰ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="quick_settings" msgid="10042998191725428">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="status_bar" msgid="4877645476959324760">"ਸਥਿਤੀ ਬਾਰ"</string>
+    <string name="status_bar" msgid="4877645476959324760">"ਸਥਿਤੀ ਪੱਟੀ"</string>
     <string name="overview" msgid="4018602013895926956">"ਰੂਪ-ਰੇਖਾ"</string>
     <string name="demo_mode" msgid="2389163018533514619">"ਡੈਮੋ ਮੋਡ"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"ਡੈਮੋ ਮੋਡ ਚਾਲੂ ਕਰੋ"</string>
@@ -473,7 +473,7 @@
     <string name="status_bar_alarm" msgid="8536256753575881818">"ਅਲਾਰਮ"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"ਜਹਾਜ਼ ਮੋਡ"</string>
-    <string name="add_tile" msgid="2995389510240786221">"ਟਾਇਲ ਜੋੜੋ"</string>
+    <string name="add_tile" msgid="2995389510240786221">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"ਪ੍ਰਸਾਰਨ ਟਾਇਲ"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"ਤੁਸੀਂ <xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ ਆਪਣਾ ਅਗਲਾ ਅਲਾਰਮ ਨਹੀਂ ਸੁਣੋਗੇ ਜਦੋਂ ਤੱਕ ਉਸਤੋਂ ਪਹਿਲਾਂ ਤੁਸੀਂ ਇਸਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"ਤੁਸੀਂ <xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ ਆਪਣਾ ਅਗਲਾ ਅਲਾਰਮ ਨਹੀਂ ਸੁਣੋਗੇ"</string>
@@ -491,7 +491,7 @@
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਾਂ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਵਰਤੋਂ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ਐਪਲੀਕੇਸ਼ਨ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਤੇ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ"</string>
-    <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਬਾਰ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਪੱਟੀ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੁਬਾਰਾ ਕ੍ਰਮ ਦਿਓ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਮਕ ਦਿਖਾਓ"</string>
     <string name="experimental" msgid="6198182315536726162">"ਪ੍ਰਯੋਗਾਤਮਿਕ"</string>
@@ -505,7 +505,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲ"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ਚਾਲੂ"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ਬੰਦ"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨਾਲ, ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਦੀਆਂ ਸੂਚਨਾਵਾਂ ਲਈ ਮਹੱਤਤਾ ਪੱਧਰ ਨੂੰ 0 ਤੋਂ 5 ਤੱਕ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ। \n\n"<b>"ਪੱਧਰ 5"</b>" \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਦੀ ਆਗਿਆ ਦਿਓ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 4"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 3"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 2"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਵੀ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n\n"<b>"ਪੱਧਰ 1"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n- ਲੌਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 0"</b>" \n- ਐਪ ਤੋਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬਲਾਕ ਕਰੋ"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨਾਲ, ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਦੀਆਂ ਸੂਚਨਾਵਾਂ ਲਈ ਮਹੱਤਤਾ ਪੱਧਰ ਨੂੰ 0 ਤੋਂ 5 ਤੱਕ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ। \n\n"<b>"ਪੱਧਰ 5"</b>" \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਦੀ ਆਗਿਆ ਦਿਓ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 4"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 3"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 2"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਵੀ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n\n"<b>"ਪੱਧਰ 1"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n- ਲਾਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 0"</b>" \n- ਐਪ ਤੋਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬਲਾਕ ਕਰੋ"</string>
     <string name="user_unspecified_importance" msgid="361613856933432117">"ਮਹੱਤਤਾ: ਸਵੈਚਾਲਿਤ"</string>
     <string name="blocked_importance" msgid="5035073235408414397">"ਮਹੱਤਤਾ: ਪੱਧਰ 0"</string>
     <string name="min_importance" msgid="560779348928574878">"ਮਹੱਤਤਾ: ਪੱਧਰ 1"</string>
@@ -515,7 +515,7 @@
     <string name="max_importance" msgid="4880179829869865275">"ਮਹੱਤਤਾ: ਪੱਧਰ 5"</string>
     <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"ਐਪ ਹਰੇਕ ਸੂਚਨਾ ਦੀ ਮਹੱਤਤਾ ਦਾ ਪਤਾ ਲਗਾਉਂਦੀ ਹੈ।"</string>
     <string name="notification_importance_blocked" msgid="4237497046867398057">"ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਕਦੇ ਨਾ  ਦਿਖਾਓ ।"</string>
-    <string name="notification_importance_min" msgid="7844224511187027155">"ਕੋਈ ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ, ਝਲਕ, ਧੁਨੀ, ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ। ਲੌਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ।"</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"ਕੋਈ ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ, ਝਲਕ, ਧੁਨੀ, ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ। ਲਾਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ।"</string>
     <string name="notification_importance_low" msgid="7950291702044409847">"ਕੋਈ ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ, ਝਲਕ, ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ।"</string>
     <string name="notification_importance_default" msgid="5924405820269074915">"ਕੋਈ ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਜਾਂ ਝਲਕ ਨਹੀਂ।"</string>
     <string name="notification_importance_high" msgid="1729480727023990427">"ਹਮੇਸ਼ਾਂ ਝਲਕ  ਦਿਖਾਓ । ਕੋਈ ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨਹੀਂ।"</string>
@@ -544,7 +544,7 @@
     <string name="keyboard_key_media_next" msgid="1894394911630345607">"ਅੱਗੇ"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"ਪਿਛਲਾ"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Rewind"</string>
-    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Fast Forward"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"ਤੇਜ਼ੀ ਨਾਲ ਅੱਗੇ ਭੇਜੋ"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"ਮਿਟਾਓ"</string>
@@ -602,7 +602,7 @@
     <string name="keycode" msgid="7335281375728356499">"ਕੀਕੋਡ"</string>
     <string name="keycode_description" msgid="1403795192716828949">"ਕੀਕੋਡ ਬਟਨ ਕੀ-ਬੋਰਡ ਕੁੰਜੀਆਂ ਨੂੰ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਪੱਟੀ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਨ ਦਿੰਦੇ ਹਨ। ਦਬਾਏ ਜਾਣ \'ਤੇ ਇਹ ਚੁਣੀਆਂ ਗਈਆਂ ਕੀ-ਬੋਰਡ ਕੁੰਜੀਆਂ ਨੂੰ ਇਮੂਲੇਟ ਕਰਦੇ ਹਨ। ਬਟਨ \'ਤੇ ਦਿਖਾਈ ਜਾਣ ਵਾਲੀ ਤਸਵੀਰ ਦਾ ਅਨੁਸਰਣ ਕਰਦੇ ਹੋਏ, ਪਹਿਲਾਂ ਬਟਨ ਲਈ ਇੱਕ ਕੁੰਜੀ ਨੂੰ ਚੁਣਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
     <string name="select_keycode" msgid="7413765103381924584">"ਕੀ-ਬੋਰਡ ਬਟਨ ਚੁਣੋ"</string>
-    <string name="preview" msgid="9077832302472282938">"ਝਲਕ"</string>
+    <string name="preview" msgid="9077832302472282938">"ਪੂਰਵ-ਝਲਕ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ਟਾਇਲਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਘਸੀਟੋ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ਹਟਾਉਣ ਲਈ ਇੱਥੇ ਘਸੀਟੋ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ਸੰਪਾਦਨ ਕਰੋ"</string>
@@ -610,12 +610,12 @@
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"ਘੰਟੇ, ਮਿੰਟ, ਅਤੇ ਸਕਿੰਟ  ਦਿਖਾਓ"</item>
     <item msgid="1427801730816895300">"ਘੰਟੇ ਅਤੇ ਮਿੰਟ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
-    <item msgid="3830170141562534721">"ਇਸ ਚਿੰਨ੍ਹ ਨੂੰ ਨਾ  ਦਿਖਾਓ"</item>
+    <item msgid="3830170141562534721">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="3160236755818672034">"ਹਮੇਸ਼ਾਂ ਪ੍ਰਤੀਸ਼ਤਤਾ  ਦਿਖਾਓ"</item>
     <item msgid="2139628951880142927">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਪ੍ਰਤੀਸ਼ਤਤਾ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
-    <item msgid="3327323682209964956">"ਇਸ ਚਿੰਨ੍ਹ ਨੂੰ ਨਾ  ਦਿਖਾਓ"</item>
+    <item msgid="3327323682209964956">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"ਹੋਰ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਡਿਵਾਈਡਰ"</string>
@@ -630,7 +630,7 @@
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"ਉੱਪਰ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"ਹੇਠਾਂ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ਸਥਿਤੀ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। ਸੰਪਾਦਨ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ।"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ।"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ।"</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ਸਥਿਤੀ <xliff:g id="POSITION">%1$d</xliff:g>। ਚੁਣਨ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ਨੂੰ ਤਬਦੀਲ ਕਰੋ"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ਹਟਾਓ"</string>
@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ਸੈਟਿੰਗਾਂ ਦੇ ਕ੍ਰਮ ਦਾ ਸੰਪਾਦਨ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ਦਾ <xliff:g id="ID_1">%1$d</xliff:g> ਪੰਨਾ"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਮੋਸ਼ ਜਾਂ ਬਲੌਕ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ਕਿਸੇ ਐਪ ਵੱਲੋਂ ਇਜਾਜ਼ਤ ਬੇਨਤੀ ਨੂੰ ਢਕੇ ਜਾਣ ਕਾਰਨ ਸੈਟਿੰਗਾਂ ਤੁਹਾਡੇ ਜਵਾਬ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕਰ ਸਕਦੀਆਂ।"</string>
 </resources>

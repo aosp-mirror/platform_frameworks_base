@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ترتیبات کی ترتیب میں ترمیم کریں۔"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحہ <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"اطلاعات کو خاموش یا مسدود نہیں کیا جا سکتا"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"چونکہ ایک ایپ اجازت کی درخواست کو مبہم کر رہی ہے، لہذا ترتیبات آپ کے جواب کی توثیق نہیں کر سکتی ہیں۔"</string>
 </resources>

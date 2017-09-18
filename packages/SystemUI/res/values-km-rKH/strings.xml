@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"កែលំដាប់ការកំណត់"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ទំព័រ <xliff:g id="ID_1">%1$d</xliff:g> នៃ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"ការជូនដំណឹងមិនអាចបិទសំឡេង ឬរារាំងបានទេ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ការកំណត់​មិនអាច​ផ្ទៀងផ្ទាត់​ការឆ្លើយតប​របស់អ្នក​បាន​ទេ ដោយសារ​កម្មវិធី​កំពុង​បាំងសំណើ​សុំការ​អនុញ្ញាត។"</string>
 </resources>

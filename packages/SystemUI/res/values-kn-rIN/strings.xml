@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"ಸೂಚನೆಗಳನ್ನು ಮೌನವಾಗಿಸಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ತಡೆಹಿಡಿಯಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಮರೆಮಾಚುತ್ತಿರುವ ಕಾರಣ, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
 </resources>

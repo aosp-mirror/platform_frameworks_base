@@ -658,4 +658,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Upraviť poradie nastavení"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Strana <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Upozornenia nie je možné stlmiť ani blokovať"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Nastavenia nemôžu overiť vašu odpoveď, pretože určitá aplikácia blokuje žiadosť o povolenie."</string>
 </resources>

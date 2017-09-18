@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"सूचनाहरूलाई मौन गर्न वा यसमाथि रोक लगाउन मिल्दैन"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"कुनै अनुप्रयोगको कारणले अनुमतिसम्बन्धी अनुरोध बुझ्न गाह्रो भइरहेकोले सेटिङहरूले तपाईंको प्रतिक्रिया प्रमाणित गर्न सक्दैनन्।"</string>
 </resources>

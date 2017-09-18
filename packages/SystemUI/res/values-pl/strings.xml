@@ -315,7 +315,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Powiadomienia"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Latarka"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Transmisja danych komórkowych"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Komórkowa transmisja danych"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Użycie danych"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Pozostały limit"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Przekroczono limit"</string>
@@ -656,4 +656,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edytuj kolejność ustawień."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Strona <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Nie można wyciszyć ani zablokować powiadomień"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikacja Ustawienia nie może zweryfikować Twojej odpowiedzi, ponieważ inna aplikacja zasłania prośbę o udzielenie uprawnień."</string>
 </resources>

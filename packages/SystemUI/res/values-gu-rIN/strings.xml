@@ -652,4 +652,5 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"સેટિંગ્સનો ક્રમ સંપાદિત કરો."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> માંથી <xliff:g id="ID_1">%1$d</xliff:g> પૃષ્ઠ"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"સૂચનાઓ શાંત અથવા અવરોધિત કરી શકાતી નથી"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"એક ઍપ પરવાનગી વિનંતીને અસ્પષ્ટ કરતી હોવાને કારણે, સેટિંગ્સ તમારા પ્રતિસાદને ચકાસી શકતી નથી."</string>
 </resources>
