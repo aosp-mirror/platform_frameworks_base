@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Quvvat tejash funksiyasini yoqing"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Sozlamalar"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Ekranni avtomatik burish"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Ekranning avtomatik burilishi"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"MUTE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Eslatmalar"</string>
@@ -242,7 +242,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Quvvat olmoqda"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G internet to‘xtatib qo‘yildi"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G internet to‘xtatib qo‘yildi"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobil internet pauza qilingan"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobil internet pauza qilindi"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Internetdan foydalanish to‘xtatib qo‘yildi"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Belgilangan trafik sarflab bo‘lindi. Endi mobil internetdan foydalana olmaysiz.\n\nDavom ettiradigan bo‘lsangiz, trafik uchun to‘lov olinishi mumkin."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Davom etish"</string>
@@ -278,7 +278,7 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Ulangan qurilmalar topilmadi"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Yorqinlik"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtomatik burilish"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekranni avtomatik burish"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekranning avtomatik burilishi"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Aylanmaydigan qilingan"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Tik holat"</string>
@@ -382,10 +382,10 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Foydalanuvchini o‘zgartirish. Joriy foydalanuvchi – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Joriy foydalanuvchi <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Profilni ko‘rsatish"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"Foydalanuvchi qo‘shish"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Foydalanuvchi"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Yangi foydalanuvchi"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Mehmon"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Mehmon qo‘shish"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Mehmon"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Mehmon rejimini o‘chirish"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -487,7 +487,7 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Berkitish"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
-    <string name="stream_voice_call" msgid="4410002696470423714">"Qo‘ng‘iroq qilish"</string>
+    <string name="stream_voice_call" msgid="4410002696470423714">"Chaqiruv"</string>
     <string name="stream_system" msgid="7493299064422163147">"Tizim"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Jiringlatish"</string>
     <string name="stream_music" msgid="9086982948697544342">"Multimedia"</string>
@@ -665,7 +665,7 @@
     <string name="right_keycode" msgid="708447961000848163">"O‘ngga tugmasi kodi"</string>
     <string name="left_icon" msgid="3096287125959387541">"Chapga belgisi"</string>
     <string name="right_icon" msgid="3952104823293824311">"O‘ngga belgisi"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kerakli elementni tortib qo‘shing"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Keraklisini tepaga torting"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"O‘chirish uchun bu yerga torting"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vaqt"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Almashtirish"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Fonda ishlayotgan ilovalar"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Ilova ruxsatnoma so‘roviga xalaqit qilayotgani tufayli, “Sozlamalar” ilovasi javobingizni tekshira olmaydi."</string>
 </resources>

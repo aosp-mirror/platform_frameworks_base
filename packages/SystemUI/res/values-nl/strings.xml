@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Accu is bijna leeg"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Batterij is bijna leeg"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Opladen via USB niet ondersteund.\nGebruik alleen de bijgeleverde oplader."</string>
@@ -102,11 +102,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kleiner scherm uitzoomen naar groter scherm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-verbinding ingesteld."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-verbinding verbroken."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Geen accu."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Accu: één streepje."</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Accu: twee streepjes."</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Accu: drie streepjes."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Accu is vol."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Geen batterij."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Batterij: één streepje."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Batterij: twee streepjes."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Batterij: drie streepjes."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Batterij is vol."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Geen telefoonsignaal."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Telefoon: één streepje."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefoon: twee streepjes."</string>
@@ -161,8 +161,8 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Geen simkaart."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netwerk van provider wordt gewijzigd."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Accudetails openen"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Accu: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Accu wordt opgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Batterij: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batterij wordt opgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeeminstellingen."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Meldingen."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Alle meldingen bekijken"</string>
@@ -502,7 +502,7 @@
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Volumeknoppen van %s worden weergegeven. Veeg omhoog om te sluiten."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Volumeknoppen verborgen"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Systeem-UI-tuner"</string>
-    <string name="show_battery_percentage" msgid="5444136600512968798">"Percentage ingebouwde accu weergeven"</string>
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Percentage ingebouwde batterij weergeven"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Accupercentage weergeven in het pictogram op de statusbalk wanneer er niet wordt opgeladen"</string>
     <string name="quick_settings" msgid="10042998191725428">"Snelle instellingen"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusbalk"</string>
@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep omlaag om te sluiten"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Beeld-in-beeld-menu"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Scherm-in-scherm-menu"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
     <string name="pip_play" msgid="1417176722760265888">"Afspelen"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Onderbreken"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Vervangen"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps uitgevoerd op achtergrond"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tik voor batterij- en datagebruik"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
 </resources>

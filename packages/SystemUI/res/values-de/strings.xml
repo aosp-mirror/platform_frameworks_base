@@ -161,7 +161,9 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Keine SIM-Karte"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netzwerk des Mobilfunkanbieters wird gewechselt"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Akkudetails öffnen"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Akku bei <xliff:g id="NUMBER">%d</xliff:g> Prozent."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
     <skip />
@@ -299,7 +301,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Kein Netz"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WLAN aus"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WLAN an"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Keine WLAN-Netzwerke verfügbar"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Keine WLANs verfügbar"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Streamen"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Wird übertragen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unbenanntes Gerät"</string>
@@ -720,8 +722,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimieren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Schließen"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zum Schließen nach unten ziehen"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menü \"Bild-in-Bild\""</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ist in Bild-in-Bild"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menü \"Bild im Bild\""</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
     <string name="pip_play" msgid="1417176722760265888">"Wiedergeben"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausieren"</string>
@@ -767,4 +769,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ersetzen"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps, die im Hintergrund ausgeführt werden"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Für Details zur Akku- und Datennutzung tippen"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Deine Eingabe wird von \"Einstellungen\" nicht erkannt, weil die Berechtigungsanfrage von einer App verdeckt wird."</string>
 </resources>

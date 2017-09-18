@@ -74,8 +74,8 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"يتم حفظ لقطة."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"انقر لعرض لقطة الشاشة."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"انقر لعرض لقطة الشاشة"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"حدثت مشكلة أثناء حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"يتعذر حفظ لقطة الشاشة نظرًا لأن مساحة التخزين المتاحة محدودة."</string>
@@ -156,12 +156,12 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك شريحة SIM."</string>
-    <string name="accessibility_cell_data" msgid="5326139158682385073">"بيانات الجوال"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"بيانات الجوّال"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"تشغيل بيانات الجوال"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"إيقاف بيانات الجوال"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
-    <string name="accessibility_vpn_on" msgid="5993385083262856059">"‏الشبكة الظاهرية الخاصة (VPN) قيد التشغيل."</string>
+    <string name="accessibility_vpn_on" msgid="5993385083262856059">"‏الشبكة الافتراضية الخاصة (VPN) قيد التشغيل."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏ليس هناك شريحة SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"فتح تفاصيل البطارية"</string>
@@ -244,7 +244,7 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"جارٍ الشحن"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"بيانات شبكات الجيل الثاني والثالث متوقفة مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"تم إيقاف بيانات شبكة الجيل الرابع مؤقتًا"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"تم إيقاف بيانات الجوال مؤقتًا"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"تم إيقاف بيانات الجوّال مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"تم إيقاف البيانات مؤقتًا"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"تم الوصول إلى حد البيانات الذي عيَّنته. لم يُعد بإمكانك استخدام بيانات الجوال.\n\nفي حالة الاستئناف، قد يتم تطبيق الرسوم لاستخدام البيانات."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"استئناف"</string>
@@ -254,7 +254,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏تم تعيين الموقع بواسطة GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"طلبات الموقع نشطة"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"محو جميع الإشعارات."</string>
-    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"و<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="zero"><xliff:g id="NUMBER_1">%s</xliff:g> إشعار آخر بداخل المجموعة.</item>
       <item quantity="two">إشعاران (<xliff:g id="NUMBER_1">%s</xliff:g>) آخران بداخل المجموعة.</item>
@@ -327,7 +327,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"استخدام البيانات"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"البيانات المتبقية"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"فوق القيد"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> مستخدم"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> مستخدَمة"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"قيد <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"تحذير <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"وضع العمل"</string>
@@ -428,22 +428,22 @@
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"يخضع الجهاز لإدارة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> وتم ربطه بـ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="3294967280853150271">"يخضع الجهاز لإدارة مؤسستك"</string>
     <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"تتم إدارة هذا الجهاز بواسطة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"يخضع الجهاز لإدارة مؤسستك وتم ربطه بالشبكات الظاهرية الخاصة"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"يخضع الجهاز لإدارة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> وتم ربطه بالشبكات الظاهرية الخاصة"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"يخضع الجهاز لإدارة مؤسستك وتم ربطه بالشبكات الافتراضية الخاصة"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"يخضع الجهاز لإدارة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> وتم ربطه بالشبكات الافتراضية الخاصة"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في الملف الشخصي للعمل"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملفك الشخصي للعمل"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"قد تكون الشبكة خاضعة للمراقبة"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"تم ربط الجهاز بالشبكات الظاهرية الخاصة"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"تم ربط الجهاز بالشبكات الافتراضية الخاصة"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"تم ربط الملف الشخصي للعمل بـ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"تم ربط الملف الشخصي بـ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"تم ربط الجهاز بـ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="1652495295941959815">"إدارة الأجهزة"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"مراقبة الملف الشخصي"</string>
     <string name="monitoring_title" msgid="169206259253048106">"مراقبة الشبكات"</string>
-    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"‏شبكة ظاهرية خاصة (VPN)"</string>
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"‏شبكة افتراضية خاصة (VPN)"</string>
     <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"تسجيل بيانات الشبكة"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"‏شهادات CA"</string>
-    <string name="disable_vpn" msgid="4435534311510272506">"تعطيل الشبكة الظاهرية الخاصة"</string>
+    <string name="disable_vpn" msgid="4435534311510272506">"تعطيل الشبكة الافتراضية الخاصة"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏قطع الاتصال بشبكة VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"عرض السياسات"</string>
     <string name="monitoring_description_named_management" msgid="5281789135578986303">"تتم إدارة جهازك بواسطة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nيمكن للمشرف مراقبة وإدارة الإعدادات والدخول إلى المؤسسة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع الجغرافي للجهاز.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
@@ -463,13 +463,13 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"مزيد من المعلومات"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏فتح إعدادات الشبكة الظاهرية الخاصة (VPN)"</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"فتح بيانات الاعتماد الموثوق بها"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏لقد منحت تطبيقًا الإذن لإعداد اتصال شبكة ظاهرية خاصة (VPN).\n\nيمكن لهذا التطبيق مراقبة أنشطتك على الجهاز والشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"تتم إدارة ملفك الشخصي للعمل بواسطة <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nويمكن للمشرف مراقبة نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف.\n\nوتجدر الإشارة إلى أنك متصل أيضًا بشبكة ظاهرية خاصة يمكن أن تراقب نشاط الشبكة."</string>
-    <string name="legacy_vpn_name" msgid="6604123105765737830">"شبكة ظاهرية خاصة"</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏لقد منحت تطبيقًا الإذن لإعداد اتصال شبكة افتراضية خاصة (VPN).\n\nيمكن لهذا التطبيق مراقبة أنشطتك على الجهاز والشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"تتم إدارة ملفك الشخصي للعمل بواسطة <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nويمكن للمشرف مراقبة نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف.\n\nوتجدر الإشارة إلى أنك متصل أيضًا بشبكة افتراضية خاصة يمكن أن تراقب نشاط الشبكة."</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"شبكة افتراضية خاصة"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"تم ربطك بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
@@ -781,4 +781,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"استبدال"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"التطبيقات التي تعمل في الخلفية"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"انقر للحصول على تفاصيل حول البطارية واستخدام البيانات"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"لا يمكن للإعدادات التحقق من ردك لأن هناك تطبيقًا يحجب طلب الإذن."</string>
 </resources>

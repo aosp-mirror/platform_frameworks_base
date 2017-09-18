@@ -775,4 +775,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяніць"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Праграма хавае запыт на дазвол, таму ваш адказ немагчыма спраўдзіць у Наладах."</string>
 </resources>

@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Reemplazar"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps que se ejecutan en segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Presiona para obtener información sobre el uso de datos y de la batería"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Como una app está bloqueando una solicitud de permiso, Configuración no puede verificar tu respuesta."</string>
 </resources>

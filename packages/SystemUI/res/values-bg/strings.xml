@@ -606,7 +606,7 @@
     <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Цифрова клавиатура – <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Системни"</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Системни настройки"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Начало"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Скорошни"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Назад"</string>
@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Намаляване"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Затваряне"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Преместете надолу с плъзгане, за да отхвърлите"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Меню за режима „Картина в картина“"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> е в режима „Картина в картина“"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Меню за режима „Картина в картината“"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> е в режима „Картина в картината“"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>
     <string name="pip_play" msgid="1417176722760265888">"Пускане"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Поставяне на пауза"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяна"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Приложения, работещи на заден план"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"От Настройки не може да се получи потвърждение за отговора ви, защото заявката за разрешение се прикрива от приложение."</string>
 </resources>

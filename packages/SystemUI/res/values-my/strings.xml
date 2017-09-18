@@ -262,7 +262,7 @@
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ဖန်သားပြင် အနေအထားက ဒေါင်လိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ယခုတော့ မျက်နှာပြင်သည် အလိုအလျောက် လည်နေမည်။"</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"မျက်နှာပြင် အနေအထားကို ဘေးတိုက် အဖြစ် သော့ချထားသည်။"</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"မျက်နှာပြင် အနေအထားကို ထောင်လိုက် အဖြစ် သော့ချထားသည်။"</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"မျက်နှာပြင်အနေအထားကို ထောင်လိုက်အဖြစ် ပုံသေသတ်မှတ်ထားသည်။"</string>
     <string name="dessert_case" msgid="1295161776223959221">"မုန့်ထည့်သော ပုံး"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ဖန်သားပြင်အသုံးပြုမှု ချွေတာမှုစနစ်"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"အီသာနက်"</string>
@@ -308,13 +308,13 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"အရောင်များ ပြောင်းပြန်လုပ်ရန်"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"အရောင် မှန်ကန်စေခြင်း အခြေအနေ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"နောက်ထပ် ဆက်တင်များ"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"လုပ်ပြီး"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"ပြီးပါပြီ"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"ချိတ်ဆက်ထား"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"ဆက်သွယ်နေ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"တွဲချီပေးခြင်း"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ဟော့စပေါ့"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"အကြောင်းကြားချက်များ"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ဖလက်ရှမီး"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ဖလက်ရှ်မီး"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"မိုဘိုင်းဒေတာ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ဒေတာ သုံးစွဲမှု"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ကျန်ရှိ ဒေတာ"</string>
@@ -380,10 +380,10 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"အသုံးပြုသူကို ပြောင်းရန်၊ လက်ရှိ အသုံးပြုသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"လတ်တလော သုံးစွဲသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ပရိုဖိုင်ကို ပြရန်"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"သုံးသူ ထပ်ထည့်ရန်"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"အသုံးပြုသူ ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"အသုံးပြုသူ အသစ်"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ဧည့်သည်"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"ဧည့်သည့်ကို ထည့်ပေးရန်"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"ဧည့်သည့် ထည့်ရန်"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"ဧည့်သည်ကို ဖယ်ထုတ်လိုက်ရမလား?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ဒီချိတ်ဆက်မှု ထဲက အက်ပ်များ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
@@ -589,7 +589,7 @@
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"ညာ"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"ဌာန"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"တဘ်"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"နေရာခြားပါ"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter ခလုတ်"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"နောက်ပြန်ဖျက်ပါ"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"ဖွင့်ပါ/ခဏရပ်ပါ"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"အစားထိုးရန်"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"နောက်ခံတွင် ပွင့်နေသော အက်ပ်များ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ဘက်ထရီနှင့် ဒေတာအသုံးပြုမှု အသေးစိတ်ကို ကြည့်ရန် တို့ပါ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"အပလီကေးရှင်းတစ်ခုက ခွင့်ပြုချက်တောင်းခံမှုကို ပိတ်ထားသောကြောင့် ဆက်တင်များသည် သင်၏ လုပ်ဆောင်ကို တုံ့ပြန်နိုင်ခြင်းမရှိပါ။"</string>
 </resources>

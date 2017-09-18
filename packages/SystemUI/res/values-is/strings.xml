@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Skipta út"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Forrit sem keyra í bakgrunni"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Ýttu til að fá upplýsingar um rafhlöðu- og gagnanotkun"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Stillingar geta ekki staðfest svarið þitt vegna þess að forrit er að fela heimildarbeiðni."</string>
 </resources>

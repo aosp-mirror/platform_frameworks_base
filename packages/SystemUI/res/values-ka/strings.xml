@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"მობილური ინტერნეტი"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"მობილური ინტერნეტი ჩართულია"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"მობილური ინტერნეტი გამორთულია"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ის ჩართვა"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth ტეტერინგის ჩართვა"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"თვითმფრინავის რეჟიმი"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ჩართულია."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ბარათი არ არის."</string>
@@ -311,7 +311,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"დასრულდა"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"დაკავშირებულია"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"დაკავშირება..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"მოდემის რეჟიმი"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ტეტერინგი"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"წვდომის წერტილი"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"შეტყობინებები"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ფანარი"</string>
@@ -718,8 +718,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ჩაკეცვა"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"დახურვა"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"დასახურად ჩავლებით ჩამოიტანეთ ქვემოთ"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"მენიუ „გამოსახულება გამოსახულებაში“"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> იყენებს რეჟიმს „გამოსახულება გამოსახულებაში“"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"მენიუ „ეკრანი ეკრანში“"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> იყენებს რეჟიმს „ეკრანი ეკრანში“"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"თუ არ გსურთ, რომ <xliff:g id="NAME">%s</xliff:g> ამ ფუნქციას იყენებდეს, აქ შეხებით შეგიძლიათ გახსნათ პარამეტრები და გამორთოთ."</string>
     <string name="pip_play" msgid="1417176722760265888">"დაკვრა"</string>
     <string name="pip_pause" msgid="8881063404466476571">"დაპაუზება"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ჩანაცვლება"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ფონურ რეჟიმში გაშვებული აპები"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"შეეხეთ ბატარეისა და მონაცემების მოხმარების შესახებ დეტალური ინფორმაციისთვის"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ვინაიდან აპი ფარავს ნებართვის მოთხოვნას, პარამეტრების მიერ თქვენი პასუხი ვერ დასტურდება."</string>
 </resources>

@@ -43,7 +43,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activar"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar o aforro de batería"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configuración"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Xirar pantalla automaticamente"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"APAGAR"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
@@ -252,7 +252,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Localización establecida polo GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de localización activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Eliminar todas as notificacións."</string>
-    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"<xliff:g id="NUMBER">%s</xliff:g> máis"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificacións máis no grupo.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación máis no grupo.</item>
@@ -614,7 +614,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Volver"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notificacións"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Atallos de teclado"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Cambiar de método de entrada"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Cambiar de método de introdución"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplicacións"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Asistente"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Navegador"</string>
@@ -753,7 +753,7 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Almacenamento"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplicacións instantáneas"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"As aplicacións instantáneas non precisan instalación."</string>
-    <string name="app_info" msgid="6856026610594615344">"Información de aplicacións"</string>
+    <string name="app_info" msgid="6856026610594615344">"Info. da aplicación"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Acceder á web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Datos móbiles"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"A wifi está desactivada"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Substituír"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicacións que se executan en segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toca para obter información sobre o uso de datos e a batería"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Dado que unha aplicación se superpón sobre unha solicitude de permiso, a configuración non pode verificar a túa resposta."</string>
 </resources>

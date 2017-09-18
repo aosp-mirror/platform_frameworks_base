@@ -269,8 +269,8 @@
     <string name="start_dreams" msgid="5640361424498338327">"Écran de veille"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne pas déranger"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priorités seulement"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmes uniquement"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Prioritaires seulement"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmes seulement"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Aucune interruption"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
@@ -351,7 +351,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Chargée dans <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"N\'est pas en charge"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Le réseau peut\nêtre surveillé."</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Recherche"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faire glisser le doigt vers le haut : <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser votre doigt vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="7577965386868311310">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
@@ -371,7 +371,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Aucune interruption"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priorités seulement"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes uniquement"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes seulement"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorités\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Remplacer"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Applications qui fonctionnent en arrière-plan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Une application obscurcit une demande d\'autorisation, alors Paramètres ne peut pas vérifier votre réponse."</string>
 </resources>

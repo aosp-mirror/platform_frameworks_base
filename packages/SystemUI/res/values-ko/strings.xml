@@ -242,9 +242,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"충전 중"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"모바일 데이터가 일시 중지됨"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"모바일 데이터가 일시중지됨"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속하면 데이터 사용량에 따른 요금이 부과될 수 있습니다."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속하면 데이터 사용량에 따라 요금이 부과될 수 있습니다."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"재개"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>
@@ -666,7 +666,7 @@
     <string name="left_icon" msgid="3096287125959387541">"왼쪽 아이콘"</string>
     <string name="right_icon" msgid="3952104823293824311">"오른쪽 아이콘"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"드래그하여 타일 추가"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"삭제하려면 여기를 드래그"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"여기로 드래그하여 삭제"</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>
     <string name="tuner_time" msgid="6572217313285536011">"시간"</string>
   <string-array name="clock_options">
@@ -750,7 +750,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"일반 메시지"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"저장소"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"저장공간"</string>
     <string name="instant_apps" msgid="6647570248119804907">"인스턴트 앱"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"인스턴트 앱은 설치가 필요하지 않습니다."</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"바꾸기"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"백그라운드에서 실행 중인 앱"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"탭하여 배터리 및 데이터 사용량 확인"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"앱이 권한 요청을 가리고 있기 때문에 설정에서 내 응답을 확인할 수 없습니다."</string>
 </resources>

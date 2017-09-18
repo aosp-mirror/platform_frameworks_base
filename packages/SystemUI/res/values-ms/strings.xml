@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Gantikan"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apl yang berjalan di latar belakang"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Ketik untuk mendapatkan butiran tentang penggunaan kuasa bateri dan data"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Oleh sebab apl melindungi permintaan kebenaran, Tetapan tidak dapat mengesahkan jawapan anda."</string>
 </resources>

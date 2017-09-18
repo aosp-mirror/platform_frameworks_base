@@ -590,7 +590,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Sinistra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Destra"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Al centro"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Scheda"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Spazio"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Invio"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
@@ -720,8 +720,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Riduci a icona"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Chiudi"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trascina verso il basso per ignorare"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture-in-picture"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> è in picture-in-picture"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture in picture"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> è in Picture in picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Se non desideri che l\'app <xliff:g id="NAME">%s</xliff:g> utilizzi questa funzione, tocca per aprire le impostazioni e disattivarla."</string>
     <string name="pip_play" msgid="1417176722760265888">"Riproduci"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Metti in pausa"</string>
@@ -767,4 +767,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Sostituisci"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"App in esecuzione in background"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Un\'app sta oscurando una richiesta di autorizzazione, pertanto Impostazioni non può verificare la tua risposta."</string>
 </resources>

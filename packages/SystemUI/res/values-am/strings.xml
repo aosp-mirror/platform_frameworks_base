@@ -298,7 +298,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ጠፍቷል"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi በርቷል"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ምንም የWi-Fi  አውታረ መረቦች የሉም"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ውሰድ"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"በመውሰድ ላይ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ያልተሰየመ መሳሪያ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ለመውሰድ ዝግጁ"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ተካ"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"በጀርባ ውስጥ የሚያሄዱ መተግበሪያዎች"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"በባትሪ እና ውሂብ አጠቃቀም ላይ ዝርዝሮችን ለማግኘት መታ ያድርጉ"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"አንድ መተግበሪያ የፍቃድ ጥያቄ እያገደ ስለሆነ ቅንብሮች ጥያቄዎን ማረጋገጥ አይችሉም።"</string>
 </resources>

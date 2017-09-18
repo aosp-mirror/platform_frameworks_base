@@ -67,12 +67,12 @@
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Սարքի վրա այս պահին մուտք գործած օգտատերը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթից օգտվելու համար մուտք գործեք ադմինիստրատորի հաշվով:"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Խոշորացնել` էկրանը լցնելու համար"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ձգել` էկրանը լցնելու համար"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Պահում է էկրանի հանույթը…"</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Պահում է էկրանի հանույթը..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Էկրանի հանույթը պահվում է:"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Էկրանի հանույթը լուսանկարվել է:"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Պահում է էկրանի պատկերը…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Պահում է էկրանի պատկերը..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Էկրանի պատկերը պահվում է:"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Էկրանի պատկերը լուսանկարվել է:"</string>
     <string name="screenshot_saved_text" msgid="2685605830386712477">"Հպեք՝ էկրանի պատկերը տեսնելու համար:"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Չհաջողվեց լուսանկարել էկրանի հանույթը:"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Չհաջողվեց լուսանկարել էկրանի պատկերը:"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Էկրանի պատկերը պահելիս խնդիր առաջացավ:"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Չհաջողվեց պահել էկրանի պատկերը սահմանափակ հիշողության պատճառով:"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Հավելվածը կամ ձեր կազմակերպությունը չի թույլատրում էկրանի պատկերի ստացումը"</string>
@@ -290,7 +290,7 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Կարգավորումներ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Ժամանակը"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ես"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"Օտատեր"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Օգտատեր"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Նոր օգտատեր"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Միացված չէ"</string>
@@ -383,7 +383,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Նոր օգտատեր"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Հյուր"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Հյուր ավելացնել"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Ավելացնել հյուր"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Հեռացնել հյուրին"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Հեռացնե՞լ հյուրին:"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
@@ -409,7 +409,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ծրագիրը կսկսի հավաքել այն ամենն ինչ ցուցադրվում է ձեր էկրանին:"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Այլևս ցույց չտալ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Մաքրել բոլորը"</string>
-    <string name="media_projection_action_text" msgid="8470872969457985954">"Մեկնարկել հիմա"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Սկսել հիմա"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ծանուցումներ չկան"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Պրոֆիլը կարող է վերահսկվել"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Ցանցը կարող է վերահսկվել"</string>
@@ -719,7 +719,7 @@
     <string name="pip_phone_close" msgid="8416647892889710330">"Փակել"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Քաշեք վար՝ փակելու համար"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"«Նկար նկարի մեջ» ռեժիմի ընտրացանկ"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>-ը «նկարը նկարի մեջ» ռեժիմում է"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>-ը «Նկար նկարի մեջ» ռեժիմում է"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
     <string name="pip_play" msgid="1417176722760265888">"Նվագարկել"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Դադարեցնել"</string>
@@ -748,7 +748,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ծանուցումներ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Էկրանի պատկերներ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Ընդհանուր հաղորդագրություններ"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"Հիշողություն"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Տարածք"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Ակնթարթորեն գործարկվող հավելվածներ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Ակնթարթորեն գործարկվող հավելվածները տեղադրում չեն պահանջում։"</string>
     <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Փոխարինել"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Ֆոնային ռեժիմում աշխատող հավելվածներ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Քանի որ ներածումն արգելափակված է ինչ-որ հավելվածի կողմից, Կարգավորումները չեն կարող հաստատել ձեր պատասխանը:"</string>
 </resources>

@@ -384,7 +384,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Perjungti naudotoją, dabartinis naudotojas <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Dabartinis naudotojas <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Rodyti profilį"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"Naudotojo pridėjimas"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Pridėti naudotoją"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Naujas naudotojas"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Svečias"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Pridėti svečią"</string>
@@ -773,4 +773,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Pakeisti"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Programos, veikiančios fone"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Palieskite ir sužinokite išsamios informacijos apie akumuliatoriaus bei duomenų naudojimą"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Kadangi programa užstoja leidimo užklausą, nustatymuose negalima patvirtinti jūsų atsakymo."</string>
 </resources>

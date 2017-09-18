@@ -352,8 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Пребарај"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Лизгај нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Лизгај налево за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Нема да ве вознемируваат звуци и вибрации, освен од аларми, потсетници, настани и повикувачи што ќе ги наведете. Сѐ уште ќе слушате сѐ што ќе изберете да пуштите, што опфаќа музика, видеа и игри."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Нема да ве вознемируваат звуци и вибрации, освен од аларми. Сѐ уште ќе слушате сѐ што ќе изберете да пуштите, што опфаќа музика, видеа и игри."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Нема да ве вознемируваат звуци и вибрации, освен од аларми, потсетници, настани и повикувачи што ќе ги наведете. Сѐ уште ќе слушате сѐ што ќе изберете да пуштите, како музика, видеа и игри."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Нема да ве вознемируваат звуци и вибрации, освен од аларми. Сѐ уште ќе слушате сѐ што ќе изберете да пуштите, како музика, видеа и игри."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Приспособи"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ова ги блокира СИТЕ звуци и вибрации, вклучувајќи ги и оние од алармите, музиката, видеата и игрите. Сѐ уште ќе може да воспоставувате телефонски повици."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ова ги блокира СИТЕ звуци и вибрации, вклучувајќи ги и оние од алармите, музиката, видеата и игрите."</string>
@@ -588,8 +588,8 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Стрелка налево"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Стрелка надесно"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Центар"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Картичка"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Празно место"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Внеси"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Бришење наназад"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Пушти/Паузирај"</string>
@@ -748,7 +748,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Предупредувања"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Слики од екранот"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Општи пораки"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"Меморија"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Капацитет"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Инстант апликации"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Инстант апликациите нема потреба да се инсталираат."</string>
     <string name="app_info" msgid="6856026610594615344">"Информации за апликација"</string>
@@ -765,4 +765,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замени"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Апликациите се извршуваат во заднина"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Бидејќи апликацијата го прикрива барањето за дозвола, „Поставките“ не може да го потврдат вашиот одговор."</string>
 </resources>
