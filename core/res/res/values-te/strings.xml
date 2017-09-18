@@ -230,8 +230,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"సెట్టింగ్‌లు"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"సహాయం"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"వాయిస్ అసిస్టెంట్"</string>
-    <!-- no translation found for global_action_lockdown (2277328351790053477) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="2277328351790053477">"లాక్‌డౌన్ నమోదు చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"వర్చువల్ కీబోర్డ్"</string>
