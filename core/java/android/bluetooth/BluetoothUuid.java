@@ -232,7 +232,7 @@ public final class BluetoothUuid {
      */
     public static int getServiceIdentifierFromParcelUuid(ParcelUuid parcelUuid) {
         UUID uuid = parcelUuid.getUuid();
-        long value = (uuid.getMostSignificantBits() & 0x0000FFFF00000000L) >>> 32;
+        long value = (uuid.getMostSignificantBits() & 0xFFFFFFFF00000000L) >>> 32;
         return (int) value;
     }
 
