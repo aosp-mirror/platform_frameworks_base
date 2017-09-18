@@ -271,7 +271,7 @@ public final class AutoFillUI {
                     if (mCallback != null) {
                         mCallback.save();
                     }
-                    destroySaveUiUiThread(pendingSaveUi);
+                    destroySaveUiUiThread(pendingSaveUi, true);
                 }
 
                 @Override
@@ -289,7 +289,7 @@ public final class AutoFillUI {
                     if (mCallback != null) {
                         mCallback.cancelSave();
                     }
-                    destroySaveUiUiThread(pendingSaveUi);
+                    destroySaveUiUiThread(pendingSaveUi, true);
                 }
 
                 @Override
@@ -331,8 +331,8 @@ public final class AutoFillUI {
      * Destroy all UI affordances.
      */
     public void destroyAll(@Nullable PendingUi pendingSaveUi,
-            @Nullable AutoFillUiCallback callback) {
-        mHandler.post(() -> destroyAllUiThread(pendingSaveUi, callback));
+            @Nullable AutoFillUiCallback callback, boolean notifyClient) {
+        mHandler.post(() -> destroyAllUiThread(pendingSaveUi, callback, notifyClient));
     }
 
     public void dump(PrintWriter pw) {
@@ -375,7 +375,7 @@ public final class AutoFillUI {
     }
 
     @android.annotation.UiThread
-    private void destroySaveUiUiThread(@Nullable PendingUi pendingSaveUi) {
+    private void destroySaveUiUiThread(@Nullable PendingUi pendingSaveUi, boolean notifyClient) {
         if (mSaveUi == null) {
             // Calling destroySaveUiUiThread() twice is normal - it usually happens when the
             // first call is made after the SaveUI is hidden and the second when the session is
@@ -387,7 +387,7 @@ public final class AutoFillUI {
         if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): " + pendingSaveUi);
         mSaveUi.destroy();
         mSaveUi = null;
-        if (pendingSaveUi != null) {
+        if (pendingSaveUi != null && notifyClient) {
             try {
                 if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): notifying client");
                 pendingSaveUi.client.setSaveUiState(pendingSaveUi.id, false);
@@ -399,9 +399,9 @@ public final class AutoFillUI {
 
     @android.annotation.UiThread
     private void destroyAllUiThread(@Nullable PendingUi pendingSaveUi,
-            @Nullable AutoFillUiCallback callback) {
+            @Nullable AutoFillUiCallback callback, boolean notifyClient) {
         hideFillUiUiThread(callback);
-        destroySaveUiUiThread(pendingSaveUi);
+        destroySaveUiUiThread(pendingSaveUi, notifyClient);
     }
 
     @android.annotation.UiThread
@@ -413,7 +413,7 @@ public final class AutoFillUI {
                 Slog.d(TAG, "hideAllUiThread(): "
                         + "destroying Save UI because pending restoration is finished");
             }
-            destroySaveUiUiThread(pendingSaveUi);
+            destroySaveUiUiThread(pendingSaveUi, true);
         }
     }
 }
