@@ -10071,6 +10071,27 @@ public class Intent implements Parcelable, Cloneable {
         return false;
     }
 
+    /**
+     * Convert the dock state to a human readable format.
+     * @hide
+     */
+    public static String dockStateToString(int dock) {
+        switch (dock) {
+            case EXTRA_DOCK_STATE_HE_DESK:
+                return "EXTRA_DOCK_STATE_HE_DESK";
+            case EXTRA_DOCK_STATE_LE_DESK:
+                return "EXTRA_DOCK_STATE_LE_DESK";
+            case EXTRA_DOCK_STATE_CAR:
+                return "EXTRA_DOCK_STATE_CAR";
+            case EXTRA_DOCK_STATE_DESK:
+                return "EXTRA_DOCK_STATE_DESK";
+            case EXTRA_DOCK_STATE_UNDOCKED:
+                return "EXTRA_DOCK_STATE_UNDOCKED";
+            default:
+                return Integer.toString(dock);
+        }
+    }
+
     private static ClipData.Item makeClipItem(ArrayList<Uri> streams, ArrayList<CharSequence> texts,
             ArrayList<String> htmlTexts, int which) {
         Uri uri = streams != null ? streams.get(which) : null;

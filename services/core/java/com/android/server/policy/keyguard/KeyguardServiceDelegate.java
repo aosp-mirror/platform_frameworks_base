@@ -13,6 +13,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -412,13 +413,45 @@ public class KeyguardServiceDelegate {
         pw.println(prefix + "systemIsReady=" + mKeyguardState.systemIsReady);
         pw.println(prefix + "deviceHasKeyguard=" + mKeyguardState.deviceHasKeyguard);
         pw.println(prefix + "enabled=" + mKeyguardState.enabled);
-        pw.println(prefix + "offReason=" + mKeyguardState.offReason);
+        pw.println(prefix + "offReason=" +
+                WindowManagerPolicy.offReasonToString(mKeyguardState.offReason));
         pw.println(prefix + "currentUser=" + mKeyguardState.currentUser);
         pw.println(prefix + "bootCompleted=" + mKeyguardState.bootCompleted);
-        pw.println(prefix + "screenState=" + mKeyguardState.screenState);
-        pw.println(prefix + "interactiveState=" + mKeyguardState.interactiveState);
+        pw.println(prefix + "screenState=" + screenStateToString(mKeyguardState.screenState));
+        pw.println(prefix + "interactiveState=" +
+                interactiveStateToString(mKeyguardState.interactiveState));
         if (mKeyguardService != null) {
             mKeyguardService.dump(prefix, pw);
+        }
+    }
+
+    private static String screenStateToString(int screen) {
+        switch (screen) {
+            case SCREEN_STATE_OFF:
+                return "SCREEN_STATE_OFF";
+            case SCREEN_STATE_TURNING_ON:
+                return "SCREEN_STATE_TURNING_ON";
+            case SCREEN_STATE_ON:
+                return "SCREEN_STATE_ON";
+            case SCREEN_STATE_TURNING_OFF:
+                return "SCREEN_STATE_TURNING_OFF";
+            default:
+                return Integer.toString(screen);
+        }
+    }
+
+    private static String interactiveStateToString(int interactive) {
+        switch (interactive) {
+            case INTERACTIVE_STATE_SLEEP:
+                return "INTERACTIVE_STATE_SLEEP";
+            case INTERACTIVE_STATE_WAKING:
+                return "INTERACTIVE_STATE_WAKING";
+            case INTERACTIVE_STATE_AWAKE:
+                return "INTERACTIVE_STATE_AWAKE";
+            case INTERACTIVE_STATE_GOING_TO_SLEEP:
+                return "INTERACTIVE_STATE_GOING_TO_SLEEP";
+            default:
+                return Integer.toString(interactive);
         }
     }
 }
