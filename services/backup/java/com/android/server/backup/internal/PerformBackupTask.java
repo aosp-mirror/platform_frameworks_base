@@ -227,9 +227,8 @@ public class PerformBackupTask implements BackupRestoreTask {
                     if (!mFinished) {
                         finalizeBackup();
                     } else {
-                        Slog.e(TAG, "Duplicate finish");
+                        Slog.e(TAG, "Duplicate finish of K/V pass");
                     }
-                    mFinished = true;
                     break;
             }
         }
@@ -609,6 +608,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     break;
             }
         }
+        mFinished = true;
         Slog.i(TAG, "K/V backup pass finished.");
         // Only once we're entirely finished do we release the wakelock for k/v backup.
         backupManagerService.getWakelock().release();
