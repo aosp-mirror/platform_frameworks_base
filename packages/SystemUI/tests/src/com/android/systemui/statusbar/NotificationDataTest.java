@@ -135,5 +135,11 @@ public class NotificationDataTest extends SysuiTestCase {
         public NotificationChannel getChannel(String key) {
             return new NotificationChannel(null, null, 0);
         }
+
+        @Override
+        protected boolean getRanking(String key, NotificationListenerService.Ranking outRanking) {
+            super.getRanking(key, outRanking);
+            return true;
+        }
     }
 }
