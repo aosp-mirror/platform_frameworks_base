@@ -377,8 +377,8 @@
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Petit"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Par défaut"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Grand"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Plus grand"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Le plus grand"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Très grand"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Extrêmement grand"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personnalisé (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Aide et commentaires"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
