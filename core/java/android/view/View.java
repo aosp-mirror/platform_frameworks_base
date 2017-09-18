@@ -127,6 +127,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1078,6 +1079,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
      * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE}</code>).
      *
+     * <p>When annotating a view with this hint, it's recommended to use a date autofill value to
+     * avoid ambiguity when the autofill service provides a value for it. To understand why a
+     * value can be ambiguous, consider "April of 2020", which could be represented as either of
+     * the following options:
+     *
+     * <ul>
+     *   <li>{@code "04/2020"}
+     *   <li>{@code "4/2020"}
+     *   <li>{@code "2020/04"}
+     *   <li>{@code "2020/4"}
+     *   <li>{@code "April/2020"}
+     *   <li>{@code "Apr/2020"}
+     * </ul>
+     *
+     * <p>You define a date autofill value for the view by overriding the following methods:
+     *
+     * <ol>
+     *   <li>{@link #getAutofillType()} to return {@link #AUTOFILL_TYPE_DATE}.
+     *   <li>{@link #getAutofillValue()} to return a
+     *       {@link AutofillValue#forDate(long) date autofillvalue}.
+     *   <li>{@link #autofill(AutofillValue)} to expect a data autofillvalue.
+     * </ol>
+     *
      * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE =
@@ -1089,6 +1113,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Can be used with either {@link #setAutofillHints(String[])} or
      * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
      * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH}</code>).
+     *
+     * <p>When annotating a view with this hint, it's recommended to use a text autofill value
+     * whose value is the numerical representation of the month, starting on {@code 1} to avoid
+     * ambiguity when the autofill service provides a value for it. To understand why a
+     * value can be ambiguous, consider "January", which could be represented as either of
+     *
+     * <ul>
+     *   <li>{@code "1"}: recommended way.
+     *   <li>{@code "0"}: if following the {@link Calendar#MONTH} convention.
+     *   <li>{@code "January"}: full name, in English.
+     *   <li>{@code "jan"}: abbreviated name, in English.
+     *   <li>{@code "Janeiro"}: full name, in another language.
+     * </ul>
+     *
+     * <p>Another recommended approach is to use a date autofill value - see
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE} for more details.
      *
      * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
