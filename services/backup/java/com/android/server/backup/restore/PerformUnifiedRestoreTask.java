@@ -779,6 +779,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     // state RESTORE_FINISHED : provide the "no more data" signpost callback at the end
     private void restoreFinished() {
+        if (DEBUG) {
+            Slog.d(TAG, "restoreFinished packageName=" + mCurrentPackage.packageName);
+        }
         try {
             backupManagerService
                     .prepareOperationTimeout(mEphemeralOpToken,
