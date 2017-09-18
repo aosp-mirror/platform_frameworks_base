@@ -871,7 +871,7 @@ public class PackageManagerTests extends AndroidTestCase {
             receiver = new InstallReceiver(ip.pkg.packageName);
         }
         try {
-            invokeInstallPackage(ip.packageURI, flags, receiver, replace);
+            invokeInstallPackage(ip.packageURI, flags, receiver, true);
             if (replace) {
                 assertInstall(ip.pkg, flags, ip.pkg.installLocation);
             }
@@ -881,7 +881,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testReplaceFailNormalInternal() throws Exception {
+    public void testReplaceFlagDoesNotNeedToBeSet() throws Exception {
         sampleReplaceFromRawResource(0);
     }
 
