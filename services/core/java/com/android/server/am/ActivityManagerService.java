@@ -682,11 +682,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     ActivityInfo mLastAddedTaskActivity;
 
     /**
-     * List of packages whitelisted by DevicePolicyManager for locktask. Indexed by userId.
-     */
-    SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
-
-    /**
      * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
      */
     String mDeviceOwnerName;
@@ -10882,7 +10877,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void updateLockTaskPackages(int userId, String[] packages) {
-        // TODO: move this into LockTaskController
         final int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != SYSTEM_UID) {
             enforceCallingPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
@@ -10891,8 +10885,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
                     Arrays.toString(packages));
-            mLockTaskPackages.put(userId, packages);
-            mLockTaskController.onLockTaskPackagesUpdated();
+            mLockTaskController.updateLockTaskPackages(userId, packages);
         }
     }
 
