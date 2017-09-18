@@ -77,6 +77,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
@@ -546,9 +547,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         @Override
         public void onUnlockUser(int userId) {
             if (userId == UserHandle.USER_SYSTEM) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
                 sInstance.initialize(userId);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 // Migrate legacy setting
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
                 if (!backupSettingMigrated(userId)) {
                     if (DEBUG) {
                         Slog.i(TAG, "Backup enable apparently not migrated");
@@ -569,12 +573,15 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         }
                     }
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
                 try {
                     sInstance.setBackupEnabled(readBackupEnableState(userId));
                 } catch (RemoteException e) {
                     // can't happen; it's a local object
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }
