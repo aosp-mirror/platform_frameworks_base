@@ -1146,20 +1146,6 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            /*
-             * StorageManagerService has a few dependencies: Notification Manager and
-             * AppWidget Provider. Make sure StorageManagerService is completely started
-             * first before continuing.
-             */
-            if (storageManager != null && !mOnlyCore) {
-                traceBeginAndSlog("WaitForAsecScan");
-                try {
-                    storageManager.waitForAsecScan();
-                } catch (RemoteException ignored) {
-                }
-                traceEnd();
-            }
-
             traceBeginAndSlog("StartNotificationManager");
             mSystemServiceManager.startService(NotificationManagerService.class);
             SystemNotificationChannels.createAll(context);
