@@ -9530,6 +9530,22 @@ public final class Settings {
         public static final String DEVICE_POLICY_CONSTANTS = "device_policy_constants";
 
         /**
+         * TextClassifier specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * <pre>
+         * smart_selection_dark_launch              (boolean)
+         * smart_selection_enabled_for_edit_text    (boolean)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * see also android.view.textclassifier.TextClassifierConstants
+         */
+        public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
