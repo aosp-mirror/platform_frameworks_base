@@ -18,7 +18,6 @@
 
     <!-- Dialog title to identify the request from a VPN application. [CHAR LIMIT=60] -->
     <string name="prompt">Connection request</string>
-
     <!-- Dialog message to warn about the risk of using a VPN application. [CHAR LIMIT=NONE] -->
     <string name="warning"><xliff:g id="app">%s</xliff:g> wants to set up a VPN connection
         that allows it to monitor network traffic. Only accept if you trust the source.
@@ -31,11 +30,6 @@
 
     <!-- Dialog title for built-in VPN. [CHAR LIMIT=40]  -->
     <string name="legacy_title">VPN is connected</string>
-    <!-- Button label to configure the current VPN session. [CHAR LIMIT=20] -->
-    <string name="configure">Configure</string>
-    <!-- Button label to disconnect the current VPN session. [CHAR LIMIT=20] -->
-    <string name="disconnect">Disconnect</string>
-
     <!-- Label for the name of the current VPN session. [CHAR LIMIT=20] -->
     <string name="session">Session:</string>
     <!-- Label for the duration of the current VPN session. [CHAR LIMIT=20] -->
@@ -44,10 +38,55 @@
     <string name="data_transmitted">Sent:</string>
     <!-- Label for the network usage of data received over VPN. [CHAR LIMIT=20] -->
     <string name="data_received">Received:</string>
-
     <!-- Formatted string for the network usage over VPN. [CHAR LIMIT=40] -->
     <string name="data_value_format">
         <xliff:g id="number">%1$s</xliff:g> bytes /
         <xliff:g id="number">%2$s</xliff:g> packets
     </string>
+
+    <!-- This string is the title of a dialog. The dialog shows up for Android users when always-on
+     VPN, a VPN that's set to always stay connected, loses its connection. [CHAR LIMIT=60] -->
+    <string name="always_on_disconnected_title">Can\'t connect to always-on VPN</string>
+    <!-- This message is part of a dialog. The dialog shows up for users when always-on VPN, a VPN
+         that's set to always stay connected, loses its connection. Until the phone can reconnect to
+         the VPN, it'll automatically connect to a public network if possible. This text is followed
+         by a clickable link that leads to VPN settings. [CHAR LIMIT=NONE] -->
+    <string name="always_on_disconnected_message">
+        <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> is set up to stay connected all
+        the time, but it can\'t connect right now. Your phone will use a public network until it can
+        reconnect to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>.
+    </string>
+    <!-- This message is part of a dialog. The dialog shows up for users when always-on VPN, a VPN
+         that's set to always stay connected, loses its connection while in the lockdown mode.
+         Until the phone can reconnect to the VPN, it won't be able to connect to the Internet. This
+         text is followed by a clickable link that leads to VPN settings. [CHAR LIMIT=NONE] -->
+    <string name="always_on_disconnected_message_lockdown">
+        <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> is set up to stay connected all
+        the time, but it can\'t connect right now. You won\'t have a connection until the VPN can
+        reconnect.
+    </string>
+    <!-- This is a space separating the body text and the "Change VPN settings" link that follows
+         it. [CHAR LIMIT=5] -->
+    <string name="always_on_disconnected_message_separator">" "</string>
+    <!-- This is a clickable link appended at the end of the body text of a dialog. The dialog shows
+         up for users when always-on VPN, a VPN that's set to always stay connected, loses its
+         connection. This link takes the user to the VPN page in Settings. -->
+    <string name="always_on_disconnected_message_settings_link">Change VPN settings</string>
+
+    <!-- This is the label of a button in a dialog. The button takes the user to the VPN settings
+         screen. [CHAR LIMIT=20] -->
+    <string name="configure">Configure</string>
+    <!-- This is the label of a button in a dialog. The button lets the user disconnect from the
+         current VPN connection. [CHAR LIMIT=20] -->
+    <string name="disconnect">Disconnect</string>
+    <!-- This button is part of a dialog, and it opens the user's VPN app. The dialog shows up for
+         users when always-on VPN, a VPN that's set to always stay connected, loses its connection.
+         Until the phone can reconnect to the VPN, it may automatically connect to a public network.
+         If it doesn't, the user won't have a connection until the VPN reconnects. [CHAR LIMIT=20]
+         -->
+    <string name="open_app">Open app</string>
+    <!-- This is the label of a button in a dialog. The button lets the user dismiss the dialog
+         without any consequences. [CHAR LIMIT=20] -->
+    <string name="dismiss">Dismiss</string>
+
 </resources>

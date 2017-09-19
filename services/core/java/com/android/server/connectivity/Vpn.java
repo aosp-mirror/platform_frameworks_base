@@ -1416,7 +1416,11 @@ public class Vpn {
                 notificationManager.cancelAsUser(TAG, SystemMessage.NOTE_VPN_DISCONNECTED, user);
                 return;
             }
-            final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
+            final Intent intent = new Intent();
+            intent.setComponent(ComponentName.unflattenFromString(mContext.getString(
+                    R.string.config_customVpnAlwaysOnDisconnectedDialogComponent)));
+            intent.putExtra("lockdown", mLockdown);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             final PendingIntent configIntent = mSystemServices.pendingIntentGetActivityAsUser(
                     intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT, user);
             final Notification.Builder builder =
