@@ -17,6 +17,7 @@
 package com.android.internal.telephony.gsm;
 
 import android.telephony.PhoneNumberUtils;
+
 import java.text.ParseException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsAddress;
@@ -71,8 +72,11 @@ public class GsmSmsAddress extends SmsAddress {
                 // Make sure the final unused BCD digit is 0xf
                 origBytes[length - 1] |= 0xf0;
             }
-            address = PhoneNumberUtils.calledPartyBCDToString(origBytes,
-                    OFFSET_TOA, length - OFFSET_TOA);
+            address = PhoneNumberUtils.calledPartyBCDToString(
+                    origBytes,
+                    OFFSET_TOA,
+                    length - OFFSET_TOA,
+                    PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
 
             // And restore origBytes
             origBytes[length - 1] = lastByte;
