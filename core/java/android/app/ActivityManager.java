@@ -1152,6 +1152,7 @@ public class ActivityManager {
      * E.g. freeform, split-screen, picture-in-picture.
      * @hide
      */
+    @TestApi
     static public boolean supportsMultiWindow(Context context) {
         // On watches, multi-window is used to present essential system UI, and thus it must be
         // supported regardless of device memory characteristics.
@@ -1166,6 +1167,7 @@ public class ActivityManager {
      * Returns true if the system supports split screen multi-window.
      * @hide
      */
+    @TestApi
     static public boolean supportsSplitScreenMultiWindow(Context context) {
         return supportsMultiWindow(context)
                 && Resources.getSystem().getBoolean(

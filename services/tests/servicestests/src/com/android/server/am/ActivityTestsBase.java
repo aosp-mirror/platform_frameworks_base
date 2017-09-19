@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.any;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.doAnswer;
 
 import org.mockito.invocation.InvocationOnMock;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +32,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
@@ -167,8 +168,11 @@ public class ActivityTestsBase {
 
         public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
             super(service, looper);
+            mDisplayManager =
+                    (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mWindowManager = prepareMockWindowManager();
-            mDisplay = new ActivityDisplay();
+            mDisplay = new ActivityDisplay(this, DEFAULT_DISPLAY);
+            attachDisplay(mDisplay);
         }
 
         // TODO: Use Mockito spy instead. Currently not possible due to TestActivityStackSupervisor
@@ -220,17 +224,15 @@ public class ActivityTestsBase {
 
         @Override
         ActivityStack createStack(int stackId, ActivityDisplay display, boolean onTop) {
-            final RecentTasks recents =
-                    new RecentTasks(mService, mService.mStackSupervisor);
             if (stackId == PINNED_STACK_ID) {
-                return new PinnedActivityStack(display, stackId, this, recents, onTop) {
+                return new PinnedActivityStack(display, stackId, this, onTop) {
                     @Override
                     Rect getDefaultPictureInPictureBounds(float aspectRatio) {
                         return new Rect(50, 50, 100, 100);
                     }
                 };
             } else {
-                return new TestActivityStack(display, stackId, this, recents, onTop);
+                return new TestActivityStack(display, stackId, this, onTop);
             }
         }
 
@@ -280,9 +282,9 @@ public class ActivityTestsBase {
             extends ActivityStack<T> implements ActivityStackReporter {
         private int mOnActivityRemovedFromStackCount = 0;
         private T mContainerController;
-        TestActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
-                ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
-            super(display, stackId, supervisor, recentTasks, onTop);
+        TestActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
+                boolean onTop) {
+            super(display, stackId, supervisor, onTop);
         }
 
         @Override

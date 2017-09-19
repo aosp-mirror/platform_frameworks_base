@@ -32,9 +32,9 @@ import java.util.List;
 class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         implements PinnedStackWindowListener {
 
-    PinnedActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
-            ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
-        super(display, stackId, supervisor, recentTasks, onTop);
+    PinnedActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
+            boolean onTop) {
+        super(display, stackId, supervisor, onTop);
     }
 
     @Override
