@@ -1722,21 +1722,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         out.set(mContentRect);
     }
 
-    TaskStack addStackToDisplay(int stackId, boolean onTop) {
+    TaskStack addStackToDisplay(int stackId, boolean onTop, StackWindowController controller) {
         if (DEBUG_STACK) Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId="
                 + mDisplayId);
 
         TaskStack stack = getStackById(stackId);
         if (stack != null) {
-            // It's already attached to the display...clear mDeferRemoval and move stack to
-            // appropriate z-order on display as needed.
+            // It's already attached to the display...clear mDeferRemoval, set controller, and move
+            // stack to appropriate z-order on display as needed.
             stack.mDeferRemoval = false;
+            stack.setController(controller);
             // We're not moving the display to front when we're adding stacks, only when
             // requested to change the position of stack explicitly.
             mTaskStackContainers.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, stack,
                     false /* includingParents */);
         } else {
-            stack = new TaskStack(mService, stackId);
+            stack = new TaskStack(mService, stackId, controller);
             mTaskStackContainers.addStackToDisplay(stack, onTop);
         }
 
