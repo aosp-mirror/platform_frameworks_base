@@ -166,7 +166,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -1639,6 +1638,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return true;
         }
 
+        // Check if caller is already present on display
+        final boolean uidPresentOnDisplay = activityDisplay.isUidPresent(callingUid);
+
         final int displayOwnerUid = activityDisplay.mDisplay.getOwnerUid();
         if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
                 && displayOwnerUid != aInfo.applicationInfo.uid) {
@@ -1651,7 +1653,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
             // Check if the caller is allowed to embed activities from other apps.
             if (mService.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
-                    == PERMISSION_DENIED) {
+                    == PERMISSION_DENIED && !uidPresentOnDisplay) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                         + " disallow activity embedding without permission.");
                 return false;
@@ -1672,8 +1674,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return true;
         }
 
-        // Check if caller is present on display
-        if (activityDisplay.isUidPresent(callingUid)) {
+        if (uidPresentOnDisplay) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                     + " allow launch for caller present on the display");
             return true;
@@ -3556,15 +3557,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
         pw.print(prefix); pw.println("mStacks=" + mStacks);
-        // TODO: move this to LockTaskController
-        final SparseArray<String[]> packages = mService.mLockTaskPackages;
-        if (packages.size() > 0) {
-            pw.print(prefix); pw.println("mLockTaskPackages (userId:packages)=");
-            for (int i = 0; i < packages.size(); ++i) {
-                pw.print(prefix); pw.print(prefix); pw.print(packages.keyAt(i));
-                pw.print(":"); pw.println(Arrays.toString(packages.valueAt(i)));
-            }
-        }
         if (!mWaitingForActivityVisible.isEmpty()) {
             pw.print(prefix); pw.println("mWaitingForActivityVisible=");
             for (int i = 0; i < mWaitingForActivityVisible.size(); ++i) {

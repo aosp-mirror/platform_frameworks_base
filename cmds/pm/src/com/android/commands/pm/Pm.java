@@ -636,7 +636,7 @@ public final class Pm {
             out = session.openWrite(splitName, 0, sizeBytes);
 
             int total = 0;
-            byte[] buffer = new byte[65536];
+            byte[] buffer = new byte[1024 * 1024];
             int c;
             while ((c = in.read(buffer)) != -1) {
                 total += c;

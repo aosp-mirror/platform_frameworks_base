@@ -116,7 +116,9 @@ import static com.android.server.wm.proto.WindowStateProto.IDENTIFIER;
 import static com.android.server.wm.proto.WindowStateProto.PARENT_FRAME;
 import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
 import static com.android.server.wm.proto.WindowStateProto.SURFACE_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.WINDOW_CONTAINER;
 
+import android.annotation.CallSuper;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -3124,8 +3126,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || (isChildWindow() && getParentWindow().isDockedResizing());
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    @CallSuper
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        super.writeToProto(proto, WINDOW_CONTAINER);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(DISPLAY_ID, getDisplayId());
         proto.write(STACK_ID, getStackId());

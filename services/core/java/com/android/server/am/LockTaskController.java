@@ -31,6 +31,7 @@ import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_CURRENT;
 import static android.provider.Settings.Secure.LOCK_TO_APP_EXIT_LOCKED;
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -55,7 +56,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Slog;
+import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
@@ -65,6 +68,7 @@ import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Helper class that deals with all things related to task locking. This includes the screen pinning
@@ -123,6 +127,11 @@ public class LockTaskController {
     private final ArrayList<TaskRecord> mLockTaskModeTasks = new ArrayList<>();
 
     /**
+     * Packages that are allowed to be launched into the lock task mode for each user.
+     */
+    private final SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
+
+    /**
      * Store the current lock task mode. Possible values:
      * {@link ActivityManager#LOCK_TASK_MODE_NONE}, {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
      * {@link ActivityManager#LOCK_TASK_MODE_PINNED}
@@ -159,8 +168,8 @@ public class LockTaskController {
     }
 
     /**
-     * @return whether the given task can be moved to the back of the stack. Locked tasks cannot be
-     * moved to the back of the stack.
+     * @return whether the given task is locked at the moment. Locked tasks cannot be moved to the
+     * back of the stack.
      */
     boolean checkLockedTask(TaskRecord task) {
         if (mLockTaskModeTasks.contains(task)) {
@@ -452,29 +461,35 @@ public class LockTaskController {
     }
 
     /**
-     * Called when the list of packages whitelisted for lock task mode is changed. Any currently
-     * locked tasks that got removed from the whitelist will be finished.
+     * Update packages that are allowed to be launched in lock task mode.
+     * @param userId Which user this whitelist is associated with
+     * @param packages The whitelist of packages allowed in lock task mode
+     * @see #mLockTaskPackages
      */
-    // TODO: Missing unit tests
-    void onLockTaskPackagesUpdated() {
-        boolean didSomething = false;
+    void updateLockTaskPackages(int userId, String[] packages) {
+        mLockTaskPackages.put(userId, packages);
+
+        boolean taskChanged = false;
         for (int taskNdx = mLockTaskModeTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord lockedTask = mLockTaskModeTasks.get(taskNdx);
-            final boolean wasWhitelisted =
-                    (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) ||
-                            (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED);
+            final boolean wasWhitelisted = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
+                    || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED;
             lockedTask.setLockTaskAuth();
-            final boolean isWhitelisted =
-                    (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) ||
-                            (lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED);
-            if (wasWhitelisted && !isWhitelisted) {
-                // Lost whitelisting authorization. End it now.
-                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "onLockTaskPackagesUpdated: removing " +
-                        lockedTask + " mLockTaskAuth()=" + lockedTask.lockTaskAuthToString());
-                removeLockedTask(lockedTask);
-                lockedTask.performClearTaskLocked();
-                didSomething = true;
+            final boolean isWhitelisted = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
+                    || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED;
+
+            if (mLockTaskModeState != LOCK_TASK_MODE_LOCKED
+                    || lockedTask.userId != userId
+                    || !wasWhitelisted || isWhitelisted) {
+                continue;
             }
+
+            // Terminate locked tasks that have recently lost whitelist authorization.
+            if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "onLockTaskPackagesUpdated: removing " +
+                    lockedTask + " mLockTaskAuth()=" + lockedTask.lockTaskAuthToString());
+            removeLockedTask(lockedTask);
+            lockedTask.performClearTaskLocked();
+            taskChanged = true;
         }
 
         for (int displayNdx = mSupervisor.getChildCount() - 1; displayNdx >= 0; --displayNdx) {
@@ -484,20 +499,38 @@ public class LockTaskController {
                 stack.onLockTaskPackagesUpdatedLocked();
             }
         }
+
         final ActivityRecord r = mSupervisor.topRunningActivityLocked();
-        final TaskRecord task = r != null ? r.getTask() : null;
-        if (mLockTaskModeTasks.isEmpty() && task != null
+        final TaskRecord task = (r != null) ? r.getTask() : null;
+        if (mLockTaskModeTasks.isEmpty() && task!= null
                 && task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
             // This task must have just been authorized.
             if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK,
                     "onLockTaskPackagesUpdated: starting new locktask task=" + task);
-            setLockTaskMode(task, LOCK_TASK_MODE_LOCKED, "package updated",
-                    false);
-            didSomething = true;
+            setLockTaskMode(task, LOCK_TASK_MODE_LOCKED, "package updated", false);
+            taskChanged = true;
         }
-        if (didSomething) {
+
+        if (taskChanged) {
             mSupervisor.resumeFocusedStackTopActivityLocked();
         }
+    }
+
+    boolean isPackageWhitelisted(int userId, String pkg) {
+        if (pkg == null) {
+            return false;
+        }
+        String[] whitelist;
+        whitelist = mLockTaskPackages.get(userId);
+        if (whitelist == null) {
+            return false;
+        }
+        for (String whitelistedPkg : whitelist) {
+            if (pkg.equals(whitelistedPkg)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -556,8 +589,18 @@ public class LockTaskController {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mLockTaskModeState=" + lockTaskModeToString());
-        pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
+        pw.println(prefix + "LockTaskController");
+        prefix = prefix + "  ";
+        pw.println(prefix + "mLockTaskModeState=" + lockTaskModeToString());
+        pw.println(prefix + "mLockTaskModeTasks=");
+        for (int i = 0; i < mLockTaskModeTasks.size(); ++i) {
+            pw.println(prefix + "  #" + i + " " + mLockTaskModeTasks.get(i));
+        }
+        pw.println(prefix + "mLockTaskPackages (userId:packages)=");
+        for (int i = 0; i < mLockTaskPackages.size(); ++i) {
+            pw.println(prefix + "  u" + mLockTaskPackages.keyAt(i)
+                    + ":" + Arrays.toString(mLockTaskPackages.valueAt(i)));
+        }
     }
 
     private String lockTaskModeToString() {

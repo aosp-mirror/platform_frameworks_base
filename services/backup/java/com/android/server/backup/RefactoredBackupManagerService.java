@@ -77,6 +77,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
@@ -149,6 +150,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RefactoredBackupManagerService implements BackupManagerServiceInterface {
 
@@ -546,9 +548,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         @Override
         public void onUnlockUser(int userId) {
             if (userId == UserHandle.USER_SYSTEM) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
                 sInstance.initialize(userId);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 // Migrate legacy setting
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
                 if (!backupSettingMigrated(userId)) {
                     if (DEBUG) {
                         Slog.i(TAG, "Backup enable apparently not migrated");
@@ -569,12 +574,15 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         }
                     }
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
                 try {
                     sInstance.setBackupEnabled(readBackupEnableState(userId));
                 } catch (RemoteException e) {
                     // can't happen; it's a local object
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }
@@ -619,6 +627,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private final SparseArray<Operation> mCurrentOperations = new SparseArray<>();
     private final Object mCurrentOpLock = new Object();
     private final Random mTokenGenerator = new Random();
+    final AtomicInteger mNextToken = new AtomicInteger();
 
     private final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<>();
 
@@ -658,15 +667,15 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     @GuardedBy("mQueueLock")
     private ArrayList<FullBackupEntry> mFullBackupQueue;
 
-    // Utility: build a new random integer token
+    // Utility: build a new random integer token. The low bits are the ordinal of the
+    // operation for near-time uniqueness, and the upper bits are random for app-
+    // side unpredictability.
     @Override
     public int generateRandomIntegerToken() {
-        int token;
-        do {
-            synchronized (mTokenGenerator) {
-                token = mTokenGenerator.nextInt();
-            }
-        } while (token < 0);
+        int token = mTokenGenerator.nextInt();
+        if (token < 0) token = -token;
+        token &= ~0xFF;
+        token |= (mNextToken.incrementAndGet() & 0xFF);
         return token;
     }
 
@@ -878,7 +887,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
                         if (AppBackupUtils.appGetsFullBackup(pkg)
                                 && AppBackupUtils.appIsEligibleForBackup(
-                                pkg.applicationInfo)) {
+                                pkg.applicationInfo, mPackageManager)) {
                             schedule.add(new FullBackupEntry(pkgName, lastBackup));
                         } else {
                             if (DEBUG) {
@@ -899,7 +908,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 for (PackageInfo app : apps) {
                     if (AppBackupUtils.appGetsFullBackup(app)
                             && AppBackupUtils.appIsEligibleForBackup(
-                            app.applicationInfo)) {
+                            app.applicationInfo, mPackageManager)) {
                         if (!foundApps.contains(app.packageName)) {
                             if (MORE_DEBUG) {
                                 Slog.i(TAG, "New full backup app " + app.packageName + " found");
@@ -925,7 +934,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             schedule = new ArrayList<>(apps.size());
             for (PackageInfo info : apps) {
                 if (AppBackupUtils.appGetsFullBackup(info) && AppBackupUtils.appIsEligibleForBackup(
-                        info.applicationInfo)) {
+                        info.applicationInfo, mPackageManager)) {
                     schedule.add(new FullBackupEntry(info.packageName, 0));
                 }
             }
@@ -1210,7 +1219,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
                         if (AppBackupUtils.appGetsFullBackup(app)
                                 && AppBackupUtils.appIsEligibleForBackup(
-                                app.applicationInfo)) {
+                                app.applicationInfo, mPackageManager)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
                         } else {
@@ -1507,7 +1516,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         long token = mAncestralToken;
         synchronized (mQueueLock) {
-            if (mProcessedPackagesJournal.hasBeenProcessed(packageName)) {
+            if (mCurrentToken != 0 && mProcessedPackagesJournal.hasBeenProcessed(packageName)) {
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "App in ever-stored, so using current token");
                 }
@@ -1568,7 +1577,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
-                if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo)) {
+                if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
+                        mPackageManager)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                     continue;
@@ -1759,8 +1769,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 // Can't delete op from mCurrentOperations here. waitUntilOperationComplete may be
                 // called after we receive cancel here. We need this op's state there.
 
-                // Remove all pending timeout messages for this operation type.
-                mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+                // Remove all pending timeout messages of types OP_TYPE_BACKUP_WAIT and
+                // OP_TYPE_RESTORE_WAIT. On the other hand, OP_TYPE_BACKUP cannot time out and
+                // doesn't require cancellation.
+                if (op.type == OP_TYPE_BACKUP_WAIT || op.type == OP_TYPE_RESTORE_WAIT) {
+                    mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+                }
             }
             mCurrentOpLock.notifyAll();
         }
@@ -2108,14 +2122,26 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // so tear down any ongoing backup task right away.
     @Override
     public void endFullBackup() {
-        synchronized (mQueueLock) {
-            if (mRunningFullBackupTask != null) {
-                if (DEBUG_SCHEDULING) {
-                    Slog.i(TAG, "Telling running backup to stop");
+        // offload the mRunningFullBackupTask.handleCancel() call to another thread,
+        // as we might have to wait for mCancelLock
+        Runnable endFullBackupRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PerformFullTransportBackupTask pftbt = null;
+                synchronized (mQueueLock) {
+                    if (mRunningFullBackupTask != null) {
+                        pftbt = mRunningFullBackupTask;
+                    }
                 }
-                mRunningFullBackupTask.handleCancel(true);
+                if (pftbt != null) {
+                    if (DEBUG_SCHEDULING) {
+                        Slog.i(TAG, "Telling running backup to stop");
+                    }
+                    pftbt.handleCancel(true);
+                }
             }
-        }
+        };
+        new Thread(endFullBackupRunnable, "end-full-backup").start();
     }
 
     // Used by both incremental and full restore
@@ -2800,8 +2826,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         final long oldId = Binder.clearCallingIdentity();
         try {
             String prevTransport = mTransportManager.selectTransport(transport);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.BACKUP_TRANSPORT, transport);
+            updateStateForTransport(transport);
             Slog.v(TAG, "selectBackupTransport() set " + mTransportManager.getCurrentTransportName()
                     + " returning " + prevTransport);
             return prevTransport;
@@ -2826,9 +2851,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     @Override
                     public void onSuccess(String transportName) {
                         mTransportManager.selectTransport(transportName);
-                        Settings.Secure.putString(mContext.getContentResolver(),
-                                Settings.Secure.BACKUP_TRANSPORT,
-                                mTransportManager.getCurrentTransportName());
+                        updateStateForTransport(mTransportManager.getCurrentTransportName());
                         Slog.v(TAG, "Transport successfully selected: "
                                 + transport.flattenToShortString());
                         try {
@@ -2851,6 +2874,28 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 });
 
         Binder.restoreCallingIdentity(oldId);
+    }
+
+    private void updateStateForTransport(String newTransportName) {
+        // Publish the name change
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_TRANSPORT, newTransportName);
+
+        // And update our current-dataset bookkeeping
+        IBackupTransport transport = mTransportManager.getTransportBinder(newTransportName);
+        if (transport != null) {
+            try {
+                mCurrentToken = transport.getCurrentRestoreSet();
+            } catch (Exception e) {
+                // Oops.  We can't know the current dataset token, so reset and figure it out
+                // when we do the next k/v backup operation on this transport.
+                mCurrentToken = 0;
+            }
+        } else {
+            // The named transport isn't bound at this particular moment, so we can't
+            // know yet what its current dataset token is.  Reset as above.
+            mCurrentToken = 0;
+        }
     }
 
     // Supply the configuration Intent for the given transport.  If the name is not one
@@ -3162,19 +3207,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    // We also avoid backups of 'disabled' apps
-    private static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
-        switch (pm.getApplicationEnabledSetting(app.packageName)) {
-            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
-            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
-            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
     @Override
     public boolean isAppEligibleForBackup(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -3182,9 +3214,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         try {
             PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
-            if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo) ||
+            if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
+                            mPackageManager) ||
                     AppBackupUtils.appIsStopped(packageInfo.applicationInfo) ||
-                    appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
+                    AppBackupUtils.appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
                 return false;
             }
             IBackupTransport transport = mTransportManager.getCurrentTransportBinder();

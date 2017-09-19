@@ -19,12 +19,14 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.res.Configuration.EMPTY;
+import static com.android.server.wm.proto.WindowContainerProto.CONFIGURATION_CONTAINER;
+import static com.android.server.wm.proto.WindowContainerProto.ORIENTATION;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
 import android.util.Pools;
 
+import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.ToBooleanFunction;
 
 import java.util.Comparator;
@@ -683,6 +685,23 @@ a     * Returns whether this child is on top of the window hierarchy.
             out.append(childPrefix + "#" + i + " ");
             wc.dumpChildrenNames(out, childPrefix);
         }
+    }
+
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition is at
+     * {@link com.android.server.wm.proto.WindowContainerProto}.
+     *
+     * @param protoOutputStream Stream to write the WindowContainer object to.
+     * @param fieldId           Field Id of the WindowContainer as defined in the parent message.
+     * @hide
+     */
+    @CallSuper
+    @Override
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        super.writeToProto(protoOutputStream, CONFIGURATION_CONTAINER);
+        protoOutputStream.write(ORIENTATION, mOrientation);
+        protoOutputStream.end(token);
     }
 
     String getName() {

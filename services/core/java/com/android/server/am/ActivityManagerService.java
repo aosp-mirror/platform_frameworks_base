@@ -682,11 +682,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     ActivityInfo mLastAddedTaskActivity;
 
     /**
-     * List of packages whitelisted by DevicePolicyManager for locktask. Indexed by userId.
-     */
-    SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
-
-    /**
      * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
      */
     String mDeviceOwnerName;
@@ -1653,45 +1648,32 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_PROCESSES_CHANGED_UI_MSG = 31;
     static final int DISPATCH_PROCESS_DIED_UI_MSG = 32;
     static final int REPORT_MEM_USAGE_MSG = 33;
-    static final int REPORT_USER_SWITCH_MSG = 34;
-    static final int CONTINUE_USER_SWITCH_MSG = 35;
-    static final int USER_SWITCH_TIMEOUT_MSG = 36;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int REQUEST_ALL_PSS_MSG = 39;
-    static final int START_PROFILES_MSG = 40;
     static final int UPDATE_TIME_PREFERENCE_MSG = 41;
-    static final int SYSTEM_USER_START_MSG = 42;
-    static final int SYSTEM_USER_CURRENT_MSG = 43;
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
     static final int FINISH_BOOTING_MSG = 45;
-    static final int START_USER_SWITCH_UI_MSG = 46;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
     static final int DISMISS_DIALOG_UI_MSG = 48;
     static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 49;
     static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 50;
     static final int DELETE_DUMPHEAP_MSG = 51;
-    static final int FOREGROUND_PROFILE_CHANGED_MSG = 52;
     static final int DISPATCH_UIDS_CHANGED_UI_MSG = 53;
     static final int REPORT_TIME_TRACKER_MSG = 54;
-    static final int REPORT_USER_SWITCH_COMPLETE_MSG = 55;
     static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 56;
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 57;
     static final int IDLE_UIDS_MSG = 58;
-    static final int SYSTEM_USER_UNLOCK_MSG = 59;
     static final int LOG_STACK_STATE = 60;
     static final int VR_MODE_CHANGE_MSG = 61;
     static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 62;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
-    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 64;
     static final int NOTIFY_VR_SLEEPING_MSG = 65;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
     static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
-    static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 71;
-    static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1902,10 +1884,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mUnsupportedDisplaySizeDialog.show();
                     }
                 }
-                break;
-            }
-            case START_USER_SWITCH_UI_MSG: {
-                mUserController.showUserSwitchDialog((Pair<UserInfo, UserInfo>) msg.obj);
                 break;
             }
             case DISMISS_DIALOG_UI_MSG: {
@@ -2136,26 +2114,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 thread.start();
                 break;
             }
-            case START_USER_SWITCH_FG_MSG: {
-                mUserController.startUserInForeground(msg.arg1);
-                break;
-            }
-            case REPORT_USER_SWITCH_MSG: {
-                mUserController.dispatchUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
-                break;
-            }
-            case CONTINUE_USER_SWITCH_MSG: {
-                mUserController.continueUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
-                break;
-            }
-            case USER_SWITCH_TIMEOUT_MSG: {
-                mUserController.timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
-                break;
-            }
-            case USER_SWITCH_CALLBACKS_TIMEOUT_MSG: {
-                mUserController.timeoutUserSwitchCallbacks(msg.arg1, msg.arg2);
-                break;
-            }
             case IMMERSIVE_MODE_LOCK_MSG: {
                 final boolean nextState = (msg.arg1 != 0);
                 if (mUpdateLock.isHeld() != nextState) {
@@ -2180,12 +2138,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 break;
             }
-            case START_PROFILES_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    mUserController.startProfilesLocked();
-                }
-                break;
-            }
             case UPDATE_TIME_PREFERENCE_MSG: {
                 // The user's time format preference might have changed.
                 // For convenience we re-use the Intent extra values.
@@ -2202,35 +2154,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 }
-                break;
-            }
-            case SYSTEM_USER_START_MSG: {
-                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
-                        Integer.toString(msg.arg1), msg.arg1);
-                mSystemServiceManager.startUser(msg.arg1);
-                break;
-            }
-            case SYSTEM_USER_UNLOCK_MSG: {
-                final int userId = msg.arg1;
-                mSystemServiceManager.unlockUser(userId);
-                synchronized (ActivityManagerService.this) {
-                    mRecentTasks.loadUserRecentsLocked(userId);
-                }
-                if (userId == UserHandle.USER_SYSTEM) {
-                    startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-                }
-                installEncryptionUnawareProviders(userId);
-                mUserController.finishUserUnlocked((UserState) msg.obj);
-                break;
-            }
-            case SYSTEM_USER_CURRENT_MSG: {
-                mBatteryStatsService.noteEvent(
-                        BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_FINISH,
-                        Integer.toString(msg.arg2), msg.arg2);
-                mBatteryStatsService.noteEvent(
-                        BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
-                        Integer.toString(msg.arg1), msg.arg1);
-                mSystemServiceManager.switchUser(msg.arg1);
                 break;
             }
             case ENTER_ANIMATION_COMPLETE_MSG: {
@@ -2372,18 +2295,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mMemWatchDumpUid = -1;
                 }
             } break;
-            case FOREGROUND_PROFILE_CHANGED_MSG: {
-                mUserController.dispatchForegroundProfileChanged(msg.arg1);
-            } break;
             case REPORT_TIME_TRACKER_MSG: {
                 AppTimeTracker tracker = (AppTimeTracker)msg.obj;
                 tracker.deliverResult(mContext);
-            } break;
-            case REPORT_USER_SWITCH_COMPLETE_MSG: {
-                mUserController.dispatchUserSwitchComplete(msg.arg1);
-            } break;
-            case REPORT_LOCKED_BOOT_COMPLETE_MSG: {
-                mUserController.dispatchLockedBootComplete(msg.arg1);
             } break;
             case SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG: {
                 IUiAutomationConnection connection = (IUiAutomationConnection) msg.obj;
@@ -3152,9 +3066,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (mLastResumedActivity != null && r.userId != mLastResumedActivity.userId) {
-            mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
-            mHandler.obtainMessage(
-                    FOREGROUND_PROFILE_CHANGED_MSG, r.userId, 0).sendToTarget();
+            mUserController.sendForegroundProfileChanged(r.userId);
         }
         mLastResumedActivity = r;
 
@@ -4153,15 +4065,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     void enforceNotIsolatedCaller(String caller) {
         if (UserHandle.isIsolated(Binder.getCallingUid())) {
             throw new SecurityException("Isolated process not allowed to call " + caller);
-        }
-    }
-
-    void enforceShellRestriction(String restriction, int userHandle) {
-        if (Binder.getCallingUid() == SHELL_UID) {
-            if (userHandle < 0 || mUserController.hasUserRestriction(restriction, userHandle)) {
-                throw new SecurityException("Shell does not have permission to access user "
-                        + userHandle);
-            }
         }
     }
 
@@ -7371,7 +7274,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 }
                             }
                         });
-                scheduleStartProfilesLocked();
+                mUserController.scheduleStartProfilesLocked();
             }
         }
     }
@@ -10882,7 +10785,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void updateLockTaskPackages(int userId, String[] packages) {
-        // TODO: move this into LockTaskController
         final int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != SYSTEM_UID) {
             enforceCallingPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
@@ -10891,8 +10793,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
                     Arrays.toString(packages));
-            mLockTaskPackages.put(userId, packages);
-            mLockTaskController.onLockTaskPackagesUpdated();
+            mLockTaskController.updateLockTaskPackages(userId, packages);
         }
     }
 
@@ -12073,7 +11974,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         //mUsageStatsService.monitorPackages();
     }
 
-    private void startPersistentApps(int matchFlags) {
+    void startPersistentApps(int matchFlags) {
         if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) return;
 
         synchronized (this) {
@@ -12094,7 +11995,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * When a user is unlocked, we need to install encryption-unaware providers
      * belonging to any running apps.
      */
-    private void installEncryptionUnawareProviders(int userId) {
+    void installEncryptionUnawareProviders(int userId) {
         // We're only interested in providers that are encryption unaware, and
         // we don't care about uninstalled apps, since there's no way they're
         // running at this point.
@@ -13982,10 +13883,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                         || Settings.Global.getInt(
                                 resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
-        final boolean supportsPictureInPicture =
-                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow(mContext);
+        final boolean supportsPictureInPicture = supportsMultiWindow &&
+                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         final boolean supportsSplitScreenMultiWindow =
                 ActivityManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
@@ -23566,54 +23467,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean switchUser(final int targetUserId) {
-        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
-        int currentUserId;
-        UserInfo targetUserInfo;
-        synchronized (this) {
-            currentUserId = mUserController.getCurrentUserIdLocked();
-            targetUserInfo = mUserController.getUserInfo(targetUserId);
-            if (targetUserId == currentUserId) {
-                Slog.i(TAG, "user #" + targetUserId + " is already the current user");
-                return true;
-            }
-            if (targetUserInfo == null) {
-                Slog.w(TAG, "No user info for user #" + targetUserId);
-                return false;
-            }
-            if (!targetUserInfo.isDemo() && UserManager.isDeviceInDemoMode(mContext)) {
-                Slog.w(TAG, "Cannot switch to non-demo user #" + targetUserId
-                        + " when device is in demo mode");
-                return false;
-            }
-            if (!targetUserInfo.supportsSwitchTo()) {
-                Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
-                return false;
-            }
-            if (targetUserInfo.isManagedProfile()) {
-                Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
-                return false;
-            }
-            mUserController.setTargetUserIdLocked(targetUserId);
-        }
-        if (mUserController.mUserSwitchUiEnabled) {
-            UserInfo currentUserInfo = mUserController.getUserInfo(currentUserId);
-            Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
-            mUiHandler.removeMessages(START_USER_SWITCH_UI_MSG);
-            mUiHandler.sendMessage(mHandler.obtainMessage(
-                    START_USER_SWITCH_UI_MSG, userNames));
-        } else {
-            mHandler.removeMessages(START_USER_SWITCH_FG_MSG);
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    START_USER_SWITCH_FG_MSG, targetUserId, 0));
-        }
-        return true;
-    }
-
-    void scheduleStartProfilesLocked() {
-        if (!mHandler.hasMessages(START_PROFILES_MSG)) {
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(START_PROFILES_MSG),
-                    DateUtils.SECOND_IN_MILLIS);
-        }
+        return mUserController.switchUser(targetUserId);
     }
 
     @Override

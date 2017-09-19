@@ -16,9 +16,20 @@
 
 package android.content.res;
 
+import static android.content.ConfigurationProto.DENSITY_DPI;
+import static android.content.ConfigurationProto.FONT_SCALE;
+import static android.content.ConfigurationProto.ORIENTATION;
+import static android.content.ConfigurationProto.SCREEN_HEIGHT_DP;
+import static android.content.ConfigurationProto.SCREEN_LAYOUT;
+import static android.content.ConfigurationProto.SCREEN_WIDTH_DP;
+import static android.content.ConfigurationProto.SMALLEST_SCREEN_WIDTH_DP;
+import static android.content.ConfigurationProto.UI_MODE;
+import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -27,6 +38,7 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.View;
 
 import com.android.internal.util.XmlUtils;
@@ -295,11 +307,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int screenLayout;
 
     /**
-     * @hide
      * Configuration relating to the windowing state of the object associated with this
      * Configuration. Contents of this field are not intended to affect resources, but need to be
      * communicated and propagated at the same time as the rest of Configuration.
+     * @hide
      */
+    @TestApi
     public final WindowConfiguration windowConfiguration = new WindowConfiguration();
 
     /** @hide */
@@ -1051,6 +1064,28 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         sb.append('}');
         return sb.toString();
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.content.ConfigurationProto}
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(FONT_SCALE, fontScale);
+        protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
+        protoOutputStream.write(ORIENTATION, orientation);
+        protoOutputStream.write(UI_MODE, uiMode);
+        protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
+        protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
+        protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
+        protoOutputStream.write(DENSITY_DPI, densityDpi);
+        windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+        protoOutputStream.end(token);
     }
 
     /**

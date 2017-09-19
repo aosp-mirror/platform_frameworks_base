@@ -198,8 +198,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             boolean hasSettings = false;
             for (int i = 0; i < filterSet.length; i++) {
                 try {
-                    PackageInfo info = backupManagerService.getPackageManager().getPackageInfo(
-                            filterSet[i], 0);
+                    PackageManager pm = backupManagerService.getPackageManager();
+                    PackageInfo info = pm.getPackageInfo(filterSet[i], 0);
                     if ("android".equals(info.packageName)) {
                         hasSystem = true;
                         continue;
@@ -209,8 +209,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         continue;
                     }
 
-                    if (AppBackupUtils.appIsEligibleForBackup(
-                            info.applicationInfo)) {
+                    if (AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, pm)) {
                         mAcceptSet.add(info);
                     }
                 } catch (NameNotFoundException e) {
@@ -779,6 +778,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     // state RESTORE_FINISHED : provide the "no more data" signpost callback at the end
     private void restoreFinished() {
+        if (DEBUG) {
+            Slog.d(TAG, "restoreFinished packageName=" + mCurrentPackage.packageName);
+        }
         try {
             backupManagerService
                     .prepareOperationTimeout(mEphemeralOpToken,

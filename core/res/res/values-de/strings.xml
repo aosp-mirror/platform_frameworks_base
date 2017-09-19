@@ -230,8 +230,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Einstellungen"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistent"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Sprachassistent"</string>
-    <!-- no translation found for global_action_lockdown (2277328351790053477) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="2277328351790053477">"Sperren"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Neue Benachrichtigung"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Bildschirmtastatur"</string>
@@ -1095,7 +1094,7 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Benachrichtigungstöne"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Unbekannt"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">WLANe verfügbar</item>
+      <item quantity="other">WLANs verfügbar</item>
       <item quantity="one">WLAN verfügbar</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">

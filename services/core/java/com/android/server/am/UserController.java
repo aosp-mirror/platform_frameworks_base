@@ -22,6 +22,7 @@ import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
+import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -30,14 +31,6 @@ import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
 import static com.android.server.am.ActivityManagerService.ALLOW_NON_FULL;
 import static com.android.server.am.ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE;
 import static com.android.server.am.ActivityManagerService.MY_PID;
-import static com.android.server.am.ActivityManagerService.REPORT_LOCKED_BOOT_COMPLETE_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_COMPLETE_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_UNLOCK_MSG;
-import static com.android.server.am.ActivityManagerService.USER_SWITCH_CALLBACKS_TIMEOUT_MSG;
-import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
 import static com.android.server.am.UserState.STATE_BOOTING;
 import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKED;
@@ -68,6 +61,7 @@ import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -78,6 +72,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
@@ -93,6 +88,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemServiceManager;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -108,7 +104,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
  */
-class UserController {
+class UserController implements Handler.Callback {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
 
     // Maximum number of users we allow to be running at a time.
@@ -118,6 +114,23 @@ class UserController {
     // giving up on them and unfreezing the screen.
     static final int USER_SWITCH_TIMEOUT_MS = 3 * 1000;
 
+    // ActivityManager thread message constants
+    static final int REPORT_USER_SWITCH_MSG = 10;
+    static final int CONTINUE_USER_SWITCH_MSG = 20;
+    static final int USER_SWITCH_TIMEOUT_MSG = 30;
+    static final int START_PROFILES_MSG = 40;
+    static final int SYSTEM_USER_START_MSG = 50;
+    static final int SYSTEM_USER_CURRENT_MSG = 60;
+    static final int FOREGROUND_PROFILE_CHANGED_MSG = 70;
+    static final int REPORT_USER_SWITCH_COMPLETE_MSG = 80;
+    static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 90;
+    static final int SYSTEM_USER_UNLOCK_MSG = 100;
+    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 110;
+    static final int START_USER_SWITCH_FG_MSG = 120;
+
+    // UI thread message constants
+    static final int START_USER_SWITCH_UI_MSG = 1000;
+
     // If a callback wasn't called within USER_SWITCH_CALLBACKS_TIMEOUT_MS after
     // USER_SWITCH_TIMEOUT_MS, an error is reported. Usually it indicates a problem in the observer
     // when it never calls back.
@@ -126,6 +139,7 @@ class UserController {
     private final Object mLock;
     private final Injector mInjector;
     private final Handler mHandler;
+    private final Handler mUiHandler;
 
     // Holds the current foreground user's id. Use mLock when updating
     @GuardedBy("mLock")
@@ -193,7 +207,8 @@ class UserController {
     UserController(Injector injector) {
         mInjector = injector;
         mLock = injector.getLock();
-        mHandler = injector.getHandler();
+        mHandler = mInjector.getHandler(this);
+        mUiHandler = mInjector.getUiHandler(this);
         // User 0 is the first and only user that runs at boot.
         final UserState uss = new UserState(UserHandle.SYSTEM);
         mStartedUsers.put(UserHandle.USER_SYSTEM, uss);
@@ -499,7 +514,7 @@ class UserController {
         if (userId < 0 || userId == UserHandle.USER_SYSTEM) {
             throw new IllegalArgumentException("Can't stop system user " + userId);
         }
-        mInjector.enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         synchronized (mLock) {
             return stopUsersLocked(userId, force, callback);
         }
@@ -635,7 +650,7 @@ class UserController {
         mInjector.batteryStatsServiceNoteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
                 Integer.toString(userId), userId);
-        mInjector.systemServiceManagerStopUser(userId);
+        mInjector.getSystemServiceManager().stopUser(userId);
 
         synchronized (mLock) {
             mInjector.broadcastIntentLocked(shutdownIntent,
@@ -762,6 +777,13 @@ class UserController {
                     break;
                 }
             }
+        }
+    }
+
+    void scheduleStartProfilesLocked() {
+        if (!mHandler.hasMessages(START_PROFILES_MSG)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(START_PROFILES_MSG),
+                    DateUtils.SECOND_IN_MILLIS);
         }
     }
 
@@ -1080,6 +1102,50 @@ class UserController {
         return true;
     }
 
+    boolean switchUser(final int targetUserId) {
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
+        int currentUserId;
+        UserInfo targetUserInfo;
+        synchronized (mLock) {
+            currentUserId = getCurrentUserIdLocked();
+            targetUserInfo = getUserInfo(targetUserId);
+            if (targetUserId == currentUserId) {
+                Slog.i(TAG, "user #" + targetUserId + " is already the current user");
+                return true;
+            }
+            if (targetUserInfo == null) {
+                Slog.w(TAG, "No user info for user #" + targetUserId);
+                return false;
+            }
+            if (!targetUserInfo.isDemo() && UserManager.isDeviceInDemoMode(mInjector.getContext())) {
+                Slog.w(TAG, "Cannot switch to non-demo user #" + targetUserId
+                        + " when device is in demo mode");
+                return false;
+            }
+            if (!targetUserInfo.supportsSwitchTo()) {
+                Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
+                return false;
+            }
+            if (targetUserInfo.isManagedProfile()) {
+                Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
+                return false;
+            }
+            setTargetUserIdLocked(targetUserId);
+        }
+        if (mUserSwitchUiEnabled) {
+            UserInfo currentUserInfo = getUserInfo(currentUserId);
+            Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
+            mUiHandler.removeMessages(START_USER_SWITCH_UI_MSG);
+            mUiHandler.sendMessage(mHandler.obtainMessage(
+                    START_USER_SWITCH_UI_MSG, userNames));
+        } else {
+            mHandler.removeMessages(START_USER_SWITCH_FG_MSG);
+            mHandler.sendMessage(mHandler.obtainMessage(
+                    START_USER_SWITCH_FG_MSG, targetUserId, 0));
+        }
+        return true;
+    }
+
     void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
         // The dialog will show and then initiate the user switch by calling startUserInForeground
         mInjector.showUserSwitchingDialog(fromToUserPair.first, fromToUserPair.second);
@@ -1215,7 +1281,7 @@ class UserController {
     void sendContinueUserSwitchLocked(UserState uss, int oldUserId, int newUserId) {
         mCurWaitingUserSwitchCallbacks = null;
         mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
-        mHandler.sendMessage(mHandler.obtainMessage(ActivityManagerService.CONTINUE_USER_SWITCH_MSG,
+        mHandler.sendMessage(mHandler.obtainMessage(CONTINUE_USER_SWITCH_MSG,
                 oldUserId, newUserId, uss));
     }
 
@@ -1393,6 +1459,11 @@ class UserController {
             throw new SecurityException(msg);
         }
         mUserSwitchObservers.register(observer, name);
+    }
+
+    void sendForegroundProfileChanged(int userId) {
+        mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
+        mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG, userId, 0).sendToTarget();
     }
 
     void unregisterUserSwitchObserver(IUserSwitchObserver observer) {
@@ -1575,6 +1646,15 @@ class UserController {
         return mInjector.getUserManager().exists(userId);
     }
 
+    void enforceShellRestriction(String restriction, int userHandle) {
+        if (Binder.getCallingUid() == SHELL_UID) {
+            if (userHandle < 0 || hasUserRestriction(restriction, userHandle)) {
+                throw new SecurityException("Shell does not have permission to access user "
+                        + userHandle);
+            }
+        }
+    }
+
     boolean hasUserRestriction(String restriction, int userId) {
         return mInjector.getUserManager().hasUserRestriction(restriction, userId);
     }
@@ -1667,6 +1747,72 @@ class UserController {
         }
     }
 
+    public boolean handleMessage(Message msg) {
+        switch (msg.what) {
+            case START_USER_SWITCH_FG_MSG:
+                startUserInForeground(msg.arg1);
+                break;
+            case REPORT_USER_SWITCH_MSG:
+                dispatchUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                break;
+            case CONTINUE_USER_SWITCH_MSG:
+                continueUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                break;
+            case USER_SWITCH_TIMEOUT_MSG:
+                timeoutUserSwitch((UserState) msg.obj, msg.arg1, msg.arg2);
+                break;
+            case USER_SWITCH_CALLBACKS_TIMEOUT_MSG:
+                timeoutUserSwitchCallbacks(msg.arg1, msg.arg2);
+                break;
+            case START_PROFILES_MSG:
+                synchronized (mLock) {
+                    startProfilesLocked();
+                }
+                break;
+            case SYSTEM_USER_START_MSG:
+                mInjector.batteryStatsServiceNoteEvent(
+                        BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
+                        Integer.toString(msg.arg1), msg.arg1);
+                mInjector.getSystemServiceManager().startUser(msg.arg1);
+                break;
+            case SYSTEM_USER_UNLOCK_MSG:
+                final int userId = msg.arg1;
+                mInjector.getSystemServiceManager().unlockUser(userId);
+                synchronized (mLock) {
+                    mInjector.loadUserRecentsLocked(userId);
+                }
+                if (userId == UserHandle.USER_SYSTEM) {
+                    mInjector.startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+                }
+                mInjector.installEncryptionUnawareProviders(userId);
+                finishUserUnlocked((UserState) msg.obj);
+                break;
+            case SYSTEM_USER_CURRENT_MSG:
+                mInjector.batteryStatsServiceNoteEvent(
+                        BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_FINISH,
+                        Integer.toString(msg.arg2), msg.arg2);
+                mInjector.batteryStatsServiceNoteEvent(
+                        BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
+                        Integer.toString(msg.arg1), msg.arg1);
+
+                mInjector.getSystemServiceManager().switchUser(msg.arg1);
+                break;
+            case FOREGROUND_PROFILE_CHANGED_MSG:
+                dispatchForegroundProfileChanged(msg.arg1);
+                break;
+            case REPORT_USER_SWITCH_COMPLETE_MSG:
+                dispatchUserSwitchComplete(msg.arg1);
+                break;
+            case REPORT_LOCKED_BOOT_COMPLETE_MSG:
+                dispatchLockedBootComplete(msg.arg1);
+                break;
+            case START_USER_SWITCH_UI_MSG:
+                showUserSwitchDialog((Pair<UserInfo, UserInfo>) msg.obj);
+                break;
+        }
+        return false;
+    }
+
     @VisibleForTesting
     static class Injector {
         private final ActivityManagerService mService;
@@ -1681,8 +1827,12 @@ class UserController {
             return mService;
         }
 
-        protected Handler getHandler() {
-            return mService.mHandler;
+        protected Handler getHandler(Handler.Callback callback) {
+            return new Handler(mService.mHandlerThread.getLooper(), callback);
+        }
+
+        protected Handler getUiHandler(Handler.Callback callback) {
+            return new Handler(mService.mUiHandler.getLooper(), callback);
         }
 
         protected Context getContext() {
@@ -1740,12 +1890,12 @@ class UserController {
             mService.mBatteryStatsService.noteEvent(code, name, uid);
         }
 
-        void systemServiceManagerStopUser(int userId) {
-            mService.mSystemServiceManager.stopUser(userId);
-        }
-
         boolean isRuntimeRestarted() {
             return mService.mSystemServiceManager.isRuntimeRestarted();
+        }
+
+        SystemServiceManager getSystemServiceManager() {
+            return mService.mSystemServiceManager;
         }
 
         boolean isFirstBootOrUpgrade() {
@@ -1788,8 +1938,16 @@ class UserController {
             mService.clearBroadcastQueueForUserLocked(userId);
         }
 
-        void enforceShellRestriction(String restriction, int userId) {
-            mService.enforceShellRestriction(restriction, userId);
+        void loadUserRecentsLocked(int userId) {
+            mService.mRecentTasks.loadUserRecentsLocked(userId);
+        }
+
+        void startPersistentApps(int matchFlags) {
+            mService.startPersistentApps(matchFlags);
+        }
+
+        void installEncryptionUnawareProviders(int userId) {
+            mService.installEncryptionUnawareProviders(userId);
         }
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser) {

@@ -97,11 +97,57 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         int what2;
         IBinder token;
 
+        public DisableRecord(int userId, IBinder token) {
+            this.userId = userId;
+            this.token = token;
+            try {
+                token.linkToDeath(this, 0);
+            } catch (RemoteException re) {
+                // Give up
+            }
+        }
+
+        @Override
         public void binderDied() {
             Slog.i(TAG, "binder died for pkg=" + pkg);
             disableForUser(0, token, pkg, userId);
             disable2ForUser(0, token, pkg, userId);
             token.unlinkToDeath(this, 0);
+        }
+
+        public void setFlags(int what, int which, String pkg) {
+            switch (which) {
+                case 1:
+                    what1 = what;
+                    return;
+                case 2:
+                    what2 = what;
+                    return;
+                default:
+                    Slog.w(TAG, "Can't set unsupported disable flag " + which
+                            + ": 0x" + Integer.toHexString(what));
+            }
+            this.pkg = pkg;
+        }
+
+        public int getFlags(int which) {
+            switch (which) {
+                case 1: return what1;
+                case 2: return what2;
+                default:
+                    Slog.w(TAG, "Can't get unsupported disable flag " + which);
+                    return 0;
+            }
+        }
+
+        public boolean isEmpty() {
+            return what1 == 0 && what2 == 0;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("userId=%d what1=0x%08X what2=0x%08X pkg=%s token=%s",
+                    userId, what1, what2, pkg, token);
         }
     }
 
@@ -970,42 +1016,42 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             Slog.d(TAG, "manageDisableList userId=" + userId
                     + " what=0x" + Integer.toHexString(what) + " pkg=" + pkg);
         }
-        // update the list
+
+        // Find matching record, if any
         final int N = mDisableRecords.size();
-        DisableRecord tok = null;
+        DisableRecord record = null;
         int i;
-        for (i=0; i<N; i++) {
-            DisableRecord t = mDisableRecords.get(i);
-            if (t.token == token && t.userId == userId) {
-                tok = t;
+        for (i = 0; i < N; i++) {
+            DisableRecord r = mDisableRecords.get(i);
+            if (r.token == token && r.userId == userId) {
+                record = r;
                 break;
             }
         }
-        if (what == 0 || !token.isBinderAlive()) {
-            if (tok != null) {
+
+        // Remove record if binder is already dead
+        if (!token.isBinderAlive()) {
+            if (record != null) {
                 mDisableRecords.remove(i);
-                tok.token.unlinkToDeath(tok, 0);
+                record.token.unlinkToDeath(record, 0);
             }
-        } else {
-            if (tok == null) {
-                tok = new DisableRecord();
-                tok.userId = userId;
-                try {
-                    token.linkToDeath(tok, 0);
-                }
-                catch (RemoteException ex) {
-                    return; // give up
-                }
-                mDisableRecords.add(tok);
-            }
-            if (which == 1) {
-                tok.what1 = what;
-            } else {
-                tok.what2 = what;
-            }
-            tok.token = token;
-            tok.pkg = pkg;
+            return;
         }
+
+        // Update existing record
+        if (record != null) {
+            record.setFlags(what, which, pkg);
+            if (record.isEmpty()) {
+                mDisableRecords.remove(i);
+                record.token.unlinkToDeath(record, 0);
+            }
+            return;
+        }
+
+        // Record doesn't exist, so we create a new one
+        record = new DisableRecord(userId, token);
+        record.setFlags(what, which, pkg);
+        mDisableRecords.add(record);
     }
 
     // lock on mDisableRecords
@@ -1016,7 +1062,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         for (int i=0; i<N; i++) {
             final DisableRecord rec = mDisableRecords.get(i);
             if (rec.userId == userId) {
-                net |= (which == 1) ? rec.what1 : rec.what2;
+                net |= rec.getFlags(which);
             }
         }
         return net;
@@ -1036,11 +1082,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             pw.println("  mDisableRecords.size=" + N);
             for (int i=0; i<N; i++) {
                 DisableRecord tok = mDisableRecords.get(i);
-                pw.println("    [" + i + "] userId=" + tok.userId
-                                + " what1=0x" + Integer.toHexString(tok.what1)
-                                + " what2=0x" + Integer.toHexString(tok.what2)
-                                + " pkg=" + tok.pkg
-                                + " token=" + tok.token);
+                pw.println("    [" + i + "] " + tok);
             }
             pw.println("  mCurrentUserId=" + mCurrentUserId);
             pw.println("  mIcons=");

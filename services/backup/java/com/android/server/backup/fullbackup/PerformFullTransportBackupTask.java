@@ -140,10 +140,10 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         for (String pkg : whichPackages) {
             try {
-                PackageInfo info = backupManagerService.getPackageManager().getPackageInfo(pkg,
-                        PackageManager.GET_SIGNATURES);
+                PackageManager pm = backupManagerService.getPackageManager();
+                PackageInfo info = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
                 mCurrentPackage = info;
-                if (!AppBackupUtils.appIsEligibleForBackup(info.applicationInfo)) {
+                if (!AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, pm)) {
                     // Cull any packages that have indicated that backups are not permitted,
                     // that run as system-domain uids but do not define their own backup agents,
                     // as well as any explicit mention of the 'special' shared-storage agent

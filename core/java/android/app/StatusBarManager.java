@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-
 package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.View;

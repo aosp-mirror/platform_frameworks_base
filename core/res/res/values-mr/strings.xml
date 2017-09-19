@@ -172,10 +172,10 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"प्रशासक अॅप गहाळ असल्यामुळे कार्य प्रोफाइल हटवले गेले"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"कार्य प्रोफाइल प्रशासक अॅप गहाळ आहे किंवा करप्ट आहे. परिणामी, आपले कार्य प्रोफाइल आणि संबंधित डेटा हटवले गेले आहेत. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"आपले कार्य प्रोफाइल आता या डिव्हाइसवर उपलब्‍ध नाही"</string>
-    <string name="network_logging_notification_title" msgid="6399790108123704477">"डीव्हाइस व्यवस्थापित केले आहे"</string>
-    <string name="network_logging_notification_text" msgid="7930089249949354026">"आपली संस्था हे डीव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
-    <string name="factory_reset_warning" msgid="5423253125642394387">"तुमचे डीव्हाइस मिटविले जाईल"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"हे प्रशासक अ‍ॅप वापरले जाऊ शकत नाही. तुमचे डीव्हाइस आता मिटवले जाईल.\n\nतुम्हाला प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="network_logging_notification_title" msgid="6399790108123704477">"डिव्हाइस व्यवस्थापित केले आहे"</string>
+    <string name="network_logging_notification_text" msgid="7930089249949354026">"आपली संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
+    <string name="factory_reset_warning" msgid="5423253125642394387">"तुमचे डिव्हाइस मिटविले जाईल"</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"हे प्रशासक अ‍ॅप वापरले जाऊ शकत नाही. तुमचे डिव्हाइस आता मिटवले जाईल.\n\nतुम्हाला प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="me" msgid="6545696007631404292">"मी"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"टॅबलेट पर्याय"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"टीव्ही पर्याय"</string>
@@ -212,11 +212,11 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"आणीबाणी"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"बग रीपोर्ट"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"बग रीपोर्ट घ्या"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे तुमच्या सद्य डीव्हाइस स्थितीविषयी माहिती संकलित करेल. बग रीपोर्ट सुरू करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे तुमच्या सद्य डिव्हाइस स्थितीविषयी माहिती संकलित करेल. बग रीपोर्ट सुरू करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते आपल्याला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील प्रविष्ट करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"संपूर्ण अहवाल"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"तुमचे डीव्हाइस प्रतिसाद देत नाही किंवा खूप धीमे असते किंवा तुम्हाला सर्व अहवाल विभागांची आवश्यकता असते तेव्हा कमीतकमी सिस्टम हस्तक्षेपासाठी या पर्यायाचा वापर करा. तुम्हाला आणखी तपशील एंटर करण्याची किंवा अतिरिक्त स्क्रीनशॉट घेण्याची अनुमती देत नाही."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"तुमचे डिव्हाइस प्रतिसाद देत नाही किंवा खूप धीमे असते किंवा तुम्हाला सर्व अहवाल विभागांची आवश्यकता असते तेव्हा कमीतकमी सिस्टम हस्तक्षेपासाठी या पर्यायाचा वापर करा. तुम्हाला आणखी तपशील एंटर करण्याची किंवा अतिरिक्त स्क्रीनशॉट घेण्याची अनुमती देत नाही."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
       <item quantity="other">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
@@ -230,8 +230,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिंग्ज"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"सहाय्यता"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"व्हॉइस सहाय्य"</string>
-    <!-- no translation found for global_action_lockdown (2277328351790053477) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="2277328351790053477">"लॉकडाउन टाका"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"व्हर्च्युअल कीबोर्ड"</string>
@@ -245,7 +244,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्क सूचना"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"नेटवर्क उपलब्ध"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN स्थिती"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"डीव्हाइस प्रशासन"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"डिव्हाइस प्रशासन"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचना"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"रीटेल डेमो"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB कनेक्‍शन"</string>
@@ -271,7 +270,7 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS संदेश पाठवणे आणि पाहणे हे"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला SMS संदेश पाठवू आणि पाहू द्या"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"संचयन"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"तुमच्या डीव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अॅक्सेस"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अॅक्सेस"</string>
     <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डीव्हाइसवरील फोटो, मीडिया आणि फायली अॅक्सेस करू द्या"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडिओ रेकॉर्ड"</string>
@@ -298,7 +297,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"फिंगरप्रिंट जेश्चर"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"डिव्‍हाइसच्‍या फिंगरप्रिंट सेंसरवर केलेले जेश्चर कॅप्‍चर करू शकते."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
-    <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टीम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्टेटस बार होऊ द्या"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"स्टेटस बार होण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"स्‍टेटस बार विस्तृत करा/संकुचित करा"</string>
@@ -329,8 +328,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले संदेश आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अॅप्लिकेशन वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाईल आणि डीव्हाइस मालक व्यवस्थापित करा"</string>
-    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"प्रोफाईल मालक आणि डीव्हाइस मालक सेट करण्याची अॅप्सना अनुमती द्या."</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"प्रोफाईल मालक आणि डिव्हाइस मालक सेट करण्याची अॅप्सना अनुमती द्या."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चालणारे अॅप्स पुनर्क्रमित करा"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"समोर आणि पार्श्वभूमीवर कार्ये हलविण्यासाठी अॅप ला अनुमती देते. अॅप हे आपल्या इनपुटशिवाय करू शकतो."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सक्षम करा"</string>
@@ -352,9 +351,9 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्टम सेटिंग्ज सुधारित करा"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपल्या सिस्टीमचे कॉन्फिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"सुरूवातीस चालवा"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"जसे सिस्टीम बूट करणे समाप्त करते तसे अॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे टॅबलेट प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी चालू राहून एकंदर टॅबलेटला धीमे करण्यास अॅप ला अनुमती देते."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"सिस्टीम बूट करणे समाप्त करते तसेच अॅपने स्वतः प्रारंभ करण्यास त्याला अनुमती देते. यामुळे टीव्ही प्रारंभ करण्यासाठी त्यास जास्त वेळ लागू शकतो आणि नेहमी चालू ठेवून संपूर्ण टॅबलेट धीमे करण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"जसे सिस्टीम बूट करणे समाप्त करते तसे अॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे फोन प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी चालू राहून एकंदर फोनला धीमे करण्यास अॅप ला अनुमती देते."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"जसे सिस्टम बूट करणे समाप्त करते तसे अॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे टॅबलेट प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी चालू राहून एकंदर टॅबलेटला धीमे करण्यास अॅप ला अनुमती देते."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"सिस्टम बूट करणे समाप्त करते तसेच अॅपने स्वतः प्रारंभ करण्यास त्याला अनुमती देते. यामुळे टीव्ही प्रारंभ करण्यासाठी त्यास जास्त वेळ लागू शकतो आणि नेहमी चालू ठेवून संपूर्ण टॅबलेट धीमे करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"जसे सिस्टम बूट करणे समाप्त करते तसे अॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे फोन प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी चालू राहून एकंदर फोनला धीमे करण्यास अॅप ला अनुमती देते."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"रोचक प्रसारण पाठवा"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"रोचक प्रसारणे पाठविण्यासाठी अॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो टॅब्लेटला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"रोचक प्रसारणे पाठविण्यास अॅपला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर तसेच रहाते. अतिरिक्त वापर टीव्ही धीमा किंवा यासाठी बरीच मेमरी वापरली जात असल्यामुळे तो अस्थिर करू शकतो."</string>
@@ -406,7 +405,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवा अॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डीव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डीव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करण्याचा अनुभव सुधारण्यासाठी अॅपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"फोन नंबर वाचा"</string>
@@ -422,9 +421,9 @@
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"टीव्हीचे इन्फ्रारेड ट्रान्समीटर वापरण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"अ‍ॅप ला फोनच्‍या इन्‍फ्रारेड ट्रान्‍समीटरचा वापर करण्‍याची अनुमती देते."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"वॉलपेपर सेट करा"</string>
-    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"सिस्टीम वॉलपेपर सेट करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"सिस्टम वॉलपेपर सेट करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"आपला वॉलपेपर आकार समायोजित करा"</string>
-    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"सिस्टीम वॉलपेपर आकार सूचना सेट करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"सिस्टम वॉलपेपर आकार सूचना सेट करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"टाइम झोन सेट करा"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"टॅब्लेटचा टाइम झोन बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"टीव्हीचा टाईम झोन बदलण्यासाठी अॅपला अनुमती देते."</string>
@@ -444,15 +443,15 @@
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"वाय-फाय कनेक्शन पहा"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"वाय-फाय सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या वाय-फाय डीव्हाइसचे नाव यासारख्या, वाय-फाय नेटवर्किंग विषयीची माहिती पाहण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाय-फाय वरून कनेक्ट करा आणि डिस्कनेक्ट करा"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय अॅक्सेस बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डीव्हाइस कॉंफिगरेशनमध्ये बदल करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय अॅक्सेस बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉंफिगरेशनमध्ये बदल करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाय-फाय मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"केवळ आपला टीव्ही न वापरता, एकाधिक पत्ते वापरून एका वाय-फाय नेटवकवरील सर्व डीव्हाइसवर पाठविलेली पॅकेट प्राप्त करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग्ज अॅक्सेस करा"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब्लूटूथ टॅबलेट कॉंफिगर करण्याकरिता आणि दूरस्थ डीव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब्लूटूथ टॅबलेट कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"स्थानिक ब्लूटूथ टीव्ही कॉंफिगर करण्यासाठी आणि दूरस्थ डीव्हाइससह शोधण्यासाठी आणि जोडण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक ब्लूटूथ फोन कॉंफिगर करण्याकरिता आणि दूरस्थ डीव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक ब्लूटूथ फोन कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX कनेक्ट करा आणि त्यावरून डिस्कनेक्ट करा"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या कोणत्याही WiMAX नेटवर्क विषयीची माहिती निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX स्थिती बदला"</string>
@@ -535,7 +534,7 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"होल्‍डरला वाहकद्वारे-प्रदान केलेल्या कॉन्फिगरेशन अ‍ॅपची विनंती करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"नेटवर्क स्‍थितींवरील निरीक्षणांसाठी ऐका"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"अनु्प्रयोगाला नेटवर्क स्‍थितींवरील निरीक्षणे ऐकण्‍यासाठी अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"इनपुट डीव्हाइस कॅलिब्रेशन बदला"</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"इनपुट डिव्हाइस कॅलिब्रेशन बदला"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"स्पर्श स्क्रीनची कॅलिब्रेशन प्राचले सुधारित करण्यासाठी अॅप ला अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यक नसते."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्रे अॅक्सेस करा"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM प्रमाणपत्रांची तरतूद करण्यासाठी आणि वापरण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्सकरिता कधीही आवश्यकता नसते."</string>
@@ -570,14 +569,14 @@
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"कोणत्याही चेतावणी शिवाय या वापरकर्त्याचा या टॅब्लेटवरील डेटा मिटवा."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"कोणत्याही चेतावणी शिवाय या वापरकर्त्याचा या टीव्ही वरील डेटा मिटवा."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"कोणत्याही चेतावणी शिवाय या वापरकर्त्याचा या फोनवरील डेटा मिटवा."</string>
-    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"डीव्हाइस समग्र प्रॉक्सी सेट करा"</string>
-    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"धोरण सक्षम असताना वापरण्यासाठी डीव्हाइस समग्र प्रॉक्सी सेट करा. फक्त डीव्हाइस मालक समग्र प्रॉक्सी सेट करु शकतो."</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"डिव्हाइस समग्र प्रॉक्सी सेट करा"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"धोरण सक्षम असताना वापरण्यासाठी डिव्हाइस समग्र प्रॉक्सी सेट करा. फक्त डिव्हाइस मालक समग्र प्रॉक्सी सेट करु शकतो."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"स्क्रीन लॉक संकेतशब्द कालबाह्यता सेट करा"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"लॉक-स्क्रीन संकेतशब्द किती वारंवार बदलणे आवश्यक आहे ते बदला."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"स्टोरेज एंक्रिप्शन सेट करा"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"स्टोअर केलेला अॅप डेटा एंक्रिप्ट केला जाणे आवश्यक आहे."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"कॅमेरे अक्षम करा"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"सर्व डीव्हाइस कॅमेर्‍यांचा वापर प्रतिबंधित करा."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"सर्व डिव्हाइस कॅमेर्‍यांचा वापर प्रतिबंधित करा."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"काही स्क्रीन लॉक वैशिष्‍ट्ये अक्षम करा"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"काही स्क्रीन लॉक वैशिष्‍ट्यांचा वापर प्रतिबंधित करा."</string>
   <string-array name="phoneTypes">
@@ -1017,7 +1016,7 @@
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"इमेज कॅप्चर करा"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"या क्रियेसाठी डीफॉल्‍टनुसार वापरा."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"एक भिन्न अ‍ॅप वापरा"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"डाउनलोड केलेल्या सिस्टीम सेटिंग्ज &gt; Apps &gt; मधील डीफॉल्ट साफ करा."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"डाउनलोड केलेल्या सिस्टम सेटिंग्ज &gt; Apps &gt; मधील डीफॉल्ट साफ करा."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"क्रिया निवडा"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB डिव्हाइससाठी अॅप निवडा"</string>
     <string name="noApplications" msgid="2991814273936504689">"कोणतेही अॅप्स ही क्रिया करू शकत नाहीत."</string>
@@ -1028,7 +1027,7 @@
     <string name="aerr_restart" msgid="7581308074153624475">"अॅप पुन्हा उघडा"</string>
     <string name="aerr_report" msgid="5371800241488400617">"अभिप्राय पाठवा"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करा"</string>
-    <string name="aerr_mute" msgid="1974781923723235953">"डीव्हाइस रीस्टार्ट होईपर्यंत म्युट करा"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"डिव्हाइस रीस्टार्ट होईपर्यंत म्युट करा"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"प्रतीक्षा करा"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"अॅप बंद करा"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1045,7 +1044,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"स्केल"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"नेहमी दर्शवा"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"सिस्टीम सेटिंग्ज &gt; Apps &gt; डाउनलोड केलेले मध्ये हे पुन्हा-सक्षम करा."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"सिस्टम सेटिंग्ज &gt; Apps &gt; डाउनलोड केलेले मध्ये हे पुन्हा-सक्षम करा."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> वर्तमान डिस्प्ले आकार सेटिंगला समर्थन देत नाही आणि अनपेक्षित वर्तन करू शकते."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"नेहमी दर्शवा"</string>
     <string name="smv_application" msgid="3307209192155442829">"अॅप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने तिच्या स्वयं-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले आहे."</string>
@@ -1116,7 +1115,7 @@
     <string name="wifi_no_internet" msgid="8451173622563841546">"वाय-फायवरून इंटरनेटवर अॅक्सेस नाही"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> वर स्विच केले"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेट अॅक्सेस नसताना डीव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरते. शुल्क लागू शकेल."</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेट अॅक्सेस नसताना डिव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरते. शुल्क लागू शकेल."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> वरून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> वर स्विच केले"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"मोबाइल डेटा"</item>
@@ -1165,7 +1164,7 @@
     <string name="sim_removed_message" msgid="2333164559970958645">"आपण एक वैध सिम कार्ड घालून प्रारंभ करेपर्यंत मोबाईल नेटवर्क अनुपलब्ध असेल."</string>
     <string name="sim_done_button" msgid="827949989369963775">"पूर्ण झाले"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोडले"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अॅक्सेस करण्यासाठी तुमचे डीव्हाइस रीस्टार्ट करा."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"रीस्टार्ट"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"आपल्या नवीन सिमने योग्यरित्या कार्य करण्यासाठी, आपल्याला अॅप इंस्टॉल करण्याची आणि तो आपल्या वाहकामधून उघडण्याची आवश्यकता असेल."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"अ‍ॅप मिळवा"</string>
@@ -1181,7 +1180,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"परवानग्या आवश्यक नाहीत"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"यासाठी आपले पैसे खर्च होऊ शकतात"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB हे डीव्हाइस चार्ज करत आहे"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB हे डिव्हाइस चार्ज करत आहे"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB संलग्न केलेल्या डिव्हाइसला पॉवरचा पुरवठा करीत आहे"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"स्थानांतरणासाठी USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फोटो स्थानांतरणासाठी USB"</string>
@@ -1219,8 +1218,8 @@
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> दूषित आहे. निराकरण करण्यासाठी टॅप करा."</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> दूषित आहे. निश्चित करण्यासाठी निवडा."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> असमर्थित"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"हे डीव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी टॅप करा."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"हे डीव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी निवडा."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी टॅप करा."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी निवडा."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> अनपेक्षितरित्या काढले"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"डेटा गमावणे टाळण्‍यासाठी काढण्‍यापूर्वी <xliff:g id="NAME">%s</xliff:g> अनमाउंट करा"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> काढले"</string>
@@ -1231,7 +1230,7 @@
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"बाहेर काढा"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"एक्सप्लोर करा"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> गहाळ आहे"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"हे डीव्हाइस पुन्हा घाला"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"हे डिव्हाइस पुन्हा घाला"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> हलवित आहे"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"डेटा हलवित आहे"</string>
     <string name="ext_media_move_success_title" msgid="8575300932957954671">"हलविणे पूर्ण"</string>
@@ -1631,7 +1630,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरी लाइफ सुधारित करण्‍यासाठी, बॅटरी सेव्हर तुमच्या डीव्हाइस ची कामगिरी कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. सिंकवर अवलंबून असणारे ईमेल, मेसेजिंग आणि इतर अ‍ॅप्स तुम्ही उघडल्याशिवाय अपडेट होऊ शकत नाहीत.\n\nतुमचे डीव्हाइस चार्ज होत असते तेव्हा बॅटरी सेव्हर आपोआप बंद होतो."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरी लाइफ सुधारित करण्‍यासाठी, बॅटरी सेव्हर तुमच्या डिव्हाइस ची कामगिरी कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. सिंकवर अवलंबून असणारे ईमेल, मेसेजिंग आणि इतर अ‍ॅप्स तुम्ही उघडल्याशिवाय अपडेट होऊ शकत नाहीत.\n\nतुमचे डिव्हाइस चार्ज होत असते तेव्हा बॅटरी सेव्हर आपोआप बंद होतो."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -1732,7 +1731,7 @@
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो प्रारंभ करत आहे..."</string>
-    <string name="demo_restarting_message" msgid="952118052531642451">"डीव्हाइस रीसेट करत आहे..."</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"डिव्हाइस रीसेट करत आहे..."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
     <string name="conference_call" msgid="3751093130790472426">"परिषद कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>
@@ -1744,7 +1743,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"बातम्‍या आणि मासिके"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"नकाशे आणि नेव्हिगेशन"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादनक्षमता"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"डीव्हाइस स्टोरेज"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"डिव्हाइस स्टोरेज"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB डीबगिंग"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"तास"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"मिनिट"</string>

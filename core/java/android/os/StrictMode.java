@@ -16,6 +16,7 @@
 package android.os;
 
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -322,16 +323,36 @@ public final class StrictMode {
 
     /** {@hide} */
     @TestApi
-    public interface ViolationListener {
-        public void onViolation(String message);
+    public interface ViolationLogger {
+
+        /** Called when penaltyLog is enabled and a violation needs logging. */
+        void log(ViolationInfo info);
     }
 
-    private static volatile ViolationListener sListener;
+    private static final ViolationLogger LOGCAT_LOGGER =
+            info -> {
+                String msg;
+                if (info.durationMillis != -1) {
+                    msg = "StrictMode policy violation; ~duration=" + info.durationMillis + " ms:";
+                } else {
+                    msg = "StrictMode policy violation:";
+                }
+                if (info.crashInfo != null) {
+                    Log.d(TAG, msg + " " + info.crashInfo.stackTrace);
+                } else {
+                    Log.d(TAG, msg + " missing stack trace!");
+                }
+            };
+
+    private static volatile ViolationLogger sLogger = LOGCAT_LOGGER;
 
     /** {@hide} */
     @TestApi
-    public static void setViolationListener(ViolationListener listener) {
-        sListener = listener;
+    public static void setViolationLogger(ViolationLogger listener) {
+        if (listener == null) {
+            listener = LOGCAT_LOGGER;
+        }
+        sLogger = listener;
     }
 
     /**
@@ -1512,28 +1533,16 @@ public final class StrictMode {
                     lastViolationTime = vtime;
                 }
             } else {
-                mLastViolationTime = new ArrayMap<Integer, Long>(1);
+                mLastViolationTime = new ArrayMap<>(1);
             }
             long now = SystemClock.uptimeMillis();
             mLastViolationTime.put(crashFingerprint, now);
             long timeSinceLastViolationMillis =
                     lastViolationTime == 0 ? Long.MAX_VALUE : (now - lastViolationTime);
 
-            if ((info.policy & PENALTY_LOG) != 0 && sListener != null) {
-                sListener.onViolation(info.crashInfo.stackTrace);
-            }
             if ((info.policy & PENALTY_LOG) != 0
                     && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
-                if (info.durationMillis != -1) {
-                    Log.d(
-                            TAG,
-                            "StrictMode policy violation; ~duration="
-                                    + info.durationMillis
-                                    + " ms: "
-                                    + info.crashInfo.stackTrace);
-                } else {
-                    Log.d(TAG, "StrictMode policy violation: " + info.crashInfo.stackTrace);
-                }
+                sLogger.log(info);
             }
 
             // The violationMaskSubset, passed to ActivityManager, is a
@@ -1925,11 +1934,11 @@ public final class StrictMode {
             }
         }
 
-        if (penaltyLog && sListener != null) {
-            sListener.onViolation(originStack.toString());
+        if (penaltyLog && sLogger != null) {
+            sLogger.log(info);
         }
         if (penaltyLog && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
-            Log.e(TAG, message, originStack);
+            sLogger.log(info);
         }
 
         int violationMaskSubset = PENALTY_DROPBOX | (ALL_VM_DETECT_BITS & sVmPolicy.mask);
@@ -2339,11 +2348,12 @@ public final class StrictMode {
      *
      * @hide
      */
-    public static class ViolationInfo implements Parcelable {
+    @TestApi
+    public static final class ViolationInfo implements Parcelable {
         public final String message;
 
         /** Stack and other stuff info. */
-        public final ApplicationErrorReport.CrashInfo crashInfo;
+        @Nullable public final ApplicationErrorReport.CrashInfo crashInfo;
 
         /** The strict mode policy mask at the time of violation. */
         public final int policy;

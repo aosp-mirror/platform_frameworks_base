@@ -22,6 +22,7 @@ import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Process;
 import android.util.Slog;
@@ -44,7 +45,7 @@ public class AppBackupUtils {
      *     <li>it is the special shared-storage backup package used for 'adb backup'
      * </ol>
      */
-    public static boolean appIsEligibleForBackup(ApplicationInfo app) {
+    public static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
         // 1. their manifest states android:allowBackup="false"
         if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
             return false;
@@ -60,11 +61,28 @@ public class AppBackupUtils {
             return false;
         }
 
-        return true;
+        // Everything else checks out; the only remaining roadblock would be if the
+        // package were disabled
+        return !appIsDisabled(app, pm);
+    }
+
+    /** Avoid backups of 'disabled' apps. */
+    public static boolean appIsDisabled(ApplicationInfo app, PackageManager pm) {
+        switch (pm.getApplicationEnabledSetting(app.packageName)) {
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     /**
-     * Checks if the app is in a stopped state, that means it won't receive broadcasts.
+     * Checks if the app is in a stopped state.  This is not part of the general "eligible for
+     * backup?" check because we *do* still need to restore data to apps in this state (e.g.
+     * newly-installing ones)
      */
     public static boolean appIsStopped(ApplicationInfo app) {
         return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);

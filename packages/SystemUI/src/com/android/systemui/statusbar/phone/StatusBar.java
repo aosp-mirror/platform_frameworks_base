@@ -339,7 +339,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
-    private static final long AUTOHIDE_TIMEOUT_MS = 3000;
+    private static final long AUTOHIDE_TIMEOUT_MS = 2250;
 
     /** The minimum delay in ms between reports of notification visibility. */
     private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;
@@ -3321,7 +3321,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             cancelAutohide();
         }
-        touchAutoDim();
     }
 
     protected int computeStatusBarMode(int oldVal, int newVal) {
@@ -3404,10 +3403,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         // manually dismiss the volume panel when interacting with the nav bar
         if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
+            touchAutoDim();
             dismissVolumeDialog();
         }
         checkBarModes();
-        touchAutoDim();
     }
 
     private void dismissVolumeDialog() {

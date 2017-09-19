@@ -230,8 +230,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Asetukset"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Auta"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ääniapuri"</string>
-    <!-- no translation found for global_action_lockdown (2277328351790053477) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="2277328351790053477">"Lukitse"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Uusi ilmoitus"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuaalinen näppäimistö"</string>
@@ -1427,7 +1426,7 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Järjestelmä"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ääni"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Langaton näyttö"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"Lähetä"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"Suoratoisto"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Yhdistä laitteeseen"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Lähetä näyttö laitteeseen"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Etsitään laitteita…"</string>
