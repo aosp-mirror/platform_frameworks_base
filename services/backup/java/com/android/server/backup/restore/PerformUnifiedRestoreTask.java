@@ -386,8 +386,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // Pull the Package Manager metadata from the restore set first
             mCurrentPackage = new PackageInfo();
             mCurrentPackage.packageName = PACKAGE_MANAGER_SENTINEL;
-            mPmAgent = new PackageManagerBackupAgent(backupManagerService.getPackageManager(),
-                    null);
+            mPmAgent = backupManagerService.makeMetadataAgent(null);
             mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
             if (MORE_DEBUG) {
                 Slog.v(TAG, "initiating restore for PMBA");

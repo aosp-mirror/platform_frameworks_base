@@ -321,8 +321,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // because it's cheap and this way we guarantee that we don't get out of
                 // step even if we're selecting among various transports at run time.
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
-                    PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
-                            backupManagerService.getPackageManager());
+                    PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
                     mStatus = invokeAgentForBackup(
                             PACKAGE_MANAGER_SENTINEL,
                             IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);

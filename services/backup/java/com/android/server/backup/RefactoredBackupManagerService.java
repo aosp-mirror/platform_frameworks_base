@@ -679,6 +679,29 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return token;
     }
 
+    /*
+     * Construct a backup agent instance for the metadata pseudopackage.  This is a
+     * process-local non-lifecycle agent instance, so we manually set up the context
+     * topology for it.
+     */
+    public PackageManagerBackupAgent makeMetadataAgent() {
+        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager);
+        pmAgent.attach(mContext);
+        pmAgent.onCreate();
+        return pmAgent;
+    }
+
+    /*
+     * Same as above but with the explicit package-set configuration.
+     */
+    public PackageManagerBackupAgent makeMetadataAgent(List<PackageInfo> packages) {
+        PackageManagerBackupAgent pmAgent =
+                new PackageManagerBackupAgent(mPackageManager, packages);
+        pmAgent.attach(mContext);
+        pmAgent.onCreate();
+        return pmAgent;
+    }
+
     // ----- Debug-only backup operation trace -----
     public void addBackupTrace(String s) {
         if (DEBUG_BACKUP_TRACE) {

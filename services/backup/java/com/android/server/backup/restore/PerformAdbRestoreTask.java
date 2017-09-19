@@ -150,8 +150,7 @@ public class PerformAdbRestoreTask implements Runnable {
         mObserver = observer;
         mLatchObject = latch;
         mAgent = null;
-        mPackageManagerBackupAgent = new PackageManagerBackupAgent(
-                backupManagerService.getPackageManager());
+        mPackageManagerBackupAgent = backupManagerService.makeMetadataAgent();
         mAgentPackage = null;
         mTargetApp = null;
         mObbConnection = new FullBackupObbConnection(backupManagerService);
