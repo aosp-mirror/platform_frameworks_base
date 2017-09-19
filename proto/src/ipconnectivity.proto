@@ -501,8 +501,8 @@ message WakeupStats {
   // between [1001, 9999]. See android.os.Process for possible uids.
   optional int64 non_application_wakeups = 6;
 
-  // The total number of wakeup packets with no associated sockets.
-  optional int64 unrouted_wakeups = 7;
+  // The total number of wakeup packets with no associated socket or uid.
+  optional int64 no_uid_wakeups = 7;
 }
 
 // Represents one of the IP connectivity event defined in this file.
