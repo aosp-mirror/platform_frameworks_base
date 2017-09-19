@@ -126,7 +126,7 @@ final public class IpConnectivityEventBuilder {
         wakeupStats.systemWakeups = in.systemWakeups;
         wakeupStats.nonApplicationWakeups = in.nonApplicationWakeups;
         wakeupStats.applicationWakeups = in.applicationWakeups;
-        wakeupStats.unroutedWakeups = in.unroutedWakeups;
+        wakeupStats.noUidWakeups = in.noUidWakeups;
         final IpConnectivityEvent out = buildEvent(0, 0, in.iface);
         out.setWakeupStats(wakeupStats);
         return out;

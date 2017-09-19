@@ -512,7 +512,7 @@ public class IpConnectivityEventBuilderTest {
         stats.nonApplicationWakeups = 1;
         stats.rootWakeups = 2;
         stats.systemWakeups = 3;
-        stats.unroutedWakeups = 3;
+        stats.noUidWakeups = 3;
 
         IpConnectivityEvent got = IpConnectivityEventBuilder.toProto(stats);
         String want = String.join("\n",
@@ -526,11 +526,11 @@ public class IpConnectivityEventBuilderTest {
                 "  wakeup_stats <",
                 "    application_wakeups: 5",
                 "    duration_sec: 0",
+                "    no_uid_wakeups: 3",
                 "    non_application_wakeups: 1",
                 "    root_wakeups: 2",
                 "    system_wakeups: 3",
                 "    total_wakeups: 14",
-                "    unrouted_wakeups: 3",
                 "  >",
                 ">",
                 "version: 2\n");

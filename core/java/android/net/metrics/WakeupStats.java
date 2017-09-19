@@ -35,7 +35,7 @@ public class WakeupStats {
     public long systemWakeups = 0;
     public long nonApplicationWakeups = 0;
     public long applicationWakeups = 0;
-    public long unroutedWakeups = 0;
+    public long noUidWakeups = 0;
     public long durationSec = 0;
 
     public WakeupStats(String iface) {
@@ -58,7 +58,7 @@ public class WakeupStats {
                 systemWakeups++;
                 break;
             case NO_UID:
-                unroutedWakeups++;
+                noUidWakeups++;
                 break;
             default:
                 if (ev.uid >= Process.FIRST_APPLICATION_UID) {
@@ -80,7 +80,7 @@ public class WakeupStats {
                 .append(", system: ").append(systemWakeups)
                 .append(", apps: ").append(applicationWakeups)
                 .append(", non-apps: ").append(nonApplicationWakeups)
-                .append(", unrouted: ").append(unroutedWakeups)
+                .append(", no uid: ").append(noUidWakeups)
                 .append(", ").append(durationSec).append("s)")
                 .toString();
     }
