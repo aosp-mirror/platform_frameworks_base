@@ -1026,7 +1026,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             @NonNull ComponentName component, int userId) {
         return ManagedApplicationService.build(context, component, userId,
                 R.string.vr_listener_binding_label, Settings.ACTION_VR_LISTENER_SETTINGS,
-                sBinderChecker);
+                sBinderChecker, /*isImportant*/true);
     }
 
     /**
