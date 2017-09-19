@@ -26,7 +26,6 @@ import java.util.Map;
 /** @hide */
 public final class ServiceManager {
     private static final String TAG = "ServiceManager";
-
     private static IServiceManager sServiceManager;
     private static HashMap<String, IBinder> sCache = new HashMap<String, IBinder>();
 
@@ -43,7 +42,7 @@ public final class ServiceManager {
 
     /**
      * Returns a reference to a service with the given name.
-     * 
+     *
      * @param name the name of the service to get
      * @return a reference to the service, or <code>null</code> if the service doesn't exist
      */
@@ -79,35 +78,46 @@ public final class ServiceManager {
     /**
      * Place a new @a service called @a name into the service
      * manager.
-     * 
+     *
      * @param name the name of the new service
      * @param service the service object
      */
     public static void addService(String name, IBinder service) {
-        try {
-            getIServiceManager().addService(name, service, false);
-        } catch (RemoteException e) {
-            Log.e(TAG, "error in addService", e);
-        }
+        addService(name, service, false, IServiceManager.DUMP_PRIORITY_NORMAL);
     }
 
     /**
      * Place a new @a service called @a name into the service
      * manager.
-     * 
+     *
      * @param name the name of the new service
      * @param service the service object
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * to access this service
      */
     public static void addService(String name, IBinder service, boolean allowIsolated) {
+        addService(name, service, allowIsolated, IServiceManager.DUMP_PRIORITY_NORMAL);
+    }
+
+    /**
+     * Place a new @a service called @a name into the service
+     * manager.
+     *
+     * @param name the name of the new service
+     * @param service the service object
+     * @param allowIsolated set to true to allow isolated sandboxed processes
+     * @param dumpPriority supported dump priority levels as a bitmask
+     * to access this service
+     */
+    public static void addService(String name, IBinder service, boolean allowIsolated,
+            int dumpPriority) {
         try {
-            getIServiceManager().addService(name, service, allowIsolated);
+            getIServiceManager().addService(name, service, allowIsolated, dumpPriority);
         } catch (RemoteException e) {
             Log.e(TAG, "error in addService", e);
         }
     }
-    
+
     /**
      * Retrieve an existing service called @a name from the
      * service manager.  Non-blocking.
@@ -133,7 +143,7 @@ public final class ServiceManager {
      */
     public static String[] listServices() {
         try {
-            return getIServiceManager().listServices();
+            return getIServiceManager().listServices(IServiceManager.DUMP_PRIORITY_ALL);
         } catch (RemoteException e) {
             Log.e(TAG, "error in listServices", e);
             return null;
@@ -144,7 +154,7 @@ public final class ServiceManager {
      * This is only intended to be called when the process is first being brought
      * up and bound by the activity manager. There is only one thread in the process
      * at that time, so no locking is done.
-     * 
+     *
      * @param cache the cache of service references
      * @hide
      */
