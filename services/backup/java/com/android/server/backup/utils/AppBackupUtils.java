@@ -61,6 +61,11 @@ public class AppBackupUtils {
             return false;
         }
 
+        // 4. it is an "instant" app
+        if (app.isInstantApp()) {
+            return false;
+        }
+
         // Everything else checks out; the only remaining roadblock would be if the
         // package were disabled
         return !appIsDisabled(app, pm);
