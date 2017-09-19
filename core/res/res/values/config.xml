@@ -2231,9 +2231,13 @@
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
 
-    <!-- Name of the CustomDialog that is used for VPN -->
-    <string name="config_customVpnConfirmDialogComponent"
+    <!-- Name of the dialog that is used to request the user's consent to VPN connection -->
+    <string name="config_customVpnConfirmDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog</string>
+
+    <!-- Name of the dialog that is used to inform the user that always-on VPN is disconnected -->
+    <string name="config_customVpnAlwaysOnDisconnectedDialogComponent" translatable="false"
+            >com.android.vpndialogs/com.android.vpndialogs.AlwaysOnDisconnectedDialog</string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
