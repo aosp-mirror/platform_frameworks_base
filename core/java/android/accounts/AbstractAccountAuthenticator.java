@@ -175,6 +175,9 @@ public abstract class AbstractAccountAuthenticator {
                 }
                 if (result != null) {
                     response.onResult(result);
+                } else {
+                    response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                            "null bundle returned");
                 }
             } catch (Exception e) {
                 handleException(response, "addAccount", accountType, e);
