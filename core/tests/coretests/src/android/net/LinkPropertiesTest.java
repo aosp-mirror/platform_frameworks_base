@@ -753,7 +753,7 @@ public class LinkPropertiesTest extends TestCase {
     @SmallTest
     public void testCompareResult() {
         // Either adding or removing items
-        testCompareResult(Arrays.asList(1), Arrays.asList(1, 2, 3, 4),
+        testCompareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
                 Arrays.asList(2, 3, 4), new ArrayList<>());
         testCompareResult(Arrays.asList(1, 2), Arrays.asList(3, 2, 1, 4),
                 new ArrayList<>(), Arrays.asList(3, 4));
@@ -780,9 +780,9 @@ public class LinkPropertiesTest extends TestCase {
         assertEquals(expectedSet, actualSet);
     }
 
-    private <T> void testCompareResult(List<T> oldItems, List<T> newItems, List<T> expectAdded,
-            List<T> expectRemoved) {
-        CompareResult<T> result = new CompareResult<>(newItems, oldItems);
+    private <T> void testCompareResult(List<T> oldItems, List<T> newItems, List<T> expectRemoved,
+            List<T> expectAdded) {
+        CompareResult<T> result = new CompareResult<>(oldItems, newItems);
         assertEquals(new ArraySet<>(expectAdded), new ArraySet<>(result.added));
         assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
