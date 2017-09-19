@@ -5549,7 +5549,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public final void setHint(CharSequence hint) {
         setHintInternal(hint);
 
-        if (isInputMethodTarget()) {
+        if (mEditor != null && isInputMethodTarget()) {
             mEditor.reportExtractedText();
         }
     }
