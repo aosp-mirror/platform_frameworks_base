@@ -170,11 +170,11 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             timestampMs = System.currentTimeMillis();
         }
 
-        addWakupEvent(iface, timestampMs, uid);
+        addWakeupEvent(iface, timestampMs, uid);
     }
 
     @GuardedBy("this")
-    private void addWakupEvent(String iface, long timestampMs, int uid) {
+    private void addWakeupEvent(String iface, long timestampMs, int uid) {
         int index = wakeupEventIndex(mWakeupEventCursor);
         mWakeupEventCursor++;
         WakeupEvent event = new WakeupEvent();
