@@ -1280,7 +1280,23 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             mGradientDrawable.setScreenSize(displaySize.x, displaySize.y);
             GradientColors colors = mColorExtractor.getColors(mKeyguardShowing ?
                     WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
-            mGradientDrawable.setColors(colors, false);
+            updateColors(colors, false /* animate */);
+        }
+
+        /**
+         * Updates background and system bars according to current GradientColors.
+         * @param colors Colors and hints to use.
+         * @param animate Interpolates gradient if true, just sets otherwise.
+         */
+        private void updateColors(GradientColors colors, boolean animate) {
+            mGradientDrawable.setColors(colors, animate);
+            View decorView = getWindow().getDecorView();
+            if (colors.supportsDarkText()) {
+                decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            } else {
+                decorView.setSystemUiVisibility(0);
+            }
         }
 
         @Override
@@ -1350,11 +1366,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         public void onColorsChanged(ColorExtractor extractor, int which) {
             if (mKeyguardShowing) {
                 if ((WallpaperManager.FLAG_LOCK & which) != 0) {
-                    mGradientDrawable.setColors(extractor.getColors(WallpaperManager.FLAG_LOCK));
+                    updateColors(extractor.getColors(WallpaperManager.FLAG_LOCK),
+                            true /* animate */);
                 }
             } else {
                 if ((WallpaperManager.FLAG_SYSTEM & which) != 0) {
-                    mGradientDrawable.setColors(extractor.getColors(WallpaperManager.FLAG_SYSTEM));
+                    updateColors(extractor.getColors(WallpaperManager.FLAG_SYSTEM),
+                            true /* animate */);
                 }
             }
         }
