@@ -176,8 +176,4 @@ public class ImageFloatingTextView extends TextView {
         }
         return false;
     }
-
-    public int getLayoutHeight() {
-        return getLayout().getHeight();
-    }
 }

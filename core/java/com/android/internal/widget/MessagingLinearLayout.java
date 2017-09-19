@@ -79,7 +79,6 @@ public class MessagingLinearLayout extends ViewGroup {
         a.recycle();
     }
 
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // This is essentially a bottom-up linear layout that only adds children that fit entirely
@@ -95,7 +94,10 @@ public class MessagingLinearLayout extends ViewGroup {
                 || getMeasuredHeight() != targetHeight
                 || mLastMeasuredWidth != widthSize;
 
+        // Now that we know which views to take, fix up the indents and see what width we get.
+        int measuredWidth = mPaddingLeft + mPaddingRight;
         final int count = getChildCount();
+        int totalHeight = getMeasuredHeight();
         if (recalculateVisibility) {
             // We only need to recalculate the view visibilities if the view wasn't measured already
             // in this pass, otherwise we may drop messages here already since we are measured
@@ -107,7 +109,7 @@ public class MessagingLinearLayout extends ViewGroup {
                 lp.hide = true;
             }
 
-            int totalHeight = mPaddingTop + mPaddingBottom;
+            totalHeight = mPaddingTop + mPaddingBottom;
             boolean first = true;
 
             // Starting from the bottom: we measure every view as if it were the only one. If it still
@@ -119,14 +121,6 @@ public class MessagingLinearLayout extends ViewGroup {
                 }
                 final View child = getChildAt(i);
                 LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
-                ImageFloatingTextView textChild = null;
-                if (child instanceof ImageFloatingTextView) {
-                    // Pretend we need the image padding for all views, we don't know which
-                    // one will end up needing to do this (might end up not using all the space,
-                    // but calculating this exactly would be more expensive).
-                    textChild = (ImageFloatingTextView) child;
-                    textChild.setNumIndentLines(mIndentLines == 2 ? 3 : mIndentLines);
-                }
 
                 int spacing = first ? 0 : mSpacing;
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight
@@ -136,66 +130,27 @@ public class MessagingLinearLayout extends ViewGroup {
                 int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
                         lp.bottomMargin + spacing);
                 first = false;
-                boolean measuredTooSmall = false;
-                if (textChild != null) {
-                    measuredTooSmall = childHeight < textChild.getLayoutHeight()
-                            + textChild.getPaddingTop() + textChild.getPaddingBottom();
+                int measureType = MessagingChild.MEASURED_NORMAL;
+                if (child instanceof MessagingChild) {
+                    measureType = ((MessagingChild) child).getMeasuredType();
+                    linesRemaining -= messagingChild.getConsumedLines();
                 }
-
-                if (newHeight <= targetHeight && !measuredTooSmall) {
+                boolean isShortened = measureType == MessagingChild.MEASURED_SHORTENED;
+                boolean isTooSmall = measureType == MessagingChild.MEASURED_TOO_SMALL;
+                if (newHeight <= targetHeight && !isTooSmall) {
                     totalHeight = newHeight;
+                    measuredWidth = Math.max(measuredWidth,
+                            child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin
+                                    + mPaddingLeft + mPaddingRight);
                     lp.hide = false;
+                    if (isShortened) {
+                        break;
+                    }
                 } else {
                     break;
                 }
             }
         }
-
-        // Now that we know which views to take, fix up the indents and see what width we get.
-        int measuredWidth = mPaddingLeft + mPaddingRight;
-        int imageLines = mIndentLines;
-        // Need to redo the height because it may change due to changing indents.
-        int totalHeight = mPaddingTop + mPaddingBottom;
-        boolean first = true;
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
-            if (child.getVisibility() == GONE || lp.hide) {
-                continue;
-            }
-
-            if (child instanceof ImageFloatingTextView) {
-                ImageFloatingTextView textChild = (ImageFloatingTextView) child;
-                if (imageLines == 2 && textChild.getLineCount() > 2) {
-                    // HACK: If we need indent for two lines, and they're coming from the same
-                    // view, we need extra spacing to compensate for the lack of margins,
-                    // so add an extra line of indent.
-                    imageLines = 3;
-                }
-                boolean changed = textChild.setNumIndentLines(Math.max(0, imageLines));
-                if (changed || !recalculateVisibility) {
-                    final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                            mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin,
-                            lp.width);
-                    // we want to measure it at most as high as it is currently, otherwise we'll
-                    // drop later lines
-                    final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
-                            targetHeight - child.getMeasuredHeight(), lp.height);
-
-                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);;
-                }
-                imageLines -= textChild.getLineCount();
-            }
-
-            measuredWidth = Math.max(measuredWidth,
-                    child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin
-                            + mPaddingLeft + mPaddingRight);
-            totalHeight = Math.max(totalHeight, totalHeight + child.getMeasuredHeight() +
-                    lp.topMargin + lp.bottomMargin + (first ? 0 : mSpacing));
-            first = false;
-        }
-
 
         setMeasuredDimension(
                 resolveSize(Math.max(getSuggestedMinimumWidth(), measuredWidth),
@@ -287,23 +242,18 @@ public class MessagingLinearLayout extends ViewGroup {
      * Sets how many lines should be indented to avoid a floating image.
      */
     @RemotableViewMethod
-    public void setNumIndentLines(int numberLines) {
+    public boolean setNumIndentLines(int numberLines) {
+        boolean changed = numberLines != mIndentLines;
         mIndentLines = numberLines;
+        return changed;
     }
 
-    /**
-     * Set id of the child that's also visible in the contracted layout.
-     */
-    @RemotableViewMethod
-    public void setContractedChildId(int contractedChildId) {
-        mContractedChildId = contractedChildId;
-    }
-
-    /**
-     * Get id of the child that's also visible in the contracted layout.
-     */
-    public int getContractedChildId() {
-        return mContractedChildId;
+    public interface MessagingChild {
+        int MEASURED_NORMAL = 0;
+        int MEASURED_SHORTENED = 1;
+        int MEASURED_TOO_SMALL = 2;
+        int getMeasuredType();
+        int getConsumedLines();
     }
 
     public static class LayoutParams extends MarginLayoutParams {

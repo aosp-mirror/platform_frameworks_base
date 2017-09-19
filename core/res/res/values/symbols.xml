@@ -3105,6 +3105,15 @@
   <java-symbol type="dimen" name="chooser_service_spacing" />
   <java-symbol type="bool" name="config_showSysuiShutdown" />
 
+  <java-symbol type="layout" name="notification_template_messaging_message" />
+  <java-symbol type="layout" name="notification_template_messaging_group" />
+  <java-symbol type="id" name="message_text" />
+  <java-symbol type="id" name="message_name" />
+  <java-symbol type="id" name="message_icon" />
+  <java-symbol type="id" name="group_message_container" />
+  <java-symbol type="drawable" name="ic_reply_notification_large" />
+  <java-symbol type="dimen" name="messaging_avatar_size" />
+
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
   <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
