@@ -42,7 +42,8 @@ public class ScheduleCalendar {
 
     public void maybeSetNextAlarm(long now, long nextAlarm) {
         if (mSchedule != null) {
-            if (mSchedule.exitAtAlarm && now > mSchedule.nextAlarm) {
+            if (mSchedule.exitAtAlarm
+                    && (now > mSchedule.nextAlarm || nextAlarm < mSchedule.nextAlarm)) {
                 mSchedule.nextAlarm = nextAlarm;
             }
         }
