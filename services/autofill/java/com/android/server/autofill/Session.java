@@ -465,7 +465,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if ((response.getDatasets() == null || response.getDatasets().isEmpty())
                         && response.getAuthentication() == null) {
             // Response is "empty" from an UI point of view, need to notify client.
-            notifyUnavailableToClient();
+            notifyUnavailableToClient(false);
         }
         synchronized (mLock) {
             processResponseLocked(response, requestFlags);
@@ -1353,11 +1353,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private void notifyUnavailableToClient() {
+    private void notifyUnavailableToClient(boolean sessionFinished) {
         synchronized (mLock) {
-            if (!mHasCallback || mCurrentViewId == null) return;
+            if (mCurrentViewId == null) return;
             try {
-                mClient.notifyNoFillUi(id, mCurrentViewId);
+                if (mHasCallback) {
+                    mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinished);
+                } else if (sessionFinished) {
+                    mClient.setSessionFinished();
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
             }
@@ -1445,7 +1449,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         mService.resetLastResponse();
         // Nothing to be done, but need to notify client.
-        notifyUnavailableToClient();
+        notifyUnavailableToClient(true);
         removeSelf();
     }
 
