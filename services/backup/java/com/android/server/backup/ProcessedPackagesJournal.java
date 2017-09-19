@@ -21,7 +21,10 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.backup.RefactoredBackupManagerService;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.EOFException;
+import java.io.FileInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -130,7 +133,8 @@ final class ProcessedPackagesJournal {
             return;
         }
 
-        try (RandomAccessFile oldJournal = new RandomAccessFile(journalFile, "r")) {
+        try (DataInputStream oldJournal = new DataInputStream(
+                new BufferedInputStream(new FileInputStream(journalFile)))) {
             while (true) {
                 String packageName = oldJournal.readUTF();
                 if (DEBUG) {
