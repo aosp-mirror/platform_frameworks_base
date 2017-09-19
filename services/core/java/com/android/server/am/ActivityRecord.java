@@ -1157,8 +1157,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *         can be put a secondary screen.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
+        final TaskRecord task = getTask();
+
+        // The resizeability of an Activity's parent task takes precendence over the ActivityInfo.
+        // This allows for a non resizable activity to be launched into a resizeable task.
+        final boolean resizeable =
+                task != null ? task.isResizeable() : supportsResizeableMultiWindow();
+
         return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                supportsResizeableMultiWindow(), launchedFromPid, launchedFromUid, info);
+                resizeable, launchedFromPid, launchedFromUid, info);
     }
 
     /**
