@@ -69,9 +69,6 @@ static SkColorType flinger2skia(PixelFormat f)
 
 static status_t notifyMediaScanner(const char* fileName) {
     String8 cmd("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://");
-    String8 fileUrl("\"");
-    fileUrl.append(fileName);
-    fileUrl.append("\"");
     cmd.append(fileName);
     cmd.append(" > /dev/null");
     int result = system(cmd.string());
