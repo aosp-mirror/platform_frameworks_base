@@ -51,6 +51,11 @@ public final class Zygote {
     /** Make the code Java debuggable by turning off some optimizations. */
     public static final int DEBUG_JAVA_DEBUGGABLE = 1 << 8;
 
+    /** Turn off the verifier. */
+    public static final int DISABLE_VERIFIER = 1 << 9;
+    /** Only use oat files located in /system. Otherwise use dex/jar/apk . */
+    public static final int ONLY_USE_SYSTEM_OAT_FILES = 1 << 10;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
     /** Default external storage should be mounted. */
