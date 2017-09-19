@@ -535,8 +535,8 @@ public class SmsMessage extends SmsMessageBase {
             } else {
                 // SC address
                 try {
-                    ret = PhoneNumberUtils
-                            .calledPartyBCDToString(mPdu, mCur, len);
+                    ret = PhoneNumberUtils.calledPartyBCDToString(
+                            mPdu, mCur, len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
                 } catch (RuntimeException tr) {
                     Rlog.d(LOG_TAG, "invalid SC address: ", tr);
                     ret = null;
