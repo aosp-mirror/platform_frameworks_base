@@ -22,12 +22,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -66,7 +64,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,7 +75,8 @@ import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH,
-        sdk = TestConfig.SDK_VERSION)
+        sdk = TestConfig.SDK_VERSION,
+        shadows = {TileUtilsTest.TileUtilsShadowRemoteViews.class})
 public class TileUtilsTest {
 
     @Mock
@@ -420,12 +421,24 @@ public class TileUtilsTest {
     }
 
     @Test
-    public void updateTileUsingSummaryUri_summaryUriSpecified_shouldOverrideRemoteViewSummary()
+    public void getTilesForIntent_summaryUriSpecified_shouldOverrideRemoteViewSummary()
             throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null,
+                null, URI_GET_SUMMARY);
+        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
+                R.layout.user_preference);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
         // Mock the content provider interaction.
         Bundle bundle = new Bundle();
-        String expectedSummary = "new summary text";
-        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, expectedSummary);
+        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, "new summary text");
         when(mIContentProvider.call(anyString(),
                 eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
                 any())).thenReturn(bundle);
@@ -434,14 +447,57 @@ public class TileUtilsTest {
         when(mContentResolver.acquireUnstableProvider(any(Uri.class)))
                 .thenReturn(mIContentProvider);
 
-        Tile tile = new Tile();
-        tile.metaData = new Bundle();
-        tile.metaData.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY_URI, URI_GET_SUMMARY);
-        tile.remoteViews = mock(RemoteViews.class);
-        TileUtils.updateTileUsingSummaryUri(mContext, tile);
-        ShadowApplication.runBackgroundTasks();
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
-        verify(tile.remoteViews, times(1)).setTextViewText(anyInt(), eq(expectedSummary));
+        assertThat(outTiles.size()).isEqualTo(1);
+        Tile tile = outTiles.get(0);
+        assertThat(tile.remoteViews).isNotNull();
+        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
+        // Make sure the summary TextView got a new text string.
+        TileUtilsShadowRemoteViews shadowRemoteViews =
+                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        assertThat(shadowRemoteViews.overrideViewId).isEqualTo(android.R.id.summary);
+        assertThat(shadowRemoteViews.overrideText).isEqualTo("new summary text");
+    }
+
+    @Test
+    public void getTilesForIntent_providerUnavailable_shouldNotOverrideRemoteViewSummary()
+            throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null,
+                null, URI_GET_SUMMARY);
+        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
+                R.layout.user_preference);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        // Mock the content provider interaction.
+        Bundle bundle = new Bundle();
+        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, "new summary text");
+        when(mIContentProvider.call(anyString(),
+                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
+                any())).thenReturn(bundle);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, true /* forceTintExternalIcon */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        Tile tile = outTiles.get(0);
+        assertThat(tile.remoteViews).isNotNull();
+        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
+        // Make sure the summary TextView didn't get any text view updates.
+        TileUtilsShadowRemoteViews shadowRemoteViews =
+                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        assertThat(shadowRemoteViews.overrideViewId).isNull();
+        assertThat(shadowRemoteViews.overrideText).isNull();
     }
 
     public static ResolveInfo newInfo(boolean systemApp, String category) {
@@ -502,4 +558,16 @@ public class TileUtilsTest {
         }
     }
 
+    @Implements(RemoteViews.class)
+    public static class TileUtilsShadowRemoteViews {
+
+        private Integer overrideViewId;
+        private CharSequence overrideText;
+
+        @Implementation
+        public void setTextViewText(int viewId, CharSequence text) {
+            overrideViewId = viewId;
+            overrideText = text;
+        }
+    }
 }
