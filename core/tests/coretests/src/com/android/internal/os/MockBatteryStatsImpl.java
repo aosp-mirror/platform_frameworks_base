@@ -26,6 +26,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     MockBatteryStatsImpl(Clocks clocks) {
         super(clocks);
         this.clocks = mClocks;
+        mScreenOnTimer = new BatteryStatsImpl.StopwatchTimer(clocks, null, -1, null,
+                mOnBatteryTimeBase);
+        mScreenDozeTimer = new BatteryStatsImpl.StopwatchTimer(clocks, null, -1, null,
+                mOnBatteryTimeBase);
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
     }
 
@@ -35,6 +39,14 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public TimeBase getOnBatteryTimeBase() {
         return mOnBatteryTimeBase;
+    }
+
+    public TimeBase getOnBatteryScreenOffTimeBase() {
+        return mOnBatteryScreenOffTimeBase;
+    }
+
+    public int getScreenState() {
+        return mScreenState;
     }
 
     public boolean isOnBattery() {
