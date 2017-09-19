@@ -2009,6 +2009,7 @@
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationComponent" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationSecondaryUserComponent" />
   <java-symbol type="string" name="config_customVpnConfirmDialogComponent" />
+  <java-symbol type="string" name="config_customVpnAlwaysOnDisconnectedDialogComponent" />
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
 
