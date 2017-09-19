@@ -50,6 +50,7 @@ using V1_0::Result;
 using V1_1::ProgramInfo;
 using V1_1::ProgramListResult;
 using V1_1::ProgramSelector;
+using V1_1::VendorKeyValue;
 using V1_2::ITunerCallback;
 using utils::HalRevision;
 
@@ -120,6 +121,7 @@ public:
     virtual Return<void> backgroundScanComplete(ProgramListResult result);
     virtual Return<void> programListChanged();
     virtual Return<void> currentProgramInfoChanged(const ProgramInfo& info);
+    virtual Return<void> parametersUpdated(const hidl_vec<VendorKeyValue>& parameters);
 };
 
 struct TunerCallbackContext {
@@ -339,6 +341,14 @@ Return<void> NativeCallback::currentProgramInfoChanged(const ProgramInfo& info) 
     });
 
     return Return<void>();
+}
+
+Return<void> NativeCallback::parametersUpdated(const hidl_vec<VendorKeyValue>& parameters) {
+    ALOGV("%s", __func__);
+
+    // TODO(b/65862441): pass this callback to the front-end
+
+    return {};
 }
 
 static TunerCallbackContext& getNativeContext(jlong nativeContextHandle) {
