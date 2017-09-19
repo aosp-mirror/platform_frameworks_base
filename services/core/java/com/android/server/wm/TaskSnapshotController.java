@@ -297,7 +297,7 @@ class TaskSnapshotController {
 
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
                 topChild.getConfiguration().orientation, mainWindow.mStableInsets,
-                false /* reduced */, 1.0f /* scale */);
+                ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */);
     }
 
     /**
