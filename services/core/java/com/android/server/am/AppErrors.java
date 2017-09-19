@@ -507,7 +507,7 @@ class AppErrors {
         // launching the report UI under a different user.
         app.errorReportReceiver = null;
 
-        for (int userId : mService.mUserController.getCurrentProfileIdsLocked()) {
+        for (int userId : mService.mUserController.getCurrentProfileIds()) {
             if (app.userId == userId) {
                 app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
                         mContext, app.info.packageName, app.info.flags);
@@ -728,7 +728,7 @@ class AppErrors {
             boolean isBackground = (UserHandle.getAppId(proc.uid)
                     >= Process.FIRST_APPLICATION_UID
                     && proc.pid != MY_PID);
-            for (int userId : mService.mUserController.getCurrentProfileIdsLocked()) {
+            for (int userId : mService.mUserController.getCurrentProfileIds()) {
                 isBackground &= (proc.userId != userId);
             }
             if (isBackground && !showBackground) {

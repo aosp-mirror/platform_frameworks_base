@@ -59,8 +59,10 @@ public final class UserState {
     /**
      * The last time that a provider was reported to usage stats as being brought to important
      * foreground procstate.
+     * <p><strong>Important: </strong>Only access this field when holding ActivityManagerService
+     * lock.
      */
-    public final ArrayMap<String,Long> mProviderLastReportedFg = new ArrayMap<>();
+    final ArrayMap<String,Long> mProviderLastReportedFg = new ArrayMap<>();
 
     public UserState(UserHandle handle) {
         mHandle = handle;

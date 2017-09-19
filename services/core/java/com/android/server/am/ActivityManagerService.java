@@ -2519,10 +2519,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public void setWindowManager(WindowManagerService wm) {
-        mWindowManager = wm;
-        mStackSupervisor.setWindowManager(wm);
-        mActivityStarter.setWindowManager(wm);
-        mLockTaskController.setWindowManager(wm);
+        synchronized (this) {
+            mWindowManager = wm;
+            mStackSupervisor.setWindowManager(wm);
+            mActivityStarter.setWindowManager(wm);
+            mLockTaskController.setWindowManager(wm);
+        }
     }
 
     public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
@@ -6150,7 +6152,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Slog.w(TAG, "Failed trying to unstop package "
                                 + packageName + ": " + e);
                     }
-                    if (mUserController.isUserRunningLocked(user, 0)) {
+                    if (mUserController.isUserRunning(user, 0)) {
                         forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
                         finishForceStopPackageLocked(packageName, pkgUid);
                     }
@@ -7308,33 +7310,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                     startProcessLocked(procs.get(ip), "on-hold", null);
                 }
             }
-
-            if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-                // Start looking for apps that are abusing wake locks.
-                Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
-                mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
-                // Tell anyone interested that we are done booting!
-                SystemProperties.set("sys.boot_completed", "1");
-
-                // And trigger dev.bootcomplete if we are not showing encryption progress
-                if (!"trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))
-                    || "".equals(SystemProperties.get("vold.encrypt_progress"))) {
-                    SystemProperties.set("dev.bootcomplete", "1");
-                }
-                mUserController.sendBootCompletedLocked(
-                        new IIntentReceiver.Stub() {
-                            @Override
-                            public void performReceive(Intent intent, int resultCode,
-                                    String data, Bundle extras, boolean ordered,
-                                    boolean sticky, int sendingUser) {
-                                synchronized (ActivityManagerService.this) {
-                                    requestPssAllProcsLocked(SystemClock.uptimeMillis(),
-                                            true, false);
-                                }
-                            }
-                        });
-                mUserController.scheduleStartProfilesLocked();
+            if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+                return;
             }
+            // Start looking for apps that are abusing wake locks.
+            Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
+            mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
+            // Tell anyone interested that we are done booting!
+            SystemProperties.set("sys.boot_completed", "1");
+
+            // And trigger dev.bootcomplete if we are not showing encryption progress
+            if (!"trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))
+                    || "".equals(SystemProperties.get("vold.encrypt_progress"))) {
+                SystemProperties.set("dev.bootcomplete", "1");
+            }
+            mUserController.sendBootCompleted(
+                    new IIntentReceiver.Stub() {
+                        @Override
+                        public void performReceive(Intent intent, int resultCode,
+                                String data, Bundle extras, boolean ordered,
+                                boolean sticky, int sendingUser) {
+                            synchronized (ActivityManagerService.this) {
+                                requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
+                            }
+                        }
+                    });
+            mUserController.scheduleStartProfiles();
         }
     }
 
@@ -11049,7 +11050,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
-            int tmpTargetUserId = mUserController.unsafeConvertIncomingUserLocked(userId);
+            int tmpTargetUserId = mUserController.unsafeConvertIncomingUser(userId);
             if (tmpTargetUserId != UserHandle.getUserId(callingUid)) {
                 if (checkAuthorityGrants(callingUid, cpi, tmpTargetUserId, checkUser)) {
                     return null;
@@ -11437,7 +11438,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Make sure that the user who owns this provider is running.  If not,
                 // we don't want to allow it to run.
-                if (!mUserController.isUserRunningLocked(userId, 0)) {
+                if (!mUserController.isUserRunning(userId, 0)) {
                     Slog.w(TAG, "Unable to launch app "
                             + cpi.applicationInfo.packageName + "/"
                             + cpi.applicationInfo.uid + " for provider "
@@ -12067,9 +12068,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callingPid = Binder.getCallingPid();
         long ident = 0;
         boolean clearedIdentity = false;
-        synchronized (this) {
-            userId = mUserController.unsafeConvertIncomingUserLocked(userId);
-        }
+        userId = mUserController.unsafeConvertIncomingUser(userId);
         if (canClearIdentity(callingPid, callingUid, userId)) {
             clearedIdentity = true;
             ident = Binder.clearCallingIdentity();
@@ -12487,7 +12486,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (mUserController.shouldConfirmCredentials(userId)) {
                     if (mKeyguardController.isKeyguardLocked()) {
                         // Showing launcher to avoid user entering credential twice.
-                        final int currentUserId = mUserController.getCurrentUserIdLocked();
+                        final int currentUserId = mUserController.getCurrentUserId();
                         startHomeActivityLocked(currentUserId, "notifyLockedProfile");
                     }
                     mStackSupervisor.lockAllProfileTasks(userId);
@@ -14067,9 +14066,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         retrieveSettings();
-        final int currentUserId;
+        final int currentUserId = mUserController.getCurrentUserId();
         synchronized (this) {
-            currentUserId = mUserController.getCurrentUserIdLocked();
             readGrantedUriPermissionsLocked();
         }
 
@@ -14148,7 +14146,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
-            mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);
+            mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
             traceLog.traceEnd(); // ActivityManagerStartApps
             traceLog.traceEnd(); // PhaseActivityManagerReady
         }
@@ -18976,7 +18974,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If not, we will just skip it. Make an exception for shutdown broadcasts
         // and upgrade steps.
 
-        if (userId != UserHandle.USER_ALL && !mUserController.isUserRunningLocked(userId, 0)) {
+        if (userId != UserHandle.USER_ALL && !mUserController.isUserRunning(userId, 0)) {
             if ((callingUid != SYSTEM_UID
                     || (intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0)
                     && !Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
@@ -19395,7 +19393,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int[] users;
         if (userId == UserHandle.USER_ALL) {
             // Caller wants broadcast to go to all started users.
-            users = mUserController.getStartedUserArrayLocked();
+            users = mUserController.getStartedUserArray();
         } else {
             // Caller wants broadcast to go to one specific user.
             users = new int[] {userId};
@@ -20161,7 +20159,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void updateUserConfigurationLocked() {
         final Configuration configuration = new Configuration(getGlobalConfiguration());
-        final int currentUserId = mUserController.getCurrentUserIdLocked();
+        final int currentUserId = mUserController.getCurrentUserId();
         Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
                 currentUserId, Settings.System.canWrite(mContext));
         updateConfigurationLocked(configuration, null /* starting */, false /* initLocale */,
@@ -20272,7 +20270,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
         mUsageStatsService.reportConfigurationChange(mTempConfig,
-                mUserController.getCurrentUserIdLocked());
+                mUserController.getCurrentUserId());
 
         // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
         mShowDialogs = shouldShowDialogs(mTempConfig);
@@ -22203,7 +22201,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String authority) {
         if (app == null) return;
         if (app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-            UserState userState = mUserController.getStartedUserStateLocked(app.userId);
+            UserState userState = mUserController.getStartedUserState(app.userId);
             if (userState == null) return;
             final long now = SystemClock.elapsedRealtime();
             Long lastReported = userState.mProviderLastReportedFg.get(authority);
@@ -23512,10 +23510,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     String getStartedUserState(int userId) {
-        synchronized (this) {
-            final UserState userState = mUserController.getStartedUserStateLocked(userId);
-            return UserState.stateToString(userState.state);
-        }
+        final UserState userState = mUserController.getStartedUserState(userId);
+        return UserState.stateToString(userState.state);
     }
 
     @Override
@@ -23530,9 +23526,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        synchronized (this) {
-            return mUserController.isUserRunningLocked(userId, flags);
-        }
+        return mUserController.isUserRunning(userId, flags);
     }
 
     @Override
@@ -23546,9 +23540,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        synchronized (this) {
-            return mUserController.getStartedUserArrayLocked();
-        }
+        return mUserController.getStartedUserArray();
     }
 
     @Override
@@ -23569,9 +23561,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public boolean isUserStopped(int userId) {
-        synchronized (this) {
-            return mUserController.getStartedUserStateLocked(userId) == null;
-        }
+        return mUserController.getStartedUserState(userId) == null;
     }
 
     ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId) {
@@ -24159,7 +24149,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 permission.INTERACT_ACROSS_USERS_FULL, "getLastResumedActivityUserId()");
         synchronized (this) {
             if (mLastResumedActivity == null) {
-                return mUserController.getCurrentUserIdLocked();
+                return mUserController.getCurrentUserId();
             }
             return mLastResumedActivity.userId;
         }

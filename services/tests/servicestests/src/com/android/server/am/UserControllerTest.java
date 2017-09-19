@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserManagerInternal;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -59,14 +60,20 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+/**
+ * Usage: bit FrameworksServicesTests:com.android.server.am.UserControllerTest
+ */
+@Presubmit
 public class UserControllerTest extends AndroidTestCase {
     private static final int TEST_USER_ID = 10;
     private static final int NONEXIST_USER_ID = 2;
@@ -96,8 +103,11 @@ public class UserControllerTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        System.setProperty("dexmaker.share_classloader", "true");
-        mInjector = new TestInjector(getContext());
+        mInjector = Mockito.spy(new TestInjector(getContext()));
+        doNothing().when(mInjector).clearLockTaskMode(anyString());
+        doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
+        doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
+        doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
         mUserController = new UserController(mInjector);
         setUpUser(TEST_USER_ID, 0);
     }
@@ -106,6 +116,7 @@ public class UserControllerTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         mInjector.handlerThread.quit();
+        Mockito.validateMockitoUsage();
     }
 
     @SmallTest
@@ -115,7 +126,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         Mockito.verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         Mockito.verify(mInjector.getWindowManager()).setSwitchingUser(true);
-        Mockito.verify(mInjector.getLockTaskController()).clearLockTaskMode(anyString());
+        Mockito.verify(mInjector).clearLockTaskMode(anyString());
         startForegroundUserAssertions();
     }
 
@@ -125,7 +136,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(
                 mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         Mockito.verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
-        verifyZeroInteractions(mInjector.getLockTaskController());
+        Mockito.verify(mInjector, never()).clearLockTaskMode(anyString());
         startBackgroundUserAssertions();
     }
 
@@ -306,16 +317,14 @@ public class UserControllerTest extends AndroidTestCase {
         return result;
     }
 
-    private static class TestInjector extends UserController.Injector {
-        final Object lock = new Object();
+    // Should be public to allow mocking
+    public static class TestInjector extends UserController.Injector {
         TestHandler handler;
         TestHandler uiHandler;
         HandlerThread handlerThread;
         UserManagerService userManagerMock;
         UserManagerInternal userManagerInternalMock;
         WindowManagerService windowManagerMock;
-        ActivityStackSupervisor activityStackSupervisor;
-        LockTaskController lockTaskController;
         private Context mCtx;
         List<Intent> sentIntents = new ArrayList<>();
 
@@ -329,13 +338,6 @@ public class UserControllerTest extends AndroidTestCase {
             userManagerMock = mock(UserManagerService.class);
             userManagerInternalMock = mock(UserManagerInternal.class);
             windowManagerMock = mock(WindowManagerService.class);
-            activityStackSupervisor = mock(ActivityStackSupervisor.class);
-            lockTaskController = mock(LockTaskController.class);
-        }
-
-        @Override
-        protected Object getLock() {
-            return lock;
         }
 
         @Override
@@ -375,32 +377,18 @@ public class UserControllerTest extends AndroidTestCase {
         }
 
         @Override
-        void updateUserConfigurationLocked() {
-            Log.i(TAG, "updateUserConfigurationLocked");
+        void updateUserConfiguration() {
+            Log.i(TAG, "updateUserConfiguration");
         }
 
         @Override
-        protected int broadcastIntentLocked(Intent intent, String resolvedType,
+        protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
                 String[] requiredPermissions, int appOp, Bundle bOptions, boolean ordered,
                 boolean sticky, int callingPid, int callingUid, int userId) {
             Log.i(TAG, "broadcastIntentLocked " + intent);
             sentIntents.add(intent);
             return 0;
-        }
-
-        @Override
-        void startHomeActivityLocked(int userId, String reason) {
-            Log.i(TAG, "startHomeActivityLocked " + userId);
-        }
-
-        @Override
-        ActivityStackSupervisor getActivityStackSupervisor() {
-            return activityStackSupervisor;
-        }
-
-        LockTaskController getLockTaskController() {
-            return lockTaskController;
         }
     }
 

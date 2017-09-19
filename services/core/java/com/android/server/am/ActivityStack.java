@@ -467,7 +467,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mHandler = new ActivityStackHandler(mService.mHandler.getLooper());
         mWindowManager = mService.mWindowManager;
         mStackId = stackId;
-        mCurrentUser = mService.mUserController.getCurrentUserIdLocked();
+        mCurrentUser = mService.mUserController.getCurrentUserId();
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
         mTmpRect2.setEmpty();
