@@ -3871,6 +3871,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mNativeDebuggingApp = null;
             }
 
+            if (app.info.isPrivilegedApp() &&
+                    !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
+                runtimeFlags |= Zygote.DISABLE_VERIFIER;
+                runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
+            }
+
             String invokeWith = null;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 // Debuggable apps may include a wrapper script with their library directory.
