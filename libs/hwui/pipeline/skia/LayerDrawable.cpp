@@ -35,6 +35,10 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
 }
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer) {
+    if (context == nullptr) {
+        SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
+        return false;
+    }
     // transform the matrix based on the layer
     SkMatrix layerTransform;
     layer->getTransform().copyTo(layerTransform);

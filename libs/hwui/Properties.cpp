@@ -58,6 +58,7 @@ bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;
+bool Properties::skpCaptureEnabled = false;
 
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {'\0',};
@@ -127,6 +128,9 @@ bool Properties::load() {
     enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
 
     filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
+
+    skpCaptureEnabled = property_get_bool("ro.debuggable", false)
+            && property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
     return (prevDebugLayersUpdates != debugLayersUpdates)
             || (prevDebugOverdraw != debugOverdraw)

@@ -101,7 +101,7 @@ void RenderNodeDrawable::onDraw(SkCanvas* canvas) {
 
 void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
     RenderNode* renderNode = mRenderNode.get();
-    if (SkiaPipeline::skpCaptureEnabled()) {
+    if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
         SkRect dimensions = SkRect::MakeWH(renderNode->getWidth(), renderNode->getHeight());
         canvas->drawAnnotation(dimensions, renderNode->getName(), nullptr);
     }
