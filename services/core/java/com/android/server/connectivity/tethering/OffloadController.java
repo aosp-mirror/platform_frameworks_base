@@ -52,6 +52,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,6 +73,8 @@ public class OffloadController {
     private static final boolean DBG = false;
     private static final String ANYIP = "0.0.0.0";
     private static final ForwardedStats EMPTY_STATS = new ForwardedStats();
+
+    private static enum UpdateType { IF_NEEDED, FORCE };
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
@@ -185,8 +188,8 @@ public class OffloadController {
                         updateStatsForAllUpstreams();
                         forceTetherStatsPoll();
                         // [2] (Re)Push all state.
-                        // TODO: computeAndPushLocalPrefixes()
-                        // TODO: push all downstream state.
+                        computeAndPushLocalPrefixes(UpdateType.FORCE);
+                        pushAllDownstreamState();
                         pushUpstreamParameters(null);
                     }
 
@@ -319,7 +322,7 @@ public class OffloadController {
     }
 
     private boolean maybeUpdateDataLimit(String iface) {
-        // setDataLimit may only be called while offload is occuring on this upstream.
+        // setDataLimit may only be called while offload is occurring on this upstream.
         if (!started() || !TextUtils.equals(iface, currentUpstreamInterface())) {
             return true;
         }
@@ -368,15 +371,15 @@ public class OffloadController {
         // upstream parameters fails (probably just wait for a subsequent
         // onOffloadEvent() callback to tell us offload is available again and
         // then reapply all state).
-        computeAndPushLocalPrefixes();
+        computeAndPushLocalPrefixes(UpdateType.IF_NEEDED);
         pushUpstreamParameters(prevUpstream);
     }
 
     public void setLocalPrefixes(Set<IpPrefix> localPrefixes) {
-        if (!started()) return;
-
         mExemptPrefixes = localPrefixes;
-        computeAndPushLocalPrefixes();
+
+        if (!started()) return;
+        computeAndPushLocalPrefixes(UpdateType.IF_NEEDED);
     }
 
     public void notifyDownstreamLinkProperties(LinkProperties lp) {
@@ -385,24 +388,35 @@ public class OffloadController {
         if (Objects.equals(oldLp, lp)) return;
 
         if (!started()) return;
+        pushDownstreamState(oldLp, lp);
+    }
 
-        final List<RouteInfo> oldRoutes = (oldLp != null) ? oldLp.getRoutes() : new ArrayList<>();
-        final List<RouteInfo> newRoutes = lp.getRoutes();
+    private void pushDownstreamState(LinkProperties oldLp, LinkProperties newLp) {
+        final String ifname = newLp.getInterfaceName();
+        final List<RouteInfo> oldRoutes =
+                (oldLp != null) ? oldLp.getRoutes() : Collections.EMPTY_LIST;
+        final List<RouteInfo> newRoutes = newLp.getRoutes();
 
         // For each old route, if not in new routes: remove.
-        for (RouteInfo oldRoute : oldRoutes) {
-            if (shouldIgnoreDownstreamRoute(oldRoute)) continue;
-            if (!newRoutes.contains(oldRoute)) {
-                mHwInterface.removeDownstreamPrefix(ifname, oldRoute.getDestination().toString());
+        for (RouteInfo ri : oldRoutes) {
+            if (shouldIgnoreDownstreamRoute(ri)) continue;
+            if (!newRoutes.contains(ri)) {
+                mHwInterface.removeDownstreamPrefix(ifname, ri.getDestination().toString());
             }
         }
 
         // For each new route, if not in old routes: add.
-        for (RouteInfo newRoute : newRoutes) {
-            if (shouldIgnoreDownstreamRoute(newRoute)) continue;
-            if (!oldRoutes.contains(newRoute)) {
-                mHwInterface.addDownstreamPrefix(ifname, newRoute.getDestination().toString());
+        for (RouteInfo ri : newRoutes) {
+            if (shouldIgnoreDownstreamRoute(ri)) continue;
+            if (!oldRoutes.contains(ri)) {
+                mHwInterface.addDownstreamPrefix(ifname, ri.getDestination().toString());
             }
+        }
+    }
+
+    private void pushAllDownstreamState() {
+        for (LinkProperties lp : mDownstreams.values()) {
+            pushDownstreamState(null, lp);
         }
     }
 
@@ -484,10 +498,11 @@ public class OffloadController {
         return success;
     }
 
-    private boolean computeAndPushLocalPrefixes() {
+    private boolean computeAndPushLocalPrefixes(UpdateType how) {
+        final boolean force = (how == UpdateType.FORCE);
         final Set<String> localPrefixStrs = computeLocalPrefixStrings(
                 mExemptPrefixes, mUpstreamLinkProperties);
-        if (mLastLocalPrefixStrs.equals(localPrefixStrs)) return true;
+        if (!force && mLastLocalPrefixStrs.equals(localPrefixStrs)) return true;
 
         mLastLocalPrefixStrs = localPrefixStrs;
         return mHwInterface.setLocalPrefixes(new ArrayList<>(localPrefixStrs));
