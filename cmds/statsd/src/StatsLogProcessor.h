@@ -16,12 +16,8 @@
 #ifndef STATS_LOG_PROCESSOR_H
 #define STATS_LOG_PROCESSOR_H
 
-#include "LogReader.h"
-#include "DropboxWriter.h"
+#include "parse_util.h"
 
-#include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
-#include <log/logprint.h>
-#include <stdio.h>
 #include <unordered_map>
 
 using android::os::statsd::StatsdConfig;

@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 using android::base::unique_fd;
-using android::os::statsd::StatsLogList;
+using android::os::statsd::StatsLogReport;
 using android::status_t;
 using std::string;
 
@@ -33,9 +33,9 @@ public:
     static status_t readStatsLogs(FILE* out, const string& tag, long msec);
 
 private:
-    static bool parseFromFile(const unique_fd& fd, StatsLogList& list);
-    static bool parseFromGzipFile(const unique_fd& fd, StatsLogList& list);
-    static void printLog(FILE* out, const StatsLogList& list);
+    static bool parseFromFile(const unique_fd& fd, StatsLogReport& logReport);
+    static bool parseFromGzipFile(const unique_fd& fd, StatsLogReport& logReport);
+    static void printLog(FILE* out, const StatsLogReport& logReport);
     enum {
       kCompressStored = 0,    // no compression
       kCompressDeflated = 8,  // standard deflate

@@ -15,7 +15,6 @@
  */
 
 #include <android/os/DropBoxManager.h>
-#include <cutils/log.h>
 
 #include "DropboxWriter.h"
 
@@ -26,36 +25,35 @@ using android::String16;
 using std::vector;
 
 DropboxWriter::DropboxWriter(const string& tag)
-    : mTag(tag), mLogList(), mBufferSize(0) {
+    : mTag(tag), mLogReport(), mBufferSize(0) {
 }
 
-void DropboxWriter::addEntry(const StatsLogEntry& entry) {
-    flushIfNecessary(entry);
-    StatsLogEntry* newEntry = mLogList.add_stats_log_entry();
-    newEntry->CopyFrom(entry);
-    mBufferSize += entry.ByteSize();
+void DropboxWriter::addStatsLogReport(const StatsLogReport& log) {
+    mLogReport = log;
+    flushIfNecessary(log);
+    mBufferSize += log.ByteSize();
 }
 
-void DropboxWriter::flushIfNecessary(const StatsLogEntry& entry) {
-    // The serialized size of the StatsLogList is approximately the sum of the serialized size of
-    // every StatsLogEntry inside it.
-    if (entry.ByteSize() + mBufferSize > kMaxSerializedBytes) {
-        flush();
-    }
+void DropboxWriter::flushIfNecessary(const StatsLogReport& log) {
+    // TODO: Decide to flush depending on the serialized size of the StatsLogReport.
+    // if (entry.ByteSize() + mBufferSize > kMaxSerializedBytes) {
+    //     flush();
+    // }
+    flush();
 }
 
 void DropboxWriter::flush() {
     // now we get an exact byte size of the output
-    const int numBytes = mLogList.ByteSize();
+    const int numBytes = mLogReport.ByteSize();
     vector<uint8_t> buffer(numBytes);
     sp<DropBoxManager> dropbox = new DropBoxManager();
-    mLogList.SerializeToArray(&buffer[0], numBytes);
+    mLogReport.SerializeToArray(&buffer[0], numBytes);
     Status status = dropbox->addData(String16(mTag.c_str()), &buffer[0],
             numBytes, 0 /* no flag */);
     if (!status.isOk()) {
         ALOGE("failed to write to dropbox");
         //TODO: What to do if flush fails??
     }
-    mLogList.Clear();
+    mLogReport.Clear();
     mBufferSize = 0;
 }

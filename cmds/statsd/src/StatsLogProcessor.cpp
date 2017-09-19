@@ -16,14 +16,13 @@
 
 #include <StatsLogProcessor.h>
 
-#include <log/event_tag_map.h>
-#include <log/logprint.h>
+#include <log/log_event_list.h>
 #include <utils/Errors.h>
-#include <cutils/log.h>
-#include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
+#include <parse_util.h>
 
 using namespace android;
-using android::os::statsd::StatsLogEntry;
+using android::os::statsd::EventMetricData;
+using android::os::statsd::StatsLogReport;
 
 StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs")
 {
@@ -57,12 +56,12 @@ StatsLogProcessor::OnLogEvent(const log_msg& msg)
     // dump all statsd logs to dropbox for now.
     // TODO: Add filtering, aggregation, etc.
     if (err == NO_ERROR) {
-        StatsLogEntry logEntry;
-        logEntry.set_uid(entry.uid);
-        logEntry.set_pid(entry.pid);
-        logEntry.set_start_report_millis(entry.tv_sec / 1000 + entry.tv_nsec / 1000 / 1000);
-        logEntry.add_pairs()->set_value_str(entry.message, entry.messageLen);
-        m_dropbox_writer.addEntry(logEntry);
+        StatsLogReport logReport;
+        logReport.set_start_report_millis(entry.tv_sec / 1000 + entry.tv_nsec / 1000 / 1000);
+        EventMetricData *eventMetricData = logReport.mutable_event_metrics()->add_data();
+        *eventMetricData = parse(msg);
+
+        m_dropbox_writer.addStatsLogReport(logReport);
     }
 }
 

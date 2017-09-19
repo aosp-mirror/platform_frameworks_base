@@ -20,8 +20,7 @@
 #include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
 
 using std::string;
-using android::os::statsd::StatsLogEntry;
-using android::os::statsd::StatsLogList;
+using android::os::statsd::StatsLogReport;
 
 class DropboxWriter {
 public:
@@ -30,7 +29,7 @@ public:
      */
     DropboxWriter(const string& tag);
 
-    void addEntry(const StatsLogEntry& entry);
+    void addStatsLogReport(const StatsLogReport& log);
 
     /* Request a flush to dropbox. */
     void flush();
@@ -46,11 +45,11 @@ private:
 
     const string mTag;
 
-    /* StatsLogList is a wrapper for storing a list of StatsLogEntry */
-    StatsLogList mLogList;
+    /* Data that was captured for a single metric over a given interval of time. */
+    StatsLogReport mLogReport;
 
     /* Current *serialized* size of the logs kept in memory.
-       To save computation, we will not calculate the size of the StatsLogList every time when a new
+       To save computation, we will not calculate the size of the StatsLogReport every time when a new
        entry is added, which would recursively call ByteSize() on every log entry. Instead, we keep
        the sum of all individual stats log entry sizes. The size of a proto is approximately the sum
        of the size of all member protos.
@@ -59,7 +58,7 @@ private:
 
     /* Check if the buffer size exceeds the max buffer size when the new entry is added, and flush
        the logs to dropbox if true. */
-    void flushIfNecessary(const StatsLogEntry& entry);
+    void flushIfNecessary(const StatsLogReport& log);
 
 };
 
