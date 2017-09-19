@@ -62,7 +62,10 @@ public class VrManager {
      * @param callback The callback to register.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public void registerVrStateCallback(VrStateCallback callback, @NonNull Handler handler) {
         if (callback == null || mCallbackMap.containsKey(callback)) {
             return;
@@ -88,7 +91,10 @@ public class VrManager {
      * @param callback The callback to deregister.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public void unregisterVrStateCallback(VrStateCallback callback) {
         CallbackEntry entry = mCallbackMap.remove(callback);
         if (entry != null) {
@@ -110,7 +116,10 @@ public class VrManager {
      * Returns the current VrMode state.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_VR_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public boolean getVrModeEnabled() {
         try {
             return mService.getVrModeState();
@@ -124,7 +133,10 @@ public class VrManager {
      * Returns the current VrMode state.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_VR_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.RESTRICTED_VR_ACCESS,
+            android.Manifest.permission.ACCESS_VR_STATE
+    })
     public boolean getPersistentVrModeEnabled() {
         try {
             return mService.getPersistentVrModeEnabled();
