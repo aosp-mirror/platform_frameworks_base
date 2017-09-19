@@ -624,7 +624,7 @@ public class WifiTracker {
                 String prevSsid = prevAccessPoint.getSsidStr();
                 boolean found = false;
                 for (AccessPoint newAccessPoint : accessPoints) {
-                    if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid()
+                    if (newAccessPoint.getSsidStr() != null && newAccessPoint.getSsidStr()
                             .equals(prevSsid)) {
                         found = true;
                         break;
@@ -676,24 +676,23 @@ public class WifiTracker {
     private void updateNetworkInfo(NetworkInfo networkInfo) {
         /* sticky broadcasts can call this when wifi is disabled */
         if (!mWifiManager.isWifiEnabled()) {
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
             clearAccessPointsAndConditionallyUpdate();
             return;
         }
 
-        if (networkInfo != null &&
-                networkInfo.getDetailedState() == DetailedState.OBTAINING_IPADDR) {
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
-        } else {
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_RESUME_SCANNING);
-        }
-
         if (networkInfo != null) {
             mLastNetworkInfo = networkInfo;
+            if (DBG()) {
+                Log.d(TAG, "mLastNetworkInfo set: " + mLastNetworkInfo);
+            }
         }
 
         WifiConfiguration connectionConfig = null;
+
         mLastInfo = mWifiManager.getConnectionInfo();
+        if (DBG()) {
+            Log.d(TAG, "mLastInfo set as: " + mLastInfo);
+        }
         if (mLastInfo != null) {
             connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId(),
                     mWifiManager.getConfiguredNetworks());
@@ -717,7 +716,6 @@ public class WifiTracker {
             }
 
             if (reorder) Collections.sort(mInternalAccessPoints);
-
             if (updated) mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
         }
     }
@@ -866,6 +864,9 @@ public class WifiTracker {
                     if (mScanner != null) {
                         mScanner.pause();
                     }
+                    synchronized (mLock) {
+                        mStaleScanResults = true;
+                    }
                     break;
             }
         }
@@ -928,6 +929,9 @@ public class WifiTracker {
                         if (mScanner != null) {
                             mScanner.pause();
                         }
+                        synchronized (mLock) {
+                            mStaleScanResults = true;
+                        }
                     }
                     mMainHandler.obtainMessage(MainHandler.MSG_WIFI_STATE_CHANGED, msg.arg1, 0)
                             .sendToTarget();
@@ -982,7 +986,7 @@ public class WifiTracker {
                 }
                 return;
             }
-            sendEmptyMessageDelayed(0, WIFI_RESCAN_INTERVAL_MS);
+            sendEmptyMessageDelayed(MSG_SCAN, WIFI_RESCAN_INTERVAL_MS);
         }
     }
 
@@ -1075,10 +1079,12 @@ public class WifiTracker {
             oldAccessPoints.put(accessPoint.mId, accessPoint);
         }
 
-        if (DBG()) {
-            Log.d(TAG, "Starting to copy AP items on the MainHandler");
-        }
         synchronized (mLock) {
+            if (DBG()) {
+                Log.d(TAG, "Starting to copy AP items on the MainHandler. Internal APs: "
+                        + mInternalAccessPoints);
+            }
+
             if (notifyListeners) {
                 notificationMap = mAccessPointListenerAdapter.mPendingNotifications.clone();
             }

@@ -454,7 +454,7 @@ public class AccessPointTest {
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
                 MAX_SCORE_CACHE_AGE_MILLIS);
-        String summary = ap.verboseScanResultSummary(scanResults.get(0), null);
+        String summary = ap.verboseScanResultSummary(scanResults.get(0), null, 0);
 
         assertThat(summary.contains(mContext.getString(R.string.speed_label_very_fast))).isTrue();
     }
