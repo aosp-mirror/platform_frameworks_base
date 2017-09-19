@@ -2318,6 +2318,10 @@ public class AccountManager {
         private class Response extends IAccountManagerResponse.Stub {
             @Override
             public void onResult(Bundle bundle) {
+                if (bundle == null) {
+                    onError(ERROR_CODE_INVALID_RESPONSE, "null bundle returned");
+                    return;
+                }
                 Intent intent = bundle.getParcelable(KEY_INTENT);
                 if (intent != null && mActivity != null) {
                     // since the user provided an Activity we will silently start intents
