@@ -10604,56 +10604,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @Override
-    public void swapDockedAndFullscreenStack() throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "swapDockedAndFullscreenStack()");
-        synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                final ActivityStack fullscreenStack = mStackSupervisor.getStack(
-                        FULLSCREEN_WORKSPACE_STACK_ID);
-                final TaskRecord topTask = fullscreenStack != null ? fullscreenStack.topTask()
-                        : null;
-                final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
-                final ArrayList<TaskRecord> tasks = dockedStack != null ? dockedStack.getAllTasks()
-                        : null;
-                if (topTask == null || tasks == null || tasks.size() == 0) {
-                    Slog.w(TAG,
-                            "Unable to swap tasks, either docked or fullscreen stack is empty.");
-                    return;
-                }
-
-                // TODO: App transition
-                mWindowManager.prepareAppTransition(TRANSIT_ACTIVITY_RELAUNCH, false);
-
-                // Defer the resume until we move all the docked tasks to the fullscreen stack below
-                topTask.reparent(DOCKED_STACK_ID, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE,
-                        DEFER_RESUME, "swapDockedAndFullscreenStack - DOCKED_STACK");
-                final int size = tasks.size();
-                for (int i = 0; i < size; i++) {
-                    final int id = tasks.get(i).taskId;
-                    if (id == topTask.taskId) {
-                        continue;
-                    }
-
-                    // Defer the resume until after all the tasks have been moved
-                    tasks.get(i).reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
-                            REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, DEFER_RESUME,
-                            "swapDockedAndFullscreenStack - FULLSCREEN_STACK");
-                }
-
-                // Because we deferred the resume to avoid conflicts with stack switches while
-                // resuming, we need to do it after all the tasks are moved.
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
-
-                mWindowManager.executeAppTransition();
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     /**
      * Moves the input task to the docked stack.
      *
