@@ -59,10 +59,10 @@ public class SpringfieldNuclearPowerPlant extends Binder {
     Donuts in the box: 1
     Nuclear reactor status: DANGER - MELTDOWN IMMINENT
 
-    $ adb shell dumpsys snpp --dump_priority CRITICAL
+    $ adb shell dumpsys snpp --dump-priority CRITICAL
     Donuts in the box: 1
 
-    $ adb shell dumpsys snpp --dump_priority NORMAL
+    $ adb shell dumpsys snpp --dump-priority NORMAL
     Nuclear reactor status: DANGER - MELTDOWN IMMINENT
 
  * </code></pre>
@@ -84,7 +84,7 @@ public class SpringfieldNuclearPowerPlant extends Binder {
  */
 public final class PriorityDump {
 
-    public static final String PRIORITY_ARG = "--dump_priority";
+    public static final String PRIORITY_ARG = "--dump-priority";
 
     private PriorityDump() {
         throw new UnsupportedOperationException();
@@ -92,12 +92,12 @@ public final class PriorityDump {
 
     /**
      * Parses {@code} and call the proper {@link PriorityDumper} method when the first argument is
-     * {@code --dump_priority}, stripping the priority and its type.
+     * {@code --dump-priority}, stripping the priority and its type.
      * <p>
-     * For example, if called as {@code --dump_priority HIGH arg1 arg2 arg3}, it will call
+     * For example, if called as {@code --dump-priority HIGH arg1 arg2 arg3}, it will call
      * <code>dumper.dumpHigh(fd, pw, {"arg1", "arg2", "arg3"}) </code>
      * <p>
-     * If the {@code --dump_priority} is not set, it calls
+     * If the {@code --dump-priority} is not set, it calls
      * {@link PriorityDumper#dump(FileDescriptor, PrintWriter, String[])} passing the whole
      * {@code args} instead.
      */
@@ -124,7 +124,7 @@ public final class PriorityDump {
     }
 
     /**
-     * Gets an array without the {@code --dump_priority PRIORITY} prefix.
+     * Gets an array without the {@code --dump-priority PRIORITY} prefix.
      */
     private static String[] getStrippedArgs(String[] args) {
         final String[] stripped = new String[args.length - 2];

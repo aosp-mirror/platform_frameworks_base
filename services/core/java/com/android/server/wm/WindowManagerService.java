@@ -247,6 +247,7 @@ import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 import com.android.server.power.ShutdownThread;
+import com.android.server.utils.PriorityDump;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -390,6 +391,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     };
     final WindowSurfacePlacer mWindowPlacerLocked;
+
+    private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
+        @Override
+        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, new String[] {"-a"});
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, args);
+        }
+    };
 
     /**
      * Current user when multi-user is enabled. Don't show windows of
@@ -6794,8 +6807,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        PriorityDump.dump(mPriorityDumper, fd, pw, args);
+    }
 
+    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean dumpAll = false;
         boolean useProto = false;
 

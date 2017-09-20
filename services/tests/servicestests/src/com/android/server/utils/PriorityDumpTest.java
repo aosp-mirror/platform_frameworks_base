@@ -80,7 +80,7 @@ public class PriorityDumpTest {
     @Test
     public void testMissingPriority() {
         final String[] args = {
-                "--dump_priority"
+                "--dump-priority"
         };
         dump(mDumper, mFd, mPw, args);
         verify(mDumper).dump(same(mFd), same(mPw), same(args));
@@ -89,7 +89,7 @@ public class PriorityDumpTest {
     @Test
     public void testInvalidPriorityNoExtraArgs() {
         final String[] args = {
-                "--dump_priority", "SUPER_HIGH"
+                "--dump-priority", "SUPER_HIGH"
         };
         dump(mDumper, mFd, mPw, args);
         verify(mDumper).dump(same(mFd), same(mPw), same(args));
@@ -98,7 +98,7 @@ public class PriorityDumpTest {
     @Test
     public void testInvalidPriorityExtraArgs() {
         final String[] args = {
-                "--dump_priority", "SUPER_HIGH", "--high", "--five"
+                "--dump-priority", "SUPER_HIGH", "--high", "--five"
         };
         dump(mDumper, mFd, mPw, args);
         verify(mDumper).dump(same(mFd), same(mPw), same(args));
@@ -129,7 +129,7 @@ public class PriorityDumpTest {
     @Test
     public void testCriticalNoExtraArgs() {
         dump(mDumper, mFd, mPw, new String[] {
-                "--dump_priority", "CRITICAL"
+                "--dump-priority", "CRITICAL"
         });
         verify(mDumper).dumpCritical(same(mFd), same(mPw), eq(EMPTY_ARGS));
     }
@@ -137,7 +137,7 @@ public class PriorityDumpTest {
     @Test
     public void testCriticalExtraArgs() {
         dump(mDumper, mFd, mPw, new String[] {
-                "--dump_priority", "CRITICAL", "--high", "--five"
+                "--dump-priority", "CRITICAL", "--high", "--five"
         });
         verify(mDumper).dumpCritical(same(mFd), same(mPw), eq(new String[] {
                 "--high", "--five"
@@ -147,7 +147,7 @@ public class PriorityDumpTest {
     @Test
     public void testHighNoExtraArgs() {
         dump(mDumper, mFd, mPw, new String[] {
-                "--dump_priority", "HIGH"
+                "--dump-priority", "HIGH"
         });
         verify(mDumper).dumpHigh(same(mFd), same(mPw), eq(EMPTY_ARGS));
     }
@@ -155,7 +155,7 @@ public class PriorityDumpTest {
     @Test
     public void testHighExtraArgs() {
         dump(mDumper, mFd, mPw, new String[] {
-                "--dump_priority", "HIGH", "--high", "--five"
+                "--dump-priority", "HIGH", "--high", "--five"
         });
         verify(mDumper).dumpHigh(same(mFd), same(mPw), eq(new String[] {
                 "--high", "--five"
@@ -165,7 +165,7 @@ public class PriorityDumpTest {
     @Test
     public void testNormalNoExtraArgs() {
         dump(mDumper, mFd, mPw, new String[] {
-                "--dump_priority", "NORMAL"
+                "--dump-priority", "NORMAL"
         });
         verify(mDumper).dumpNormal(same(mFd), same(mPw), eq(EMPTY_ARGS));
     }
@@ -173,7 +173,7 @@ public class PriorityDumpTest {
     @Test
     public void testNormalExtraArgs() {
         dump(mDumper, mFd, mPw, new String[] {
-                "--dump_priority", "NORMAL", "--high", "--five"
+                "--dump-priority", "NORMAL", "--high", "--five"
         });
         verify(mDumper).dumpNormal(same(mFd), same(mPw), eq(new String[] {
                 "--high", "--five"
