@@ -93,7 +93,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final int LOG_VALUE_UNDOCK_MAX_OTHER = 1;
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
-    private static final boolean SWAPPING_ENABLED = false;
 
     /**
      * How much the background gets scaled when we are in the minimized dock state.
@@ -153,7 +152,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mEntranceAnimationRunning;
     private boolean mExitAnimationRunning;
     private int mExitStartPosition;
-    private GestureDetector mGestureDetector;
     private boolean mDockedStackMinimized;
     private boolean mHomeStackResizable;
     private boolean mAdjustedForIme;
@@ -295,21 +293,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 landscape ? TYPE_HORIZONTAL_DOUBLE_ARROW : TYPE_VERTICAL_DOUBLE_ARROW));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
         mHandle.setAccessibilityDelegate(mHandleDelegate);
-        mGestureDetector = new GestureDetector(mContext, new SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                if (SWAPPING_ENABLED) {
-                    updateDockSide();
-                    SystemServicesProxy ssp = Recents.getSystemServices();
-                    if (mDockSide != WindowManager.DOCKED_INVALID
-                            && !ssp.isRecentsActivityVisible()) {
-                        mWindowManagerProxy.swapTasks();
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -478,7 +461,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         convertToScreenCoordinates(event);
-        mGestureDetector.onTouchEvent(event);
         final int action = event.getAction() & MotionEvent.ACTION_MASK;
         switch (action) {
             case MotionEvent.ACTION_DOWN:

@@ -120,17 +120,6 @@ public class WindowManagerProxy {
         }
     };
 
-    private final Runnable mSwapRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                ActivityManager.getService().swapDockedAndFullscreenStack();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to resize stack: " + e);
-            }
-        }
-    };
-
     private final Runnable mSetTouchableRegionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -216,10 +205,6 @@ public class WindowManagerProxy {
         mDimLayerTargetStack = targetStackId;
         mDimLayerAlpha = alpha;
         mExecutor.execute(mDimLayerRunnable);
-    }
-
-    public void swapTasks() {
-        mExecutor.execute(mSwapRunnable);
     }
 
     public void setTouchRegion(Rect region) {

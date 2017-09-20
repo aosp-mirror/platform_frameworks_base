@@ -553,11 +553,6 @@ interface IActivityManager {
      */
     void resizePinnedStack(in Rect pinnedBounds, in Rect tempPinnedTaskBounds);
     boolean isVrModePackageEnabled(in ComponentName packageName);
-    /**
-     * Moves all tasks from the docked stack in the fullscreen stack and puts the top task of the
-     * fullscreen stack into the docked stack.
-     */
-    void swapDockedAndFullscreenStack();
     void notifyLockedProfile(int userId);
     void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
     void sendIdleJobTrigger();
