@@ -103,6 +103,7 @@ import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.soundtrigger.SoundTriggerService;
+import com.android.server.stats.StatsCompanionService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
@@ -1522,6 +1523,11 @@ public final class SystemServer {
             mSystemServiceManager.startService(CameraServiceProxy.class);
             traceEnd();
         }
+
+        // Statsd helper
+        traceBeginAndSlog("StartStatsCompanionService");
+        mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
+        traceEnd();
 
         // Before things start rolling, be sure we have decided whether
         // we are in safe mode.

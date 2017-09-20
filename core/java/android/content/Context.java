@@ -2991,6 +2991,7 @@ public abstract class Context {
             //@hide: CONTEXTHUB_SERVICE,
             SYSTEM_HEALTH_SERVICE,
             //@hide: INCIDENT_SERVICE,
+            //@hide: STATS_COMPANION_SERVICE,
             COMPANION_DEVICE_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -4018,6 +4019,12 @@ public abstract class Context {
      * @hide
      */
     public static final String INCIDENT_SERVICE = "incident";
+
+    /**
+     * Service to assist statsd in obtaining general stats.
+     * @hide
+     */
+    public static final String STATS_COMPANION_SERVICE = "statscompanion";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
