@@ -82,4 +82,5 @@
     <string name="qs_menu_item_columns_eight">8</string>
     <string name="qs_menu_item_columns_nine">9</string>
     <string name="qs_menu_item_reset">Reset</string>
+    <string name="qs_menu_item_titles">Show labels</string>
 </resources>
