@@ -29,6 +29,8 @@
 
 using namespace android;
 
+namespace android {
+namespace os {
 namespace statsd {
 
 /** Defines a hash function for sp<AA>, returning the hash of the underlying pointer. */
@@ -191,5 +193,7 @@ void indexed_priority_queue<AA,Comparator>::swap_indices(size_t i, size_t j) {
 }
 
 } // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif //STATSD_INDEXED_PRIORITY_QUEUE_H

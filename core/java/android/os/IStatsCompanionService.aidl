@@ -22,6 +22,11 @@ package android.os;
   */
 oneway interface IStatsCompanionService {
     /**
+     * Tell statscompanion that stastd is up and running.
+     */
+    void statsdReady();
+
+    /**
     * Register an alarm for anomaly detection to fire at the given timestamp (ms since epoch).
     * If anomaly alarm had already been registered, it will be replaced with the new timestamp.
     * Uses AlarmManager.set API, so  if the timestamp is in the past, alarm fires immediately, and

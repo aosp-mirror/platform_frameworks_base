@@ -19,10 +19,9 @@
 
 #include <AnomalyMonitor.h>
 
-#include <binder/IServiceManager.h>
 #include <cutils/log.h>
 
-namespace statsd {
+using namespace android::os::statsd;
 
 AnomalyMonitor::AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec)
         : mRegisteredAlarmTimeSec(0),
@@ -32,7 +31,23 @@ AnomalyMonitor::AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec)
 AnomalyMonitor::~AnomalyMonitor() {
 }
 
+void AnomalyMonitor::setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
+    std::lock_guard<std::mutex> lock(mLock);
+    sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
+    mStatsCompanionService = statsCompanionService;
+    if (statsCompanionService == nullptr) {
+        if (DEBUG) ALOGD("Erasing link to statsCompanionService");
+        return;
+    }
+    if (DEBUG) ALOGD("Creating link to statsCompanionService");
+    const sp<const AnomalyAlarm> top = mPq.top();
+    if (top != nullptr) {
+        updateRegisteredAlarmTime_l(top->timestampSec);
+    }
+}
+
 void AnomalyMonitor::add(sp<const AnomalyAlarm> alarm) {
+    std::lock_guard<std::mutex> lock(mLock);
     if (alarm == nullptr) {
         ALOGW("Asked to add a null alarm.");
         return;
@@ -42,70 +57,46 @@ void AnomalyMonitor::add(sp<const AnomalyAlarm> alarm) {
         ALOGW("Asked to add a 0-time alarm.");
         return;
     }
-    std::lock_guard<std::mutex> lock(mLock);
     // TODO: Ensure that refractory period is respected.
     if (DEBUG) ALOGD("Adding alarm with time %u", alarm->timestampSec);
     mPq.push(alarm);
     if (mRegisteredAlarmTimeSec < 1 ||
             alarm->timestampSec + mMinUpdateTimeSec < mRegisteredAlarmTimeSec) {
-        updateRegisteredAlarmTime(alarm->timestampSec);
+        updateRegisteredAlarmTime_l(alarm->timestampSec);
     }
 }
 
 void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
+    std::lock_guard<std::mutex> lock(mLock);
     if (alarm == nullptr) {
         ALOGW("Asked to remove a null alarm.");
         return;
     }
-    std::lock_guard<std::mutex> lock(mLock);
     if (DEBUG) ALOGD("Removing alarm with time %u", alarm->timestampSec);
     mPq.remove(alarm);
     if (mPq.empty()) {
         if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
         mRegisteredAlarmTimeSec = 0;
-        // TODO: Make this resistant to doing work when companion is not ready yet
-        sp<IStatsCompanionService> statsCompanionService = getStatsCompanion_l();
-        if (statsCompanionService != nullptr) {
-            statsCompanionService->cancelAnomalyAlarm();
+        if (mStatsCompanionService != nullptr) {
+            mStatsCompanionService->cancelAnomalyAlarm();
         }
         return;
     }
     uint32_t soonestAlarmTimeSec = mPq.top()->timestampSec;
     if (DEBUG) ALOGD("Soonest alarm is %u", soonestAlarmTimeSec);
     if (soonestAlarmTimeSec > mRegisteredAlarmTimeSec + mMinUpdateTimeSec) {
-        updateRegisteredAlarmTime(soonestAlarmTimeSec);
+        updateRegisteredAlarmTime_l(soonestAlarmTimeSec);
     }
 }
 
-void AnomalyMonitor::updateRegisteredAlarmTime(uint32_t timestampSec) {
+void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
     if (DEBUG) ALOGD("Updating reg alarm time to %u", timestampSec);
     mRegisteredAlarmTimeSec = timestampSec;
-    sp<IStatsCompanionService> statsCompanionService = getStatsCompanion_l();
-    if (statsCompanionService != nullptr) {
-        statsCompanionService->setAnomalyAlarm(secToMs(mRegisteredAlarmTimeSec));
+    if (mStatsCompanionService != nullptr) {
+        mStatsCompanionService->setAnomalyAlarm(secToMs(mRegisteredAlarmTimeSec));
     }
-}
-
-sp<IStatsCompanionService> AnomalyMonitor::getStatsCompanion_l() {
-    if (mStatsCompanion != nullptr) {
-        return mStatsCompanion;
-    }
-    // Get statscompanion service from service manager
-    const sp<IServiceManager> sm(defaultServiceManager());
-    if (sm != nullptr) {
-        const String16 name("statscompanion");
-        mStatsCompanion =
-                interface_cast<IStatsCompanionService>(sm->checkService(name));
-        if (mStatsCompanion == nullptr) {
-            ALOGW("statscompanion service unavailable!");
-            return nullptr;
-        }
-    }
-    return mStatsCompanion;
 }
 
 int64_t AnomalyMonitor::secToMs(uint32_t timeSec) {
     return ((int64_t) timeSec) * 1000;
 }
-
-}  // namespace statsd

@@ -24,9 +24,11 @@
 #include <queue>
 #include <vector>
 
-using namespace android::os;
 using namespace android;
+using namespace android::os;
 
+namespace android {
+namespace os {
 namespace statsd {
 
 /**
@@ -52,7 +54,7 @@ struct AnomalyAlarm : public RefBase {
 /**
  * Manages alarms for Anomaly Detection.
  */
-class AnomalyMonitor {
+class AnomalyMonitor : public RefBase {
  public:
     /**
      * @param minDiffToUpdateRegisteredAlarmTimeSec If the soonest alarm differs
@@ -61,6 +63,14 @@ class AnomalyMonitor {
      */
     AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec);
     ~AnomalyMonitor();
+
+    /**
+     * Tells AnomalyMonitor what IStatsCompanionService to use and, if
+     * applicable, immediately registers an existing alarm with it.
+     * If nullptr, AnomalyMonitor will continue to add/remove alarms, but won't
+     * update IStatsCompanionService (until such time as it is set non-null).
+     */
+    void setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
 
     /**
      * Adds the given alarm (reference) to the queue.
@@ -84,7 +94,6 @@ class AnomalyMonitor {
     }
 
  private:
-    /** Lock for accessing/writing to mPq. */
     std::mutex mLock;
 
     /**
@@ -103,11 +112,11 @@ class AnomalyMonitor {
     /**
      * Binder interface for communicating with StatsCompanionService.
      */
-    sp<IStatsCompanionService> mStatsCompanion;
+    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     /**
      * Amount by which the soonest projected alarm must differ from
-     * mRegisteredAlarmTimeSec before updateRegisteredAlarmTime is called.
+     * mRegisteredAlarmTimeSec before updateRegisteredAlarmTime_l is called.
      */
     uint32_t mMinUpdateTimeSec;
 
@@ -115,15 +124,14 @@ class AnomalyMonitor {
      * Updates the alarm registered with StatsCompanionService to the given time.
      * Also correspondingly updates mRegisteredAlarmTimeSec.
      */
-    void updateRegisteredAlarmTime(uint32_t timestampSec);
-
-    /** Returns the StatsCompanionService. */
-    sp<IStatsCompanionService> getStatsCompanion_l();
+    void updateRegisteredAlarmTime_l(uint32_t timestampSec);
 
     /** Converts uint32 timestamp in seconds to a Java long in msec. */
     int64_t secToMs(uint32_t timeSec);
 };
 
 } // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif // ANOMALY_MONITOR_H

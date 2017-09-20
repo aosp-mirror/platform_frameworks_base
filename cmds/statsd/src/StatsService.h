@@ -17,9 +17,11 @@
 #ifndef STATS_SERVICE_H
 #define STATS_SERVICE_H
 
+#include "AnomalyMonitor.h"
 #include "StatsLogProcessor.h"
 
 #include <android/os/BnStatsManager.h>
+#include <android/os/IStatsCompanionService.h>
 #include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
@@ -32,7 +34,9 @@ using namespace android;
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
+using namespace android::os::statsd;
 using namespace std;
+
 using android::os::statsd::StatsdConfig;
 
 // ================================================================================
@@ -49,17 +53,46 @@ public:
 
     virtual Status systemRunning();
 
+    // Inform statsd that statsCompanion is ready.
+    virtual Status statsCompanionReady();
+
     virtual Status informAnomalyAlarmFired();
 
     virtual Status informPollAlarmFired();
 
     virtual status_t setProcessor(const sp<StatsLogProcessor>& main_processor);
 
+    // TODO: public for testing since statsd doesn't run when system starts. Change to private later.
+    /** Inform statsCompanion that statsd is ready. */
+    virtual void sayHiToStatsCompanion();
+
 private:
     sp<StatsLogProcessor> m_processor; // Reference to the processor for updating configs.
+
     status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
+
     void printCmdHelp(FILE* out);
+
     status_t doLoadConfig(FILE* in);
+
+    const sp<AnomalyMonitor> mAnomalyMonitor;  // TODO: Move this to a more logical file/class
+
+ private:
+    /** Fetches the StatsCompanionService. */
+    sp<IStatsCompanionService> getStatsCompanionService();
+};
+
+// --- StatsdDeathRecipient ---
+class StatsdDeathRecipient : public IBinder::DeathRecipient {
+public:
+    StatsdDeathRecipient(sp<AnomalyMonitor> anomalyMonitor)
+            : mAnmlyMntr(anomalyMonitor) {
+    }
+
+    virtual void binderDied(const wp<IBinder>& who);
+
+private:
+    const sp<AnomalyMonitor> mAnmlyMntr;
 };
 
 #endif // STATS_SERVICE_H
