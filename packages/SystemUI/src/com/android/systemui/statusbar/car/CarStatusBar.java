@@ -378,9 +378,10 @@ public class CarStatusBar extends StatusBar implements
         return result;
     }
 
-    public int startActivityOnStack(Intent intent, int stackId) {
-        ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchStackId(stackId);
+    public int startActivityOnStack(Intent intent, int windowingMode, int activityType) {
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(windowingMode);
+        options.setLaunchActivityType(activityType);
         return startActivityWithOptions(intent, options.toBundle());
     }
 

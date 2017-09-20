@@ -63,8 +63,21 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * The containers adjacent to the {@link #WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} container in
      * split-screen mode.
+     * NOTE: Containers launched with the windowing mode with APIs like
+     * {@link ActivityOptions#setLaunchWindowingMode(int)} will be launched in
+     * {@link #WINDOWING_MODE_FULLSCREEN} if the display isn't currently in split-screen windowing
+     * mode
+     * @see #WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
      */
     public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY = 4;
+    /**
+     * Alias for {@link #WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} that makes it clear that the usage
+     * points for APIs like {@link ActivityOptions#setLaunchWindowingMode(int)} that the container
+     * will launch into fullscreen or split-screen secondary depending on if the device is currently
+     * in fullscreen mode or split-screen mode.
+     */
+    public static final int WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY =
+            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     /** Can be freely resized within its parent container. */
     public static final int WINDOWING_MODE_FREEFORM = 5;
 
@@ -75,6 +88,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOWING_MODE_PINNED,
             WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
             WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+            WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY,
             WINDOWING_MODE_FREEFORM,
     })
     public @interface WindowingMode {}

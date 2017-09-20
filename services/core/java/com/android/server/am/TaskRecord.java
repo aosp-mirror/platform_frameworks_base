@@ -26,6 +26,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -507,8 +508,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             updateOverrideConfiguration(bounds);
             if (getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
                 // re-restore the task so it can have the proper stack association.
-                mService.mStackSupervisor.restoreRecentTaskLocked(this,
-                        FREEFORM_WORKSPACE_STACK_ID);
+                mService.mStackSupervisor.restoreRecentTaskLocked(this, null);
             }
             return true;
         }
@@ -729,7 +729,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         // TODO: Handle incorrect request to move before the actual move, not after.
-        supervisor.handleNonResizableTaskIfNeeded(this, preferredStackId, DEFAULT_DISPLAY, stackId);
+        supervisor.handleNonResizableTaskIfNeeded(this, getWindowingModeForStackId(preferredStackId,
+                        supervisor.getStack(DOCKED_STACK_ID) != null), DEFAULT_DISPLAY, stackId);
 
         boolean successful = (preferredStackId == stackId);
         if (successful && stackId == DOCKED_STACK_ID) {
@@ -2077,27 +2078,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         } else {
             updateOverrideConfiguration(inStack.mBounds);
         }
-    }
-
-    /**
-     * Returns the correct stack to use based on task type and currently set bounds,
-     * regardless of the focused stack and current stack association of the task.
-     * The task will be moved (and stack focus changed) later if necessary.
-     */
-    int getLaunchStackId() {
-        if (isActivityTypeRecents()) {
-            return RECENTS_STACK_ID;
-        }
-        if (isActivityTypeHome()) {
-            return HOME_STACK_ID;
-        }
-        if (isActivityTypeAssistant()) {
-            return ASSISTANT_STACK_ID;
-        }
-        if (mBounds != null) {
-            return FREEFORM_WORKSPACE_STACK_ID;
-        }
-        return FULLSCREEN_WORKSPACE_STACK_ID;
     }
 
     /** Returns the bounds that should be used to launch this task. */

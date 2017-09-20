@@ -23,6 +23,10 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.annotation.NonNull;
@@ -576,7 +580,7 @@ public class SystemServicesProxy {
         try {
             final ActivityOptions options = ActivityOptions.makeBasic();
             options.setDockCreateMode(createMode);
-            options.setLaunchStackId(DOCKED_STACK_ID);
+            options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
             mIam.startActivityFromRecents(taskId, options.toBundle());
             return true;
         } catch (Exception e) {
@@ -1120,9 +1124,16 @@ public class SystemServicesProxy {
                 opts != null ? opts.toBundle() : null, UserHandle.CURRENT));
     }
 
+    public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
+            ActivityOptions options,
+            @Nullable final StartActivityFromRecentsResultListener resultListener) {
+        startActivityFromRecents(context, taskKey, taskName, options,
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED, resultListener);
+    }
+
     /** Starts an activity from recents. */
     public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
-            ActivityOptions options, int stackId,
+            ActivityOptions options, int windowingMode, int activityType,
             @Nullable final StartActivityFromRecentsResultListener resultListener) {
         if (mIam == null) {
             return;
@@ -1133,12 +1144,14 @@ public class SystemServicesProxy {
             if (options == null) {
                 options = ActivityOptions.makeBasic();
             }
-            options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
-        } else if (stackId != INVALID_STACK_ID) {
+            options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        } else if (windowingMode != WINDOWING_MODE_UNDEFINED
+                || activityType != ACTIVITY_TYPE_UNDEFINED) {
             if (options == null) {
                 options = ActivityOptions.makeBasic();
             }
-            options.setLaunchStackId(stackId);
+            options.setLaunchWindowingMode(windowingMode);
+            options.setLaunchActivityType(activityType);
         }
         final ActivityOptions finalOptions = options;
 

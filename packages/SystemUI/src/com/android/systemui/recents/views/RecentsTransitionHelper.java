@@ -21,6 +21,15 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
@@ -107,7 +116,7 @@ public class RecentsTransitionHelper {
      */
     public void launchTaskFromRecents(final TaskStack stack, @Nullable final Task task,
             final TaskStackView stackView, final TaskView taskView,
-            final boolean screenPinningRequested, final int destinationStack) {
+            final boolean screenPinningRequested, final int windowingMode, final int activityType) {
 
         final ActivityOptions.OnAnimationStartedListener animStartedListener;
         final AppTransitionAnimationSpecsFuture transitionFuture;
@@ -116,8 +125,8 @@ public class RecentsTransitionHelper {
             // Fetch window rect here already in order not to be blocked on lock contention in WM
             // when the future calls it.
             final Rect windowRect = Recents.getSystemServices().getWindowRect();
-            transitionFuture = getAppTransitionFuture(
-                    () -> composeAnimationSpecs(task, stackView, destinationStack, windowRect));
+            transitionFuture = getAppTransitionFuture(() -> composeAnimationSpecs(
+                    task, stackView, windowingMode, activityType, windowRect));
             animStartedListener = new OnAnimationStartedListener() {
                 private boolean mHandled;
 
@@ -180,7 +189,8 @@ public class RecentsTransitionHelper {
         if (taskView == null) {
             // If there is no task view, then we do not need to worry about animating out occluding
             // task views, and we can launch immediately
-            startTaskActivity(stack, task, taskView, opts, transitionFuture, destinationStack);
+            startTaskActivity(stack, task, taskView, opts, transitionFuture,
+                    windowingMode, activityType);
         } else {
             LaunchTaskStartedEvent launchStartedEvent = new LaunchTaskStartedEvent(taskView,
                     screenPinningRequested);
@@ -189,13 +199,14 @@ public class RecentsTransitionHelper {
                     @Override
                     public void run() {
                         startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                                destinationStack);
+                                windowingMode, activityType);
                     }
                 });
                 EventBus.getDefault().send(launchStartedEvent);
             } else {
                 EventBus.getDefault().send(launchStartedEvent);
-                startTaskActivity(stack, task, taskView, opts, transitionFuture, destinationStack);
+                startTaskActivity(stack, task, taskView, opts, transitionFuture,
+                        windowingMode, activityType);
             }
         }
         Recents.getSystemServices().sendCloseSystemWindows(
@@ -224,13 +235,13 @@ public class RecentsTransitionHelper {
      *
      * @param taskView this is the {@link TaskView} that we are launching from. This can be null if
      *                 we are toggling recents and the launch-to task is now offscreen.
-     * @param destinationStack id of the stack to put the task into.
      */
     private void startTaskActivity(TaskStack stack, Task task, @Nullable TaskView taskView,
             ActivityOptions opts, AppTransitionAnimationSpecsFuture transitionFuture,
-            int destinationStack) {
+            int windowingMode, int activityType) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        ssp.startActivityFromRecents(mContext, task.key, task.title, opts, destinationStack,
+        ssp.startActivityFromRecents(mContext, task.key, task.title, opts, windowingMode,
+                activityType,
                 succeeded -> {
             if (succeeded) {
                 // Keep track of the index of the task launch
@@ -310,11 +321,9 @@ public class RecentsTransitionHelper {
      * Composes the animation specs for all the tasks in the target stack.
      */
     private List<AppTransitionAnimationSpec> composeAnimationSpecs(final Task task,
-            final TaskStackView stackView, final int destinationStack, Rect windowRect) {
-        // Ensure we have a valid target stack id
-        final int targetStackId = destinationStack != INVALID_STACK_ID ?
-                destinationStack : task.key.stackId;
-        if (!StackId.useAnimationSpecForAppTransition(targetStackId)) {
+            final TaskStackView stackView, int windowingMode, int activityType, Rect windowRect) {
+        if (activityType == ACTIVITY_TYPE_RECENTS || activityType == ACTIVITY_TYPE_HOME
+                || windowingMode == WINDOWING_MODE_PINNED) {
             return null;
         }
 
@@ -329,9 +338,12 @@ public class RecentsTransitionHelper {
         List<AppTransitionAnimationSpec> specs = new ArrayList<>();
 
         // TODO: Sometimes targetStackId is not initialized after reboot, so we also have to
-        // check for INVALID_STACK_ID
-        if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID || targetStackId == DOCKED_STACK_ID
-                || targetStackId == ASSISTANT_STACK_ID || targetStackId == INVALID_STACK_ID) {
+        // check for INVALID_STACK_ID (now WINDOWING_MODE_UNDEFINED)
+        if (windowingMode == WINDOWING_MODE_FULLSCREEN
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                || activityType == ACTIVITY_TYPE_ASSISTANT
+                || windowingMode == WINDOWING_MODE_UNDEFINED) {
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
@@ -353,7 +365,7 @@ public class RecentsTransitionHelper {
         int taskCount = tasks.size();
         for (int i = taskCount - 1; i >= 0; i--) {
             Task t = tasks.get(i);
-            if (t.isFreeformTask() || targetStackId == FREEFORM_WORKSPACE_STACK_ID) {
+            if (t.isFreeformTask() || windowingMode == WINDOWING_MODE_FREEFORM) {
                 TaskView tv = stackView.getChildViewForTask(t);
                 if (tv == null) {
                     // TODO: Create a different animation task rect for this case (though it should

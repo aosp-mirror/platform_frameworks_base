@@ -770,21 +770,6 @@ public class ActivityManager {
         }
 
         /**
-         * Returns true if animation specs should be constructed for app transition that moves
-         * the task to the specified stack.
-         * @hide
-         */
-        public static boolean useAnimationSpecForAppTransition(int stackId) {
-            // TODO: INVALID_STACK_ID is also animated because we don't persist stack id's across
-            // reboots.
-            return stackId == FREEFORM_WORKSPACE_STACK_ID
-                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                    || stackId == ASSISTANT_STACK_ID
-                    || stackId == DOCKED_STACK_ID
-                    || stackId == INVALID_STACK_ID;
-        }
-
-        /**
          * Returns true if activities from stasks in the given {@param stackId} are allowed to
          * enter picture-in-picture.
          * @hide
@@ -885,6 +870,18 @@ public class ActivityManager {
             return windowingMode;
         }
 
+        /** Returns the stack id for the input windowing mode.
+         * @hide */
+        // TODO: To be removed once we are not using stack id for stuff...
+        public static int getStackIdForWindowingMode(int windowingMode) {
+            switch (windowingMode) {
+                case WINDOWING_MODE_PINNED: return PINNED_STACK_ID;
+                case WINDOWING_MODE_FREEFORM: return FREEFORM_WORKSPACE_STACK_ID;
+                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY: return DOCKED_STACK_ID;
+                default: return INVALID_STACK_ID;
+            }
+        }
+
         /** Returns the activity type that should be used for this input stack id.
          * @hide */
         // TODO: To be removed once we are not using stack id for stuff...
@@ -904,6 +901,18 @@ public class ActivityManager {
                     activityType = ACTIVITY_TYPE_STANDARD;
             }
             return activityType;
+        }
+
+        /** Returns the stack id for the input activity type.
+         * @hide */
+        // TODO: To be removed once we are not using stack id for stuff...
+        public static int getStackIdForActivityType(int activityType) {
+            switch (activityType) {
+                case ACTIVITY_TYPE_HOME: return HOME_STACK_ID;
+                case ACTIVITY_TYPE_RECENTS: return RECENTS_STACK_ID;
+                case ACTIVITY_TYPE_ASSISTANT: return ASSISTANT_STACK_ID;
+                default: return INVALID_STACK_ID;
+            }
         }
     }
 

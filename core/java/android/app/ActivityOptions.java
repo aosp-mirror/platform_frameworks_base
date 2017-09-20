@@ -18,6 +18,8 @@ package android.app;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
@@ -164,10 +166,16 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_DISPLAY_ID = "android.activity.launchDisplayId";
 
     /**
-     * The stack id the activity should be launched into.
+     * The windowing mode the activity should be launched into.
      * @hide
      */
-    private static final String KEY_LAUNCH_STACK_ID = "android.activity.launchStackId";
+    private static final String KEY_LAUNCH_WINDOWING_MODE = "android.activity.windowingMode";
+
+    /**
+     * The activity type the activity should be launched as.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_ACTIVITY_TYPE = "android.activity.activityType";
 
     /**
      * The task id the activity should be launched into.
@@ -272,7 +280,10 @@ public class ActivityOptions {
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
     private int mLaunchDisplayId = INVALID_DISPLAY;
-    private int mLaunchStackId = INVALID_STACK_ID;
+    @WindowConfiguration.WindowingMode
+    private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
+    @WindowConfiguration.ActivityType
+    private int mLaunchActivityType = ACTIVITY_TYPE_UNDEFINED;
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
@@ -860,7 +871,8 @@ public class ActivityOptions {
                 break;
         }
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
-        mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
+        mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
+        mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
@@ -1070,14 +1082,34 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public int getLaunchStackId() {
-        return mLaunchStackId;
+    public int getLaunchWindowingMode() {
+        return mLaunchWindowingMode;
+    }
+
+    /**
+     * Sets the windowing mode the activity should launch into. If the input windowing mode is
+     * {@link android.app.WindowConfiguration#WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} and the device
+     * isn't currently in split-screen windowing mode, then the activity will be launched in
+     * {@link android.app.WindowConfiguration#WINDOWING_MODE_FULLSCREEN} windowing mode. For clarity
+     * on this you can use
+     * {@link android.app.WindowConfiguration#WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY}
+     *
+     * @hide
+     */
+    @TestApi
+    public void setLaunchWindowingMode(int windowingMode) {
+        mLaunchWindowingMode = windowingMode;
+    }
+
+    /** @hide */
+    public int getLaunchActivityType() {
+        return mLaunchActivityType;
     }
 
     /** @hide */
     @TestApi
-    public void setLaunchStackId(int launchStackId) {
-        mLaunchStackId = launchStackId;
+    public void setLaunchActivityType(int activityType) {
+        mLaunchActivityType = activityType;
     }
 
     /**
@@ -1291,7 +1323,8 @@ public class ActivityOptions {
                 break;
         }
         b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
-        b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
+        b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
+        b.putInt(KEY_LAUNCH_ACTIVITY_TYPE, mLaunchActivityType);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
         b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);

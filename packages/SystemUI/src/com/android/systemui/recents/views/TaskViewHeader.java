@@ -16,6 +16,11 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
@@ -56,10 +61,6 @@ import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
-
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /* The task bar view */
 public class TaskViewHeader extends FrameLayout
@@ -172,7 +173,7 @@ public class TaskViewHeader extends FrameLayout
     int mTaskBarViewLightTextColor;
     int mTaskBarViewDarkTextColor;
     int mDisabledTaskBarBackgroundColor;
-    int mMoveTaskTargetStackId = INVALID_STACK_ID;
+    int mTaskWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     // Header background
     private HighlightColorDrawable mBackground;
@@ -485,12 +486,12 @@ public class TaskViewHeader extends FrameLayout
         // current task
         if (mMoveTaskButton != null) {
             if (t.isFreeformTask()) {
-                mMoveTaskTargetStackId = FULLSCREEN_WORKSPACE_STACK_ID;
+                mTaskWindowingMode = WINDOWING_MODE_FULLSCREEN;
                 mMoveTaskButton.setImageDrawable(t.useLightOnPrimaryColor
                         ? mLightFullscreenIcon
                         : mDarkFullscreenIcon);
             } else {
-                mMoveTaskTargetStackId = FREEFORM_WORKSPACE_STACK_ID;
+                mTaskWindowingMode = WINDOWING_MODE_FREEFORM;
                 mMoveTaskButton.setImageDrawable(t.useLightOnPrimaryColor
                         ? mLightFreeformIcon
                         : mDarkFreeformIcon);
@@ -621,8 +622,8 @@ public class TaskViewHeader extends FrameLayout
                     Constants.Metrics.DismissSourceHeaderButton);
         } else if (v == mMoveTaskButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
-            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, null,
-                    mMoveTaskTargetStackId, false));
+            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, null, false,
+                    mTaskWindowingMode, ACTIVITY_TYPE_UNDEFINED));
         } else if (v == mAppInfoView) {
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
         } else if (v == mAppIconView) {

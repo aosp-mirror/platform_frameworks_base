@@ -75,6 +75,8 @@ import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
@@ -115,7 +117,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mStreaming;   // Streaming the profiling output to a file.
     private String mAgent;  // Agent to attach on startup.
     private int mDisplayId;
-    private int mStackId;
+    private int mWindowingMode;
+    private int mActivityType;
     private int mTaskId;
     private boolean mIsTaskOverlay;
 
@@ -271,7 +274,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mStreaming = false;
         mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
-        mStackId = INVALID_STACK_ID;
+        mWindowingMode = WINDOWING_MODE_UNDEFINED;
+        mActivityType = ACTIVITY_TYPE_UNDEFINED;
         mTaskId = INVALID_TASK_ID;
         mIsTaskOverlay = false;
 
@@ -308,8 +312,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mReceiverPermission = getNextArgRequired();
                 } else if (opt.equals("--display")) {
                     mDisplayId = Integer.parseInt(getNextArgRequired());
-                } else if (opt.equals("--stack")) {
-                    mStackId = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--windowingMode")) {
+                    mWindowingMode = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--activityType")) {
+                    mActivityType = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--task")) {
                     mTaskId = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--task-overlay")) {
@@ -396,9 +402,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options = ActivityOptions.makeBasic();
                 options.setLaunchDisplayId(mDisplayId);
             }
-            if (mStackId != INVALID_STACK_ID) {
-                options = ActivityOptions.makeBasic();
-                options.setLaunchStackId(mStackId);
+            if (mWindowingMode != WINDOWING_MODE_UNDEFINED) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLaunchWindowingMode(mWindowingMode);
+            }
+            if (mActivityType != ACTIVITY_TYPE_UNDEFINED) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLaunchActivityType(mActivityType);
             }
             if (mTaskId != INVALID_TASK_ID) {
                 options = ActivityOptions.makeBasic();
@@ -2685,7 +2699,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --track-allocation: enable tracking of object allocations");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
             pw.println("          specified then run as the current user.");
-            pw.println("      --stack <STACK_ID>: Specify into which stack should the activity be put.");
+            pw.println("      --windowingMode <WINDOWING_MODE>: The windowing mode to launch the activity into.");
+            pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
