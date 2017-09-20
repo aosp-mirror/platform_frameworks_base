@@ -42,40 +42,17 @@ const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff"; // -1
 const string FIX32_FIELD_4 = "\x25\xff\xff\xff\xff"; // -1
 const string MESSAGE_FIELD_5 = "\x2a\x10" + VARINT_FIELD_1 + STRING_FIELD_2;
 
-static Privacy* create_privacy(uint32_t field_id, uint8_t type, uint8_t dest) {
-  struct Privacy* p = (struct Privacy*)malloc(sizeof(struct Privacy));
-  p->field_id = field_id;
-  p->type = type;
-  p->children = NULL;
-  p->dest = dest;
-  p->patterns = NULL;
-  return p;
-}
-
-static Privacy* create_message_privacy(uint32_t field_id, Privacy** children)
-{
-  struct Privacy* p = (struct Privacy*)malloc(sizeof(struct Privacy));
-  p->field_id = field_id;
-  p->type = MESSAGE_TYPE;
-  p->children = children;
-  p->dest = EXPLICIT;
-  p->patterns = NULL;
-  return p;
-}
-
-static Privacy* create_string_privacy(uint32_t field_id, uint8_t dest, const char** patterns)
-{
-  struct Privacy* p = (struct Privacy*)malloc(sizeof(struct Privacy));
-  p->field_id = field_id;
-  p->type = STRING_TYPE;
-  p->children = NULL;
-  p->dest = dest;
-  p->patterns = patterns;
-  return p;
-}
-
 class EncodedBufferTest : public Test {
 public:
+    virtual ~EncodedBufferTest() {
+        // Delete in reverse order of construction, to be consistent with
+        // regular allocation/deallocation.
+        while (!privacies.empty()) {
+            delete privacies.back();
+            privacies.pop_back();
+        }
+    }
+
     virtual void SetUp() override {
         ASSERT_NE(tf.fd, -1);
     }
@@ -113,9 +90,48 @@ public:
         assertStrip(dest, expected, create_message_privacy(300, list));
     }
 
+    Privacy* create_privacy(uint32_t field_id, uint8_t type, uint8_t dest) {
+        Privacy* p = new_uninit_privacy();
+        p->field_id = field_id;
+        p->type = type;
+        p->children = NULL;
+        p->dest = dest;
+        p->patterns = NULL;
+        return p;
+    }
+
+    Privacy* create_message_privacy(uint32_t field_id, Privacy** children) {
+        Privacy* p = new_uninit_privacy();
+        p->field_id = field_id;
+        p->type = MESSAGE_TYPE;
+        p->children = children;
+        p->dest = EXPLICIT;
+        p->patterns = NULL;
+        return p;
+    }
+
+    Privacy* create_string_privacy(uint32_t field_id, uint8_t dest, const char** patterns) {
+        Privacy* p = new_uninit_privacy();
+        p->field_id = field_id;
+        p->type = STRING_TYPE;
+        p->children = NULL;
+        p->dest = dest;
+        p->patterns = patterns;
+        return p;
+    }
+
     FdBuffer buffer;
 private:
     TemporaryFile tf;
+    // Littering this code with unique_ptr (or similar) is ugly, so we just
+    // mass-free everything after the test completes.
+    std::vector<Privacy *> privacies;
+
+    Privacy *new_uninit_privacy() {
+        Privacy* p = new Privacy;
+        privacies.push_back(p);
+        return p;
+    }
 };
 
 TEST_F(EncodedBufferTest, NullFieldPolicy) {
