@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 using namespace android;
+using namespace android::os::statsd;
 
 // ================================================================================
 /**

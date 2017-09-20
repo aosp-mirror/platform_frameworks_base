@@ -23,10 +23,13 @@ using android::sp;
 using android::String16;
 using android::binder::Status;
 using android::base::unique_fd;
-using android::os::statsd::EventMetricData;
 using android::os::DropBoxManager;
 using android::ZipUtils;
 using std::vector;
+
+namespace android {
+namespace os {
+namespace statsd {
 
 status_t DropboxReader::readStatsLogs(FILE* out, const string& tag, long msec) {
     sp<DropBoxManager> dropbox = new DropBoxManager();
@@ -117,3 +120,7 @@ void DropboxReader::printLog(FILE* out, const StatsLogReport& logReport) {
     }
     fprintf(out, "\n");
 }
+
+} // namespace statsd
+} // namespace os
+} // namespace android

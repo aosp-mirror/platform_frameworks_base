@@ -20,7 +20,10 @@
 #include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
 
 using std::string;
-using android::os::statsd::StatsLogReport;
+
+namespace android {
+namespace os {
+namespace statsd {
 
 class DropboxWriter {
 public:
@@ -61,5 +64,9 @@ private:
     void flushIfNecessary(const StatsLogReport& log);
 
 };
+
+} // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif //DROPBOX_WRITER_H

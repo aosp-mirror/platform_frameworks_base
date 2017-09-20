@@ -34,9 +34,11 @@
 #include <stdlib.h>
 
 using namespace android;
-using android::os::statsd::StatsdConfig;
 
-// ================================================================================
+namespace android {
+namespace os {
+namespace statsd {
+
 StatsService::StatsService(const sp<Looper>& handlerLooper)
         : mAnomalyMonitor(new AnomalyMonitor(2)) // TODO: Change this based on the config
 {
@@ -211,23 +213,6 @@ StatsService::systemRunning()
     return Status::ok();
 }
 
-status_t
-StatsService::doPrintStatsLog(FILE* out, const Vector<String8>& args) {
-    long msec = 0;
-
-    if (args.size() > 2) {
-        msec = strtol(args[2].string(), NULL, 10);
-    }
-    return DropboxReader::readStatsLogs(out, args[1].string(), msec);
-}
-
-void
-StatsService::printCmdHelp(FILE* out) {
-    fprintf(out, "Usage:\n");
-    fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
-    fprintf(out, "\t config\t Loads a new config from command-line (must be proto in wire-encoded format).\n");
-}
-
 void
 StatsService::sayHiToStatsCompanion()
 {
@@ -239,6 +224,22 @@ StatsService::sayHiToStatsCompanion()
     } else {
         if (DEBUG) ALOGD("Could not access statsCompanion");
     }
+}
+
+sp<IStatsCompanionService>
+StatsService::getStatsCompanionService() {
+    sp<IStatsCompanionService> statsCompanion = nullptr;
+    // Get statscompanion service from service manager
+    const sp<IServiceManager> sm(defaultServiceManager());
+    if (sm != nullptr) {
+        const String16 name("statscompanion");
+        statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
+        if (statsCompanion == nullptr) {
+            ALOGW("statscompanion service unavailable!");
+            return nullptr;
+        }
+    }
+    return statsCompanion;
 }
 
 Status
@@ -263,24 +264,29 @@ StatsService::statsCompanionReady()
     return Status::ok();
 }
 
-sp<IStatsCompanionService>
-StatsService::getStatsCompanionService() {
-    sp<IStatsCompanionService> statsCompanion = nullptr;
-    // Get statscompanion service from service manager
-    const sp<IServiceManager> sm(defaultServiceManager());
-    if (sm != nullptr) {
-        const String16 name("statscompanion");
-        statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
-        if (statsCompanion == nullptr) {
-            ALOGW("statscompanion service unavailable!");
-            return nullptr;
-        }
-    }
-    return statsCompanion;
-}
-
 void
 StatsdDeathRecipient::binderDied(const wp<IBinder>& who) {
     ALOGW("statscompanion service died");
     mAnmlyMntr->setStatsCompanionService(nullptr);
 }
+
+status_t
+StatsService::doPrintStatsLog(FILE* out, const Vector<String8>& args) {
+    long msec = 0;
+
+    if (args.size() > 2) {
+        msec = strtol(args[2].string(), NULL, 10);
+    }
+    return DropboxReader::readStatsLogs(out, args[1].string(), msec);
+}
+
+void
+StatsService::printCmdHelp(FILE* out) {
+    fprintf(out, "Usage:\n");
+    fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
+    fprintf(out, "\t config\t Loads a new config from command-line (must be proto in wire-encoded format).\n");
+}
+
+} // namespace statsd
+} // namespace os
+} // namespace android

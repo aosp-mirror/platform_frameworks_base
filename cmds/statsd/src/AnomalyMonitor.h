@@ -25,7 +25,8 @@
 #include <vector>
 
 using namespace android;
-using namespace android::os;
+
+using android::os::IStatsCompanionService;
 
 namespace android {
 namespace os {
