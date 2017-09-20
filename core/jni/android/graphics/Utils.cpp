@@ -42,7 +42,7 @@ bool AssetStreamAdaptor::isAtEnd() const {
     return fAsset->getRemainingLength() == 0;
 }
 
-SkStreamRewindable* AssetStreamAdaptor::duplicate() const {
+SkStreamRewindable* AssetStreamAdaptor::onDuplicate() const {
     // Cannot create a duplicate, since each AssetStreamAdaptor
     // would be modifying the Asset.
     //return new AssetStreamAdaptor(fAsset);

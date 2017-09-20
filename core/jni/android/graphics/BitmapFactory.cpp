@@ -560,7 +560,7 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
 
     if (stream.get()) {
         std::unique_ptr<SkStreamRewindable> bufferedStream(
-                SkFrontBufferedStream::Create(stream.release(), SkCodec::MinBufferedBytesNeeded()));
+                SkFrontBufferedStream::Make(std::move(stream), SkCodec::MinBufferedBytesNeeded()));
         SkASSERT(bufferedStream.get() != NULL);
         bitmap = doDecode(env, std::move(bufferedStream), padding, options);
     }
@@ -610,7 +610,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
-    std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.release(),
+    std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Make(std::move(fileStream),
             SkCodec::MinBufferedBytesNeeded()));
 
     return doDecode(env, std::move(stream), padding, bitmapFactoryOptions);
