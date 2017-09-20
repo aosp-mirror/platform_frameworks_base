@@ -294,6 +294,7 @@ abstract public class ManagedServices {
             }
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_MANAGED_SERVICES.equals(tag)) {
+                    Slog.i(TAG, "Read " + mConfig.caption + " permissions from xml");
                     final String approved = XmlUtils.readStringAttribute(parser, ATT_APPROVED_LIST);
                     final int userId = XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
                     final boolean isPrimary =
@@ -353,6 +354,8 @@ abstract public class ManagedServices {
 
     protected void setPackageOrComponentEnabled(String pkgOrComponent, int userId,
             boolean isPrimary, boolean enabled) {
+        Slog.i(TAG,
+                (enabled ? " Allowing " : "Disallowing ") + mConfig.caption + " " + pkgOrComponent);
         ArrayMap<Boolean, ArraySet<String>> allowedByType = mApproved.get(userId);
         if (allowedByType == null) {
             allowedByType = new ArrayMap<>();
@@ -460,6 +463,7 @@ abstract public class ManagedServices {
     }
 
     public void onUserRemoved(int user) {
+        Slog.i(TAG, "Removing approved services for removed user " + user);
         mApproved.remove(user);
         rebindServices(true);
     }
@@ -543,10 +547,8 @@ abstract public class ManagedServices {
         }
 
         // State changed
-        if (DEBUG) {
-            Slog.d(TAG, ((enabled) ? "Enabling " : "Disabling ") + "component " +
-                    component.flattenToShortString());
-        }
+        Slog.d(TAG, ((enabled) ? "Enabling " : "Disabling ") + "component " +
+                component.flattenToShortString());
 
         synchronized (mMutex) {
             final int[] userIds = mUserProfiles.getCurrentProfileIds();
@@ -628,12 +630,10 @@ abstract public class ManagedServices {
                 int P = approved.size();
                 for (int k = P - 1; k >= 0; k--) {
                     final String approvedPackageOrComponent = approved.valueAt(k);
-                    if (!hasMatchingServices(approvedPackageOrComponent, userId)){
+                    if (!isValidEntry(approvedPackageOrComponent, userId)){
                         approved.removeAt(k);
-                        if (DEBUG) {
-                            Slog.v(TAG, "Removing " + approvedPackageOrComponent
-                                    + " from approved list; no matching services found");
-                        }
+                        Slog.v(TAG, "Removing " + approvedPackageOrComponent
+                                + " from approved list; no matching services found");
                     } else {
                         if (DEBUG) {
                             Slog.v(TAG, "Keeping " + approvedPackageOrComponent
@@ -676,6 +676,10 @@ abstract public class ManagedServices {
         } else {
             return packageOrComponent;
         }
+    }
+
+    protected boolean isValidEntry(String packageOrComponent, int userId) {
+        return hasMatchingServices(packageOrComponent, userId);
     }
 
     private boolean hasMatchingServices(String packageOrComponent, int userId) {
@@ -830,8 +834,7 @@ abstract public class ManagedServices {
             if (name.equals(info.component)
                 && info.userid == userid) {
                 // cut old connections
-                if (DEBUG) Slog.v(TAG, "    disconnecting old " + getCaption() + ": "
-                    + info.service);
+                Slog.v(TAG, "    disconnecting old " + getCaption() + ": " + info.service);
                 removeServiceLocked(i);
                 if (info.connection != null) {
                     mContext.unbindService(info.connection);
@@ -859,7 +862,7 @@ abstract public class ManagedServices {
             appInfo != null ? appInfo.targetSdkVersion : Build.VERSION_CODES.BASE;
 
         try {
-            if (DEBUG) Slog.v(TAG, "binding: " + intent);
+            Slog.v(TAG, "binding: " + intent);
             ServiceConnection serviceConnection = new ServiceConnection() {
                 IInterface mService;
 
@@ -917,8 +920,7 @@ abstract public class ManagedServices {
         final int N = mServices.size();
         for (int i = N - 1; i >= 0; i--) {
             final ManagedServiceInfo info = mServices.get(i);
-            if (name.equals(info.component)
-                && info.userid == userid) {
+            if (name.equals(info.component) && info.userid == userid) {
                 removeServiceLocked(i);
                 if (info.connection != null) {
                     try {
@@ -945,9 +947,8 @@ abstract public class ManagedServices {
             final int N = mServices.size();
             for (int i = N - 1; i >= 0; i--) {
                 final ManagedServiceInfo info = mServices.get(i);
-                if (info.service.asBinder() == service.asBinder()
-                        && info.userid == userid) {
-                    if (DEBUG) Slog.d(TAG, "Removing active service " + info.component);
+                if (info.service.asBinder() == service.asBinder() && info.userid == userid) {
+                    Slog.d(TAG, "Removing active service " + info.component);
                     serviceInfo = removeServiceLocked(i);
                 }
             }
