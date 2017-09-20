@@ -51,7 +51,7 @@ import java.io.PrintWriter;
  */
 // Also made non-final so it can be mocked.
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class PackageTracker implements IntentHelper.Listener {
+public class PackageTracker {
     private static final String TAG = "timezone.PackageTracker";
 
     private final PackageManagerHelper mPackageManagerHelper;
@@ -71,6 +71,13 @@ public class PackageTracker implements IntentHelper.Listener {
     private int mCheckTimeAllowedMillis;
     // The number of failed checks in a row before reliability checks should stop happening.
     private long mFailedCheckRetryCount;
+
+    /*
+     * The minimum delay between a successive reliability triggers / other operations. Should to be
+     * larger than mCheckTimeAllowedMillis to avoid reliability triggers happening during package
+     * update checks.
+     */
+    private int mDelayBeforeReliabilityCheckMillis;
 
     // Reliability check state: If a check was triggered but not acknowledged within
     // mCheckTimeAllowedMillis then another one can be triggered.
@@ -122,6 +129,7 @@ public class PackageTracker implements IntentHelper.Listener {
         mDataAppPackageName = mConfigHelper.getDataAppPackageName();
         mCheckTimeAllowedMillis = mConfigHelper.getCheckTimeAllowedMillis();
         mFailedCheckRetryCount = mConfigHelper.getFailedCheckRetryCount();
+        mDelayBeforeReliabilityCheckMillis = mCheckTimeAllowedMillis + (60 * 1000);
 
         // Validate the device configuration including the application packages.
         // The manifest entries in the apps themselves are not validated until use as they can
@@ -135,9 +143,10 @@ public class PackageTracker implements IntentHelper.Listener {
         // Initialize the intent helper.
         mIntentHelper.initialize(mUpdateAppPackageName, mDataAppPackageName, this);
 
-        // Enable the reliability triggering so we will have at least one reliability trigger if
-        // a package isn't updated.
-        mIntentHelper.enableReliabilityTriggering();
+        // Schedule a reliability trigger so we will have at least one after boot. This will allow
+        // us to catch if a package updated wasn't handled to completion. There's no hurry: it's ok
+        // to delay for a while before doing this even if idle.
+        mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
 
         Slog.i(TAG, "Time zone updater / data package tracking enabled");
     }
@@ -195,7 +204,6 @@ public class PackageTracker implements IntentHelper.Listener {
      * @param packageChanged true if this method was called because a known packaged definitely
      *     changed, false if the cause is a reliability trigger
      */
-    @Override
     public synchronized void triggerUpdateIfNeeded(boolean packageChanged) {
         if (!mTrackingEnabled) {
             throw new IllegalStateException("Unexpected call. Tracking is disabled.");
@@ -212,8 +220,8 @@ public class PackageTracker implements IntentHelper.Listener {
                     + " updaterApp=" + updaterAppManifestValid
                     + ", dataApp=" + dataAppManifestValid);
 
-            // There's no point in doing reliability checks if the current packages are bad.
-            mIntentHelper.disableReliabilityTriggering();
+            // There's no point in doing any reliability triggers if the current packages are bad.
+            mIntentHelper.unscheduleReliabilityTrigger();
             return;
         }
 
@@ -238,7 +246,8 @@ public class PackageTracker implements IntentHelper.Listener {
                     Slog.d(TAG,
                             "triggerUpdateIfNeeded: checkComplete call is not yet overdue."
                                     + " Not triggering.");
-                    // Not doing any work, but also not disabling future reliability triggers.
+                    // Don't do any work now but we do schedule a future reliability trigger.
+                    mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
                     return;
                 }
             } else if (mCheckFailureCount > mFailedCheckRetryCount) {
@@ -247,13 +256,13 @@ public class PackageTracker implements IntentHelper.Listener {
                 Slog.i(TAG, "triggerUpdateIfNeeded: number of allowed consecutive check failures"
                         + " exceeded. Stopping reliability triggers until next reboot or package"
                         + " update.");
-                mIntentHelper.disableReliabilityTriggering();
+                mIntentHelper.unscheduleReliabilityTrigger();
                 return;
             } else if (mCheckFailureCount == 0) {
                 // Case 4.
                 Slog.i(TAG, "triggerUpdateIfNeeded: No reliability check required. Last check was"
                         + " successful.");
-                mIntentHelper.disableReliabilityTriggering();
+                mIntentHelper.unscheduleReliabilityTrigger();
                 return;
             }
         }
@@ -263,7 +272,7 @@ public class PackageTracker implements IntentHelper.Listener {
         if (currentInstalledVersions == null) {
             // This should not happen if the device is configured in a valid way.
             Slog.e(TAG, "triggerUpdateIfNeeded: currentInstalledVersions was null");
-            mIntentHelper.disableReliabilityTriggering();
+            mIntentHelper.unscheduleReliabilityTrigger();
             return;
         }
 
@@ -288,7 +297,7 @@ public class PackageTracker implements IntentHelper.Listener {
                 // The last check succeeded and nothing has changed. Do nothing and disable
                 // reliability checks.
                 Slog.i(TAG, "triggerUpdateIfNeeded: Prior check succeeded. No need to trigger.");
-                mIntentHelper.disableReliabilityTriggering();
+                mIntentHelper.unscheduleReliabilityTrigger();
                 return;
             }
         }
@@ -299,6 +308,8 @@ public class PackageTracker implements IntentHelper.Listener {
         if (checkToken == null) {
             Slog.w(TAG, "triggerUpdateIfNeeded: Unable to generate check token."
                     + " Not sending check request.");
+            // Trigger again later: perhaps we'll have better luck.
+            mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
             return;
         }
 
@@ -309,9 +320,9 @@ public class PackageTracker implements IntentHelper.Listener {
         // Update the reliability check state in case the update fails.
         setCheckInProgress();
 
-        // Enable reliability triggering in case the check doesn't succeed and there is no
-        // response at all. Enabling reliability triggering is idempotent.
-        mIntentHelper.enableReliabilityTriggering();
+        // Schedule a reliability trigger in case the update check doesn't succeed and there is no
+        // response at all. It will be cancelled if the check is successful in recordCheckResult.
+        mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
     }
 
     /**
@@ -370,9 +381,9 @@ public class PackageTracker implements IntentHelper.Listener {
                     + " storage state.");
             mPackageStatusStorage.resetCheckState();
 
-            // Enable reliability triggering and reset the failure count so we know that the
+            // Schedule a reliability trigger and reset the failure count so we know that the
             // next reliability trigger will do something.
-            mIntentHelper.enableReliabilityTriggering();
+            mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
             mCheckFailureCount = 0;
         } else {
             // This is the expected case when tracking is enabled: a check was triggered and it has
@@ -385,13 +396,13 @@ public class PackageTracker implements IntentHelper.Listener {
                 setCheckComplete();
 
                 if (success) {
-                    // Since the check was successful, no more reliability checks are required until
+                    // Since the check was successful, no reliability trigger is required until
                     // there is a package change.
-                    mIntentHelper.disableReliabilityTriggering();
+                    mIntentHelper.unscheduleReliabilityTrigger();
                     mCheckFailureCount = 0;
                 } else {
-                    // Enable reliability triggering to potentially check again in future.
-                    mIntentHelper.enableReliabilityTriggering();
+                    // Enable schedule a reliability trigger to check again in future.
+                    mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
                     mCheckFailureCount++;
                 }
             } else {
@@ -400,8 +411,8 @@ public class PackageTracker implements IntentHelper.Listener {
                 Slog.i(TAG, "recordCheckResult: could not update token=" + checkToken
                         + " with success=" + success + ". Optimistic lock failure");
 
-                // Enable reliability triggering to potentially try again in future.
-                mIntentHelper.enableReliabilityTriggering();
+                // Schedule a reliability trigger to potentially try again in future.
+                mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
                 mCheckFailureCount++;
             }
         }
@@ -515,6 +526,7 @@ public class PackageTracker implements IntentHelper.Listener {
                 ", mUpdateAppPackageName='" + mUpdateAppPackageName + '\'' +
                 ", mDataAppPackageName='" + mDataAppPackageName + '\'' +
                 ", mCheckTimeAllowedMillis=" + mCheckTimeAllowedMillis +
+                ", mDelayBeforeReliabilityCheckMillis=" + mDelayBeforeReliabilityCheckMillis +
                 ", mFailedCheckRetryCount=" + mFailedCheckRetryCount +
                 ", mLastTriggerTimestamp=" + mLastTriggerTimestamp +
                 ", mCheckTriggered=" + mCheckTriggered +
