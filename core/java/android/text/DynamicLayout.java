@@ -384,7 +384,7 @@ public class DynamicLayout extends Layout
 
     private DynamicLayout(@NonNull Builder b) {
         super(createEllipsizer(b.mEllipsize, b.mDisplay),
-                b.mPaint, b.mWidth, b.mAlignment, b.mSpacingMult, b.mSpacingAdd);
+                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd);
 
         mDisplay = b.mDisplay;
         mIncludePad = b.mIncludePad;

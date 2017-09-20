@@ -259,4 +259,21 @@ public class DynamicLayoutTest {
             assertEquals(2 * textSize, layout.getLineDescent(2));
         }
     }
+
+    @Test
+    public void testBuilder_defaultTextDirection() {
+        final DynamicLayout.Builder builder = DynamicLayout.Builder
+                .obtain("", new TextPaint(), WIDTH);
+        final DynamicLayout layout = builder.build();
+        assertEquals(TextDirectionHeuristics.FIRSTSTRONG_LTR, layout.getTextDirectionHeuristic());
+    }
+
+    @Test
+    public void testBuilder_setTextDirection() {
+        final DynamicLayout.Builder builder = DynamicLayout.Builder
+                .obtain("", new TextPaint(), WIDTH)
+                .setTextDirection(TextDirectionHeuristics.ANYRTL_LTR);
+        final DynamicLayout layout = builder.build();
+        assertEquals(TextDirectionHeuristics.ANYRTL_LTR, layout.getTextDirectionHeuristic());
+    }
 }
