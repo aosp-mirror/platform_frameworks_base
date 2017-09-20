@@ -59,6 +59,7 @@ public class WifiManagerTest {
     private static final int ERROR_NOT_SET = -1;
     private static final int ERROR_TEST_REASON = 5;
     private static final String TEST_PACKAGE_NAME = "TestPackage";
+    private static final String TEST_COUNTRY_CODE = "US";
 
     @Mock Context mContext;
     @Mock IWifiManager mWifiService;
@@ -776,5 +777,24 @@ public class WifiManagerTest {
         mWifiManager.watchLocalOnlyHotspot(observer, observerHandler);
         mWifiManager.unregisterLocalOnlyHotspotObserver();
         verify(mWifiService).stopWatchLocalOnlyHotspot();
+    }
+
+    /**
+     * Verify that calls WifiServiceImpl to set country code when no exception happens.
+     */
+    @Test
+    public void testSetWifiCountryCode() throws Exception {
+        mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
+        verify(mWifiService).setCountryCode(TEST_COUNTRY_CODE);
+    }
+
+    /**
+     * Verify that WifiManager.setCountryCode() rethrows exceptions if caller does not
+     * have necessary permissions.
+     */
+    @Test(expected = SecurityException.class)
+    public void testSetWifiCountryCodeFailedOnSecurityException() throws Exception {
+        doThrow(new SecurityException()).when(mWifiService).setCountryCode(anyString());
+        mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
     }
 }
