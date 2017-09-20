@@ -577,8 +577,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 5;
+    public static final int REASON_SHARED = 6;
 
-    public static final int REASON_LAST = REASON_INACTIVE_PACKAGE_DOWNGRADE;
+    public static final int REASON_LAST = REASON_SHARED;
 
     /** All dangerous permission names in the same order as the events in MetricsEvent */
     private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
@@ -9803,19 +9804,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     compilerFilter,
                     dexoptFlags));
 
-            if (pkg.isSystemApp()) {
-                // Only dexopt shared secondary dex files belonging to system apps to not slow down
-                // too much boot after an OTA.
-                int secondaryDexoptFlags = dexoptFlags |
-                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                        DexoptOptions.DEXOPT_ONLY_SHARED_DEX;
-                mDexManager.dexoptSecondaryDex(new DexoptOptions(
-                        pkg.packageName,
-                        compilerFilter,
-                        secondaryDexoptFlags));
-            }
-
-            // TODO(shubhamajmera): Record secondary dexopt stats.
             switch (primaryDexOptStaus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
                     numberOfPackagesOptimized++;

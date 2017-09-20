@@ -32,6 +32,7 @@ import android.text.BidiFormatter;
 import android.text.TextUtils;
 import android.view.View;
 
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.Locale;
 
@@ -194,13 +195,29 @@ public final class Formatter {
 
     /**
      * ICU doesn't support PETABYTE yet. Fake it so that we can treat all units the same way.
-     * {@hide}
      */
-    public static final MeasureUnit PETABYTE = MeasureUnit.internalGetInstance(
-            "digital", "petabyte");
+    private static final MeasureUnit PETABYTE = createPetaByte();
 
-    /** {@hide} */
-    public static class RoundedBytesResult {
+    /**
+     * Create a petabyte MeasureUnit without registering it with ICU.
+     * ICU doesn't support user-create MeasureUnit and the only public (but hidden) method to do so
+     * is {@link MeasureUnit#internalGetInstance(String, String)} which also registers the unit as
+     * an available type and thus leaks it to code that doesn't expect or support it.
+     * <p>This method uses reflection to create an instance of MeasureUnit to avoid leaking it. This
+     * instance is <b>only</b> to be used in this class.
+     */
+    private static MeasureUnit createPetaByte() {
+        try {
+            Constructor<MeasureUnit> constructor = MeasureUnit.class
+                    .getDeclaredConstructor(String.class, String.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance("digital", "petabyte");
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to create petabyte MeasureUnit", e);
+        }
+    }
+
+    private static class RoundedBytesResult {
         public final float value;
         public final MeasureUnit units;
         public final int fractionDigits;
@@ -218,7 +235,7 @@ public final class Formatter {
          * Returns a RoundedBytesResult object based on the input size in bytes and the rounding
          * flags. The result can be used for formatting.
          */
-        public static RoundedBytesResult roundBytes(long sizeBytes, int flags) {
+        static RoundedBytesResult roundBytes(long sizeBytes, int flags) {
             final boolean isNegative = (sizeBytes < 0);
             float result = isNegative ? -sizeBytes : sizeBytes;
             MeasureUnit units = MeasureUnit.BYTE;

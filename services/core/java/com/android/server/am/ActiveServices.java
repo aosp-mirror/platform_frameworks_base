@@ -2162,6 +2162,15 @@ public final class ActiveServices {
             }
         }
 
+        if (r.fgRequired) {
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.v(TAG, "Whitelisting " + UserHandle.formatUid(r.appInfo.uid)
+                        + " for fg-service launch");
+            }
+            mAm.tempWhitelistUidLocked(r.appInfo.uid,
+                    SERVICE_START_FOREGROUND_TIMEOUT, "fg-service-launch");
+        }
+
         if (!mPendingServices.contains(r)) {
             mPendingServices.add(r);
         }
