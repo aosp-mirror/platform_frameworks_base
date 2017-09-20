@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 
@@ -39,7 +40,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
-    private final IStatsManager mStatsd;
+    private static IStatsManager sStatsd;
 
     private final PendingIntent mAnomalyAlarmIntent;
     private final PendingIntent mPollingAlarmIntent;
@@ -48,7 +49,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred.");
-            // TODO: mStatsd.informAlarm(); // should be twoway so device won't sleep before acting?
+            try {
+                // TODO: should be twoway so device won't sleep before acting?
+                getStatsdService().informAnomalyAlarmFired();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to inform statsd of anomaly alarm firing", e);
+            } catch (NullPointerException e) {
+                Slog.e(TAG, "could not access statsd to inform it of anomaly alarm firing", e);
+            }
             // AlarmManager releases its own wakelock here.
         }
     };
@@ -57,7 +65,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Slog.d(TAG, "Time to poll something.");
-            // TODO: mStatsd.poll(); // should be twoway so device won't sleep before acting?
+            if (DEBUG) Slog.d(TAG, "Time to poll something.");
+            try {
+                // TODO: should be twoway so device won't sleep before acting?
+                getStatsdService().informPollAlarmFired();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to inform statsd of polling alarm firing",e);
+            } catch (NullPointerException e) {
+                Slog.e(TAG, "could not access statsd to inform it of polling alarm firing", e);
+            }
             // AlarmManager releases its own wakelock here.
         }
     };
@@ -71,13 +87,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 new Intent(mContext, AnomalyAlarmReceiver.class), 0);
         mPollingAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(mContext, PollingAlarmReceiver.class), 0);
-
-        mStatsd = getStatsdService();
     }
 
     /** Returns the statsd IBinder service */
     public static IStatsManager getStatsdService() {
-        return IStatsManager.Stub.asInterface(ServiceManager.getService("statsd"));
+        if (sStatsd != null) {
+            return sStatsd;
+        }
+        sStatsd = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+        return sStatsd;
     }
 
     public static final class Lifecycle extends SystemService {

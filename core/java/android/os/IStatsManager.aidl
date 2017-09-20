@@ -17,12 +17,23 @@
 package android.os;
 
 /**
-  * Binder interface to communicate with the statistics collection service.
+  * Binder interface to communicate with the statistics management service.
   * {@hide}
   */
 oneway interface IStatsManager {
     /**
-     * Tell the incident daemon that the android system server is up and running.
+     * Tell the stats daemon that the android system server is up and running.
      */
     void systemRunning();
+
+    /**
+     * Tells statsd that an anomaly may have occurred, so statsd can check whether this is so and
+     * act accordingly.
+     */
+    void informAnomalyAlarmFired();
+
+    /** Tells statsd that it is time to poll some stats. Statsd will be responsible for determing
+     * what stats to poll and initiating the polling.
+     */
+    void informPollAlarmFired();
 }
