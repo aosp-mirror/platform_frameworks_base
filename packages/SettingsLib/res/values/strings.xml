@@ -608,11 +608,6 @@
     <string name="wait_for_debugger_summary">Debugged application waits for debugger to
         attach before executing</string>
 
-    <!-- UI debug setting: title for Telephonymonitor switch [CHAR LIMIT=50] -->
-    <string name="telephony_monitor_switch">Telephony Monitor</string>
-    <!-- UI debug setting: summary for switch of Telephonymonitor [CHAR LIMIT=500] -->
-    <string name="telephony_monitor_switch_summary">TelephonyMonitor will collect logs when it detects a problem with telephony/modem functionality and prompt notification to user to file a bug</string>
-
     <!-- Preference category for input debugging development settings. [CHAR LIMIT=25] -->
     <string name="debug_input_category">Input</string>
 
