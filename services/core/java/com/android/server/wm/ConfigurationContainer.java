@@ -236,6 +236,28 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return thisType == ACTIVITY_TYPE_UNDEFINED || otherType == ACTIVITY_TYPE_UNDEFINED;
     }
 
+    /**
+     * Returns true if this container is compatible with the input windowing mode and activity type.
+     */
+    public boolean isCompatible(int windowingMode, int activityType) {
+        final int thisActivityType = getActivityType();
+        final int thisWindowingMode = getWindowingMode();
+        final boolean sameActivityType = thisActivityType == activityType;
+        final boolean sameWindowingMode = thisWindowingMode == windowingMode;
+
+        if (sameActivityType && sameWindowingMode) {
+            return true;
+        }
+
+        if (activityType != ACTIVITY_TYPE_UNDEFINED && activityType != ACTIVITY_TYPE_STANDARD) {
+            // Only activity type need to match for non-standard activity types that are defined.
+            return sameActivityType;
+        }
+
+        // Otherwise we are compatible if the windowing mode is the same.
+        return sameWindowingMode;
+    }
+
     public void registerConfigurationChangeListener(ConfigurationContainerListener listener) {
         if (mChangeListeners.contains(listener)) {
             return;

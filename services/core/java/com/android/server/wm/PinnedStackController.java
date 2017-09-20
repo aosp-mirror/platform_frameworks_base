@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -404,27 +405,29 @@ class PinnedStackController {
      */
     private void notifyMovementBoundsChanged(boolean fromImeAdjustement) {
         synchronized (mService.mWindowMap) {
-            if (mPinnedStackListener != null) {
-                try {
-                    final Rect insetBounds = new Rect();
-                    getInsetBounds(insetBounds);
-                    final Rect normalBounds = getDefaultBounds();
-                    if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
-                        transformBoundsToAspectRatio(normalBounds, mAspectRatio,
-                                false /* useCurrentMinEdgeSize */);
-                    }
-                    final Rect animatingBounds = mTmpAnimatingBoundsRect;
-                    final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
-                    if (pinnedStack != null) {
-                        pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
-                    } else {
-                        animatingBounds.set(normalBounds);
-                    }
-                    mPinnedStackListener.onMovementBoundsChanged(insetBounds, normalBounds,
-                            animatingBounds, fromImeAdjustement, mDisplayInfo.rotation);
-                } catch (RemoteException e) {
-                    Slog.e(TAG_WM, "Error delivering actions changed event.", e);
+            if (mPinnedStackListener == null) {
+                return;
+            }
+            try {
+                final Rect insetBounds = new Rect();
+                getInsetBounds(insetBounds);
+                final Rect normalBounds = getDefaultBounds();
+                if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
+                    transformBoundsToAspectRatio(normalBounds, mAspectRatio,
+                            false /* useCurrentMinEdgeSize */);
                 }
+                final Rect animatingBounds = mTmpAnimatingBoundsRect;
+                final TaskStack pinnedStack =
+                        mDisplayContent.getStack(WINDOWING_MODE_PINNED);
+                if (pinnedStack != null) {
+                    pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
+                } else {
+                    animatingBounds.set(normalBounds);
+                }
+                mPinnedStackListener.onMovementBoundsChanged(insetBounds, normalBounds,
+                        animatingBounds, fromImeAdjustement, mDisplayInfo.rotation);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
         }
     }

@@ -19,8 +19,10 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -117,7 +119,6 @@ import static com.android.server.wm.proto.DisplayProto.WINDOW_CONTAINER;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
-import android.app.WindowConfiguration;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -1457,6 +1458,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return null;
     }
 
+    /**
+     * Returns the topmost stack on the display that is compatible with the input windowing mode.
+     * Null is no compatible stack on the display.
+     */
+    TaskStack getStack(int windowingMode) {
+        return getStack(windowingMode, ACTIVITY_TYPE_UNDEFINED);
+    }
+
+    /**
+     * Returns the topmost stack on the display that is compatible with the input windowing mode and
+     * activity type. Null is no compatible stack on the display.
+     */
+    private TaskStack getStack(int windowingMode, int activityType) {
+        for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mTaskStackContainers.get(i);
+            if (stack.isCompatible(windowingMode, activityType)) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
     @VisibleForTesting
     int getStackCount() {
         return mTaskStackContainers.size();
@@ -1501,7 +1524,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // If there was no pinned stack, we still need to notify the controller of the display info
         // update as a result of the config change.  We do this here to consolidate the flow between
         // changes when there is and is not a stack.
-        if (getStackById(PINNED_STACK_ID) == null) {
+        if (getStack(WINDOWING_MODE_PINNED) == null) {
             mPinnedStackControllerLocked.onDisplayInfoChanged();
         }
     }
@@ -2238,7 +2261,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @return The docked stack, but only if it is visible, and {@code null} otherwise.
      */
     TaskStack getDockedStackLocked() {
-        final TaskStack stack = getStackById(DOCKED_STACK_ID);
+        final TaskStack stack = getStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         return (stack != null && stack.isVisible()) ? stack : null;
     }
 
@@ -2247,7 +2270,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * visible.
      */
     TaskStack getDockedStackIgnoringVisibility() {
-        return getStackById(DOCKED_STACK_ID);
+        return getStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
     }
 
     /** Find the visible, touch-deliverable window under the given point */
@@ -3421,11 +3444,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     : requestedPosition >= topChildPosition;
             int targetPosition = requestedPosition;
 
-            if (toTop && stack.mStackId != PINNED_STACK_ID
-                    && getStackById(PINNED_STACK_ID) != null) {
+            if (toTop && stack.getWindowingMode() != WINDOWING_MODE_PINNED
+                    && getStack(WINDOWING_MODE_PINNED) != null) {
                 // The pinned stack is always the top most stack (always-on-top) when it is present.
                 TaskStack topStack = mChildren.get(topChildPosition);
-                if (topStack.mStackId != PINNED_STACK_ID) {
+                if (topStack.getWindowingMode() != WINDOWING_MODE_PINNED) {
                     throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
                 }
 

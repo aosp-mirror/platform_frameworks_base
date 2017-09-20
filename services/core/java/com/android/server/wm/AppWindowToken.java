@@ -16,8 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -1312,7 +1311,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
                 // Notify the pinned stack upon all windows drawn. If there was an animation in
                 // progress then this signal will resume that animation.
-                final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
+                final TaskStack pinnedStack =
+                        mDisplayContent.getStack(WINDOWING_MODE_PINNED);
                 if (pinnedStack != null) {
                     pinnedStack.onAllWindowsDrawn();
                 }
