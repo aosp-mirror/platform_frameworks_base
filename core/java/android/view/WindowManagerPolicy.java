@@ -617,6 +617,38 @@ public interface WindowManagerPolicy {
          * @param listener callback to call when display can be turned off
          */
         void screenTurningOff(ScreenOffListener listener);
+
+        /**
+         * Convert the lid state to a human readable format.
+         */
+        static String lidStateToString(int lid) {
+            switch (lid) {
+                case LID_ABSENT:
+                    return "LID_ABSENT";
+                case LID_CLOSED:
+                    return "LID_CLOSED";
+                case LID_OPEN:
+                    return "LID_OPEN";
+                default:
+                    return Integer.toString(lid);
+            }
+        }
+
+        /**
+         * Convert the camera lens state to a human readable format.
+         */
+        static String cameraLensStateToString(int lens) {
+            switch (lens) {
+                case CAMERA_LENS_COVER_ABSENT:
+                    return "CAMERA_LENS_COVER_ABSENT";
+                case CAMERA_LENS_UNCOVERED:
+                    return "CAMERA_LENS_UNCOVERED";
+                case CAMERA_LENS_COVERED:
+                    return "CAMERA_LENS_COVERED";
+                default:
+                    return Integer.toString(lens);
+            }
+        }
     }
 
     public interface PointerEventListener {
@@ -1750,4 +1782,34 @@ public interface WindowManagerPolicy {
      * @return true if ready; false otherwise.
      */
     boolean canDismissBootAnimation();
+
+    /**
+     * Convert the user rotation mode to a human readable format.
+     */
+    static String userRotationModeToString(int mode) {
+        switch(mode) {
+            case USER_ROTATION_FREE:
+                return "USER_ROTATION_FREE";
+            case USER_ROTATION_LOCKED:
+                return "USER_ROTATION_LOCKED";
+            default:
+                return Integer.toString(mode);
+        }
+    }
+
+    /**
+     * Convert the off reason to a human readable format.
+     */
+    static String offReasonToString(int why) {
+        switch (why) {
+            case OFF_BECAUSE_OF_ADMIN:
+                return "OFF_BECAUSE_OF_ADMIN";
+            case OFF_BECAUSE_OF_USER:
+                return "OFF_BECAUSE_OF_USER";
+            case OFF_BECAUSE_OF_TIMEOUT:
+                return "OFF_BECAUSE_OF_TIMEOUT";
+            default:
+                return Integer.toString(why);
+        }
+    }
 }

@@ -25,53 +25,53 @@ option java_outer_classname = "StatsLog";
 import "frameworks/base/cmds/statsd/src/statsd_config.proto";
 import "frameworks/base/cmds/statsd/src/stats_constants.proto";
 
-// StatsLogEntry is a generic proto holding a single metrics data.
-message StatsLogEntry {
-  // Type of stats.
-  optional android.os.statsd.StatsConstants.Type type = 1;
+message KeyValuePair {
+  optional KeyId key = 1;
 
-  // Aggregation type of the data.
-  optional android.os.statsd.TrackedAggregateType aggregate_type = 2;
-
-  // Start timestamp of the interval. Timestamp for event-type data will have
-  // equal value for start_report_millis and end_report_millis.
-  optional int64 start_report_millis = 3;
-
-  // End timestamp of the interval.
-  optional int64 end_report_millis = 4;
-
-  // Package information for application-level data.
-  optional string package_name = 5;
-  optional int32 package_version = 6;
-  optional string package_version_string = 7;
-
-  // UID associated with the data.
-  optional int32 uid = 8;
-
-  // PID associated with the data.
-  optional int32 pid = 9;
-
-  // Payload contains key value pairs of the data from statsd.
-  message KeyValuePair {
-    // Integer representation of data type.
-    optional int32 key = 1;
-
-    oneof value {
-      string value_str = 2;
-      int64 value_int = 3;
-      bool value_bool = 4;
-    }
+  oneof value {
+    string value_str = 2;
+    int64 value_int = 3;
+    bool value_bool = 4;
+    float value_float = 5;
   }
-  repeated KeyValuePair pairs = 10;
-
-  // Next tag: 11
 }
 
-// Data captured for a given metric during a given period of time.
-message StatsLogList {
-  // Unique ID for this metric.
+message EventMetricData {
+  optional TagId tag = 1;
+
+  repeated KeyValuePair key_value_pair = 2;
+}
+
+message CountBucketInfo {
+  optional int64 start_bucket_millis = 1;
+
+  optional int64 end_bucket_millis = 2;
+
+  optional int64 count = 3;
+}
+
+message CountMetricData {
+  repeated KeyValuePair dimension = 1;
+
+  repeated CountBucketInfo bucket_info = 2;
+}
+
+message StatsLogReport {
   optional int32 metric_id = 1;
 
-  // List of stats log entry.
-  repeated StatsLogEntry stats_log_entry = 2;
+  optional int64 start_report_millis = 2;
+
+  optional int64 end_report_millis = 3;
+
+  message EventMetricDataWrapper {
+    repeated EventMetricData data = 1;
+  }
+  message CountMetricDataWrapper {
+    repeated CountMetricData data = 1;
+  }
+
+  oneof data {
+    EventMetricDataWrapper event_metrics = 4;
+    CountMetricDataWrapper count_metrics = 5;
+  }
 }

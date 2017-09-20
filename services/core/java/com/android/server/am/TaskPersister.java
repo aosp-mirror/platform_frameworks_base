@@ -472,8 +472,7 @@ public class TaskPersister {
 
                                 final int taskId = task.taskId;
                                 if (mStackSupervisor.anyTaskForIdLocked(taskId,
-                                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS,
-                                        INVALID_STACK_ID) != null) {
+                                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
                                 } else if (userId != task.userId) {

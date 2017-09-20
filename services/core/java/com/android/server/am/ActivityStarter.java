@@ -39,6 +39,8 @@ import static android.app.ActivityManager.StackId.isDynamicStack;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -1024,10 +1026,12 @@ class ActivityStarter {
 
         ActivityRecord reusedActivity = getReusableIntentActivity();
 
-        final int preferredLaunchStackId =
-                (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
-        final int preferredLaunchDisplayId =
-                (mOptions != null) ? mOptions.getLaunchDisplayId() : DEFAULT_DISPLAY;
+        int preferredWindowingMode = WINDOWING_MODE_UNDEFINED;
+        int preferredLaunchDisplayId = DEFAULT_DISPLAY;
+        if (mOptions != null) {
+            preferredWindowingMode = mOptions.getLaunchWindowingMode();
+            preferredLaunchDisplayId = mOptions.getLaunchDisplayId();
+        }
 
         if (reusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
@@ -1158,7 +1162,7 @@ class ActivityStarter {
 
             // Don't use mStartActivity.task to show the toast. We're not starting a new activity
             // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
-            mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(), preferredLaunchStackId,
+            mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(), preferredWindowingMode,
                     preferredLaunchDisplayId, topStack.mStackId);
 
             return START_DELIVERED_TO_TOP;
@@ -1173,8 +1177,7 @@ class ActivityStarter {
         if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            result = setTaskFromReuseOrCreateNewTask(
-                    taskToAffiliate, preferredLaunchStackId, topStack);
+            result = setTaskFromReuseOrCreateNewTask(taskToAffiliate, topStack);
         } else if (mSourceRecord != null) {
             result = setTaskFromSourceRecord();
         } else if (mInTask != null) {
@@ -1241,7 +1244,7 @@ class ActivityStarter {
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(), preferredLaunchStackId,
+        mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(), preferredWindowingMode,
                 preferredLaunchDisplayId, mTargetStack.mStackId);
 
         return START_SUCCESS;
@@ -1654,8 +1657,8 @@ class ActivityStarter {
             mTargetStack.moveToFront("intentActivityFound");
         }
 
-        mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(), INVALID_STACK_ID,
-                DEFAULT_DISPLAY, mTargetStack.mStackId);
+        mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(),
+                WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY, mTargetStack.mStackId);
 
         // If the caller has requested that the target task be reset, then do so.
         if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
@@ -1675,8 +1678,7 @@ class ActivityStarter {
             // Task will be launched over the home stack, so return home.
             task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
             return;
-        } else if (focusedStack != null && focusedStack != task.getStack() &&
-                focusedStack.isActivityTypeAssistant()) {
+        } else if (focusedStack != task.getStack() && focusedStack.isActivityTypeAssistant()) {
             // Task was launched over the assistant stack, so return there
             task.setTaskToReturnTo(ACTIVITY_TYPE_ASSISTANT);
             return;
@@ -1779,7 +1781,7 @@ class ActivityStarter {
     }
 
     private int setTaskFromReuseOrCreateNewTask(
-            TaskRecord taskToAffiliate, int preferredLaunchStackId, ActivityStack topStack) {
+            TaskRecord taskToAffiliate, ActivityStack topStack) {
         mTargetStack = computeStackFocus(
                 mStartActivity, true, mLaunchBounds, mLaunchFlags, mOptions);
 
@@ -1821,8 +1823,10 @@ class ActivityStarter {
             // If stack id is specified in activity options, usually it means that activity is
             // launched not from currently focused stack (e.g. from SysUI or from shell) - in
             // that case we check the target stack.
+            // TODO: Not sure I understand the value or use of the commented out code and the
+            // comment above. See if this causes any issues and why...
             updateTaskReturnToType(mStartActivity.getTask(), mLaunchFlags,
-                    preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : topStack);
+                    /*preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : */topStack);
         }
         if (mDoResume) {
             mTargetStack.moveToFront("reuseOrNewTask");
@@ -1964,7 +1968,8 @@ class ActivityStarter {
 
         if (mLaunchBounds != null) {
             mInTask.updateOverrideConfiguration(mLaunchBounds);
-            int stackId = mInTask.getLaunchStackId();
+            // TODO: Shouldn't we already know what stack to use by the time we get here?
+            int stackId = mSupervisor.getLaunchStackId(null, null, mInTask);
             if (stackId != mInTask.getStackId()) {
                 mInTask.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
                         DEFER_RESUME, "inTaskToFront");
@@ -2102,9 +2107,10 @@ class ActivityStarter {
                 }
             }
             // If there is no suitable dynamic stack then we figure out which static stack to use.
-            final int stackId = task != null ? task.getLaunchStackId() :
-                    bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
-                            FULLSCREEN_WORKSPACE_STACK_ID;
+            final int stackId = task != null ? mSupervisor.getLaunchStackId(r, aOptions, task)
+                    // TODO: This should go in mSupervisor.getLaunchStackId method...
+                    : bounds != null && mService.mSupportsFreeformWindowManagement
+                            ? FREEFORM_WORKSPACE_STACK_ID : FULLSCREEN_WORKSPACE_STACK_ID;
             stack = mSupervisor.getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
         }
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
@@ -2165,18 +2171,16 @@ class ActivityStarter {
             return mSupervisor.getStack(ASSISTANT_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
 
-        final int launchDisplayId =
-                (aOptions != null) ? aOptions.getLaunchDisplayId() : INVALID_DISPLAY;
-
-        final int launchStackId =
-                (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
-
-        if (launchStackId != INVALID_STACK_ID && launchDisplayId != INVALID_DISPLAY) {
-            throw new IllegalArgumentException(
-                    "Stack and display id can't be set at the same time.");
+        int launchDisplayId = INVALID_DISPLAY;
+        int launchStackId = INVALID_STACK_ID;
+        if (aOptions != null) {
+            launchDisplayId = aOptions.getLaunchDisplayId();
+            final int vrDisplayId = mUsingVr2dDisplay ? mSourceDisplayId : INVALID_DISPLAY;
+            launchStackId = mSupervisor.getLaunchStackId(r, aOptions, task, vrDisplayId);
         }
 
-        if (isValidLaunchStackId(launchStackId, launchDisplayId, r)) {
+        // TODO: Will no longer be needed once we are on longer using static stack ids.
+        if (mSupervisor.isValidLaunchStackId(launchStackId, launchDisplayId, r)) {
             return mSupervisor.getStack(launchStackId, CREATE_IF_NEEDED, ON_TOP);
         }
         if (launchStackId == DOCKED_STACK_ID) {
@@ -2184,12 +2188,14 @@ class ActivityStarter {
             // for this activity, so we put the activity in the fullscreen stack.
             return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
+        // TODO: Can probably be removed since ASS.getLaunchStackId() does display resolution.
         if (launchDisplayId != INVALID_DISPLAY) {
             // Stack id has higher priority than display id.
             return mSupervisor.getValidLaunchStackOnDisplay(launchDisplayId, r);
         }
 
         // If we are using Vr2d display, find the virtual display stack.
+        // TODO: Can be removed.
         if (mUsingVr2dDisplay) {
             ActivityStack as = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
             if (DEBUG_STACK) {
@@ -2240,39 +2246,11 @@ class ActivityStarter {
         }
     }
 
-    boolean isValidLaunchStackId(int stackId, int displayId, ActivityRecord r) {
-        switch (stackId) {
-            case INVALID_STACK_ID:
-            case HOME_STACK_ID:
-                return false;
-            case FULLSCREEN_WORKSPACE_STACK_ID:
-                return true;
-            case FREEFORM_WORKSPACE_STACK_ID:
-                return r.supportsFreeform();
-            case DOCKED_STACK_ID:
-                return r.supportsSplitScreen();
-            case PINNED_STACK_ID:
-                return r.supportsPictureInPicture();
-            case RECENTS_STACK_ID:
-                return r.isActivityTypeRecents();
-            case ASSISTANT_STACK_ID:
-                return r.isActivityTypeAssistant();
-            default:
-                if (StackId.isDynamicStack(stackId)) {
-                    return r.canBeLaunchedOnDisplay(displayId);
-                }
-                Slog.e(TAG, "isValidLaunchStackId: Unexpected stackId=" + stackId);
-                return false;
-        }
-    }
-
-    Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
+    private Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
         Rect newBounds = null;
-        if (options != null && (r.isResizeable() || (inTask != null && inTask.isResizeable()))) {
-            if (mSupervisor.canUseActivityOptionsLaunchBounds(
-                    options, options.getLaunchStackId())) {
-                newBounds = TaskRecord.validateBounds(options.getLaunchBounds());
-            }
+        if (mSupervisor.canUseActivityOptionsLaunchBounds(options)
+                && (r.isResizeable() || (inTask != null && inTask.isResizeable()))) {
+            newBounds = TaskRecord.validateBounds(options.getLaunchBounds());
         }
         return newBounds;
     }

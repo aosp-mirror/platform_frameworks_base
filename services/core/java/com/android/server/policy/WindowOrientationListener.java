@@ -26,6 +26,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.Surface;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -236,7 +237,7 @@ public abstract class WindowOrientationListener {
             pw.println(prefix + TAG);
             prefix += "  ";
             pw.println(prefix + "mEnabled=" + mEnabled);
-            pw.println(prefix + "mCurrentRotation=" + mCurrentRotation);
+            pw.println(prefix + "mCurrentRotation=" + Surface.rotationToString(mCurrentRotation));
             pw.println(prefix + "mSensorType=" + mSensorType);
             pw.println(prefix + "mSensor=" + mSensor);
             pw.println(prefix + "mRate=" + mRate);
@@ -1026,8 +1027,9 @@ public abstract class WindowOrientationListener {
         public void dumpLocked(PrintWriter pw, String prefix) {
             pw.println(prefix + "OrientationSensorJudge");
             prefix += "  ";
-            pw.println(prefix + "mDesiredRotation=" + mDesiredRotation);
-            pw.println(prefix + "mProposedRotation=" + mProposedRotation);
+            pw.println(prefix + "mDesiredRotation=" + Surface.rotationToString(mDesiredRotation));
+            pw.println(prefix + "mProposedRotation="
+                    + Surface.rotationToString(mProposedRotation));
             pw.println(prefix + "mTouching=" + mTouching);
             pw.println(prefix + "mTouchEndedTimestampNanos=" + mTouchEndedTimestampNanos);
         }

@@ -1089,6 +1089,33 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
+     * Convert the UI mode to a human readable format.
+     * @hide
+     */
+    public static String uiModeToString(int uiMode) {
+        switch (uiMode) {
+            case UI_MODE_TYPE_UNDEFINED:
+                return "UI_MODE_TYPE_UNDEFINED";
+            case UI_MODE_TYPE_NORMAL:
+                return "UI_MODE_TYPE_NORMAL";
+            case UI_MODE_TYPE_DESK:
+                return "UI_MODE_TYPE_DESK";
+            case UI_MODE_TYPE_CAR:
+                return "UI_MODE_TYPE_CAR";
+            case UI_MODE_TYPE_TELEVISION:
+                return "UI_MODE_TYPE_TELEVISION";
+            case UI_MODE_TYPE_APPLIANCE:
+                return "UI_MODE_TYPE_APPLIANCE";
+            case UI_MODE_TYPE_WATCH:
+                return "UI_MODE_TYPE_WATCH";
+            case UI_MODE_TYPE_VR_HEADSET:
+                return "UI_MODE_TYPE_VR_HEADSET";
+            default:
+                return Integer.toString(uiMode);
+        }
+    }
+
+    /**
      * Set this object to the system defaults.
      */
     public void setToDefaults() {

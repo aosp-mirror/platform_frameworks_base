@@ -15,6 +15,12 @@
  */
 package com.android.systemui.statusbar.car;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.Intent;
@@ -117,7 +123,8 @@ class CarNavigationBarController {
         // Set up the persistent docked task if needed.
         if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask()
                 && stackId != StackId.HOME_STACK_ID) {
-            mStatusBar.startActivityOnStack(mPersistentTaskIntent, StackId.DOCKED_STACK_ID);
+            mStatusBar.startActivityOnStack(mPersistentTaskIntent,
+                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
         }
     }
 
@@ -375,13 +382,15 @@ class CarNavigationBarController {
         // rather than the "preferred/last run" app.
         intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, index == mCurrentFacetIndex);
 
-        int stackId = StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+        int windowingMode = WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+        int activityType = ACTIVITY_TYPE_UNDEFINED;
         if (intent.getCategories().contains(Intent.CATEGORY_HOME)) {
-            stackId = StackId.HOME_STACK_ID;
+            windowingMode = WINDOWING_MODE_UNDEFINED;
+            activityType = ACTIVITY_TYPE_HOME;
         }
 
         setCurrentFacet(index);
-        mStatusBar.startActivityOnStack(intent, stackId);
+        mStatusBar.startActivityOnStack(intent, windowingMode, activityType);
     }
 
     /**
@@ -391,6 +400,7 @@ class CarNavigationBarController {
      */
     private void onFacetLongClicked(Intent intent, int index) {
         setCurrentFacet(index);
-        mStatusBar.startActivityOnStack(intent, StackId.FULLSCREEN_WORKSPACE_STACK_ID);
+        mStatusBar.startActivityOnStack(intent,
+                WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_UNDEFINED);
     }
 }

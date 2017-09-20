@@ -471,7 +471,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if ((response.getDatasets() == null || response.getDatasets().isEmpty())
                         && response.getAuthentication() == null) {
             // Response is "empty" from an UI point of view, need to notify client.
-            notifyUnavailableToClient();
+            notifyUnavailableToClient(false);
         }
         synchronized (mLock) {
             processResponseLocked(response, requestFlags);
@@ -572,6 +572,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // FillServiceCallbacks
     @Override
     public void authenticate(int requestId, int datasetIndex, IntentSender intent, Bundle extras) {
+        if (sDebug) {
+            Slog.d(TAG, "authenticate(): requestId=" + requestId + "; datasetIdx=" + datasetIndex
+                    + "; intentSender=" + intent);
+        }
         final Intent fillInIntent;
         synchronized (mLock) {
             if (mDestroyed) {
@@ -580,6 +584,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
             fillInIntent = createAuthFillInIntentLocked(requestId, extras);
+            if (fillInIntent == null) {
+                forceRemoveSelfLocked();
+                return;
+            }
         }
 
         mService.setAuthenticationSelected(id, mClientState);
@@ -1361,11 +1369,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private void notifyUnavailableToClient() {
+    private void notifyUnavailableToClient(boolean sessionFinished) {
         synchronized (mLock) {
-            if (!mHasCallback || mCurrentViewId == null) return;
+            if (mCurrentViewId == null) return;
             try {
-                mClient.notifyNoFillUi(id, mCurrentViewId);
+                if (mHasCallback) {
+                    mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinished);
+                } else if (sessionFinished) {
+                    mClient.setSessionFinished();
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
             }
@@ -1453,7 +1465,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         mService.resetLastResponse();
         // Nothing to be done, but need to notify client.
-        notifyUnavailableToClient();
+        notifyUnavailableToClient(true);
         removeSelf();
     }
 
@@ -1572,6 +1584,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     void autoFill(int requestId, int datasetIndex, Dataset dataset, boolean generateEvent) {
+        if (sDebug) {
+            Slog.d(TAG, "autoFill(): requestId=" + requestId  + "; datasetIdx=" + datasetIndex
+                    + "; dataset=" + dataset);
+        }
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#autoFill() rejected - session: "
@@ -1592,10 +1608,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mService.logDatasetAuthenticationSelected(dataset.getId(), id, mClientState);
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntentLocked(requestId, mClientState);
-
+            if (fillInIntent == null) {
+                forceRemoveSelfLocked();
+                return;
+            }
             final int authenticationId = AutofillManager.makeAuthenticationId(requestId,
                     datasetIndex);
             startAuthentication(authenticationId, dataset.getAuthentication(), fillInIntent);
+
         }
     }
 
@@ -1605,14 +1625,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    // TODO: this should never be null, but we got at least one occurrence, probably due to a race.
+    @Nullable
     private Intent createAuthFillInIntentLocked(int requestId, Bundle extras) {
         final Intent fillInIntent = new Intent();
 
         final FillContext context = getFillContextByRequestIdLocked(requestId);
         if (context == null) {
-            // TODO(b/653742740): this will crash system_server. We need to handle it, but we're
-            // keeping it crashing for now so we can diagnose when it happens again
-            Slog.wtf(TAG, "no FillContext for requestId" + requestId + "; mContexts= " + mContexts);
+            Slog.wtf(TAG, "createAuthFillInIntentLocked(): no FillContext. requestId=" + requestId
+                    + "; mContexts= " + mContexts);
+            return null;
         }
         fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, context.getStructure());
         fillInIntent.putExtra(AutofillManager.EXTRA_CLIENT_STATE, extras);
@@ -1759,7 +1781,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mDestroyed) {
             return null;
         }
-        mUi.destroyAll(mPendingSaveUi, this);
+        mUi.destroyAll(mPendingSaveUi, this, true);
         mUi.clearCallback(this);
         mDestroyed = true;
         writeLog(MetricsEvent.AUTOFILL_SESSION_FINISHED);
@@ -1775,7 +1797,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mPendingSaveUi = null;
         removeSelfLocked();
-        mUi.destroyAll(mPendingSaveUi, this);
+
+        mHandlerCaller.getHandler().post(() -> {
+            try {
+                mClient.setState(mService.isEnabled(), true, false);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "error updating client state: " + e);
+            }
+        });
+
+        mUi.destroyAll(mPendingSaveUi, this, false);
     }
 
     /**

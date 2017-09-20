@@ -438,16 +438,7 @@ public class PackageDexOptimizer {
                     PackageDexUsage.DexUseInfo dexUseInfo = e.getValue();
                     pw.println(dex);
                     pw.increaseIndent();
-                    for (String isa : dexUseInfo.getLoaderIsas()) {
-                        String status = null;
-                        try {
-                            status = DexFile.getDexFileStatus(path, isa);
-                        } catch (IOException ioe) {
-                             status = "[Exception]: " + ioe.getMessage();
-                        }
-                        pw.println(isa + ": " + status);
-                    }
-
+                    // TODO(calin): get the status of the oat file (needs installd call)
                     pw.println("class loader context: " + dexUseInfo.getClassLoaderContext());
                     if (dexUseInfo.isUsedByOtherApps()) {
                         pw.println("used be other apps: " + dexUseInfo.getLoadingPackages());
@@ -474,8 +465,9 @@ public class PackageDexOptimizer {
         }
 
         if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
-            // If the dex files is used by other apps, we cannot use profile-guided compilation.
-            return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+            // If the dex files is used by other apps, apply the shared filter.
+            return PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                    PackageManagerService.REASON_SHARED);
         }
 
         return targetCompilerFilter;

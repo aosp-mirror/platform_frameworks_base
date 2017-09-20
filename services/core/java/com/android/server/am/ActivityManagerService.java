@@ -709,7 +709,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardShowing()
+                && !mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)
                 && !(UserManager.isDeviceInDemoMode(mContext)
                         && mUserController.getCurrentUser().isDemo());
     }
@@ -3784,6 +3784,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO; // Generate debug info
                 runtimeFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;   // Disbale optimizations
                 mNativeDebuggingApp = null;
+            }
+
+            if (app.info.isPrivilegedApp() &&
+                    !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
+                runtimeFlags |= Zygote.DISABLE_VERIFIER;
+                runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
             String invokeWith = null;
@@ -9951,7 +9957,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                     "getTaskDescription()");
             final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(id,
-                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
+                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (tr != null) {
                 return tr.lastTaskDescription;
             }
@@ -10064,7 +10070,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setTaskResizeable(int taskId, int resizeableMode) {
         synchronized (this) {
             final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
-                    taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
+                    taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (task == null) {
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
@@ -10127,7 +10133,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
-                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (task == null) {
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
                     return rect;
@@ -10159,7 +10165,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY, INVALID_STACK_ID);
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "cancelTaskWindowTransition: taskId=" + taskId + " not found");
                     return;
@@ -10178,7 +10184,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
-                        MATCH_TASK_IN_STACKS_ONLY, INVALID_STACK_ID);
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "cancelTaskThumbnailTransition: taskId=" + taskId + " not found");
                     return;
@@ -10198,7 +10204,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final TaskRecord task;
             synchronized (this) {
                 task = mStackSupervisor.anyTaskForIdLocked(taskId,
-                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS, INVALID_STACK_ID);
+                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (task == null) {
                     Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
                     return null;
@@ -10506,56 +10512,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 task.reparent(stackId, toTop,
                         REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "moveTaskToStack");
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
-    public void swapDockedAndFullscreenStack() throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "swapDockedAndFullscreenStack()");
-        synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                final ActivityStack fullscreenStack = mStackSupervisor.getStack(
-                        FULLSCREEN_WORKSPACE_STACK_ID);
-                final TaskRecord topTask = fullscreenStack != null ? fullscreenStack.topTask()
-                        : null;
-                final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
-                final ArrayList<TaskRecord> tasks = dockedStack != null ? dockedStack.getAllTasks()
-                        : null;
-                if (topTask == null || tasks == null || tasks.size() == 0) {
-                    Slog.w(TAG,
-                            "Unable to swap tasks, either docked or fullscreen stack is empty.");
-                    return;
-                }
-
-                // TODO: App transition
-                mWindowManager.prepareAppTransition(TRANSIT_ACTIVITY_RELAUNCH, false);
-
-                // Defer the resume until we move all the docked tasks to the fullscreen stack below
-                topTask.reparent(DOCKED_STACK_ID, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE,
-                        DEFER_RESUME, "swapDockedAndFullscreenStack - DOCKED_STACK");
-                final int size = tasks.size();
-                for (int i = 0; i < size; i++) {
-                    final int id = tasks.get(i).taskId;
-                    if (id == topTask.taskId) {
-                        continue;
-                    }
-
-                    // Defer the resume until after all the tasks have been moved
-                    tasks.get(i).reparent(FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP,
-                            REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, DEFER_RESUME,
-                            "swapDockedAndFullscreenStack - FULLSCREEN_STACK");
-                }
-
-                // Because we deferred the resume to avoid conflicts with stack switches while
-                // resuming, we need to do it after all the tasks are moved.
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
-
-                mWindowManager.executeAppTransition();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -12300,19 +12256,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
+            boolean wasAwake = mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
+            boolean isAwake = wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
             mWakefulness = wakefulness;
 
-            // Also update state in a special way for running foreground services UI.
-            switch (mWakefulness) {
-                case PowerManagerInternal.WAKEFULNESS_ASLEEP:
-                case PowerManagerInternal.WAKEFULNESS_DREAMING:
-                case PowerManagerInternal.WAKEFULNESS_DOZING:
-                    mServices.updateScreenStateLocked(false /* screenOn */);
-                    break;
-                case PowerManagerInternal.WAKEFULNESS_AWAKE:
-                default:
-                    mServices.updateScreenStateLocked(true /* screenOn */);
-                    break;
+            if (wasAwake != isAwake) {
+                // Also update state in a special way for running foreground services UI.
+                mServices.updateScreenStateLocked(isAwake);
+                sendNotifyVrManagerOfSleepState(!isAwake);
             }
         }
     }
@@ -12348,7 +12299,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.applySleepTokensLocked(true /* applyToStacks */);
             if (wasSleeping) {
-                sendNotifyVrManagerOfSleepState(false);
                 updateOomAdjLocked();
             }
         } else if (!mSleeping && shouldSleep) {
@@ -12358,7 +12308,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
-            sendNotifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
         }
     }
@@ -12452,7 +12401,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setLockScreenShown(boolean showing) {
+    public void setLockScreenShown(boolean showing, int secondaryDisplayShowing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -12462,7 +12411,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mKeyguardController.setKeyguardShown(showing);
+                mKeyguardController.setKeyguardShown(showing, secondaryDisplayShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -23879,7 +23828,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void notifyKeyguardTrustedChanged() {
             synchronized (ActivityManagerService.this) {
-                if (mKeyguardController.isKeyguardShowing()) {
+                if (mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
             }

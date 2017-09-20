@@ -762,7 +762,7 @@ public class Surface implements Parcelable {
                 return "ROTATION_270";
             }
             default: {
-                throw new IllegalArgumentException("Invalid rotation: " + rotation);
+                return Integer.toString(rotation);
             }
         }
     }

@@ -88,4 +88,9 @@ public interface ViewMediatorCallback {
      *         {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}.
      */
     int getBouncerPromptReason();
+
+    /**
+     * Invoked when the secondary display showing a keyguard window changes.
+     */
+    void onSecondaryDisplayShowingChanged(int displayId);
 }

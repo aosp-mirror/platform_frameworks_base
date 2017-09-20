@@ -679,6 +679,29 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return token;
     }
 
+    /*
+     * Construct a backup agent instance for the metadata pseudopackage.  This is a
+     * process-local non-lifecycle agent instance, so we manually set up the context
+     * topology for it.
+     */
+    public PackageManagerBackupAgent makeMetadataAgent() {
+        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager);
+        pmAgent.attach(mContext);
+        pmAgent.onCreate();
+        return pmAgent;
+    }
+
+    /*
+     * Same as above but with the explicit package-set configuration.
+     */
+    public PackageManagerBackupAgent makeMetadataAgent(List<PackageInfo> packages) {
+        PackageManagerBackupAgent pmAgent =
+                new PackageManagerBackupAgent(mPackageManager, packages);
+        pmAgent.attach(mContext);
+        pmAgent.onCreate();
+        return pmAgent;
+    }
+
     // ----- Debug-only backup operation trace -----
     public void addBackupTrace(String s) {
         if (DEBUG_BACKUP_TRACE) {
@@ -809,17 +832,18 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         // Remember our ancestral dataset
         mTokenFile = new File(mBaseStateDir, "ancestral");
-        try (RandomAccessFile tf = new RandomAccessFile(mTokenFile, "r")) {
-            int version = tf.readInt();
+        try (DataInputStream tokenStream = new DataInputStream(new BufferedInputStream(
+                new FileInputStream(mTokenFile)))) {
+            int version = tokenStream.readInt();
             if (version == CURRENT_ANCESTRAL_RECORD_VERSION) {
-                mAncestralToken = tf.readLong();
-                mCurrentToken = tf.readLong();
+                mAncestralToken = tokenStream.readLong();
+                mCurrentToken = tokenStream.readLong();
 
-                int numPackages = tf.readInt();
+                int numPackages = tokenStream.readInt();
                 if (numPackages >= 0) {
                     mAncestralPackages = new HashSet<>();
                     for (int i = 0; i < numPackages; i++) {
-                        String pkgName = tf.readUTF();
+                        String pkgName = tokenStream.readUTF();
                         mAncestralPackages.add(pkgName);
                     }
                 }

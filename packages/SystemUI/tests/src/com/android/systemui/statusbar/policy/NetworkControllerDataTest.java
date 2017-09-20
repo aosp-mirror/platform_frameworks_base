@@ -9,6 +9,9 @@ import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.net.DataUsageController;
 
@@ -16,7 +19,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
     @Test
@@ -126,6 +130,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
         when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(false);
         mUserCallback.onUserSetupChanged();
+        TestableLooper.get(this).processAllMessages();
 
         // Don't show the X until the device is setup.
         verifyDataIndicators(0, 0);

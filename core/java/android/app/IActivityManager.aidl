@@ -307,7 +307,15 @@ interface IActivityManager {
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
     boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
             in Intent resultData);
-    void setLockScreenShown(boolean showing);
+    /**
+     * Informs ActivityManagerService that the keyguard is showing.
+     *
+     * @param showing True if the keyguard is showing, false otherwise.
+     * @param secondaryDisplayShowing The displayId of the secondary display on which the keyguard
+     *        is showing, or INVALID_DISPLAY if there is no such display. Only meaningful if
+     *        showing is true.
+     */
+    void setLockScreenShown(boolean showing, int secondaryDisplayShowing);
     boolean finishActivityAffinity(in IBinder token);
     // This is not public because you need to be very careful in how you
     // manage your activity to make sure it is always the uid you expect.
@@ -545,11 +553,6 @@ interface IActivityManager {
      */
     void resizePinnedStack(in Rect pinnedBounds, in Rect tempPinnedTaskBounds);
     boolean isVrModePackageEnabled(in ComponentName packageName);
-    /**
-     * Moves all tasks from the docked stack in the fullscreen stack and puts the top task of the
-     * fullscreen stack into the docked stack.
-     */
-    void swapDockedAndFullscreenStack();
     void notifyLockedProfile(int userId);
     void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
     void sendIdleJobTrigger();

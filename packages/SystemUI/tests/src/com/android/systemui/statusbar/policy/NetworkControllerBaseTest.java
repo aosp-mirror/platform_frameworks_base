@@ -16,44 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.wifi.WifiManager;
-import android.os.Looper;
-import android.provider.Settings;
-import android.provider.Settings.Global;
-import android.telephony.PhoneStateListener;
-import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
-import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
-import android.util.Log;
-import com.android.internal.telephony.cdma.EriInfo;
-import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.statusbar.phone.SignalDrawable;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
-import com.android.systemui.SysuiTestCase;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.Matchers.any;
@@ -64,6 +26,43 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.wifi.WifiManager;
+import android.provider.Settings;
+import android.provider.Settings.Global;
+import android.telephony.PhoneStateListener;
+import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
+import android.testing.TestableLooper;
+import android.util.Log;
+
+import com.android.internal.telephony.cdma.EriInfo;
+import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.SignalDrawable;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkControllerBaseTest extends SysuiTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
@@ -131,11 +130,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             mUserCallback = (DeviceProvisionedListener) invocation.getArguments()[0];
             mUserCallback.onUserSetupChanged();
             mUserCallback.onDeviceProvisionedChanged();
+            TestableLooper.get(this).processAllMessages();
             return null;
         }).when(mMockProvisionController).addCallback(any());
 
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                mConfig, Looper.getMainLooper(), mCallbackHandler,
+                mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mMockProvisionController);
         setupNetworkController();
@@ -176,7 +176,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
       when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
       NetworkControllerImpl networkControllerNoMobile
               = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                        mConfig, mContext.getMainLooper(), mCallbackHandler,
+                        mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class));

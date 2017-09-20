@@ -1487,7 +1487,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Task frontTask = tasks.get(tasks.size() - 1);
             if (frontTask != null && frontTask.isFreeformTask()) {
                 EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(frontTask),
-                        frontTask, null, INVALID_STACK_ID, false));
+                        frontTask, null, false));
                 return true;
             }
         }
@@ -2369,12 +2369,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         public void run() {
                             EventBus.getDefault().send(new LaunchTaskEvent(
                                     getChildViewForTask(task), task, null,
-                                    INVALID_STACK_ID, false /* screenPinningRequested */));
+                                    false /* screenPinningRequested */));
                         }
                     });
         } else {
-            EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(task),
-                    task, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+            EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(task), task, null,
+                    false /* screenPinningRequested */));
         }
     }
 

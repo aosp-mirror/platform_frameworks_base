@@ -198,6 +198,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.MutableBoolean;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -296,12 +297,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
 
-    static final int LONG_PRESS_BACK_NOTHING = 0;
-    static final int LONG_PRESS_BACK_GO_TO_VOICE_ASSIST = 1;
-
     static final int MULTI_PRESS_POWER_NOTHING = 0;
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
     static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;
+
+    static final int LONG_PRESS_BACK_NOTHING = 0;
+    static final int LONG_PRESS_BACK_GO_TO_VOICE_ASSIST = 1;
 
     // Number of presses needed before we induce panic press behavior on the back button
     static final int PANIC_PRESS_BACK_COUNT = 4;
@@ -565,7 +566,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLongPressOnBackBehavior;
     int mPanicPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
-    int mShortPressWindowBehavior;
+    int mShortPressOnWindowBehavior;
     volatile boolean mAwake;
     boolean mScreenOnEarly;
     boolean mScreenOnFully;
@@ -2180,9 +2181,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDoubleTapOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
         }
 
-        mShortPressWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
+        mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
         if (mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
-            mShortPressWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
+            mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
 
         mNavBarOpacityMode = res.getInteger(
@@ -6276,7 +6277,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
             case KeyEvent.KEYCODE_WINDOW: {
-                if (mShortPressWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
+                if (mShortPressOnWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
                     if (mPictureInPictureVisible) {
                         // Consumes the key only if picture-in-picture is visible to show
                         // picture-in-picture control menu. This gives a chance to the foreground
@@ -8323,9 +8324,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
                 pw.print(" mSystemReady="); pw.print(mSystemReady);
                 pw.print(" mSystemBooted="); pw.println(mSystemBooted);
-        pw.print(prefix); pw.print("mLidState="); pw.print(mLidState);
-                pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
-                pw.print(" mCameraLensCoverState="); pw.print(mCameraLensCoverState);
+        pw.print(prefix); pw.print("mLidState=");
+                pw.print(WindowManagerFuncs.lidStateToString(mLidState));
+                pw.print(" mLidOpenRotation=");
+                pw.println(Surface.rotationToString(mLidOpenRotation));
+        pw.print(prefix); pw.print("mCameraLensCoverState=");
+                pw.print(WindowManagerFuncs.cameraLensStateToString(mCameraLensCoverState));
                 pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);
         if (mLastSystemUiFlags != 0 || mResettingSystemUiFlags != 0
                 || mForceClearedSystemUiFlags != 0) {
@@ -8343,16 +8347,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mWakeGestureEnabledSetting=");
                 pw.println(mWakeGestureEnabledSetting);
 
-        pw.print(prefix); pw.print("mSupportAutoRotation="); pw.println(mSupportAutoRotation);
-        pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
-                pw.print(" mDockMode="); pw.print(mDockMode);
-                pw.print(" mEnableCarDockHomeCapture="); pw.print(mEnableCarDockHomeCapture);
-                pw.print(" mCarDockRotation="); pw.print(mCarDockRotation);
-                pw.print(" mDeskDockRotation="); pw.println(mDeskDockRotation);
-        pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
-                pw.print(" mUserRotation="); pw.print(mUserRotation);
-                pw.print(" mAllowAllRotations="); pw.println(mAllowAllRotations);
-        pw.print(prefix); pw.print("mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
+        pw.print(prefix);
+                pw.print("mSupportAutoRotation="); pw.print(mSupportAutoRotation);
+                pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);
+        pw.print(prefix); pw.print("mUiMode="); pw.print(Configuration.uiModeToString(mUiMode));
+                pw.print(" mDockMode="); pw.println(Intent.dockStateToString(mDockMode));
+        pw.print(prefix); pw.print("mEnableCarDockHomeCapture=");
+                pw.print(mEnableCarDockHomeCapture);
+                pw.print(" mCarDockRotation=");
+                pw.print(Surface.rotationToString(mCarDockRotation));
+                pw.print(" mDeskDockRotation=");
+                pw.println(Surface.rotationToString(mDeskDockRotation));
+        pw.print(prefix); pw.print("mUserRotationMode=");
+                pw.print(WindowManagerPolicy.userRotationModeToString(mUserRotationMode));
+                pw.print(" mUserRotation="); pw.print(Surface.rotationToString(mUserRotation));
+                pw.print(" mAllowAllRotations=");
+                pw.println(allowAllRotationsToString(mAllowAllRotations));
+        pw.print(prefix); pw.print("mCurrentAppOrientation=");
+                pw.println(ActivityInfo.screenOrientationToString(mCurrentAppOrientation));
         pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
                 pw.print(mCarDockEnablesAccelerometer);
                 pw.print(" mDeskDockEnablesAccelerometer=");
@@ -8361,23 +8373,54 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(mLidKeyboardAccessibility);
                 pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
                 pw.print(" mLidControlsScreenLock="); pw.println(mLidControlsScreenLock);
-                pw.print(" mLidControlsSleep="); pw.println(mLidControlsSleep);
+        pw.print(prefix); pw.print("mLidControlsSleep="); pw.println(mLidControlsSleep);
         pw.print(prefix);
-                pw.print(" mLongPressOnBackBehavior="); pw.println(mLongPressOnBackBehavior);
+                pw.print("mLongPressOnBackBehavior=");
+                pw.println(longPressOnBackBehaviorToString(mLongPressOnBackBehavior));
         pw.print(prefix);
-                pw.print("mShortPressOnPowerBehavior="); pw.print(mShortPressOnPowerBehavior);
-                pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
+                pw.print("mPanicPressOnBackBehavior=");
+                pw.println(panicPressOnBackBehaviorToString(mPanicPressOnBackBehavior));
         pw.print(prefix);
-                pw.print("mDoublePressOnPowerBehavior="); pw.print(mDoublePressOnPowerBehavior);
-                pw.print(" mTriplePressOnPowerBehavior="); pw.println(mTriplePressOnPowerBehavior);
-        pw.print(prefix); pw.print("mHasSoftInput="); pw.println(mHasSoftInput);
-        pw.print(prefix); pw.print("mAwake="); pw.println(mAwake);
-        pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
+                pw.print("mLongPressOnHomeBehavior=");
+                pw.println(longPressOnHomeBehaviorToString(mLongPressOnHomeBehavior));
+        pw.print(prefix);
+                pw.print("mDoubleTapOnHomeBehavior=");
+                pw.println(doubleTapOnHomeBehaviorToString(mDoubleTapOnHomeBehavior));
+        pw.print(prefix);
+                pw.print("mShortPressOnPowerBehavior=");
+                pw.println(shortPressOnPowerBehaviorToString(mShortPressOnPowerBehavior));
+        pw.print(prefix);
+                pw.print("mLongPressOnPowerBehavior=");
+                pw.println(longPressOnPowerBehaviorToString(mLongPressOnPowerBehavior));
+        pw.print(prefix);
+                pw.print("mDoublePressOnPowerBehavior=");
+                pw.println(multiPressOnPowerBehaviorToString(mDoublePressOnPowerBehavior));
+        pw.print(prefix);
+                pw.print("mTriplePressOnPowerBehavior=");
+                pw.println(multiPressOnPowerBehaviorToString(mTriplePressOnPowerBehavior));
+        pw.print(prefix);
+                pw.print("mShortPressOnSleepBehavior=");
+                pw.println(shortPressOnSleepBehaviorToString(mShortPressOnSleepBehavior));
+        pw.print(prefix);
+                pw.print("mShortPressOnWindowBehavior=");
+                pw.println(shortPressOnWindowBehaviorToString(mShortPressOnWindowBehavior));
+        pw.print(prefix);
+                pw.print("mHasSoftInput="); pw.print(mHasSoftInput);
+                pw.print(" mDismissImeOnBackKeyPressed="); pw.println(mDismissImeOnBackKeyPressed);
+        pw.print(prefix);
+                pw.print("mIncallPowerBehavior=");
+                pw.print(incallPowerBehaviorToString(mIncallPowerBehavior));
+                pw.print(" mIncallBackBehavior=");
+                pw.print(incallBackBehaviorToString(mIncallBackBehavior));
+                pw.print(" mEndcallBehavior=");
+                pw.println(endcallBehaviorToString(mEndcallBehavior));
+        pw.print(prefix); pw.print("mHomePressed="); pw.println(mHomePressed);
+        pw.print(prefix);
+                pw.print("mAwake="); pw.print(mAwake);
+                pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
                 pw.print(" mScreenOnFully="); pw.println(mScreenOnFully);
         pw.print(prefix); pw.print("mKeyguardDrawComplete="); pw.print(mKeyguardDrawComplete);
                 pw.print(" mWindowManagerDrawComplete="); pw.println(mWindowManagerDrawComplete);
-        pw.print(prefix); pw.print("mOrientationSensorEnabled=");
-                pw.println(mOrientationSensorEnabled);
         pw.print(prefix); pw.print("mOverscanScreen=("); pw.print(mOverscanScreenLeft);
                 pw.print(","); pw.print(mOverscanScreenTop);
                 pw.print(") "); pw.print(mOverscanScreenWidth);
@@ -8443,8 +8486,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pw.print(prefix); pw.print("mLastInputMethodTargetWindow=");
                     pw.println(mLastInputMethodTargetWindow);
         }
-        pw.print(prefix); pw.print("mDismissImeOnBackKeyPressed=");
-                pw.println(mDismissImeOnBackKeyPressed);
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar=");
                     pw.print(mStatusBar); pw.print(" isStatusBarKeyguard=");
@@ -8477,26 +8518,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
                 pw.print(" mKeyguardOccluded="); pw.println(mKeyguardOccluded);
-                pw.print(" mKeyguardOccludedChanged="); pw.println(mKeyguardOccludedChanged);
+        pw.print(prefix);
+                pw.print("mKeyguardOccludedChanged="); pw.print(mKeyguardOccludedChanged);
                 pw.print(" mPendingKeyguardOccluded="); pw.println(mPendingKeyguardOccluded);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
                 pw.print(" mForceStatusBarFromKeyguard=");
                 pw.println(mForceStatusBarFromKeyguard);
-        pw.print(prefix); pw.print("mHomePressed="); pw.println(mHomePressed);
         pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
                 pw.print(" mLockScreenTimeout="); pw.print(mLockScreenTimeout);
                 pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
-        pw.print(prefix); pw.print("mEndcallBehavior="); pw.print(mEndcallBehavior);
-                pw.print(" mIncallPowerBehavior="); pw.print(mIncallPowerBehavior);
-                pw.print(" mIncallBackBehavior="); pw.print(mIncallBackBehavior);
-                pw.print(" mLongPressOnHomeBehavior="); pw.println(mLongPressOnHomeBehavior);
-        pw.print(prefix); pw.print("mLandscapeRotation="); pw.print(mLandscapeRotation);
-                pw.print(" mSeascapeRotation="); pw.println(mSeascapeRotation);
-        pw.print(prefix); pw.print("mPortraitRotation="); pw.print(mPortraitRotation);
-                pw.print(" mUpsideDownRotation="); pw.println(mUpsideDownRotation);
-        pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
+        pw.print(prefix); pw.print("mLandscapeRotation=");
+                pw.print(Surface.rotationToString(mLandscapeRotation));
+                pw.print(" mSeascapeRotation=");
+                pw.println(Surface.rotationToString(mSeascapeRotation));
+        pw.print(prefix); pw.print("mPortraitRotation=");
+                pw.print(Surface.rotationToString(mPortraitRotation));
+                pw.print(" mUpsideDownRotation=");
+                pw.println(Surface.rotationToString(mUpsideDownRotation));
+        pw.print(prefix); pw.print("mDemoHdmiRotation=");
+                pw.print(Surface.rotationToString(mDemoHdmiRotation));
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
-        pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
+        pw.print(prefix); pw.print("mUndockedHdmiRotation=");
+                pw.println(Surface.rotationToString(mUndockedHdmiRotation));
         if (mHasFeatureLeanback) {
             pw.print(prefix);
             pw.print("mAccessibilityTvKey1Pressed="); pw.println(mAccessibilityTvKey1Pressed);
@@ -8522,6 +8565,170 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.dump(prefix, pw);
+        }
+
+        pw.print(prefix); pw.println("Looper state:");
+        mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");
+    }
+
+    private static String allowAllRotationsToString(int allowAll) {
+        switch (allowAll) {
+            case -1:
+                return "unknown";
+            case 0:
+                return "false";
+            case 1:
+                return "true";
+            default:
+                return Integer.toString(allowAll);
+        }
+    }
+
+    private static String endcallBehaviorToString(int behavior) {
+        StringBuilder sb = new StringBuilder();
+        if ((behavior & Settings.System.END_BUTTON_BEHAVIOR_HOME) != 0 ) {
+            sb.append("home|");
+        }
+        if ((behavior & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
+            sb.append("sleep|");
+        }
+
+        final int N = sb.length();
+        if (N == 0) {
+            return "<nothing>";
+        } else {
+            // Chop off the trailing '|'
+            return sb.substring(0, N - 1);
+        }
+    }
+
+    private static String incallPowerBehaviorToString(int behavior) {
+        if ((behavior & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0) {
+            return "hangup";
+        } else {
+            return "sleep";
+        }
+    }
+
+    private static String incallBackBehaviorToString(int behavior) {
+        if ((behavior & Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR_HANGUP) != 0) {
+            return "hangup";
+        } else {
+            return "<nothing>";
+        }
+    }
+
+    private static String longPressOnBackBehaviorToString(int behavior) {
+        switch (behavior) {
+            case LONG_PRESS_BACK_NOTHING:
+                return "LONG_PRESS_BACK_NOTHING";
+            case LONG_PRESS_BACK_GO_TO_VOICE_ASSIST:
+                return "LONG_PRESS_BACK_GO_TO_VOICE_ASSIST";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String panicPressOnBackBehaviorToString(int behavior) {
+        switch (behavior) {
+            case PANIC_PRESS_BACK_NOTHING:
+                return "PANIC_PRESS_BACK_NOTHING";
+            case PANIC_PRESS_BACK_HOME:
+                return "PANIC_PRESS_BACK_HOME";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String longPressOnHomeBehaviorToString(int behavior) {
+        switch (behavior) {
+            case LONG_PRESS_HOME_NOTHING:
+                return "LONG_PRESS_HOME_NOTHING";
+            case LONG_PRESS_HOME_ALL_APPS:
+                return "LONG_PRESS_HOME_ALL_APPS";
+            case LONG_PRESS_HOME_ASSIST:
+                return "LONG_PRESS_HOME_ASSIST";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String doubleTapOnHomeBehaviorToString(int behavior) {
+        switch (behavior) {
+            case DOUBLE_TAP_HOME_NOTHING:
+                return "DOUBLE_TAP_HOME_NOTHING";
+            case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                return "DOUBLE_TAP_HOME_RECENT_SYSTEM_UI";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String shortPressOnPowerBehaviorToString(int behavior) {
+        switch (behavior) {
+            case SHORT_PRESS_POWER_NOTHING:
+                return "SHORT_PRESS_POWER_NOTHING";
+            case SHORT_PRESS_POWER_GO_TO_SLEEP:
+                return "SHORT_PRESS_POWER_GO_TO_SLEEP";
+            case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
+                return "SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP";
+            case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
+                return "SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME";
+            case SHORT_PRESS_POWER_GO_HOME:
+                return "SHORT_PRESS_POWER_GO_HOME";
+            case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME:
+                return "SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String longPressOnPowerBehaviorToString(int behavior) {
+        switch (behavior) {
+            case LONG_PRESS_POWER_NOTHING:
+                return "LONG_PRESS_POWER_NOTHING";
+            case LONG_PRESS_POWER_GLOBAL_ACTIONS:
+                return "LONG_PRESS_POWER_GLOBAL_ACTIONS";
+            case LONG_PRESS_POWER_SHUT_OFF:
+                return "LONG_PRESS_POWER_SHUT_OFF";
+            case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
+                return "LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+    private static String multiPressOnPowerBehaviorToString(int behavior) {
+        switch (behavior) {
+            case MULTI_PRESS_POWER_NOTHING:
+                return "MULTI_PRESS_POWER_NOTHING";
+            case MULTI_PRESS_POWER_THEATER_MODE:
+                return "MULTI_PRESS_POWER_THEATER_MODE";
+            case MULTI_PRESS_POWER_BRIGHTNESS_BOOST:
+                return "MULTI_PRESS_POWER_BRIGHTNESS_BOOST";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String shortPressOnSleepBehaviorToString(int behavior) {
+        switch (behavior) {
+            case SHORT_PRESS_SLEEP_GO_TO_SLEEP:
+                return "SHORT_PRESS_SLEEP_GO_TO_SLEEP";
+            case SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME:
+                return "SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String shortPressOnWindowBehaviorToString(int behavior) {
+        switch (behavior) {
+            case SHORT_PRESS_WINDOW_NOTHING:
+                return "SHORT_PRESS_WINDOW_NOTHING";
+            case SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE:
+                return "SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE";
+            default:
+                return Integer.toString(behavior);
         }
     }
 }

@@ -18,41 +18,70 @@ package android.database;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.SystemProperties;
 import android.test.PerformanceTestCase;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
- * Database Performance Tests
- * 
+ * Database Performance Tests.
+ *
+ * <p>Usage:
+ * <code>./frameworks/base/core/tests/coretests/src/android/database/run_newdb_perf_test.sh</code>
+ * <p>Test with WAL journaling enabled:
+ * <code>setprop debug.NewDatabasePerformanceTests.enable_wal 1</code>
  */
-
 public class NewDatabasePerformanceTests {
     private static final String TAG = "NewDatabasePerformanceTests";
+
+    private static final boolean DEBUG_ENABLE_WAL = SystemProperties
+            .getBoolean("debug.NewDatabasePerformanceTests.enable_wal", false);
 
     private static final int DATASET_SIZE = 100; // Size of dataset to use for testing
     private static final int FAST_OP_MULTIPLIER = 25;
     private static final int FAST_OP_COUNT = FAST_OP_MULTIPLIER * DATASET_SIZE;
 
+    private static Long sInitialWriteBytes;
+
+    static {
+        sInitialWriteBytes = getIoStats().get("write_bytes");
+        if (DEBUG_ENABLE_WAL) {
+            Log.i(TAG, "Testing with WAL enabled");
+        }
+    }
+
     public static class PerformanceBase extends TestCase
-    implements PerformanceTestCase {
+            implements PerformanceTestCase {
         protected static final int CURRENT_DATABASE_VERSION = 42;
         protected SQLiteDatabase mDatabase;
         protected File mDatabaseFile;
         private long mSetupFinishedTime;
+        private Long mSetupWriteBytes;
 
         public void setUp() {
             long setupStarted = System.currentTimeMillis();
             mDatabaseFile = new File("/sdcard", "perf_database_test.db");
             if (mDatabaseFile.exists()) {
-                mDatabaseFile.delete();
+                SQLiteDatabase.deleteDatabase(mDatabaseFile);
             }
-            mDatabase = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile.getPath(), null);
-            assertTrue(mDatabase != null);
+            SQLiteDatabase.OpenParams.Builder params = new SQLiteDatabase.OpenParams.Builder();
+            params.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
+            if (DEBUG_ENABLE_WAL) {
+                params.addOpenFlags(SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING);
+            }
+            mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile, params.build());
+            if (DEBUG_ENABLE_WAL) {
+                assertTrue("Cannot enable WAL", mDatabase.isWriteAheadLoggingEnabled());
+            }
             mDatabase.setVersion(CURRENT_DATABASE_VERSION);
             mDatabase.beginTransactionNonExclusive();
             prepareForTest();
@@ -61,6 +90,7 @@ public class NewDatabasePerformanceTests {
             mSetupFinishedTime = System.currentTimeMillis();
             Log.i(TAG, "Setup for " + getClass().getSimpleName() + " took "
                     + (mSetupFinishedTime - setupStarted) + " ms");
+            mSetupWriteBytes = getIoStats().get("write_bytes");
         }
 
         protected void prepareForTest() {
@@ -70,7 +100,14 @@ public class NewDatabasePerformanceTests {
             long duration = System.currentTimeMillis() - mSetupFinishedTime;
             Log.i(TAG, "Test " + getClass().getSimpleName() + " took " + duration + " ms");
             mDatabase.close();
-            mDatabaseFile.delete();
+            SQLiteDatabase.deleteDatabase(mDatabaseFile);
+            Long writeBytes = getIoStats().get("write_bytes");
+            if (writeBytes != null && sInitialWriteBytes != null) {
+                long testWriteBytes = writeBytes - mSetupWriteBytes;
+                long totalWriteBytes = (writeBytes - sInitialWriteBytes);
+                Log.i(TAG, "Test " + getClass().getSimpleName() + " write_bytes=" + testWriteBytes
+                        + ". Since tests started - totalWriteBytes=" + totalWriteBytes);
+            }
         }
 
         public boolean isPerformanceOnly() {
@@ -897,4 +934,31 @@ public class NewDatabasePerformanceTests {
     static final String[] TENS =
         {"", "ten", "twenty", "thirty", "forty", "fifty", "sixty",
         "seventy", "eighty", "ninety"};
+
+    static Map<String, Long> getIoStats() {
+        String ioStat = "/proc/self/io";
+        Map<String, Long> results = new ArrayMap<>();
+        try {
+            List<String> lines = Files.readAllLines(new File(ioStat).toPath());
+            for (String line : lines) {
+                line = line.trim();
+                String[] split = line.split(":");
+                if (split.length == 2) {
+                    try {
+                        String key = split[0].trim();
+                        Long value = Long.valueOf(split[1].trim());
+                        results.put(key, value);
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Cannot parse number from " + line);
+                    }
+                } else if (line.isEmpty()) {
+                    Log.e(TAG, "Cannot parse line " + line);
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Can't read: " + ioStat, e);
+        }
+        return results;
+    }
+
 }

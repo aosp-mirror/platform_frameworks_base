@@ -1146,20 +1146,6 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            /*
-             * StorageManagerService has a few dependencies: Notification Manager and
-             * AppWidget Provider. Make sure StorageManagerService is completely started
-             * first before continuing.
-             */
-            if (storageManager != null && !mOnlyCore) {
-                traceBeginAndSlog("WaitForAsecScan");
-                try {
-                    storageManager.waitForAsecScan();
-                } catch (RemoteException ignored) {
-                }
-                traceEnd();
-            }
-
             traceBeginAndSlog("StartNotificationManager");
             mSystemServiceManager.startService(NotificationManagerService.class);
             SystemNotificationChannels.createAll(context);
@@ -1206,18 +1192,6 @@ public final class SystemServer {
                         R.bool.config_enableWallpaperService)) {
                 traceBeginAndSlog("StartWallpaperManagerService");
                 mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
-                traceEnd();
-            }
-
-            // timezone.RulesManagerService will prevent a device starting up if the chain of trust
-            // required for safe time zone updates might be broken. RuleManagerService cannot do
-            // this check when mOnlyCore == true, so we don't enable the service in this case.
-            final boolean startRulesManagerService =
-                    !mOnlyCore && context.getResources().getBoolean(
-                            R.bool.config_enableUpdateableTimeZoneRules);
-            if (startRulesManagerService) {
-                traceBeginAndSlog("StartTimeZoneRulesManagerService");
-                mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
                 traceEnd();
             }
 
@@ -1360,6 +1334,19 @@ public final class SystemServer {
                 reportWtf("starting DiskStats Service", e);
             }
             traceEnd();
+
+            // timezone.RulesManagerService will prevent a device starting up if the chain of trust
+            // required for safe time zone updates might be broken. RuleManagerService cannot do
+            // this check when mOnlyCore == true, so we don't enable the service in this case.
+            // This service requires that JobSchedulerService is already started when it starts.
+            final boolean startRulesManagerService =
+                    !mOnlyCore && context.getResources().getBoolean(
+                            R.bool.config_enableUpdateableTimeZoneRules);
+            if (startRulesManagerService) {
+                traceBeginAndSlog("StartTimeZoneRulesManagerService");
+                mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
+                traceEnd();
+            }
 
             if (!disableNetwork && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");

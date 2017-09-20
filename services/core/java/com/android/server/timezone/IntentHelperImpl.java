@@ -36,16 +36,13 @@ final class IntentHelperImpl implements IntentHelper {
     private final Context mContext;
     private String mUpdaterAppPackageName;
 
-    private boolean mReliabilityReceiverEnabled;
-    private Receiver mReliabilityReceiver;
-
     IntentHelperImpl(Context context) {
         mContext = context;
     }
 
     @Override
-    public void initialize(
-            String updaterAppPackageName, String dataAppPackageName, Listener listener) {
+    public void initialize(String updaterAppPackageName, String dataAppPackageName,
+            PackageTracker packageTracker) {
         mUpdaterAppPackageName = updaterAppPackageName;
 
         // Register for events of interest.
@@ -78,10 +75,8 @@ final class IntentHelperImpl implements IntentHelper {
         // We do not register for ACTION_PACKAGE_DATA_CLEARED because the updater / data apps are
         // not expected to need local data.
 
-        Receiver packageUpdateReceiver = new Receiver(listener, true /* packageUpdated */);
+        Receiver packageUpdateReceiver = new Receiver(packageTracker);
         mContext.registerReceiver(packageUpdateReceiver, packageIntentFilter);
-
-        mReliabilityReceiver = new Receiver(listener, false /* packageUpdated */);
     }
 
     /** Sends an intent to trigger an update check. */
@@ -93,39 +88,26 @@ final class IntentHelperImpl implements IntentHelper {
     }
 
     @Override
-    public synchronized void enableReliabilityTriggering() {
-        if (!mReliabilityReceiverEnabled) {
-            // The intent filter that exists to make updates reliable in the event of failures /
-            // reboots.
-            IntentFilter reliabilityIntentFilter = new IntentFilter();
-            reliabilityIntentFilter.addAction(Intent.ACTION_IDLE_MAINTENANCE_START);
-            mContext.registerReceiver(mReliabilityReceiver, reliabilityIntentFilter);
-            mReliabilityReceiverEnabled = true;
-        }
+    public synchronized void scheduleReliabilityTrigger(long minimumDelayMillis) {
+        TimeZoneUpdateIdler.schedule(mContext, minimumDelayMillis);
     }
 
     @Override
-    public synchronized void disableReliabilityTriggering() {
-        if (mReliabilityReceiverEnabled) {
-            mContext.unregisterReceiver(mReliabilityReceiver);
-            mReliabilityReceiverEnabled = false;
-        }
+    public synchronized void unscheduleReliabilityTrigger() {
+        TimeZoneUpdateIdler.unschedule(mContext);
     }
 
     private static class Receiver extends BroadcastReceiver {
-        private final Listener mListener;
-        private final boolean mPackageUpdated;
+        private final PackageTracker mPackageTracker;
 
-        private Receiver(Listener listener, boolean packageUpdated) {
-            mListener = listener;
-            mPackageUpdated = packageUpdated;
+        private Receiver(PackageTracker packageTracker) {
+            mPackageTracker = packageTracker;
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.d(TAG, "Received intent: " + intent.toString());
-            mListener.triggerUpdateIfNeeded(mPackageUpdated);
+            mPackageTracker.triggerUpdateIfNeeded(true /* packageChanged */);
         }
     }
-
 }

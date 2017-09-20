@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
@@ -36,7 +35,6 @@ import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.Intent.ACTION_MAIN;
@@ -89,10 +87,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SCREENSHOTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_THUMBNAILS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -1038,7 +1034,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
         } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
             activityType = ACTIVITY_TYPE_RECENTS;
-        } else if (options != null && options.getLaunchStackId() == ASSISTANT_STACK_ID
+        } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
             activityType = ACTIVITY_TYPE_ASSISTANT;
         }
@@ -1157,8 +1153,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *         can be put a secondary screen.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
+        final TaskRecord task = getTask();
+
+        // The resizeability of an Activity's parent task takes precendence over the ActivityInfo.
+        // This allows for a non resizable activity to be launched into a resizeable task.
+        final boolean resizeable =
+                task != null ? task.isResizeable() : supportsResizeableMultiWindow();
+
         return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                supportsResizeableMultiWindow(), launchedFromPid, launchedFromUid, info);
+                resizeable, launchedFromPid, launchedFromUid, info);
     }
 
     /**

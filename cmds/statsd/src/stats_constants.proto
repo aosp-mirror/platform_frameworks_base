@@ -22,10 +22,17 @@ option optimize_for = LITE_RUNTIME;
 option java_package = "com.android.internal.logging";
 option java_outer_classname = "StatsConstantsProto";
 
-message StatsConstants {
-  // Event type.
-  enum Type {
-    WAKELOCK = 1;
-    SCREEN= 2;
-  }
+enum TagId {
+  WAKELOCK = 1;
+  SCREEN = 1003;
+}
+
+enum KeyId {
+  STATE = 1;
+  ANOTHER_STATE = 2;
+  EVENT_TIMESTAMP = 1001;
+  PACKAGE_NAME = 1002;
+  PACKAGE_VERSION = 1003;
+  PACKAGE_VERSION_STRING = 1004;
+  ATTRIBUTION_CHAIN = 1005;
 }

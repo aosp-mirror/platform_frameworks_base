@@ -46,6 +46,7 @@ LOCAL_SRC_FILES := \
     src/LogReader.cpp \
     src/main.cpp \
     src/DropboxWriter.cpp \
+    src/parse_util.cpp \
     src/StatsLogProcessor.cpp \
     src/stats_log.proto \
     src/statsd_config.proto \
