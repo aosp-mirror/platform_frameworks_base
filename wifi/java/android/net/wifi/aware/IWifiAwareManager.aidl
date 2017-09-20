@@ -24,7 +24,6 @@ import android.net.wifi.aware.IWifiAwareEventCallback;
 import android.net.wifi.aware.PublishConfig;
 import android.net.wifi.aware.SubscribeConfig;
 import android.net.wifi.aware.Characteristics;
-import android.net.wifi.RttManager;
 
 /**
  * Interface that WifiAwareService implements
@@ -53,5 +52,4 @@ interface IWifiAwareManager
     void sendMessage(int clientId, int discoverySessionId, int peerId, in byte[] message,
         int messageId, int retryCount);
     void terminateSession(int clientId, int discoverySessionId);
-    int startRanging(int clientId, int discoverySessionId, in RttManager.ParcelableRttParams parms);
 }
