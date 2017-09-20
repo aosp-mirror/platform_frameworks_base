@@ -2784,7 +2784,6 @@ com.android.internal.app.IVoiceInteractionManagerService$Stub
 com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
 com.android.internal.app.NightDisplayController
-com.android.internal.app.NightDisplayController$1
 com.android.internal.appwidget.IAppWidgetService
 com.android.internal.appwidget.IAppWidgetService$Stub
 com.android.internal.appwidget.IAppWidgetService$Stub$Proxy
