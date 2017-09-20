@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity;
 
+import static android.util.TimeUtils.NANOS_PER_MS;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetdEventCallback;
@@ -25,9 +27,12 @@ import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.net.metrics.WakeupEvent;
+import android.net.metrics.WakeupStats;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.ArrayMap;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -59,11 +64,27 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     private static final int CONNECT_LATENCY_FILL_RATE    = 15 * (int) DateUtils.SECOND_IN_MILLIS;
     private static final int CONNECT_LATENCY_MAXIMUM_RECORDS = 20000;
 
+    @VisibleForTesting
+    static final int WAKEUP_EVENT_BUFFER_LENGTH = 1024;
+    // TODO: dedup this String constant with the one used in
+    // ConnectivityService#wakeupModifyInterface().
+    @VisibleForTesting
+    static final String WAKEUP_EVENT_IFACE_PREFIX = "iface:";
+
     // Sparse arrays of DNS and connect events, grouped by net id.
     @GuardedBy("this")
     private final SparseArray<DnsEvent> mDnsEvents = new SparseArray<>();
     @GuardedBy("this")
     private final SparseArray<ConnectStats> mConnectEvents = new SparseArray<>();
+
+    // Array of aggregated wakeup event stats, grouped by interface name.
+    @GuardedBy("this")
+    private final ArrayMap<String, WakeupStats> mWakeupStats = new ArrayMap<>();
+    // Ring buffer array for storing packet wake up events sent by Netd.
+    @GuardedBy("this")
+    private final WakeupEvent[] mWakeupEvents = new WakeupEvent[WAKEUP_EVENT_BUFFER_LENGTH];
+    @GuardedBy("this")
+    private long mWakeupEventCursor = 0;
 
     private final ConnectivityManager mCm;
 
@@ -137,11 +158,62 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     @Override
     public synchronized void onWakeupEvent(String prefix, int uid, int gid, long timestampNs) {
+        maybeVerboseLog("onWakeupEvent(%s, %d, %d, %sns)", prefix, uid, gid, timestampNs);
+
+        // TODO: add ip protocol and port
+
+        String iface = prefix.replaceFirst(WAKEUP_EVENT_IFACE_PREFIX, "");
+        final long timestampMs;
+        if (timestampNs > 0) {
+            timestampMs = timestampNs / NANOS_PER_MS;
+        } else {
+            timestampMs = System.currentTimeMillis();
+        }
+
+        addWakeupEvent(iface, timestampMs, uid);
+    }
+
+    @GuardedBy("this")
+    private void addWakeupEvent(String iface, long timestampMs, int uid) {
+        int index = wakeupEventIndex(mWakeupEventCursor);
+        mWakeupEventCursor++;
+        WakeupEvent event = new WakeupEvent();
+        event.iface = iface;
+        event.timestampMs = timestampMs;
+        event.uid = uid;
+        mWakeupEvents[index] = event;
+        WakeupStats stats = mWakeupStats.get(iface);
+        if (stats == null) {
+            stats = new WakeupStats(iface);
+            mWakeupStats.put(iface, stats);
+        }
+        stats.countEvent(event);
+    }
+
+    @GuardedBy("this")
+    private WakeupEvent[] getWakeupEvents() {
+        int length = (int) Math.min(mWakeupEventCursor, (long) mWakeupEvents.length);
+        WakeupEvent[] out = new WakeupEvent[length];
+        // Reverse iteration from youngest event to oldest event.
+        long inCursor = mWakeupEventCursor - 1;
+        int outIdx = out.length - 1;
+        while (outIdx >= 0) {
+            out[outIdx--] = mWakeupEvents[wakeupEventIndex(inCursor--)];
+        }
+        return out;
+    }
+
+    private static int wakeupEventIndex(long cursor) {
+        return (int) Math.abs(cursor % WAKEUP_EVENT_BUFFER_LENGTH);
     }
 
     public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
         flushProtos(events, mConnectEvents, IpConnectivityEventBuilder::toProto);
         flushProtos(events, mDnsEvents, IpConnectivityEventBuilder::toProto);
+        for (int i = 0; i < mWakeupStats.size(); i++) {
+            events.add(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
+        }
+        mWakeupStats.clear();
     }
 
     public synchronized void dump(PrintWriter writer) {
@@ -153,13 +225,22 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     }
 
     public synchronized void list(PrintWriter pw) {
-        listEvents(pw, mConnectEvents, (x) -> x);
-        listEvents(pw, mDnsEvents, (x) -> x);
+        listEvents(pw, mConnectEvents, (x) -> x, "\n");
+        listEvents(pw, mDnsEvents, (x) -> x, "\n");
+        for (int i = 0; i < mWakeupStats.size(); i++) {
+            pw.println(mWakeupStats.valueAt(i));
+        }
+        for (WakeupEvent wakeup : getWakeupEvents()) {
+            pw.println(wakeup);
+        }
     }
 
     public synchronized void listAsProtos(PrintWriter pw) {
-        listEvents(pw, mConnectEvents, IpConnectivityEventBuilder::toProto);
-        listEvents(pw, mDnsEvents, IpConnectivityEventBuilder::toProto);
+        listEvents(pw, mConnectEvents, IpConnectivityEventBuilder::toProto, "");
+        listEvents(pw, mDnsEvents, IpConnectivityEventBuilder::toProto, "");
+        for (int i = 0; i < mWakeupStats.size(); i++) {
+            pw.print(IpConnectivityEventBuilder.toProto(mWakeupStats.valueAt(i)));
+        }
     }
 
     private static <T> void flushProtos(List<IpConnectivityEvent> out, SparseArray<T> in,
@@ -170,10 +251,13 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         in.clear();
     }
 
-    public static <T> void listEvents(
-            PrintWriter pw, SparseArray<T> events, Function<T, Object> mapper) {
+    private static <T> void listEvents(
+            PrintWriter pw, SparseArray<T> events, Function<T, Object> mapper, String separator) {
+        // Proto derived Classes have toString method that adds a \n at the end.
+        // Let the caller control that by passing in the line separator explicitly.
         for (int i = 0; i < events.size(); i++) {
-            pw.println(mapper.apply(events.valueAt(i)).toString());
+            pw.print(mapper.apply(events.valueAt(i)));
+            pw.print(separator);
         }
     }
 
