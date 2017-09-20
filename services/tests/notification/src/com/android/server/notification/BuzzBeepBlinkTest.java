@@ -558,6 +558,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -568,6 +569,22 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     }
 
     @Test
+    public void testNoDemoteSoundToVibrateIfNonNotificationStream() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        assertTrue(r.getSound() != null);
+        assertNull(r.getVibration());
+
+        // the phone is quiet
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(1);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverVibrate();
+        verifyBeepLooped();
+    }
+
+    @Test
     public void testDemoteSoundToVibrate() throws Exception {
         NotificationRecord r = getBeepyNotification();
         assertTrue(r.getSound() != null);
@@ -575,6 +592,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
 
         mService.buzzBeepBlinkLocked(r);
 
