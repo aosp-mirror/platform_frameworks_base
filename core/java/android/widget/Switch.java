@@ -248,10 +248,7 @@ public class Switch extends CompoundButton {
                 com.android.internal.R.styleable.Switch_switchPadding, 0);
         mSplitTrack = a.getBoolean(com.android.internal.R.styleable.Switch_splitTrack, false);
 
-        // TODO: replace CUR_DEVELOPMENT with P once P is added to android.os.Build.VERSION_CODES.
-        // STOPSHIP if the above TODO is not done.
-        mUseFallbackLineSpacing =
-                context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.CUR_DEVELOPMENT;
+        mUseFallbackLineSpacing = context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.P;
 
         ColorStateList thumbTintList = a.getColorStateList(
                 com.android.internal.R.styleable.Switch_thumbTint);
