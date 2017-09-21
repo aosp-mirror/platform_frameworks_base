@@ -5708,6 +5708,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED =
                 "accessibility_display_magnification_enabled";
 
