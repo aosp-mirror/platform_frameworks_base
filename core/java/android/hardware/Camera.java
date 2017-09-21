@@ -16,10 +16,11 @@
 
 package android.hardware;
 
-import android.app.ActivityThread;
+import static android.system.OsConstants.*;
+
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.app.job.JobInfo;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
@@ -34,11 +35,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
-import android.renderscript.RenderScript;
 import android.renderscript.RSIllegalArgumentException;
+import android.renderscript.RenderScript;
 import android.renderscript.Type;
-import android.util.Log;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -47,8 +48,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import static android.system.OsConstants.*;
 
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
@@ -243,12 +242,19 @@ public class Camera {
 
     /**
      * Returns the number of physical cameras available on this device.
+     *
+     * @return total number of accessible camera devices, or 0 if there are no
+     *   cameras or an error was encountered enumerating them.
      */
     public native static int getNumberOfCameras();
 
     /**
      * Returns the information about a particular camera.
      * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
+     *
+     * @throws RuntimeException if an invalid ID is provided, or if there is an
+     *    error retrieving the information (generally due to a hardware or other
+     *    low-level failure).
      */
     public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
         _getCameraInfo(cameraId, cameraInfo);
@@ -362,7 +368,10 @@ public class Camera {
     /**
      * Creates a new Camera object to access the first back-facing camera on the
      * device. If the device does not have a back-facing camera, this returns
-     * null.
+     * null. Otherwise acts like the {@link #open(int)} call.
+     *
+     * @return a new Camera object for the first back-facing camera, or null if there is no
+     *  backfacing camera
      * @see #open(int)
      */
     public static Camera open() {
@@ -609,6 +618,8 @@ public class Camera {
      *
      * @throws IOException if a connection cannot be re-established (for
      *     example, if the camera is still in use by another process).
+     * @throws RuntimeException if release() has been called on this Camera
+     *     instance.
      */
     public native final void reconnect() throws IOException;
 
@@ -637,6 +648,8 @@ public class Camera {
      *     or null to remove the preview surface
      * @throws IOException if the method fails (for example, if the surface
      *     is unavailable or unsuitable).
+     * @throws RuntimeException if release() has been called on this Camera
+     *    instance.
      */
     public final void setPreviewDisplay(SurfaceHolder holder) throws IOException {
         if (holder != null) {
@@ -684,6 +697,8 @@ public class Camera {
      *     texture
      * @throws IOException if the method fails (for example, if the surface
      *     texture is unavailable or unsuitable).
+     * @throws RuntimeException if release() has been called on this Camera
+     *    instance.
      */
     public native final void setPreviewTexture(SurfaceTexture surfaceTexture) throws IOException;
 
@@ -733,12 +748,20 @@ public class Camera {
      * {@link #setPreviewCallbackWithBuffer(Camera.PreviewCallback)} were
      * called, {@link Camera.PreviewCallback#onPreviewFrame(byte[], Camera)}
      * will be called when preview data becomes available.
+     *
+     * @throws RuntimeException if starting preview fails; usually this would be
+     *    because of a hardware or other low-level error, or because release()
+     *    has been called on this Camera instance.
      */
     public native final void startPreview();
 
     /**
      * Stops capturing and drawing preview frames to the surface, and
      * resets the camera for a future call to {@link #startPreview()}.
+     *
+     * @throws RuntimeException if stopping preview fails; usually this would be
+     *    because of a hardware or other low-level error, or because release()
+     *    has been called on this Camera instance.
      */
     public final void stopPreview() {
         _stopPreview();
@@ -777,6 +800,8 @@ public class Camera {
      *
      * @param cb a callback object that receives a copy of each preview frame,
      *     or null to stop receiving callbacks.
+     * @throws RuntimeException if release() has been called on this Camera
+     *     instance.
      * @see android.media.MediaActionSound
      */
     public final void setPreviewCallback(PreviewCallback cb) {
@@ -803,6 +828,8 @@ public class Camera {
      *
      * @param cb a callback object that receives a copy of the next preview frame,
      *     or null to stop receiving callbacks.
+     * @throws RuntimeException if release() has been called on this Camera
+     *     instance.
      * @see android.media.MediaActionSound
      */
     public final void setOneShotPreviewCallback(PreviewCallback cb) {
@@ -840,6 +867,8 @@ public class Camera {
      *
      * @param cb a callback object that receives a copy of the preview frame,
      *     or null to stop receiving callbacks and clear the buffer queue.
+     * @throws RuntimeException if release() has been called on this Camera
+     *     instance.
      * @see #addCallbackBuffer(byte[])
      * @see android.media.MediaActionSound
      */
@@ -1259,6 +1288,9 @@ public class Camera {
      * success sound to the user.</p>
      *
      * @param cb the callback to run
+     * @throws RuntimeException if starting autofocus fails; usually this would
+     *    be because of a hardware or other low-level error, or because
+     *    release() has been called on this Camera instance.
      * @see #cancelAutoFocus()
      * @see android.hardware.Camera.Parameters#setAutoExposureLock(boolean)
      * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
@@ -1279,6 +1311,9 @@ public class Camera {
      * this function will return the focus position to the default.
      * If the camera does not support auto-focus, this is a no-op.
      *
+     * @throws RuntimeException if canceling autofocus fails; usually this would
+     *    be because of a hardware or other low-level error, or because
+     *    release() has been called on this Camera instance.
      * @see #autoFocus(Camera.AutoFocusCallback)
      */
     public final void cancelAutoFocus()
@@ -1333,6 +1368,9 @@ public class Camera {
      * Sets camera auto-focus move callback.
      *
      * @param cb the callback to run
+     * @throws RuntimeException if enabling the focus move callback fails;
+     *    usually this would be because of a hardware or other low-level error,
+     *    or because release() has been called on this Camera instance.
      */
     public void setAutoFocusMoveCallback(AutoFocusMoveCallback cb) {
         mAutoFocusMoveCallback = cb;
@@ -1384,7 +1422,7 @@ public class Camera {
     };
 
     /**
-     * Equivalent to takePicture(shutter, raw, null, jpeg).
+     * Equivalent to <pre>takePicture(Shutter, raw, null, jpeg)</pre>.
      *
      * @see #takePicture(ShutterCallback, PictureCallback, PictureCallback, PictureCallback)
      */
@@ -1422,6 +1460,9 @@ public class Camera {
      * @param raw       the callback for raw (uncompressed) image data, or null
      * @param postview  callback with postview image data, may be null
      * @param jpeg      the callback for JPEG image data, or null
+     * @throws RuntimeException if starting picture capture fails; usually this
+     *    would be because of a hardware or other low-level error, or because
+     *    release() has been called on this Camera instance.
      */
     public final void takePicture(ShutterCallback shutter, PictureCallback raw,
             PictureCallback postview, PictureCallback jpeg) {
@@ -1534,6 +1575,9 @@ public class Camera {
      *
      * @param degrees the angle that the picture will be rotated clockwise.
      *                Valid values are 0, 90, 180, and 270.
+     * @throws RuntimeException if setting orientation fails; usually this would
+     *    be because of a hardware or other low-level error, or because
+     *    release() has been called on this Camera instance.
      * @see #setPreviewDisplay(SurfaceHolder)
      */
     public native final void setDisplayOrientation(int degrees);
@@ -1559,6 +1603,9 @@ public class Camera {
      *         changed. {@code false} if the shutter sound state could not be
      *         changed. {@code true} is also returned if shutter sound playback
      *         is already set to the requested state.
+     * @throws RuntimeException if the call fails; usually this would be because
+     *    of a hardware or other low-level error, or because release() has been
+     *    called on this Camera instance.
      * @see #takePicture
      * @see CameraInfo#canDisableShutterSound
      * @see ShutterCallback
@@ -1903,6 +1950,9 @@ public class Camera {
      * If modifications are made to the returned Parameters, they must be passed
      * to {@link #setParameters(Camera.Parameters)} to take effect.
      *
+     * @throws RuntimeException if reading parameters fails; usually this would
+     *    be because of a hardware or other low-level error, or because
+     *    release() has been called on this Camera instance.
      * @see #setParameters(Camera.Parameters)
      */
     public Parameters getParameters() {
