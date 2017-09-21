@@ -300,10 +300,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             // TODO: remove this once we figure out properly where and how
             // PROCESS_EVENT = 1112
-            // EVENT SUBTYPE: START = 1
-            // KEY_NAME: 1
+            // KEY_STATE = 1
+            // KEY_PACKAGE_NAME: 1002
             // KEY_UID: 2
-            StatsLog.writeArray(1112, 1, 1, name, 2, uid);
+            StatsLog.writeArray(1112, 1, 1, 1002, name, 2, uid);
         }
     }
 
@@ -313,10 +313,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             // TODO: remove this once we figure out properly where and how
             // PROCESS_EVENT = 1112
-            // EVENT SUBTYPE: CRASH = 2
-            // KEY_NAME: 1
+            // KEY_STATE = 1
+            // KEY_PACKAGE_NAME: 1002
             // KEY_UID: 2
-            StatsLog.writeArray(1112, 2, 1, name, 2, uid);
+            StatsLog.writeArray(1112, 1, 2, 1002, name, 2, uid);
         }
     }
 
@@ -550,10 +550,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteScreenStateLocked(state);
             // TODO: remove this once we figure out properly where and how
-            // SCREEN_EVENT = 1003
-            // State key: 1
+            // SCREEN_EVENT = 2
+            // KEY_STATE: 1
             // State value: state. We can change this to our own def later.
-            StatsLog.writeArray(1003, 1, state);
+            StatsLog.writeArray(2, 1, state);
         }
         if (DBG) Slog.d(TAG, "end noteScreenState");
     }
@@ -564,14 +564,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.noteScreenBrightnessLocked(brightness);
         }
     }
-    
+
     public void noteUserActivity(int uid, int event) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteUserActivityLocked(uid, event);
         }
     }
-    
+
     public void noteWakeUp(String reason, int reasonUid) {
         enforceCallingPermission();
         synchronized (mStats) {
