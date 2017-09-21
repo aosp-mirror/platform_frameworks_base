@@ -1342,11 +1342,17 @@ public final class AutofillManager {
         }
     }
 
-    private void setSessionFinished() {
-        if (sVerbose) Log.v(TAG, "setSessionFinished()");
+    /**
+     * Marks the state of the session as finished.
+     *
+     * @param newState {@link #STATE_FINISHED} (because the autofill service returned a {@code null}
+     *  FillResponse) or {@link #STATE_UNKNOWN} (because the session was removed).
+     */
+    private void setSessionFinished(int newState) {
         synchronized (mLock) {
+            if (sVerbose) Log.v(TAG, "setSessionFinished(): from " + mState + " to " + newState);
             resetSessionLocked();
-            mState = STATE_FINISHED;
+            mState = newState;
         }
     }
 
@@ -1413,7 +1419,7 @@ public final class AutofillManager {
 
         if (sessionFinished) {
             // Callback call was "hijacked" to also update the session state.
-            setSessionFinished();
+            setSessionFinished(STATE_FINISHED);
         }
     }
 
@@ -1898,10 +1904,10 @@ public final class AutofillManager {
         }
 
         @Override
-        public void setSessionFinished() {
+        public void setSessionFinished(int newState) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.setSessionFinished());
+                afm.post(() -> afm.setSessionFinished(newState));
             }
         }
     }

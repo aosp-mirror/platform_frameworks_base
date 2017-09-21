@@ -305,7 +305,7 @@ final class SaveUi {
 
         if (actualWidth <= maxWidth && actualHeight <= maxHeight) {
             if (sDebug) {
-                Slog.d(TAG, "Addingservice icon "
+                Slog.d(TAG, "Adding service icon "
                         + "(" + actualWidth + "x" + actualHeight + ") as it's less than maximum "
                         + "(" + maxWidth + "x" + maxHeight + ").");
             }
