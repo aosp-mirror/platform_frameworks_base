@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.app.Presentation;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,16 +30,21 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 
+// TODO(multi-display): Support multiple external displays
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
     private static boolean DEBUG = KeyguardConstants.DEBUG;
+
+    private final ViewMediatorCallback mCallback;
+    private final MediaRouter mMediaRouter;
+    private final Context mContext;
+
     Presentation mPresentation;
-    private MediaRouter mMediaRouter;
-    private Context mContext;
     private boolean mShowing;
 
-    public KeyguardDisplayManager(Context context) {
+    public KeyguardDisplayManager(Context context, ViewMediatorCallback callback) {
         mContext = context;
+        mCallback = callback;
         mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
     }
 
@@ -90,6 +97,7 @@ public class KeyguardDisplayManager {
     };
 
     protected void updateDisplays(boolean showing) {
+        Presentation originalPresentation = mPresentation;
         if (showing) {
             MediaRouter.RouteInfo route = mMediaRouter.getSelectedRoute(
                     MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY);
@@ -120,6 +128,13 @@ public class KeyguardDisplayManager {
                 mPresentation.dismiss();
                 mPresentation = null;
             }
+        }
+
+        // mPresentation is only updated when the display changes
+        if (mPresentation != originalPresentation) {
+            final int displayId = mPresentation != null
+                    ? mPresentation.getDisplay().getDisplayId() : INVALID_DISPLAY;
+            mCallback.onSecondaryDisplayShowingChanged(displayId);
         }
     }
 

@@ -40,6 +40,7 @@
 #include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
 #include "io/BigBufferInputStream.h"
+#include "io/FileInputStream.h"
 #include "io/FileSystem.h"
 #include "io/Util.h"
 #include "io/ZipArchive.h"
@@ -61,8 +62,9 @@
 #include "util/Files.h"
 #include "xml/XmlDom.h"
 
-using android::StringPiece;
-using android::base::StringPrintf;
+using ::aapt::io::FileInputStream;
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
@@ -284,13 +286,11 @@ static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source, cons
   return table;
 }
 
-/**
- * Inflates an XML file from the source path.
- */
+// Inflates an XML file from the source path.
 static std::unique_ptr<xml::XmlResource> LoadXml(const std::string& path, IDiagnostics* diag) {
-  std::ifstream fin(path, std::ifstream::binary);
-  if (!fin) {
-    diag->Error(DiagMessage(path) << strerror(errno));
+  FileInputStream fin(path);
+  if (fin.HadError()) {
+    diag->Error(DiagMessage(path) << "failed to load XML file: " << fin.GetError());
     return {};
   }
   return xml::Inflate(&fin, diag, Source(path));
@@ -482,7 +482,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
 
   if (options_.no_version_vectors || options_.no_version_transitions) {
     // Skip this if it is a vector or animated-vector.
-    xml::Element* el = xml::FindRootElement(doc);
+    xml::Element* el = doc->root.get();
     if (el && el->namespace_uri.empty()) {
       if ((options_.no_version_vectors && IsVectorElement(el->name)) ||
           (options_.no_version_transitions && IsTransitionElement(el->name))) {
@@ -1295,7 +1295,7 @@ class LinkCommand {
       }
 
       for (uint32_t i = 0; i < num_files; i++) {
-        pb::CompiledFile compiled_file;
+        pb::internal::CompiledFile compiled_file;
         if (!input_stream.ReadCompiledFile(&compiled_file)) {
           context_->GetDiagnostics()->Error(DiagMessage(src)
                                             << "failed to read compiled file header");

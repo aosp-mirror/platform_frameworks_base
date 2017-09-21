@@ -41,6 +41,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -1250,7 +1251,8 @@ public class Editor {
         }
     }
 
-    void sendOnTextChanged(int start, int after) {
+    void sendOnTextChanged(int start, int before, int after) {
+        getSelectionActionModeHelper().onTextChanged(start, start + before);
         updateSpellCheckSpans(start, start + after, false);
 
         // Flip flag to indicate the word iterator needs to have the text reset.
@@ -3920,6 +3922,10 @@ public class Editor {
                         textClassification.getLabel())
                         .setIcon(textClassification.getIcon())
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                mMetricsLogger.write(
+                        new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
+                                .setType(MetricsEvent.TYPE_OPEN)
+                                .setSubtype(textClassification.getLogType()));
             }
         }
 
@@ -3961,6 +3967,9 @@ public class Editor {
                                 .onClick(mTextView);
                     }
                 }
+                mMetricsLogger.action(
+                        MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
+                        textClassification.getLogType());
                 stopTextActionMode();
                 return true;
             }

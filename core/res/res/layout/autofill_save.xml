@@ -44,9 +44,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <ImageView
+                    android:id="@+id/autofill_save_icon"
+                    android:scaleType="fitStart"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+
                 <TextView
                     android:id="@+id/autofill_save_title"
-                    android:layout_width="0dp"
+                    android:paddingLeft="8dp"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/autofill_save_title"
                     android:textSize="16sp"

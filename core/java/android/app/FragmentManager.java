@@ -1380,8 +1380,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                     @Override
                                     public void onAnimationEnd(Animator anim) {
                                         container.endViewTransition(view);
-                                        if (fragment.getAnimatingAway() != null) {
-                                            fragment.setAnimatingAway(null);
+                                        Animator animator = f.getAnimatingAway();
+                                        f.setAnimatingAway(null);
+                                        // If the animation finished immediately, the fragment's
+                                        // view will still be there. If so, we can just pretend
+                                        // there was no animation and skip the moveToState()
+                                        if (container.indexOfChild(view) == -1
+                                                && animator != null) {
                                             moveToState(fragment, fragment.getStateAfterAnimating(),
                                                     0, 0, false);
                                         }

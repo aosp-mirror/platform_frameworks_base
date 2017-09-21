@@ -23,12 +23,15 @@ import android.telephony.mbms.FileInfo;
  * The optional interface used by download clients to track progress.
  * @hide
  */
-interface IDownloadProgressListener
+interface IDownloadStateCallback
 {
     /**
      * Gives progress callbacks for a given DownloadRequest.  Includes a FileInfo
      * as the list of files may not have been known at request-time.
      */
-    void progress(in DownloadRequest request, in FileInfo fileInfo, int currentDownloadSize,
-            int fullDownloadSize, int currentDecodedSize, int fullDecodedSize);
+    void onProgressUpdated(in DownloadRequest request, in FileInfo fileInfo,
+            int currentDownloadSize, int fullDownloadSize,
+            int currentDecodedSize, int fullDecodedSize);
+
+    void onStateUpdated(in DownloadRequest request, in FileInfo fileInfo, int state);
 }

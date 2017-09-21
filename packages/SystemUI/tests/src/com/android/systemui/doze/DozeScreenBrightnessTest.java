@@ -30,6 +30,7 @@ import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.os.PowerManager;
@@ -149,8 +150,6 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
         mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
         mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
-
-        assertTrue(mScreen.isReady());
     }
 
     @Test
@@ -165,87 +164,77 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNonPositiveBrightness_keepsPreviousBrightness() throws Exception {
+    public void testNonPositiveBrightness_keepsPreviousBrightnessAndScrim() throws Exception {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+
+        mSensor.sendSensorEvent(1);
+        mSensor.sendSensorEvent(0);
+
+        assertEquals(1, mServiceFake.screenBrightness);
+        assertEquals(10/255f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
+    }
+
+    @Test
+    public void pausingAod_softBlanks() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
 
         mSensor.sendSensorEvent(2);
-        mSensor.sendSensorEvent(0);
 
-        assertEquals(2, mServiceFake.screenBrightness);
-    }
+        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
+        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
 
-    @Test
-    public void readyWhenNotInitialized() {
-        assertTrue(mScreen.isReady());
-    }
-
-    @Test
-    public void readyWhenNotRegistered() {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE);
-
-        assertTrue(mScreen.isReady());
-    }
-
-    @Test
-    public void notReadyWhenRegistered_butNoEventYet() {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-
-        assertFalse(mScreen.isReady());
-    }
-
-    @Test
-    public void notReady_afterZeroBrightness() {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
 
         mSensor.sendSensorEvent(0);
+        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
 
-        assertFalse(mScreen.isReady());
+        mScreen.transitionTo(DOZE_AOD_PAUSED, DOZE_AOD);
+        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
     }
 
     @Test
-    public void ready_afterNonZeroBrightness() {
+    public void pausingAod_softBlanks_withSpuriousSensorDuringPause() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
+        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
 
         mSensor.sendSensorEvent(1);
-
-        assertTrue(mScreen.isReady());
+        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
     }
 
     @Test
-    public void notReady_nonZeroThenZeroBrightness() {
+    public void pausingAod_unblanksAfterSensor() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
 
-        mSensor.sendSensorEvent(1);
+        mSensor.sendSensorEvent(2);
+
+        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
+        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
+
         mSensor.sendSensorEvent(0);
 
-        assertFalse(mScreen.isReady());
+        mScreen.transitionTo(DOZE_AOD_PAUSED, DOZE_AOD);
+
+        mSensor.sendSensorEvent(2);
+
+        assertEquals(0f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
     }
 
     @Test
-    public void readyListener_getsCalled_whenRegistering() throws Exception {
-        Boolean[] ready = new Boolean[1];
-
-        mScreen.setBrightnessReadyListener((x) -> ready[0] = true);
-
-        assertTrue(ready[0]);
-    }
-
-    @Test
-    public void readyListener_getsCalled_whenReadyChanges() throws Exception {
-        Boolean[] ready = new Boolean[1];
-        mScreen.setBrightnessReadyListener((x) -> ready[0] = true);
-
+    public void pausingAod_unblanksIfSensorWasAlwaysReady() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
 
-        ready[0] = null;
-        mSensor.sendSensorEvent(1);
-        assertTrue(ready[0]);
+        mSensor.sendSensorEvent(2);
+
+        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
+        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
+        mScreen.transitionTo(DOZE_AOD_PAUSED, DOZE_AOD);
+
+        assertEquals(0f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
     }
 }

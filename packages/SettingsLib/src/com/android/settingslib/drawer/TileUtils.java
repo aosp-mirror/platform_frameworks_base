@@ -326,6 +326,15 @@ public class TileUtils {
             Context context, UserHandle user, Intent intent,
             Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
             boolean usePriority, boolean checkCategory, boolean forceTintExternalIcon) {
+        getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
+                usePriority, checkCategory, forceTintExternalIcon, false /* shouldUpdateTiles */);
+    }
+
+    public static void getTilesForIntent(
+            Context context, UserHandle user, Intent intent,
+            Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
+            boolean usePriority, boolean checkCategory, boolean forceTintExternalIcon,
+            boolean shouldUpdateTiles) {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
@@ -363,9 +372,11 @@ public class TileUtils {
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo,
                         pm, providerMap, forceTintExternalIcon);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
-
                 addedCache.put(key, tile);
+            } else if (shouldUpdateTiles) {
+                updateSummaryAndTitle(context, providerMap, tile);
             }
+
             if (!tile.userHandle.contains(user)) {
                 tile.userHandle.add(user);
             }
@@ -386,7 +397,6 @@ public class TileUtils {
             String summary = null;
             String keyHint = null;
             boolean isIconTintable = false;
-            RemoteViews remoteViews = null;
 
             // Get the activity's meta-data
             try {
@@ -441,7 +451,8 @@ public class TileUtils {
                     }
                     if (metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)) {
                         int layoutId = metaData.getInt(META_DATA_PREFERENCE_CUSTOM_VIEW);
-                        remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
+                        tile.remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
+                        updateSummaryAndTitle(context, providerMap, tile);
                     }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
@@ -473,12 +484,31 @@ public class TileUtils {
             // Suggest a key for this tile
             tile.key = keyHint;
             tile.isIconTintable = isIconTintable;
-            tile.remoteViews = remoteViews;
 
             return true;
         }
 
         return false;
+    }
+
+    private static void updateSummaryAndTitle(
+            Context context, Map<String, IContentProvider> providerMap, Tile tile) {
+        if (tile == null || tile.metaData == null
+                || !tile.metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+            return;
+        }
+
+        String uriString = tile.metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI);
+        Bundle bundle = getBundleFromUri(context, uriString, providerMap);
+        String overrideSummary = getString(bundle, META_DATA_PREFERENCE_SUMMARY);
+        String overrideTitle = getString(bundle, META_DATA_PREFERENCE_TITLE);
+        if (overrideSummary != null) {
+            tile.remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
+        }
+
+        if (overrideTitle != null) {
+            tile.remoteViews.setTextViewText(android.R.id.title, overrideTitle);
+        }
     }
 
     /**
@@ -543,26 +573,6 @@ public class TileUtils {
             return provider.call(context.getPackageName(), method, uriString, null);
         } catch (RemoteException e) {
             return null;
-        }
-    }
-
-    public static void updateTileUsingSummaryUri(Context context, Tile tile) {
-        if (tile == null || tile.metaData == null ||
-            !tile.metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
-            return;
-        }
-
-        final Map<String, IContentProvider> providerMap = new HashMap<>();
-
-        final String uriString = tile.metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI);
-        final Bundle bundle = getBundleFromUri(context, uriString, providerMap);
-        final String overrideSummary = getString(bundle, META_DATA_PREFERENCE_SUMMARY);
-        final String overrideTitle = getString(bundle, META_DATA_PREFERENCE_TITLE);
-        if (overrideSummary != null) {
-            tile.remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
-        }
-        if (overrideTitle != null) {
-            tile.remoteViews.setTextViewText(android.R.id.title, overrideTitle);
         }
     }
 

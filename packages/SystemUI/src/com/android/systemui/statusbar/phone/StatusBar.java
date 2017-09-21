@@ -339,7 +339,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
-    private static final long AUTOHIDE_TIMEOUT_MS = 3000;
+    private static final long AUTOHIDE_TIMEOUT_MS = 2250;
 
     /** The minimum delay in ms between reports of notification visibility. */
     private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;
@@ -1125,7 +1125,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        mLightBarController = new LightBarController(context);
+        mLightBarController = Dependency.get(LightBarController.class);
         if (mNavigationBar != null) {
             mNavigationBar.setLightBarController(mLightBarController);
         }
@@ -3321,7 +3321,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             cancelAutohide();
         }
-        touchAutoDim();
     }
 
     protected int computeStatusBarMode(int oldVal, int newVal) {
@@ -3370,9 +3369,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean powerSave = mBatteryController.isPowerSave();
         final boolean anim = !mNoAnimationOnNextBarModeChange && mDeviceInteractive
                 && windowState != WINDOW_STATE_HIDDEN && !powerSave;
-        if (powerSave && getBarState() == StatusBarState.SHADE
-                && (Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.BATTERY_SAVER_USE_RED_BAR, 1) != 0)) {
+        if (powerSave && getBarState() == StatusBarState.SHADE) {
             mode = MODE_WARNING;
         }
         transitions.transitionTo(mode, anim);
@@ -3406,10 +3403,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         // manually dismiss the volume panel when interacting with the nav bar
         if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
+            touchAutoDim();
             dismissVolumeDialog();
         }
         checkBarModes();
-        touchAutoDim();
     }
 
     private void dismissVolumeDialog() {
@@ -4790,7 +4787,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             animateCollapsePanels();
             return true;
         }
-        if (mKeyguardUserSwitcher.hideIfNotSimple(true)) {
+        if (mKeyguardUserSwitcher != null && mKeyguardUserSwitcher.hideIfNotSimple(true)) {
             return true;
         }
         return false;
@@ -6811,6 +6808,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setOnExpandClickListener(this);
         row.setRemoteViewClickHandler(mOnClickHandler);
         row.setInflationCallback(this);
+        row.setSecureStateProvider(this::isKeyguardCurrentlySecure);
 
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic

@@ -308,7 +308,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
-import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -408,7 +407,6 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
@@ -715,7 +713,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardShowing()
+                && !mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)
                 && !(UserManager.isDeviceInDemoMode(mContext)
                         && mUserController.getCurrentUser().isDemo());
     }
@@ -1211,8 +1209,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Set of app ids that are whitelisted for device idle and thus background check.
      */
     int[] mDeviceIdleWhitelist = new int[0];
-
-    int[] mDeviceIdleUserWhitelist = new int[0];
 
     /**
      * Set of app ids that are temporarily allowed to escape bg check due to high-pri message
@@ -7009,7 +7005,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProfileProc = app;
                 profilerInfo = (mProfilerInfo != null && mProfilerInfo.profileFile != null) ?
                         new ProfilerInfo(mProfilerInfo) : null;
-                agent = profilerInfo.agent;
+                agent = mProfilerInfo != null ? mProfilerInfo.agent : null;
             } else if (app.instr != null && app.instr.mProfileFile != null) {
                 profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
                         null);
@@ -7869,15 +7865,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean isIntentSenderAForegroundService(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE;
-        }
-        return false;
-    }
-
-    @Override
     public Intent getIntentForIntentSender(IIntentSender pendingResult) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "getIntentForIntentSender()");
@@ -8540,7 +8527,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-//xxx
     // Unified app-op and target sdk check
     int appRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
@@ -8550,14 +8536,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return ActivityManager.APP_START_MODE_DELAYED_RIGID;
         }
-        if (uid >= Process.FIRST_APPLICATION_UID && mForceAppStandby) {
-
-            // This is used for implicit broadcasts. User-whitelist should still affect it.
-            if (!isOnDeviceIdleUserWhitelistLocked(uid)) {
-                return ActivityManager.APP_START_MODE_DELAYED;
-            }
-        }
-
         // ...and legacy apps get an AppOp check
         int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
                 uid, packageName);
@@ -8670,11 +8648,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return Arrays.binarySearch(mDeviceIdleWhitelist, appId) >= 0
                 || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0
                 || mPendingTempWhitelist.indexOfKey(uid) >= 0;
-    }
-
-    boolean isOnDeviceIdleUserWhitelistLocked(int uid) {
-        final int appId = UserHandle.getAppId(uid);
-        return Arrays.binarySearch(mDeviceIdleUserWhitelist, appId) >= 0;
     }
 
     private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
@@ -12490,19 +12463,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
+            boolean wasAwake = mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
+            boolean isAwake = wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
             mWakefulness = wakefulness;
 
-            // Also update state in a special way for running foreground services UI.
-            switch (mWakefulness) {
-                case PowerManagerInternal.WAKEFULNESS_ASLEEP:
-                case PowerManagerInternal.WAKEFULNESS_DREAMING:
-                case PowerManagerInternal.WAKEFULNESS_DOZING:
-                    mServices.updateScreenStateLocked(false /* screenOn */);
-                    break;
-                case PowerManagerInternal.WAKEFULNESS_AWAKE:
-                default:
-                    mServices.updateScreenStateLocked(true /* screenOn */);
-                    break;
+            if (wasAwake != isAwake) {
+                // Also update state in a special way for running foreground services UI.
+                mServices.updateScreenStateLocked(isAwake);
+                sendNotifyVrManagerOfSleepState(!isAwake);
             }
         }
     }
@@ -12538,7 +12506,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.applySleepTokensLocked(true /* applyToStacks */);
             if (wasSleeping) {
-                sendNotifyVrManagerOfSleepState(false);
                 updateOomAdjLocked();
             }
         } else if (!mSleeping && shouldSleep) {
@@ -12548,7 +12515,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
-            sendNotifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
         }
     }
@@ -12642,7 +12608,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setLockScreenShown(boolean showing) {
+    public void setLockScreenShown(boolean showing, int secondaryDisplayShowing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -12652,7 +12618,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mKeyguardController.setKeyguardShown(showing);
+                mKeyguardController.setKeyguardShown(showing, secondaryDisplayShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -14073,10 +14039,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                         || Settings.Global.getInt(
                                 resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
-        final boolean supportsPictureInPicture =
-                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow(mContext);
+        final boolean supportsPictureInPicture = supportsMultiWindow &&
+                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         final boolean supportsSplitScreenMultiWindow =
                 ActivityManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
@@ -14178,26 +14144,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mRecentTasks.onSystemReadyLocked();
             mAppOpsService.systemReady();
             mSystemReady = true;
-        }
-
-        final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
-        if (pmi != null) {
-            pmi.registerLowPowerModeObserver(
-                    new PowerManagerInternal.LowPowerModeListener() {
-                        @Override
-                        public int getServiceType() {
-                            return ServiceType.FORCE_APPS_STANDBY;
-                        }
-
-                        @Override
-                        public void onLowPowerModeChanged(PowerSaveState result) {
-                            updateForceAppStandby(result.batterySaverEnabled);
-                        }
-                    });
-            updateForceAppStandby(
-                    pmi.getLowPowerState(ServiceType.FORCE_APPS_STANDBY).batterySaverEnabled);
-        } else {
-            Slog.wtf(TAG, "PowerManagerInternal not found.");
         }
 
         try {
@@ -14359,22 +14305,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);
             traceLog.traceEnd(); // ActivityManagerStartApps
             traceLog.traceEnd(); // PhaseActivityManagerReady
-        }
-    }
-
-    boolean mForceAppStandby;
-
-    void updateForceAppStandby(boolean enabled) {
-        synchronized (this) {
-            if (mForceAppStandby != enabled) {
-                mForceAppStandby = enabled;
-
-                if (mForceAppStandby) {
-                    Slog.w(TAG, "Forcing app standby.");
-
-                    doStopUidForIdleUidsLocked();
-                }
-            }
         }
     }
 
@@ -15947,7 +15877,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
-            pw.println("  mDeviceIdleUserWhitelist=" + Arrays.toString(mDeviceIdleUserWhitelist));
             pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
             if (mPendingTempWhitelist.size() > 0) {
                 pw.println("  mPendingTempWhitelist:");
@@ -23262,21 +23191,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void doStopUidForIdleUidsLocked() {
-        final int size = mActiveUids.size();
-        for (int i = 0; i < size; i++) {
-            final int uid = mActiveUids.keyAt(i);
-            if (uid < Process.FIRST_APPLICATION_UID) {
-                continue;
-            }
-            final UidRecord uidRec = mActiveUids.valueAt(i);
-            if (!uidRec.idle) {
-                continue;
-            }
-            doStopUidLocked(uidRec.uid, uidRec);
-        }
-    }
-
     final void doStopUidLocked(int uid, final UidRecord uidRec) {
         mServices.stopInBackgroundLocked(uid);
         enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
@@ -24077,10 +23991,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setDeviceIdleWhitelist(int[] userAppids, int[] allAppids) {
+        public void setDeviceIdleWhitelist(int[] appids) {
             synchronized (ActivityManagerService.this) {
-                mDeviceIdleUserWhitelist = userAppids;
-                mDeviceIdleWhitelist = allAppids;
+                mDeviceIdleWhitelist = appids;
             }
         }
 
@@ -24168,7 +24081,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void notifyKeyguardTrustedChanged() {
             synchronized (ActivityManagerService.this) {
-                if (mKeyguardController.isKeyguardShowing()) {
+                if (mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
             }

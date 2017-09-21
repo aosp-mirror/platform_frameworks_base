@@ -5159,17 +5159,39 @@ public final class Settings {
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
-         * A 64-bit number (as a hex string) that is randomly
-         * generated when the user first sets up the device and should remain
-         * constant for the lifetime of the user's device. The value may
-         * change if a factory reset is performed on the device.
-         * <p class="note"><strong>Note:</strong> When a device has <a
-         * href="{@docRoot}about/versions/android-4.2.html#MultipleUsers">multiple users</a>
-         * (available on certain devices running Android 4.2 or higher), each user appears as a
-         * completely separate device, so the {@code ANDROID_ID} value is unique to each
-         * user.</p>
+         * On Android 8.0 (API level 26) and higher versions of the platform,
+         * a 64-bit number (expressed as a hexadecimal string), unique to
+         * each combination of app-signing key, user, and device.
+         * Values of {@code ANDROID_ID} are scoped by signing key and user.
+         * The value may change if a factory reset is performed on the
+         * device or if an APK signing key changes.
          *
-         * <p class="note"><strong>Note:</strong> If the caller is an Instant App the id is scoped
+         * For more information about how the platform handles {@code ANDROID_ID}
+         * in Android 8.0 (API level 26) and higher, see <a
+         * href="{@docRoot}preview/behavior-changes.html#privacy-all">
+         * Android 8.0 Behavior Changes</a>.
+         *
+         * <p class="note"><strong>Note:</strong> For apps that were installed
+         * prior to updating the device to a version of Android 8.0
+         * (API level 26) or higher, the value of {@code ANDROID_ID} changes
+         * if the app is uninstalled and then reinstalled after the OTA.
+         * To preserve values across uninstalls after an OTA to Android 8.0
+         * or higher, developers can use
+         * <a href="{@docRoot}guide/topics/data/keyvaluebackup.html">
+         * Key/Value Backup</a>.</p>
+         *
+         * <p>In versions of the platform lower than Android 8.0 (API level 26),
+         * a 64-bit number (expressed as a hexadecimal string) that is randomly
+         * generated when the user first sets up the device and should remain
+         * constant for the lifetime of the user's device.
+         *
+         * On devices that have
+         * <a href="{@docRoot}about/versions/android-4.2.html#MultipleUsers">
+         * multiple users</a>, each user appears as a
+         * completely separate device, so the {@code ANDROID_ID} value is
+         * unique to each user.</p>
+         *
+         * <p class="note"><strong>Note:</strong> If the caller is an Instant App the ID is scoped
          * to the Instant App, it is generated when the Instant App is first installed and reset if
          * the user clears the Instant App.
          */
@@ -6909,8 +6931,9 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
-         * Time in milliseconds (since epoch) when Night display was last activated. Use to decide
-         * whether to apply the current activated state after a reboot or user change.
+         * A String representing the LocalDateTime when Night display was last activated. Use to
+         * decide whether to apply the current activated state after a reboot or user change. In
+         * legacy cases, this is represented by the time in milliseconds (since epoch).
          * @hide
          */
         public static final String NIGHT_DISPLAY_LAST_ACTIVATED_TIME =
@@ -8532,6 +8555,16 @@ public final class Settings {
         public static final String NETWORK_SCORING_UI_ENABLED = "network_scoring_ui_enabled";
 
         /**
+         * Value to specify how long in milliseconds to retain seen score cache curves to be used
+         * when generating SSID only bases score curves.
+         *
+         * Type: long
+         * @hide
+         */
+        public static final String SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS =
+                "speed_label_cache_eviction_age_millis";
+
+        /**
          * Value to specify if network recommendations from
          * {@link com.android.server.NetworkScoreService} are enabled.
          *
@@ -9313,9 +9346,6 @@ public final class Settings {
          * @see com.android.server.power.BatterySaverPolicy
          */
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
-
-        /** @hide */
-        public static final String BATTERY_SAVER_USE_RED_BAR = "battery_saver_use_red_bar";
 
         /**
          * Battery anomaly detection specific settings

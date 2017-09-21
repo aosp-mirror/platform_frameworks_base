@@ -308,7 +308,7 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंग उलटें"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"रंग सुधार मोड"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"और सेटिंग"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"पूर्ण"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"हो गया"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"कनेक्ट है"</string>
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"कनेक्ट किया गया, बैटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> है"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट हो रहा है..."</string>

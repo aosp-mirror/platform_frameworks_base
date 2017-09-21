@@ -1152,7 +1152,7 @@
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कभी भी अनुमति न दें"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"सिमकार्ड निकाला गया"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"मान्‍य सि‍म कार्ड डालकर पुन: प्रारंभ करने तक मोबाइल नेटवर्क अनुपलब्‍ध रहेगा."</string>
-    <string name="sim_done_button" msgid="827949989369963775">"पूर्ण"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"हो गया"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोड़ा गया"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाइल नेटवर्क की पहुंच पाने लिए अपना डिवाइस फिर से चालू करें."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"फिर से शुरू करें"</string>
@@ -1164,7 +1164,7 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"समय सेट करें"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"तारीख सेट करें"</string>
     <string name="date_time_set" msgid="5777075614321087758">"सेट करें"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"पूर्ण"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"हो गया"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"नया: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> द्वारा प्रदत्त."</string>
     <string name="no_permissions" msgid="7283357728219338112">"किसी अनुमति की आवश्‍यकता नहीं है"</string>
@@ -1176,7 +1176,7 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फ़ोटो स्‍थानांतरण के लिए USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI के लिए USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
-    <string name="usb_notification_message" msgid="3370903770828407960">"अधिक विकल्पों के लिए टैप करें."</string>
+    <string name="usb_notification_message" msgid="3370903770828407960">"ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"एनालॉग ऑडियो एक्सेसरी का पता चला"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"अटैच किया गया डिवाइस इस फ़ोन से संगत नहीं है. अधिक जानने के लिए टैप करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
@@ -1255,7 +1255,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"सर्च करें"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"भेजें"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"आगे"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"पूर्ण"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"हो गया"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"पीछे जाएं"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"निष्‍पादित करें"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g> के उपयोग द्वारा \n नंबर डायल करें"</string>
@@ -1297,14 +1297,14 @@
     <string name="tethered_notification_message" msgid="2113628520792055377">"सेट करने के लिए टैप करें."</string>
     <string name="back_button_label" msgid="2300470004503343439">"वापस जाएं"</string>
     <string name="next_button_label" msgid="1080555104677992408">"आगे"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"रद्द करें"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"अभी नहीं"</string>
     <string name="no_matches" msgid="8129421908915840737">"कोई मिलान नहीं"</string>
     <string name="find_on_page" msgid="1946799233822820384">"पेज पर ढूंढें"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
     </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"पूर्ण"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"हो गया"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB मेमोरी मिटाया जा रहा है…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD कार्ड मिटाया जा रहा है…"</string>
     <string name="share" msgid="1778686618230011964">"साझा करें"</string>
@@ -1346,7 +1346,7 @@
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"रद्द करें"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"मिटाएं"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"पूर्ण"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"हो गया"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mode change"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
@@ -1479,7 +1479,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"सुलभता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद किया"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"सुलभता बटन पर टैप करते समय इस्तेमाल की जाने वाली सुविधा चुनें:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"सुविधाओं में बदलाव करने के लिए, सुलभता बटन को दबाकर रखें."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"आवर्धन"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"बड़ा करें"</string>
     <string name="user_switched" msgid="3768006783166984410">"मौजूदा उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा प्रस्‍थान किया जा रहा है…"</string>
@@ -1594,7 +1594,7 @@
     <string name="immersive_cling_title" msgid="8394201622932303336">"पूरे स्क्रीन पर देखें"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ठीक है"</string>
-    <string name="done_label" msgid="2093726099505892398">"पूर्ण"</string>
+    <string name="done_label" msgid="2093726099505892398">"हो गया"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"मिनटों का चक्राकार स्लाइडर"</string>
     <string name="select_hours" msgid="6043079511766008245">"घंटे चुनें"</string>

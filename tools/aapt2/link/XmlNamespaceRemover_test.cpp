@@ -18,6 +18,10 @@
 
 #include "test/Test.h"
 
+using ::testing::NotNull;
+using ::testing::SizeIs;
+using ::testing::StrEq;
+
 namespace aapt {
 
 class XmlUriTestVisitor : public xml::Visitor {
@@ -25,16 +29,14 @@ class XmlUriTestVisitor : public xml::Visitor {
   XmlUriTestVisitor() = default;
 
   void Visit(xml::Element* el) override {
-    for (const auto& attr : el->attributes) {
-      EXPECT_EQ(std::string(), attr.namespace_uri);
-    }
-    EXPECT_EQ(std::string(), el->namespace_uri);
-    xml::Visitor::Visit(el);
-  }
+    EXPECT_THAT(el->namespace_decls, SizeIs(0u));
 
-  void Visit(xml::Namespace* ns) override {
-    EXPECT_EQ(std::string(), ns->namespace_uri);
-    xml::Visitor::Visit(ns);
+    for (const auto& attr : el->attributes) {
+      EXPECT_THAT(attr.namespace_uri, StrEq(""));
+    }
+    EXPECT_THAT(el->namespace_uri, StrEq(""));
+
+    xml::Visitor::Visit(el);
   }
 
  private:
@@ -45,10 +47,9 @@ class XmlNamespaceTestVisitor : public xml::Visitor {
  public:
   XmlNamespaceTestVisitor() = default;
 
-  void Visit(xml::Namespace* ns) override {
-    ADD_FAILURE() << "Detected namespace: " << ns->namespace_prefix << "=\""
-                  << ns->namespace_uri << "\"";
-    xml::Visitor::Visit(ns);
+  void Visit(xml::Element* el) override {
+    EXPECT_THAT(el->namespace_decls, SizeIs(0u));
+    xml::Visitor::Visit(el);
   }
 
  private:
@@ -58,8 +59,7 @@ class XmlNamespaceTestVisitor : public xml::Visitor {
 class XmlNamespaceRemoverTest : public ::testing::Test {
  public:
   void SetUp() override {
-    context_ =
-        test::ContextBuilder().SetCompilationPackage("com.app.test").Build();
+    context_ = test::ContextBuilder().SetCompilationPackage("com.app.test").Build();
   }
 
  protected:
@@ -75,8 +75,8 @@ TEST_F(XmlNamespaceRemoverTest, RemoveUris) {
   XmlNamespaceRemover remover;
   ASSERT_TRUE(remover.Consume(context_.get(), doc.get()));
 
-  xml::Node* root = doc.get()->root.get();
-  ASSERT_NE(root, nullptr);
+  xml::Node* root = doc->root.get();
+  ASSERT_THAT(root, NotNull());
 
   XmlUriTestVisitor visitor;
   root->Accept(&visitor);
@@ -93,8 +93,8 @@ TEST_F(XmlNamespaceRemoverTest, RemoveNamespaces) {
   XmlNamespaceRemover remover;
   ASSERT_TRUE(remover.Consume(context_.get(), doc.get()));
 
-  xml::Node* root = doc.get()->root.get();
-  ASSERT_NE(root, nullptr);
+  xml::Node* root = doc->root.get();
+  ASSERT_THAT(root, NotNull());
 
   XmlNamespaceTestVisitor visitor;
   root->Accept(&visitor);
@@ -112,8 +112,8 @@ TEST_F(XmlNamespaceRemoverTest, RemoveNestedNamespaces) {
   XmlNamespaceRemover remover;
   ASSERT_TRUE(remover.Consume(context_.get(), doc.get()));
 
-  xml::Node* root = doc.get()->root.get();
-  ASSERT_NE(root, nullptr);
+  xml::Node* root = doc->root.get();
+  ASSERT_THAT(root, NotNull());
 
   XmlNamespaceTestVisitor visitor;
   root->Accept(&visitor);

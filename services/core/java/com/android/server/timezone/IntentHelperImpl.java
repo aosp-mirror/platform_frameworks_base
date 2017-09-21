@@ -36,16 +36,13 @@ final class IntentHelperImpl implements IntentHelper {
     private final Context mContext;
     private String mUpdaterAppPackageName;
 
-    private boolean mReliabilityReceiverEnabled;
-    private Receiver mReliabilityReceiver;
-
     IntentHelperImpl(Context context) {
         mContext = context;
     }
 
     @Override
-    public void initialize(
-            String updaterAppPackageName, String dataAppPackageName, Listener listener) {
+    public void initialize(String updaterAppPackageName, String dataAppPackageName,
+            PackageTracker packageTracker) {
         mUpdaterAppPackageName = updaterAppPackageName;
 
         // Register for events of interest.
@@ -53,21 +50,33 @@ final class IntentHelperImpl implements IntentHelper {
         // The intent filter that triggers when package update events happen that indicate there may
         // be work to do.
         IntentFilter packageIntentFilter = new IntentFilter();
-        // Either of these mean a downgrade?
-        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+
         packageIntentFilter.addDataScheme("package");
         packageIntentFilter.addDataSchemeSpecificPart(
                 updaterAppPackageName, PatternMatcher.PATTERN_LITERAL);
         packageIntentFilter.addDataSchemeSpecificPart(
                 dataAppPackageName, PatternMatcher.PATTERN_LITERAL);
-        Receiver packageUpdateReceiver = new Receiver(listener, true /* packageUpdated */);
-        mContext.registerReceiver(packageUpdateReceiver, packageIntentFilter);
 
-        // TODO(nfuller): Add more exotic intents as needed. e.g.
-        // packageIntentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        // Also, disabled...?
-        mReliabilityReceiver = new Receiver(listener, false /* packageUpdated */);
+        // ACTION_PACKAGE_ADDED is fired when a package is upgraded or downgraded (in addition to
+        // ACTION_PACKAGE_REMOVED and ACTION_PACKAGE_REPLACED). A system/priv-app can never be
+        // removed entirely so we do not need to trigger on ACTION_PACKAGE_REMOVED or
+        // ACTION_PACKAGE_FULLY_REMOVED.
+        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+
+        // ACTION_PACKAGE_CHANGED is used when a package is disabled / re-enabled. It is not
+        // strictly necessary to trigger on this but it won't hurt anything and may catch some cases
+        // where a package has changed while disabled.
+        // Note: ACTION_PACKAGE_CHANGED is not fired when updating a suspended app, but
+        // ACTION_PACKAGE_ADDED, ACTION_PACKAGE_REMOVED and ACTION_PACKAGE_REPLACED are (and the app
+        // is left in an unsuspended state after this).
+        packageIntentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+
+        // We do not register for ACTION_PACKAGE_RESTARTED because it doesn't imply an update.
+        // We do not register for ACTION_PACKAGE_DATA_CLEARED because the updater / data apps are
+        // not expected to need local data.
+
+        Receiver packageUpdateReceiver = new Receiver(packageTracker);
+        mContext.registerReceiver(packageUpdateReceiver, packageIntentFilter);
     }
 
     /** Sends an intent to trigger an update check. */
@@ -79,39 +88,26 @@ final class IntentHelperImpl implements IntentHelper {
     }
 
     @Override
-    public synchronized void enableReliabilityTriggering() {
-        if (!mReliabilityReceiverEnabled) {
-            // The intent filter that exists to make updates reliable in the event of failures /
-            // reboots.
-            IntentFilter reliabilityIntentFilter = new IntentFilter();
-            reliabilityIntentFilter.addAction(Intent.ACTION_IDLE_MAINTENANCE_START);
-            mContext.registerReceiver(mReliabilityReceiver, reliabilityIntentFilter);
-            mReliabilityReceiverEnabled = true;
-        }
+    public synchronized void scheduleReliabilityTrigger(long minimumDelayMillis) {
+        TimeZoneUpdateIdler.schedule(mContext, minimumDelayMillis);
     }
 
     @Override
-    public synchronized void disableReliabilityTriggering() {
-        if (mReliabilityReceiverEnabled) {
-            mContext.unregisterReceiver(mReliabilityReceiver);
-            mReliabilityReceiverEnabled = false;
-        }
+    public synchronized void unscheduleReliabilityTrigger() {
+        TimeZoneUpdateIdler.unschedule(mContext);
     }
 
     private static class Receiver extends BroadcastReceiver {
-        private final Listener mListener;
-        private final boolean mPackageUpdated;
+        private final PackageTracker mPackageTracker;
 
-        private Receiver(Listener listener, boolean packageUpdated) {
-            mListener = listener;
-            mPackageUpdated = packageUpdated;
+        private Receiver(PackageTracker packageTracker) {
+            mPackageTracker = packageTracker;
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.d(TAG, "Received intent: " + intent.toString());
-            mListener.triggerUpdateIfNeeded(mPackageUpdated);
+            mPackageTracker.triggerUpdateIfNeeded(true /* packageChanged */);
         }
     }
-
 }

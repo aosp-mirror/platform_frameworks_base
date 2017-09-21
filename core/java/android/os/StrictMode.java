@@ -791,7 +791,7 @@ public final class StrictMode {
 
             /**
              * Detect when an {@link java.io.Closeable} or other
-             * object with a explict termination method is finalized
+             * object with an explicit termination method is finalized
              * without having been closed.
              *
              * <p>You always want to explicitly close such objects to

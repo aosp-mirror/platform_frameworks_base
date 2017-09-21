@@ -1458,9 +1458,9 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 getContext().registerReceiver(mInteractivityReceiver, filter);
 
-                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
+                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
-                mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
+                mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
 
                 updateInteractivityLocked();
             }
@@ -2389,7 +2389,7 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting activity manager whitelist to "
                         + Arrays.toString(mPowerSaveWhitelistAllAppIdArray));
             }
-            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
+            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
@@ -2403,7 +2403,7 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting alarm whitelist to "
                         + Arrays.toString(mPowerSaveWhitelistUserAppIdArray));
             }
-            mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
+            mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
         }
     }
 

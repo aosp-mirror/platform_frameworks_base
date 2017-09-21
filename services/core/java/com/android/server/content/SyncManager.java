@@ -143,6 +143,7 @@ public class SyncManager {
 
     private static final boolean DEBUG_ACCOUNT_ACCESS = false;
 
+    // Only do the check on a debuggable build.
     private static final boolean ENABLE_SUSPICIOUS_CHECK = Build.IS_DEBUGGABLE;
 
     /** Delay a sync due to local changes this long. In milliseconds */
@@ -537,9 +538,11 @@ public class SyncManager {
      * @return whether the device most likely has some periodic syncs.
      */
     private boolean likelyHasPeriodicSyncs() {
-        // STOPSHIP Remove the google specific string.
         try {
-            return AccountManager.get(mContext).getAccountsByType("com.google").length > 0;
+            // Each sync adapter has a daily periodic sync by default, but sync adapters can remove
+            // them by themselves. So here, we use an arbitrary threshold. If there are more than
+            // this many sync endpoints, surely one of them should have a periodic sync...
+            return mSyncStorageEngine.getAuthorityCount() >= 6;
         } catch (Throwable th) {
             // Just in case.
         }
@@ -3775,46 +3778,8 @@ public class SyncManager {
         }
         if (op.isPeriodic) {
             mLogger.log("Removing periodic sync ", op, " for ", why);
-
-            if (ENABLE_SUSPICIOUS_CHECK && isSuspiciousPeriodicSyncRemoval(op)) {
-                wtfWithLog("Suspicious removal of " + op + " for " + why);
-            }
         }
         getJobScheduler().cancel(op.jobId);
-    }
-
-    private boolean isSuspiciousPeriodicSyncRemoval(SyncOperation op) {
-        // STOPSHIP Remove the google specific string.
-        if (!op.isPeriodic){
-            return false;
-        }
-        boolean found = false;
-        for (UserInfo user : UserManager.get(mContext).getUsers(/*excludeDying=*/ true)) {
-            if (op.target.userId == user.id) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            return false; // User is being removed, okay.
-        }
-        switch (op.target.provider) {
-            case "gmail-ls":
-            case "com.android.contacts.metadata":
-                break;
-            default:
-                return false;
-        }
-        final Account account = op.target.account;
-        final Account[] accounts = AccountManager.get(mContext)
-                .getAccountsByTypeAsUser(account.type, UserHandle.of(op.target.userId));
-        for (Account a : accounts) {
-            if (a.equals(account)) {
-                return true; // Account still exists.  Suspicious!
-            }
-        }
-        // Account no longer exists. Makes sense...
-        return false;
     }
 
     private void wtfWithLog(String message) {

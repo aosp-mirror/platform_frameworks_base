@@ -231,6 +231,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         updateRequestedVisibility();
 
         mAttachedToWindow = true;
+        mParent.requestTransparentRegion(SurfaceView.this);
         if (!mGlobalListenersAdded) {
             ViewTreeObserver observer = getViewTreeObserver();
             observer.addOnScrollChangedListener(mScrollChangedListener);
@@ -269,8 +270,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         if (mPendingReportDraws > 0) {
             mDrawFinished = true;
             if (mAttachedToWindow) {
-                mParent.requestTransparentRegion(SurfaceView.this);
-                
                 notifyDrawFinished();
                 invalidate();
             }

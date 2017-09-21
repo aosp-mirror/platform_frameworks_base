@@ -18,7 +18,6 @@ package android.hardware.camera2;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -37,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -122,7 +122,7 @@ public final class DngCreator implements AutoCloseable {
         // Create this fresh each time since the time zone may change while a long-running application
         // is active.
         final DateFormat dateTimeStampFormat =
-            new SimpleDateFormat(TIFF_DATETIME_FORMAT);
+                new SimpleDateFormat(TIFF_DATETIME_FORMAT, Locale.US);
         dateTimeStampFormat.setTimeZone(TimeZone.getDefault());
 
         // Format for metadata
@@ -472,7 +472,8 @@ public final class DngCreator implements AutoCloseable {
 
     private static final String GPS_DATE_FORMAT_STR = "yyyy:MM:dd";
     private static final String TIFF_DATETIME_FORMAT = "yyyy:MM:dd HH:mm:ss";
-    private static final DateFormat sExifGPSDateStamp = new SimpleDateFormat(GPS_DATE_FORMAT_STR);
+    private static final DateFormat sExifGPSDateStamp =
+            new SimpleDateFormat(GPS_DATE_FORMAT_STR, Locale.US);
     private final Calendar mGPSTimeStampCalendar = Calendar
             .getInstance(TimeZone.getTimeZone("UTC"));
 

@@ -352,7 +352,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Chargée dans <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"N\'est pas en charge"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Le réseau peut\nêtre surveillé."</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Recherche"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faire glisser le doigt vers le haut : <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser votre doigt vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="1149025108714420281">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants que vous sélectionnez. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>

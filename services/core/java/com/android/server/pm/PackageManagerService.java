@@ -577,8 +577,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 5;
+    public static final int REASON_SHARED = 6;
 
-    public static final int REASON_LAST = REASON_INACTIVE_PACKAGE_DOWNGRADE;
+    public static final int REASON_LAST = REASON_SHARED;
 
     /** All dangerous permission names in the same order as the events in MetricsEvent */
     private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
@@ -2711,8 +2712,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         // Actual deletion of code and data will be handled by later
                         // reconciliation step
                     } else {
-                        final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
-                        if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
+                        // we still have a disabled system package, but, it still might have
+                        // been removed. check the code path still exists and check there's
+                        // still a package. the latter can happen if an OTA keeps the same
+                        // code path, but, changes the package name.
+                        final PackageSetting disabledPs =
+                                mSettings.getDisabledSystemPkgLPr(ps.name);
+                        if (disabledPs.codePath == null || !disabledPs.codePath.exists()
+                                || disabledPs.pkg == null) {
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
                         }
                     }
@@ -9797,19 +9804,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     compilerFilter,
                     dexoptFlags));
 
-            if (pkg.isSystemApp()) {
-                // Only dexopt shared secondary dex files belonging to system apps to not slow down
-                // too much boot after an OTA.
-                int secondaryDexoptFlags = dexoptFlags |
-                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                        DexoptOptions.DEXOPT_ONLY_SHARED_DEX;
-                mDexManager.dexoptSecondaryDex(new DexoptOptions(
-                        pkg.packageName,
-                        compilerFilter,
-                        secondaryDexoptFlags));
-            }
-
-            // TODO(shubhamajmera): Record secondary dexopt stats.
             switch (primaryDexOptStaus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
                     numberOfPackagesOptimized++;
@@ -11398,6 +11392,10 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + " but expected at " + known.codePathString
                                     + "; ignoring.");
                         }
+                    } else {
+                        throw new PackageManagerException(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                                "Application package " + pkg.packageName
+                                + " not found; ignoring.");
                     }
                 }
             }
@@ -25142,6 +25140,37 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             }
             return results;
+        }
+
+        // NB: this differentiates between preloads and sideloads
+        @Override
+        public String getInstallerForPackage(String packageName) throws RemoteException {
+            final String installerName = getInstallerPackageName(packageName);
+            if (!TextUtils.isEmpty(installerName)) {
+                return installerName;
+            }
+            // differentiate between preload and sideload
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo appInfo = getApplicationInfo(packageName,
+                                    /*flags*/ 0,
+                                    /*userId*/ callingUser);
+            if (appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return "preload";
+            }
+            return "";
+        }
+
+        @Override
+        public int getVersionCodeForPackage(String packageName) throws RemoteException {
+            try {
+                int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+                PackageInfo pInfo = getPackageInfo(packageName, 0, callingUser);
+                if (pInfo != null) {
+                    return pInfo.versionCode;
+                }
+            } catch (Exception e) {
+            }
+            return 0;
         }
     }
 

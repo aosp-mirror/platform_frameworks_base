@@ -38,6 +38,7 @@ import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
+import android.net.metrics.WakeupStats;
 import android.os.Parcelable;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -112,6 +113,22 @@ final public class IpConnectivityEventBuilder {
         dnsLookupBatch.latenciesMs = in.latenciesMs;
         final IpConnectivityEvent out = buildEvent(in.netId, in.transports, null);
         out.setDnsLookupBatch(dnsLookupBatch);
+        return out;
+    }
+
+    public static IpConnectivityEvent toProto(WakeupStats in) {
+        IpConnectivityLogClass.WakeupStats wakeupStats =
+                new IpConnectivityLogClass.WakeupStats();
+        in.updateDuration();
+        wakeupStats.durationSec = in.durationSec;
+        wakeupStats.totalWakeups = in.totalWakeups;
+        wakeupStats.rootWakeups = in.rootWakeups;
+        wakeupStats.systemWakeups = in.systemWakeups;
+        wakeupStats.nonApplicationWakeups = in.nonApplicationWakeups;
+        wakeupStats.applicationWakeups = in.applicationWakeups;
+        wakeupStats.noUidWakeups = in.noUidWakeups;
+        final IpConnectivityEvent out = buildEvent(0, 0, in.iface);
+        out.setWakeupStats(wakeupStats);
         return out;
     }
 

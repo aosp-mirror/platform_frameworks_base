@@ -177,7 +177,7 @@ public abstract class ActivityManagerInternal {
     /**
      * Allow DeviceIdleController to tell us about what apps are whitelisted.
      */
-    public abstract void setDeviceIdleWhitelist(int[] userAppids, int[] allAppids);
+    public abstract void setDeviceIdleWhitelist(int[] appids);
 
     /**
      * Update information about which app IDs are on the temp whitelist.

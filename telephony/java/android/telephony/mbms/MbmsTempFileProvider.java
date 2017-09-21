@@ -23,12 +23,11 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.telephony.MbmsDownloadSession;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +38,6 @@ import java.util.Objects;
  * @hide
  */
 public class MbmsTempFileProvider extends ContentProvider {
-    public static final String DEFAULT_TOP_LEVEL_TEMP_DIRECTORY = "androidMbmsTempFileRoot";
     public static final String TEMP_FILE_ROOT_PREF_FILE_NAME = "MbmsTempFileRootPrefs";
     public static final String TEMP_FILE_ROOT_PREF_NAME = "mbms_temp_file_root";
 
@@ -182,8 +180,8 @@ public class MbmsTempFileProvider extends ContentProvider {
             if (storedTempFileRoot != null) {
                 return new File(storedTempFileRoot).getCanonicalFile();
             } else {
-                return new File(context.getFilesDir(), DEFAULT_TOP_LEVEL_TEMP_DIRECTORY)
-                        .getCanonicalFile();
+                return new File(context.getFilesDir(),
+                        MbmsDownloadSession.DEFAULT_TOP_LEVEL_TEMP_DIRECTORY).getCanonicalFile();
             }
         } catch (IOException e) {
             throw new RuntimeException("Unable to canonicalize temp file root path " + e);

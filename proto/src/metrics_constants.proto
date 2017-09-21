@@ -33,7 +33,7 @@ message MetricsEvent {
     // The view became hidden.
     TYPE_CLOSE = 2;
 
-    // The view switched to detail mode (most relevant for quick settings tiles)
+    // The view switched to detail mode (most relevant for quick settings tiles and notifications)
     TYPE_DETAIL = 3;
 
     // The view or control was activated.
@@ -70,6 +70,9 @@ message MetricsEvent {
     // Type for APP_TRANSITION_REPORTED_DRAWN event: The activity was started with restoring from
     // a bundle.
     TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE = 13;
+
+    // The view switched to summary mode (most relevant for notifications)
+    TYPE_COLLAPSE = 14;
   }
 
   // Types of alerts, as bit field values
@@ -156,6 +159,16 @@ message MetricsEvent {
 
     // An external camera was used
     CAMERA_EXTERNAL_USED = 2;
+  }
+
+  // TextClassifier entity types.
+  enum TextClassifierEntityType {
+    TEXT_CLASSIFIER_TYPE_UNKNOWN = 1;
+    TEXT_CLASSIFIER_TYPE_OTHER = 2;
+    TEXT_CLASSIFIER_TYPE_EMAIL = 3;
+    TEXT_CLASSIFIER_TYPE_PHONE = 4;
+    TEXT_CLASSIFIER_TYPE_ADDRESS = 5;
+    TEXT_CLASSIFIER_TYPE_URL = 6;
   }
 
   // Known visual elements: views or controls.
@@ -4310,6 +4323,211 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O MR
     FIELD_SETTINGS_SMART_SUGGESTIONS_ENABLED = 1097;
+
+    // ACTION: The device boots
+    ACTION_BOOT = 1098;
+
+    // FIELD: A string value representing some state of the platform, e.g., boot reason
+    FIELD_PLATFORM_REASON = 1099;
+
+    // CATEGORY: The category for all actions relating to selection session logging.
+    // OS: O MR
+    TEXT_SELECTION_SESSION = 1100;
+
+    // ACTION: A selection session started (i.e. the selection handles appeared)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_START = 1101;
+
+    // ACTION: The user modified the selection (e.g. by dragging the handles)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_MODIFY = 1102;
+
+    // ACTION: The user modified the selection by pressing the "select all" button.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SELECT_ALL = 1103;
+
+    // ACTION: The user modified the selection by pressing on a word in a multi word selection
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_RESET = 1104;
+
+    // ACTION: Smart selection made a single word prediction
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_SINGLE = 1105;
+
+    // ACTION: Smart selection made a multi word prediction
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_MULTI = 1106;
+
+    // ACTION: The app made an automatic selection on the user's behalf (not smart selection)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_AUTO = 1107;
+
+    // ACTION: A selection session ended with the user typing over the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_OVERTYPE = 1108;
+
+    // ACTION: A selection session ended with the user copying the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_COPY = 1109;
+
+    // ACTION: A selection session ended with the user pasting over the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_PASTE = 1110;
+
+    // ACTION: A selection session ended with the user cutting the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_CUT = 1111;
+
+    // ACTION: A selection session ended with the user pressing the share button
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SHARE = 1112;
+
+    // ACTION: A selection session ended with the user pressing the smart share button
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_SHARE = 1113;
+
+    // ACTION: A selection session ended with the user dragging the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_DRAG = 1114;
+
+    // ACTION: A selection session ended with the user abandoning the selection
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_ABANDON = 1115;
+
+    // ACTION: A selection session ended with the user picking an unhandled action bar item
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_OTHER = 1116;
+
+    // FIELD: Time in milliseconds from the start of the session to this event
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SINCE_START = 1117;
+
+    // FIELD: time in milliseconds between the last event in the session and this one
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SINCE_PREVIOUS = 1118;
+
+    // FIELD: a random uid for a selection session (lasting from select start to end)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SESSION_ID = 1119;
+
+    // FIELD: the sequence number of the event in the session
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SESSION_INDEX = 1120;
+
+    // FIELD: a concatenation of the widget type and ML model version.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_VERSION_TAG = 1121;
+
+    // FIELD: text select start offset in words (as defined by the ICU BreakIterator), stored as two
+    //        packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_RANGE = 1122;
+
+    // FIELD: smart text selection start offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SMART_RANGE = 1123;
+
+    // The value of an autofillable and savable view was reset
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_PREVIOUS_LENGTH: the previous length of the value
+    AUTOFILL_VALUE_RESET = 1124;
+
+    // Tag of AUTOFILL_VALUE_RESET
+    // OS: O MR
+    FIELD_AUTOFILL_PREVIOUS_LENGTH = 1125;
+
+    // An autofill dataset authentification succeeded
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_DATASET_AUTHENTICATED = 1126;
+
+    // An autofill service provided an invalid dataset authentification
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_INVALID_DATASET_AUTHENTICATION = 1127;
+
+    // An autofill service provided an invalid authentification extra
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_INVALID_AUTHENTICATION = 1128;
+
+    // An autofill service used a custom description (using RemoteViews) in the Save affordance
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_CUSTOM_DESCRIPTION = 1129;
+
+    // FIELD - Type of save object passed by the service when the Save UI is shown
+    // OS: O MR
+    FIELD_AUTOFILL_SAVE_TYPE = 1130;
+
+    // An autofill service used a custom subtitle (String) in the Save affordance
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
+
+    // User tapped a link in the custom description of the Save affordance provided by an autofill service
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_UNKNOWN: The link was not properly set by the service
+    // Type TYPE_OPEN: The link launched an activity
+    // Type TYPE_FAILURE: The link could not launc an activity
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_LINK_TAPPED = 1132;
+
+    // Result of the validation on save when an autofill service provided a validator
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_FAILURE: The validation could not be performed due to an error
+    // Type TYPE_SUCCESS: The validation passed
+    // Type TYPE_DISMISS: The validation failed
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_VALIDATION = 1133;
+
+    // Result of an operation in the autofill save affordance after the user tapped a link in the custom description
+    // provided by the autofill service
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_OPEN: The save affordance was restored
+    // Type TYPE_DISMISS: The save affordcance was destroyed
+    // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
+    AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
+
+    // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

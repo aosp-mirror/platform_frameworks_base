@@ -8515,8 +8515,15 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
-            title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE), ambient);
-            text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT), ambient);
+            this.title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE), ambient);
+
+            // Big text notifications should contain their content when viewed in ambient mode.
+            CharSequence text = extras.getCharSequence(EXTRA_BIG_TEXT);
+            if (!ambient || TextUtils.isEmpty(text)) {
+                text = extras.getCharSequence(EXTRA_TEXT);
+            }
+            this.text = b.processLegacyText(text, ambient);
+
             return this;
         }
     }

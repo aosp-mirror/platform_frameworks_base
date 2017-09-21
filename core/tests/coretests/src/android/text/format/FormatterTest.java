@@ -17,10 +17,12 @@
 package android.text.format;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.icu.util.MeasureUnit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -32,6 +34,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Locale;
+import java.util.Set;
+
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -204,5 +208,25 @@ public class FormatterTest {
         res.updateConfiguration(config, res.getDisplayMetrics());
 
         Locale.setDefault(locale);
+    }
+
+    /**
+     * Verifies that Formatter doesn't "leak" the locally defined petabyte unit into ICU via the
+     * {@link MeasureUnit} registry. This test can fail for two reasons:
+     * 1. we regressed and started leaking again. In this case the code needs to be fixed.
+     * 2. ICU started supporting petabyte as a unit, in which case change one needs to revert this
+     * change (I494fb59a3b3742f35cbdf6b8705817f404a2c6b0), remove Formatter.PETABYTE and replace any
+     * usages of that field with just MeasureUnit.PETABYTE.
+     */
+    // http://b/65632959
+    @Test
+    public void doesNotLeakPetabyte() {
+        // Ensure that the Formatter class is loaded when we call .getAvailable().
+        Formatter.formatFileSize(mContext, Long.MAX_VALUE);
+        Set<MeasureUnit> digitalUnits = MeasureUnit.getAvailable("digital");
+        for (MeasureUnit unit : digitalUnits) {
+            // This assert can fail if we don't leak PETABYTE, but ICU has added it, see #2 above.
+            assertNotEquals("petabyte", unit.getSubtype());
+        }
     }
 }

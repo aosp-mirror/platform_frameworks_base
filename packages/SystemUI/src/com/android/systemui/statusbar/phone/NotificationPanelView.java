@@ -509,7 +509,8 @@ public class NotificationPanelView extends PanelView implements
             if (row.isRemoved()) {
                 continue;
             }
-            availableSpace -= child.getMinHeight() + notificationPadding;
+            availableSpace -= child.getMinHeight(true /* ignoreTemporaryStates */)
+                    + notificationPadding;
             if (availableSpace >= 0 && count < maximum) {
                 count++;
             } else if (availableSpace > -shelfSize) {

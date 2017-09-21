@@ -1142,12 +1142,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 continue;
             }
             try {
-                result.put(userId, getDecryptedPasswordForTiedProfile(userId));
+                result.put(managedUserId, getDecryptedPasswordForTiedProfile(managedUserId));
             } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
                     | NoSuchPaddingException | InvalidKeyException
                     | InvalidAlgorithmParameterException | IllegalBlockSizeException
                     | BadPaddingException | CertificateException | IOException e) {
-                // ignore
+                Slog.e(TAG, "getDecryptedPasswordsForAllTiedProfiles failed for user " +
+                    managedUserId, e);
             }
         }
         return result;
@@ -2363,6 +2364,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     getGateKeeperService(), tokenHandle, token, userId);
             if (result.authToken == null) {
                 Slog.w(TAG, "Invalid escrow token supplied");
+                return false;
+            }
+            if (result.gkResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+                // Most likely, an untrusted credential reset happened in the past which
+                // changed the synthetic password
+                Slog.e(TAG, "Obsolete token: synthetic password derived but it fails GK "
+                        + "verification.");
                 return false;
             }
             // Update PASSWORD_TYPE_KEY since it's needed by notifyActivePasswordMetricsAvailable()

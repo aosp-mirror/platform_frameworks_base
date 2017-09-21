@@ -578,9 +578,8 @@ final class RemoteFillService implements DeathRecipient {
         public void run() {
             synchronized (mLock) {
                 if (isCancelledLocked()) {
-                    // TODO(b/653742740): we should probably return here, but for now we're justing
-                    // logging to confirm this is the problem if it happens again.
-                    Slog.e(LOG_TAG, "run() called after canceled: " + mRequest);
+                    if (sDebug) Slog.d(LOG_TAG, "run() called after canceled: " + mRequest);
+                    return;
                 }
             }
             final RemoteFillService remoteService = getService();
