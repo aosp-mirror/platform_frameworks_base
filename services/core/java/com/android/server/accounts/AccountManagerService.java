@@ -5285,7 +5285,7 @@ public class AccountManagerService
                         == PackageManager.PERMISSION_GRANTED) {
                     // Checks runtime permission revocation.
                     final int opCode = AppOpsManager.permissionToOpCode(perm);
-                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOp(
+                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOpNoThrow(
                             opCode, uid, packageName) == AppOpsManager.MODE_ALLOWED) {
                         return true;
                     }
@@ -5306,7 +5306,7 @@ public class AccountManagerService
                     Log.v(TAG, "  caller uid " + callingUid + " has " + perm);
                 }
                 final int opCode = AppOpsManager.permissionToOpCode(perm);
-                if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOp(
+                if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOpNoThrow(
                         opCode, callingUid, opPackageName) == AppOpsManager.MODE_ALLOWED) {
                     return true;
                 }
