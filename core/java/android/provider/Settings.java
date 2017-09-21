@@ -10200,7 +10200,7 @@ public final class Settings {
                 "allow_user_switching_when_system_user_locked";
 
         /**
-         * Boot count since the device starts running APK level 24.
+         * Boot count since the device starts running API level 24.
          * <p>
          * Type: int
          */
