@@ -579,7 +579,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ਬੈਟਰੀ ਸੇਵਰ"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਡੈਟੇ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ  ਡਾਟੇ  ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ਬਟਨ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Back"</string>
