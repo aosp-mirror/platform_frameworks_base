@@ -21,8 +21,10 @@
 #include <parse_util.h>
 
 using namespace android;
-using android::os::statsd::EventMetricData;
-using android::os::statsd::StatsLogReport;
+
+namespace android {
+namespace os {
+namespace statsd {
 
 StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs")
 {
@@ -71,3 +73,7 @@ StatsLogProcessor::UpdateConfig(const int config_source, StatsdConfig config)
     m_configs[config_source] = config;
     ALOGD("Updated configuration for source %i", config_source);
 }
+
+} // namespace statsd
+} // namespace os
+} // namespace android

@@ -18,10 +18,13 @@
 #define LOGREADER_H
 
 #include <log/log_read.h>
-
 #include <utils/RefBase.h>
 
 #include <vector>
+
+namespace android {
+namespace os {
+namespace statsd {
 
 /**
  * Callback for LogReader 
@@ -77,5 +80,9 @@ private:
      */
     int connect_and_read();
 };
+
+} // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif // LOGREADER_H

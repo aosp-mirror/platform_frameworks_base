@@ -17,11 +17,13 @@
 #define LOG_TAG "AnomalyMonitor"
 #define DEBUG true
 
-#include <AnomalyMonitor.h>
+#include "AnomalyMonitor.h"
 
 #include <cutils/log.h>
 
-using namespace android::os::statsd;
+namespace android {
+namespace os {
+namespace statsd {
 
 AnomalyMonitor::AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec)
         : mRegisteredAlarmTimeSec(0),
@@ -100,3 +102,7 @@ void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
 int64_t AnomalyMonitor::secToMs(uint32_t timeSec) {
     return ((int64_t) timeSec) * 1000;
 }
+
+} // namespace statsd
+} // namespace os
+} // namespace android

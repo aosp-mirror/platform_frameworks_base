@@ -34,12 +34,12 @@ using namespace android;
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
-using namespace android::os::statsd;
 using namespace std;
 
-using android::os::statsd::StatsdConfig;
+namespace android {
+namespace os {
+namespace statsd {
 
-// ================================================================================
 class StatsService : public BnStatsManager {
 public:
     StatsService(const sp<Looper>& handlerLooper);
@@ -69,15 +69,14 @@ public:
 private:
     sp<StatsLogProcessor> m_processor; // Reference to the processor for updating configs.
 
+    const sp<AnomalyMonitor> mAnomalyMonitor;  // TODO: Move this to a more logical file/class
+
     status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
 
     void printCmdHelp(FILE* out);
 
     status_t doLoadConfig(FILE* in);
 
-    const sp<AnomalyMonitor> mAnomalyMonitor;  // TODO: Move this to a more logical file/class
-
- private:
     /** Fetches the StatsCompanionService. */
     sp<IStatsCompanionService> getStatsCompanionService();
 };
@@ -94,5 +93,9 @@ public:
 private:
     const sp<AnomalyMonitor> mAnmlyMntr;
 };
+
+} // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif // STATS_SERVICE_H

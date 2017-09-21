@@ -22,6 +22,10 @@
 
 using namespace android;
 
+namespace android {
+namespace os {
+namespace statsd {
+
 LogEntryPrinter::LogEntryPrinter(int out)
     :m_out(out)
 {
@@ -58,4 +62,8 @@ LogEntryPrinter::OnLogEvent(const log_msg& msg)
         fflush(stdout);
     }
 }
+
+} // namespace statsd
+} // namespace os
+} // namespace android
 
