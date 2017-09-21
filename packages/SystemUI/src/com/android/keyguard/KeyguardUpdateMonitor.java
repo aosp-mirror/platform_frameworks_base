@@ -1069,6 +1069,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onDreamingStateChanged(mIsDreaming);
             }
         }
+        updateFingerprintListeningState();
     }
 
     /**
