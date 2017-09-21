@@ -19,6 +19,7 @@
 #include "SkiaDisplayList.h"
 #include "SkiaPipeline.h"
 #include "utils/TraceUtils.h"
+#include <SkPaintFilterCanvas.h>
 
 namespace android {
 namespace uirenderer {
@@ -151,6 +152,27 @@ static bool layerNeedsPaint(const LayerProperties& properties,
     return false;
 }
 
+class AlphaFilterCanvas : public SkPaintFilterCanvas {
+public:
+    AlphaFilterCanvas(SkCanvas* canvas, float alpha) : SkPaintFilterCanvas(canvas), mAlpha(alpha) {}
+protected:
+    bool onFilter(SkTCopyOnFirstWrite<SkPaint>* paint, Type t) const override {
+        SkTLazy<SkPaint> defaultPaint;
+        if (!*paint) {
+            paint->init(*defaultPaint.init());
+        }
+        paint->writable()->setAlpha((uint8_t)(*paint)->getAlpha()*mAlpha);
+        return true;
+    }
+    void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
+        // We unroll the drawable using "this" canvas, so that draw calls contained inside will
+        // get their alpha applied. THe default SkPaintFilterCanvas::onDrawDrawable does not unroll.
+        drawable->draw(this, matrix);
+    }
+private:
+    float mAlpha;
+};
+
 void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     RenderNode* renderNode = mRenderNode.get();
     float alphaMultiplier = 1.0f;
@@ -211,7 +233,14 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 canvas->restore();
             }
         } else {
-            displayList->draw(canvas);
+            if (alphaMultiplier < 1.0f) {
+                // Non-layer draw for a view with getHasOverlappingRendering=false, will apply
+                // the alpha to the paint of each nested draw.
+                AlphaFilterCanvas alphaCanvas(canvas, alphaMultiplier);
+                displayList->draw(&alphaCanvas);
+            } else {
+                displayList->draw(canvas);
+            }
         }
     }
 }
