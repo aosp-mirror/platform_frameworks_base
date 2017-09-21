@@ -2339,20 +2339,12 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         if (src.mActions != null) {
-            mActions = new ArrayList<>();
-
             Parcel p = Parcel.obtain();
-            int count = src.mActions.size();
-            for (int i = 0; i < count; i++) {
-                p.setDataPosition(0);
-                Action a = src.mActions.get(i);
-                a.writeToParcel(
-                        p, a.hasSameAppInfo(mApplication) ? PARCELABLE_ELIDE_DUPLICATES : 0);
-                p.setDataPosition(0);
-                // Since src is already in memory, we do not care about stack overflow as it has
-                // already been read once.
-                mActions.add(getActionFromParcel(p, 0));
-            }
+            writeActionsToParcel(p);
+            p.setDataPosition(0);
+            // Since src is already in memory, we do not care about stack overflow as it has
+            // already been read once.
+            readActionsFromParcel(p, 0);
             p.recycle();
         }
 
@@ -2393,13 +2385,7 @@ public class RemoteViews implements Parcelable, Filter {
             mLayoutId = parcel.readInt();
             mIsWidgetCollectionChild = parcel.readInt() == 1;
 
-            int count = parcel.readInt();
-            if (count > 0) {
-                mActions = new ArrayList<>(count);
-                for (int i = 0; i < count; i++) {
-                    mActions.add(getActionFromParcel(parcel, depth));
-                }
-            }
+            readActionsFromParcel(parcel, depth);
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
             mLandscape = new RemoteViews(parcel, mBitmapCache, info, depth);
@@ -2408,6 +2394,16 @@ public class RemoteViews implements Parcelable, Filter {
             mLayoutId = mPortrait.getLayoutId();
         }
         mReapplyDisallowed = parcel.readInt() == 0;
+    }
+
+    private void readActionsFromParcel(Parcel parcel, int depth) {
+        int count = parcel.readInt();
+        if (count > 0) {
+            mActions = new ArrayList<>(count);
+            for (int i = 0; i < count; i++) {
+                mActions.add(getActionFromParcel(parcel, depth));
+            }
+        }
     }
 
     private Action getActionFromParcel(Parcel parcel, int depth) {
@@ -3696,18 +3692,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
             dest.writeInt(mLayoutId);
             dest.writeInt(mIsWidgetCollectionChild ? 1 : 0);
-            int count;
-            if (mActions != null) {
-                count = mActions.size();
-            } else {
-                count = 0;
-            }
-            dest.writeInt(count);
-            for (int i=0; i<count; i++) {
-                Action a = mActions.get(i);
-                a.writeToParcel(dest, a.hasSameAppInfo(mApplication)
-                        ? PARCELABLE_ELIDE_DUPLICATES : 0);
-            }
+            writeActionsToParcel(dest);
         } else {
             dest.writeInt(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
             // We only write the bitmap cache if we are the root RemoteViews, as this cache
@@ -3720,6 +3705,21 @@ public class RemoteViews implements Parcelable, Filter {
             mPortrait.writeToParcel(dest, flags | PARCELABLE_ELIDE_DUPLICATES);
         }
         dest.writeInt(mReapplyDisallowed ? 1 : 0);
+    }
+
+    private void writeActionsToParcel(Parcel parcel) {
+        int count;
+        if (mActions != null) {
+            count = mActions.size();
+        } else {
+            count = 0;
+        }
+        parcel.writeInt(count);
+        for (int i = 0; i < count; i++) {
+            Action a = mActions.get(i);
+            a.writeToParcel(parcel, a.hasSameAppInfo(mApplication)
+                    ? PARCELABLE_ELIDE_DUPLICATES : 0);
+        }
     }
 
     private static ApplicationInfo getApplicationInfo(String packageName, int userId) {
