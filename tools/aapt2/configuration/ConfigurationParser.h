@@ -17,6 +17,7 @@
 #ifndef AAPT2_CONFIGURATION_H
 #define AAPT2_CONFIGURATION_H
 
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -41,6 +42,12 @@ using Entry = std::unordered_map<std::string, T>;
 struct Artifact {
   /** Name to use for output of processing foo.apk -> foo.<name>.apk. */
   Maybe<std::string> name;
+  /**
+   * Value to add to the base Android manifest versionCode. If it is not present in the
+   * configuration file, it is set to the previous artifact + 1. If the first artifact does not have
+   * a value, artifacts are a 1 based index.
+   */
+  int version;
   /** If present, uses the ABI group with this name. */
   Maybe<std::string> abi_group;
   /** If present, uses the screen density group with this name. */
@@ -60,6 +67,15 @@ struct Artifact {
 
   /** Convert an artifact name template into a name string based on configuration contents. */
   Maybe<std::string> Name(const android::StringPiece& apk_name, IDiagnostics* diag) const;
+
+  bool operator<(const Artifact& rhs) const {
+    // TODO(safarmer): Order by play store multi-APK requirements.
+    return version < rhs.version;
+  }
+
+  bool operator==(const Artifact& rhs) const  {
+    return version == rhs.version;
+  }
 };
 
 /** Enumeration of currently supported ABIs. */
