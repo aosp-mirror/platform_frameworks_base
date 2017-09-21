@@ -23,17 +23,12 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -58,16 +53,16 @@ import java.util.concurrent.Executor;
  * {@link RemoteViews}.
  */
 public class AppWidgetHostView extends FrameLayout {
+
     static final String TAG = "AppWidgetHostView";
+    private static final String KEY_JAILED_ARRAY = "jail";
+
     static final boolean LOGD = false;
-    static final boolean CROSSFADE = false;
 
     static final int VIEW_MODE_NOINIT = 0;
     static final int VIEW_MODE_CONTENT = 1;
     static final int VIEW_MODE_ERROR = 2;
     static final int VIEW_MODE_DEFAULT = 3;
-
-    static final int FADE_DURATION = 1000;
 
     // When we're inflating the initialLayout for a AppWidget, we only allow
     // views that are allowed in RemoteViews.
@@ -85,9 +80,6 @@ public class AppWidgetHostView extends FrameLayout {
     View mView;
     int mViewMode = VIEW_MODE_NOINIT;
     int mLayoutId = -1;
-    long mFadeStartTime = -1;
-    Bitmap mOld;
-    Paint mOldPaint = new Paint();
     private OnClickHandler mOnClickHandler;
 
     private Executor mAsyncExecutor;
@@ -212,9 +204,12 @@ public class AppWidgetHostView extends FrameLayout {
 
     @Override
     protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
-        final ParcelableSparseArray jail = new ParcelableSparseArray();
+        final SparseArray<Parcelable> jail = new SparseArray<>();
         super.dispatchSaveInstanceState(jail);
-        container.put(generateId(), jail);
+
+        Bundle bundle = new Bundle();
+        bundle.putSparseParcelableArray(KEY_JAILED_ARRAY, jail);
+        container.put(generateId(), bundle);
     }
 
     private int generateId() {
@@ -226,12 +221,12 @@ public class AppWidgetHostView extends FrameLayout {
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         final Parcelable parcelable = container.get(generateId());
 
-        ParcelableSparseArray jail = null;
-        if (parcelable != null && parcelable instanceof ParcelableSparseArray) {
-            jail = (ParcelableSparseArray) parcelable;
+        SparseArray<Parcelable> jail = null;
+        if (parcelable instanceof Bundle) {
+            jail = ((Bundle) parcelable).getSparseParcelableArray(KEY_JAILED_ARRAY);
         }
 
-        if (jail == null) jail = new ParcelableSparseArray();
+        if (jail == null) jail = new SparseArray<>();
 
         try  {
             super.dispatchRestoreInstanceState(jail);
@@ -383,30 +378,9 @@ public class AppWidgetHostView extends FrameLayout {
      * @hide
      */
     protected void applyRemoteViews(RemoteViews remoteViews, boolean useAsyncIfPossible) {
-        if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
-
         boolean recycled = false;
         View content = null;
         Exception exception = null;
-
-        // Capture the old view into a bitmap so we can do the crossfade.
-        if (CROSSFADE) {
-            if (mFadeStartTime < 0) {
-                if (mView != null) {
-                    final int width = mView.getWidth();
-                    final int height = mView.getHeight();
-                    try {
-                        mOld = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    } catch (OutOfMemoryError e) {
-                        // we just won't do the fade
-                        mOld = null;
-                    }
-                    if (mOld != null) {
-                        //mView.drawIntoBitmap(mOld);
-                    }
-                }
-            }
-        }
 
         if (mLastExecutionSignal != null) {
             mLastExecutionSignal.cancel();
@@ -483,16 +457,6 @@ public class AppWidgetHostView extends FrameLayout {
         if (mView != content) {
             removeView(mView);
             mView = content;
-        }
-
-        if (CROSSFADE) {
-            if (mFadeStartTime < 0) {
-                // if there is already an animation in progress, don't do anything --
-                // the new view will pop in on top of the old one during the cross fade,
-                // and that looks okay.
-                mFadeStartTime = SystemClock.uptimeMillis();
-                invalidate();
-            }
         }
     }
 
@@ -617,45 +581,6 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
-    @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (CROSSFADE) {
-            int alpha;
-            int l = child.getLeft();
-            int t = child.getTop();
-            if (mFadeStartTime > 0) {
-                alpha = (int)(((drawingTime-mFadeStartTime)*255)/FADE_DURATION);
-                if (alpha > 255) {
-                    alpha = 255;
-                }
-                Log.d(TAG, "drawChild alpha=" + alpha + " l=" + l + " t=" + t
-                        + " w=" + child.getWidth());
-                if (alpha != 255 && mOld != null) {
-                    mOldPaint.setAlpha(255-alpha);
-                    //canvas.drawBitmap(mOld, l, t, mOldPaint);
-                }
-            } else {
-                alpha = 255;
-            }
-            int restoreTo = canvas.saveLayerAlpha(l, t, child.getWidth(), child.getHeight(), alpha,
-                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-            boolean rv = super.drawChild(canvas, child, drawingTime);
-            canvas.restoreToCount(restoreTo);
-            if (alpha < 255) {
-                invalidate();
-            } else {
-                mFadeStartTime = -1;
-                if (mOld != null) {
-                    mOld.recycle();
-                    mOld = null;
-                }
-            }
-            return rv;
-        } else {
-            return super.drawChild(canvas, child, drawingTime);
-        }
-    }
-
     /**
      * Prepare the given view to be shown. This might include adjusting
      * {@link FrameLayout.LayoutParams} before inserting.
@@ -739,37 +664,5 @@ public class AppWidgetHostView extends FrameLayout {
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(AppWidgetHostView.class.getName());
-    }
-
-    private static class ParcelableSparseArray extends SparseArray<Parcelable> implements Parcelable {
-        public int describeContents() {
-            return 0;
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            final int count = size();
-            dest.writeInt(count);
-            for (int i = 0; i < count; i++) {
-                dest.writeInt(keyAt(i));
-                dest.writeParcelable(valueAt(i), 0);
-            }
-        }
-
-        public static final Parcelable.Creator<ParcelableSparseArray> CREATOR =
-                new Parcelable.Creator<ParcelableSparseArray>() {
-                    public ParcelableSparseArray createFromParcel(Parcel source) {
-                        final ParcelableSparseArray array = new ParcelableSparseArray();
-                        final ClassLoader loader = array.getClass().getClassLoader();
-                        final int count = source.readInt();
-                        for (int i = 0; i < count; i++) {
-                            array.put(source.readInt(), source.readParcelable(loader));
-                        }
-                        return array;
-                    }
-
-                    public ParcelableSparseArray[] newArray(int size) {
-                        return new ParcelableSparseArray[size];
-                    }
-                };
     }
 }
