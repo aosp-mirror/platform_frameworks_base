@@ -143,11 +143,12 @@ public class BatteryStatsImpl extends BatteryStats {
             MAX_HISTORY_BUFFER = 96*1024;  // 96KB
             MAX_MAX_HISTORY_BUFFER = 128*1024; // 128KB
         } else {
-            MAX_HISTORY_ITEMS = 2000;
-            MAX_MAX_HISTORY_ITEMS = 3000;
-            MAX_WAKELOCKS_PER_UID = 100;
-            MAX_HISTORY_BUFFER = 256*1024;  // 256KB
-            MAX_MAX_HISTORY_BUFFER = 320*1024;  // 256KB
+            final int INCREASE_FACTOR = 10;
+            MAX_HISTORY_ITEMS = 2000 * INCREASE_FACTOR;
+            MAX_MAX_HISTORY_ITEMS = 3000 * INCREASE_FACTOR;
+            MAX_WAKELOCKS_PER_UID = 100 * INCREASE_FACTOR;
+            MAX_HISTORY_BUFFER = 256*1024 * INCREASE_FACTOR;
+            MAX_MAX_HISTORY_BUFFER = 320*1024 * INCREASE_FACTOR;
         }
     }
 
