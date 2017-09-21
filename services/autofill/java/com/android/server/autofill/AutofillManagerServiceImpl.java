@@ -452,7 +452,7 @@ final class AutofillManagerServiceImpl {
             final int sessionCount = mSessions.size();
             for (int i = sessionCount - 1; i >= 0; i--) {
                 final Session session = mSessions.valueAt(i);
-                if (session.isSaveUiPendingForToken(token)) {
+                if (session.isSaveUiPendingForTokenLocked(token)) {
                     session.onPendingSaveUi(operation, token);
                     return;
                 }
@@ -643,6 +643,18 @@ final class AutofillManagerServiceImpl {
         }
         while (mSessions.size() > 0) {
             mSessions.valueAt(0).forceRemoveSelfLocked();
+        }
+    }
+
+    // TODO(b/64940307): remove this method if SaveUI is refactored to be attached on activities
+    void destroyFinishedSessionsLocked() {
+        final int sessionCount = mSessions.size();
+        for (int i = sessionCount - 1; i >= 0; i--) {
+            final Session session = mSessions.valueAt(i);
+            if (session.isSavingLocked()) {
+                if (sDebug) Slog.d(TAG, "destroyFinishedSessionsLocked(): " + session.id);
+                session.forceRemoveSelfLocked();
+            }
         }
     }
 

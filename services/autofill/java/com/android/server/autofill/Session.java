@@ -1376,7 +1376,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (mHasCallback) {
                     mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinished);
                 } else if (sessionFinished) {
-                    mClient.setSessionFinished();
+                    mClient.setSessionFinished(AutofillManager.STATE_FINISHED);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
@@ -1795,18 +1795,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     void forceRemoveSelfLocked() {
         if (sVerbose) Slog.v(TAG, "forceRemoveSelfLocked(): " + mPendingSaveUi);
 
+        final boolean isPendingSaveUi = isSaveUiPendingLocked();
         mPendingSaveUi = null;
         removeSelfLocked();
-
-        mHandlerCaller.getHandler().post(() -> {
-            try {
-                mClient.setState(mService.isEnabled(), true, false);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "error updating client state: " + e);
-            }
-        });
-
         mUi.destroyAll(mPendingSaveUi, this, false);
+        if (!isPendingSaveUi) {
+            try {
+                mClient.setSessionFinished(AutofillManager.STATE_UNKNOWN);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error notifying client to finish session", e);
+            }
+        }
     }
 
     /**
@@ -1829,7 +1828,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
-        if (isSaveUiPending()) {
+        if (isSaveUiPendingLocked()) {
             Slog.i(TAG, "removeSelfLocked() ignored, waiting for pending save ui");
             return;
         }
@@ -1850,14 +1849,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * a specific {@code token} created by
      * {@link PendingUi#PendingUi(IBinder, int, IAutoFillManagerClient)}.
      */
-    boolean isSaveUiPendingForToken(@NonNull IBinder token) {
-        return isSaveUiPending() && token.equals(mPendingSaveUi.getToken());
+    boolean isSaveUiPendingForTokenLocked(@NonNull IBinder token) {
+        return isSaveUiPendingLocked() && token.equals(mPendingSaveUi.getToken());
     }
 
     /**
      * Checks whether this session is hiding the Save UI to handle a custom description link.
      */
-    private boolean isSaveUiPending() {
+    private boolean isSaveUiPendingLocked() {
         return mPendingSaveUi != null && mPendingSaveUi.getState() == PendingUi.STATE_PENDING;
     }
 
