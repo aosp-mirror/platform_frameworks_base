@@ -20,7 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -381,5 +383,20 @@ public class RemoteViewsTest {
 
         RemoteViews.CREATOR.createFromParcel(p);
         p.recycle();
+    }
+
+    @Test
+    public void copyWithBinders() throws Exception {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        for (int i = 1; i < 10; i++) {
+            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
+                    new Intent("android.widget.RemoteViewsTest_" + i), PendingIntent.FLAG_ONE_SHOT);
+            views.setOnClickPendingIntent(i, pi);
+        }
+        try {
+            new RemoteViews(views);
+        } catch (Throwable t) {
+            throw new Exception(t);
+        }
     }
 }
