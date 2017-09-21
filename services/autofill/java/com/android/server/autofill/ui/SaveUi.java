@@ -263,18 +263,13 @@ final class SaveUi {
         } else {
             noButton.setText(R.string.autofill_save_no);
         }
-        final View.OnClickListener cancelListener =
-                (v) -> mListener.onCancel(info.getNegativeActionListener());
-        noButton.setOnClickListener(cancelListener);
+        noButton.setOnClickListener((v) -> mListener.onCancel(info.getNegativeActionListener()));
 
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
         mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
         mDialog.setContentView(view);
-
-        // Dialog can be dismissed when touched outside.
-        mDialog.setOnDismissListener((d) -> mListener.onCancel(info.getNegativeActionListener()));
 
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
