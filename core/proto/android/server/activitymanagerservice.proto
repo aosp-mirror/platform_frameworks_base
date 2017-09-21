@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
+import "frameworks/base/core/proto/android/graphics/rect.proto";
+
+package com.android.server.am.proto;
+
+option java_multiple_files = true;
+
+message ActivityManagerServiceProto {
+  ActivityStackSupervisorProto activities = 1;
+}
+
+message ActivityStackSupervisorProto {
+  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  repeated ActivityDisplayProto displays = 2;
+  KeyguardControllerProto keyguard_controller = 3;
+  int32 focused_stack_id = 4;
+  .com.android.server.wm.proto.IdentifierProto resumed_activity = 5;
+}
+
+/* represents ActivityStackSupervisor.ActivityDisplay */
+message ActivityDisplayProto {
+  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  int32 id = 2;
+  repeated ActivityStackProto stacks = 3;
+}
+
+message ActivityStackProto {
+  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  int32 id = 2;
+  repeated TaskRecordProto tasks = 3;
+  .com.android.server.wm.proto.IdentifierProto resumed_activity = 4;
+  int32 display_id = 5;
+  bool fullscreen = 6;
+  .android.graphics.RectProto bounds = 7;
+}
+
+message TaskRecordProto {
+  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  int32 id = 2;
+  repeated ActivityRecordProto activities = 3;
+  int32 stack_id = 4;
+  .android.graphics.RectProto last_non_fullscreen_bounds = 5;
+  string real_activity = 6;
+  string orig_activity = 7;
+  int32 activity_type = 8;
+  int32 return_to_type = 9;
+  int32 resize_mode = 10;
+  bool fullscreen = 11;
+  .android.graphics.RectProto bounds = 12;
+  int32 min_width = 13;
+  int32 min_height = 14;
+}
+
+message ActivityRecordProto {
+  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  .com.android.server.wm.proto.IdentifierProto identifier = 2;
+  string state = 3;
+  bool visible = 4;
+  bool front_of_task = 5;
+  int32 proc_id = 6;
+}
+
+message KeyguardControllerProto {
+  bool keyguard_showing = 1;
+  bool keyguard_occluded = 2;
+}

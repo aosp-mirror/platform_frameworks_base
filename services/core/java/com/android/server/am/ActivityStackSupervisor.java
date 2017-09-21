@@ -97,6 +97,13 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.proto.ActivityDisplayProto.STACKS;
+import static com.android.server.am.proto.ActivityDisplayProto.ID;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static java.lang.Integer.MAX_VALUE;
 
@@ -157,6 +164,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -166,6 +174,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.proto.ActivityDisplayProto;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
@@ -3755,6 +3764,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mService.mLockTaskController.dump(pw, prefix);
     }
 
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
+            ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
+            activityDisplay.writeToProto(proto, DISPLAYS);
+        }
+        mKeyguardController.writeToProto(proto, KEYGUARD_CONTROLLER);
+        if (mFocusedStack != null) {
+            proto.write(FOCUSED_STACK_ID, mFocusedStack.mStackId);
+            ActivityRecord focusedActivity = getResumedActivityLocked();
+            if (focusedActivity != null) {
+                focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
+            }
+        } else {
+            proto.write(FOCUSED_STACK_ID, INVALID_STACK_ID);
+        }
+        proto.end(token);
+    }
+
     /**
      * Dump all connected displays' configurations.
      * @param prefix Prefix to apply to each line of the dump.
@@ -4575,6 +4604,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         void setIsSleeping(boolean asleep) {
             mSleeping = asleep;
+        }
+
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            super.writeToProto(proto, ActivityDisplayProto.CONFIGURATION_CONTAINER);
+            proto.write(ID, mDisplayId);
+            for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = mStacks.get(stackNdx);
+                stack.writeToProto(proto, STACKS);
+            }
+            proto.end(token);
         }
     }
 
