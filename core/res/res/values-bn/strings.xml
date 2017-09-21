@@ -1420,9 +1420,12 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ট্যাবলেট"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"টিভি"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ফোন"</string>
-    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"হেডফোন"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"ডক স্পিকার"</string>
-    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
+    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
+    <skip />
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"হেডফোন"</string>
+    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"সিস্টেম"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ব্লুটুথ অডিও"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ওয়্যারলেস প্রদর্শন"</string>

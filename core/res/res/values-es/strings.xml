@@ -1221,7 +1221,7 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"El dispositivo no admite este medio externo (<xliff:g id="NAME">%s</xliff:g>). Toca para configurarlo con un formato admitido."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"El dispositivo no admite esta <xliff:g id="NAME">%s</xliff:g>. Selecciónala para configurarla en un formato admitido."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Extracción inesperada de <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Desactiva tu <xliff:g id="NAME">%s</xliff:g> antes de extraer la unidad para evitar pérdidas de datos"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Desconecta tu <xliff:g id="NAME">%s</xliff:g> antes de extraer la unidad para evitar pérdidas de datos"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Tu <xliff:g id="NAME">%s</xliff:g> se ha extraído"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Tu <xliff:g id="NAME">%s</xliff:g> se ha extraído: inserta otra unidad"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Expulsando <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1420,9 +1420,12 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Teléfono"</string>
-    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculares"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altavoces de la base"</string>
-    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
+    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
+    <skip />
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculares"</string>
+    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla inalámbrica"</string>

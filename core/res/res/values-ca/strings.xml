@@ -1285,7 +1285,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Processador de RV"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Processador d\'RV"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveïdor de condicions"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servei de classificació de notificacions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
@@ -1420,9 +1420,12 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tauleta"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televisor"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telèfon"</string>
-    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculars"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altaveus de la base"</string>
-    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
+    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
+    <skip />
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculars"</string>
+    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla sense fil"</string>
