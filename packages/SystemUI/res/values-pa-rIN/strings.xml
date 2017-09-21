@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G  ਡਾਟਾ  ਰੁਕ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ਸੈਲਿਊਲਰ ਡਾਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">" ਡਾਟਾ  ਰੁਕ ਗਿਆ ਹੈ"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"ਤੁਸੀਂ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸੈੱਟ ਕੀਤੀ ਗਈ  ਡਾਟਾ  ਸੀਮਾ \'ਤੇ ਪਹੁੰਚ ਚੁੱਕੇ ਹੋ। ਤੁਸੀਂ ਹੁਣ ਸੈਲਿਊਲਰ ਡੈਟੇ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਰਹੇ ਹੋ।\n\nਜੇਕਰ ਤੁਸੀਂ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਦੇ ਹੋ, ਤਾਂ  ਡਾਟਾ  ਵਰਤੋਂ ਲਈ ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"ਤੁਸੀਂ ਤੁਹਾਡੇ ਵੱਲੋਂ ਸੈੱਟ ਕੀਤੀ ਗਈ  ਡਾਟਾ  ਸੀਮਾ \'ਤੇ ਪਹੁੰਚ ਚੁੱਕੇ ਹੋ। ਤੁਸੀਂ ਹੁਣ ਸੈਲਿਊਲਰ  ਡਾਟੇ  ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਰਹੇ ਹੋ।\n\nਜੇਕਰ ਤੁਸੀਂ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਦੇ ਹੋ, ਤਾਂ  ਡਾਟਾ  ਵਰਤੋਂ ਲਈ ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ਕੋਈ ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਨਹੀਂ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਹੈ"</string>
@@ -526,7 +526,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ਬੈਟਰੀ ਸੇਵਰ"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਡੈਟੇ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ  ਡਾਟੇ  ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ਬਟਨ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Back"</string>
