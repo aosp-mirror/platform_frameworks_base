@@ -169,7 +169,8 @@ class ActivityStarter {
     private boolean mDoResume;
     private int mStartFlags;
     private ActivityRecord mSourceRecord;
-    private int mSourceDisplayId;
+    // The display to launch the activity onto, barring any strong reason to do otherwise.
+    private int mPreferredDisplayId;
 
     private TaskRecord mInTask;
     private boolean mAddingToTask;
@@ -224,7 +225,7 @@ class ActivityStarter {
         mDoResume = false;
         mStartFlags = 0;
         mSourceRecord = null;
-        mSourceDisplayId = INVALID_DISPLAY;
+        mPreferredDisplayId = INVALID_DISPLAY;
 
         mInTask = null;
         mAddingToTask = false;
@@ -1263,7 +1264,7 @@ class ActivityStarter {
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
 
-        mSourceDisplayId = getSourceDisplayId(mSourceRecord, mStartActivity);
+        mPreferredDisplayId = getPreferedDisplayId(mSourceRecord, mStartActivity, options);
 
         mLaunchBounds = getOverrideBounds(r, options, inTask);
 
@@ -1518,7 +1519,7 @@ class ActivityStarter {
                         !mLaunchSingleTask);
             } else {
                 // Otherwise find the best task to put the activity in.
-                intentActivity = mSupervisor.findTaskLocked(mStartActivity, mSourceDisplayId);
+                intentActivity = mSupervisor.findTaskLocked(mStartActivity, mPreferredDisplayId);
             }
         }
         return intentActivity;
@@ -1526,10 +1527,12 @@ class ActivityStarter {
 
     /**
      * Returns the ID of the display to use for a new activity. If the device is in VR mode,
-     * then return the Vr mode's virtual display ID. If not, if the source activity has
-     * a explicit display ID set, use that to launch the activity.
+     * then return the Vr mode's virtual display ID. If not,  if the activity was started with
+     * a launchDisplayId, use that. Otherwise, if the source activity has a explicit display ID
+     * set, use that to launch the activity.
      */
-    private int getSourceDisplayId(ActivityRecord sourceRecord, ActivityRecord startingActivity) {
+    private int getPreferedDisplayId(
+            ActivityRecord sourceRecord, ActivityRecord startingActivity, ActivityOptions options) {
         // Check if the Activity is a VR activity. If so, the activity should be launched in
         // main display.
         if (startingActivity != null && startingActivity.requestedVrComponent != null) {
@@ -1544,6 +1547,13 @@ class ActivityStarter {
             }
             mUsingVr2dDisplay = true;
             return displayId;
+        }
+
+        // If the caller requested a display, prefer that display.
+        final int launchDisplayId =
+                (options != null) ? options.getLaunchDisplayId() : INVALID_DISPLAY;
+        if (launchDisplayId != INVALID_DISPLAY) {
+            return launchDisplayId;
         }
 
         displayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
@@ -2084,15 +2094,15 @@ class ActivityStarter {
             return mSupervisor.mFocusedStack;
         }
 
-        if (mSourceDisplayId != DEFAULT_DISPLAY) {
+        if (mPreferredDisplayId != DEFAULT_DISPLAY) {
             // Try to put the activity in a stack on a secondary display.
-            stack = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
+            stack = mSupervisor.getValidLaunchStackOnDisplay(mPreferredDisplayId, r);
             if (stack == null) {
                 // If source display is not suitable - look for topmost valid stack in the system.
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                        "computeStackFocus: Can't launch on mSourceDisplayId=" + mSourceDisplayId
-                                + ", looking on all displays.");
-                stack = mSupervisor.getNextValidLaunchStackLocked(r, mSourceDisplayId);
+                        "computeStackFocus: Can't launch on mPreferredDisplayId="
+                                + mPreferredDisplayId + ", looking on all displays.");
+                stack = mSupervisor.getNextValidLaunchStackLocked(r, mPreferredDisplayId);
             }
         }
         if (stack == null) {
@@ -2148,8 +2158,8 @@ class ActivityStarter {
         }
 
         return canUseFocusedStack && !newTask
-                // We strongly prefer to launch activities on the same display as their source.
-                && (mSourceDisplayId == focusedStack.mDisplayId);
+                // Using the focus stack isn't important enough to override the prefered display.
+                && (mPreferredDisplayId == focusedStack.mDisplayId);
     }
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
@@ -2175,7 +2185,7 @@ class ActivityStarter {
         int launchStackId = INVALID_STACK_ID;
         if (aOptions != null) {
             launchDisplayId = aOptions.getLaunchDisplayId();
-            final int vrDisplayId = mUsingVr2dDisplay ? mSourceDisplayId : INVALID_DISPLAY;
+            final int vrDisplayId = mUsingVr2dDisplay ? mPreferredDisplayId : INVALID_DISPLAY;
             launchStackId = mSupervisor.getLaunchStackId(r, aOptions, task, vrDisplayId);
         }
 
@@ -2197,7 +2207,7 @@ class ActivityStarter {
         // If we are using Vr2d display, find the virtual display stack.
         // TODO: Can be removed.
         if (mUsingVr2dDisplay) {
-            ActivityStack as = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
+            ActivityStack as = mSupervisor.getValidLaunchStackOnDisplay(mPreferredDisplayId, r);
             if (DEBUG_STACK) {
                 Slog.v(TAG, "Launch stack for app: " + r.toString() +
                     ", on virtual display stack:" + as.toString());
@@ -2206,7 +2216,7 @@ class ActivityStarter {
         }
 
         if (((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0)
-                 || mSourceDisplayId != DEFAULT_DISPLAY) {
+                 || mPreferredDisplayId != DEFAULT_DISPLAY) {
             return null;
         }
         // Otherwise handle adjacent launch.
