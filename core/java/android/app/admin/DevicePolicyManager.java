@@ -7534,12 +7534,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the device owner or profile owner to set the name of the organization under
-     * management.
-     * <p>
-     * If the organization name needs to be localized, it is the responsibility of the
-     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
-     * and set a new version of this string accordingly.
+     * Called by the device owner (since API 26) or profile owner (since API 24) to set the name of
+     * the organization under management.
+     *
+     * <p>If the organization name needs to be localized, it is the responsibility of the {@link
+     * DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set
+     * a new version of this string accordingly.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param title The organization name or {@code null} to clear a previously set name.
