@@ -82,8 +82,9 @@ oneway interface IAutoFillManagerClient {
    void setSaveUiState(int sessionId, boolean shown);
 
    /**
-     * Marks the state of the session as finished (because the AutofillService returned a null
-     * FillResponse).
+     * Marks the state of the session as finished.
+     * @param newState STATE_FINISHED (because the autofill service returned a null
+     * FillResponse) or STATE_UNKNOWN (because the session was removed).
      */
-   void setSessionFinished();
+   void setSessionFinished(int newState);
 }
