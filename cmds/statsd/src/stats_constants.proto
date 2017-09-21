@@ -24,7 +24,8 @@ option java_outer_classname = "StatsConstantsProto";
 
 enum TagId {
   WAKELOCK = 1;
-  SCREEN = 1003;
+  SCREEN = 2;
+  PROCESS = 1112; // TODO: Temporary usage only for testing.
 }
 
 enum KeyId {
