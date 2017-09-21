@@ -3824,7 +3824,6 @@ android.system.PacketSocketAddress
 android.system.StructAddrinfo
 android.system.StructFlock
 android.system.StructGroupReq
-android.system.StructGroupSourceReq
 android.system.StructIcmpHdr
 android.system.StructIfaddrs
 android.system.StructLinger
