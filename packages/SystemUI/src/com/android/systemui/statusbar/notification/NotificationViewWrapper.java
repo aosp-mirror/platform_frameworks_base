@@ -190,14 +190,4 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public boolean disallowSingleClick(float x, float y) {
         return false;
     }
-
-    /**
-     * Get the amount that the minheight is allowed to be increased based on this layout.
-     *
-     * @param increasedHeight is the view allowed to show even bigger, i.e for messaging layouts
-     * @return
-     */
-    public int getMinHeightIncrease(boolean increasedHeight) {
-        return 0;
-    }
 }

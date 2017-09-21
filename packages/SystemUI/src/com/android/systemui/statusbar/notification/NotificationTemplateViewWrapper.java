@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
@@ -48,7 +47,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     private int mContentHeight;
     private int mMinHeightHint;
-    private boolean mColorized;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -164,9 +162,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     public void onContentUpdated(ExpandableNotificationRow row) {
         // Reinspect the notification. Before the super call, because the super call also updates
         // the transformation types and we need to have our values set by then.
-        StatusBarNotification sbn = row.getStatusBarNotification();
-        resolveTemplateViews(sbn);
-        mColorized = sbn.getNotification().isColorized();
+        resolveTemplateViews(row.getStatusBarNotification());
         super.onContentUpdated(row);
     }
 
@@ -267,17 +263,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         mContentHeight = contentHeight;
         mMinHeightHint = minHeightHint;
         updateActionOffset();
-    }
-
-    @Override
-    public int getMinHeightIncrease(boolean useIncreasedCollapsedHeight) {
-        if (mColorized) {
-            int dimen = useIncreasedCollapsedHeight
-                    ? R.dimen.notification_height_increase_colorized_increased
-                    : R.dimen.notification_height_increase_colorized;
-            return mRow.getResources().getDimensionPixelSize(dimen);
-        }
-        return super.getMinHeightIncrease(useIncreasedCollapsedHeight);
     }
 
     private void updateActionOffset() {

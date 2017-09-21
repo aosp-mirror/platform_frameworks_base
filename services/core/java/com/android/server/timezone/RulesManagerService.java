@@ -69,18 +69,22 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     DistroVersion.CURRENT_FORMAT_MINOR_VERSION);
 
     public static class Lifecycle extends SystemService {
-        private RulesManagerService mService;
-
         public Lifecycle(Context context) {
             super(context);
         }
 
         @Override
         public void onStart() {
-            mService = RulesManagerService.create(getContext());
-            mService.start();
+            RulesManagerService service = RulesManagerService.create(getContext());
+            service.start();
 
-            publishBinderService(Context.TIME_ZONE_RULES_MANAGER_SERVICE, mService);
+            // Publish the binder service so it can be accessed from other (appropriately
+            // permissioned) processes.
+            publishBinderService(Context.TIME_ZONE_RULES_MANAGER_SERVICE, service);
+
+            // Publish the service instance locally so we can use it directly from within the system
+            // server from TimeZoneUpdateIdler.
+            publishLocalService(RulesManagerService.class, service);
         }
     }
 
@@ -494,6 +498,16 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 + ZoneInfoDB.getInstance().getVersion());
         pw.println("Distro state: " + rulesState.toString());
         mPackageTracker.dump(pw);
+    }
+
+    /**
+     * Called when the device is considered idle.
+     */
+    void notifyIdle() {
+        // No package has changed: we are just triggering because the device is idle and there
+        // *might* be work to do.
+        final boolean packageChanged = false;
+        mPackageTracker.triggerUpdateIfNeeded(packageChanged);
     }
 
     @Override
