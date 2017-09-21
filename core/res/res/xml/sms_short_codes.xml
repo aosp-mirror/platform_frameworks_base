@@ -80,7 +80,7 @@
     <shortcode country="cn" premium="1066.*" free="1065.*" />
 
     <!-- Colombia: 1-6 digits (not confirmed) -->
-    <shortcode country="co" pattern="\\d{1,6}" free="890350" />
+    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160" />
 
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
@@ -165,10 +165,10 @@
     <shortcode country="kz" pattern="\\d{4}" premium="335[02]|4161|444[469]|77[2359]0|8444|919[3-5]|968[2-5]" />
 
     <!-- Kuwait: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006" />
+    <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006|55991" />
 
     <!-- Lithuania: 3-5 digits, known premium codes listed, plus EU -->
-    <shortcode country="lt" pattern="\\d{3,5}" premium="13[89]1|1394|16[34]5" free="116\\d{3}|1399" />
+    <shortcode country="lt" pattern="\\d{3,5}" premium="13[89]1|1394|16[34]5" free="116\\d{3}|1399|1324" />
 
     <!-- Luxembourg: 5 digits, 6xxxx, plus EU:
          http://www.luxgsm.lu/assets/files/filepage/file_1253803400.pdf -->
