@@ -33,6 +33,7 @@ import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 
+import com.android.systemui.qs.AlphaControlledSignalTileView.AlphaControlledSlashImageView;
 import java.util.Objects;
 
 public class QSIconViewImpl extends QSIconView {
@@ -138,7 +139,12 @@ public class QSIconViewImpl extends QSIconView {
                 animateGrayScale(mTint, color, iv);
                 mTint = color;
             } else {
-                setTint(iv, color);
+                if (iv instanceof AlphaControlledSlashImageView) {
+                    ((AlphaControlledSlashImageView)iv)
+                            .setFinalImageTintList(ColorStateList.valueOf(color));
+                } else {
+                    setTint(iv, color);
+                }
                 mTint = color;
             }
         }
@@ -149,6 +155,10 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     public static void animateGrayScale(int fromColor, int toColor, ImageView iv) {
+        if (iv instanceof AlphaControlledSlashImageView) {
+            ((AlphaControlledSlashImageView)iv)
+                    .setFinalImageTintList(ColorStateList.valueOf(toColor));
+        }
         if (ValueAnimator.areAnimatorsEnabled()) {
             final float fromAlpha = Color.alpha(fromColor);
             final float toAlpha = Color.alpha(toColor);
