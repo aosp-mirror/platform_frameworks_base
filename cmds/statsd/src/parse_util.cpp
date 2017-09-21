@@ -17,6 +17,7 @@
 #include <parse_util.h>
 #include <log/log_event_list.h>
 
+using android::os::statsd::EVENT_TIMESTAMP;
 using android::os::statsd::EventMetricData;
 using android::os::statsd::KeyId;
 using android::os::statsd::KeyId_IsValid;
@@ -29,6 +30,13 @@ EventMetricData parse(log_msg msg)
     // dump all statsd logs to dropbox for now.
     // TODO: Add filtering, aggregation, etc.
     EventMetricData eventMetricData;
+
+    // set timestamp of the event.
+    KeyValuePair *keyValuePair = eventMetricData.add_key_value_pair();
+    keyValuePair->set_key(EVENT_TIMESTAMP);
+    keyValuePair->set_value_int(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec);
+
+    // start iterating k,v pairs.
     android_log_context context = create_android_log_parser(const_cast<log_msg*>(&msg)->msg()
                                                             + sizeof(uint32_t),
                                                             const_cast<log_msg*>(&msg)->len()
