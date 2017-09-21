@@ -238,7 +238,7 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
     env->ExceptionClear();
 
     ScopedLocalRef<jstring> tagstr(env, env->NewStringUTF(LOG_TAG));
-    ScopedLocalRef<jstring> msgstr;
+    ScopedLocalRef<jstring> msgstr(env);
     if (tagstr != nullptr) {
         msgstr.reset(env->NewStringUTF(msg));
     }
