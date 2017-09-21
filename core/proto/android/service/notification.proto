@@ -21,10 +21,22 @@ package android.service.notification;
 option java_multiple_files = true;
 option java_outer_classname = "NotificationServiceProto";
 
+import "frameworks/base/core/proto/android/content/component_name.proto";
+
 message NotificationServiceDumpProto {
     repeated NotificationRecordProto records = 1;
 
     ZenModeProto zen = 2;
+
+    ManagedServicesProto notification_listeners = 3;
+
+    int32 listener_hints = 4;
+
+    repeated ListenersDisablingEffectsProto listeners_disabling_effects = 5;
+
+    ManagedServicesProto notification_assistants = 6;
+
+    ManagedServicesProto condition_providers = 7;
 }
 
 message NotificationRecordProto {
@@ -38,6 +50,39 @@ message NotificationRecordProto {
     bool can_show_light = 8;
     string group_key = 9;
     int32 importance = 10;
+}
+
+message ListenersDisablingEffectsProto {
+    int32 hint = 1;
+    repeated ManagedServiceInfoProto listeners = 2;
+}
+
+message ManagedServiceInfoProto {
+    android.content.ComponentNameProto component = 1;
+    int32 user_id = 2;
+    string service = 3;
+    bool is_system = 4;
+    bool is_guest = 5;
+}
+
+message ManagedServicesProto {
+    string caption = 1;
+
+    message ServiceProto {
+        repeated string name = 1;
+        int32 user_id = 2;
+        bool is_primary = 3;
+    }
+    repeated ServiceProto approved = 2;
+
+    // All of this type/caption enabled for current profiles.
+    repeated android.content.ComponentNameProto enabled = 3;
+
+
+    repeated ManagedServiceInfoProto live_services = 4;
+
+    // Snoozed for current profiles.
+    repeated android.content.ComponentNameProto snoozed = 5;
 }
 
 enum State {
