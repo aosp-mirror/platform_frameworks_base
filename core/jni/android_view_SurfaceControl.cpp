@@ -736,13 +736,11 @@ static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong nativeObject
     ctrl->reparentChildren(handle);
 }
 
-static void nativeReparentChild(JNIEnv* env, jclass clazz, jlong nativeObject,
-        jobject newParentObject, jobject childObject) {
+static void nativeReparent(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jobject newParentObject) {
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     sp<IBinder> parentHandle = ibinderForJavaObject(env, newParentObject);
-    sp<IBinder> childHandle = ibinderForJavaObject(env, childObject);
-
-    ctrl->reparentChild(parentHandle, childHandle);
+    ctrl->reparent(parentHandle);
 }
 
 static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -868,8 +866,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeDeferTransactionUntilSurface },
     {"nativeReparentChildren", "(JLandroid/os/IBinder;)V",
             (void*)nativeReparentChildren } ,
-    {"nativeReparentChild", "(JLandroid/os/IBinder;Landroid/os/IBinder;)V",
-            (void*)nativeReparentChild },
+    {"nativeReparent", "(JLandroid/os/IBinder;)V",
+            (void*)nativeReparent },
     {"nativeSeverChildren", "(J)V",
             (void*)nativeSeverChildren } ,
     {"nativeSetOverrideScalingMode", "(JI)V",
