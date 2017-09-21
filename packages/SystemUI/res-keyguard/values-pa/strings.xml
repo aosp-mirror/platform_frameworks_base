@@ -45,7 +45,7 @@
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"ਤੁਹਾਡਾ ਸਿਮ ਕਾਰਡ ਸਥਾਈ ਤੌਰ \'ਤੇ ਅਯੋਗ ਬਣਾ ਦਿੱਤਾ ਗਿਆ ਹੈ।\n ਇੱਕ ਹੋਰ ਸਿਮ ਕਾਰਡ ਲਈ ਆਪਣੇ ਵਾਇਰਲੈੱਸ ਸੇਵਾ ਪ੍ਰਦਾਨਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM ਕਾਰਡ ਲੌਕ ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM ਕਾਰਡ PUK-ਲੌਕ ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM ਕਾਰਡ ਨੂੰ ਅਨਲੌਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM ਕਾਰਡ ਨੂੰ ਅਣਲਾਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"ਪਿੰਨ ਖੇਤਰ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ਸਿਮ ਪਿੰਨ ਖੇਤਰ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK ਖੇਤਰ"</string>
@@ -71,7 +71,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"ਸਿਮ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ਹੁਣ ਬੰਦ ਕੀਤਾ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"ਇੱਛਤ ਪਿੰਨ ਕੋਡ ਦਾਖਲ ਕਰੋ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"ਇੱਛਤ ਪਿੰਨ ਕੋਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM ਕਾਰਡ ਨੂੰ ਅਨਲੌਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM ਕਾਰਡ ਨੂੰ ਅਣਲਾਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"ਕੋਈ ਪਿੰਨ ਟਾਈਪ ਕਰੋ ਜੋ 4 ਤੋਂ 8 ਨੰਬਰਾਂ ਦਾ ਹੋਵੇ।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK ਕੋਡ 8 ਜਾਂ ਵੱਧ ਨੰਬਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"ਸਹੀ PUK ਕੋਡ ਮੁੜ-ਦਾਖਲ ਕਰੋ। ਬਾਰ-ਬਾਰ ਕੀਤੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ ਸਿਮ ਨੂੰ ਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਕਰ ਦੇਣਗੀਆਂ।"</string>
