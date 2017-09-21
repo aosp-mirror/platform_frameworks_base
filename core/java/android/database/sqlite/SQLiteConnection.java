@@ -104,7 +104,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private PreparedStatement mPreparedStatementPool;
 
     // The recent operations log.
-    private final OperationLog mRecentOperations = new OperationLog();
+    private final OperationLog mRecentOperations;
 
     // The native SQLiteConnection pointer.  (FOR INTERNAL USE ONLY)
     private long mConnectionPtr;
@@ -162,6 +162,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             SQLiteDatabaseConfiguration configuration,
             int connectionId, boolean primaryConnection) {
         mPool = pool;
+        mRecentOperations = new OperationLog(mPool);
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
         mConnectionId = connectionId;
         mIsPrimaryConnection = primaryConnection;
@@ -1298,6 +1299,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private final Operation[] mOperations = new Operation[MAX_RECENT_OPERATIONS];
         private int mIndex;
         private int mGeneration;
+        private final SQLiteConnectionPool mPool;
+
+        OperationLog(SQLiteConnectionPool pool) {
+            mPool = pool;
+        }
 
         public int beginOperation(String kind, String sql, Object[] bindArgs) {
             synchronized (mOperations) {
@@ -1381,8 +1387,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 }
                 operation.mEndTime = SystemClock.uptimeMillis();
                 operation.mFinished = true;
+                final long execTime = operation.mEndTime - operation.mStartTime;
+                mPool.onStatementExecuted(execTime);
                 return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
-                                operation.mEndTime - operation.mStartTime);
+                        execTime);
             }
             return false;
         }
@@ -1426,11 +1434,16 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 int index = mIndex;
                 Operation operation = mOperations[index];
                 if (operation != null) {
+                    // Note: SimpleDateFormat is not thread-safe, cannot be compile-time created,
+                    // and is relatively expensive to create during preloading. This method is only
+                    // used when dumping a connection, which is a rare (mainly error) case.
+                    SimpleDateFormat opDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                     int n = 0;
                     do {
                         StringBuilder msg = new StringBuilder();
                         msg.append("    ").append(n).append(": [");
-                        msg.append(operation.getFormattedStartTime());
+                        String formattedStartTime = opDF.format(new Date(operation.mStartWallTime));
+                        msg.append(formattedStartTime);
                         msg.append("] ");
                         operation.describe(msg, verbose);
                         printer.println(msg.toString());
@@ -1518,12 +1531,5 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return methodName;
         }
 
-        private String getFormattedStartTime() {
-            // Note: SimpleDateFormat is not thread-safe, cannot be compile-time created, and is
-            //       relatively expensive to create during preloading. This method is only used
-            //       when dumping a connection, which is a rare (mainly error) case. So:
-            //       DO NOT CACHE.
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date(mStartWallTime));
-        }
     }
 }

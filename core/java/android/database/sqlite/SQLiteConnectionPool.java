@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -101,6 +102,8 @@ public final class SQLiteConnectionPool implements Closeable {
 
     @GuardedBy("mLock")
     private IdleConnectionHandler mIdleConnectionHandler;
+
+    private final AtomicLong mTotalExecutionTimeCounter = new AtomicLong(0);
 
     // Describes what should happen to an acquired connection when it is returned to the pool.
     enum AcquiredConnectionStatus {
@@ -521,6 +524,10 @@ public final class SQLiteConnectionPool implements Closeable {
                 + "when it is no longer needed.");
 
         mConnectionLeaked.set(true);
+    }
+
+    void onStatementExecuted(long executionTimeMs) {
+        mTotalExecutionTimeCounter.addAndGet(executionTimeMs);
     }
 
     // Can't throw.
@@ -1076,6 +1083,7 @@ public final class SQLiteConnectionPool implements Closeable {
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
+            printer.println("  Total execution time: " + mTotalExecutionTimeCounter);
             if (mConfiguration.isLookasideConfigSet()) {
                 printer.println("  Lookaside config: sz=" + mConfiguration.lookasideSlotSize
                         + " cnt=" + mConfiguration.lookasideSlotCount);
