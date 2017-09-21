@@ -60,6 +60,13 @@ public class PackageManagerWrapper {
     }
 
     /**
+     * Calls {@code PackageManager.getInstalledPackagesAsUser}
+     */
+    public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
+        return mPm.getInstalledPackagesAsUser(flags, userId);
+    }
+
+    /**
      * Calls {@code PackageManager.hasSystemFeature()}.
      *
      * @see android.content.pm.PackageManager#hasSystemFeature
