@@ -331,7 +331,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ਤਬਦੀਲ ਕਰੋ ..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ਫ਼ਾਈਲ ਪਹਿਲਾਂ ਤੋਂ ਇਨਕ੍ਰਿਪਟਡ ਹੈ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"ਫ਼ਾਈਲ ਆਧਾਰਿਤ ਇਨਕ੍ਰਿਪਸ਼ਨ ਵਿੱਚ ਤਬਦੀਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">" ਡਾਟਾ  ਪਾਰਟੀਸ਼ਨ ਦਾ ਫ਼ਾਈਲ ਆਧਾਰਿਤ ਇਨਕ੍ਰਿਪਸ਼ਨ ਵਿੱਚ ਰੁਪਾਂਤਰਣ ਕਰੋ\n !! ਚਿਤਾਵਨੀ !! ਇਹ ਤੁਹਾਡੇ ਸਾਰੇ ਡੈਟੇ ਨੂੰ ਮਿਟਾ ਦੇਵੇਗਾ\n ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਯੋਗਿਕ ਹੈ, ਅਤੇ ਸ਼ਾਇਦ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।\n ਜਾਰੀ ਰੱਖਣ ਲਈ \'ਮਿਟਾਓ ਅਤੇ ਰੁਪਾਂਤਰਣ ਕਰੋ...\' ਨੂੰ ਦਬਾਓ।"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">" ਡਾਟਾ  ਪਾਰਟੀਸ਼ਨ ਦਾ ਫ਼ਾਈਲ ਆਧਾਰਿਤ ਇਨਕ੍ਰਿਪਸ਼ਨ ਵਿੱਚ ਰੁਪਾਂਤਰਣ ਕਰੋ\n !! ਚਿਤਾਵਨੀ !! ਇਹ ਤੁਹਾਡੇ ਸਾਰੇ  ਡਾਟੇ  ਨੂੰ ਮਿਟਾ ਦੇਵੇਗਾ\n ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਯੋਗਿਕ ਹੈ, ਅਤੇ ਸ਼ਾਇਦ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।\n ਜਾਰੀ ਰੱਖਣ ਲਈ \'ਮਿਟਾਓ ਅਤੇ ਰੁਪਾਂਤਰਣ ਕਰੋ...\' ਨੂੰ ਦਬਾਓ।"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"ਮਿਟਾਓ ਅਤੇ ਰੁਪਾਂਤਰਣ ਕਰੋ..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"ਤਸਵੀਰ ਰੰਗ ਮੋਡ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ਵਰਤੋਂ ਕਰੋ"</string>
