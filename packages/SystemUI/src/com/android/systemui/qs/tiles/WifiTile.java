@@ -37,10 +37,10 @@ import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.qs.AlphaControlledSignalTileView;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
@@ -104,7 +104,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
     @Override
     public QSIconView createTileView(Context context) {
-        return new SignalTileView(context);
+        return new AlphaControlledSignalTileView(context);
     }
 
     @Override
