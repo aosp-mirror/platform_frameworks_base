@@ -197,4 +197,18 @@ public class PackageManagerWrapper {
             throws PackageManager.NameNotFoundException {
         return mPm.getPackageUidAsUser(pkg, userId);
     }
+
+    /**
+     * Calls {@code PackageManager.setApplicationEnabledSetting}
+     */
+    public void setApplicationEnabledSetting(String packageName, int newState, int flags) {
+        mPm.setApplicationEnabledSetting(packageName, newState, flags);
+    }
+
+    /**
+     * Calls {@code PackageManager.getApplicationEnabledSetting}
+     */
+    public int getApplicationEnabledSetting(String packageName) {
+        return mPm.getApplicationEnabledSetting(packageName);
+    }
 }
