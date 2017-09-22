@@ -683,8 +683,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Configure auto-brightness.
         boolean autoBrightnessEnabled = false;
         if (mAutomaticBrightnessController != null) {
-            final boolean autoBrightnessEnabledInDoze = mAllowAutoBrightnessWhileDozingConfig
-                    && (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND);
+            final boolean autoBrightnessEnabledInDoze =
+                    mAllowAutoBrightnessWhileDozingConfig && Display.isDozeState(state);
             autoBrightnessEnabled = mPowerRequest.useAutoBrightness
                     && (state == Display.STATE_ON || autoBrightnessEnabledInDoze)
                     && brightness < 0;
@@ -726,8 +726,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         // Use default brightness when dozing unless overridden.
-        if (brightness < 0 && (state == Display.STATE_DOZE
-                || state == Display.STATE_DOZE_SUSPEND)) {
+        if (brightness < 0 && Display.isDozeState(state)) {
             brightness = mScreenBrightnessDozeConfig;
         }
 
@@ -777,7 +776,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Skip the animation when the screen is off or suspended or transition to/from VR.
         if (!mPendingScreenOff) {
             if (mSkipScreenOnBrightnessRamp) {
-
                 if (state == Display.STATE_ON) {
                     if (mSkipRampState == RAMP_STATE_SKIP_NONE && mDozing) {
                         mInitialAutoBrightness = brightness;
@@ -794,15 +792,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
 
-            boolean wasOrWillBeInVr = (state == Display.STATE_VR || oldState == Display.STATE_VR);
-            if ((state == Display.STATE_ON
-                    && mSkipRampState == RAMP_STATE_SKIP_NONE
-                    || state == Display.STATE_DOZE && !mBrightnessBucketsInDozeConfig)
-                    && !wasOrWillBeInVr) {
+            final boolean wasOrWillBeInVr =
+                    (state == Display.STATE_VR || oldState == Display.STATE_VR);
+            final boolean initialRampSkip =
+                    state == Display.STATE_ON && mSkipRampState != RAMP_STATE_SKIP_NONE;
+            // While dozing, sometimes the brightness is split into buckets. Rather than animating
+            // through the buckets, which is unlikely to be smooth in the first place, just jump
+            // right to the suggested brightness.
+            final boolean hasBrightnessBuckets =
+                    Display.isDozeState(state) && mBrightnessBucketsInDozeConfig;
+            // If the color fade is totally covering the screen then we can change the backlight
+            // level without it being a noticeable jump since any actual content isn't yet visible.
+            final boolean isDisplayContentVisible =
+                    mColorFadeEnabled && mPowerState.getColorFadeLevel() == 1.0f;
+            if (initialRampSkip || hasBrightnessBuckets
+                    || wasOrWillBeInVr || !isDisplayContentVisible) {
+                animateScreenBrightness(brightness, 0);
+            } else {
                 animateScreenBrightness(brightness,
                         slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
-            } else {
-                animateScreenBrightness(brightness, 0);
             }
         }
 
@@ -925,6 +933,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
 
             if (!reportOnly) {
+                Trace.traceCounter(Trace.TRACE_TAG_POWER, "ScreenState", state);
                 mPowerState.setScreenState(state);
                 // Tell battery stats about the transition.
                 try {
