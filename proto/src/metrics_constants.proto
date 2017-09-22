@@ -4527,6 +4527,11 @@ message MetricsEvent {
     // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
     AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
 
+    // Autofill service called API that disables itself
+    // Package: Package of the autofill service
+    // OS: O MR
+    AUTOFILL_SERVICE_DISABLED_SELF = 1135;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // OPEN: Settings > Network & Internet > Mobile network
