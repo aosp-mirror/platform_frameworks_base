@@ -115,6 +115,7 @@ public final class AutofillManagerService extends SystemService {
     private final SparseBooleanArray mDisabledUsers = new SparseBooleanArray();
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
+    private final LocalLog mUiLatencyHistory = new LocalLog(20);
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -306,7 +307,7 @@ public final class AutofillManagerService extends SystemService {
         AutofillManagerServiceImpl service = mServicesCache.get(resolvedUserId);
         if (service == null) {
             service = new AutofillManagerServiceImpl(mContext, mLock, mRequestsHistory,
-                    resolvedUserId, mUi, mDisabledUsers.get(resolvedUserId));
+                    mUiLatencyHistory, resolvedUserId, mUi, mDisabledUsers.get(resolvedUserId));
             mServicesCache.put(userId, service);
         }
         return service;
@@ -736,6 +737,8 @@ public final class AutofillManagerService extends SystemService {
                 if (showHistory) {
                     pw.println("Requests history:");
                     mRequestsHistory.reverseDump(fd, pw, args);
+                    pw.println("UI latency history:");
+                    mUiLatencyHistory.reverseDump(fd, pw, args);
                 }
             } finally {
                 setDebugLocked(oldDebug);
