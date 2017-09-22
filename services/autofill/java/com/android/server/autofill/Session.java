@@ -50,6 +50,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillContext;
@@ -61,8 +62,10 @@ import android.service.autofill.SaveRequest;
 import android.service.autofill.ValueFinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -181,6 +184,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private ArrayList<String> mSelectedDatasetIds;
+
+    /**
+     * When the session started (using elapsed time since boot).
+     */
+    private final long mStartTime;
+
+    /**
+     * When the UI was shown for the first time (using elapsed time since boot).
+     */
+    @GuardedBy("mLock")
+    private long mUiShownTime;
+
+    @GuardedBy("mLock")
+    private final LocalLog mUiLatencyHistory;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -403,10 +420,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     Session(@NonNull AutofillManagerServiceImpl service, @NonNull AutoFillUI ui,
             @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
-            @NonNull IBinder client, boolean hasCallback,
+            @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
             @NonNull ComponentName componentName, @NonNull String packageName) {
         id = sessionId;
         this.uid = uid;
+        mStartTime = SystemClock.elapsedRealtime();
         mService = service;
         mLock = lock;
         mUi = ui;
@@ -414,6 +432,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mRemoteFillService = new RemoteFillService(context, componentName, userId, this);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
+        mUiLatencyHistory = uiLatencyHistory;
         mPackageName = packageName;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
@@ -1355,6 +1374,31 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         getUiForShowing().showFillUi(filledId, response, filterText,
                 mService.getServicePackageName(), mPackageName, this);
+
+        synchronized (mLock) {
+            if (mUiShownTime == 0) {
+                // Log first time UI is shown.
+                mUiShownTime = SystemClock.elapsedRealtime();
+                final long duration = mUiShownTime - mStartTime;
+                if (sDebug) {
+                    final StringBuilder msg = new StringBuilder("1st UI for ")
+                            .append(mActivityToken)
+                            .append(" shown in ");
+                    TimeUtils.formatDuration(duration, msg);
+                    Slog.d(TAG, msg.toString());
+                }
+                final StringBuilder historyLog = new StringBuilder("id=").append(id)
+                        .append(" app=").append(mActivityToken)
+                        .append(" svc=").append(mService.getServicePackageName())
+                        .append(" latency=");
+                TimeUtils.formatDuration(duration, historyLog);
+                mUiLatencyHistory.log(historyLog.toString());
+
+                final LogMaker metricsLog = newLogMaker(MetricsEvent.AUTOFILL_UI_LATENCY)
+                        .setCounterValue((int) duration);
+                mMetricsLogger.write(metricsLog);
+            }
+        }
     }
 
     boolean isDestroyed() {
@@ -1663,6 +1707,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
         pw.print(prefix); pw.print("mPackagename: "); pw.println(mPackageName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
+        pw.print(prefix); pw.print("mStartTime: "); pw.println(mStartTime);
+        pw.print(prefix); pw.print("Time to show UI: ");
+        if (mUiShownTime == 0) {
+            pw.println("N/A");
+        } else {
+            TimeUtils.formatDuration(mUiShownTime - mStartTime, pw);
+            pw.println();
+        }
         pw.print(prefix); pw.print("mResponses: ");
         if (mResponses == null) {
             pw.println("null");
