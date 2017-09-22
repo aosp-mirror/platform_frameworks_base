@@ -31,6 +31,7 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -605,38 +606,44 @@ public class VectorDrawable extends Drawable {
     public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        if (mVectorState.mRootGroup != null || mVectorState.mNativeTree != null) {
-            // This VD has been used to display other VD resource content, clean up.
-            if (mVectorState.mRootGroup != null) {
-                // Subtract the native allocation for all the nodes.
-                VMRuntime.getRuntime().registerNativeFree(mVectorState.mRootGroup.getNativeSize());
-                // Remove child nodes' reference to tree
-                mVectorState.mRootGroup.setTree(null);
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "VectorDrawable#inflate");
+            if (mVectorState.mRootGroup != null || mVectorState.mNativeTree != null) {
+                // This VD has been used to display other VD resource content, clean up.
+                if (mVectorState.mRootGroup != null) {
+                    // Subtract the native allocation for all the nodes.
+                    VMRuntime.getRuntime().registerNativeFree(
+                            mVectorState.mRootGroup.getNativeSize());
+                    // Remove child nodes' reference to tree
+                    mVectorState.mRootGroup.setTree(null);
+                }
+                mVectorState.mRootGroup = new VGroup();
+                if (mVectorState.mNativeTree != null) {
+                    // Subtract the native allocation for the tree wrapper, which contains root node
+                    // as well as rendering related data.
+                    VMRuntime.getRuntime().registerNativeFree(mVectorState.NATIVE_ALLOCATION_SIZE);
+                    mVectorState.mNativeTree.release();
+                }
+                mVectorState.createNativeTree(mVectorState.mRootGroup);
             }
-            mVectorState.mRootGroup = new VGroup();
-            if (mVectorState.mNativeTree != null) {
-                // Subtract the native allocation for the tree wrapper, which contains root node
-                // as well as rendering related data.
-                VMRuntime.getRuntime().registerNativeFree(mVectorState.NATIVE_ALLOCATION_SIZE);
-                mVectorState.mNativeTree.release();
-            }
-            mVectorState.createNativeTree(mVectorState.mRootGroup);
+            final VectorDrawableState state = mVectorState;
+            state.setDensity(Drawable.resolveDensity(r, 0));
+
+            final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.VectorDrawable);
+            updateStateFromTypedArray(a);
+            a.recycle();
+
+            mDpiScaledDirty = true;
+
+            state.mCacheDirty = true;
+            inflateChildElements(r, parser, attrs, theme);
+
+            state.onTreeConstructionFinished();
+            // Update local properties.
+            updateLocalState(r);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
-        final VectorDrawableState state = mVectorState;
-        state.setDensity(Drawable.resolveDensity(r, 0));
-
-        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.VectorDrawable);
-        updateStateFromTypedArray(a);
-        a.recycle();
-
-        mDpiScaledDirty = true;
-
-        state.mCacheDirty = true;
-        inflateChildElements(r, parser, attrs, theme);
-
-        state.onTreeConstructionFinished();
-        // Update local properties.
-        updateLocalState(r);
     }
 
     private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
