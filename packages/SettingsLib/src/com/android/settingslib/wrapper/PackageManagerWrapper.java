@@ -139,11 +139,11 @@ public class PackageManagerWrapper {
 
     /**
      * Gets information about a particular package from the package manager.
+     *
      * @param packageName The name of the package we would like information about.
-     * @param i additional options flags. see javadoc for
-     * {@link PackageManager#getPackageInfo(String, int)}
+     * @param i           additional options flags. see javadoc for
+     *                    {@link PackageManager#getPackageInfo(String, int)}
      * @return The PackageInfo for the requested package
-     * @throws NameNotFoundException
      */
     public PackageInfo getPackageInfo(String packageName, int i) throws NameNotFoundException {
         return mPm.getPackageInfo(packageName, i);
@@ -151,6 +151,7 @@ public class PackageManagerWrapper {
 
     /**
      * Retrieves the icon associated with this particular set of ApplicationInfo
+     *
      * @param info The ApplicationInfo to retrieve the icon for
      * @return The icon as a drawable.
      */
@@ -161,6 +162,7 @@ public class PackageManagerWrapper {
 
     /**
      * Retrieves the label associated with the particular set of ApplicationInfo
+     *
      * @param app The ApplicationInfo to retrieve the label for
      * @return the label as a CharSequence
      */
@@ -211,4 +213,20 @@ public class PackageManagerWrapper {
     public int getApplicationEnabledSetting(String packageName) {
         return mPm.getApplicationEnabledSetting(packageName);
     }
+
+    /**
+     * Calls {@code PackageManager.getApplicationInfo}
+     */
+    public ApplicationInfo getApplicationInfo(String packageName, int flags)
+            throws NameNotFoundException {
+        return mPm.getApplicationInfo(packageName, flags);
+    }
+
+    /**
+     * Calls {@code PackageManager.getApplicationLabel}
+     */
+    public CharSequence getApplicationLabel(ApplicationInfo info) {
+        return mPm.getApplicationLabel(info);
+    }
 }
+
