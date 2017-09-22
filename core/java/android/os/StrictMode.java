@@ -154,12 +154,15 @@ public final class StrictMode {
     // Byte 1: Thread-policy
 
     /** @hide */
+    @TestApi
     public static final int DETECT_DISK_WRITE = 0x01; // for ThreadPolicy
 
     /** @hide */
+    @TestApi
     public static final int DETECT_DISK_READ = 0x02; // for ThreadPolicy
 
     /** @hide */
+    @TestApi
     public static final int DETECT_NETWORK = 0x04; // for ThreadPolicy
 
     /**
@@ -167,6 +170,7 @@ public final class StrictMode {
      *
      * @hide
      */
+    @TestApi
     public static final int DETECT_CUSTOM = 0x08; // for ThreadPolicy
 
     /**
@@ -174,9 +178,11 @@ public final class StrictMode {
      *
      * @hide
      */
+    @TestApi
     public static final int DETECT_RESOURCE_MISMATCH = 0x10; // for ThreadPolicy
 
     /** @hide */
+    @TestApi
     public static final int DETECT_UNBUFFERED_IO = 0x20; // for ThreadPolicy
 
     private static final int ALL_THREAD_DETECT_BITS =
@@ -194,6 +200,7 @@ public final class StrictMode {
      *
      * @hide
      */
+    @TestApi
     public static final int DETECT_VM_CURSOR_LEAKS = 0x01 << 8; // for VmPolicy
 
     /**
@@ -201,6 +208,7 @@ public final class StrictMode {
      *
      * @hide
      */
+    @TestApi
     public static final int DETECT_VM_CLOSABLE_LEAKS = 0x02 << 8; // for VmPolicy
 
     /**
@@ -208,25 +216,32 @@ public final class StrictMode {
      *
      * @hide
      */
+    @TestApi
     public static final int DETECT_VM_ACTIVITY_LEAKS = 0x04 << 8; // for VmPolicy
 
     /** @hide */
-    private static final int DETECT_VM_INSTANCE_LEAKS = 0x08 << 8; // for VmPolicy
+    @TestApi
+    public static final int DETECT_VM_INSTANCE_LEAKS = 0x08 << 8; // for VmPolicy
 
     /** @hide */
+    @TestApi
     public static final int DETECT_VM_REGISTRATION_LEAKS = 0x10 << 8; // for VmPolicy
 
     /** @hide */
-    private static final int DETECT_VM_FILE_URI_EXPOSURE = 0x20 << 8; // for VmPolicy
+    @TestApi
+    public static final int DETECT_VM_FILE_URI_EXPOSURE = 0x20 << 8; // for VmPolicy
 
     /** @hide */
-    private static final int DETECT_VM_CLEARTEXT_NETWORK = 0x40 << 8; // for VmPolicy
+    @TestApi
+    public static final int DETECT_VM_CLEARTEXT_NETWORK = 0x40 << 8; // for VmPolicy
 
     /** @hide */
-    private static final int DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION = 0x80 << 8; // for VmPolicy
+    @TestApi
+    public static final int DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION = 0x80 << 8; // for VmPolicy
 
     /** @hide */
-    private static final int DETECT_VM_UNTAGGED_SOCKET = 0x80 << 24; // for VmPolicy
+    @TestApi
+    public static final int DETECT_VM_UNTAGGED_SOCKET = 0x80 << 24; // for VmPolicy
 
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS
@@ -1858,6 +1873,10 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static final String CLEARTEXT_DETECTED_MSG =
+            "Detected cleartext network traffic from UID ";
+
+    /** @hide */
     public static void onCleartextNetworkDetected(byte[] firstPacket) {
         byte[] rawAddr = null;
         if (firstPacket != null) {
@@ -1873,14 +1892,10 @@ public final class StrictMode {
         }
 
         final int uid = android.os.Process.myUid();
-        String msg = "Detected cleartext network traffic from UID " + uid;
+        String msg = CLEARTEXT_DETECTED_MSG + uid;
         if (rawAddr != null) {
             try {
-                msg =
-                        "Detected cleartext network traffic from UID "
-                                + uid
-                                + " to "
-                                + InetAddress.getByAddress(rawAddr);
+                msg += " to " + InetAddress.getByAddress(rawAddr);
             } catch (UnknownHostException ignored) {
             }
         }
@@ -1891,12 +1906,13 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static final String UNTAGGED_SOCKET_VIOLATION_MESSAGE =
+            "Untagged socket detected; use"
+                    + " TrafficStats.setThreadSocketTag() to track all network usage";
+
+    /** @hide */
     public static void onUntaggedSocket() {
-        onVmPolicyViolation(
-                null,
-                new Throwable(
-                        "Untagged socket detected; use"
-                                + " TrafficStats.setThreadSocketTag() to track all network usage"));
+        onVmPolicyViolation(null, new Throwable(UNTAGGED_SOCKET_VIOLATION_MESSAGE));
     }
 
     // Map from VM violation fingerprint to uptime millis.
