@@ -16,8 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -1142,6 +1144,12 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    NotificationRecord getNotificationRecord(String key) {
+        return mNotificationsByKey.get(key);
+    }
+
+
+    @VisibleForTesting
     void setSystemReady(boolean systemReady) {
         mSystemReady = systemReady;
     }
@@ -1216,7 +1224,7 @@ public class NotificationManagerService extends SystemService {
         mUsageStats = usageStats;
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
-                getContext().getPackageManager(),
+                mPackageManagerClient,
                 mRankingHandler,
                 mUsageStats,
                 extractorNames);
@@ -1476,7 +1484,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
-        mRankingHelper.updateNotificationChannel(pkg, uid, channel);
+        mRankingHelper.updateNotificationChannel(pkg, uid, channel, true);
 
         if (!fromListener) {
             final NotificationChannel modifiedChannel =
@@ -3518,6 +3526,21 @@ public class NotificationManagerService extends SystemService {
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
+
+        if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0
+                && (channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
+                && (r.getImportance() == IMPORTANCE_MIN || r.getImportance() == IMPORTANCE_NONE)) {
+            // Increase the importance of foreground service notifications unless the user had an
+            // opinion otherwise
+            if (TextUtils.isEmpty(channelId)
+                    || NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
+                r.setImportance(IMPORTANCE_LOW, "Bumped for foreground service");
+            } else {
+                channel.setImportance(IMPORTANCE_LOW);
+                mRankingHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+                r.updateNotificationChannel(channel);
+            }
+        }
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.sbn.getOverrideGroupKey() != null)) {

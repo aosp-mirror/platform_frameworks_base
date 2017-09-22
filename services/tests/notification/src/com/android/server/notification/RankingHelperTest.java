@@ -497,7 +497,7 @@ public class RankingHelperTest extends NotificationTestCase {
         final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG, UID,
                 NotificationChannel.DEFAULT_CHANNEL_ID, false);
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
-        mHelper.updateNotificationChannel(PKG, UID, defaultChannel);
+        mHelper.updateNotificationChannel(PKG, UID, defaultChannel, true);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false,
                 NotificationChannel.DEFAULT_CHANNEL_ID);
@@ -646,7 +646,7 @@ public class RankingHelperTest extends NotificationTestCase {
         channel2.setBypassDnd(false);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
-        mHelper.updateNotificationChannel(PKG, UID, channel2);
+        mHelper.updateNotificationChannel(PKG, UID, channel2, true);
 
         // all fields should be changed
         assertEquals(channel2, mHelper.getNotificationChannel(PKG, UID, channel.getId(), false));
@@ -670,7 +670,7 @@ public class RankingHelperTest extends NotificationTestCase {
         defaultChannel.setBypassDnd(true);
         defaultChannel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
 
-        mHelper.updateNotificationChannel(PKG, UID, defaultChannel);
+        mHelper.updateNotificationChannel(PKG, UID, defaultChannel, true);
 
         // ensure app level fields are changed
         assertFalse(mHelper.canShowBadge(PKG, UID));
@@ -694,7 +694,7 @@ public class RankingHelperTest extends NotificationTestCase {
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
 
-        mHelper.updateNotificationChannel(PKG, UID, channel);
+        mHelper.updateNotificationChannel(PKG, UID, channel, true);
 
         // ensure app level fields are not changed
         assertTrue(mHelper.canShowBadge(PKG, UID));
@@ -785,14 +785,14 @@ public class RankingHelperTest extends NotificationTestCase {
         update1.setSound(new Uri.Builder().scheme("test").build(),
                 new AudioAttributes.Builder().build());
         update1.lockFields(NotificationChannel.USER_LOCKED_PRIORITY); // should be ignored
-        mHelper.updateNotificationChannel(PKG, UID, update1);
+        mHelper.updateNotificationChannel(PKG, UID, update1, true);
         assertEquals(NotificationChannel.USER_LOCKED_SOUND,
                 mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
                         .getUserLockedFields());
 
         NotificationChannel update2 = getChannel();
         update2.enableVibration(true);
-        mHelper.updateNotificationChannel(PKG, UID, update2);
+        mHelper.updateNotificationChannel(PKG, UID, update2, true);
         assertEquals(NotificationChannel.USER_LOCKED_SOUND
                         | NotificationChannel.USER_LOCKED_VIBRATION,
                 mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
@@ -805,14 +805,14 @@ public class RankingHelperTest extends NotificationTestCase {
 
         final NotificationChannel update1 = getChannel();
         update1.setVibrationPattern(new long[]{7945, 46 ,246});
-        mHelper.updateNotificationChannel(PKG, UID, update1);
+        mHelper.updateNotificationChannel(PKG, UID, update1, true);
         assertEquals(NotificationChannel.USER_LOCKED_VIBRATION,
                 mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
                         .getUserLockedFields());
 
         final NotificationChannel update2 = getChannel();
         update2.enableLights(true);
-        mHelper.updateNotificationChannel(PKG, UID, update2);
+        mHelper.updateNotificationChannel(PKG, UID, update2, true);
         assertEquals(NotificationChannel.USER_LOCKED_VIBRATION
                         | NotificationChannel.USER_LOCKED_LIGHTS,
                 mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
@@ -825,14 +825,14 @@ public class RankingHelperTest extends NotificationTestCase {
 
         final NotificationChannel update1 = getChannel();
         update1.setLightColor(Color.GREEN);
-        mHelper.updateNotificationChannel(PKG, UID, update1);
+        mHelper.updateNotificationChannel(PKG, UID, update1, true);
         assertEquals(NotificationChannel.USER_LOCKED_LIGHTS,
                 mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
                         .getUserLockedFields());
 
         final NotificationChannel update2 = getChannel();
         update2.setImportance(IMPORTANCE_DEFAULT);
-        mHelper.updateNotificationChannel(PKG, UID, update2);
+        mHelper.updateNotificationChannel(PKG, UID, update2, true);
         assertEquals(NotificationChannel.USER_LOCKED_LIGHTS
                         | NotificationChannel.USER_LOCKED_IMPORTANCE,
                 mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
@@ -848,14 +848,14 @@ public class RankingHelperTest extends NotificationTestCase {
 
         final NotificationChannel update1 = getChannel();
         update1.setBypassDnd(true);
-        mHelper.updateNotificationChannel(PKG, UID, update1);
+        mHelper.updateNotificationChannel(PKG, UID, update1, true);
         assertEquals(NotificationChannel.USER_LOCKED_PRIORITY,
                 mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
                         .getUserLockedFields());
 
         final NotificationChannel update2 = getChannel();
         update2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
-        mHelper.updateNotificationChannel(PKG, UID, update2);
+        mHelper.updateNotificationChannel(PKG, UID, update2, true);
         assertEquals(NotificationChannel.USER_LOCKED_PRIORITY
                         | NotificationChannel.USER_LOCKED_VISIBILITY,
                 mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
@@ -863,7 +863,7 @@ public class RankingHelperTest extends NotificationTestCase {
 
         final NotificationChannel update3 = getChannel();
         update3.setShowBadge(false);
-        mHelper.updateNotificationChannel(PKG, UID, update3);
+        mHelper.updateNotificationChannel(PKG, UID, update3, true);
         assertEquals(NotificationChannel.USER_LOCKED_PRIORITY
                         | NotificationChannel.USER_LOCKED_VISIBILITY
                         | NotificationChannel.USER_LOCKED_SHOW_BADGE,
@@ -1276,7 +1276,7 @@ public class RankingHelperTest extends NotificationTestCase {
         mHelper.getNotificationChannelGroups(PKG, UID, true).getList();
 
         channel1.setImportance(IMPORTANCE_LOW);
-        mHelper.updateNotificationChannel(PKG, UID, channel1);
+        mHelper.updateNotificationChannel(PKG, UID, channel1, true);
 
         List<NotificationChannelGroup> actual =
                 mHelper.getNotificationChannelGroups(PKG, UID, true).getList();
