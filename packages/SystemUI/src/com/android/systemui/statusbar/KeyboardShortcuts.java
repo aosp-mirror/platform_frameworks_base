@@ -433,24 +433,27 @@ public final class KeyboardShortcuts {
         // Assist.
         final AssistUtils assistUtils = new AssistUtils(mContext);
         final ComponentName assistComponent = assistUtils.getAssistComponentForUser(userId);
-        PackageInfo assistPackageInfo = null;
-        try {
-            assistPackageInfo = mPackageManager.getPackageInfo(
-                    assistComponent.getPackageName(), 0, userId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "PackageManagerService is dead");
-        }
+        // Not all devices have an assist component.
+        if (assistComponent != null) {
+            PackageInfo assistPackageInfo = null;
+            try {
+                assistPackageInfo = mPackageManager.getPackageInfo(
+                        assistComponent.getPackageName(), 0, userId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "PackageManagerService is dead");
+            }
 
-        if (assistPackageInfo != null) {
-            final Icon assistIcon = Icon.createWithResource(
-                    assistPackageInfo.applicationInfo.packageName,
-                    assistPackageInfo.applicationInfo.icon);
+            if (assistPackageInfo != null) {
+                final Icon assistIcon = Icon.createWithResource(
+                        assistPackageInfo.applicationInfo.packageName,
+                        assistPackageInfo.applicationInfo.icon);
 
-            keyboardShortcutInfoAppItems.add(new KeyboardShortcutInfo(
-                    mContext.getString(R.string.keyboard_shortcut_group_applications_assist),
-                    assistIcon,
-                    KeyEvent.KEYCODE_UNKNOWN,
-                    KeyEvent.META_META_ON));
+                keyboardShortcutInfoAppItems.add(new KeyboardShortcutInfo(
+                        mContext.getString(R.string.keyboard_shortcut_group_applications_assist),
+                        assistIcon,
+                        KeyEvent.KEYCODE_UNKNOWN,
+                        KeyEvent.META_META_ON));
+            }
         }
 
         // Browser.
