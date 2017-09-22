@@ -29,10 +29,11 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
@@ -146,5 +147,10 @@ public final class AutofillServiceInfo {
     @Nullable
     public String getSettingsActivity() {
         return mSettingsActivity;
+    }
+
+    @Override
+    public String toString() {
+        return mServiceInfo == null ? "null" : mServiceInfo.toString();
     }
 }
