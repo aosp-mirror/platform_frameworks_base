@@ -27,6 +27,7 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.DeadObjectException;
@@ -74,7 +75,10 @@ public class LockSettingsStrongAuth {
     }
 
     public void systemReady() {
-        mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
+        }
     }
 
     private void handleAddStrongAuthTracker(IStrongAuthTracker tracker) {
