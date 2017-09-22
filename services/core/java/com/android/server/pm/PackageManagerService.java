@@ -24872,6 +24872,50 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return mInstantAppRegistry.getInstantAppAndroidIdLPw(packageName, userId);
         }
     }
+
+    boolean canHaveOatDir(String packageName) {
+        synchronized (mPackages) {
+            PackageParser.Package p = mPackages.get(packageName);
+            if (p == null) {
+                return false;
+            }
+            return p.canHaveOatDir();
+        }
+    }
+
+    private String getOatDir(PackageParser.Package pkg) {
+        if (!pkg.canHaveOatDir()) {
+            return null;
+        }
+        File codePath = new File(pkg.codePath);
+        if (codePath.isDirectory()) {
+            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
+        }
+        return null;
+    }
+
+    void deleteOatArtifactsOfPackage(String packageName) {
+        final String[] instructionSets;
+        final List<String> codePaths;
+        final String oatDir;
+        final PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+        }
+        instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
+        codePaths = pkg.getAllCodePaths();
+        oatDir = getOatDir(pkg);
+
+        for (String codePath : codePaths) {
+            for (String isa : instructionSets) {
+                try {
+                    mInstaller.deleteOdex(codePath, isa, oatDir);
+                } catch (InstallerException e) {
+                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
+                }
+            }
+        }
+    }
 }
 
 interface PackageSender {
