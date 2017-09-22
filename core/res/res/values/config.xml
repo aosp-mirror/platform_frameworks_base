@@ -1363,7 +1363,7 @@
 
     <!-- The package of the time zone rules updater application. Expected to be the same
          for all Android devices that support APK-based time zone rule updates.
-         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
          will be sent to the updater app if the system server detects an update to the updater or
          data app packages.
          The package referenced here must have the android.permission.UPDATE_TIME_ZONE_RULES
@@ -1374,7 +1374,7 @@
 
     <!-- The package of the time zone rules data application. Expected to be configured
          by OEMs to reference their own priv-app APK package.
-         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
          will be sent to the updater app if the system server detects an update to the updater or
          data app packages.
          [This is only used if config_enableUpdateableTimeZoneRules and
