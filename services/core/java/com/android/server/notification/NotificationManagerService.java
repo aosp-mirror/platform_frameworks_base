@@ -127,6 +127,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
+import android.service.notification.ListenersDisablingEffectsProto;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
@@ -3247,14 +3248,47 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             proto.end(records);
-        }
 
-        long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
-        mZenModeHelper.dump(proto);
-        for (ComponentName suppressor : mEffectsSuppressors) {
-            proto.write(ZenModeProto.SUPPRESSORS, suppressor.toString());
+            long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
+            mZenModeHelper.dump(proto);
+            for (ComponentName suppressor : mEffectsSuppressors) {
+                proto.write(ZenModeProto.SUPPRESSORS, suppressor.toString());
+            }
+            proto.end(zenLog);
+
+            long listenersToken = proto.start(NotificationServiceDumpProto.NOTIFICATION_LISTENERS);
+            mListeners.dump(proto, filter);
+            proto.end(listenersToken);
+
+            proto.write(NotificationServiceDumpProto.LISTENER_HINTS, mListenerHints);
+
+            for (int i = 0; i < mListenersDisablingEffects.size(); ++i) {
+                long effectsToken = proto.start(
+                    NotificationServiceDumpProto.LISTENERS_DISABLING_EFFECTS);
+
+                proto.write(
+                    ListenersDisablingEffectsProto.HINT, mListenersDisablingEffects.keyAt(i));
+                final ArraySet<ManagedServiceInfo> listeners =
+                    mListenersDisablingEffects.valueAt(i);
+                for (int j = 0; j < listeners.size(); j++) {
+                    final ManagedServiceInfo listener = listeners.valueAt(i);
+                    listenersToken = proto.start(ListenersDisablingEffectsProto.LISTENERS);
+                    listener.toProto(proto, null);
+                    proto.end(listenersToken);
+                }
+
+                proto.end(effectsToken);
+            }
+
+            long assistantsToken = proto.start(
+                NotificationServiceDumpProto.NOTIFICATION_ASSISTANTS);
+            mAssistants.dump(proto, filter);
+            proto.end(assistantsToken);
+
+            long conditionsToken = proto.start(NotificationServiceDumpProto.CONDITION_PROVIDERS);
+            mConditionProviders.dump(proto, filter);
+            proto.end(conditionsToken);
         }
-        proto.end(zenLog);
 
         proto.flush();
     }
