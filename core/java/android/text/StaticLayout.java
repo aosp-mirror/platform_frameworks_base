@@ -616,7 +616,7 @@ public class StaticLayout extends Layout {
                 : (b.mText instanceof Spanned)
                     ? new SpannedEllipsizer(b.mText)
                     : new Ellipsizer(b.mText),
-                b.mPaint, b.mWidth, b.mAlignment, b.mSpacingMult, b.mSpacingAdd);
+                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd);
 
         if (b.mEllipsize != null) {
             Ellipsizer e = (Ellipsizer) getText();
