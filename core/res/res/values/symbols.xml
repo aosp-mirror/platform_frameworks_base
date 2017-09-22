@@ -2474,6 +2474,14 @@
   <java-symbol type="drawable" name="ft_avd_tooverflow_animation" />
   <java-symbol type="attr" name="floatingToolbarDividerColor" />
 
+  <!-- Magnifier -->
+  <java-symbol type="id" name="magnifier_image" />
+  <java-symbol type="layout" name="magnifier" />
+  <java-symbol type="dimen" name="magnifier_width" />
+  <java-symbol type="dimen" name="magnifier_height" />
+  <java-symbol type="dimen" name="magnifier_elevation" />
+  <java-symbol type="dimen" name="magnifier_offset" />
+
   <java-symbol type="string" name="date_picker_prev_month_button" />
   <java-symbol type="string" name="date_picker_next_month_button" />
   <java-symbol type="layout" name="date_picker_month_item_material" />
