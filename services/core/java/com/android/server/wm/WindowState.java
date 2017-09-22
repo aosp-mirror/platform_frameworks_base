@@ -3173,7 +3173,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 pw.print(" mShowToOwnerOnly="); pw.print(mShowToOwnerOnly);
                 pw.print(" package="); pw.print(mAttrs.packageName);
                 pw.print(" appop="); pw.println(AppOpsManager.opToName(mAppOp));
-        pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
+        pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs.toString(prefix));
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                 pw.print(" h="); pw.print(mRequestedHeight);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);

@@ -1217,7 +1217,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public static String screenOrientationToString(int orientation) {
-        switch(orientation) {
+        switch (orientation) {
             case SCREEN_ORIENTATION_UNSET:
                 return "SCREEN_ORIENTATION_UNSET";
             case SCREEN_ORIENTATION_UNSPECIFIED:
@@ -1254,6 +1254,22 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                 return "SCREEN_ORIENTATION_LOCKED";
             default:
                 return Integer.toString(orientation);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static String colorModeToString(@ColorMode int colorMode) {
+        switch (colorMode) {
+            case COLOR_MODE_DEFAULT:
+                return "COLOR_MODE_DEFAULT";
+            case COLOR_MODE_WIDE_COLOR_GAMUT:
+                return "COLOR_MODE_WIDE_COLOR_GAMUT";
+            case COLOR_MODE_HDR:
+                return "COLOR_MODE_HDR";
+            default:
+                return Integer.toString(colorMode);
         }
     }
 
