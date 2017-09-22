@@ -55,7 +55,7 @@ void StatsLogProcessor::OnLogEvent(const log_msg& msg) {
     // TODO: Add filtering, aggregation, etc.
     if (err == NO_ERROR) {
         StatsLogReport logReport;
-        logReport.set_start_report_millis(entry.tv_sec / 1000 + entry.tv_nsec / 1000 / 1000);
+        logReport.set_start_report_millis(entry.tv_sec * 1000 + entry.tv_nsec / 1000 / 1000);
         EventMetricData* eventMetricData = logReport.mutable_event_metrics()->add_data();
         *eventMetricData = parse(msg);
 
