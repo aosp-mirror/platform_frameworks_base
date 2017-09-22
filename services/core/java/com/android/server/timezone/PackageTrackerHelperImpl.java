@@ -26,6 +26,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import java.util.List;
@@ -114,8 +115,8 @@ final class PackageTrackerHelperImpl implements ClockHelper, ConfigHelper, Packa
     @Override
     public boolean contentProviderRegistered(String authority, String requiredPackageName) {
         int flags = PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
-        ProviderInfo providerInfo =
-                mPackageManager.resolveContentProvider(authority, flags);
+        ProviderInfo providerInfo = mPackageManager.resolveContentProviderAsUser(
+                authority, flags, UserHandle.SYSTEM.getIdentifier());
         if (providerInfo == null) {
             Slog.i(TAG, "contentProviderRegistered: No content provider registered with authority="
                     + authority);
@@ -136,7 +137,8 @@ final class PackageTrackerHelperImpl implements ClockHelper, ConfigHelper, Packa
             throws PackageManager.NameNotFoundException {
 
         int flags = PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
-        List<ResolveInfo> resolveInfo = mPackageManager.queryBroadcastReceivers(intent, flags);
+        List<ResolveInfo> resolveInfo = mPackageManager.queryBroadcastReceiversAsUser(
+                intent, flags, UserHandle.SYSTEM);
         if (resolveInfo.size() != 1) {
             Slog.i(TAG, "receiverRegistered: Zero or multiple broadcast receiver registered for"
                     + " intent=" + intent + ", found=" + resolveInfo);
