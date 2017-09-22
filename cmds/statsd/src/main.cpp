@@ -18,8 +18,8 @@
 
 #include "LogEntryPrinter.h"
 #include "LogReader.h"
-#include "StatsService.h"
 #include "StatsLogProcessor.h"
+#include "StatsService.h"
 
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
@@ -31,8 +31,8 @@
 #include <utils/StrongPointer.h>
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 using namespace android;
@@ -49,9 +49,7 @@ struct log_reader_thread_data {
 /**
  * Thread func for where the log reader runs.
  */
-static void*
-log_reader_thread_func(void* cookie)
-{
+static void* log_reader_thread_func(void* cookie) {
     log_reader_thread_data* data = static_cast<log_reader_thread_data*>(cookie);
 
     sp<LogReader> reader = new LogReader();
@@ -75,9 +73,7 @@ log_reader_thread_func(void* cookie)
 /**
  * Creates and starts the thread to own the LogReader.
  */
-static status_t
-start_log_reader_thread(const sp<StatsService>& service)
-{
+static status_t start_log_reader_thread(const sp<StatsService>& service) {
     status_t err;
     pthread_attr_t attr;
     pthread_t thread;
@@ -108,9 +104,7 @@ start_log_reader_thread(const sp<StatsService>& service)
 }
 
 // ================================================================================
-int
-main(int /*argc*/, char** /*argv*/)
-{
+int main(int /*argc*/, char** /*argv*/) {
     status_t err;
 
     // Set up the looper
@@ -118,7 +112,7 @@ main(int /*argc*/, char** /*argv*/)
 
     // Set up the binder
     sp<ProcessState> ps(ProcessState::self());
-    ps->setThreadPoolMaxThreadCount(1); // everything is oneway, let it queue and save ram
+    ps->setThreadPoolMaxThreadCount(1);  // everything is oneway, let it queue and save ram
     ps->startThreadPool();
     ps->giveThreadPoolName();
     IPCThreadState::self()->disableBackgroundScheduling(true);

@@ -20,11 +20,11 @@
 // ALOGE can be called from this file. If header loaded by another class, use their LOG_TAG instead.
 #ifndef LOG_TAG
 #define LOG_TAG "statsd(indexed_priority_queue)"
-#endif //LOG_TAG
+#endif  // LOG_TAG
 
 #include <cutils/log.h>
-#include <unordered_map>
 #include <utils/RefBase.h>
+#include <unordered_map>
 #include <vector>
 
 using namespace android;
@@ -49,7 +49,7 @@ struct SpHash {
  */
 template <class AA, class Comparator>
 class indexed_priority_queue {
- public:
+public:
     indexed_priority_queue();
     /** Adds a into the priority queue. If already present or a==nullptr, does nothing. */
     void push(sp<const AA> a);
@@ -62,11 +62,15 @@ class indexed_priority_queue {
     /** Returns min element. Returns nullptr iff empty(). */
     sp<const AA> top() const;
     /** Returns number of elements in priority queue. */
-    size_t size() const { return pq.size() - 1; } // pq is 1-indexed
+    size_t size() const {
+        return pq.size() - 1;
+    }  // pq is 1-indexed
     /** Returns true iff priority queue is empty. */
-    bool empty() const { return size() < 1; }
+    bool empty() const {
+        return size() < 1;
+    }
 
- private:
+private:
     /** Vector representing a min-heap (1-indexed, with nullptr at 0). */
     std::vector<sp<const AA>> pq;
     /** Mapping of each element in pq to its index in pq (i.e. the inverse of a=pq[i]). */
@@ -83,22 +87,22 @@ class indexed_priority_queue {
 // Implementation must be done in this file due to use of template.
 
 template <class AA, class Comparator>
-indexed_priority_queue<AA,Comparator>::indexed_priority_queue() {
+indexed_priority_queue<AA, Comparator>::indexed_priority_queue() {
     init();
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::push(sp<const AA> a) {
+void indexed_priority_queue<AA, Comparator>::push(sp<const AA> a) {
     if (a == nullptr) return;
     if (contains(a)) return;
     pq.push_back(a);
-    size_t idx = size(); // index of last element since 1-indexed
+    size_t idx = size();  // index of last element since 1-indexed
     indices.insert({a, idx});
-    sift_up(idx); // get the pq back in order
+    sift_up(idx);  // get the pq back in order
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::remove(sp<const AA> a) {
+void indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
     if (a == nullptr) return;
     if (!contains(a)) return;
     size_t idx = indices[a];
@@ -106,7 +110,7 @@ void indexed_priority_queue<AA,Comparator>::remove(sp<const AA> a) {
         ALOGE("indexed_priority_queue: Invalid index in map of indices.");
         return;
     }
-    if (idx == size()) { // if a is the last element, i.e. at index idx == size() == (pq.size()-1)
+    if (idx == size()) {  // if a is the last element, i.e. at index idx == size() == (pq.size()-1)
         pq.pop_back();
         indices.erase(a);
         return;
@@ -124,62 +128,66 @@ void indexed_priority_queue<AA,Comparator>::remove(sp<const AA> a) {
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::clear() {
+void indexed_priority_queue<AA, Comparator>::clear() {
     pq.clear();
     indices.clear();
     init();
 }
 
 template <class AA, class Comparator>
-sp<const AA> indexed_priority_queue<AA,Comparator>::top() const {
+sp<const AA> indexed_priority_queue<AA, Comparator>::top() const {
     if (empty()) return nullptr;
     return pq[1];
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::init() {
-    pq.push_back(nullptr); // so that pq is 1-indexed.
-    indices.insert({nullptr, 0}); // just to be consistent with pq.
+void indexed_priority_queue<AA, Comparator>::init() {
+    pq.push_back(nullptr);         // so that pq is 1-indexed.
+    indices.insert({nullptr, 0});  // just to be consistent with pq.
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::sift_up(size_t idx) {
+void indexed_priority_queue<AA, Comparator>::sift_up(size_t idx) {
     while (idx > 1) {
-        size_t parent = idx/2;
-        if (higher(idx, parent)) swap_indices(idx, parent);
-        else break;
+        size_t parent = idx / 2;
+        if (higher(idx, parent))
+            swap_indices(idx, parent);
+        else
+            break;
         idx = parent;
     }
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::sift_down(size_t idx) {
-    while (2*idx <= size()) {
+void indexed_priority_queue<AA, Comparator>::sift_down(size_t idx) {
+    while (2 * idx <= size()) {
         size_t child = 2 * idx;
-        if (child < size() && higher(child+1, child)) child++;
-        if (higher(child, idx)) swap_indices(child, idx);
-        else break;
+        if (child < size() && higher(child + 1, child)) child++;
+        if (higher(child, idx))
+            swap_indices(child, idx);
+        else
+            break;
         idx = child;
     }
 }
 
 template <class AA, class Comparator>
-bool indexed_priority_queue<AA,Comparator>::higher(size_t idx1, size_t idx2) const {
+bool indexed_priority_queue<AA, Comparator>::higher(size_t idx1, size_t idx2) const {
     if (!(0u < idx1 && idx1 < pq.size() && 0u < idx2 && idx2 < pq.size())) {
         ALOGE("indexed_priority_queue: Attempting to access invalid index");
-        return false; // got to do something.
+        return false;  // got to do something.
     }
     return Comparator()(pq[idx1], pq[idx2]);
 }
 
 template <class AA, class Comparator>
-bool indexed_priority_queue<AA,Comparator>::contains(sp<const AA> a) const {
-    if (a == nullptr) return false; // publicly, we pretend that nullptr is not actually in pq.
+bool indexed_priority_queue<AA, Comparator>::contains(sp<const AA> a) const {
+    if (a == nullptr) return false;  // publicly, we pretend that nullptr is not actually in pq.
     return indices.count(a) > 0;
 }
 
 template <class AA, class Comparator>
-void indexed_priority_queue<AA,Comparator>::swap_indices(size_t i, size_t j) {
+void indexed_priority_queue<AA, Comparator>::swap_indices(size_t i, size_t j) {
     if (!(0u < i && i < pq.size() && 0u < j && j < pq.size())) {
         ALOGE("indexed_priority_queue: Attempting to swap invalid index");
         return;
@@ -192,8 +200,8 @@ void indexed_priority_queue<AA,Comparator>::swap_indices(size_t i, size_t j) {
     indices[val_j] = i;
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif //STATSD_INDEXED_PRIORITY_QUEUE_H
+#endif  // STATSD_INDEXED_PRIORITY_QUEUE_H

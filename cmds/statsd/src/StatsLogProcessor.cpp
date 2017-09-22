@@ -17,8 +17,8 @@
 #include <StatsLogProcessor.h>
 
 #include <log/log_event_list.h>
-#include <utils/Errors.h>
 #include <parse_util.h>
+#include <utils/Errors.h>
 
 using namespace android;
 
@@ -26,8 +26,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs")
-{
+StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs") {
     // Initialize the EventTagMap, which is how we know the names of the numeric event tags.
     // If this fails, we can't print well, but something will print.
     m_tags = android_openEventTagMap(NULL);
@@ -37,43 +36,38 @@ StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs")
     android_log_setPrintFormat(m_format, FORMAT_THREADTIME);
 }
 
-StatsLogProcessor::~StatsLogProcessor()
-{
+StatsLogProcessor::~StatsLogProcessor() {
     if (m_tags != NULL) {
         android_closeEventTagMap(m_tags);
     }
     android_log_format_free(m_format);
 }
 
-void
-StatsLogProcessor::OnLogEvent(const log_msg& msg)
-{
+void StatsLogProcessor::OnLogEvent(const log_msg& msg) {
     status_t err;
     AndroidLogEntry entry;
     char buf[1024];
 
-    err = android_log_processBinaryLogBuffer(&(const_cast<log_msg*>(&msg)->entry_v1),
-                &entry, m_tags, buf, sizeof(buf));
+    err = android_log_processBinaryLogBuffer(&(const_cast<log_msg*>(&msg)->entry_v1), &entry,
+                                             m_tags, buf, sizeof(buf));
 
     // dump all statsd logs to dropbox for now.
     // TODO: Add filtering, aggregation, etc.
     if (err == NO_ERROR) {
         StatsLogReport logReport;
         logReport.set_start_report_millis(entry.tv_sec / 1000 + entry.tv_nsec / 1000 / 1000);
-        EventMetricData *eventMetricData = logReport.mutable_event_metrics()->add_data();
+        EventMetricData* eventMetricData = logReport.mutable_event_metrics()->add_data();
         *eventMetricData = parse(msg);
 
         m_dropbox_writer.addStatsLogReport(logReport);
     }
 }
 
-void
-StatsLogProcessor::UpdateConfig(const int config_source, StatsdConfig config)
-{
+void StatsLogProcessor::UpdateConfig(const int config_source, StatsdConfig config) {
     m_configs[config_source] = config;
     ALOGD("Updated configuration for source %i", config_source);
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

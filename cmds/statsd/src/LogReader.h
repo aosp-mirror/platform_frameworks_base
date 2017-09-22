@@ -27,10 +27,9 @@ namespace os {
 namespace statsd {
 
 /**
- * Callback for LogReader 
+ * Callback for LogReader
  */
-class LogListener : public virtual android::RefBase
-{
+class LogListener : public virtual android::RefBase {
 public:
     LogListener();
     virtual ~LogListener();
@@ -43,8 +42,7 @@ public:
 /**
  * Class to read logs from logd.
  */
-class LogReader : public virtual android::RefBase
-{
+class LogReader : public virtual android::RefBase {
 public:
     /**
      * Construct the LogReader with a pointer back to the StatsService
@@ -61,9 +59,9 @@ public:
      */
     void AddListener(const android::sp<LogListener>& listener);
 
-   /**
-    * Run the main LogReader loop
-    */
+    /**
+     * Run the main LogReader loop
+     */
     void Run();
 
 private:
@@ -81,8 +79,8 @@ private:
     int connect_and_read();
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif // LOGREADER_H
+#endif  // LOGREADER_H

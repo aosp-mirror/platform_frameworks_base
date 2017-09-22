@@ -62,12 +62,13 @@ public:
 
     virtual status_t setProcessor(const sp<StatsLogProcessor>& main_processor);
 
-    // TODO: public for testing since statsd doesn't run when system starts. Change to private later.
+    // TODO: public for testing since statsd doesn't run when system starts. Change to private
+    // later.
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
 
 private:
-    sp<StatsLogProcessor> m_processor; // Reference to the processor for updating configs.
+    sp<StatsLogProcessor> m_processor;  // Reference to the processor for updating configs.
 
     const sp<AnomalyMonitor> mAnomalyMonitor;  // TODO: Move this to a more logical file/class
 
@@ -84,8 +85,7 @@ private:
 // --- StatsdDeathRecipient ---
 class StatsdDeathRecipient : public IBinder::DeathRecipient {
 public:
-    StatsdDeathRecipient(sp<AnomalyMonitor> anomalyMonitor)
-            : mAnmlyMntr(anomalyMonitor) {
+    StatsdDeathRecipient(sp<AnomalyMonitor> anomalyMonitor) : mAnmlyMntr(anomalyMonitor) {
     }
 
     virtual void binderDied(const wp<IBinder>& who);
@@ -94,8 +94,8 @@ private:
     const sp<AnomalyMonitor> mAnmlyMntr;
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif // STATS_SERVICE_H
+#endif  // STATS_SERVICE_H

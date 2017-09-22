@@ -133,7 +133,6 @@ TEST(indexed_priority_queue, push_same_aa) {
     EXPECT_TRUE(ipq.contains(aa4_b));
 }
 
-
 TEST(indexed_priority_queue, remove_nonexistant) {
     indexed_priority_queue<AATest, AATest::Smaller> ipq;
     sp<const AATest> aa4 = new AATest{4};
