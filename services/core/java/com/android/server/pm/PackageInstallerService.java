@@ -243,35 +243,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
-    public void onSecureContainersAvailable() {
-        synchronized (mSessions) {
-            final ArraySet<String> unclaimed = new ArraySet<>();
-            for (String cid : PackageHelper.getSecureContainerList()) {
-                if (isStageName(cid)) {
-                    unclaimed.add(cid);
-                }
-            }
-
-            // Ignore stages claimed by active sessions
-            for (int i = 0; i < mSessions.size(); i++) {
-                final PackageInstallerSession session = mSessions.valueAt(i);
-                final String cid = session.stageCid;
-
-                if (unclaimed.remove(cid)) {
-                    // Claimed by active session, mount it
-                    PackageHelper.mountSdDir(cid, PackageManagerService.getEncryptKey(),
-                            Process.SYSTEM_UID);
-                }
-            }
-
-            // Clean up orphaned staging containers
-            for (String cid : unclaimed) {
-                Slog.w(TAG, "Deleting orphan container " + cid);
-                PackageHelper.destroySdDir(cid);
-            }
-        }
-    }
-
     public static boolean isStageName(String name) {
         final boolean isFile = name.startsWith("vmdl") && name.endsWith(".tmp");
         final boolean isContainer = name.startsWith("smdl") && name.endsWith(".tmp");
@@ -669,13 +640,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     private String buildExternalStageCid(int sessionId) {
         return "smdl" + sessionId + ".tmp";
-    }
-
-    static void prepareExternalStageCid(String stageCid, long sizeBytes) throws IOException {
-        if (PackageHelper.createSdDir(sizeBytes, stageCid, PackageManagerService.getEncryptKey(),
-                Process.SYSTEM_UID, true) == null) {
-            throw new IOException("Failed to create session cid: " + stageCid);
-        }
     }
 
     @Override

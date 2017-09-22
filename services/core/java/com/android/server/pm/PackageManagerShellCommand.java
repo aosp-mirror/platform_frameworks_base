@@ -183,7 +183,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
                             null, null);
                     params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
-                            pkgLite, false, params.sessionParams.abiOverride));
+                            pkgLite, params.sessionParams.abiOverride));
                 } catch (PackageParserException | IOException e) {
                     pw.println("Error: Failed to parse APK file: " + file);
                     throw new IllegalArgumentException(

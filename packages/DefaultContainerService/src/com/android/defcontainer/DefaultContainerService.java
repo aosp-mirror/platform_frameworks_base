@@ -16,8 +16,6 @@
 
 package com.android.defcontainer;
 
-import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
@@ -31,21 +29,15 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.Environment.UserEnvironment;
-import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.StructStatVfs;
 import android.util.Slog;
 
 import com.android.internal.app.IMediaContainerService;
-import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.util.ArrayUtils;
@@ -71,51 +63,6 @@ public class DefaultContainerService extends IntentService {
     // TODO: migrate native code unpacking to always be a derivative work
 
     private IMediaContainerService.Stub mBinder = new IMediaContainerService.Stub() {
-        /**
-         * Creates a new container and copies package there.
-         *
-         * @param packagePath absolute path to the package to be copied. Can be
-         *            a single monolithic APK file or a cluster directory
-         *            containing one or more APKs.
-         * @param containerId the id of the secure container that should be used
-         *            for creating a secure container into which the resource
-         *            will be copied.
-         * @param key Refers to key used for encrypting the secure container
-         * @return Returns the new cache path where the resource has been copied
-         *         into
-         */
-        @Override
-        public String copyPackageToContainer(String packagePath, String containerId, String key,
-                boolean isExternal, boolean isForwardLocked, String abiOverride) {
-            if (packagePath == null || containerId == null) {
-                return null;
-            }
-
-            if (isExternal) {
-                // Make sure the sdcard is mounted.
-                String status = Environment.getExternalStorageState();
-                if (!status.equals(Environment.MEDIA_MOUNTED)) {
-                    Slog.w(TAG, "Make sure sdcard is mounted.");
-                    return null;
-                }
-            }
-
-            PackageLite pkg = null;
-            NativeLibraryHelper.Handle handle = null;
-            try {
-                final File packageFile = new File(packagePath);
-                pkg = PackageParser.parsePackageLite(packageFile, 0);
-                handle = NativeLibraryHelper.Handle.create(pkg);
-                return copyPackageToContainerInner(pkg, handle, containerId, key, isExternal,
-                        isForwardLocked, abiOverride);
-            } catch (PackageParserException | IOException e) {
-                Slog.w(TAG, "Failed to copy package at " + packagePath, e);
-                return null;
-            } finally {
-                IoUtils.closeQuietly(handle);
-            }
-        }
-
         /**
          * Copy package to the target location.
          *
@@ -153,7 +100,6 @@ public class DefaultContainerService extends IntentService {
         public PackageInfoLite getMinimalPackageInfo(String packagePath, int flags,
                 String abiOverride) {
             final Context context = DefaultContainerService.this;
-            final boolean isForwardLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
 
             PackageInfoLite ret = new PackageInfoLite();
             if (packagePath == null) {
@@ -167,7 +113,7 @@ public class DefaultContainerService extends IntentService {
             final long sizeBytes;
             try {
                 pkg = PackageParser.parsePackageLite(packageFile, 0);
-                sizeBytes = PackageHelper.calculateInstalledSize(pkg, isForwardLocked, abiOverride);
+                sizeBytes = PackageHelper.calculateInstalledSize(pkg, abiOverride);
             } catch (PackageParserException | IOException e) {
                 Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
 
@@ -230,13 +176,13 @@ public class DefaultContainerService extends IntentService {
          *            containing one or more APKs.
          */
         @Override
-        public long calculateInstalledSize(String packagePath, boolean isForwardLocked,
-                String abiOverride) throws RemoteException {
+        public long calculateInstalledSize(String packagePath, String abiOverride)
+                throws RemoteException {
             final File packageFile = new File(packagePath);
             final PackageParser.PackageLite pkg;
             try {
                 pkg = PackageParser.parsePackageLite(packageFile, 0);
-                return PackageHelper.calculateInstalledSize(pkg, isForwardLocked, abiOverride);
+                return PackageHelper.calculateInstalledSize(pkg, abiOverride);
             } catch (PackageParserException | IOException e) {
                 Slog.w(TAG, "Failed to calculate installed size: " + e);
                 return Long.MAX_VALUE;
@@ -292,60 +238,6 @@ public class DefaultContainerService extends IntentService {
         return mBinder;
     }
 
-    private String copyPackageToContainerInner(PackageLite pkg, NativeLibraryHelper.Handle handle,
-            String newCid, String key, boolean isExternal, boolean isForwardLocked,
-            String abiOverride) throws IOException {
-
-        // Calculate container size, rounding up to nearest MB and adding an
-        // extra MB for filesystem overhead
-        final long sizeBytes = PackageHelper.calculateInstalledSize(pkg, handle,
-                isForwardLocked, abiOverride);
-
-        // Create new container
-        final String newMountPath = PackageHelper.createSdDir(sizeBytes, newCid, key,
-                Process.myUid(), isExternal);
-        if (newMountPath == null) {
-            throw new IOException("Failed to create container " + newCid);
-        }
-        final File targetDir = new File(newMountPath);
-
-        try {
-            // Copy all APKs
-            copyFile(pkg.baseCodePath, targetDir, "base.apk", isForwardLocked);
-            if (!ArrayUtils.isEmpty(pkg.splitNames)) {
-                for (int i = 0; i < pkg.splitNames.length; i++) {
-                    copyFile(pkg.splitCodePaths[i], targetDir,
-                            "split_" + pkg.splitNames[i] + ".apk", isForwardLocked);
-                }
-            }
-
-            // Extract native code
-            final File libraryRoot = new File(targetDir, LIB_DIR_NAME);
-            final int res = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                    abiOverride);
-            if (res != PackageManager.INSTALL_SUCCEEDED) {
-                throw new IOException("Failed to extract native code, res=" + res);
-            }
-
-            if (!PackageHelper.finalizeSdDir(newCid)) {
-                throw new IOException("Failed to finalize " + newCid);
-            }
-
-            if (PackageHelper.isContainerMounted(newCid)) {
-                PackageHelper.unMountSdDir(newCid);
-            }
-
-        } catch (ErrnoException e) {
-            PackageHelper.destroySdDir(newCid);
-            throw e.rethrowAsIOException();
-        } catch (IOException e) {
-            PackageHelper.destroySdDir(newCid);
-            throw e;
-        }
-
-        return newMountPath;
-    }
-
     private int copyPackageInner(PackageLite pkg, IParcelFileDescriptorFactory target)
             throws IOException, RemoteException {
         copyFile(pkg.baseCodePath, target, "base.apk");
@@ -371,30 +263,6 @@ public class DefaultContainerService extends IntentService {
         } finally {
             IoUtils.closeQuietly(out);
             IoUtils.closeQuietly(in);
-        }
-    }
-
-    private void copyFile(String sourcePath, File targetDir, String targetName,
-            boolean isForwardLocked) throws IOException, ErrnoException {
-        final File sourceFile = new File(sourcePath);
-        final File targetFile = new File(targetDir, targetName);
-
-        Slog.d(TAG, "Copying " + sourceFile + " to " + targetFile);
-        if (!FileUtils.copyFile(sourceFile, targetFile)) {
-            throw new IOException("Failed to copy " + sourceFile + " to " + targetFile);
-        }
-
-        if (isForwardLocked) {
-            final String publicTargetName = PackageHelper.replaceEnd(targetName,
-                    ".apk", ".zip");
-            final File publicTargetFile = new File(targetDir, publicTargetName);
-
-            PackageHelper.extractPublicFiles(sourceFile, publicTargetFile);
-
-            Os.chmod(targetFile.getAbsolutePath(), 0640);
-            Os.chmod(publicTargetFile.getAbsolutePath(), 0644);
-        } else {
-            Os.chmod(targetFile.getAbsolutePath(), 0644);
         }
     }
 }
