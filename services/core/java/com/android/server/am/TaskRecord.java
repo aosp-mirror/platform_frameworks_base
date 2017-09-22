@@ -438,7 +438,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void removeWindowContainer() {
-        mService.mLockTaskController.removeLockedTask(this);
+        mService.mLockTaskController.clearLockedTask(this);
         mWindowContainerController.removeContainer();
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses

@@ -20,6 +20,7 @@ import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
@@ -83,6 +84,7 @@ import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
@@ -1306,8 +1308,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mService.updateLruProcessLocked(app, true, null);
             mService.updateOomAdjLocked();
 
-            if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE ||
-                    task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV) {
+            if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
+                    || task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV
+                    || (task.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED
+                            && mService.mLockTaskController.getLockTaskModeState()
+                            == LOCK_TASK_MODE_LOCKED)) {
                 mService.mLockTaskController.startLockTaskMode(task, false, 0 /* blank UID */);
             }
 
@@ -2769,6 +2774,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (tr != null) {
             tr.removeTaskActivitiesLocked(pauseImmediately);
             cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
+            mService.mLockTaskController.clearLockedTask(tr);
             if (tr.isPersistable) {
                 mService.notifyTaskPersisterLocked(null, true);
             }

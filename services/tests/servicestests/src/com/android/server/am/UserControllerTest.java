@@ -60,7 +60,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -104,7 +103,7 @@ public class UserControllerTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         mInjector = Mockito.spy(new TestInjector(getContext()));
-        doNothing().when(mInjector).clearLockTaskMode(anyString());
+        doNothing().when(mInjector).clearAllLockedTasks(anyString());
         doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
         doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
         doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
@@ -126,7 +125,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         Mockito.verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         Mockito.verify(mInjector.getWindowManager()).setSwitchingUser(true);
-        Mockito.verify(mInjector).clearLockTaskMode(anyString());
+        Mockito.verify(mInjector).clearAllLockedTasks(anyString());
         startForegroundUserAssertions();
     }
 
@@ -136,7 +135,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(
                 mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         Mockito.verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
-        Mockito.verify(mInjector, never()).clearLockTaskMode(anyString());
+        Mockito.verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
     }
 

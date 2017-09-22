@@ -7303,24 +7303,25 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Request to put this Activity in a mode where the user is locked to the
-     * current task.
+     * Request to put this activity in a mode where the user is locked to a restricted set of
+     * applications.
      *
-     * This will prevent the user from launching other apps, going to settings, or reaching the
-     * home screen. This does not include those apps whose {@link android.R.attr#lockTaskMode}
-     * values permit launching while locked.
+     * <p>If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns {@code true}
+     * for this component, the current task will be launched directly into LockTask mode. Only apps
+     * whitelisted by {@link DevicePolicyManager#setLockTaskPackages(ComponentName, String[])} can
+     * be launched while LockTask mode is active. The user will not be able to leave this mode
+     * until this activity calls {@link #stopLockTask()}. Calling this method while the device is
+     * already in LockTask mode has no effect.
      *
-     * If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns true or
-     * lockTaskMode=lockTaskModeAlways for this component then the app will go directly into
-     * Lock Task mode. The user will not be able to exit this mode until
-     * {@link Activity#stopLockTask()} is called.
+     * <p>Otherwise, the current task will be launched into screen pinning mode. In this case, the
+     * system will prompt the user with a dialog requesting permission to use this mode.
+     * The user can exit at any time through instructions shown on the request dialog. Calling
+     * {@link #stopLockTask()} will also terminate this mode.
      *
-     * If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns false
-     * then the system will prompt the user with a dialog requesting permission to enter
-     * this mode.  When entered through this method the user can exit at any time through
-     * an action described by the request dialog.  Calling stopLockTask will also exit the
-     * mode.
+     * <p><strong>Note:</strong> this method can only be called when the activity is foreground.
+     * That is, between {@link #onResume()} and {@link #onPause()}.
      *
+     * @see #stopLockTask()
      * @see android.R.attr#lockTaskMode
      */
     public void startLockTask() {
@@ -7331,25 +7332,24 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Allow the user to switch away from the current task.
+     * Stop the current task from being locked.
      *
-     * Called to end the mode started by {@link Activity#startLockTask}. This
-     * can only be called by activities that have successfully called
-     * startLockTask previously.
+     * <p>Called to end the LockTask or screen pinning mode started by {@link #startLockTask()}.
+     * This can only be called by activities that have called {@link #startLockTask()} previously.
      *
-     * This will allow the user to exit this app and move onto other activities.
-     * <p>Note: This method should only be called when the activity is user-facing. That is,
-     * between onResume() and onPause().
-     * <p>Note: If there are other tasks below this one that are also locked then calling this
-     * method will immediately finish this task and resume the previous locked one, remaining in
-     * lockTask mode.
+     * <p><strong>Note:</strong> If the device is in LockTask mode that is not initially started
+     * by this activity, then calling this method will not terminate the LockTask mode, but only
+     * finish its own task. The device will remain in LockTask mode, until the activity which
+     * started the LockTask mode calls this method, or until its whitelist authorization is revoked
+     * by {@link DevicePolicyManager#setLockTaskPackages(ComponentName, String[])}.
      *
+     * @see #startLockTask()
      * @see android.R.attr#lockTaskMode
      * @see ActivityManager#getLockTaskModeState()
      */
     public void stopLockTask() {
         try {
-            ActivityManager.getService().stopLockTaskMode();
+            ActivityManager.getService().stopLockTaskModeByToken(mToken);
         } catch (RemoteException e) {
         }
     }
