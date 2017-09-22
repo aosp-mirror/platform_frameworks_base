@@ -44,6 +44,7 @@ public class ManagedApplicationService {
     private final int mClientLabel;
     private final String mSettingsAction;
     private final BinderChecker mChecker;
+    private final boolean mIsImportant;
 
     private final DeathRecipient mDeathRecipient = new DeathRecipient() {
         @Override
@@ -64,13 +65,14 @@ public class ManagedApplicationService {
 
     private ManagedApplicationService(final Context context, final ComponentName component,
             final int userId, int clientLabel, String settingsAction,
-            BinderChecker binderChecker) {
+            BinderChecker binderChecker, boolean isImportant) {
         mContext = context;
         mComponent = component;
         mUserId = userId;
         mClientLabel = clientLabel;
         mSettingsAction = settingsAction;
         mChecker = binderChecker;
+        mIsImportant = isImportant;
     }
 
     /**
@@ -99,13 +101,15 @@ public class ManagedApplicationService {
      * @param settingsAction an action that can be used to open the Settings UI to enable/disable
      *      binding to these services.
      * @param binderChecker an interface used to validate the returned binder object.
+     * @param isImportant bind the user service with BIND_IMPORTANT.
      * @return a ManagedApplicationService instance.
      */
     public static ManagedApplicationService build(@NonNull final Context context,
         @NonNull final ComponentName component, final int userId, @NonNull int clientLabel,
-        @NonNull String settingsAction, @NonNull BinderChecker binderChecker) {
+        @NonNull String settingsAction, @NonNull BinderChecker binderChecker,
+        boolean isImportant) {
         return new ManagedApplicationService(context, component, userId, clientLabel,
-            settingsAction, binderChecker);
+            settingsAction, binderChecker, isImportant);
     }
 
     /**
@@ -248,9 +252,12 @@ public class ManagedApplicationService {
 
             mPendingConnection = serviceConnection;
 
+            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+            if (mIsImportant) {
+                flags |= Context.BIND_IMPORTANT;
+            }
             try {
-                if (!mContext.bindServiceAsUser(intent, serviceConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                if (!mContext.bindServiceAsUser(intent, serviceConnection, flags,
                         new UserHandle(mUserId))) {
                     Slog.w(TAG, "Unable to bind service: " + intent);
                 }
