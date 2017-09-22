@@ -9820,19 +9820,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     compilerFilter,
                     dexoptFlags));
 
-            if (pkg.isSystemApp()) {
-                // Only dexopt shared secondary dex files belonging to system apps to not slow down
-                // too much boot after an OTA.
-                int secondaryDexoptFlags = dexoptFlags |
-                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                        DexoptOptions.DEXOPT_ONLY_SHARED_DEX;
-                mDexManager.dexoptSecondaryDex(new DexoptOptions(
-                        pkg.packageName,
-                        compilerFilter,
-                        secondaryDexoptFlags));
-            }
-
-            // TODO(shubhamajmera): Record secondary dexopt stats.
             switch (primaryDexOptStaus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
                     numberOfPackagesOptimized++;
@@ -25245,6 +25232,37 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             }
             return results;
+        }
+
+        // NB: this differentiates between preloads and sideloads
+        @Override
+        public String getInstallerForPackage(String packageName) throws RemoteException {
+            final String installerName = getInstallerPackageName(packageName);
+            if (!TextUtils.isEmpty(installerName)) {
+                return installerName;
+            }
+            // differentiate between preload and sideload
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo appInfo = getApplicationInfo(packageName,
+                                    /*flags*/ 0,
+                                    /*userId*/ callingUser);
+            if (appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return "preload";
+            }
+            return "";
+        }
+
+        @Override
+        public int getVersionCodeForPackage(String packageName) throws RemoteException {
+            try {
+                int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+                PackageInfo pInfo = getPackageInfo(packageName, 0, callingUser);
+                if (pInfo != null) {
+                    return pInfo.versionCode;
+                }
+            } catch (Exception e) {
+            }
+            return 0;
         }
     }
 

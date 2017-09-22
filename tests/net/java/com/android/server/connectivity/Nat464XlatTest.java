@@ -85,6 +85,32 @@ public class Nat464XlatTest {
     }
 
     @Test
+    public void testRequiresClat() throws Exception {
+        final int[] supportedTypes = {
+            ConnectivityManager.TYPE_MOBILE,
+            ConnectivityManager.TYPE_WIFI,
+            ConnectivityManager.TYPE_ETHERNET,
+        };
+
+        // NetworkInfo doesn't allow setting the State directly, but rather
+        // requires setting DetailedState in order set State as a side-effect.
+        final NetworkInfo.DetailedState[] supportedDetailedStates = {
+            NetworkInfo.DetailedState.CONNECTED,
+            NetworkInfo.DetailedState.SUSPENDED,
+        };
+
+        for (int type : supportedTypes) {
+            mNai.networkInfo.setType(type);
+            for (NetworkInfo.DetailedState state : supportedDetailedStates) {
+                mNai.networkInfo.setDetailedState(state, "reason", "extraInfo");
+                assertTrue(
+                        String.format("requiresClat expected for type=%d state=%s", type, state),
+                        Nat464Xlat.requiresClat(mNai));
+            }
+        }
+    }
+
+    @Test
     public void testNormalStartAndStop() throws Exception {
         Nat464Xlat nat = makeNat464Xlat();
         ArgumentCaptor<LinkProperties> c = ArgumentCaptor.forClass(LinkProperties.class);

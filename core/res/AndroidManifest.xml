@@ -3074,6 +3074,12 @@
     <permission android:name="android.permission.BATTERY_STATS"
         android:protectionLevel="signature|privileged|development" />
 
+    <!--Allows an application to manage statscompanion.
+    <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.STATSCOMPANION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to control the backup and restore process.
     <p>Not for use by third-party applications.
          @hide pending API council -->
@@ -3857,6 +3863,16 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <category android:name="android.intent.category.MASTER_CLEAR" />
             </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.android.server.stats.StatsCompanionService$AnomalyAlarmReceiver"
+                  android:permission="android.permission.STATSCOMPANION"
+                  android:exported="false">
+        </receiver>
+
+        <receiver android:name="com.android.server.stats.StatsCompanionService$PollingAlarmReceiver"
+                  android:permission="android.permission.STATSCOMPANION"
+                  android:exported="false">
         </receiver>
 
         <service android:name="android.hardware.location.GeofenceHardwareService"

@@ -1256,9 +1256,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         mUseInternationalizedInput = targetSdkVersion >= VERSION_CODES.O;
-        // TODO: replace CUR_DEVELOPMENT with P once P is added to android.os.Build.VERSION_CODES.
-        // STOPSHIP if the above TODO is not done.
-        mUseFallbackLineSpacing = targetSdkVersion >= VERSION_CODES.CUR_DEVELOPMENT;
+        mUseFallbackLineSpacing = targetSdkVersion >= VERSION_CODES.P;
 
         if (inputMethod != null) {
             Class<?> c;

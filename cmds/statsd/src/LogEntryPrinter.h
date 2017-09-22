@@ -23,6 +23,10 @@
 
 #include <stdio.h>
 
+namespace android {
+namespace os {
+namespace statsd {
+
 /**
  * Decodes the log entry and prints it to the supplied file descriptor.
  */
@@ -50,5 +54,9 @@ private:
      */
     AndroidLogFormat* m_format;
 };
+
+} // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif // LOG_ENTRY_PRINTER_H

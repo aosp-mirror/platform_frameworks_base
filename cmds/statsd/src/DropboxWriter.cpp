@@ -18,11 +18,15 @@
 
 #include "DropboxWriter.h"
 
-using android::os::DropBoxManager;
 using android::binder::Status;
+using android::os::DropBoxManager;
 using android::sp;
 using android::String16;
 using std::vector;
+
+namespace android {
+namespace os {
+namespace statsd {
 
 DropboxWriter::DropboxWriter(const string& tag)
     : mTag(tag), mLogReport(), mBufferSize(0) {
@@ -57,3 +61,7 @@ void DropboxWriter::flush() {
     mLogReport.Clear();
     mBufferSize = 0;
 }
+
+} // namespace statsd
+} // namespace os
+} // namespace android

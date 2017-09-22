@@ -26,6 +26,8 @@ import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WAL
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.proto.KeyguardControllerProto.KEYGUARD_OCCLUDED;
+import static com.android.server.am.proto.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
@@ -39,6 +41,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.wm.WindowManagerService;
@@ -361,5 +364,12 @@ class KeyguardController {
         pw.println(prefix + "  mDismissingKeyguardActivity=" + mDismissingKeyguardActivity);
         pw.println(prefix + "  mDismissalRequested=" + mDismissalRequested);
         pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(KEYGUARD_SHOWING, mKeyguardShowing);
+        proto.write(KEYGUARD_OCCLUDED, mOccluded);
+        proto.end(token);
     }
 }

@@ -524,18 +524,17 @@ public class ZenModePanel extends FrameLayout {
             bindGenericCountdown();
             bindNextAlarm(getTimeUntilNextAlarmCondition());
         } else if (isForever(c)) {
+
             getConditionTagAt(FOREVER_CONDITION_INDEX).rb.setChecked(true);
             bindGenericCountdown();
             bindNextAlarm(getTimeUntilNextAlarmCondition());
         } else {
             if (isAlarm(c)) {
                 bindGenericCountdown();
-
                 bindNextAlarm(c);
                 getConditionTagAt(COUNTDOWN_ALARM_CONDITION_INDEX).rb.setChecked(true);
             } else if (isCountdown(c)) {
                 bindNextAlarm(getTimeUntilNextAlarmCondition());
-
                 bind(c, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
                         COUNTDOWN_CONDITION_INDEX);
                 getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
@@ -568,8 +567,8 @@ public class ZenModePanel extends FrameLayout {
         tag = (ConditionTag) alarmContent.getTag();
         boolean showAlarm = tag != null && tag.condition != null;
         mZenRadioGroup.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(
-                showAlarm ? View.VISIBLE : View.GONE);
-        alarmContent.setVisibility(showAlarm ? View.VISIBLE : View.GONE);
+                showAlarm ? View.VISIBLE : View.INVISIBLE);
+        alarmContent.setVisibility(showAlarm ? View.VISIBLE : View.INVISIBLE);
     }
 
     private Condition forever() {

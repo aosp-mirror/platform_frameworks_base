@@ -6966,8 +6966,9 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
-         * Time in milliseconds (since epoch) when Night display was last activated. Use to decide
-         * whether to apply the current activated state after a reboot or user change.
+         * A String representing the LocalDateTime when Night display was last activated. Use to
+         * decide whether to apply the current activated state after a reboot or user change. In
+         * legacy cases, this is represented by the time in milliseconds (since epoch).
          * @hide
          */
         public static final String NIGHT_DISPLAY_LAST_ACTIVATED_TIME =
@@ -10199,7 +10200,7 @@ public final class Settings {
                 "allow_user_switching_when_system_user_locked";
 
         /**
-         * Boot count since the device starts running APK level 24.
+         * Boot count since the device starts running API level 24.
          * <p>
          * Type: int
          */

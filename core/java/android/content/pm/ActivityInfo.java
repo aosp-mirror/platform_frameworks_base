@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
@@ -180,6 +181,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Activity explicitly requested to be resizeable.
      * @hide
      */
+    @TestApi
     public static final int RESIZE_MODE_RESIZEABLE = 2;
     /**
      * Activity is resizeable and supported picture-in-picture mode.  This flag is now deprecated

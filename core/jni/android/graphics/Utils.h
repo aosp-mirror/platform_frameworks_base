@@ -36,7 +36,9 @@ public:
     virtual size_t getLength() const;
     virtual bool isAtEnd() const;
 
-    virtual SkStreamRewindable* duplicate() const;
+protected:
+    SkStreamRewindable* onDuplicate() const override;
+
 private:
     Asset* fAsset;
 };

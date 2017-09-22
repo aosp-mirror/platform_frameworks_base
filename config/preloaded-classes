@@ -2006,7 +2006,6 @@ android.system.PacketSocketAddress
 android.system.StructAddrinfo
 android.system.StructFlock
 android.system.StructGroupReq
-android.system.StructGroupSourceReq
 android.system.StructIfaddrs
 android.system.StructLinger
 android.system.StructPasswd
@@ -2786,7 +2785,6 @@ com.android.internal.app.IVoiceInteractionManagerService$Stub
 com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
 com.android.internal.app.NightDisplayController
-com.android.internal.app.NightDisplayController$1
 com.android.internal.appwidget.IAppWidgetService
 com.android.internal.appwidget.IAppWidgetService$Stub
 com.android.internal.appwidget.IAppWidgetService$Stub$Proxy

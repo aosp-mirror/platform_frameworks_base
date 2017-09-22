@@ -66,6 +66,20 @@ import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.proto.TaskRecordProto.ACTIVITIES;
+import static com.android.server.am.proto.TaskRecordProto.BOUNDS;
+import static com.android.server.am.proto.TaskRecordProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.proto.TaskRecordProto.FULLSCREEN;
+import static com.android.server.am.proto.TaskRecordProto.ID;
+import static com.android.server.am.proto.TaskRecordProto.LAST_NON_FULLSCREEN_BOUNDS;
+import static com.android.server.am.proto.TaskRecordProto.MIN_HEIGHT;
+import static com.android.server.am.proto.TaskRecordProto.MIN_WIDTH;
+import static com.android.server.am.proto.TaskRecordProto.ORIG_ACTIVITY;
+import static com.android.server.am.proto.TaskRecordProto.REAL_ACTIVITY;
+import static com.android.server.am.proto.TaskRecordProto.RESIZE_MODE;
+import static com.android.server.am.proto.TaskRecordProto.RETURN_TO_TYPE;
+import static com.android.server.am.proto.TaskRecordProto.STACK_ID;
+import static com.android.server.am.proto.TaskRecordProto.ACTIVITY_TYPE;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -95,6 +109,7 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -2236,5 +2251,35 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
         stringName = sb.toString();
         return toString();
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        proto.write(ID, taskId);
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            ActivityRecord activity = mActivities.get(i);
+            activity.writeToProto(proto, ACTIVITIES);
+        }
+        proto.write(STACK_ID, mStack.mStackId);
+        if (mLastNonFullscreenBounds != null) {
+            mLastNonFullscreenBounds.writeToProto(proto, LAST_NON_FULLSCREEN_BOUNDS);
+        }
+        if (realActivity != null) {
+            proto.write(REAL_ACTIVITY, realActivity.flattenToShortString());
+        }
+        if (origActivity != null) {
+            proto.write(ORIG_ACTIVITY, origActivity.flattenToShortString());
+        }
+        proto.write(ACTIVITY_TYPE, getActivityType());
+        proto.write(RETURN_TO_TYPE, mTaskToReturnTo);
+        proto.write(RESIZE_MODE, mResizeMode);
+        proto.write(FULLSCREEN, mFullscreen);
+        if (mBounds != null) {
+            mBounds.writeToProto(proto, BOUNDS);
+        }
+        proto.write(MIN_WIDTH, mMinWidth);
+        proto.write(MIN_HEIGHT, mMinHeight);
+        proto.end(token);
     }
 }

@@ -20,7 +20,9 @@
 
 #include <unordered_map>
 
-using android::os::statsd::StatsdConfig;
+namespace android {
+namespace os {
+namespace statsd {
 
 class StatsLogProcessor : public LogListener
 {
@@ -51,4 +53,9 @@ private:
      */
     std::unordered_map<int, StatsdConfig> m_configs;
 };
+
+} // namespace statsd
+} // namespace os
+} // namespace android
+
 #endif //STATS_LOG_PROCESSOR_H

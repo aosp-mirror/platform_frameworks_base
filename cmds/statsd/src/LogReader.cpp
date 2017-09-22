@@ -26,6 +26,10 @@
 using namespace android;
 using namespace std;
 
+namespace android {
+namespace os {
+namespace statsd {
+
 #define SNOOZE_INITIAL_MS 100
 #define SNOOZE_MAX_MS (10 * 60 * 1000) // Ten minutes
 
@@ -141,3 +145,6 @@ LogReader::connect_and_read()
     return lineCount;
 }
 
+} // namespace statsd
+} // namespace os
+} // namespace android

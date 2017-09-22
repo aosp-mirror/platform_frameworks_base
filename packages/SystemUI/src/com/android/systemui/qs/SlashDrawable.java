@@ -197,9 +197,13 @@ public class SlashDrawable extends Drawable {
     public void setTintList(@Nullable ColorStateList tint) {
         mTintList = tint;
         super.setTintList(tint);
-        mDrawable.setTintList(tint);
+        setDrawableTintList(tint);
         mPaint.setColor(tint.getDefaultColor());
         invalidateSelf();
+    }
+
+    protected void setDrawableTintList(@Nullable ColorStateList tint) {
+        mDrawable.setTintList(tint);
     }
 
     @Override

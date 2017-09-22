@@ -3824,7 +3824,6 @@ android.system.PacketSocketAddress
 android.system.StructAddrinfo
 android.system.StructFlock
 android.system.StructGroupReq
-android.system.StructGroupSourceReq
 android.system.StructIcmpHdr
 android.system.StructIfaddrs
 android.system.StructLinger
@@ -5243,7 +5242,6 @@ com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
 com.android.internal.app.NightDisplayController
 com.android.internal.app.NightDisplayController$Callback
-com.android.internal.app.NightDisplayController$LocalTime
 com.android.internal.app.ProcessMap
 com.android.internal.app.ResolverActivity
 com.android.internal.app.ToolbarActionBar

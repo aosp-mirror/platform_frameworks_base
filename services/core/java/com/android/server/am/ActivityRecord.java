@@ -112,6 +112,16 @@ import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.am.TaskPersister.DEBUG;
 import static com.android.server.am.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static com.android.server.am.proto.ActivityRecordProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.proto.ActivityRecordProto.FRONT_OF_TASK;
+import static com.android.server.am.proto.ActivityRecordProto.IDENTIFIER;
+import static com.android.server.am.proto.ActivityRecordProto.PROC_ID;
+import static com.android.server.am.proto.ActivityRecordProto.STATE;
+import static com.android.server.am.proto.ActivityRecordProto.VISIBLE;
+import static com.android.server.wm.proto.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.proto.IdentifierProto.TITLE;
+import static com.android.server.wm.proto.IdentifierProto.USER_ID;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -149,6 +159,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
@@ -2772,5 +2783,26 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         sb.append(intent.getComponent().flattenToShortString());
         stringName = sb.toString();
         return toString();
+    }
+
+    void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        proto.write(USER_ID, userId);
+        proto.write(TITLE, intent.getComponent().flattenToShortString());
+        proto.end(token);
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        writeIdentifierToProto(proto, IDENTIFIER);
+        proto.write(STATE, state.toString());
+        proto.write(VISIBLE, visible);
+        proto.write(FRONT_OF_TASK, frontOfTask);
+        if (app != null) {
+            proto.write(PROC_ID, app.pid);
+        }
+        proto.end(token);
     }
 }

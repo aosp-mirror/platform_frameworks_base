@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 using namespace android;
+using namespace android::os::statsd;
 
 // ================================================================================
 /**
@@ -128,6 +129,10 @@ main(int /*argc*/, char** /*argv*/)
         ALOGE("Failed to add service");
         return -1;
     }
+
+    // TODO: This line is temporary, since statsd doesn't start up automatically (and therefore
+    // the call in StatsService::SystemRunning() won't ever be called right now).
+    service->sayHiToStatsCompanion();
 
     // Start the log reader thread
     err = start_log_reader_thread(service);

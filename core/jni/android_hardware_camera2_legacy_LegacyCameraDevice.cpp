@@ -484,14 +484,14 @@ static jint LegacyCameraDevice_nativeDetectSurfaceUsageFlags(JNIEnv* env, jobjec
 
     sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(env, surface)) == NULL) {
-        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+        jniThrowException(env, "java/lang/UnsupportedOperationException;",
             "Could not retrieve native window from surface.");
         return BAD_VALUE;
     }
     int32_t usage = 0;
     status_t err = anw->query(anw.get(), NATIVE_WINDOW_CONSUMER_USAGE_BITS, &usage);
     if(err != NO_ERROR) {
-        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+        jniThrowException(env, "java/lang/UnsupportedOperationException;",
             "Error while querying surface usage bits");
         return err;
     }
@@ -511,7 +511,7 @@ static jint LegacyCameraDevice_nativeDisconnectSurface(JNIEnv* env, jobject thiz
 
     status_t err = native_window_api_disconnect(anw.get(), NATIVE_WINDOW_API_CAMERA);
     if(err != NO_ERROR) {
-        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+        jniThrowException(env, "java/lang/UnsupportedOperationException;",
             "Error while disconnecting surface");
         return err;
     }

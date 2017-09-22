@@ -145,7 +145,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
@@ -163,7 +162,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_URI_PERMISSION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
@@ -177,6 +175,7 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
+import static com.android.server.am.proto.ActivityManagerServiceProto.ACTIVITIES;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
 import static com.android.server.wm.AppTransition.TRANSIT_NONE;
@@ -349,6 +348,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -402,6 +402,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
@@ -706,6 +707,42 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @VisibleForTesting
     long mWaitForNetworkTimeoutMs;
+
+    /**
+     * Helper class which parses out priority arguments and dumps sections according to their
+     * priority. If priority arguments are omitted, function calls the legacy dump command.
+     */
+    private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
+        @Override
+        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, new String[] {"activities"});
+        }
+
+        @Override
+        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, new String[] {"settings"});
+            doDump(fd, pw, new String[] {"intents"});
+            doDump(fd, pw, new String[] {"broadcasts"});
+            doDump(fd, pw, new String[] {"providers"});
+            doDump(fd, pw, new String[] {"permissions"});
+            doDump(fd, pw, new String[] {"services"});
+            doDump(fd, pw, new String[] {"recents"});
+            doDump(fd, pw, new String[] {"lastanr"});
+            doDump(fd, pw, new String[] {"starter"});
+            if (mAssociations.size() > 0) {
+                doDump(fd, pw, new String[] {"associations"});
+            }
+            doDump(fd, pw, new String[] {"processes"});
+            doDump(fd, pw, new String[] {"-v", "all"});
+            doDump(fd, pw, new String[] {"service", "all"});
+            doDump(fd, pw, new String[] {"provider", "all"});
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            doDump(fd, pw, args);
+        }
+    };
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
@@ -2503,6 +2540,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static class MemBinder extends Binder {
         ActivityManagerService mActivityManagerService;
+        private final PriorityDump.PriorityDumper mPriorityDumper =
+                new PriorityDump.PriorityDumper() {
+            @Override
+            public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
+                mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
+            }
+        };
+
         MemBinder(ActivityManagerService activityManagerService) {
             mActivityManagerService = activityManagerService;
         }
@@ -2511,7 +2556,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                     "meminfo", pw)) return;
-            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
+            PriorityDump.dump(mPriorityDumper, fd, pw, args);
         }
     }
 
@@ -2545,19 +2590,27 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static class CpuBinder extends Binder {
         ActivityManagerService mActivityManagerService;
+        private final PriorityDump.PriorityDumper mPriorityDumper =
+                new PriorityDump.PriorityDumper() {
+            @Override
+            public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
+                if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
+                        "cpuinfo", pw)) return;
+                synchronized (mActivityManagerService.mProcessCpuTracker) {
+                    pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
+                    pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
+                            SystemClock.uptimeMillis()));
+                }
+            }
+        };
+
         CpuBinder(ActivityManagerService activityManagerService) {
             mActivityManagerService = activityManagerService;
         }
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
-                    "cpuinfo", pw)) return;
-            synchronized (mActivityManagerService.mProcessCpuTracker) {
-                pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
-                pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
-                        SystemClock.uptimeMillis()));
-            }
+            PriorityDump.dump(mPriorityDumper, fd, pw, args);
         }
     }
 
@@ -14793,6 +14846,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        PriorityDump.dump(mPriorityDumper, fd, pw, args);
+    }
+
+    /**
+     * Wrapper function to print out debug data filtered by specified arguments.
+    */
+    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         boolean dumpAll = false;
@@ -14801,6 +14861,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpCheckinFormat = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
+        boolean useProto = false;
         String dumpPackage = null;
 
         int opti = 0;
@@ -14834,12 +14895,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
+            } else if ("--proto".equals(opt)) {
+                useProto = true;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
         }
 
         long origId = Binder.clearCallingIdentity();
+
+        if (useProto) {
+            //TODO: Options when dumping proto
+            final ProtoOutputStream proto = new ProtoOutputStream(fd);
+            synchronized (this) {
+                writeActivitiesToProtoLocked(proto);
+            }
+            proto.flush();
+            Binder.restoreCallingIdentity(origId);
+            return;
+        }
+
         boolean more = false;
         // Is the caller requesting to dump a particular piece of data?
         if (opti < args.length) {
@@ -15181,6 +15256,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         Binder.restoreCallingIdentity(origId);
+    }
+
+    private void writeActivitiesToProtoLocked(ProtoOutputStream proto) {
+        mStackSupervisor.writeToProto(proto, ACTIVITIES);
     }
 
     private void dumpLastANRLocked(PrintWriter pw) {

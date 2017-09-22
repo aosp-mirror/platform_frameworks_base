@@ -2675,6 +2675,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  -p: limit output to given package.");
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
+            pw.println("  --proto: output dump in protocol buffer format.");
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");

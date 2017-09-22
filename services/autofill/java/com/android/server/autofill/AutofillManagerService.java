@@ -120,6 +120,18 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                if (sDebug) Slog.d(TAG, "Close system dialogs");
+
+                // TODO(b/64940307): we need to destroy all sessions that are finished but showing
+                // Save UI because there is no way to show the Save UI back when the activity
+                // beneath it is brought back to top. Ideally, we should just hide the UI and
+                // bring it back when the activity resumes.
+                synchronized (mLock) {
+                    for (int i = 0; i < mServicesCache.size(); i++) {
+                        mServicesCache.valueAt(i).destroyFinishedSessionsLocked();
+                    }
+                }
+
                 mUi.hideAll(null);
             }
         }

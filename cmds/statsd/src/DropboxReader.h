@@ -23,9 +23,12 @@
 #include <stdio.h>
 
 using android::base::unique_fd;
-using android::os::statsd::StatsLogReport;
 using android::status_t;
 using std::string;
+
+namespace android {
+namespace os {
+namespace statsd {
 
 class DropboxReader {
 public:
@@ -41,5 +44,9 @@ private:
       kCompressDeflated = 8,  // standard deflate
     };
 };
+
+} // namespace statsd
+} // namespace os
+} // namespace android
 
 #endif //DROPBOX_READER_H
