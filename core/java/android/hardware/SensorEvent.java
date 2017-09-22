@@ -207,8 +207,8 @@ public class SensorEvent {
      *          timestamp = event.timestamp;
      *          float[] deltaRotationMatrix = new float[9];
      *          SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
-     *          // User code should concatenate the delta rotation we computed with the current rotation
-     *          // in order to get the updated rotation.
+     *          // User code should concatenate the delta rotation we computed with the current
+     *          // rotation in order to get the updated rotation.
      *          // rotationCurrent = rotationCurrent * deltaRotationMatrix;
      *     }
      * </pre>
@@ -244,21 +244,22 @@ public class SensorEvent {
      *  <h4>{@link android.hardware.Sensor#TYPE_GRAVITY Sensor.TYPE_GRAVITY}:</h4>
      *  <p>A three dimensional vector indicating the direction and magnitude of gravity.  Units
      *  are m/s^2. The coordinate system is the same as is used by the acceleration sensor.</p>
-     *  <p><b>Note:</b> When the device is at rest, the output of the gravity sensor should be identical
-     *  to that of the accelerometer.</p>
+     *  <p><b>Note:</b> When the device is at rest, the output of the gravity sensor should be
+     *  identical to that of the accelerometer.</p>
      *
-     *  <h4>{@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION Sensor.TYPE_LINEAR_ACCELERATION}:</h4>
-     *  A three dimensional vector indicating acceleration along each device axis, not including
-     *  gravity.  All values have units of m/s^2.  The coordinate system is the same as is used by the
-     *  acceleration sensor.
+     *  <h4>
+     *  {@link android.hardware.Sensor#TYPE_LINEAR_ACCELERATION Sensor.TYPE_LINEAR_ACCELERATION}:
+     *  </h4> A three dimensional vector indicating acceleration along each device axis, not
+     *  including gravity. All values have units of m/s^2.  The coordinate system is the same as is
+     *  used by the acceleration sensor.
      *  <p>The output of the accelerometer, gravity and  linear-acceleration sensors must obey the
      *  following relation:</p>
-     *   <p><ul>acceleration = gravity + linear-acceleration</ul></p>
+     *  <p><ul>acceleration = gravity + linear-acceleration</ul></p>
      *
      *  <h4>{@link android.hardware.Sensor#TYPE_ROTATION_VECTOR Sensor.TYPE_ROTATION_VECTOR}:</h4>
-     *  <p>The rotation vector represents the orientation of the device as a combination of an <i>angle</i>
-     *  and an <i>axis</i>, in which the device has rotated through an angle &#952 around an axis
-     *  &lt;x, y, z>.</p>
+     *  <p>The rotation vector represents the orientation of the device as a combination of an
+     *  <i>angle</i> and an <i>axis</i>, in which the device has rotated through an angle &#952
+     *  around an axis &lt;x, y, z>.</p>
      *  <p>The three elements of the rotation vector are
      *  &lt;x*sin(&#952/2), y*sin(&#952/2), z*sin(&#952/2)>, such that the magnitude of the rotation
      *  vector is equal to sin(&#952/2), and the direction of the rotation vector is equal to the

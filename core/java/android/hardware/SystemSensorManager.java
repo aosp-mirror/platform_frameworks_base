@@ -28,9 +28,10 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import dalvik.system.CloseGuard;
 
 import com.android.internal.annotations.GuardedBy;
+
+import dalvik.system.CloseGuard;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -39,7 +40,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Sensor manager implementation that communicates with the built-in
@@ -101,7 +101,7 @@ public class SystemSensorManager extends SensorManager {
 
     /** {@hide} */
     public SystemSensorManager(Context context, Looper mainLooper) {
-        synchronized(sLock) {
+        synchronized (sLock) {
             if (!sNativeClassInited) {
                 sNativeClassInited = true;
                 nativeClassInit();
@@ -114,7 +114,7 @@ public class SystemSensorManager extends SensorManager {
         mNativeInstance = nativeCreate(context.getOpPackageName());
 
         // initialize the sensor list
-        for (int index = 0;;++index) {
+        for (int index = 0;; ++index) {
             Sensor sensor = new Sensor();
             if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
             mFullSensorsList.add(sensor);
@@ -157,9 +157,9 @@ public class SystemSensorManager extends SensorManager {
             return false;
         }
         if (mSensorListeners.size() >= MAX_LISTENER_COUNT) {
-            throw new IllegalStateException("register failed, " +
-                "the sensor listeners size has exceeded the maximum limit " +
-                MAX_LISTENER_COUNT);
+            throw new IllegalStateException("register failed, "
+                + "the sensor listeners size has exceeded the maximum limit "
+                + MAX_LISTENER_COUNT);
         }
 
         // Invariants to preserve:
@@ -170,9 +170,10 @@ public class SystemSensorManager extends SensorManager {
             SensorEventQueue queue = mSensorListeners.get(listener);
             if (queue == null) {
                 Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
-                final String fullClassName = listener.getClass().getEnclosingClass() != null ?
-                    listener.getClass().getEnclosingClass().getName() :
-                    listener.getClass().getName();
+                final String fullClassName =
+                        listener.getClass().getEnclosingClass() != null
+                            ? listener.getClass().getEnclosingClass().getName()
+                            : listener.getClass().getName();
                 queue = new SensorEventQueue(listener, looper, this, fullClassName);
                 if (!queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs)) {
                     queue.dispose();
@@ -221,17 +222,18 @@ public class SystemSensorManager extends SensorManager {
         if (sensor.getReportingMode() != Sensor.REPORTING_MODE_ONE_SHOT) return false;
 
         if (mTriggerListeners.size() >= MAX_LISTENER_COUNT) {
-            throw new IllegalStateException("request failed, " +
-                    "the trigger listeners size has exceeded the maximum limit " +
-                    MAX_LISTENER_COUNT);
+            throw new IllegalStateException("request failed, "
+                    + "the trigger listeners size has exceeded the maximum limit "
+                    + MAX_LISTENER_COUNT);
         }
 
         synchronized (mTriggerListeners) {
             TriggerEventQueue queue = mTriggerListeners.get(listener);
             if (queue == null) {
-                final String fullClassName = listener.getClass().getEnclosingClass() != null ?
-                    listener.getClass().getEnclosingClass().getName() :
-                    listener.getClass().getName();
+                final String fullClassName =
+                        listener.getClass().getEnclosingClass() != null
+                            ? listener.getClass().getEnclosingClass().getName()
+                            : listener.getClass().getName();
                 queue = new TriggerEventQueue(listener, mMainLooper, this, fullClassName);
                 if (!queue.addSensor(sensor, 0, 0)) {
                     queue.dispose();
@@ -336,27 +338,27 @@ public class SystemSensorManager extends SensorManager {
         mHandleToSensor.remove(sensor.getHandle());
 
         if (sensor.getReportingMode() == Sensor.REPORTING_MODE_ONE_SHOT) {
-            synchronized(mTriggerListeners) {
+            synchronized (mTriggerListeners) {
                 HashMap<TriggerEventListener, TriggerEventQueue> triggerListeners =
-                    new HashMap<TriggerEventListener, TriggerEventQueue>(mTriggerListeners);
+                        new HashMap<TriggerEventListener, TriggerEventQueue>(mTriggerListeners);
 
-                for (TriggerEventListener l: triggerListeners.keySet()) {
-                    if (DEBUG_DYNAMIC_SENSOR){
-                        Log.i(TAG, "removed trigger listener" + l.toString() +
-                                   " due to sensor disconnection");
+                for (TriggerEventListener l : triggerListeners.keySet()) {
+                    if (DEBUG_DYNAMIC_SENSOR) {
+                        Log.i(TAG, "removed trigger listener" + l.toString()
+                                + " due to sensor disconnection");
                     }
                     cancelTriggerSensorImpl(l, sensor, true);
                 }
             }
         } else {
-            synchronized(mSensorListeners) {
+            synchronized (mSensorListeners) {
                 HashMap<SensorEventListener, SensorEventQueue> sensorListeners =
-                    new HashMap<SensorEventListener, SensorEventQueue>(mSensorListeners);
+                        new HashMap<SensorEventListener, SensorEventQueue>(mSensorListeners);
 
                 for (SensorEventListener l: sensorListeners.keySet()) {
-                    if (DEBUG_DYNAMIC_SENSOR){
-                        Log.i(TAG, "removed event listener" + l.toString() +
-                                   " due to sensor disconnection");
+                    if (DEBUG_DYNAMIC_SENSOR) {
+                        Log.i(TAG, "removed event listener" + l.toString()
+                                + " due to sensor disconnection");
                     }
                     unregisterListenerImpl(l, sensor);
                 }
@@ -365,7 +367,7 @@ public class SystemSensorManager extends SensorManager {
     }
 
     private void updateDynamicSensorList() {
-        synchronized(mFullDynamicSensorsList) {
+        synchronized (mFullDynamicSensorsList) {
             if (mDynamicSensorListDirty) {
                 List<Sensor> list = new ArrayList<>();
                 nativeGetDynamicSensors(mNativeInstance, list);
@@ -488,15 +490,15 @@ public class SystemSensorManager extends SensorManager {
 
         int i = 0, j = 0;
         while (true) {
-            if (j < oldList.size() && ( i >= newList.size() ||
-                    newList.get(i).getHandle() > oldList.get(j).getHandle()) ) {
+            if (j < oldList.size() && (i >= newList.size()
+                    || newList.get(i).getHandle() > oldList.get(j).getHandle())) {
                 changed = true;
                 if (removed != null) {
                     removed.add(oldList.get(j));
                 }
                 ++j;
-            } else if (i < newList.size() && ( j >= oldList.size() ||
-                    newList.get(i).getHandle() < oldList.get(j).getHandle())) {
+            } else if (i < newList.size() && (j >= oldList.size()
+                    || newList.get(i).getHandle() < oldList.get(j).getHandle())) {
                 changed = true;
                 if (added != null) {
                     added.add(newList.get(i));
@@ -505,8 +507,8 @@ public class SystemSensorManager extends SensorManager {
                     updated.add(newList.get(i));
                 }
                 ++i;
-            } else if (i < newList.size() && j < oldList.size() &&
-                    newList.get(i).getHandle() == oldList.get(j).getHandle()) {
+            } else if (i < newList.size() && j < oldList.size()
+                    && newList.get(i).getHandle() == oldList.get(j).getHandle()) {
                 if (updated != null) {
                     updated.add(oldList.get(j));
                 }
@@ -623,7 +625,7 @@ public class SystemSensorManager extends SensorManager {
      * associated with any listener and there is one InjectEventQueue associated with a
      * SensorManager instance.
      */
-    private static abstract class BaseEventQueue {
+    private abstract static class BaseEventQueue {
         private static native long nativeInitBaseEventQueue(long nativeManager,
                 WeakReference<BaseEventQueue> eventQWeak, MessageQueue msgQ,
                 String packageName, int mode, String opPackageName);
@@ -633,9 +635,9 @@ public class SystemSensorManager extends SensorManager {
         private static native void nativeDestroySensorEventQueue(long eventQ);
         private static native int nativeFlushSensor(long eventQ);
         private static native int nativeInjectSensorData(long eventQ, int handle,
-                float[] values,int accuracy, long timestamp);
+                float[] values, int accuracy, long timestamp);
 
-        private long nSensorEventQueue;
+        private long mNativeSensorEventQueue;
         private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
         protected final SparseIntArray mSensorAccuracies = new SparseIntArray();
         private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -646,7 +648,7 @@ public class SystemSensorManager extends SensorManager {
 
         BaseEventQueue(Looper looper, SystemSensorManager manager, int mode, String packageName) {
             if (packageName == null) packageName = "";
-            nSensorEventQueue = nativeInitBaseEventQueue(manager.mNativeInstance,
+            mNativeSensorEventQueue = nativeInitBaseEventQueue(manager.mNativeInstance,
                     new WeakReference<>(this), looper.getQueue(),
                     packageName, mode, manager.mContext.getOpPackageName());
             mCloseGuard.open("dispose");
@@ -668,17 +670,17 @@ public class SystemSensorManager extends SensorManager {
             addSensorEvent(sensor);
             if (enableSensor(sensor, delayUs, maxBatchReportLatencyUs) != 0) {
                 // Try continuous mode if batching fails.
-                if (maxBatchReportLatencyUs == 0 ||
-                    maxBatchReportLatencyUs > 0 && enableSensor(sensor, delayUs, 0) != 0) {
-                  removeSensor(sensor, false);
-                  return false;
+                if (maxBatchReportLatencyUs == 0
+                        || maxBatchReportLatencyUs > 0 && enableSensor(sensor, delayUs, 0) != 0) {
+                    removeSensor(sensor, false);
+                    return false;
                 }
             }
             return true;
         }
 
         public boolean removeAllSensors() {
-            for (int i=0 ; i<mActiveSensors.size(); i++) {
+            for (int i = 0; i < mActiveSensors.size(); i++) {
                 if (mActiveSensors.valueAt(i) == true) {
                     int handle = mActiveSensors.keyAt(i);
                     Sensor sensor = mManager.mHandleToSensor.get(handle);
@@ -706,8 +708,8 @@ public class SystemSensorManager extends SensorManager {
         }
 
         public int flush() {
-            if (nSensorEventQueue == 0) throw new NullPointerException();
-            return nativeFlushSensor(nSensorEventQueue);
+            if (mNativeSensorEventQueue == 0) throw new NullPointerException();
+            return nativeFlushSensor(mNativeSensorEventQueue);
         }
 
         public boolean hasSensors() {
@@ -731,29 +733,30 @@ public class SystemSensorManager extends SensorManager {
                 }
                 mCloseGuard.close();
             }
-            if (nSensorEventQueue != 0) {
-                nativeDestroySensorEventQueue(nSensorEventQueue);
-                nSensorEventQueue = 0;
+            if (mNativeSensorEventQueue != 0) {
+                nativeDestroySensorEventQueue(mNativeSensorEventQueue);
+                mNativeSensorEventQueue = 0;
             }
         }
 
         private int enableSensor(
                 Sensor sensor, int rateUs, int maxBatchReportLatencyUs) {
-            if (nSensorEventQueue == 0) throw new NullPointerException();
+            if (mNativeSensorEventQueue == 0) throw new NullPointerException();
             if (sensor == null) throw new NullPointerException();
-            return nativeEnableSensor(nSensorEventQueue, sensor.getHandle(), rateUs,
+            return nativeEnableSensor(mNativeSensorEventQueue, sensor.getHandle(), rateUs,
                     maxBatchReportLatencyUs);
         }
 
         protected int injectSensorDataBase(int handle, float[] values, int accuracy,
                                            long timestamp) {
-            return nativeInjectSensorData(nSensorEventQueue, handle, values, accuracy, timestamp);
+            return nativeInjectSensorData(
+                    mNativeSensorEventQueue, handle, values, accuracy, timestamp);
         }
 
         private int disableSensor(Sensor sensor) {
-            if (nSensorEventQueue == 0) throw new NullPointerException();
+            if (mNativeSensorEventQueue == 0) throw new NullPointerException();
             if (sensor == null) throw new NullPointerException();
-            return nativeDisableSensor(nSensorEventQueue, sensor.getHandle());
+            return nativeDisableSensor(mNativeSensorEventQueue, sensor.getHandle());
         }
         protected abstract void dispatchSensorEvent(int handle, float[] values, int accuracy,
                 long timestamp);
@@ -840,7 +843,7 @@ public class SystemSensorManager extends SensorManager {
                     // sensor disconnected
                     return;
                 }
-                ((SensorEventListener2)mListener).onFlushCompleted(sensor);
+                ((SensorEventListener2) mListener).onFlushCompleted(sensor);
             }
             return;
         }
@@ -858,7 +861,7 @@ public class SystemSensorManager extends SensorManager {
                 }
                 SensorAdditionalInfo info =
                         new SensorAdditionalInfo(sensor, type, serial, intValues, floatValues);
-                ((SensorEventCallback)mListener).onSensorAdditionalInfo(info);
+                ((SensorEventCallback) mListener).onSensorAdditionalInfo(info);
             }
         }
     }
@@ -930,8 +933,8 @@ public class SystemSensorManager extends SensorManager {
             super(looper, manager, OPERATING_MODE_DATA_INJECTION, packageName);
         }
 
-        int injectSensorData(int handle, float[] values,int accuracy, long timestamp) {
-             return injectSensorDataBase(handle, values, accuracy, timestamp);
+        int injectSensorData(int handle, float[] values, int accuracy, long timestamp) {
+            return injectSensorDataBase(handle, values, accuracy, timestamp);
         }
 
         @SuppressWarnings("unused")
@@ -959,6 +962,7 @@ public class SystemSensorManager extends SensorManager {
         int handle = -1;
         if (parameter.sensor != null) handle = parameter.sensor.getHandle();
         return nativeSetOperationParameter(
-                mNativeInstance, handle, parameter.type, parameter.floatValues, parameter.intValues) == 0;
+                mNativeInstance, handle,
+                parameter.type, parameter.floatValues, parameter.intValues) == 0;
     }
 }
