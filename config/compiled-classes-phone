@@ -5022,8 +5022,6 @@ android.widget.RemoteViews$AsyncApplyTask
 android.widget.RemoteViews$BitmapCache
 android.widget.RemoteViews$BitmapReflectionAction
 android.widget.RemoteViews$LayoutParamAction
-android.widget.RemoteViews$MemoryUsageCounter
-android.widget.RemoteViews$MutablePair
 android.widget.RemoteViews$OnClickHandler
 android.widget.RemoteViews$OnViewAppliedListener
 android.widget.RemoteViews$ReflectionAction
@@ -5031,7 +5029,7 @@ android.widget.RemoteViews$RemoteView
 android.widget.RemoteViews$RemoteViewsContextWrapper
 android.widget.RemoteViews$RunnableAction
 android.widget.RemoteViews$RuntimeAction
-android.widget.RemoteViews$SetDrawableParameters
+android.widget.RemoteViews$SetDrawableTint
 android.widget.RemoteViews$SetOnClickPendingIntent
 android.widget.RemoteViews$SetOnClickPendingIntent$1
 android.widget.RemoteViews$ViewGroupAction
