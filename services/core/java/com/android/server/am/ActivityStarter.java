@@ -39,7 +39,6 @@ import static android.app.ActivityManager.StackId.isDynamicStack;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
@@ -78,7 +77,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
@@ -1241,7 +1239,7 @@ class ActivityStarter {
                         mOptions);
             }
         } else {
-            mTargetStack.addRecentActivityLocked(mStartActivity);
+            mSupervisor.addRecentActivity(mStartActivity);
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
@@ -2107,7 +2105,8 @@ class ActivityStarter {
         }
         if (stack == null) {
             // We first try to put the task in the first dynamic stack on home display.
-            final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
+            final ArrayList<ActivityStack> homeDisplayStacks =
+                    mSupervisor.getStacksOnDefaultDisplay();
             for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 stack = homeDisplayStacks.get(stackNdx);
                 if (isDynamicStack(stack.mStackId)) {
@@ -2245,8 +2244,7 @@ class ActivityStarter {
                 // and if yes, we will launch into that stack. If not, we just put the new
                 // activity into parent's stack, because we can't find a better place.
                 final ActivityStack dockedStack = mSupervisor.getStack(DOCKED_STACK_ID);
-                if (dockedStack != null
-                        && dockedStack.shouldBeVisible(r) == STACK_INVISIBLE) {
+                if (dockedStack != null && !dockedStack.shouldBeVisible(r)) {
                     // There is a docked stack, but it isn't visible, so we can't launch into that.
                     return null;
                 } else {

@@ -225,9 +225,15 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         /*@WindowConfiguration.ActivityType*/ int thisType = getActivityType();
         /*@WindowConfiguration.ActivityType*/ int otherType = other.getActivityType();
 
-        return thisType == otherType
-                || thisType == ACTIVITY_TYPE_UNDEFINED
-                || otherType == ACTIVITY_TYPE_UNDEFINED;
+        if (thisType == otherType) {
+            return true;
+        }
+        if (thisType == ACTIVITY_TYPE_ASSISTANT) {
+            // Assistant activities are only compatible with themselves...
+            return false;
+        }
+        // Otherwise we are compatible if us or other is not currently defined.
+        return thisType == ACTIVITY_TYPE_UNDEFINED || otherType == ACTIVITY_TYPE_UNDEFINED;
     }
 
     public void registerConfigurationChangeListener(ConfigurationContainerListener listener) {
