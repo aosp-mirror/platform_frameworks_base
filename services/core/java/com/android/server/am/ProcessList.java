@@ -40,7 +40,7 @@ import android.view.Display;
 /**
  * Activity manager code dealing with processes.
  */
-final class ProcessList {
+public final class ProcessList {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
 
     // The minimum time we allow between crashes, for us to consider this
