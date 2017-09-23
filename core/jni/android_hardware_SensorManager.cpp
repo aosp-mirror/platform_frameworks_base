@@ -270,7 +270,7 @@ static jint nativeConfigDirectChannel(JNIEnv *_env, jclass _this, jlong sensorMa
 }
 
 static jint nativeSetOperationParameter(JNIEnv *_env, jclass _this, jlong sensorManager,
-        jint type, jfloatArray floats, jintArray ints) {
+        jint handle, jint type, jfloatArray floats, jintArray ints) {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
     Vector<float> floatVector;
     Vector<int32_t> int32Vector;
@@ -285,7 +285,7 @@ static jint nativeSetOperationParameter(JNIEnv *_env, jclass _this, jlong sensor
         _env->GetIntArrayRegion(ints, 0, _env->GetArrayLength(ints), int32Vector.editArray());
     }
 
-    return mgr->setOperationParameter(type, floatVector, int32Vector);
+    return mgr->setOperationParameter(handle, type, floatVector, int32Vector);
 }
 
 //----------------------------------------------------------------------------
@@ -512,7 +512,7 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
             (void*)nativeConfigDirectChannel },
 
     {"nativeSetOperationParameter",
-            "(JI[F[I)I",
+            "(JII[F[I)I",
             (void*)nativeSetOperationParameter },
 };
 
