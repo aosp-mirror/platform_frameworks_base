@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <android/os/DropBoxManager.h>
 #include <android-base/file.h>
+#include <android/os/DropBoxManager.h>
 #include <androidfw/ZipUtils.h>
 
 #include "DropboxReader.h"
 
-using android::sp;
 using android::String16;
-using android::binder::Status;
-using android::base::unique_fd;
-using android::os::DropBoxManager;
 using android::ZipUtils;
+using android::base::unique_fd;
+using android::binder::Status;
+using android::os::DropBoxManager;
+using android::sp;
 using std::vector;
 
 namespace android {
@@ -37,10 +37,9 @@ status_t DropboxReader::readStatsLogs(FILE* out, const string& tag, long msec) {
 
     long timestamp = msec;
     // instead of while(true), put a hard limit 1000. Dropbox won't have more than 1000 files.
-    for(int i = 0; i < 1000; i++ ) {
+    for (int i = 0; i < 1000; i++) {
         DropBoxManager::Entry entry;
-        Status status = dropbox->getNextEntry(String16(tag.c_str()),
-                timestamp, &entry);
+        Status status = dropbox->getNextEntry(String16(tag.c_str()), timestamp, &entry);
         if (!status.isOk()) {
             ALOGD("No more entries, or failed to read. We can't tell unfortunately.");
             return android::OK;
@@ -69,15 +68,14 @@ status_t DropboxReader::readStatsLogs(FILE* out, const string& tag, long msec) {
 }
 
 bool DropboxReader::parseFromGzipFile(const unique_fd& fd, StatsLogReport& logReport) {
-    FILE *file = fdopen(fd, "r");
+    FILE* file = fdopen(fd, "r");
     bool result = false;
     bool scanResult;
     int method;
     long compressedLen;
     long uncompressedLen;
     unsigned long crc32;
-    scanResult = ZipUtils::examineGzip(file, &method, &uncompressedLen,
-            &compressedLen, &crc32);
+    scanResult = ZipUtils::examineGzip(file, &method, &uncompressedLen, &compressedLen, &crc32);
     if (scanResult && method == kCompressDeflated) {
         vector<uint8_t> buf(uncompressedLen);
         if (ZipUtils::inflateToBuffer(file, &buf[0], uncompressedLen, compressedLen)) {
@@ -107,8 +105,8 @@ bool DropboxReader::parseFromFile(const unique_fd& fd, StatsLogReport& logReport
 }
 
 void DropboxReader::printLog(FILE* out, const StatsLogReport& logReport) {
-    fprintf(out, "start_time_msec=%lld, end_time_msec=%lld, ",
-            logReport.start_report_millis(), logReport.end_report_millis());
+    fprintf(out, "start_time_msec=%lld, end_time_msec=%lld, ", logReport.start_report_millis(),
+            logReport.end_report_millis());
     for (int i = 0; i < logReport.event_metrics().data_size(); i++) {
         EventMetricData eventMetricData = logReport.event_metrics().data(i);
         for (int j = 0; j < eventMetricData.key_value_pair_size(); j++) {
@@ -121,6 +119,6 @@ void DropboxReader::printLog(FILE* out, const StatsLogReport& logReport) {
     fprintf(out, "\n");
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

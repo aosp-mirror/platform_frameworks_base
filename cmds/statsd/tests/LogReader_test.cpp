@@ -21,4 +21,3 @@
 TEST(LogReaderTest, TestNothingAtAll) {
     printf("yay!");
 }
-

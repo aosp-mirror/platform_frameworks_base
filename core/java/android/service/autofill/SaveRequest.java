@@ -48,7 +48,8 @@ public final class SaveRequest implements Parcelable {
     }
 
     private SaveRequest(@NonNull Parcel parcel) {
-        this(parcel.readTypedArrayList(null), parcel.readBundle(), parcel.createStringArrayList());
+        this(parcel.createTypedArrayList(FillContext.CREATOR),
+                parcel.readBundle(), parcel.createStringArrayList());
     }
 
     /**
@@ -84,7 +85,7 @@ public final class SaveRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedArrayList(mFillContexts, flags);
+        parcel.writeTypedList(mFillContexts, flags);
         parcel.writeBundle(mClientState);
         parcel.writeStringList(mDatasetIds);
     }

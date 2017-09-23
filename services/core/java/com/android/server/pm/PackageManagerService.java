@@ -3315,6 +3315,24 @@ public class PackageManagerService extends IPackageManager.Stub
             removeCodePathLI(dstCodePath);
             return null;
         }
+
+        // If we have a profile for a compressed APK, copy it to the reference location.
+        // Since the package is the stub one, remove the stub suffix to get the normal package and
+        // APK name.
+        File profileFile = new File(getPrebuildProfilePath(pkg).replace(STUB_SUFFIX, ""));
+        if (profileFile.exists()) {
+            try {
+                // We could also do this lazily before calling dexopt in
+                // PackageDexOptimizer to prevent this happening on first boot. The issue
+                // is that we don't have a good way to say "do this only once".
+                if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                        pkg.applicationInfo.uid, pkg.packageName)) {
+                    Log.e(TAG, "decompressPackage failed to copy system profile!");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ", e);
+            }
+        }
         return dstCodePath;
     }
 
@@ -9739,7 +9757,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            String compilerFilter, boolean bootComplete) {
+            final String compilerFilter, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -9749,6 +9767,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         for (PackageParser.Package pkg : pkgs) {
             numberOfPackagesVisited++;
+
+            boolean useProfileForDexopt = false;
 
             if ((isFirstBoot() || isUpgrade()) && isSystemApp(pkg)) {
                 // Copy over initial preopt profiles since we won't get any JIT samples for methods
@@ -9763,10 +9783,27 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
                                 pkg.applicationInfo.uid, pkg.packageName)) {
                             Log.e(TAG, "Installer failed to copy system profile!");
+                        } else {
+                            useProfileForDexopt = true;
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ",
                                 e);
+                    }
+                } else {
+                    PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(pkg.packageName);
+                    // Handle compressed APKs in this path. Only do this for stubs with profiles to
+                    // minimize the number off apps being speed-profile compiled during first boot.
+                    // The other paths will not change the filter.
+                    if (disabledPs != null && disabledPs.pkg.isStub) {
+                        // The package is the stub one, remove the stub suffix to get the normal
+                        // package and APK names.
+                        String systemProfilePath =
+                                getPrebuildProfilePath(disabledPs.pkg).replace(STUB_SUFFIX, "");
+                        File systemProfile = new File(systemProfilePath);
+                        // Use the profile for compilation if there exists one for the same package
+                        // in the system partition.
+                        useProfileForDexopt = systemProfile.exists();
                     }
                 }
             }
@@ -9796,6 +9833,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
+            String pkgCompilerFilter = compilerFilter;
+            if (useProfileForDexopt) {
+                // Use background dexopt mode to try and use the profile. Note that this does not
+                // guarantee usage of the profile.
+                pkgCompilerFilter =
+                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
+            }
             // If the OTA updates a system app which was previously preopted to a non-preopted state
             // the app might end up being verified at runtime. That's because by default the apps
             // are verify-profile but for preopted apps there's no profile.
@@ -9804,9 +9849,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // filter (by default 'quicken').
             // Note that at this stage unused apps are already filtered.
             if (isSystemApp(pkg) &&
-                    DexFile.isProfileGuidedCompilerFilter(compilerFilter) &&
+                    DexFile.isProfileGuidedCompilerFilter(pkgCompilerFilter) &&
                     !Environment.getReferenceProfile(pkg.packageName).exists()) {
-                compilerFilter = getNonProfileGuidedCompilerFilter(compilerFilter);
+                pkgCompilerFilter = getNonProfileGuidedCompilerFilter(pkgCompilerFilter);
             }
 
             // checkProfiles is false to avoid merging profiles during boot which
@@ -9817,7 +9862,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
-                    compilerFilter,
+                    pkgCompilerFilter,
                     dexoptFlags));
 
             switch (primaryDexOptStaus) {

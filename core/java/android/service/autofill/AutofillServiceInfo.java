@@ -146,4 +146,9 @@ public final class AutofillServiceInfo {
     public String getSettingsActivity() {
         return mSettingsActivity;
     }
+
+    @Override
+    public String toString() {
+        return mServiceInfo == null ? "null" : mServiceInfo.toString();
+    }
 }

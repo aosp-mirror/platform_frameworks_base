@@ -1340,6 +1340,13 @@ public final class Parcel {
      * @see Parcelable
      */
     public final <T extends Parcelable> void writeTypedList(List<T> val) {
+        writeTypedList(val, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public <T extends Parcelable> void writeTypedList(List<T> val, int parcelableFlags) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -1348,13 +1355,7 @@ public final class Parcel {
         int i=0;
         writeInt(N);
         while (i < N) {
-            T item = val.get(i);
-            if (item != null) {
-                writeInt(1);
-                item.writeToParcel(this, 0);
-            } else {
-                writeInt(0);
-            }
+            writeTypedObject(val.get(i), parcelableFlags);
             i++;
         }
     }
@@ -1456,157 +1457,11 @@ public final class Parcel {
             int N = val.length;
             writeInt(N);
             for (int i = 0; i < N; i++) {
-                T item = val[i];
-                if (item != null) {
-                    writeInt(1);
-                    item.writeToParcel(this, parcelableFlags);
-                } else {
-                    writeInt(0);
-                }
+                writeTypedObject(val[i], parcelableFlags);
             }
         } else {
             writeInt(-1);
         }
-    }
-
-    /**
-     * Write a uniform (all items are null or the same class) array list of
-     * parcelables.
-     *
-     * @param list The list to write.
-     *
-     * @hide
-     */
-    public final <T extends Parcelable> void writeTypedArrayList(@Nullable ArrayList<T> list,
-            int parcelableFlags) {
-        if (list != null) {
-            int N = list.size();
-            writeInt(N);
-            boolean wroteCreator = false;
-            for (int i = 0; i < N; i++) {
-                T item = list.get(i);
-                if (item != null) {
-                    writeInt(1);
-                    if (!wroteCreator) {
-                        writeParcelableCreator(item);
-                        wroteCreator = true;
-                    }
-                    item.writeToParcel(this, parcelableFlags);
-                } else {
-                    writeInt(0);
-                }
-            }
-        } else {
-            writeInt(-1);
-        }
-    }
-
-    /**
-     * Reads a uniform (all items are null or the same class) array list of
-     * parcelables.
-     *
-     * @return The list or null.
-     *
-     * @hide
-     */
-    public final @Nullable <T> ArrayList<T> readTypedArrayList(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N <= 0) {
-            return null;
-        }
-        Parcelable.Creator<?> creator = null;
-        ArrayList<T> result = new ArrayList<T>(N);
-        for (int i = 0; i < N; i++) {
-            if (readInt() != 0) {
-                if (creator == null) {
-                    creator = readParcelableCreator(loader);
-                    if (creator == null) {
-                        return null;
-                    }
-                }
-                final T parcelable;
-                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
-                            (Parcelable.ClassLoaderCreator<?>) creator;
-                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
-                } else {
-                    parcelable = (T) creator.createFromParcel(this);
-                }
-                result.add(parcelable);
-            } else {
-                result.add(null);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Write a uniform (all items are null or the same class) array set of
-     * parcelables.
-     *
-     * @param set The set to write.
-     *
-     * @hide
-     */
-    public final <T extends Parcelable> void writeTypedArraySet(@Nullable ArraySet<T> set,
-            int parcelableFlags) {
-        if (set != null) {
-            int N = set.size();
-            writeInt(N);
-            boolean wroteCreator = false;
-            for (int i = 0; i < N; i++) {
-                T item = set.valueAt(i);
-                if (item != null) {
-                    writeInt(1);
-                    if (!wroteCreator) {
-                        writeParcelableCreator(item);
-                        wroteCreator = true;
-                    }
-                    item.writeToParcel(this, parcelableFlags);
-                } else {
-                    writeInt(0);
-                }
-            }
-        } else {
-            writeInt(-1);
-        }
-    }
-
-    /**
-     * Reads a uniform (all items are null or the same class) array set of
-     * parcelables.
-     *
-     * @return The set or null.
-     *
-     * @hide
-     */
-    public final @Nullable <T> ArraySet<T> readTypedArraySet(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N <= 0) {
-            return null;
-        }
-        Parcelable.Creator<?> creator = null;
-        ArraySet<T> result = new ArraySet<T>(N);
-        for (int i = 0; i < N; i++) {
-            T parcelable = null;
-            if (readInt() != 0) {
-                if (creator == null) {
-                    creator = readParcelableCreator(loader);
-                    if (creator == null) {
-                        return null;
-                    }
-                }
-                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
-                            (Parcelable.ClassLoaderCreator<?>) creator;
-                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
-                } else {
-                    parcelable = (T) creator.createFromParcel(this);
-                }
-            }
-            result.append(parcelable);
-        }
-        return result;
     }
 
     /**
@@ -2458,11 +2313,7 @@ public final class Parcel {
         }
         ArrayList<T> l = new ArrayList<T>(N);
         while (N > 0) {
-            if (readInt() != 0) {
-                l.add(c.createFromParcel(this));
-            } else {
-                l.add(null);
-            }
+            l.add(readTypedObject(c));
             N--;
         }
         return l;
@@ -2485,18 +2336,10 @@ public final class Parcel {
         int N = readInt();
         int i = 0;
         for (; i < M && i < N; i++) {
-            if (readInt() != 0) {
-                list.set(i, c.createFromParcel(this));
-            } else {
-                list.set(i, null);
-            }
+            list.set(i, readTypedObject(c));
         }
         for (; i<N; i++) {
-            if (readInt() != 0) {
-                list.add(c.createFromParcel(this));
-            } else {
-                list.add(null);
-            }
+            list.add(readTypedObject(c));
         }
         for (; i<M; i++) {
             list.remove(N);
@@ -2641,9 +2484,7 @@ public final class Parcel {
         }
         T[] l = c.newArray(N);
         for (int i=0; i<N; i++) {
-            if (readInt() != 0) {
-                l[i] = c.createFromParcel(this);
-            }
+            l[i] = readTypedObject(c);
         }
         return l;
     }
@@ -2652,11 +2493,7 @@ public final class Parcel {
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
-                if (readInt() != 0) {
-                    val[i] = c.createFromParcel(this);
-                } else {
-                    val[i] = null;
-                }
+                val[i] = readTypedObject(c);
             }
         } else {
             throw new RuntimeException("bad array lengths");

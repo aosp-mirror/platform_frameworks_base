@@ -30,8 +30,7 @@ namespace statsd {
 /**
  * Decodes the log entry and prints it to the supplied file descriptor.
  */
-class LogEntryPrinter : public LogListener
-{
+class LogEntryPrinter : public LogListener {
 public:
     LogEntryPrinter(int out);
     virtual ~LogEntryPrinter();
@@ -55,8 +54,8 @@ private:
     AndroidLogFormat* m_format;
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif // LOG_ENTRY_PRINTER_H
+#endif  // LOG_ENTRY_PRINTER_H

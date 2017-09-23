@@ -45,12 +45,16 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.notification.ManagedServiceInfoProto;
+import android.service.notification.ManagedServicesProto;
+import android.service.notification.ManagedServicesProto.ServiceProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
@@ -211,6 +215,53 @@ abstract public class ManagedServices {
                 mSnoozingForCurrentProfiles.size() + "):");
         for (ComponentName name : mSnoozingForCurrentProfiles) {
             pw.println("      " + name.flattenToShortString());
+        }
+    }
+
+    public void dump(ProtoOutputStream proto, DumpFilter filter) {
+        proto.write(ManagedServicesProto.CAPTION, getCaption());
+        final int N = mApproved.size();
+        for (int i = 0 ; i < N; i++) {
+            final int userId = mApproved.keyAt(i);
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
+            if (approvedByType != null) {
+                final int M = approvedByType.size();
+                for (int j = 0; j < M; j++) {
+                    final boolean isPrimary = approvedByType.keyAt(j);
+                    final ArraySet<String> approved = approvedByType.valueAt(j);
+                    if (approvedByType != null && approvedByType.size() > 0) {
+                        final long sToken = proto.start(ManagedServicesProto.APPROVED);
+                        for (String s : approved) {
+                            proto.write(ServiceProto.NAME, s);
+                        }
+                        proto.write(ServiceProto.USER_ID, userId);
+                        proto.write(ServiceProto.IS_PRIMARY, isPrimary);
+                        proto.end(sToken);
+                    }
+                }
+            }
+        }
+
+        for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
+            if (filter != null && !filter.matches(cmpt)) continue;
+
+            final long cToken = proto.start(ManagedServicesProto.ENABLED);
+            cmpt.toProto(proto);
+            proto.end(cToken);
+        }
+
+        for (ManagedServiceInfo info : mServices) {
+            if (filter != null && !filter.matches(info.component)) continue;
+
+            final long lToken = proto.start(ManagedServicesProto.LIVE_SERVICES);
+            info.toProto(proto, this);
+            proto.end(lToken);
+        }
+
+        for (ComponentName name : mSnoozingForCurrentProfiles) {
+            final long cToken = proto.start(ManagedServicesProto.SNOOZED);
+            name.toProto(proto);
+            proto.end(cToken);
         }
     }
 
@@ -1034,6 +1085,16 @@ abstract public class ManagedServices {
                     .append(",connection=").append(connection == null ? null : "<connection>")
                     .append(",service=").append(service)
                     .append(']').toString();
+        }
+
+        public void toProto(ProtoOutputStream proto, ManagedServices host) {
+            final long cToken = proto.start(ManagedServiceInfoProto.COMPONENT);
+            component.toProto(proto);
+            proto.end(cToken);
+            proto.write(ManagedServiceInfoProto.USER_ID, userid);
+            proto.write(ManagedServiceInfoProto.SERVICE, service.getClass().getName());
+            proto.write(ManagedServiceInfoProto.IS_SYSTEM, isSystem);
+            proto.write(ManagedServiceInfoProto.IS_GUEST, isGuest(host));
         }
 
         public boolean enabledAndUserMatches(int nid) {

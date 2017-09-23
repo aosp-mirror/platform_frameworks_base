@@ -373,6 +373,16 @@ static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat
     }
 }
 
+static void nativeSetColor(JNIEnv* env, jclass clazz, jlong nativeObject, jfloatArray fColor) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    float* floatColors = env->GetFloatArrayElements(fColor, 0);
+    half3 color(floatColors[0], floatColors[1], floatColors[2]);
+    status_t err = ctrl->setColor(color);
+    if (err < 0 && err != NO_INIT) {
+        doThrowIAE(env);
+    }
+}
+
 static void nativeSetMatrix(JNIEnv* env, jclass clazz, jlong nativeObject,
         jfloat dsdx, jfloat dtdx, jfloat dtdy, jfloat dsdy) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
@@ -812,6 +822,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetTransparentRegionHint },
     {"nativeSetAlpha", "(JF)V",
             (void*)nativeSetAlpha },
+    {"nativeSetColor", "(J[F)V",
+            (void*)nativeSetColor },
     {"nativeSetMatrix", "(JFFFF)V",
             (void*)nativeSetMatrix },
     {"nativeSetFlags", "(JII)V",

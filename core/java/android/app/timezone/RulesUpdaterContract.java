@@ -51,7 +51,7 @@ public final class RulesUpdaterContract {
      * applies.
      */
     public static final String ACTION_TRIGGER_RULES_UPDATE_CHECK =
-            "android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK";
+            "com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK";
 
     /**
      * The extra containing the {@code byte[]} that should be passed to
@@ -61,7 +61,7 @@ public final class RulesUpdaterContract {
      * {@link #ACTION_TRIGGER_RULES_UPDATE_CHECK} intent has been processed.
      */
     public static final String EXTRA_CHECK_TOKEN =
-            "android.intent.extra.timezone.CHECK_TOKEN";
+            "com.android.intent.extra.timezone.CHECK_TOKEN";
 
     /**
      * Creates an intent that would trigger a time zone rules update check.

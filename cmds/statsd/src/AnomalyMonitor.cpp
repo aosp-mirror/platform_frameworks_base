@@ -26,8 +26,7 @@ namespace os {
 namespace statsd {
 
 AnomalyMonitor::AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec)
-        : mRegisteredAlarmTimeSec(0),
-          mMinUpdateTimeSec(minDiffToUpdateRegisteredAlarmTimeSec) {
+    : mRegisteredAlarmTimeSec(0), mMinUpdateTimeSec(minDiffToUpdateRegisteredAlarmTimeSec) {
 }
 
 AnomalyMonitor::~AnomalyMonitor() {
@@ -63,7 +62,7 @@ void AnomalyMonitor::add(sp<const AnomalyAlarm> alarm) {
     if (DEBUG) ALOGD("Adding alarm with time %u", alarm->timestampSec);
     mPq.push(alarm);
     if (mRegisteredAlarmTimeSec < 1 ||
-            alarm->timestampSec + mMinUpdateTimeSec < mRegisteredAlarmTimeSec) {
+        alarm->timestampSec + mMinUpdateTimeSec < mRegisteredAlarmTimeSec) {
         updateRegisteredAlarmTime_l(alarm->timestampSec);
     }
 }
@@ -100,9 +99,9 @@ void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
 }
 
 int64_t AnomalyMonitor::secToMs(uint32_t timeSec) {
-    return ((int64_t) timeSec) * 1000;
+    return ((int64_t)timeSec) * 1000;
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

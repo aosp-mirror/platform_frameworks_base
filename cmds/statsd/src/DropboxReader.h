@@ -40,13 +40,13 @@ private:
     static bool parseFromGzipFile(const unique_fd& fd, StatsLogReport& logReport);
     static void printLog(FILE* out, const StatsLogReport& logReport);
     enum {
-      kCompressStored = 0,    // no compression
-      kCompressDeflated = 8,  // standard deflate
+        kCompressStored = 0,    // no compression
+        kCompressDeflated = 8,  // standard deflate
     };
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif //DROPBOX_READER_H
+#endif  // DROPBOX_READER_H

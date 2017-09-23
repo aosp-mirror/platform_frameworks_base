@@ -16,8 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -125,6 +127,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
+import android.service.notification.ListenersDisablingEffectsProto;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
@@ -1142,6 +1145,12 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    NotificationRecord getNotificationRecord(String key) {
+        return mNotificationsByKey.get(key);
+    }
+
+
+    @VisibleForTesting
     void setSystemReady(boolean systemReady) {
         mSystemReady = systemReady;
     }
@@ -1216,7 +1225,7 @@ public class NotificationManagerService extends SystemService {
         mUsageStats = usageStats;
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
-                getContext().getPackageManager(),
+                mPackageManagerClient,
                 mRankingHandler,
                 mUsageStats,
                 extractorNames);
@@ -1476,7 +1485,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
-        mRankingHelper.updateNotificationChannel(pkg, uid, channel);
+        mRankingHelper.updateNotificationChannel(pkg, uid, channel, true);
 
         if (!fromListener) {
             final NotificationChannel modifiedChannel =
@@ -3239,14 +3248,47 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             proto.end(records);
-        }
 
-        long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
-        mZenModeHelper.dump(proto);
-        for (ComponentName suppressor : mEffectsSuppressors) {
-            proto.write(ZenModeProto.SUPPRESSORS, suppressor.toString());
+            long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
+            mZenModeHelper.dump(proto);
+            for (ComponentName suppressor : mEffectsSuppressors) {
+                proto.write(ZenModeProto.SUPPRESSORS, suppressor.toString());
+            }
+            proto.end(zenLog);
+
+            long listenersToken = proto.start(NotificationServiceDumpProto.NOTIFICATION_LISTENERS);
+            mListeners.dump(proto, filter);
+            proto.end(listenersToken);
+
+            proto.write(NotificationServiceDumpProto.LISTENER_HINTS, mListenerHints);
+
+            for (int i = 0; i < mListenersDisablingEffects.size(); ++i) {
+                long effectsToken = proto.start(
+                    NotificationServiceDumpProto.LISTENERS_DISABLING_EFFECTS);
+
+                proto.write(
+                    ListenersDisablingEffectsProto.HINT, mListenersDisablingEffects.keyAt(i));
+                final ArraySet<ManagedServiceInfo> listeners =
+                    mListenersDisablingEffects.valueAt(i);
+                for (int j = 0; j < listeners.size(); j++) {
+                    final ManagedServiceInfo listener = listeners.valueAt(i);
+                    listenersToken = proto.start(ListenersDisablingEffectsProto.LISTENERS);
+                    listener.toProto(proto, null);
+                    proto.end(listenersToken);
+                }
+
+                proto.end(effectsToken);
+            }
+
+            long assistantsToken = proto.start(
+                NotificationServiceDumpProto.NOTIFICATION_ASSISTANTS);
+            mAssistants.dump(proto, filter);
+            proto.end(assistantsToken);
+
+            long conditionsToken = proto.start(NotificationServiceDumpProto.CONDITION_PROVIDERS);
+            mConditionProviders.dump(proto, filter);
+            proto.end(conditionsToken);
         }
-        proto.end(zenLog);
 
         proto.flush();
     }
@@ -3518,6 +3560,21 @@ public class NotificationManagerService extends SystemService {
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
+
+        if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0
+                && (channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
+                && (r.getImportance() == IMPORTANCE_MIN || r.getImportance() == IMPORTANCE_NONE)) {
+            // Increase the importance of foreground service notifications unless the user had an
+            // opinion otherwise
+            if (TextUtils.isEmpty(channelId)
+                    || NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
+                r.setImportance(IMPORTANCE_LOW, "Bumped for foreground service");
+            } else {
+                channel.setImportance(IMPORTANCE_LOW);
+                mRankingHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+                r.updateNotificationChannel(channel);
+            }
+        }
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.sbn.getOverrideGroupKey() != null)) {

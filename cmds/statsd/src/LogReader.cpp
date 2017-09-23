@@ -31,37 +31,27 @@ namespace os {
 namespace statsd {
 
 #define SNOOZE_INITIAL_MS 100
-#define SNOOZE_MAX_MS (10 * 60 * 1000) // Ten minutes
-
-
-// ================================================================================
-LogListener::LogListener()
-{
-}
-
-LogListener::~LogListener()
-{
-}
-
+#define SNOOZE_MAX_MS (10 * 60 * 1000)  // Ten minutes
 
 // ================================================================================
-LogReader::LogReader()
-{
+LogListener::LogListener() {
 }
 
-LogReader::~LogReader()
-{
+LogListener::~LogListener() {
 }
 
-void
-LogReader::AddListener(const sp<LogListener>& listener)
-{
+// ================================================================================
+LogReader::LogReader() {
+}
+
+LogReader::~LogReader() {
+}
+
+void LogReader::AddListener(const sp<LogListener>& listener) {
     m_listeners.push_back(listener);
 }
 
-void
-LogReader::Run()
-{
+void LogReader::Run() {
     int nextSnoozeMs = SNOOZE_INITIAL_MS;
 
     // In an ideal world, this outer loop will only ever run one iteration, but it
@@ -100,9 +90,7 @@ LogReader::Run()
     }
 }
 
-int
-LogReader::connect_and_read()
-{
+int LogReader::connect_and_read() {
     int lineCount = 0;
     status_t err;
     logger_list* loggers;
@@ -110,8 +98,8 @@ LogReader::connect_and_read()
 
     // Prepare the logging context
     loggers = android_logger_list_alloc(ANDROID_LOG_RDONLY,
-            /* don't stop after N lines */ 0,
-            /* no pid restriction */ 0);
+                                        /* don't stop after N lines */ 0,
+                                        /* no pid restriction */ 0);
 
     // Open the buffer(s)
     eventLogger = android_logger_open(loggers, LOG_ID_STATS);
@@ -133,7 +121,7 @@ LogReader::connect_and_read()
 
             // Call the listeners
             for (vector<sp<LogListener> >::iterator it = m_listeners.begin();
-                    it != m_listeners.end(); it++) {
+                 it != m_listeners.end(); it++) {
                 (*it)->OnLogEvent(msg);
             }
         }
@@ -145,6 +133,6 @@ LogReader::connect_and_read()
     return lineCount;
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

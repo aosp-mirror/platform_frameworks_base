@@ -9444,7 +9444,7 @@ public class Intent implements Parcelable, Cloneable {
                 for (int i=0; i<N; i++) {
                     char c = data.charAt(i);
                     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-                            || c == '.' || c == '-') {
+                            || (c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+') {
                         continue;
                     }
                     if (c == ':' && i > 0) {

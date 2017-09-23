@@ -72,7 +72,7 @@ public class StaticLayoutTest {
     }
 
     @Test
-    public void testBuilder() {
+    public void testBuilder_textDirection() {
         {
             // Obtain.
             final StaticLayout.Builder builder = StaticLayout.Builder.obtain(LAYOUT_TEXT, 0,
@@ -88,8 +88,7 @@ public class StaticLayoutTest {
                     LAYOUT_TEXT.length(), mDefaultPaint, DEFAULT_OUTER_WIDTH);
             builder.setTextDirection(TextDirectionHeuristics.RTL);
             final StaticLayout layout = builder.build();
-            // Always returns TextDirectionHeuristics.FIRSTSTRONG_LTR.
-            assertEquals(TextDirectionHeuristics.FIRSTSTRONG_LTR,
+            assertEquals(TextDirectionHeuristics.RTL,
                     layout.getTextDirectionHeuristic());
         }
     }

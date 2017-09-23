@@ -18,18 +18,17 @@
 
 #include "DropboxWriter.h"
 
+using android::String16;
 using android::binder::Status;
 using android::os::DropBoxManager;
 using android::sp;
-using android::String16;
 using std::vector;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-DropboxWriter::DropboxWriter(const string& tag)
-    : mTag(tag), mLogReport(), mBufferSize(0) {
+DropboxWriter::DropboxWriter(const string& tag) : mTag(tag), mLogReport(), mBufferSize(0) {
 }
 
 void DropboxWriter::addStatsLogReport(const StatsLogReport& log) {
@@ -52,16 +51,15 @@ void DropboxWriter::flush() {
     vector<uint8_t> buffer(numBytes);
     sp<DropBoxManager> dropbox = new DropBoxManager();
     mLogReport.SerializeToArray(&buffer[0], numBytes);
-    Status status = dropbox->addData(String16(mTag.c_str()), &buffer[0],
-            numBytes, 0 /* no flag */);
+    Status status = dropbox->addData(String16(mTag.c_str()), &buffer[0], numBytes, 0 /* no flag */);
     if (!status.isOk()) {
         ALOGE("failed to write to dropbox");
-        //TODO: What to do if flush fails??
+        // TODO: What to do if flush fails??
     }
     mLogReport.Clear();
     mBufferSize = 0;
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

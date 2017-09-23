@@ -340,7 +340,7 @@
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"ਇਹ ਐਪ ਹੋਰ ਐਪਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਜਾਂ ਸਕ੍ਰੀਨ ਦੇ ਹੋਰ ਭਾਗਾਂ \'ਤੇ ਵਿਖਾਈ ਦੇ ਸਕਦੀ ਹੈ। ਇਹ ਸਧਾਰਨ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀ ਹੈ ਅਤੇ ਹੋਰ ਐਪਾਂ ਦੇ ਵਿਖਾਈ ਦੇਣ ਦੇ ਤਰੀਕੇ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚਲਾਓ"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"ਇਹ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਸਕਦੀ ਹੈ। ਇਸ ਨਾਲ ਬੈਟਰੀ ਵਧੇਰੇ ਤੇਜ਼ੀ ਨਾਲ ਖਤਮ ਹੋ ਸਕਦੀ ਹੈ।"</string>
-    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡੈਟੇ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="permlab_useDataInBackground" msgid="8694951340794341809">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ  ਡਾਟੇ  ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"ਇਹ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦੀ ਹੈ। ਇਸ ਨਾਲ ਡਾਟਾ ਵਰਤੋਂ ਵਧ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਚਲਾਏ ਰੱਖੋ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਟੈਬਲੈੱਟ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਲਈ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
@@ -552,10 +552,10 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਲੌਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਲੌਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ ਲੌਕ ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ ਲੌਕ ਬਦਲੋ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"ਸਕ੍ਰੀਨ ਲੌਕ ਬਦਲੋ।"</string>
@@ -735,7 +735,7 @@
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM ਕਾਰਡ PUK-ਲੌਕਡ ਹੈ।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"ਵਰਤੋਂਕਾਰ ਗਾਈਡ ਦੇਖੋ ਜਾਂ ਗਾਹਕ ਸੇਵਾ ਨੂੰ ਫ਼ੋਨ ਕਰੋ।"</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM ਕਾਰਡ ਲੌਕ ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM ਕਾਰਡ ਅਨਲੌਕ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM ਕਾਰਡ ਅਣਲਾਕ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਉਲੀਕਿਆ ਹੈ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਪਾਸਵਰਡ ਗਲਤ ਢੰਗ ਨਾਲ ਟਾਈਪ ਕੀਤਾ ਹੈ।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"ਤੁਸੀਂ ਆਪਣਾ ਪਿੰਨ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਗਲਤ ਢੰਗ ਨਾਲ ਟਾਈਪ ਕੀਤਾ ਹੈ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -1420,9 +1420,12 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ਟੈਬਲੈੱਟ"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ਫ਼ੋਨ ਕਰੋ"</string>
-    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ਹੈੱਡਫ਼ੋਨ"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"ਡੌਕ ਸਪੀਕਰਸ"</string>
-    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
+    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
+    <skip />
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ਹੈੱਡਫ਼ੋਨ"</string>
+    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ਸਿਸਟਮ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth  ਆਡੀਓ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ"</string>
@@ -1457,7 +1460,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"ਸਿਮ ਹੁਣ ਬੰਦ ਕੀਤਾ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"ਇੱਛਤ ਪਿੰਨ ਕੋਡ ਦਾਖਲ ਕਰੋ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"ਇੱਛਤ ਪਿੰਨ ਕੋਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM ਕਾਰਡ ਅਨਲੌਕ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM ਕਾਰਡ ਅਣਲਾਕ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ਗਲਤ ਪਿੰਨ ਕੋਡ।"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ਕੋਈ ਪਿੰਨ ਟਾਈਪ ਕਰੋ ਜੋ 4 ਤੋਂ 8 ਨੰਬਰਾਂ ਦਾ ਹੋਵੇ।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK ਕੋਡ 8 ਸੰਖਿਆਵਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
