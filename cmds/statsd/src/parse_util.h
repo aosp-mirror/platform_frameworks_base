@@ -16,8 +16,8 @@
 #ifndef PARSE_UTIL_H
 #define PARSE_UTIL_H
 
-#include "LogReader.h"
 #include "DropboxWriter.h"
+#include "LogReader.h"
 
 #include <log/logprint.h>
 
@@ -25,4 +25,4 @@ using android::os::statsd::EventMetricData;
 
 EventMetricData parse(const log_msg msg);
 
-#endif // PARSE_UTIL_H
+#endif  // PARSE_UTIL_H

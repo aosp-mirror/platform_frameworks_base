@@ -52,21 +52,20 @@ private:
     StatsLogReport mLogReport;
 
     /* Current *serialized* size of the logs kept in memory.
-       To save computation, we will not calculate the size of the StatsLogReport every time when a new
-       entry is added, which would recursively call ByteSize() on every log entry. Instead, we keep
-       the sum of all individual stats log entry sizes. The size of a proto is approximately the sum
-       of the size of all member protos.
+       To save computation, we will not calculate the size of the StatsLogReport every time when a
+       new entry is added, which would recursively call ByteSize() on every log entry. Instead, we
+       keep the sum of all individual stats log entry sizes. The size of a proto is approximately
+       the sum of the size of all member protos.
      */
     size_t mBufferSize = 0;
 
     /* Check if the buffer size exceeds the max buffer size when the new entry is added, and flush
        the logs to dropbox if true. */
     void flushIfNecessary(const StatsLogReport& log);
-
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif //DROPBOX_WRITER_H
+#endif  // DROPBOX_WRITER_H

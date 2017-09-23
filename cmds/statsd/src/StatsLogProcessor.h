@@ -24,8 +24,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsLogProcessor : public LogListener
-{
+class StatsLogProcessor : public LogListener {
 public:
     StatsLogProcessor();
     virtual ~StatsLogProcessor();
@@ -54,8 +53,8 @@ private:
     std::unordered_map<int, StatsdConfig> m_configs;
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif //STATS_LOG_PROCESSOR_H
+#endif  // STATS_LOG_PROCESSOR_H

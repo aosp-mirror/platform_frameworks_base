@@ -26,9 +26,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-LogEntryPrinter::LogEntryPrinter(int out)
-    :m_out(out)
-{
+LogEntryPrinter::LogEntryPrinter(int out) : m_out(out) {
     // Initialize the EventTagMap, which is how we know the names of the numeric event tags.
     // If this fails, we can't print well, but something will print.
     m_tags = android_openEventTagMap(NULL);
@@ -38,23 +36,20 @@ LogEntryPrinter::LogEntryPrinter(int out)
     android_log_setPrintFormat(m_format, FORMAT_THREADTIME);
 }
 
-LogEntryPrinter::~LogEntryPrinter()
-{
+LogEntryPrinter::~LogEntryPrinter() {
     if (m_tags != NULL) {
         android_closeEventTagMap(m_tags);
     }
     android_log_format_free(m_format);
 }
 
-void
-LogEntryPrinter::OnLogEvent(const log_msg& msg)
-{
+void LogEntryPrinter::OnLogEvent(const log_msg& msg) {
     status_t err;
     AndroidLogEntry entry;
     char buf[1024];
 
-    err = android_log_processBinaryLogBuffer(&(const_cast<log_msg*>(&msg)->entry_v1),
-                &entry, m_tags, buf, sizeof(buf));
+    err = android_log_processBinaryLogBuffer(&(const_cast<log_msg*>(&msg)->entry_v1), &entry,
+                                             m_tags, buf, sizeof(buf));
     if (err == NO_ERROR) {
         android_log_printLogLine(m_format, m_out, &entry);
     } else {
@@ -63,7 +58,6 @@ LogEntryPrinter::OnLogEvent(const log_msg& msg)
     }
 }
 
-} // namespace statsd
-} // namespace os
-} // namespace android
-
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

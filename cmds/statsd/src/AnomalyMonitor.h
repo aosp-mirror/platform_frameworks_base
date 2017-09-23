@@ -17,8 +17,8 @@
 #ifndef ANOMALY_MONITOR_H
 #define ANOMALY_MONITOR_H
 
-#include <indexed_priority_queue.h>
 #include <android/os/IStatsCompanionService.h>
+#include <indexed_priority_queue.h>
 #include <utils/RefBase.h>
 
 #include <queue>
@@ -56,7 +56,7 @@ struct AnomalyAlarm : public RefBase {
  * Manages alarms for Anomaly Detection.
  */
 class AnomalyMonitor : public RefBase {
- public:
+public:
     /**
      * @param minDiffToUpdateRegisteredAlarmTimeSec If the soonest alarm differs
      * from the registered alarm by more than this amount, update the registered
@@ -94,7 +94,7 @@ class AnomalyMonitor : public RefBase {
         return mRegisteredAlarmTimeSec;
     }
 
- private:
+private:
     std::mutex mLock;
 
     /**
@@ -131,8 +131,8 @@ class AnomalyMonitor : public RefBase {
     int64_t secToMs(uint32_t timeSec);
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-#endif // ANOMALY_MONITOR_H
+#endif  // ANOMALY_MONITOR_H

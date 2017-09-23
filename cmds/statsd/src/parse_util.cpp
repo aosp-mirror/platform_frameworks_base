@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <parse_util.h>
 #include <log/log_event_list.h>
+#include <parse_util.h>
 
 using android::os::statsd::EVENT_TIMESTAMP;
 using android::os::statsd::EventMetricData;
@@ -25,22 +25,20 @@ using android::os::statsd::KeyValuePair;
 using android::os::statsd::TagId;
 using android::os::statsd::TagId_IsValid;
 
-EventMetricData parse(log_msg msg)
-{
+EventMetricData parse(log_msg msg) {
     // dump all statsd logs to dropbox for now.
     // TODO: Add filtering, aggregation, etc.
     EventMetricData eventMetricData;
 
     // set timestamp of the event.
-    KeyValuePair *keyValuePair = eventMetricData.add_key_value_pair();
+    KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
     keyValuePair->set_key(EVENT_TIMESTAMP);
     keyValuePair->set_value_int(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec);
 
     // start iterating k,v pairs.
-    android_log_context context = create_android_log_parser(const_cast<log_msg*>(&msg)->msg()
-                                                            + sizeof(uint32_t),
-                                                            const_cast<log_msg*>(&msg)->len()
-                                                            - sizeof(uint32_t));
+    android_log_context context =
+            create_android_log_parser(const_cast<log_msg*>(&msg)->msg() + sizeof(uint32_t),
+                                      const_cast<log_msg*>(&msg)->len() - sizeof(uint32_t));
     android_log_list_element elem;
 
     if (context) {
@@ -64,7 +62,7 @@ EventMetricData parse(log_msg msg)
                         key = elem.data.int32;
                     } else if (KeyId_IsValid(key)) {
                         int32_t val = elem.data.int32;
-                        KeyValuePair *keyValuePair = eventMetricData.add_key_value_pair();
+                        KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
                         keyValuePair->set_value_int(val);
                     } else {
@@ -74,7 +72,7 @@ EventMetricData parse(log_msg msg)
                 case EVENT_TYPE_FLOAT:
                     if (index % 2 == 0 && KeyId_IsValid(key)) {
                         float val = elem.data.float32;
-                        KeyValuePair *keyValuePair = eventMetricData.add_key_value_pair();
+                        KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
                         keyValuePair->set_value_float(val);
                     }
@@ -83,7 +81,7 @@ EventMetricData parse(log_msg msg)
                 case EVENT_TYPE_STRING:
                     if (index % 2 == 0 && KeyId_IsValid(key)) {
                         char* val = elem.data.string;
-                        KeyValuePair *keyValuePair = eventMetricData.add_key_value_pair();
+                        KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
                         keyValuePair->set_value_str(val);
                     }
@@ -92,7 +90,7 @@ EventMetricData parse(log_msg msg)
                 case EVENT_TYPE_LONG:
                     if (index % 2 == 0 && KeyId_IsValid(key)) {
                         int64_t val = elem.data.int64;
-                        KeyValuePair *keyValuePair = eventMetricData.add_key_value_pair();
+                        KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
                         keyValuePair->set_value_int(val);
                     }
