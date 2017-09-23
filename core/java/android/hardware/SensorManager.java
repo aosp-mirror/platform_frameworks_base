@@ -83,7 +83,7 @@ public abstract class SensorManager {
     /** @hide */
     protected static final String TAG = "SensorManager";
 
-    private static final float[] mTempMatrix = new float[16];
+    private static final float[] sTempMatrix = new float[16];
 
     // Cached lists of sensors by type.  Guarded by mSensorListByType.
     private final SparseArray<List<Sensor>> mSensorListByType =
@@ -188,7 +188,7 @@ public abstract class SensorManager {
      * @deprecated use {@link android.hardware.Sensor Sensor} instead.
      */
     @Deprecated
-    public static final int SENSOR_MAX = ((SENSOR_ALL + 1)>>1);
+    public static final int SENSOR_MAX = ((SENSOR_ALL + 1) >> 1);
 
 
     /**
@@ -425,8 +425,9 @@ public abstract class SensorManager {
                 } else {
                     list = new ArrayList<Sensor>();
                     for (Sensor i : fullList) {
-                        if (i.getType() == type)
+                        if (i.getType() == type) {
                             list.add(i);
+                        }
                     }
                 }
                 list = Collections.unmodifiableList(list);
@@ -461,8 +462,9 @@ public abstract class SensorManager {
         } else {
             List<Sensor> list = new ArrayList();
             for (Sensor i : fullList) {
-                if (i.getType() == type)
+                if (i.getType() == type) {
                     list.add(i);
+                }
             }
             return Collections.unmodifiableList(list);
         }
@@ -490,10 +492,11 @@ public abstract class SensorManager {
         // For the following sensor types, return a wake-up sensor. These types are by default
         // defined as wake-up sensors. For the rest of the SDK defined sensor types return a
         // non_wake-up version.
-        if (type == Sensor.TYPE_PROXIMITY || type == Sensor.TYPE_SIGNIFICANT_MOTION ||
-                type == Sensor.TYPE_TILT_DETECTOR || type == Sensor.TYPE_WAKE_GESTURE ||
-                type == Sensor.TYPE_GLANCE_GESTURE || type == Sensor.TYPE_PICK_UP_GESTURE ||
-                type == Sensor.TYPE_WRIST_TILT_GESTURE || type == Sensor.TYPE_DYNAMIC_SENSOR_META) {
+        if (type == Sensor.TYPE_PROXIMITY || type == Sensor.TYPE_SIGNIFICANT_MOTION
+                || type == Sensor.TYPE_TILT_DETECTOR || type == Sensor.TYPE_WAKE_GESTURE
+                || type == Sensor.TYPE_GLANCE_GESTURE || type == Sensor.TYPE_PICK_UP_GESTURE
+                || type == Sensor.TYPE_WRIST_TILT_GESTURE
+                || type == Sensor.TYPE_DYNAMIC_SENSOR_META) {
             wakeUpSensor = true;
         }
 
@@ -509,12 +512,12 @@ public abstract class SensorManager {
      * <p>
      * For example,
      * <ul>
-     *     <li>getDefaultSensor({@link Sensor#TYPE_ACCELEROMETER}, true) returns a wake-up accelerometer
-     *     sensor if it exists. </li>
-     *     <li>getDefaultSensor({@link Sensor#TYPE_PROXIMITY}, false) returns a non wake-up proximity
-     *     sensor if it exists. </li>
-     *     <li>getDefaultSensor({@link Sensor#TYPE_PROXIMITY}, true) returns a wake-up proximity sensor
-     *     which is the same as the Sensor returned by {@link #getDefaultSensor(int)}. </li>
+     *     <li>getDefaultSensor({@link Sensor#TYPE_ACCELEROMETER}, true) returns a wake-up
+     *     accelerometer sensor if it exists. </li>
+     *     <li>getDefaultSensor({@link Sensor#TYPE_PROXIMITY}, false) returns a non wake-up
+     *     proximity sensor if it exists. </li>
+     *     <li>getDefaultSensor({@link Sensor#TYPE_PROXIMITY}, true) returns a wake-up proximity
+     *     sensor which is the same as the Sensor returned by {@link #getDefaultSensor(int)}. </li>
      * </ul>
      * </p>
      * <p class="note">
@@ -532,8 +535,9 @@ public abstract class SensorManager {
     public Sensor getDefaultSensor(int type, boolean wakeUp) {
         List<Sensor> l = getSensorList(type);
         for (Sensor sensor : l) {
-            if (sensor.isWakeUpSensor() == wakeUp)
+            if (sensor.isWakeUpSensor() == wakeUp) {
                 return sensor;
+            }
         }
         return null;
     }
@@ -842,8 +846,8 @@ public abstract class SensorManager {
      * @return <code>true</code> if the sensor is supported and successfully enabled.
      * @see #registerListener(SensorEventListener, Sensor, int, int)
      */
-    public boolean registerListener(SensorEventListener listener, Sensor sensor, int samplingPeriodUs,
-            int maxReportLatencyUs, Handler handler) {
+    public boolean registerListener(SensorEventListener listener, Sensor sensor,
+            int samplingPeriodUs, int maxReportLatencyUs, Handler handler) {
         int delayUs = getDelay(samplingPeriodUs);
         return registerListenerImpl(listener, sensor, delayUs, handler, maxReportLatencyUs, 0);
     }
@@ -953,7 +957,7 @@ public abstract class SensorManager {
      * Used for receiving notifications from the SensorManager when dynamic sensors are connected or
      * disconnected.
      */
-    public static abstract class DynamicSensorCallback {
+    public abstract static class DynamicSensorCallback {
         /**
          * Called when there is a dynamic sensor being connected to the system.
          *
@@ -1180,7 +1184,7 @@ public abstract class SensorManager {
         float Ay = gravity[1];
         float Az = gravity[2];
 
-        final float normsqA = (Ax*Ax + Ay*Ay + Az*Az);
+        final float normsqA = (Ax * Ax + Ay * Ay + Az * Az);
         final float g = 9.81f;
         final float freeFallGravitySquared = 0.01f * g * g;
         if (normsqA < freeFallGravitySquared) {
@@ -1191,10 +1195,10 @@ public abstract class SensorManager {
         final float Ex = geomagnetic[0];
         final float Ey = geomagnetic[1];
         final float Ez = geomagnetic[2];
-        float Hx = Ey*Az - Ez*Ay;
-        float Hy = Ez*Ax - Ex*Az;
-        float Hz = Ex*Ay - Ey*Ax;
-        final float normH = (float)Math.sqrt(Hx*Hx + Hy*Hy + Hz*Hz);
+        float Hx = Ey * Az - Ez * Ay;
+        float Hy = Ez * Ax - Ex * Az;
+        float Hz = Ex * Ay - Ey * Ax;
+        final float normH = (float) Math.sqrt(Hx * Hx + Hy * Hy + Hz * Hz);
 
         if (normH < 0.1f) {
             // device is close to free fall (or in space?), or close to
@@ -1205,13 +1209,13 @@ public abstract class SensorManager {
         Hx *= invH;
         Hy *= invH;
         Hz *= invH;
-        final float invA = 1.0f / (float)Math.sqrt(Ax*Ax + Ay*Ay + Az*Az);
+        final float invA = 1.0f / (float) Math.sqrt(Ax * Ax + Ay * Ay + Az * Az);
         Ax *= invA;
         Ay *= invA;
         Az *= invA;
-        final float Mx = Ay*Hz - Az*Hy;
-        final float My = Az*Hx - Ax*Hz;
-        final float Mz = Ax*Hy - Ay*Hx;
+        final float Mx = Ay * Hz - Az * Hy;
+        final float My = Az * Hx - Ax * Hz;
+        final float Mz = Ax * Hy - Ay * Hx;
         if (R != null) {
             if (R.length == 9) {
                 R[0] = Hx;     R[1] = Hy;     R[2] = Hz;
@@ -1228,17 +1232,17 @@ public abstract class SensorManager {
             // compute the inclination matrix by projecting the geomagnetic
             // vector onto the Z (gravity) and X (horizontal component
             // of geomagnetic vector) axes.
-            final float invE = 1.0f / (float)Math.sqrt(Ex*Ex + Ey*Ey + Ez*Ez);
-            final float c = (Ex*Mx + Ey*My + Ez*Mz) * invE;
-            final float s = (Ex*Ax + Ey*Ay + Ez*Az) * invE;
+            final float invE = 1.0f / (float) Math.sqrt(Ex * Ex + Ey * Ey + Ez * Ez);
+            final float c = (Ex * Mx + Ey * My + Ez * Mz) * invE;
+            final float s = (Ex * Ax + Ey * Ay + Ez * Az) * invE;
             if (I.length == 9) {
                 I[0] = 1;     I[1] = 0;     I[2] = 0;
                 I[3] = 0;     I[4] = c;     I[5] = s;
-                I[6] = 0;     I[7] =-s;     I[8] = c;
+                I[6] = 0;     I[7] = -s;     I[8] = c;
             } else if (I.length == 16) {
                 I[0] = 1;     I[1] = 0;     I[2] = 0;
                 I[4] = 0;     I[5] = c;     I[6] = s;
-                I[8] = 0;     I[9] =-s;     I[10]= c;
+                I[8] = 0;     I[9] = -s;     I[10] = c;
                 I[3] = I[7] = I[11] = I[12] = I[13] = I[14] = 0;
                 I[15] = 1;
             }
@@ -1262,9 +1266,9 @@ public abstract class SensorManager {
      */
     public static float getInclination(float[] I) {
         if (I.length == 9) {
-            return (float)Math.atan2(I[5], I[4]);
+            return (float) Math.atan2(I[5], I[4]);
         } else {
-            return (float)Math.atan2(I[6], I[5]);
+            return (float) Math.atan2(I[6], I[5]);
         }
     }
 
@@ -1343,17 +1347,16 @@ public abstract class SensorManager {
      * @see #getRotationMatrix(float[], float[], float[], float[])
      */
 
-    public static boolean remapCoordinateSystem(float[] inR, int X, int Y,
-            float[] outR)
-    {
+    public static boolean remapCoordinateSystem(float[] inR, int X, int Y, float[] outR) {
         if (inR == outR) {
-            final float[] temp = mTempMatrix;
-            synchronized(temp) {
+            final float[] temp = sTempMatrix;
+            synchronized (temp) {
                 // we don't expect to have a lot of contention
                 if (remapCoordinateSystemImpl(inR, X, Y, temp)) {
                     final int size = outR.length;
-                    for (int i=0 ; i<size ; i++)
+                    for (int i = 0; i < size; i++) {
                         outR[i] = temp[i];
+                    }
                     return true;
                 }
             }
@@ -1361,9 +1364,7 @@ public abstract class SensorManager {
         return remapCoordinateSystemImpl(inR, X, Y, outR);
     }
 
-    private static boolean remapCoordinateSystemImpl(float[] inR, int X, int Y,
-            float[] outR)
-    {
+    private static boolean remapCoordinateSystemImpl(float[] inR, int X, int Y, float[] outR) {
         /*
          * X and Y define a rotation matrix 'r':
          *
@@ -1376,14 +1377,18 @@ public abstract class SensorManager {
          */
 
         final int length = outR.length;
-        if (inR.length != length)
+        if (inR.length != length) {
             return false;   // invalid parameter
-        if ((X & 0x7C)!=0 || (Y & 0x7C)!=0)
+        }
+        if ((X & 0x7C) != 0 || (Y & 0x7C) != 0) {
             return false;   // invalid parameter
-        if (((X & 0x3)==0) || ((Y & 0x3)==0))
+        }
+        if (((X & 0x3) == 0) || ((Y & 0x3) == 0)) {
             return false;   // no axis specified
-        if ((X & 0x3) == (Y & 0x3))
+        }
+        if ((X & 0x3) == (Y & 0x3)) {
             return false;   // same axis specified
+        }
 
         // Z is "the other" axis, its sign is either +/- sign(X)*sign(Y)
         // this can be calculated by exclusive-or'ing X and Y; except for
@@ -1391,28 +1396,29 @@ public abstract class SensorManager {
         int Z = X ^ Y;
 
         // extract the axis (remove the sign), offset in the range 0 to 2.
-        final int x = (X & 0x3)-1;
-        final int y = (Y & 0x3)-1;
-        final int z = (Z & 0x3)-1;
+        final int x = (X & 0x3) - 1;
+        final int y = (Y & 0x3) - 1;
+        final int z = (Z & 0x3) - 1;
 
         // compute the sign of Z (whether it needs to be inverted)
-        final int axis_y = (z+1)%3;
-        final int axis_z = (z+2)%3;
-        if (((x^axis_y)|(y^axis_z)) != 0)
+        final int axis_y = (z + 1) % 3;
+        final int axis_z = (z + 2) % 3;
+        if (((x ^ axis_y) | (y ^ axis_z)) != 0) {
             Z ^= 0x80;
+        }
 
-        final boolean sx = (X>=0x80);
-        final boolean sy = (Y>=0x80);
-        final boolean sz = (Z>=0x80);
+        final boolean sx = (X >= 0x80);
+        final boolean sy = (Y >= 0x80);
+        final boolean sz = (Z >= 0x80);
 
         // Perform R * r, in avoiding actual muls and adds.
-        final int rowLength = ((length==16)?4:3);
-        for (int j=0 ; j<3 ; j++) {
-            final int offset = j*rowLength;
-            for (int i=0 ; i<3 ; i++) {
-                if (x==i)   outR[offset+i] = sx ? -inR[offset+0] : inR[offset+0];
-                if (y==i)   outR[offset+i] = sy ? -inR[offset+1] : inR[offset+1];
-                if (z==i)   outR[offset+i] = sz ? -inR[offset+2] : inR[offset+2];
+        final int rowLength = ((length == 16) ? 4 : 3);
+        for (int j = 0; j < 3; j++) {
+            final int offset = j * rowLength;
+            for (int i = 0; i < 3; i++) {
+                if (x == i)   outR[offset + i] = sx ? -inR[offset + 0] : inR[offset + 0];
+                if (y == i)   outR[offset + i] = sy ? -inR[offset + 1] : inR[offset + 1];
+                if (z == i)   outR[offset + i] = sz ? -inR[offset + 2] : inR[offset + 2];
             }
         }
         if (length == 16) {
@@ -1466,7 +1472,7 @@ public abstract class SensorManager {
      * @see #getRotationMatrix(float[], float[], float[], float[])
      * @see GeomagneticField
      */
-    public static float[] getOrientation(float[] R, float values[]) {
+    public static float[] getOrientation(float[] R, float[] values) {
         /*
          * 4x4 (length=16) case:
          *   /  R[ 0]   R[ 1]   R[ 2]   0  \
@@ -1481,13 +1487,13 @@ public abstract class SensorManager {
          *
          */
         if (R.length == 9) {
-            values[0] = (float)Math.atan2(R[1], R[4]);
-            values[1] = (float)Math.asin(-R[7]);
-            values[2] = (float)Math.atan2(-R[6], R[8]);
+            values[0] = (float) Math.atan2(R[1], R[4]);
+            values[1] = (float) Math.asin(-R[7]);
+            values[2] = (float) Math.atan2(-R[6], R[8]);
         } else {
-            values[0] = (float)Math.atan2(R[1], R[5]);
-            values[1] = (float)Math.asin(-R[9]);
-            values[2] = (float)Math.atan2(-R[8], R[10]);
+            values[0] = (float) Math.atan2(R[1], R[5]);
+            values[1] = (float) Math.asin(-R[9]);
+            values[2] = (float) Math.atan2(-R[8], R[10]);
         }
 
         return values;
@@ -1524,7 +1530,7 @@ public abstract class SensorManager {
      */
     public static float getAltitude(float p0, float p) {
         final float coef = 1.0f / 5.255f;
-        return 44330.0f * (1.0f - (float)Math.pow(p/p0, coef));
+        return 44330.0f * (1.0f - (float) Math.pow(p / p0, coef));
     }
 
     /** Helper function to compute the angle change between two rotation matrices.
@@ -1557,12 +1563,13 @@ public abstract class SensorManager {
      *        (in radians) is stored
      */
 
-    public static void getAngleChange( float[] angleChange, float[] R, float[] prevR) {
-        float rd1=0,rd4=0, rd6=0,rd7=0, rd8=0;
-        float ri0=0,ri1=0,ri2=0,ri3=0,ri4=0,ri5=0,ri6=0,ri7=0,ri8=0;
-        float pri0=0, pri1=0, pri2=0, pri3=0, pri4=0, pri5=0, pri6=0, pri7=0, pri8=0;
+    public static void getAngleChange(float[] angleChange, float[] R, float[] prevR) {
+        float rd1 = 0, rd4 = 0, rd6 = 0, rd7 = 0, rd8 = 0;
+        float ri0 = 0, ri1 = 0, ri2 = 0, ri3 = 0, ri4 = 0, ri5 = 0, ri6 = 0, ri7 = 0, ri8 = 0;
+        float pri0 = 0, pri1 = 0, pri2 = 0, pri3 = 0, pri4 = 0;
+        float pri5 = 0, pri6 = 0, pri7 = 0, pri8 = 0;
 
-        if(R.length == 9) {
+        if (R.length == 9) {
             ri0 = R[0];
             ri1 = R[1];
             ri2 = R[2];
@@ -1572,7 +1579,7 @@ public abstract class SensorManager {
             ri6 = R[6];
             ri7 = R[7];
             ri8 = R[8];
-        } else if(R.length == 16) {
+        } else if (R.length == 16) {
             ri0 = R[0];
             ri1 = R[1];
             ri2 = R[2];
@@ -1584,7 +1591,7 @@ public abstract class SensorManager {
             ri8 = R[10];
         }
 
-        if(prevR.length == 9) {
+        if (prevR.length == 9) {
             pri0 = prevR[0];
             pri1 = prevR[1];
             pri2 = prevR[2];
@@ -1594,7 +1601,7 @@ public abstract class SensorManager {
             pri6 = prevR[6];
             pri7 = prevR[7];
             pri8 = prevR[8];
-        } else if(prevR.length == 16) {
+        } else if (prevR.length == 16) {
             pri0 = prevR[0];
             pri1 = prevR[1];
             pri2 = prevR[2];
@@ -1615,9 +1622,9 @@ public abstract class SensorManager {
         rd7 = pri2 * ri1 + pri5 * ri4 + pri8 * ri7; //rd[2][1]
         rd8 = pri2 * ri2 + pri5 * ri5 + pri8 * ri8; //rd[2][2]
 
-        angleChange[0] = (float)Math.atan2(rd1, rd4);
-        angleChange[1] = (float)Math.asin(-rd7);
-        angleChange[2] = (float)Math.atan2(-rd6, rd8);
+        angleChange[0] = (float) Math.atan2(rd1, rd4);
+        angleChange[1] = (float) Math.asin(-rd7);
+        angleChange[2] = (float) Math.atan2(-rd6, rd8);
 
     }
 
@@ -1650,8 +1657,8 @@ public abstract class SensorManager {
         if (rotationVector.length >= 4) {
             q0 = rotationVector[3];
         } else {
-            q0 = 1 - q1*q1 - q2*q2 - q3*q3;
-            q0 = (q0 > 0) ? (float)Math.sqrt(q0) : 0;
+            q0 = 1 - q1 * q1 - q2 * q2 - q3 * q3;
+            q0 = (q0 > 0) ? (float) Math.sqrt(q0) : 0;
         }
 
         float sq_q1 = 2 * q1 * q1;
@@ -1664,7 +1671,7 @@ public abstract class SensorManager {
         float q2_q3 = 2 * q2 * q3;
         float q1_q0 = 2 * q1 * q0;
 
-        if(R.length == 9) {
+        if (R.length == 9) {
             R[0] = 1 - sq_q2 - sq_q3;
             R[1] = q1_q2 - q3_q0;
             R[2] = q1_q3 + q2_q0;
@@ -1707,8 +1714,8 @@ public abstract class SensorManager {
         if (rv.length >= 4) {
             Q[0] = rv[3];
         } else {
-            Q[0] = 1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2];
-            Q[0] = (Q[0] > 0) ? (float)Math.sqrt(Q[0]) : 0;
+            Q[0] = 1 - rv[0] * rv[0] - rv[1] * rv[1] - rv[2] * rv[2];
+            Q[0] = (Q[0] > 0) ? (float) Math.sqrt(Q[0]) : 0;
         }
         Q[1] = rv[0];
         Q[2] = rv[1];
@@ -1800,7 +1807,7 @@ public abstract class SensorManager {
      */
     @SystemApi
     public boolean initDataInjection(boolean enable) {
-          return initDataInjectionImpl(enable);
+        return initDataInjectionImpl(enable);
     }
 
     /**
@@ -1846,9 +1853,9 @@ public abstract class SensorManager {
         }
         int expectedNumValues = Sensor.getMaxLengthValuesArray(sensor, Build.VERSION_CODES.M);
         if (values.length != expectedNumValues) {
-            throw new  IllegalArgumentException ("Wrong number of values for sensor " +
-                    sensor.getName() + " actual=" + values.length + " expected=" +
-                                                  expectedNumValues);
+            throw new  IllegalArgumentException("Wrong number of values for sensor "
+                    + sensor.getName() + " actual=" + values.length + " expected="
+                    + expectedNumValues);
         }
         if (accuracy < SENSOR_STATUS_NO_CONTACT || accuracy > SENSOR_STATUS_ACCURACY_HIGH) {
             throw new IllegalArgumentException("Invalid sensor accuracy");
