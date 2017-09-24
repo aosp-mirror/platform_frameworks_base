@@ -100,6 +100,8 @@ final class AutofillManagerServiceImpl {
     private static final Random sRandom = new Random();
 
     private final LocalLog mRequestsHistory;
+    private final LocalLog mUiLatencyHistory;
+
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
      */
@@ -141,10 +143,11 @@ final class AutofillManagerServiceImpl {
     private long mLastPrune = 0;
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
-            int userId, AutoFillUI ui, boolean disabled) {
+            LocalLog uiLatencyHistory, int userId, AutoFillUI ui, boolean disabled) {
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
+        mUiLatencyHistory = uiLatencyHistory;
         mUserId = userId;
         mUi = ui;
         updateLocked(disabled);
@@ -399,7 +402,7 @@ final class AutofillManagerServiceImpl {
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback,
-                mInfo.getServiceInfo().getComponentName(), packageName);
+                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), packageName);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
