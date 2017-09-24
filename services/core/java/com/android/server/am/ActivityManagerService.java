@@ -20060,7 +20060,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                mStackSupervisor.moveTasksToFullscreenStackLocked(fromStackId, onTop);
+                final ActivityStack stack = mStackSupervisor.getStack(fromStackId);
+                if (stack != null){
+                    mStackSupervisor.moveTasksToFullscreenStackLocked(stack, onTop);
+                }
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

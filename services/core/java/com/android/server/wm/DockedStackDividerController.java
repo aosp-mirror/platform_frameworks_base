@@ -17,8 +17,9 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Surface.ROTATION_270;
@@ -456,7 +457,8 @@ public class DockedStackDividerController implements DimLayerUser {
             boolean isHomeStackResizable) {
         long animDuration = 0;
         if (animate) {
-            final TaskStack stack = mDisplayContent.getStackById(DOCKED_STACK_ID);
+            final TaskStack stack =
+                    mDisplayContent.getStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
             final long transitionDuration = isAnimationMaximizing()
                     ? mService.mAppTransition.getLastClipRevealTransitionDuration()
                     : DEFAULT_APP_TRANSITION_DURATION;
@@ -605,8 +607,8 @@ public class DockedStackDividerController implements DimLayerUser {
         if (mMinimizedDock && mService.mPolicy.isKeyguardShowingAndNotOccluded()) {
             return;
         }
-        final TaskStack fullscreenStack =
-                mDisplayContent.getStackById(FULLSCREEN_WORKSPACE_STACK_ID);
+        final TaskStack fullscreenStack = mDisplayContent.getStack(
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
         final boolean homeBehind = fullscreenStack != null && fullscreenStack.isVisible();
         setMinimizedDockedStack(homeVisible && !homeBehind, animate);
@@ -801,7 +803,8 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
-        final TaskStack stack = mDisplayContent.getStackById(DOCKED_STACK_ID);
+        final TaskStack stack =
+                mDisplayContent.getStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
