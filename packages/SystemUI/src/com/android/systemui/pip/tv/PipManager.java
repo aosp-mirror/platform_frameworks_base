@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 /**
@@ -502,7 +504,8 @@ public class PipManager implements BasePipManager {
     private StackInfo getPinnedStackInfo() {
         StackInfo stackInfo = null;
         try {
-            stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+            stackInfo = mActivityManager.getStackInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
         } catch (RemoteException e) {
             Log.e(TAG, "getStackInfo failed", e);
         }

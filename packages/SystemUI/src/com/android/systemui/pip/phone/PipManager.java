@@ -17,6 +17,8 @@
 package com.android.systemui.pip.phone;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
@@ -199,7 +201,8 @@ public class PipManager implements BasePipManager {
     public final void onBusEvent(ExpandPipEvent event) {
         if (event.clearThumbnailWindows) {
             try {
-                StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+                StackInfo stackInfo = mActivityManager.getStackInfo(
+                        WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                 if (stackInfo != null && stackInfo.taskIds != null) {
                     SystemServicesProxy ssp = SystemServicesProxy.getInstance(mContext);
                     for (int taskId : stackInfo.taskIds) {

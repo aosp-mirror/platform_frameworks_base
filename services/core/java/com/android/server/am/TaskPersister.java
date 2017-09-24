@@ -54,9 +54,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 
 public class TaskPersister {

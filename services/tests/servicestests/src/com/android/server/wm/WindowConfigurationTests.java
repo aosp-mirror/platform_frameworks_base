@@ -26,10 +26,10 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayInfo;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
@@ -155,7 +155,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
         shiftedBounds.offset(10, 10);
         final Rect expectedBounds = new Rect(mParentBounds);
         expectedBounds.intersect(shiftedBounds);
-        testStackBoundsConfiguration(null /*stackId*/, mParentBounds, shiftedBounds,
+        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, shiftedBounds,
                 expectedBounds);
     }
 
@@ -163,7 +163,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
     @Test
     public void testAppBounds_EmptyBounds() throws Exception {
         final Rect emptyBounds = new Rect();
-        testStackBoundsConfiguration(null /*stackId*/, mParentBounds, emptyBounds,
+        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, emptyBounds,
                 null /*ExpectedBounds*/);
     }
 
@@ -172,7 +172,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
     public void testAppBounds_FreeFormBounds() throws Exception {
         final Rect freeFormBounds = new Rect(mParentBounds);
         freeFormBounds.offset(10, 10);
-        testStackBoundsConfiguration(FREEFORM_WORKSPACE_STACK_ID, mParentBounds, freeFormBounds,
+        testStackBoundsConfiguration(WINDOWING_MODE_FREEFORM, mParentBounds, freeFormBounds,
                 freeFormBounds);
     }
 
@@ -181,7 +181,8 @@ public class WindowConfigurationTests extends WindowTestsBase {
     public void testAppBounds_ContainedBounds() throws Exception {
         final Rect insetBounds = new Rect(mParentBounds);
         insetBounds.inset(5, 5, 5, 5);
-        testStackBoundsConfiguration(null /*stackId*/, mParentBounds, insetBounds, insetBounds);
+        testStackBoundsConfiguration(
+                WINDOWING_MODE_FULLSCREEN, mParentBounds, insetBounds, insetBounds);
     }
 
     /** Ensures that full screen free form bounds are clipped */
@@ -189,15 +190,14 @@ public class WindowConfigurationTests extends WindowTestsBase {
     public void testAppBounds_FullScreenFreeFormBounds() throws Exception {
         final Rect fullScreenBounds = new Rect(0, 0, mDisplayInfo.logicalWidth,
                 mDisplayInfo.logicalHeight);
-        testStackBoundsConfiguration(null /*stackId*/, mParentBounds, fullScreenBounds,
+        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, fullScreenBounds,
                 mParentBounds);
     }
 
-    private void testStackBoundsConfiguration(Integer stackId, Rect parentBounds, Rect bounds,
+    private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
             Rect expectedConfigBounds) {
-        final StackWindowController stackController = stackId != null ?
-                createStackControllerOnStackOnDisplay(stackId, mDisplayContent)
-                : createStackControllerOnDisplay(mDisplayContent);
+        final StackWindowController stackController = createStackControllerOnStackOnDisplay(
+                        windowingMode, ACTIVITY_TYPE_STANDARD, mDisplayContent);
 
         final Configuration parentConfig = mDisplayContent.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);

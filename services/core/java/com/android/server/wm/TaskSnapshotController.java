@@ -254,7 +254,7 @@ class TaskSnapshotController {
     @VisibleForTesting
     int getSnapshotMode(Task task) {
         final AppWindowToken topChild = task.getTopChild();
-        if (StackId.isHomeOrRecentsStack(task.mStack.mStackId)) {
+        if (!task.isActivityTypeStandardOrUndefined()) {
             return SNAPSHOT_MODE_NONE;
         } else if (topChild != null && topChild.shouldUseAppThemeSnapshot()) {
             return SNAPSHOT_MODE_APP_THEME;

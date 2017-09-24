@@ -18,6 +18,8 @@ package com.android.systemui.pip.phone;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN;
@@ -121,7 +123,8 @@ public class PipMotionHelper implements Handler.Callback {
     void synchronizePinnedStackBounds() {
         cancelAnimations();
         try {
-            StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+            StackInfo stackInfo =
+                    mActivityManager.getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {
                 mBounds.set(stackInfo.bounds);
             }
@@ -529,7 +532,8 @@ public class PipMotionHelper implements Handler.Callback {
                 Rect toBounds = (Rect) args.arg1;
                 int duration = args.argi1;
                 try {
-                    StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+                    StackInfo stackInfo = mActivityManager.getStackInfo(
+                            WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                     if (stackInfo == null) {
                         // In the case where we've already re-expanded or dismissed the PiP, then
                         // just skip the resize

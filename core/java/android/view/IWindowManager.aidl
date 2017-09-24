@@ -358,10 +358,10 @@ interface IWindowManager
      * Updates the dim layer used while resizing.
      *
      * @param visible Whether the dim layer should be visible.
-     * @param targetStackId The id of the task stack the dim layer should be placed on.
+     * @param targetWindowingMode The windowing mode of the stack the dim layer should be placed on.
      * @param alpha The translucency of the dim layer, between 0 and 1.
      */
-    void setResizeDimLayer(boolean visible, int targetStackId, float alpha);
+    void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha);
 
     /**
      * Requests Keyboard Shortcuts from the displayed window.

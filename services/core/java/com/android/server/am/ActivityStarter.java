@@ -27,10 +27,7 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.isDynamicStack;
@@ -38,6 +35,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -2122,36 +2121,39 @@ class ActivityStarter {
     }
 
     /** Check if provided activity record can launch in currently focused stack. */
+    // TODO: This method can probably be consolidated into getLaunchStack() below.
     private boolean canLaunchIntoFocusedStack(ActivityRecord r, boolean newTask) {
         final ActivityStack focusedStack = mSupervisor.mFocusedStack;
-        final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
         final boolean canUseFocusedStack;
-        switch (focusedStackId) {
-            case FULLSCREEN_WORKSPACE_STACK_ID:
-                // The fullscreen stack can contain any task regardless of if the task is resizeable
-                // or not. So, we let the task go in the fullscreen task if it is the focus stack.
-                canUseFocusedStack = true;
-                break;
-            case ASSISTANT_STACK_ID:
-                canUseFocusedStack = r.isActivityTypeAssistant();
-                break;
-            case DOCKED_STACK_ID:
-                // Any activity which supports split screen can go in the docked stack.
-                canUseFocusedStack = r.supportsSplitScreenWindowingMode();
-                break;
-            case FREEFORM_WORKSPACE_STACK_ID:
-                // Any activity which supports freeform can go in the freeform stack.
-                canUseFocusedStack = r.supportsFreeform();
-                break;
-            default:
-                // Dynamic stacks behave similarly to the fullscreen stack and can contain any
-                // resizeable task.
-                canUseFocusedStack = isDynamicStack(focusedStackId)
-                        && r.canBeLaunchedOnDisplay(focusedStack.mDisplayId);
+        final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
+        if (focusedStack.isActivityTypeAssistant()) {
+            canUseFocusedStack = r.isActivityTypeAssistant();
+        } else {
+            switch (focusedStack.getWindowingMode()) {
+                case WINDOWING_MODE_FULLSCREEN:
+                    // The fullscreen stack can contain any task regardless of if the task is
+                    // resizeable or not. So, we let the task go in the fullscreen task if it is the
+                    // focus stack.
+                    canUseFocusedStack = true;
+                    break;
+                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
+                    // Any activity which supports split screen can go in the docked stack.
+                    canUseFocusedStack = r.supportsSplitScreenWindowingMode();
+                    break;
+                case WINDOWING_MODE_FREEFORM:
+                    // Any activity which supports freeform can go in the freeform stack.
+                    canUseFocusedStack = r.supportsFreeform();
+                    break;
+                default:
+                    // Dynamic stacks behave similarly to the fullscreen stack and can contain any
+                    // resizeable task.
+                    canUseFocusedStack = isDynamicStack(focusedStackId)
+                            && r.canBeLaunchedOnDisplay(focusedStack.mDisplayId);
+            }
         }
-
         return canUseFocusedStack && !newTask
-                // Using the focus stack isn't important enough to override the prefered display.
+                // Using the focus stack isn't important enough to override the preferred display.
                 && (mPreferredDisplayId == focusedStack.mDisplayId);
     }
 

@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.getStackIdForActivityType;
 import static android.app.ActivityManager.StackId.getStackIdForWindowingMode;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -174,10 +173,26 @@ class ActivityDisplay extends ConfigurationContainer {
         return createStack(windowingMode, activityType, onTop);
     }
 
-    /** Creates a stack matching the input windowing mode and activity type on this display. */
+    /**
+     * Creates a stack matching the input windowing mode and activity type on this display.
+     * @param windowingMode The windowing mode the stack should be created in. If
+     *                      {@link WindowConfiguration#WINDOWING_MODE_UNDEFINED} then the stack will
+     *                      be created in {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+     * @param activityType The activityType the stack should be created in. If
+     *                     {@link WindowConfiguration#ACTIVITY_TYPE_UNDEFINED} then the stack will
+     *                     be created in {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
+     * @param onTop If true the stack will be created at the top of the display, else at the bottom.
+     * @return The newly created stack.
+     */
     <T extends ActivityStack> T createStack(int windowingMode, int activityType, boolean onTop) {
 
-        if (activityType != ACTIVITY_TYPE_STANDARD && activityType != ACTIVITY_TYPE_UNDEFINED) {
+        if (activityType == ACTIVITY_TYPE_UNDEFINED) {
+            // Can't have an undefined stack type yet...so re-map to standard. Anyone that wants
+            // anything else should be passing it in anyways...
+            activityType = ACTIVITY_TYPE_STANDARD;
+        }
+
+        if (activityType != ACTIVITY_TYPE_STANDARD) {
             // For now there can be only one stack of a particular non-standard activity type on a
             // display. So, get that ignoring whatever windowing mode it is currently in.
             T stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
@@ -214,12 +229,10 @@ class ActivityDisplay extends ConfigurationContainer {
         }
 
         int stackId = INVALID_STACK_ID;
-        if (mDisplayId == DEFAULT_DISPLAY) {
+        if (mDisplayId == DEFAULT_DISPLAY && (activityType == ACTIVITY_TYPE_STANDARD
+                || activityType == ACTIVITY_TYPE_UNDEFINED)) {
             // TODO: Will be removed once we are no longer using static stack ids.
-            stackId = getStackIdForActivityType(activityType);
-            if (stackId == INVALID_STACK_ID) {
-                stackId = getStackIdForWindowingMode(windowingMode);
-            }
+            stackId = getStackIdForWindowingMode(windowingMode);
             if (stackId == INVALID_STACK_ID) {
                 // Whatever...put in fullscreen stack for now.
                 stackId = FULLSCREEN_WORKSPACE_STACK_ID;
@@ -259,12 +272,42 @@ class ActivityDisplay extends ConfigurationContainer {
         }
     }
 
-    /** Removes all stacks in the input windowing mode from the system */
-    void removeStacksInWindowingMode(int windowingMode) {
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mStacks.get(i);
-            if (stack.getWindowingMode() == windowingMode) {
+    /**
+     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
+     */
+    void removeStacksInWindowingModes(int... windowingModes) {
+        if (windowingModes == null || windowingModes.length == 0) {
+            return;
+        }
+
+        for (int j = windowingModes.length - 1 ; j >= 0; --j) {
+            final int windowingMode = windowingModes[j];
+            for (int i = mStacks.size() - 1; i >= 0; --i) {
+                final ActivityStack stack = mStacks.get(i);
+                if (!stack.isActivityTypeStandardOrUndefined()) {
+                    continue;
+                }
+                if (stack.getWindowingMode() != windowingMode) {
+                    continue;
+                }
                 mSupervisor.removeStackLocked(stack.mStackId);
+            }
+        }
+    }
+
+    void removeStacksWithActivityTypes(int... activityTypes) {
+        if (activityTypes == null || activityTypes.length == 0) {
+            return;
+        }
+
+        for (int j = activityTypes.length - 1 ; j >= 0; --j) {
+            final int activityType = activityTypes[j];
+            for (int i = mStacks.size() - 1; i >= 0; --i) {
+                final ActivityStack stack = mStacks.get(i);
+                if (stack.getActivityType() == activityType) {
+                    mSupervisor.removeStackLocked(stack.mStackId);
+                }
             }
         }
     }

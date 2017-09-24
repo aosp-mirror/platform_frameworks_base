@@ -17,8 +17,8 @@
 package com.android.systemui.recents;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.isHomeOrRecentsStack;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.View.MeasureSpec;
 
 import android.app.ActivityManager;
@@ -533,7 +533,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         if (runningTask == null) return;
 
         // Find the task in the recents list
-        boolean isRunningTaskInHomeStack = SystemServicesProxy.isHomeStack(runningTask.stackId);
+        boolean isRunningTaskInHomeStack =
+                runningTask.configuration.windowConfiguration.getActivityType()
+                        == ACTIVITY_TYPE_HOME;
         ArrayList<Task> tasks = focusedStack.getStackTasks();
         Task toTask = null;
         ActivityOptions launchOpts = null;
@@ -583,9 +585,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         // Return early if there is no running task (can't determine affiliated tasks in this case)
         ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+        final int activityType = runningTask.configuration.windowConfiguration.getActivityType();
         if (runningTask == null) return;
         // Return early if the running task is in the home/recents stack (optimization)
-        if (isHomeOrRecentsStack(runningTask.stackId)) return;
+        if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) return;
 
         // Find the task in the recents list
         ArrayList<Task> tasks = focusedStack.getStackTasks();
