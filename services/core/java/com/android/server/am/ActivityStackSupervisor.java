@@ -3042,7 +3042,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName,
+        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName, r.userId,
                 r.getTask().taskId);
     }
 

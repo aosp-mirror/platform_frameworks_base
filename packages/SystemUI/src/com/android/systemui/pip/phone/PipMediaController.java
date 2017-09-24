@@ -230,7 +230,7 @@ public class PipMediaController {
     private void resolveActiveMediaController(List<MediaController> controllers) {
         if (controllers != null) {
             final ComponentName topActivity = PipUtils.getTopPinnedActivity(mContext,
-                    mActivityManager);
+                    mActivityManager).first;
             if (topActivity != null) {
                 for (int i = 0; i < controllers.size(); i++) {
                     final MediaController controller = controllers.get(i);
