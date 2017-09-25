@@ -25,6 +25,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
@@ -101,7 +102,17 @@ public class PackageDexOptimizer {
     }
 
     static boolean canOptimizePackage(PackageParser.Package pkg) {
-        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        // We do not dexopt a package with no code.
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+            return false;
+        }
+
+        // We do not dexopt a priv-app package when pm.dexopt.priv-apps is false.
+        if (pkg.isPrivilegedApp()) {
+            return SystemProperties.getBoolean("pm.dexopt.priv-apps", true);
+        }
+
+        return true;
     }
 
     /**
