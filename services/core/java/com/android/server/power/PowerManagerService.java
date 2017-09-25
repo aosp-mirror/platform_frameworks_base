@@ -206,6 +206,8 @@ public final class PowerManagerService extends SystemService
     private static final String REASON_REBOOT = "reboot";
     private static final String REASON_USERREQUESTED = "shutdown,userrequested";
     private static final String REASON_THERMAL_SHUTDOWN = "shutdown,thermal";
+    private static final String REASON_LOW_BATTERY = "shutdown,battery";
+    private static final String REASON_BATTERY_THERMAL_STATE = "shutdown,thermal,battery";
 
     private static final String TRACE_SCREEN_ON = "Screen turning on";
 
@@ -4651,6 +4653,10 @@ public final class PowerManagerService extends SystemService
                 return PowerManager.SHUTDOWN_REASON_USER_REQUESTED;
             case REASON_THERMAL_SHUTDOWN:
                 return PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN;
+            case REASON_LOW_BATTERY:
+                return PowerManager.SHUTDOWN_REASON_LOW_BATTERY;
+            case REASON_BATTERY_THERMAL_STATE:
+                return PowerManager.SHUTDOWN_REASON_BATTERY_THERMAL;
             default:
                 return PowerManager.SHUTDOWN_REASON_UNKNOWN;
         }
