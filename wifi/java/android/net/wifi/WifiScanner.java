@@ -1105,8 +1105,6 @@ public class WifiScanner {
     private static final int BASE = Protocol.BASE_WIFI_SCANNER;
 
     /** @hide */
-    public static final int CMD_SCAN                        = BASE + 0;
-    /** @hide */
     public static final int CMD_START_BACKGROUND_SCAN       = BASE + 2;
     /** @hide */
     public static final int CMD_STOP_BACKGROUND_SCAN        = BASE + 3;
@@ -1115,19 +1113,9 @@ public class WifiScanner {
     /** @hide */
     public static final int CMD_SCAN_RESULT                 = BASE + 5;
     /** @hide */
-    public static final int CMD_AP_FOUND                    = BASE + 9;
-    /** @hide */
-    public static final int CMD_AP_LOST                     = BASE + 10;
-    /** @hide */
-    public static final int CMD_WIFI_CHANGE_DETECTED        = BASE + 15;
-    /** @hide */
-    public static final int CMD_WIFI_CHANGES_STABILIZED     = BASE + 16;
-    /** @hide */
     public static final int CMD_OP_SUCCEEDED                = BASE + 17;
     /** @hide */
     public static final int CMD_OP_FAILED                   = BASE + 18;
-    /** @hide */
-    public static final int CMD_PERIOD_CHANGED              = BASE + 19;
     /** @hide */
     public static final int CMD_FULL_SCAN_RESULT            = BASE + 20;
     /** @hide */
@@ -1358,25 +1346,6 @@ public class WifiScanner {
                 case CMD_FULL_SCAN_RESULT :
                     ScanResult result = (ScanResult) msg.obj;
                     ((ScanListener) listener).onFullResult(result);
-                    return;
-                case CMD_PERIOD_CHANGED:
-                    ((ScanListener) listener).onPeriodChanged(msg.arg1);
-                    return;
-                case CMD_AP_FOUND:
-                    ((BssidListener) listener).onFound(
-                            ((ParcelableScanResults) msg.obj).getResults());
-                    return;
-                case CMD_AP_LOST:
-                    ((BssidListener) listener).onLost(
-                            ((ParcelableScanResults) msg.obj).getResults());
-                    return;
-                case CMD_WIFI_CHANGE_DETECTED:
-                    ((WifiChangeListener) listener).onChanging(
-                            ((ParcelableScanResults) msg.obj).getResults());
-                   return;
-                case CMD_WIFI_CHANGES_STABILIZED:
-                    ((WifiChangeListener) listener).onQuiescence(
-                            ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_SINGLE_SCAN_COMPLETED:
                     if (DBG) Log.d(TAG, "removing listener for single scan");
