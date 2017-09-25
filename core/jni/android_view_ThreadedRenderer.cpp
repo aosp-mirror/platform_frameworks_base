@@ -937,6 +937,11 @@ static void android_view_ThreadedRenderer_setHighContrastText(JNIEnv*, jclass, j
     Properties::enableHighContrastText = enable;
 }
 
+static void android_view_ThreadedRenderer_hackySetRTAnimationsEnabled(JNIEnv*, jclass,
+        jboolean enable) {
+    Properties::enableRTAnimations = enable;
+}
+
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
 // ----------------------------------------------------------------------------
@@ -1041,6 +1046,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode },
     { "disableVsync", "()V", (void*)android_view_ThreadedRenderer_disableVsync },
     { "nSetHighContrastText", "(Z)V", (void*)android_view_ThreadedRenderer_setHighContrastText },
+    { "nHackySetRTAnimationsEnabled", "(Z)V",
+            (void*)android_view_ThreadedRenderer_hackySetRTAnimationsEnabled },
 };
 
 static JavaVM* mJvm = nullptr;

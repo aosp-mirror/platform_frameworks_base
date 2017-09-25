@@ -190,6 +190,17 @@ public final class ThreadedRenderer {
     public static final String DEBUG_SHOW_NON_RECTANGULAR_CLIP_PROPERTY =
             "debug.hwui.show_non_rect_clip";
 
+    /**
+     * Sets the FPS devisor to lower the FPS.
+     *
+     * Sets a positive integer as a divisor. 1 (the default value) menas the full FPS, and 2
+     * means half the full FPS.
+     *
+     *
+     * @hide
+     */
+    public static final String DEBUG_FPS_DIVISOR = "debug.hwui.fps_divisor";
+
     static {
         // Try to check OpenGL support early if possible.
         isAvailable();
@@ -955,6 +966,9 @@ public final class ThreadedRenderer {
             if (mInitialized) return;
             mInitialized = true;
             mAppContext = context.getApplicationContext();
+
+            // b/68769804: For low FPS experiments.
+            setFPSDivisor(SystemProperties.getInt(DEBUG_FPS_DIVISOR, 1));
             initSched(renderProxy);
             initGraphicsStats();
         }
@@ -1005,6 +1019,13 @@ public final class ThreadedRenderer {
     void removeFrameMetricsObserver(FrameMetricsObserver observer) {
         nRemoveFrameMetricsObserver(mNativeProxy, observer.mNative.get());
         observer.mNative = null;
+    }
+
+    /** b/68769804: For low FPS experiments. */
+    public static void setFPSDivisor(int divisor) {
+        if (divisor <= 0) divisor = 1;
+        Choreographer.getInstance().setFPSDivisor(divisor);
+        nHackySetRTAnimationsEnabled(divisor == 1);
     }
 
     /** Not actually public - internal use only. This doc to make lint happy */
@@ -1075,4 +1096,6 @@ public final class ThreadedRenderer {
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
     private static native void nSetHighContrastText(boolean enabled);
+    // For temporary experimentation b/66945974
+    private static native void nHackySetRTAnimationsEnabled(boolean enabled);
 }
