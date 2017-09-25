@@ -1127,6 +1127,11 @@
     <!-- Is the lock-screen disabled for new users by default -->
     <bool name="config_disableLockscreenByDefault">false</bool>
 
+    <!-- If true, enables verification of the lockscreen credential in the factory reset protection
+        flow. This should be true if gatekeeper / weaver credentials can still be checked after a
+        factory reset. -->
+    <bool name="config_enableCredentialFactoryResetProtection">true</bool>
+
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
             1 - Launch all apps intent
