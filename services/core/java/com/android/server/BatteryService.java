@@ -20,6 +20,7 @@ import android.app.ActivityManagerInternal;
 import android.database.ContentObserver;
 import android.os.BatteryStats;
 
+import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
@@ -291,6 +292,8 @@ public final class BatteryService extends SystemService {
                     if (mActivityManagerInternal.isSystemReady()) {
                         Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
                         intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+                        intent.putExtra(Intent.EXTRA_REASON,
+                                PowerManager.SHUTDOWN_LOW_BATTERY);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     }
@@ -310,6 +313,8 @@ public final class BatteryService extends SystemService {
                     if (mActivityManagerInternal.isSystemReady()) {
                         Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
                         intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+                        intent.putExtra(Intent.EXTRA_REASON,
+                                PowerManager.SHUTDOWN_BATTERY_THERMAL_STATE);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     }
