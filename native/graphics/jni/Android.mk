@@ -20,14 +20,11 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
-    libskia \
     libui \
     libandroidfw
 
 LOCAL_C_INCLUDES += \
-    frameworks/base/native/include \
-    frameworks/base/core/jni/android/graphics \
-    frameworks/base/libs/hwui
+    frameworks/base/core/jni/android/graphics
 
 LOCAL_MODULE:= libjnigraphics
 

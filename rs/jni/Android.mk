@@ -12,7 +12,7 @@ LOCAL_SHARED_LIBRARIES := \
     libRS \
     libcutils \
     liblog \
-    libskia \
+    libhwui \
     libutils \
     libui \
     libgui \
@@ -23,9 +23,7 @@ LOCAL_HEADER_LIBRARIES := \
 
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
-    frameworks/rs \
-    frameworks/base/core/jni \
-    frameworks/base/libs/hwui
+    frameworks/rs
 
 LOCAL_CFLAGS += -Wno-unused-parameter
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code

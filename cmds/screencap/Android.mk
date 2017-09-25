@@ -8,7 +8,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     libbinder \
-    libskia \
+    libhwui \
     libui \
     libgui
 

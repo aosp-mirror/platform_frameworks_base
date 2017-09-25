@@ -78,7 +78,6 @@ LOCAL_SHARED_LIBRARIES += \
     libschedulerservicehidl \
     libsensorservice \
     libsensorservicehidl \
-    libskia \
     libgui \
     libusbhost \
     libsuspend \

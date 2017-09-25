@@ -2,7 +2,7 @@ cc_defaults {
     name: "hwui_defaults",
     defaults: [
         "hwui_static_deps",
-
+        "skia_deps"
         //"hwui_bugreport_font_cache_usage",
         //"hwui_compile_for_perf",
     ],
@@ -55,7 +55,6 @@ cc_defaults {
         "libEGL",
         "libGLESv2",
         "libvulkan",
-        "libskia",
         "libui",
         "libgui",
         "libprotobuf-cpp-lite",
@@ -114,6 +113,9 @@ cc_defaults {
 cc_defaults {
     name: "libhwui_defaults",
     defaults: ["hwui_defaults"],
+
+    whole_static_libs: ["libskia"],
+
     srcs: [
         "hwui/Bitmap.cpp",
         "font/CacheTexture.cpp",
