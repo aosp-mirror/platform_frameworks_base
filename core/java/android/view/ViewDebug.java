@@ -1375,6 +1375,79 @@ public class ViewDebug {
         }
     }
 
+    /**
+     * Converts an integer from a field that is mapped with {@link IntToString} to its string
+     * representation.
+     *
+     * @param clazz The class the field is defined on.
+     * @param field The field on which the {@link ExportedProperty} is defined on.
+     * @param integer The value to convert.
+     * @return The value converted into its string representation.
+     * @hide
+     */
+    public static String intToString(Class<?> clazz, String field, int integer) {
+        final IntToString[] mapping = getMapping(clazz, field);
+        if (mapping == null) {
+            return Integer.toString(integer);
+        }
+        final int count = mapping.length;
+        for (int j = 0; j < count; j++) {
+            final IntToString map = mapping[j];
+            if (map.from() == integer) {
+                return map.to();
+            }
+        }
+        return Integer.toString(integer);
+    }
+
+    /**
+     * Converts a set of flags from a field that is mapped with {@link FlagToString} to its string
+     * representation.
+     *
+     * @param clazz The class the field is defined on.
+     * @param field The field on which the {@link ExportedProperty} is defined on.
+     * @param flags The flags to convert.
+     * @return The flags converted into their string representations.
+     * @hide
+     */
+    public static String flagsToString(Class<?> clazz, String field, int flags) {
+        final FlagToString[] mapping = getFlagMapping(clazz, field);
+        if (mapping == null) {
+            return Integer.toHexString(flags);
+        }
+        final StringBuilder result = new StringBuilder();
+        final int count = mapping.length;
+        for (int j = 0; j < count; j++) {
+            final FlagToString flagMapping = mapping[j];
+            final boolean ifTrue = flagMapping.outputIf();
+            final int maskResult = flags & flagMapping.mask();
+            final boolean test = maskResult == flagMapping.equals();
+            if (test && ifTrue) {
+                final String name = flagMapping.name();
+                result.append(name).append(' ');
+            }
+        }
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
+
+    private static FlagToString[] getFlagMapping(Class<?> clazz, String field) {
+        try {
+            return clazz.getDeclaredField(field).getAnnotation(ExportedProperty.class)
+                    .flagMapping();
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
+
+    private static IntToString[] getMapping(Class<?> clazz, String field) {
+        try {
+            return clazz.getDeclaredField(field).getAnnotation(ExportedProperty.class).mapping();
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
+
     private static void exportUnrolledArray(Context context, BufferedWriter out,
             ExportedProperty property, int[] array, String prefix, String suffix)
             throws IOException {
