@@ -582,6 +582,7 @@ public final class SmartSelectionEventTracker {
                 case ActionType.SMART_SHARE:  // fall through
                 case ActionType.DRAG:  // fall through
                 case ActionType.ABANDON:  // fall through
+                case ActionType.OTHER:  // fall through
                     return true;
                 default:
                     return false;
