@@ -1580,8 +1580,8 @@ public class ChooserActivity extends ResolverActivity {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
                     mChooserActivity.unbindService(this);
-                    destroy();
                     mChooserActivity.mServiceConnections.remove(this);
+                    destroy();
                 }
             }
         }
@@ -1597,7 +1597,6 @@ public class ChooserActivity extends ResolverActivity {
                 }
 
                 mChooserActivity.unbindService(this);
-                destroy();
                 mChooserActivity.mServiceConnections.remove(this);
                 if (mChooserActivity.mServiceConnections.isEmpty()) {
                     mChooserActivity.mChooserHandler.removeMessages(
@@ -1605,6 +1604,7 @@ public class ChooserActivity extends ResolverActivity {
                     mChooserActivity.sendVoiceChoicesIfNeeded();
                 }
                 mConnectedComponent = null;
+                destroy();
             }
         }
 
