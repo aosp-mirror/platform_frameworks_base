@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLP
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
@@ -34,8 +35,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -43,7 +47,6 @@ import android.view.InputChannel;
 import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-
 import android.view.WindowManagerPolicy;
 
 import com.android.server.input.InputApplicationHandle;
@@ -106,8 +109,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
         EventReceiverInputConsumer(WindowManagerService service, InputMonitor monitor,
                                    Looper looper, String name,
-                                   InputEventReceiver.Factory inputEventReceiverFactory) {
-            super(service, name, null);
+                                   InputEventReceiver.Factory inputEventReceiverFactory,
+                                   int clientPid, UserHandle clientUser) {
+            super(service, null /* token */, name, null /* inputChannel */, clientPid, clientUser);
             mInputMonitor = monitor;
             mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
                     mClientChannel, looper);
@@ -129,6 +133,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     private void addInputConsumer(String name, InputConsumerImpl consumer) {
         mInputConsumers.put(name, consumer);
+        consumer.linkToDeathRecipient();
         updateInputWindowsLw(true /* force */);
     }
 
@@ -166,17 +171,20 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         final EventReceiverInputConsumer consumer = new EventReceiverInputConsumer(mService,
-                this, looper, name, inputEventReceiverFactory);
+                this, looper, name, inputEventReceiverFactory, Process.myPid(),
+                UserHandle.SYSTEM);
         addInputConsumer(name, consumer);
         return consumer;
     }
 
-    void createInputConsumer(String name, InputChannel inputChannel) {
+    void createInputConsumer(IBinder token, String name, InputChannel inputChannel, int clientPid,
+            UserHandle clientUser) {
         if (mInputConsumers.containsKey(name)) {
             throw new IllegalStateException("Existing input consumer found with name: " + name);
         }
 
-        final InputConsumerImpl consumer = new InputConsumerImpl(mService, name, inputChannel);
+        final InputConsumerImpl consumer = new InputConsumerImpl(mService, token, name,
+                inputChannel, clientPid, clientUser);
         switch (name) {
             case INPUT_CONSUMER_WALLPAPER:
                 consumer.mWindowHandle.hasWallpaper = true;
@@ -592,7 +600,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         if (!inputConsumerKeys.isEmpty()) {
             pw.println(prefix + "InputConsumers:");
             for (String key : inputConsumerKeys) {
-                pw.println(prefix + "  name=" + key);
+                mInputConsumers.get(key).dump(pw, key, prefix);
             }
         }
     }
