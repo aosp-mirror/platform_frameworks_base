@@ -9614,7 +9614,8 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public boolean isScreenOn(int state) {
-        return state == Display.STATE_ON || state == Display.STATE_VR;
+        return state == Display.STATE_ON || state == Display.STATE_VR
+            || state == Display.STATE_ON_SUSPEND;
     }
 
     public boolean isScreenOff(int state) {

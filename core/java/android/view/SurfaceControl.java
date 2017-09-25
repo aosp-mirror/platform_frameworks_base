@@ -295,6 +295,12 @@ public class SurfaceControl {
     public static final int POWER_MODE_DOZE_SUSPEND = 3;
 
     /**
+     * Display power mode on: used while putting the screen into a suspended
+     * full power mode.  Use only with {@link SurfaceControl#setDisplayPowerMode}.
+     */
+    public static final int POWER_MODE_ON_SUSPEND = 4;
+
+    /**
      * A value for windowType used to indicate that the window should be omitted from screenshots
      * and display mirroring. A temporary workaround until we express such things with
      * the hierarchy.

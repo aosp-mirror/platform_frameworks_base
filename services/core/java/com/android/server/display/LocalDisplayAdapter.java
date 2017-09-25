@@ -148,6 +148,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 return SurfaceControl.POWER_MODE_DOZE;
             case Display.STATE_DOZE_SUSPEND:
                 return SurfaceControl.POWER_MODE_DOZE_SUSPEND;
+            case Display.STATE_ON_SUSPEND:
+                return SurfaceControl.POWER_MODE_ON_SUSPEND;
             default:
                 return SurfaceControl.POWER_MODE_NORMAL;
         }
@@ -467,6 +469,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     || oldState == Display.STATE_DOZE_SUSPEND) {
                                 setDisplayState(Display.STATE_DOZE);
                                 currentState = Display.STATE_DOZE;
+                            } else if (state == Display.STATE_ON_SUSPEND
+                                    || oldState == Display.STATE_ON_SUSPEND) {
+                                setDisplayState(Display.STATE_ON);
+                                currentState = Display.STATE_ON;
                             } else {
                                 return; // old state and new state is off
                             }
