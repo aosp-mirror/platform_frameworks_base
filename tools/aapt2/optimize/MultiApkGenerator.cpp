@@ -324,7 +324,30 @@ bool MultiApkGenerator::UpdateManifest(const Artifact& artifact,
     }
   }
 
-  // TODO(safarmer): Check if we changed the supported screens and update the manifest.
+  if (artifact.screen_density_group) {
+    auto densities = config.screen_density_groups.find(artifact.screen_density_group.value());
+    CHECK(densities != config.screen_density_groups.end()) << "Missing density group";
+
+    xml::Element* screens_el = manifest_el->FindChild({}, "compatible-screens");
+    if (!screens_el) {
+      // create a new element.
+      std::unique_ptr<xml::Element> new_screens_el = util::make_unique<xml::Element>();
+      new_screens_el->name = "compatible-screens";
+      screens_el = new_screens_el.get();
+      manifest_el->InsertChild(0, std::move(new_screens_el));
+    } else {
+      // clear out the old element.
+      screens_el->GetChildElements().clear();
+    }
+
+    for (const auto& density : densities->second) {
+      std::unique_ptr<xml::Element> screen_el = util::make_unique<xml::Element>();
+      screen_el->name = "screen";
+      const char* density_str = density.toString().string();
+      screen_el->attributes.push_back(xml::Attribute{kSchemaAndroid, "screenDensity", density_str});
+      screens_el->AppendChild(std::move(screen_el));
+    }
+  }
 
   return true;
 }
