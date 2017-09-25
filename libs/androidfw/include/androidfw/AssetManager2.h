@@ -70,9 +70,8 @@ struct ResolvedBag {
 };
 
 // AssetManager2 is the main entry point for accessing assets and resources.
-// AssetManager2 provides caching of resources retrieved via the underlying
-// ApkAssets.
-class AssetManager2 : public ::AAssetManager {
+// AssetManager2 provides caching of resources retrieved via the underlying ApkAssets.
+class AssetManager2 {
  public:
   struct ResourceName {
     const char* package = nullptr;
