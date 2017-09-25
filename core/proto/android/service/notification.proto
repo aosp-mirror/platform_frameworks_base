@@ -21,6 +21,7 @@ package android.service.notification;
 option java_multiple_files = true;
 option java_outer_classname = "NotificationServiceProto";
 
+import "frameworks/base/core/proto/android/app/notificationmanager.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
 
 message NotificationServiceDumpProto {
@@ -98,7 +99,7 @@ message ZenModeProto {
     repeated string enabled_active_conditions = 2;
     int32 suppressed_effects = 3;
     repeated string suppressors = 4;
-    string policy = 5;
+    android.app.PolicyProto policy = 5;
 }
 
 enum ZenMode {
