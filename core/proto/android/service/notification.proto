@@ -21,6 +21,8 @@ package android.service.notification;
 option java_multiple_files = true;
 option java_outer_classname = "NotificationServiceProto";
 
+import "frameworks/base/core/proto/android/app/notification_channel.proto";
+import "frameworks/base/core/proto/android/app/notification_channel_group.proto";
 import "frameworks/base/core/proto/android/app/notificationmanager.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
 
@@ -38,6 +40,8 @@ message NotificationServiceDumpProto {
     ManagedServicesProto notification_assistants = 6;
 
     ManagedServicesProto condition_providers = 7;
+
+    RankingHelperProto ranking_config = 8;
 }
 
 message NotificationRecordProto {
@@ -84,6 +88,28 @@ message ManagedServicesProto {
 
     // Snoozed for current profiles.
     repeated android.content.ComponentNameProto snoozed = 5;
+}
+
+message RankingHelperProto {
+    repeated string notification_signal_extractors = 1;
+
+    message RecordProto {
+        string package = 1;
+        // Default value is UNKNOWN_UID = USER_NULL = -10000.
+        int32 uid = 2;
+        // Default is IMPORTANCE_UNSPECIFIED (-1000).
+        int32 importance = 3;
+        // Default is PRIORITY_DEFAULT (0).
+        int32 priority = 4;
+        // Default is VISIBILITY_NO_OVERRIDE (-1000).
+        int32 visibility = 5;
+        // Default is true.
+        bool show_badge = 6;
+        repeated android.app.NotificationChannelProto channels = 7;
+        repeated android.app.NotificationChannelGroupProto channel_groups = 8;
+    }
+    repeated RecordProto records = 2;
+    repeated RecordProto records_restored_without_uid = 3;
 }
 
 enum State {

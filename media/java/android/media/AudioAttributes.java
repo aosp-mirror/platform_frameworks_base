@@ -19,12 +19,14 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.media.AudioAttributesProto;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -177,7 +179,7 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
-     *            if applicable.
+     *            if applicable, as well as audioattributes.proto.
      */
 
     /**
@@ -847,6 +849,21 @@ public final class AudioAttributes implements Parcelable {
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
                 + " tags=" + mFormattedTags
                 + " bundle=" + (mBundle == null ? "null" : mBundle.toString()));
+    }
+
+    /** @hide */
+    public void toProto(ProtoOutputStream proto) {
+        proto.write(AudioAttributesProto.USAGE, mUsage);
+        proto.write(AudioAttributesProto.CONTENT_TYPE, mContentType);
+        proto.write(AudioAttributesProto.FLAGS, mFlags);
+        // mFormattedTags is never null due to assignment in Builder or unmarshalling.
+        for (String t : mFormattedTags.split(";")) {
+            t = t.trim();
+            if (t != "") {
+                proto.write(AudioAttributesProto.TAGS, t);
+            }
+        }
+        // TODO: is the data in mBundle useful for debugging?
     }
 
     /** @hide */

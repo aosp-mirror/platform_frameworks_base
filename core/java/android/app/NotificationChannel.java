@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,12 +136,15 @@ public final class NotificationChannel implements Parcelable {
     private boolean mLights;
     private int mLightColor = DEFAULT_LIGHT_COLOR;
     private long[] mVibration;
+    // Bitwise representation of fields that have been changed by the user, preventing the app from
+    // making changes to these fields.
     private int mUserLockedFields;
     private boolean mVibrationEnabled;
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
     private String mGroup;
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+    // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
 
     /**
@@ -849,5 +853,36 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
                 + '}';
+    }
+
+    /** @hide */
+    public void toProto(ProtoOutputStream proto) {
+        proto.write(NotificationChannelProto.ID, mId);
+        proto.write(NotificationChannelProto.NAME, mName);
+        proto.write(NotificationChannelProto.DESCRIPTION, mDesc);
+        proto.write(NotificationChannelProto.IMPORTANCE, mImportance);
+        proto.write(NotificationChannelProto.CAN_BYPASS_DND, mBypassDnd);
+        proto.write(NotificationChannelProto.LOCKSCREEN_VISIBILITY, mLockscreenVisibility);
+        if (mSound != null) {
+            proto.write(NotificationChannelProto.SOUND, mSound.toString());
+        }
+        proto.write(NotificationChannelProto.USE_LIGHTS, mLights);
+        proto.write(NotificationChannelProto.LIGHT_COLOR, mLightColor);
+        if (mVibration != null) {
+            for (long v : mVibration) {
+                proto.write(NotificationChannelProto.VIBRATION, v);
+            }
+        }
+        proto.write(NotificationChannelProto.USER_LOCKED_FIELDS, mUserLockedFields);
+        proto.write(NotificationChannelProto.IS_VIBRATION_ENABLED, mVibrationEnabled);
+        proto.write(NotificationChannelProto.SHOW_BADGE, mShowBadge);
+        proto.write(NotificationChannelProto.IS_DELETED, mDeleted);
+        proto.write(NotificationChannelProto.GROUP, mGroup);
+        if (mAudioAttributes != null) {
+            long aToken = proto.start(NotificationChannelProto.AUDIO_ATTRIBUTES);
+            mAudioAttributes.toProto(proto);
+            proto.end(aToken);
+        }
+        proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
     }
 }

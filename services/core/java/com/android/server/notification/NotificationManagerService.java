@@ -3286,6 +3286,10 @@ public class NotificationManagerService extends SystemService {
             long conditionsToken = proto.start(NotificationServiceDumpProto.CONDITION_PROVIDERS);
             mConditionProviders.dump(proto, filter);
             proto.end(conditionsToken);
+
+            long rankingToken = proto.start(NotificationServiceDumpProto.RANKING_CONFIG);
+            mRankingHelper.dump(proto, filter);
+            proto.end(rankingToken);
         }
 
         proto.flush();
@@ -5828,10 +5832,9 @@ public class NotificationManagerService extends SystemService {
             final DumpFilter filter = new DumpFilter();
             for (int ai = 0; ai < args.length; ai++) {
                 final String a = args[ai];
-                if ("--proto".equals(args[0])) {
+                if ("--proto".equals(a)) {
                     filter.proto = true;
-                }
-                if ("--noredact".equals(a) || "--reveal".equals(a)) {
+                } else if ("--noredact".equals(a) || "--reveal".equals(a)) {
                     filter.redact = false;
                 } else if ("p".equals(a) || "pkg".equals(a) || "--package".equals(a)) {
                     if (ai < args.length-1) {
