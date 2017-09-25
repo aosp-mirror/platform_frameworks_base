@@ -106,8 +106,6 @@ public class TelephonyManager {
     public static final String MODEM_ACTIVITY_RESULT_KEY =
             BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY;
 
-    private static ITelephonyRegistry sRegistry;
-
     /**
      * The allowed states of Wi-Fi calling.
      *
@@ -178,11 +176,6 @@ public class TelephonyManager {
             mContext = context;
         }
         mSubscriptionManager = SubscriptionManager.from(mContext);
-
-        if (sRegistry == null) {
-            sRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
-                    "telephony.registry"));
-        }
     }
 
     /** @hide */
@@ -3453,6 +3446,10 @@ public class TelephonyManager {
         return ITelecomService.Stub.asInterface(ServiceManager.getService(Context.TELECOM_SERVICE));
     }
 
+    private ITelephonyRegistry getTelephonyRegistry() {
+        return ITelephonyRegistry.Stub.asInterface(ServiceManager.getService("telephony.registry"));
+    }
+
     //
     //
     // PhoneStateListener
@@ -3492,11 +3489,15 @@ public class TelephonyManager {
             if (listener.mSubId == null) {
                 listener.mSubId = mSubId;
             }
-            sRegistry.listenForSubscriber(listener.mSubId, getOpPackageName(),
-                    listener.callback, events, notifyNow);
+
+            ITelephonyRegistry registry = getTelephonyRegistry();
+            if (registry != null) {
+                registry.listenForSubscriber(listener.mSubId, getOpPackageName(),
+                        listener.callback, events, notifyNow);
+            } else {
+                Rlog.w(TAG, "telephony registry not ready.");
+            }
         } catch (RemoteException ex) {
-            // system process dead
-        } catch (NullPointerException ex) {
             // system process dead
         }
     }
