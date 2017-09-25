@@ -32,7 +32,7 @@ public:
      */
     DropboxWriter(const string& tag);
 
-    void addStatsLogReport(const StatsLogReport& log);
+    void addEventMetricData(const EventMetricData& eventMetricData);
 
     /* Request a flush to dropbox. */
     void flush();
@@ -61,7 +61,7 @@ private:
 
     /* Check if the buffer size exceeds the max buffer size when the new entry is added, and flush
        the logs to dropbox if true. */
-    void flushIfNecessary(const StatsLogReport& log);
+    void flushIfNecessary(const EventMetricData& eventMetricData);
 };
 
 }  // namespace statsd
