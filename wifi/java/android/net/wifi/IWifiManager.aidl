@@ -126,8 +126,6 @@ interface IWifiManager
 
     void releaseMulticastLock();
 
-    void setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
-
     void updateInterfaceIpState(String ifaceName, int mode);
 
     boolean startSoftAp(in WifiConfiguration wifiConfig);
