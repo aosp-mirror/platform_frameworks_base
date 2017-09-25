@@ -174,7 +174,7 @@ public class KeyguardManager {
      */
     public Intent createConfirmFactoryResetCredentialIntent(
             CharSequence title, CharSequence description, CharSequence alternateButtonLabel) {
-        if (!LockPatternUtils.frpCredentialEnabled()) {
+        if (!LockPatternUtils.frpCredentialEnabled(mContext)) {
             Log.w(TAG, "Factory reset credentials not supported.");
             return null;
         }
