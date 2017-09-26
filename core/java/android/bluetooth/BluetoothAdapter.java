@@ -1134,8 +1134,10 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Sets the {@link BluetoothClass} Bluetooth Class of Device (CoD) of
-     * the local Bluetooth adapter.
+     * Sets the {@link BluetoothClass} Bluetooth Class of Device (CoD) of the local Bluetooth
+     * adapter.
+     *
+     * <p>Note: This value persists across system reboot.
      *
      * @param bluetoothClass {@link BluetoothClass} to set the local Bluetooth adapter to.
      * @return true if successful, false if unsuccessful.
