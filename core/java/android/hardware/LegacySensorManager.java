@@ -204,7 +204,7 @@ final class LegacySensorManager {
     }
 
     private static final class LegacyListener implements SensorEventListener {
-        private float mValues[] = new float[6];
+        private float[] mValues = new float[6];
         private SensorListener mTarget;
         private int mSensors;
         private final LmsFilter mYawfilter = new LmsFilter();
@@ -256,7 +256,7 @@ final class LegacySensorManager {
         }
 
         public void onSensorChanged(SensorEvent event) {
-            final float v[] = mValues;
+            final float[] v = mValues;
             v[0] = event.values[0];
             v[1] = event.values[1];
             v[2] = event.values[2];
@@ -264,10 +264,10 @@ final class LegacySensorManager {
             int legacyType = getLegacySensorType(type);
             mapSensorDataToWindow(legacyType, v, LegacySensorManager.getRotation());
             if (type == Sensor.TYPE_ORIENTATION) {
-                if ((mSensors & SensorManager.SENSOR_ORIENTATION_RAW)!=0) {
+                if ((mSensors & SensorManager.SENSOR_ORIENTATION_RAW) != 0) {
                     mTarget.onSensorChanged(SensorManager.SENSOR_ORIENTATION_RAW, v);
                 }
-                if ((mSensors & SensorManager.SENSOR_ORIENTATION)!=0) {
+                if ((mSensors & SensorManager.SENSOR_ORIENTATION) != 0) {
                     v[0] = mYawfilter.filter(event.timestamp, v[0]);
                     mTarget.onSensorChanged(SensorManager.SENSOR_ORIENTATION, v);
                 }
@@ -317,7 +317,7 @@ final class LegacySensorManager {
                 switch (sensor) {
                     case SensorManager.SENSOR_ACCELEROMETER:
                     case SensorManager.SENSOR_MAGNETIC_FIELD:
-                        values[0] =-y;
+                        values[0] = -y;
                         values[1] = x;
                         values[2] = z;
                         break;
@@ -337,15 +337,15 @@ final class LegacySensorManager {
                 switch (sensor) {
                     case SensorManager.SENSOR_ACCELEROMETER:
                     case SensorManager.SENSOR_MAGNETIC_FIELD:
-                        values[0] =-x;
-                        values[1] =-y;
+                        values[0] = -x;
+                        values[1] = -y;
                         values[2] = z;
                         break;
                     case SensorManager.SENSOR_ORIENTATION:
                     case SensorManager.SENSOR_ORIENTATION_RAW:
                         values[0] = (x >= 180) ? (x - 180) : (x + 180);
-                        values[1] =-y;
-                        values[2] =-z;
+                        values[1] = -y;
+                        values[2] = -z;
                         break;
                 }
             }
@@ -369,10 +369,11 @@ final class LegacySensorManager {
     private static final class LmsFilter {
         private static final int SENSORS_RATE_MS = 20;
         private static final int COUNT = 12;
-        private static final float PREDICTION_RATIO = 1.0f/3.0f;
-        private static final float PREDICTION_TIME = (SENSORS_RATE_MS*COUNT/1000.0f)*PREDICTION_RATIO;
-        private float mV[] = new float[COUNT*2];
-        private long mT[] = new long[COUNT*2];
+        private static final float PREDICTION_RATIO = 1.0f / 3.0f;
+        private static final float PREDICTION_TIME =
+                (SENSORS_RATE_MS * COUNT / 1000.0f) * PREDICTION_RATIO;
+        private float[] mV = new float[COUNT * 2];
+        private long[] mT = new long[COUNT * 2];
         private int mIndex;
 
         public LmsFilter() {
@@ -383,9 +384,9 @@ final class LegacySensorManager {
             float v = in;
             final float ns = 1.0f / 1000000000.0f;
             float v1 = mV[mIndex];
-            if ((v-v1) > 180) {
+            if ((v - v1) > 180) {
                 v -= 360;
-            } else if ((v1-v) > 180) {
+            } else if ((v1 - v) > 180) {
                 v += 360;
             }
             /* Manage the circular buffer, we write the data twice spaced
@@ -393,40 +394,43 @@ final class LegacySensorManager {
              * when it's full
              */
             mIndex++;
-            if (mIndex >= COUNT*2)
+            if (mIndex >= COUNT * 2) {
                 mIndex = COUNT;
+            }
             mV[mIndex] = v;
             mT[mIndex] = time;
-            mV[mIndex-COUNT] = v;
-            mT[mIndex-COUNT] = time;
+            mV[mIndex - COUNT] = v;
+            mT[mIndex - COUNT] = time;
 
             float A, B, C, D, E;
             float a, b;
             int i;
 
             A = B = C = D = E = 0;
-            for (i=0 ; i<COUNT-1 ; i++) {
+            for (i = 0; i < COUNT - 1; i++) {
                 final int j = mIndex - 1 - i;
                 final float Z = mV[j];
-                final float T = (mT[j]/2 + mT[j+1]/2 - time)*ns;
-                float dT = (mT[j] - mT[j+1])*ns;
+                final float T = (mT[j] / 2 + mT[j + 1] / 2 - time) * ns;
+                float dT = (mT[j] - mT[j + 1]) * ns;
                 dT *= dT;
-                A += Z*dT;
-                B += T*(T*dT);
-                C +=   (T*dT);
-                D += Z*(T*dT);
+                A += Z * dT;
+                B += T * (T * dT);
+                C += (T * dT);
+                D += Z * (T * dT);
                 E += dT;
             }
-            b = (A*B + C*D) / (E*B + C*C);
-            a = (E*b - A) / C;
-            float f = b + PREDICTION_TIME*a;
+            b = (A * B + C * D) / (E * B + C * C);
+            a = (E * b - A) / C;
+            float f = b + PREDICTION_TIME * a;
 
             // Normalize
             f *= (1.0f / 360.0f);
-            if (((f>=0)?f:-f) >= 0.5f)
-                f = f - (float)Math.ceil(f + 0.5f) + 1.0f;
-            if (f < 0)
+            if (((f >= 0) ? f : -f) >= 0.5f) {
+                f = f - (float) Math.ceil(f + 0.5f) + 1.0f;
+            }
+            if (f < 0) {
                 f += 1.0f;
+            }
             f *= 360.0f;
             return f;
         }
