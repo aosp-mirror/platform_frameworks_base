@@ -38,6 +38,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.TokenBucket;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import java.io.PrintWriter;
@@ -82,9 +83,8 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     private final ArrayMap<String, WakeupStats> mWakeupStats = new ArrayMap<>();
     // Ring buffer array for storing packet wake up events sent by Netd.
     @GuardedBy("this")
-    private final WakeupEvent[] mWakeupEvents = new WakeupEvent[WAKEUP_EVENT_BUFFER_LENGTH];
-    @GuardedBy("this")
-    private long mWakeupEventCursor = 0;
+    private final RingBuffer<WakeupEvent> mWakeupEvents =
+            new RingBuffer(WakeupEvent.class, WAKEUP_EVENT_BUFFER_LENGTH);
 
     private final ConnectivityManager mCm;
 
@@ -175,36 +175,17 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     @GuardedBy("this")
     private void addWakeupEvent(String iface, long timestampMs, int uid) {
-        int index = wakeupEventIndex(mWakeupEventCursor);
-        mWakeupEventCursor++;
         WakeupEvent event = new WakeupEvent();
         event.iface = iface;
         event.timestampMs = timestampMs;
         event.uid = uid;
-        mWakeupEvents[index] = event;
+        mWakeupEvents.append(event);
         WakeupStats stats = mWakeupStats.get(iface);
         if (stats == null) {
             stats = new WakeupStats(iface);
             mWakeupStats.put(iface, stats);
         }
         stats.countEvent(event);
-    }
-
-    @GuardedBy("this")
-    private WakeupEvent[] getWakeupEvents() {
-        int length = (int) Math.min(mWakeupEventCursor, (long) mWakeupEvents.length);
-        WakeupEvent[] out = new WakeupEvent[length];
-        // Reverse iteration from youngest event to oldest event.
-        long inCursor = mWakeupEventCursor - 1;
-        int outIdx = out.length - 1;
-        while (outIdx >= 0) {
-            out[outIdx--] = mWakeupEvents[wakeupEventIndex(inCursor--)];
-        }
-        return out;
-    }
-
-    private static int wakeupEventIndex(long cursor) {
-        return (int) Math.abs(cursor % WAKEUP_EVENT_BUFFER_LENGTH);
     }
 
     public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
@@ -230,7 +211,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         for (int i = 0; i < mWakeupStats.size(); i++) {
             pw.println(mWakeupStats.valueAt(i));
         }
-        for (WakeupEvent wakeup : getWakeupEvents()) {
+        for (WakeupEvent wakeup : mWakeupEvents.toArray()) {
             pw.println(wakeup);
         }
     }
