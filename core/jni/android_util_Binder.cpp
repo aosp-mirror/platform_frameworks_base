@@ -488,8 +488,8 @@ protected:
 
 private:
     JavaVM* const mVM;
-    jobject mObject;
-    jweak mObjectWeak; // will be a weak ref to the same VM-side DeathRecipient after binderDied()
+    jobject mObject;  // Initial strong ref to Java-side DeathRecipient. Cleared on binderDied().
+    jweak mObjectWeak; // weak ref to the same Java-side DeathRecipient after binderDied().
     wp<DeathRecipientList> mList;
 };
 
@@ -561,7 +561,7 @@ static void proxy_cleanup(const void* id, void* obj, void* cleanupCookie)
     env->DeleteGlobalRef((jobject)obj);
 }
 
-static Mutex mProxyLock;
+static Mutex gProxyLock;
 
 jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 {
@@ -576,7 +576,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 
     // For the rest of the function we will hold this lock, to serialize
     // looking/creation/destruction of Java proxies for native Binder proxies.
-    AutoMutex _l(mProxyLock);
+    AutoMutex _l(gProxyLock);
 
     // Someone else's...  do we know about it?
     jobject object = (jobject)val->findObject(&gBinderProxyOffsets);
@@ -1252,7 +1252,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
 {
     // Don't race with construction/initialization
-    AutoMutex _l(mProxyLock);
+    AutoMutex _l(gProxyLock);
 
     IBinder* b = (IBinder*)
             env->GetLongField(obj, gBinderProxyOffsets.mObject);
