@@ -794,12 +794,12 @@ public final class Sensor {
             1, // SENSOR_TYPE_PICK_UP_GESTURE
             1, // SENSOR_TYPE_WRIST_TILT_GESTURE
             1, // SENSOR_TYPE_DEVICE_ORIENTATION
-            16,// SENSOR_TYPE_POSE_6DOF
+            16, // SENSOR_TYPE_POSE_6DOF
             1, // SENSOR_TYPE_STATIONARY_DETECT
             1, // SENSOR_TYPE_MOTION_DETECT
             1, // SENSOR_TYPE_HEART_BEAT
             2, // SENSOR_TYPE_DYNAMIC_SENSOR_META
-            16,// skip over additional sensor info type
+            16, // skip over additional sensor info type
             1, // SENSOR_TYPE_LOW_LATENCY_OFFBODY_DETECT
             6, // SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED
     };
@@ -857,8 +857,8 @@ public final class Sensor {
     static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
         // RotationVector length has changed to 3 to 5 for API level 18
         // Set it to 3 for backward compatibility.
-        if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR &&
-                sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR
+                && sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return 3;
         }
         int offset = sensor.mType;
@@ -1033,9 +1033,9 @@ public final class Sensor {
      * Returns true if the sensor is a wake-up sensor.
      * <p>
      * <b>Application Processor Power modes</b> <p>
-     * Application Processor(AP), is the processor on which applications run.  When no wake lock is held
-     * and the user is not interacting with the device, this processor can enter a “Suspend” mode,
-     * reducing the power consumption by 10 times or more.
+     * Application Processor(AP), is the processor on which applications run.  When no wake lock is
+     * held and the user is not interacting with the device, this processor can enter a “Suspend”
+     * mode, reducing the power consumption by 10 times or more.
      * </p>
      * <p>
      * <b>Non-wake-up sensors</b> <p>
@@ -1232,6 +1232,6 @@ public final class Sensor {
      */
     private void setUuid(long msb, long lsb) {
         // TODO(b/29547335): Rename this method to setId.
-        mId = (int)msb;
+        mId = (int) msb;
     }
 }
