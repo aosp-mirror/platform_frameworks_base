@@ -30,6 +30,8 @@
 
 namespace android {
 
+ApkAssets::ApkAssets() : zip_handle_(nullptr, ::CloseArchive) {}
+
 std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system) {
   return ApkAssets::LoadImpl(path, system, false /*load_as_shared_library*/);
 }

@@ -902,26 +902,32 @@ bool Theme::SetTo(const Theme& o) {
     return true;
   }
 
-  if (asset_manager_ != o.asset_manager_) {
-    return false;
-  }
-
   type_spec_flags_ = o.type_spec_flags_;
+
+  const bool copy_only_system = asset_manager_ != o.asset_manager_;
 
   for (size_t p = 0; p < packages_.size(); p++) {
     const Package* package = o.packages_[p].get();
-    if (package == nullptr) {
+    if (package == nullptr || (copy_only_system && p != 0x01)) {
+      // The other theme doesn't have this package, clear ours.
       packages_[p].reset();
       continue;
+    }
+
+    if (packages_[p] == nullptr) {
+      // The other theme has this package, but we don't. Make one.
+      packages_[p].reset(new Package());
     }
 
     for (size_t t = 0; t < package->types.size(); t++) {
       const Type* type = package->types[t].get();
       if (type == nullptr) {
+        // The other theme doesn't have this type, clear ours.
         packages_[p]->types[t].reset();
         continue;
       }
 
+      // Create a new type and update it to theirs.
       const size_t type_alloc_size = sizeof(Type) + (type->entry_capacity * sizeof(Entry));
       void* copied_data = malloc(type_alloc_size);
       memcpy(copied_data, type, type_alloc_size);
