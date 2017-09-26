@@ -42,13 +42,8 @@ void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source*
 
 void DeserializeSourceFromPb(const pb::Source& pb_source, const android::ResStringPool& src_pool,
                              Source* out_source) {
-  if (pb_source.has_path_idx()) {
-    out_source->path = util::GetString(src_pool, pb_source.path_idx());
-  }
-
-  if (pb_source.has_position()) {
-    out_source->line = static_cast<size_t>(pb_source.position().line_number());
-  }
+  out_source->path = util::GetString(src_pool, pb_source.path_idx());
+  out_source->line = static_cast<size_t>(pb_source.position().line_number());
 }
 
 pb::SymbolStatus_Visibility SerializeVisibilityToPb(SymbolState state) {
@@ -84,7 +79,8 @@ void SerializeConfig(const ConfigDescription& config, pb::ConfigDescription* out
 
 bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
                                         ConfigDescription* out_config) {
-  if (!pb_config.has_data()) {
+  // a ConfigDescription must be at least 4 bytes to store the size.
+  if (pb_config.data().size() < 4) {
     return false;
   }
 
