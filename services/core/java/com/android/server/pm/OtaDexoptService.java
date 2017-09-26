@@ -152,7 +152,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + PackageManagerServiceUtils.packagesToString(others));
             for (PackageParser.Package pkg : others) {
-                deleteOatArtifactsOfPackage(pkg);
+                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.packageName);
             }
         }
         long spaceAvailableNow = getAvailableSpace();
@@ -240,30 +240,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         long usableSpace = dataDir.getUsableSpace();
 
         return usableSpace - lowThreshold;
-    }
-
-    private static String getOatDir(PackageParser.Package pkg) {
-        if (!pkg.canHaveOatDir()) {
-            return null;
-        }
-        File codePath = new File(pkg.codePath);
-        if (codePath.isDirectory()) {
-            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
-        }
-        return null;
-    }
-
-    private void deleteOatArtifactsOfPackage(PackageParser.Package pkg) {
-        String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
-        for (String codePath : pkg.getAllCodePaths()) {
-            for (String isa : instructionSets) {
-                try {
-                    mPackageManagerService.mInstaller.deleteOdex(codePath, isa, getOatDir(pkg));
-                } catch (InstallerException e) {
-                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
-                }
-            }
-        }
     }
 
     /**
