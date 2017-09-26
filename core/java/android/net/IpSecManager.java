@@ -38,7 +38,9 @@ import java.net.Socket;
  * This class contains methods for managing IPsec sessions, which will perform kernel-space
  * encryption and decryption of socket or Network traffic.
  *
- * @hide
+ * <p>An IpSecManager may be obtained by calling {@link
+ * android.content.Context#getSystemService(String) Context#getSystemService(String)} with {@link
+ * android.content.Context#IPSEC_SERVICE Context#IPSEC_SERVICE}
  */
 @SystemService(Context.IPSEC_SERVICE)
 public final class IpSecManager {
