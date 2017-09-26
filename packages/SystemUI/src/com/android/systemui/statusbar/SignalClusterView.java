@@ -16,14 +16,15 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
+import static android.app.StatusBarManager.DISABLE_NONE;
+
 import android.annotation.DrawableRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
@@ -50,14 +51,14 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.Utils.DisableStateTracker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView extends LinearLayout implements NetworkControllerImpl.SignalCallback,
-        SecurityController.SecurityControllerCallback, Tunable,
-        DarkReceiver {
+        SecurityController.SecurityControllerCallback, Tunable, DarkReceiver {
 
     static final String TAG = "SignalClusterView";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -148,6 +149,8 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         mIconScaleFactor = typedValue.getFloat();
         mNetworkController = Dependency.get(NetworkController.class);
         mSecurityController = Dependency.get(SecurityController.class);
+        addOnAttachStateChangeListener(
+                new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS));
         updateActivityEnabled();
     }
 
