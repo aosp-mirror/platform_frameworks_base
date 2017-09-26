@@ -335,7 +335,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"épinglage d\'écran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> est désactivée en mode sécurisé."</string>
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> est désactivée en mode sans échec."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Effacer tout"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Glissez l\'élément ici pour utiliser l\'écran partagé"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Séparation horizontale"</string>
