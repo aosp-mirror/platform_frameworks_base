@@ -378,7 +378,7 @@ public abstract class ViewStructure {
      *
      * <p>Typically used when the view is a container for an HTML document.
      *
-     * @param domain URL representing the domain; only the host part will be used.
+     * @param domain RFC 2396-compliant URI representing the domain.
      */
     public abstract void setWebDomain(@Nullable String domain);
 
