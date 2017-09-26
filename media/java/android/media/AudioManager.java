@@ -4119,7 +4119,15 @@ public class AudioManager {
                         Log.w(TAG, "updateAudioPortCache: listAudioPatches failed");
                         return status;
                     }
-                } while (patchGeneration[0] != portGeneration[0]);
+                    // Loop until patch generation is the same as port generation unless audio ports
+                    // and audio patches are not null.
+                } while (patchGeneration[0] != portGeneration[0]
+                        && (ports == null || patches == null));
+                // If the patch generation doesn't equal port generation, return ERROR here in case
+                // of mismatch between audio ports and audio patches.
+                if (patchGeneration[0] != portGeneration[0]) {
+                    return ERROR;
+                }
 
                 for (int i = 0; i < newPatches.size(); i++) {
                     for (int j = 0; j < newPatches.get(i).sources().length; j++) {
