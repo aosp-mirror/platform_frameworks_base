@@ -64,6 +64,20 @@ class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {p
 
     void shutdown() override {
         if (mBootAction != nullptr) {
+            // If we have a bootaction we want to wait until we are actually
+            // told to shut down. If the animation exits early keep the action
+            // running.
+            char value[PROPERTY_VALUE_MAX] = {0};
+            for (int exitRequested = 0; exitRequested == 0; ) {
+                property_get("service.bootanim.exit", value, "0");
+                exitRequested = atoi(value);
+
+                // Poll value at 10hz.
+                if (exitRequested == 0) {
+                  usleep(100000);
+                }
+            }
+
             mBootAction->shutdown();
             // Give it two seconds to shut down.
             sleep(2);
