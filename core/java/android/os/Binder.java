@@ -21,7 +21,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 
@@ -200,7 +199,7 @@ public class Binder implements IBinder {
      * then its own pid is returned.
      */
     public static final native int getCallingPid();
-    
+
     /**
      * Return the Linux uid assigned to the process that sent you the
      * current transaction that is being processed.  This uid can be used with
@@ -333,7 +332,7 @@ public class Binder implements IBinder {
      * it needs to.
      */
     public static final native void flushPendingCommands();
-    
+
     /**
      * Add the calling thread to the IPC thread pool.  This function does
      * not return until the current process is exiting.
@@ -370,7 +369,7 @@ public class Binder implements IBinder {
             }
         }
     }
-    
+
     /**
      * Convenience method for associating a specific interface with the Binder.
      * After calling, queryLocalInterface() will be implemented for you
@@ -381,7 +380,7 @@ public class Binder implements IBinder {
         mOwner = owner;
         mDescriptor = descriptor;
     }
-    
+
     /**
      * Default implementation returns an empty interface name.
      */
@@ -406,7 +405,7 @@ public class Binder implements IBinder {
     public boolean isBinderAlive() {
         return true;
     }
-    
+
     /**
      * Use information supplied to attachInterface() to return the
      * associated IInterface if it matches the requested
@@ -607,7 +606,7 @@ public class Binder implements IBinder {
         }
         return r;
     }
-    
+
     /**
      * Local implementation is a no-op.
      */
@@ -620,7 +619,7 @@ public class Binder implements IBinder {
     public boolean unlinkToDeath(DeathRecipient recipient, int flags) {
         return true;
     }
-    
+
     protected void finalize() throws Throwable {
         try {
             destroyBinder();
@@ -714,7 +713,15 @@ public class Binder implements IBinder {
     }
 }
 
+/**
+ * Java proxy for a native IBinder object.
+ * Allocated and constructed by the native javaObjectforIBinder function. Never allocated
+ * directly from Java code.
+ */
 final class BinderProxy implements IBinder {
+    // See android_util_Binder.cpp for the native half of this.
+    // TODO: Consider using NativeAllocationRegistry instead of finalization.
+
     // Assume the process-wide default value when created
     volatile boolean mWarnOnBlocking = Binder.sWarnOnBlocking;
 
@@ -773,7 +780,7 @@ final class BinderProxy implements IBinder {
             reply.recycle();
         }
     }
-    
+
     public void dumpAsync(FileDescriptor fd, String[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -810,7 +817,7 @@ final class BinderProxy implements IBinder {
     BinderProxy() {
         mSelf = new WeakReference(this);
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -819,9 +826,9 @@ final class BinderProxy implements IBinder {
             super.finalize();
         }
     }
-    
+
     private native final void destroy();
-    
+
     private static final void sendDeathNotice(DeathRecipient recipient) {
         if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
         try {
@@ -832,8 +839,20 @@ final class BinderProxy implements IBinder {
                     exc);
         }
     }
-    
+
+    // This WeakReference to "this" is used only by native code to "attach" to the
+    // native IBinder object.
+    // Using WeakGlobalRefs instead currently appears unsafe, in that they can yield a
+    // non-null value after the BinderProxy is enqueued for finalization.
+    // Used only once immediately after construction.
+    // TODO: Consider making the extra native-to-java call to compute this on the fly.
     final private WeakReference mSelf;
+
+    // Native pointer to the wrapped native IBinder object. Counted as strong reference.
     private long mObject;
+
+    // Native pointer to native DeathRecipientList. Counted as strong reference.
+    // Basically owned by the JavaProxy object. Reference counted only because DeathRecipients
+    // hold a weak reference that can be temporarily promoted.
     private long mOrgue;
 }
