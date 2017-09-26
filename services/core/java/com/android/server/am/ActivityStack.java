@@ -4510,7 +4510,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         Slog.i(TAG, "moveTaskToBack: " + tr);
 
         // If the task is locked, then show the lock task toast
-        if (!mService.mLockTaskController.checkLockedTask(tr)) {
+        if (mService.mLockTaskController.checkLockedTask(tr)) {
             return false;
         }
 
