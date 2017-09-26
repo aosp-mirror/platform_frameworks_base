@@ -19,14 +19,17 @@ message KeyValueMatcher {
   oneof value_matcher {
     bool eq_bool = 2;
     string eq_string = 3;
-    int32 eq_int32 = 4;
-    int64 eq_int64 = 5;
-    int32 lt_int32 = 6;
-    int32 gt_int32 = 7;
-    int64 lt_int64 = 8;
-    int64 gt_int64 = 9;
-    float lt_float = 10;
-    float gt_float = 11;
+    int32 eq_int = 4;
+
+    // Numeric comparisons. Lt means strictly less than.
+    int64 lt_int = 5;
+    int64 gt_int = 6;
+    float lt_float = 7;
+    float gt_float = 8;
+
+    // Numeric comparisons with equality. Lte means less than or equal.
+    int64 lte_int = 9;
+    int64 gte_int = 10;
   }
 }
 
